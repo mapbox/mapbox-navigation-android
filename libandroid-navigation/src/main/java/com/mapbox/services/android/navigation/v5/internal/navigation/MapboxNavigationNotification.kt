@@ -108,16 +108,16 @@ internal class MapboxNavigationNotification : NavigationNotification {
     // Package private (no modifier) for testing purposes
     fun updateNotificationViews(routeProgress: RouteProgress) {
         buildRemoteViews()
-        updateInstructionText(routeProgress.bannerInstruction())
+        updateInstructionText(routeProgress.bannerInstruction)
         updateDistanceText(routeProgress)
         val time = Calendar.getInstance()
 
         generateArrivalTime(routeProgress, time)?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
-            routeProgress.currentLegProgress()?.upComingStep()?.let { step ->
-                routeProgress.currentLegProgress()?.upComingStep()
+            routeProgress.currentLegProgress.upComingStep()?.let { step ->
+                routeProgress.currentLegProgress.upComingStep()
                 updateManeuverImage(step)
-            } ?: routeProgress.currentLegProgress()?.currentStep()
+            } ?: routeProgress.currentLegProgress.currentStep()
         }
     }
 

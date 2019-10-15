@@ -99,7 +99,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
 
   private int determineMaxFpsFrom(RouteProgress routeProgress, Context context) {
     final boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    RouteLegProgress routeLegProgress = routeProgress.currentLegProgress();
+    RouteLegProgress routeLegProgress = routeProgress.getCurrentLegProgress();
 
     if (isPluggedIn) {
       return LOW_POWER_MAX_FPS;

@@ -88,7 +88,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    boolean isCurrentStepArrival = routeProgress.currentLegProgress().currentStep().maneuver().type()
+    boolean isCurrentStepArrival = routeProgress.getCurrentLegProgress().currentStep().maneuver().type()
       .contains(STEP_MANEUVER_TYPE_ARRIVE);
 
     if (isCurrentStepArrival && !paellaPickedUp) {

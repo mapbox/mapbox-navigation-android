@@ -75,7 +75,7 @@ object TriggerProperty {
     ): SparseArray<Array<Number>> =
             // Build hashMap matching the trigger properties to their corresponding current values.
             SparseArray<Array<Number>>(STATEMENTS_COUNT).apply {
-                ifNonNull(routeProgress.currentLegProgress()?.currentStep()) { currentStep ->
+                ifNonNull(routeProgress.currentLegProgress.currentStep()) { currentStep ->
                     put(
                             STEP_DISTANCE_TOTAL_METERS,
                             arrayOf(currentStep.distance())
@@ -85,7 +85,7 @@ object TriggerProperty {
                             arrayOf(currentStep.duration())
                     )
                 }
-                ifNonNull(routeProgress.currentLegProgress()?.currentStepProgress()) { currentStepProgress ->
+                ifNonNull(routeProgress.currentLegProgress.currentStepProgress()) { currentStepProgress ->
                     put(
                             STEP_DISTANCE_REMAINING_METERS,
                             arrayOf(currentStepProgress.distanceRemaining())
@@ -99,7 +99,7 @@ object TriggerProperty {
                             arrayOf(currentStepProgress.distanceTraveled())
                     )
                 }
-                ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
+                ifNonNull(routeProgress.currentLegProgress) { currentLegProgress ->
                     put(
                             STEP_INDEX,
                             arrayOf(currentLegProgress.stepIndex())
@@ -141,14 +141,14 @@ object TriggerProperty {
                             )
                     )
                 }
-                ifNonNull(routeProgress, routeProgress.legIndex()) { routeProgress, legIndex ->
+                ifNonNull(routeProgress, routeProgress.legIndex) { _, legIndex ->
                     put(
                             FIRST_LEG,
                             arrayOf(legIndex, 0)
                     )
                 }
 
-                ifNonNull(routeProgress.directionsRoute(), routeProgress.legIndex()) { directionsRoute, legIndex ->
+                ifNonNull(routeProgress.directionsRoute, routeProgress.legIndex) { directionsRoute, legIndex ->
                     put(
                             LAST_LEG,
                             arrayOf(

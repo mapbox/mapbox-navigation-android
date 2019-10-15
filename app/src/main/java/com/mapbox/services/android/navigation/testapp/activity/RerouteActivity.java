@@ -196,7 +196,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    boolean isInTunnel = routeProgress.inTunnel();
+    boolean isInTunnel = routeProgress.getInTunnel();
     lastLocation = location;
     if (!wasInTunnel && isInTunnel) {
       wasInTunnel = true;

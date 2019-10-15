@@ -65,16 +65,16 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
         private set
 
     init {
-        ifNonNull(routeProgress, routeProgress?.directionsRoute(),
-                routeProgress?.currentLegProgress(),
-                routeProgress?.distanceRemaining(), routeProgress?.durationRemaining()) { _routeProgress, _directionsRoute, _currentLegProgress, _distanceRemaining, _durationRemaining ->
+        ifNonNull(routeProgress, routeProgress?.directionsRoute,
+                routeProgress?.currentLegProgress,
+                routeProgress?.distanceRemaining, routeProgress?.durationRemaining()) { _routeProgress, _directionsRoute, _currentLegProgress, _distanceRemaining, _durationRemaining ->
             obtainRouteData(_directionsRoute)
             obtainLegData(_currentLegProgress)
             obtainStepData(_routeProgress)
             distanceRemaining = _distanceRemaining.toInt()
             durationRemaining = _durationRemaining.toInt()
             distanceTraveled = _routeProgress.distanceTraveled()?.toInt() ?: 0
-            legIndex = _routeProgress.legIndex() ?: 0
+            legIndex = _routeProgress.legIndex
             legCount = _directionsRoute.legs()?.size ?: 0
             stepIndex = _currentLegProgress.stepIndex()
             stepCount = _routeProgress.currentLeg()?.steps()?.size ?: 0
@@ -111,8 +111,8 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
     }
 
     private fun obtainStepData(routeProgress: RouteProgress) {
-        val legProgress = routeProgress.currentLegProgress()
-        legProgress?.upComingStep()?.let { upcomingStep ->
+        val legProgress = routeProgress.currentLegProgress
+        legProgress.upComingStep()?.let { upcomingStep ->
             upcomingStepName = upcomingStep.name()
             upcomingStep.maneuver().let {
                 upcomingStepInstruction = it.instruction()
@@ -120,7 +120,7 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
                 upcomingStepModifier = it.modifier()
             }
         }
-        legProgress?.currentStep()?.maneuver().let { stepManeuver ->
+        legProgress.currentStep()?.maneuver().let { stepManeuver ->
             previousStepInstruction = stepManeuver?.instruction()
             previousStepType = stepManeuver?.type()
             previousStepModifier = stepManeuver?.modifier()

@@ -19,8 +19,8 @@ public class SummaryModel {
 
   public SummaryModel(Context context, DistanceFormatter distanceFormatter, RouteProgress progress,
                       @TimeFormatType int timeFormatType) {
-    distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
-    double legDurationRemaining = progress.currentLegProgress().durationRemaining();
+    distanceRemaining = distanceFormatter.formatDistance(progress.getDistanceRemaining()).toString();
+    double legDurationRemaining = progress.getCurrentLegProgress().durationRemaining();
     timeRemaining = TimeFormatter.formatTimeRemaining(context, legDurationRemaining);
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);

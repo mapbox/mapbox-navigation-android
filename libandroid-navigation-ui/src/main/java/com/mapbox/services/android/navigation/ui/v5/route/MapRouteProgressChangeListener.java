@@ -24,7 +24,7 @@ class MapRouteProgressChangeListener implements ProgressChangeListener {
     if (!isVisible) {
       return;
     }
-    DirectionsRoute currentRoute = routeProgress.directionsRoute();
+    DirectionsRoute currentRoute = routeProgress.getDirectionsRoute();
     List<DirectionsRoute> directionsRoutes = routeLine.retrieveDirectionsRoutes();
     int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
     addNewRoute(currentRoute, directionsRoutes, primaryRouteIndex);

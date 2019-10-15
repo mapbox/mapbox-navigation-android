@@ -636,8 +636,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * @return true if new step, false if not
    */
   private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
-    currentStep = routeProgress.currentLegProgress().currentStep();
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.getCurrentLegProgress().currentStep());
+    currentStep = routeProgress.getCurrentLegProgress().currentStep();
     return newStep;
   }
 
@@ -759,7 +759,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     updateDistanceText(model);
     updateInstructionList(model);
     if (newStep(model.retrieveProgress())) {
-      LegStep upComingStep = model.retrieveProgress().currentLegProgress().upComingStep();
+      LegStep upComingStep = model.retrieveProgress().getCurrentLegProgress().upComingStep();
       ImageCreator.getInstance().prefetchImageCache(upComingStep);
     }
   }

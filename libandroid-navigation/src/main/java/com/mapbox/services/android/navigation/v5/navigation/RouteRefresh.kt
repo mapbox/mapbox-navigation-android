@@ -31,7 +31,7 @@ class RouteRefresh(private val accessToken: String) {
      * @param refreshCallback to call with updated routes
      */
     fun refresh(routeProgress: RouteProgress, refreshCallback: RefreshCallback) {
-        ifNonNull(routeProgress.directionsRoute(), routeProgress.legIndex()) { directionsRoute, legIndex ->
+        ifNonNull(routeProgress.directionsRoute, routeProgress.legIndex) { directionsRoute, legIndex ->
             refresh(directionsRoute, legIndex, refreshCallback)
         }
     }

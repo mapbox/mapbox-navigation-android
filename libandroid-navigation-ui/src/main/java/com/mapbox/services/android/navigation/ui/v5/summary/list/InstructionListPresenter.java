@@ -115,7 +115,7 @@ class InstructionListPresenter {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
       currentLeg = routeProgress.currentLeg();
-      drivingSide = routeProgress.currentLegProgress().currentStep().drivingSide();
+      drivingSide = routeProgress.getCurrentLegProgress().currentStep().drivingSide();
       List<LegStep> steps = currentLeg.steps();
       for (LegStep step : steps) {
         List<BannerInstructions> bannerInstructions = step.bannerInstructions();
@@ -134,7 +134,7 @@ class InstructionListPresenter {
     if (instructions.isEmpty()) {
       return false;
     }
-    RouteLegProgress legProgress = routeProgress.currentLegProgress();
+    RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
     LegStep currentStep = legProgress.currentStep();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
     BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(

@@ -15,6 +15,6 @@ class MapWaynameProgressChangeListener implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    mapWayName.updateProgress(location, routeProgress.currentStepPoints());
+    mapWayName.updateProgress(location, routeProgress.getCurrentStepPoints());
   }
 }

@@ -134,7 +134,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
-    boolean isInTunnel = routeProgress.inTunnel();
+    boolean isInTunnel = routeProgress.getInTunnel();
     boolean wasInTunnel = wasInTunnel();
     if (isInTunnel) {
       if (!wasInTunnel) {

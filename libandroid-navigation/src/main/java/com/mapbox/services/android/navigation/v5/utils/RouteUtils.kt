@@ -25,7 +25,7 @@ class RouteUtils {
      * @return true if in arrival state, false if not
      */
     fun isArrivalEvent(routeProgress: RouteProgress): Boolean {
-        val currentState = routeProgress.currentState()
+        val currentState = routeProgress.currentState
         return currentState != null && currentState == RouteProgressState.ROUTE_ARRIVED
     }
 
@@ -38,7 +38,7 @@ class RouteUtils {
      * @since 0.8.0
      */
     fun isLastLeg(routeProgress: RouteProgress): Boolean {
-        val legs = routeProgress.directionsRoute()?.legs()
+        val legs = routeProgress.directionsRoute.legs()
         val currentLeg = routeProgress.currentLeg()
         return legs?.let { legsList ->
             currentLeg == legsList[legsList.size - 1]
@@ -58,7 +58,7 @@ class RouteUtils {
      * @since 0.10.0
      */
     fun calculateRemainingWaypoints(routeProgress: RouteProgress): List<Point>? {
-        val routeOptions = routeProgress.directionsRoute()?.routeOptions() ?: return null
+        val routeOptions = routeProgress.directionsRoute.routeOptions() ?: return null
         val coordinates = ArrayList(routeOptions.coordinates())
         val coordinatesSize = coordinates.size
         return ifNonNull(routeProgress.remainingWaypoints()) { remainingWaypoints ->
@@ -81,7 +81,7 @@ class RouteUtils {
      * @since 0.19.0
      */
     fun calculateRemainingWaypointNames(routeProgress: RouteProgress): Array<String?>? {
-        val routeOptions = routeProgress.directionsRoute()?.routeOptions() ?: return null
+        val routeOptions = routeProgress.directionsRoute.routeOptions() ?: return null
         val allWaypointNames = routeOptions.waypointNames()
         if (allWaypointNames.isNullOrEmpty()) {
             return null
