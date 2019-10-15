@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dependencies {
+
+    implementation dependenciesList.kotlinStdLib
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    api dependenciesList.mapboxSdkServices
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"

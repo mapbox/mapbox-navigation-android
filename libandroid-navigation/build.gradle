@@ -55,6 +55,7 @@ android {
 }
 
 dependencies {
+  api project(':linavigation-base')
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
