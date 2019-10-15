@@ -8,6 +8,7 @@ import android.database.Cursor
 import android.net.Uri
 import com.mapbox.services.android.navigation.v5.internal.accounts.Billing
 import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import timber.log.Timber
 
 class MapboxNavigationProvider : ContentProvider() {
@@ -19,9 +20,9 @@ class MapboxNavigationProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
         try {
-            context?.let { ctx ->
-                if (Billing.getInstance(ctx).getBillingType() == Billing.BillingModel.MAU) {
-                    MapboxNavigationAccounts.getInstance(ctx).obtainSkuToken()
+            ifNonNull(context, context?.applicationContext) { _, applicationContext ->
+                if (Billing.getInstance(applicationContext).getBillingType() == Billing.BillingModel.MAU) {
+                    MapboxNavigationAccounts.getInstance(applicationContext).obtainSkuToken()
                 }
             }
         } catch (throwable: Throwable) {

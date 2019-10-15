@@ -11,7 +11,7 @@ class MapboxNavigationAccounts private constructor() {
         private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
         private const val TRIPS_REQUEST_COUNT_THRESHOLD = 5
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
-        private var skuGenerator: SkuGenerator = DisableSku()
+        private var skuGenerator: SkuGenerator = DisabledSku()
         private var INSTANCE: MapboxNavigationAccounts? = null
 
         @JvmStatic
@@ -34,7 +34,7 @@ class MapboxNavigationAccounts private constructor() {
     }
 
     fun obtainSkuToken(): String {
-        return skuGenerator.generateSkuToken()
+        return skuGenerator.generateToken()
     }
 
     fun navigationStopped() {

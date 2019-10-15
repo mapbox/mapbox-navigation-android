@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.v5.internal.accounts
 
-internal class DisableSku : SkuGenerator {
+internal class DisabledSku : SkuGenerator {
 
-    override fun generateSkuToken(): String {
+    override fun generateToken(): String {
         return ""
     }
 

@@ -26,7 +26,7 @@ internal class TripsSku(
         private const val DEFAULT_TRIP_TOKEN_TIMER = 0L
     }
 
-    override fun generateSkuToken(): String {
+    override fun generateToken(): String {
         refreshSkuToken()
         return retrieveTripsSkuToken()
     }
@@ -120,6 +120,6 @@ internal class TripsSku(
     }
 
     private fun isExpired(now: Long, then: Long): Boolean {
-        return now - then > timerExpireAfter
+        return (now - then)/1000 > timerExpireAfter
     }
 }

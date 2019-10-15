@@ -18,7 +18,7 @@ internal class MauSku(
         private const val DEFAULT_TOKEN_TIMER = 0L
     }
 
-    override fun generateSkuToken(): String {
+    override fun generateToken(): String {
         refreshSkuToken()
         return retrieveMauSkuToken()
     }
@@ -105,6 +105,6 @@ internal class MauSku(
     }
 
     private fun isExpired(now: Long, then: Long): Boolean {
-        return now - then > timerExpireAfter
+        return (now - then)/1000 > timerExpireAfter
     }
 }
