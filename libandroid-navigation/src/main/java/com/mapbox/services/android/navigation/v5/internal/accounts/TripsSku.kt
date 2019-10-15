@@ -120,6 +120,6 @@ internal class TripsSku(
     }
 
     private fun isExpired(now: Long, then: Long): Boolean {
-        return (now - then)/1000 > timerExpireAfter
+        return (now - then) / 1000 > timerExpireAfter
     }
 }
