@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 
 /**
@@ -35,10 +36,10 @@ open class SimpleCamera : Camera() {
     }
 
     private fun buildRouteCoordinatesFromRouteData(routeInformation: RouteInformation) {
-        if (routeInformation.route != null) {
-            setupLineStringAndBearing(routeInformation.route)
-        } else if (routeInformation.routeProgress != null) {
-            setupLineStringAndBearing(routeInformation.routeProgress.directionsRoute())
+        ifNonNull(routeInformation.route) {route ->
+            setupLineStringAndBearing(route)
+        } ?: ifNonNull (routeInformation.routeProgress) {routeProgress->
+            setupLineStringAndBearing(routeProgress.directionsRoute())
         }
     }
 
