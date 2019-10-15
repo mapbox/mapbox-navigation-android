@@ -47,7 +47,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onInformationFromRoute_engineCreatesCorrectZoom() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+    RouteInformation routeInformation = new RouteInformation(buildDirectionsRoute(), null, null);
 
     double zoom = cameraEngine.zoom(routeInformation);
 
@@ -57,7 +57,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onCameraPositionNull_engineReturnsDefaultZoom() throws Exception {
     DynamicCamera theCameraEngine = buildDynamicCamera();
-    RouteInformation anyRouteInformation = RouteInformation.create(null,
+    RouteInformation anyRouteInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double defaultZoom = theCameraEngine.zoom(anyRouteInformation);
@@ -73,7 +73,7 @@ public class DynamicCameraTest extends BaseTest {
       .build();
     when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMax);
     DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
-    RouteInformation anyRouteInformation = RouteInformation.create(null,
+    RouteInformation anyRouteInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
@@ -89,7 +89,7 @@ public class DynamicCameraTest extends BaseTest {
       .build();
     when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomLessThanMin);
     DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
-    RouteInformation anyRouteInformation = RouteInformation.create(null,
+    RouteInformation anyRouteInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
@@ -105,7 +105,7 @@ public class DynamicCameraTest extends BaseTest {
       .build();
     when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMinAndLessThanMax);
     DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
-    RouteInformation anyRouteInformation = RouteInformation.create(null,
+    RouteInformation anyRouteInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
@@ -115,7 +115,7 @@ public class DynamicCameraTest extends BaseTest {
 
   @Test
   public void onIsResetting_dynamicCameraReturnsDefault() throws Exception {
-    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+    RouteInformation routeInformation = new RouteInformation(buildDirectionsRoute(), null, null);
     DynamicCamera cameraEngine = buildDynamicCamera();
     cameraEngine.forceResetZoomLevel();
 
@@ -127,7 +127,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onInformationFromRoute_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(buildDirectionsRoute(), null, null);
+    RouteInformation routeInformation = new RouteInformation(buildDirectionsRoute(), null, null);
 
     double tilt = cameraEngine.tilt(routeInformation);
 
@@ -137,7 +137,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onHighDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null,
+    RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double tilt = cameraEngine.tilt(routeInformation);
@@ -148,7 +148,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onMediumDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null,
+    RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(200d));
 
     double tilt = cameraEngine.tilt(routeInformation);
@@ -159,7 +159,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void onLowDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null,
+    RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
 
     double tilt = cameraEngine.tilt(routeInformation);
@@ -172,7 +172,7 @@ public class DynamicCameraTest extends BaseTest {
     DynamicCamera cameraEngine = buildDynamicCamera();
     DirectionsRoute route = buildDirectionsRoute();
     List<Point> routePoints = generateRouteCoordinates(route);
-    RouteInformation routeInformation = RouteInformation.create(route, null, null);
+    RouteInformation routeInformation = new RouteInformation(route, null, null);
 
     List<Point> overviewPoints = cameraEngine.overview(routeInformation);
 
@@ -184,7 +184,7 @@ public class DynamicCameraTest extends BaseTest {
     DynamicCamera cameraEngine = buildDynamicCamera();
     RouteProgress routeProgress = buildDefaultRouteProgress(null);
     List<Point> routePoints = buildRouteCoordinatesFrom(routeProgress);
-    RouteInformation routeInformation = RouteInformation.create(null, null, routeProgress);
+    RouteInformation routeInformation = new RouteInformation(null, null, routeProgress);
 
     List<Point> overviewPoints = cameraEngine.overview(routeInformation);
 
@@ -194,7 +194,7 @@ public class DynamicCameraTest extends BaseTest {
   @Test
   public void noRouteInformation_engineCreatesEmptyOverviewPointList() {
     DynamicCamera cameraEngine = buildDynamicCamera();
-    RouteInformation routeInformation = RouteInformation.create(null, null, null);
+    RouteInformation routeInformation = new RouteInformation(null, null, null);
 
     List<Point> overviewPoints = cameraEngine.overview(routeInformation);
 

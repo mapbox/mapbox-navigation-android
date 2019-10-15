@@ -38,12 +38,12 @@ public class DynamicCamera extends SimpleCamera {
   }
 
   @Override
-  public double tilt(RouteInformation routeInformation) {
+  public double tilt(@NonNull RouteInformation routeInformation) {
     if (isShutdown) {
       return DEFAULT_TILT;
     }
 
-    RouteProgress progress = routeInformation.routeProgress();
+    RouteProgress progress = routeInformation.getRouteProgress();
     if (progress != null) {
       double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
       return createTilt(distanceRemaining);
@@ -52,14 +52,14 @@ public class DynamicCamera extends SimpleCamera {
   }
 
   @Override
-  public double zoom(RouteInformation routeInformation) {
+  public double zoom(@NonNull RouteInformation routeInformation) {
     if (isShutdown) {
       return DEFAULT_ZOOM;
     }
 
     if (validLocationAndProgress(routeInformation) && shouldUpdateZoom(routeInformation)) {
       return createZoom(routeInformation);
-    } else if (routeInformation.route() != null) {
+    } else if (routeInformation.getRoute() != null) {
       return super.zoom(routeInformation);
     }
     return mapboxMap.getCameraPosition().zoom;
@@ -107,7 +107,7 @@ public class DynamicCamera extends SimpleCamera {
    * @return zoom within set min / max bounds
    */
   private double createZoom(RouteInformation routeInformation) {
-    CameraPosition position = createCameraPosition(routeInformation.location(), routeInformation.routeProgress());
+    CameraPosition position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
     if (position == null) {
       return DEFAULT_ZOOM;
     }
@@ -184,11 +184,11 @@ public class DynamicCamera extends SimpleCamera {
   }
 
   private boolean validLocationAndProgress(RouteInformation routeInformation) {
-    return routeInformation.location() != null && routeInformation.routeProgress() != null;
+    return routeInformation.getLocation() != null && routeInformation.getRouteProgress() != null;
   }
 
   private boolean shouldUpdateZoom(RouteInformation routeInformation) {
-    RouteProgress progress = routeInformation.routeProgress();
+    RouteProgress progress = routeInformation.getRouteProgress();
     return isForceUpdate()
       || isNewStep(progress)
       || isLowAlert(progress)
