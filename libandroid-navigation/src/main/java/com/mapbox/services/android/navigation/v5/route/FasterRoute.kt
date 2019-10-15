@@ -10,10 +10,8 @@ abstract class FasterRoute {
      * This method determine if a new [DirectionsResponse] should
      * be retrieved by [RouteFetcher].
      *
-     *
      * It will also be called every time
      * the <tt>NavigationEngine</tt> gets a valid [Location] update.
-     *
      *
      * The most recent snapped location and route progress are provided.  Both can be used to
      * determine if a new route should be fetched or not.
@@ -21,7 +19,6 @@ abstract class FasterRoute {
      * @param location current snapped location
      * @param routeProgress current route progress
      * @return true if should check, false if not
-     * @since 0.9.0
      */
     abstract fun shouldCheckFasterRoute(location: Location, routeProgress: RouteProgress): Boolean
 

@@ -9,6 +9,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.lang.ref.WeakReference
 import java.util.Arrays
 import java.util.concurrent.CopyOnWriteArrayList
@@ -24,7 +25,6 @@ import timber.log.Timber
 class RouteFetcher {
 
     companion object {
-
         private const val BEARING_TOLERANCE = 90.0
         private const val SEMICOLON = ";"
         private const val ORIGIN_APPROACH_THRESHOLD = 1
@@ -232,10 +232,8 @@ class RouteFetcher {
 
     private fun updateListeners(response: DirectionsResponse?, routeProgress: RouteProgress?) {
         for (listener in routeListeners) {
-            response?.let { directionsResponse ->
-                routeProgress?.let { routeProgress ->
-                    listener.onResponseReceived(directionsResponse, routeProgress)
-                }
+            ifNonNull(response, routeProgress) { directionsResponse, progress ->
+                listener.onResponseReceived(directionsResponse, progress)
             }
         }
     }
