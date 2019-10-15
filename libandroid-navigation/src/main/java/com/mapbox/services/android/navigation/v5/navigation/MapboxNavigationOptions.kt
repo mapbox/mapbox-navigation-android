@@ -1,10 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import androidx.annotation.ColorRes
-
-import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
-
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 
 /**
  * Immutable and can't be changed after passing into [MapboxNavigation].
