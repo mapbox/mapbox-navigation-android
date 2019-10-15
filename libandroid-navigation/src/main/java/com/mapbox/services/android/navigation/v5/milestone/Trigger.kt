@@ -35,7 +35,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class AllStatement internal constructor(
+    private class AllStatement(
         private vararg val statements: Statement
     ) : Statement() {
 
@@ -54,7 +54,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class NoneStatement internal constructor(
+    private class NoneStatement(
         private vararg val statements: Statement
     ) : Statement() {
 
@@ -73,7 +73,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class AnyStatement internal constructor(
+    private class AnyStatement(
         private vararg val statements: Statement
     ) : Statement() {
 
@@ -97,7 +97,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class GreaterThanStatement internal constructor(
+    private class GreaterThanStatement(
         private val key: Int,
         private val value: Any
     ) : Statement() {
@@ -112,7 +112,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class GreaterThanEqualStatement internal constructor(
+    private class GreaterThanEqualStatement(
         private val key: Int,
         private val value: Any
     ) : Statement() {
@@ -126,7 +126,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class LessThanStatement internal constructor(
+    private class LessThanStatement(
         private val key: Int,
         private val value: Any
     ) : Statement() {
@@ -141,7 +141,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class LessThanEqualStatement internal constructor(
+    private class LessThanEqualStatement(
         private val key: Int,
         private val value: Any
     ) : Statement() {
@@ -155,7 +155,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class NotEqualStatement internal constructor(
+    private class NotEqualStatement(
         private val key: Int,
         private vararg val values: Any
     ) : Statement() {
@@ -169,7 +169,7 @@ object Trigger {
      *
      * @since 0.4.0
      */
-    private class EqualStatement internal constructor(
+    private class EqualStatement(
         private val key: Int,
         private val value: Any
     ) : Statement() {
