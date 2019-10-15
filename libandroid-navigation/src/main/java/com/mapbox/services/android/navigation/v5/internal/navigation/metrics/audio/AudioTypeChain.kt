@@ -2,8 +2,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics.au
 
 internal class AudioTypeChain {
 
-    // Fixme: Remove JvmOverload when NavigationUtils migrated to Kotlin
-    @JvmOverloads
     fun setup(
         unknownAudioType: AudioTypeResolver.Unknown = AudioTypeResolver.Unknown(),
         speakerAudioType: AudioTypeResolver.Speaker = AudioTypeResolver.Speaker(),
