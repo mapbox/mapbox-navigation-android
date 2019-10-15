@@ -89,7 +89,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
 
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder().isDebugLoggingEnabled(true).build();
+    MapboxNavigationOptions options = new MapboxNavigationOptions.Builder().isDebugLoggingEnabled(true).build();
     navigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken(), options);
     navigation.addNavigationEventListener(this);
     navigation.addMilestoneEventListener(this);

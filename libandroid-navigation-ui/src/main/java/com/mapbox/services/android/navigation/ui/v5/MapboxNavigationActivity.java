@@ -96,7 +96,7 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     options.navigationListener(this);
     extractRoute(options);
     extractConfiguration(options);
-    options.navigationOptions(MapboxNavigationOptions.builder().build());
+    options.navigationOptions(new MapboxNavigationOptions.Builder().build());
     navigationView.startNavigation(options.build());
   }
 

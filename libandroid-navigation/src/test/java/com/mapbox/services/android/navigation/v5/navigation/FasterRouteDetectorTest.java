@@ -28,97 +28,99 @@ import static org.mockito.Mockito.when;
 
 public class FasterRouteDetectorTest extends BaseTest {
 
-  private static final String PRECISION_6 = "directions_v5_precision_6.json";
+    private static final String PRECISION_6 = "directions_v5_precision_6.json";
 
-  @Test
-  public void sanity() throws Exception {
-    FasterRouteDetector fasterRouteDetector = new FasterRouteDetector();
+    @Test
+    public void sanity() throws Exception {
+        FasterRouteDetector fasterRouteDetector = new FasterRouteDetector();
 
-    assertNotNull(fasterRouteDetector);
-  }
+        assertNotNull(fasterRouteDetector);
+    }
 
-  @Test
-  public void defaultFasterRouteEngine_didGetAddedOnInitialization() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
+    @Test
+    public void defaultFasterRouteEngine_didGetAddedOnInitialization() throws Exception {
+        MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
 
-    assertNotNull(navigation.getFasterRouteEngine());
-  }
+        assertNotNull(navigation.getFasterRouteEngine());
+    }
 
-  @Test
-  public void addFasterRouteEngine_didGetAdded() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
-    FasterRoute fasterRouteEngine = mock(FasterRoute.class);
+    @Test
+    public void addFasterRouteEngine_didGetAdded() throws Exception {
+        MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
+        FasterRoute fasterRouteEngine = mock(FasterRoute.class);
 
-    navigation.setFasterRouteEngine(fasterRouteEngine);
+        navigation.setFasterRouteEngine(fasterRouteEngine);
 
-    assertEquals(navigation.getFasterRouteEngine(), fasterRouteEngine);
-  }
+        assertEquals(navigation.getFasterRouteEngine(), fasterRouteEngine);
+    }
 
-  @Test
-  public void onFasterRouteResponse_isFasterRouteIsTrue() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
-    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
-    RouteProgress currentProgress = obtainDefaultRouteProgress();
-    DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
-      .duration(10000000d)
-      .build();
-    currentProgress = currentProgress.toBuilder()
-      .directionsRoute(longerRoute)
-      .build();
-    DirectionsResponse response = obtainADirectionsResponse();
+    @Test
+    public void onFasterRouteResponse_isFasterRouteIsTrue() throws Exception {
+        MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
+        FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
+        RouteProgress currentProgress = obtainDefaultRouteProgress();
+        DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
+                .duration(10000000d)
+                .build();
+        currentProgress = currentProgress.toBuilder()
+                .directionsRoute(longerRoute)
+                .build();
+        DirectionsResponse response = obtainADirectionsResponse();
 
-    boolean isFasterRoute = fasterRouteEngine.isFasterRoute(response, currentProgress);
+        boolean isFasterRoute = fasterRouteEngine.isFasterRoute(response, currentProgress);
 
-    assertTrue(isFasterRoute);
-  }
+        assertTrue(isFasterRoute);
+    }
 
-  @Test
-  public void onSlowerRouteResponse_isFasterRouteIsFalse() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
-    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
-    RouteProgress currentProgress = obtainDefaultRouteProgress();
-    DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
-      .duration(1000d)
-      .build();
-    currentProgress = currentProgress.toBuilder()
-      .directionsRoute(longerRoute)
-      .build();
-    DirectionsResponse response = obtainADirectionsResponse();
+    @Test
+    public void onSlowerRouteResponse_isFasterRouteIsFalse() throws Exception {
+        MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
+        FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
+        RouteProgress currentProgress = obtainDefaultRouteProgress();
+        DirectionsRoute longerRoute = currentProgress.directionsRoute().toBuilder()
+                .duration(1000d)
+                .build();
+        currentProgress = currentProgress.toBuilder()
+                .directionsRoute(longerRoute)
+                .build();
+        DirectionsResponse response = obtainADirectionsResponse();
 
-    boolean isFasterRoute = fasterRouteEngine.isFasterRoute(response, currentProgress);
+        boolean isFasterRoute = fasterRouteEngine.isFasterRoute(response, currentProgress);
 
-    assertFalse(isFasterRoute);
-  }
+        assertFalse(isFasterRoute);
+    }
 
-  private MapboxNavigation buildNavigationWithFasterRouteEnabled() {
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
-      .enableFasterRouteDetection(true)
-      .build();
-    Context context = mock(Context.class);
-    when(context.getApplicationContext()).thenReturn(mock(Context.class));
-    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
-  }
 
-  private RouteProgress obtainDefaultRouteProgress() throws Exception {
-    DirectionsRoute aRoute = obtainADirectionsRoute();
-    return buildTestRouteProgress(aRoute, 100, 700, 1000, 0, 0);
-  }
 
-  private DirectionsRoute obtainADirectionsRoute() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(PRECISION_6);
-    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    DirectionsRoute aRoute = response.routes().get(0);
-    return aRoute;
-  }
+    private MapboxNavigation buildNavigationWithFasterRouteEnabled() {
+        MapboxNavigationOptions options = new MapboxNavigationOptions.Builder()
+                .enableFasterRouteDetection(true)
+                .build();
+        Context context = mock(Context.class);
+        when(context.getApplicationContext()).thenReturn(mock(Context.class));
+        return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
+                mock(LocationEngine.class));
+    }
 
-  private DirectionsResponse obtainADirectionsResponse() throws IOException {
-    Gson gson = new GsonBuilder()
-      .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
-    String body = loadJsonFixture(PRECISION_6);
-    DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
-    return response;
-  }
+    private RouteProgress obtainDefaultRouteProgress() throws Exception {
+        DirectionsRoute aRoute = obtainADirectionsRoute();
+        return buildTestRouteProgress(aRoute, 100, 700, 1000, 0, 0);
+    }
+
+    private DirectionsRoute obtainADirectionsRoute() throws IOException {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+        String body = loadJsonFixture(PRECISION_6);
+        DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
+        DirectionsRoute aRoute = response.routes().get(0);
+        return aRoute;
+    }
+
+    private DirectionsResponse obtainADirectionsResponse() throws IOException {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create();
+        String body = loadJsonFixture(PRECISION_6);
+        DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
+        return response;
+    }
 }

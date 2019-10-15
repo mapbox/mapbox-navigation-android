@@ -136,7 +136,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
-      .navigationOptions(MapboxNavigationOptions.builder().build())
+      .navigationOptions(new MapboxNavigationOptions.Builder().build())
       .shouldSimulateRoute(false)
       .waynameChipEnabled(true);
   }
