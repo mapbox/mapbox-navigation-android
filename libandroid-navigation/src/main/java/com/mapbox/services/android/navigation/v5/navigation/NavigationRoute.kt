@@ -599,7 +599,7 @@ internal constructor(
          * @return this builder for chaining options together
          */
         fun walkingOptions(navigationWalkingOptions: NavigationWalkingOptions): Builder {
-            directionsBuilder.walkingOptions(navigationWalkingOptions.getWalkingOptions())
+            directionsBuilder.walkingOptions(navigationWalkingOptions.walkingOptions)
             return this
         }
 
