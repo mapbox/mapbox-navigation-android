@@ -90,26 +90,6 @@ public class FasterRouteDetectorTest extends BaseTest {
     assertFalse(isFasterRoute);
   }
 
-  @Test
-  public void onNullLocationPassed_shouldCheckFasterRouteIsFalse() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
-    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
-
-    boolean checkFasterRoute = fasterRouteEngine.shouldCheckFasterRoute(null, obtainDefaultRouteProgress());
-
-    assertFalse(checkFasterRoute);
-  }
-
-  @Test
-  public void onNullRouteProgressPassed_shouldCheckFasterRouteIsFalse() throws Exception {
-    MapboxNavigation navigation = buildNavigationWithFasterRouteEnabled();
-    FasterRoute fasterRouteEngine = navigation.getFasterRouteEngine();
-
-    boolean checkFasterRoute = fasterRouteEngine.shouldCheckFasterRoute(mock(Location.class), null);
-
-    assertFalse(checkFasterRoute);
-  }
-
   private MapboxNavigation buildNavigationWithFasterRouteEnabled() {
     MapboxNavigationOptions options = MapboxNavigationOptions.builder()
       .enableFasterRouteDetection(true)
