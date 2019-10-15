@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit
 class FasterRouteDetector : FasterRoute() {
 
     companion object {
-
         private const val VALID_ROUTE_DURATION_REMAINING = 600
     }
 
@@ -44,10 +43,10 @@ class FasterRouteDetector : FasterRoute() {
                 newRoute.legs()?.let { routeLegList ->
                     val routeLeg = routeLegList[0]
                     if (hasAtLeastTwoSteps(routeLeg)) {
-                        routeLeg.steps()?.let {
+                        routeLeg.steps()?.let { stepList ->
                             // Extract the first two steps
-                            val firstStep = routeLeg.steps()!![0]
-                            val secondStep = routeLeg.steps()!![1]
+                            val firstStep = stepList[0]
+                            val secondStep = stepList[1]
                             // Check for valid first and second steps of the new route
                             if (!validFirstStep(firstStep) || !validSecondStep(secondStep, routeProgress)) {
                                 return false

@@ -4,23 +4,6 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
-/**
- * This class can be subclassed to provide custom logic for checking / determining
- * new / faster routes while navigating.
- *
- *
- * To provide your implementation,
- * use [com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation.setFasterRouteEngine].
- *
- *
- * [FasterRoute.shouldCheckFasterRoute] determines how quickly a
- * new route will be fetched by [RouteFetcher].
- *
- *
- * [FasterRoute.isFasterRoute] determines if the new route
- * retrieved by [RouteFetcher] is actually faster than the current route.
- *
- */
 abstract class FasterRoute {
 
     /**
