@@ -1,3 +1,2 @@
-include ':app'
-include ':libandroid-navigation'
+include ':app', ':libandroid-navigation', ':libnavigator', ':linavigation-base', ':libdirections-onboard', ':libdirections-offboard', ':libdirections-hybrid'
 include ':libandroid-navigation-ui'
