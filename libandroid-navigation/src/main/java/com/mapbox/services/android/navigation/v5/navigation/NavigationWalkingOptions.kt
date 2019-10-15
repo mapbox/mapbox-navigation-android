@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.WalkingOptions
 /**
  * Class for specifying options for use with the walking profile.
  */
-class NavigationWalkingOptions internal constructor(internal val walkingOptions: WalkingOptions) {
+class NavigationWalkingOptions internal constructor(val walkingOptions: WalkingOptions) {
 
     companion object {
         /**
@@ -13,6 +13,7 @@ class NavigationWalkingOptions internal constructor(internal val walkingOptions:
          *
          * @return a [Builder] object for creating a [NavigationWalkingOptions] object
          */
+        @JvmStatic
         fun builder(): Builder {
             return Builder(WalkingOptions.builder())
         }
