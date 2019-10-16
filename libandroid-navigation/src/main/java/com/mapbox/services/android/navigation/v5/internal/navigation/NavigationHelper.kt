@@ -149,7 +149,7 @@ internal object NavigationHelper {
 
     private fun findAnnotationIndex(
         currentLegAnnotation: CurrentLegAnnotation?,
-        annotationBuilder: CurrentLegAnnotation.Builder,
+        annotationBuilder: CurrentLegAnnotation.Companion.Builder,
         leg: RouteLeg,
         legDistanceRemaining: Double,
         distanceAnnotationList: List<Double?>
@@ -161,8 +161,8 @@ internal object NavigationHelper {
             var distanceIndex = 0
             var annotationDistancesTraveled = 0.0
             ifNonNull(currentLegAnnotation) {
-                distanceIndex = it.index()
-                annotationDistancesTraveled = it.distanceToAnnotation()
+                distanceIndex = it.index
+                annotationDistancesTraveled = it.distanceToAnnotation
             }
             for (i in distanceIndex until legDistances.size) {
                 val distance = legDistances[i]
