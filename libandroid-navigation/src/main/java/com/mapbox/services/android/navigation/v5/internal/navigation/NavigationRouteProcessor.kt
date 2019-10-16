@@ -79,7 +79,7 @@ internal class NavigationRouteProcessor {
             val routeState = status.routeState
             val currentRouteState = progressStateMap[routeState]
 
-            val progressBuilder = RouteProgress.builder()
+            val progressBuilder = RouteProgress.Builder()
                     .distanceRemaining(routeDistanceRemaining)
                     .legDistanceRemaining(legDistanceRemaining)
                     .legDurationRemaining(legDurationRemaining)

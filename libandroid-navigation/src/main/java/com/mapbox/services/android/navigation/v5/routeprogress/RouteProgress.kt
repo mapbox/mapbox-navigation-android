@@ -242,14 +242,14 @@ data class RouteProgress internal constructor(
         fun legIndex(legIndex: Int) = apply { this.legIndex = legIndex }
         fun distanceRemaining(distanceRemaining: Double) = apply { this.distanceRemaining = distanceRemaining }
         fun currentLegProgress(currentLegProgress: RouteLegProgress) = apply { this.currentLegProgress = currentLegProgress }
-        fun currentStepPoints(currentStepPoints: List<Point>) = apply { this.currentStepPoints = currentStepPoints }
+        fun currentStepPoints(currentStepPoints: List<Point>?) = apply { this.currentStepPoints = currentStepPoints }
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) = apply { this.upcomingStepPoints = upcomingStepPoints }
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
         fun voiceInstruction(voiceInstruction: VoiceInstruction?) = apply { this.voiceInstruction = voiceInstruction }
         fun bannerInstruction(bannerInstruction: BannerInstruction?) = apply { this.bannerInstruction = bannerInstruction }
         fun currentState(currentState: RouteProgressState?) = apply { this.currentState = currentState }
         fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) = apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
-        fun currentStep(currentStep: LegStep) = apply { this.currentStep = currentStep }
+        fun currentStep(currentStep: LegStep?) = apply { this.currentStep = currentStep }
         fun stepIndex(stepIndex: Int) = apply { this.stepIndex = stepIndex }
         fun legDistanceRemaining(legDistanceRemaining: Double) = apply { this.legDistanceRemaining = legDistanceRemaining }
         fun stepDistanceRemaining(stepDistanceRemaining: Double) = apply { this.stepDistanceRemaining = stepDistanceRemaining }
