@@ -67,9 +67,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     // For testing only
     constructor(
-        applicationContext: Context,
-        mapboxNavigation: MapboxNavigation,
-        notification: Notification
+            applicationContext: Context,
+            mapboxNavigation: MapboxNavigation,
+            notification: Notification
     ) {
         this.applicationContext = applicationContext
         this.notification = notification
@@ -151,8 +151,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun initializeDistanceFormatter(
-        applicationContext: Context,
-        mapboxNavigation: MapboxNavigation
+            applicationContext: Context,
+            mapboxNavigation: MapboxNavigation
     ) {
         val routeOptions = mapboxNavigation.route.routeOptions()
         var language: String = applicationContext.inferDeviceLanguage()
@@ -266,22 +266,13 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
-        ifNonNull(currentDistanceText, distanceFormatter) { distanceText, distanceFormatter ->
-            if (newDistanceText(routeProgress)) {
-                routeProgress.currentLegProgress().currentStepProgress()?.let { currentStepProgress ->
-                    currentDistanceText = distanceFormatter.formatDistance(
-                            currentStepProgress.distanceRemaining()
-                    )
-                }
-                collapsedNotificationRemoteViews?.setTextViewText(
-                        R.id.notificationDistanceText,
-                        distanceText
-                )
-                expandedNotificationRemoteViews?.setTextViewText(
-                        R.id.notificationDistanceText,
-                        distanceText
-                )
-            }
+        if (currentDistanceText == null || newDistanceText(routeProgress)) {
+            currentDistanceText = distanceFormatter?.formatDistance(
+                    routeProgress.currentLegProgress().currentStepProgress().distanceRemaining()
+            )
+
+            collapsedNotificationRemoteViews?.setTextViewText(R.id.notificationDistanceText, currentDistanceText)
+            expandedNotificationRemoteViews?.setTextViewText(R.id.notificationDistanceText, currentDistanceText)
         }
     }
 
@@ -396,9 +387,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-        maneuverType: String?,
-        maneuverModifier: String?,
-        drivingSide: String?
+            maneuverType: String?,
+            maneuverModifier: String?,
+            drivingSide: String?
     ): Boolean {
         return NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT == drivingSide && (
                 NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
