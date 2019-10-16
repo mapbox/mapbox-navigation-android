@@ -12,6 +12,7 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
+import java.util.Date
 
 internal class RouteProcessorRunnable(
     private val routeProcessor: NavigationRouteProcessor,
@@ -42,18 +43,18 @@ internal class RouteProcessorRunnable(
         val options = navigation.options()
         val route = navigation.route
 
-        val date = java.util.Date()
+        val date = Date()
         var status = mapboxNavigator.retrieveStatus(
-                date,
-                options.navigationLocationEngineIntervalLagInMilliseconds().toLong()
+            date,
+            options.navigationLocationEngineIntervalLagInMilliseconds().toLong()
         )
         val previousStatus = routeProcessor.retrievePreviousStatus()
         status = checkForNewLegIndex(
-                mapboxNavigator,
-                route,
-                status,
-                previousStatus,
-                options.enableAutoIncrementLegIndex()
+            mapboxNavigator,
+            route,
+            status,
+            previousStatus,
+            options.enableAutoIncrementLegIndex()
         )
         val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
 
@@ -69,20 +70,20 @@ internal class RouteProcessorRunnable(
         val engineFactory = navigation.retrieveEngineFactory()
         ifNonNull(routeProgress) { progress ->
             val userOffRoute =
-                    isUserOffRoute(options, status, rawLocation, progress, engineFactory)
+                isUserOffRoute(options, status, rawLocation, progress, engineFactory)
             val snappedLocation = findSnappedLocation(status, rawLocation, progress, engineFactory)
             val checkFasterRoute = checkFasterRoute(
-                    options, snappedLocation, progress, engineFactory,
-                    userOffRoute
+                options, snappedLocation, progress, engineFactory,
+                userOffRoute
             )
             val milestones = findTriggeredMilestones(navigation, progress)
 
             sendUpdateToResponseHandler(
-                    userOffRoute,
-                    milestones,
-                    snappedLocation,
-                    checkFasterRoute,
-                    progress
+                userOffRoute,
+                milestones,
+                snappedLocation,
+                checkFasterRoute,
+                progress
             )
             routeProcessor.updatePreviousRouteProgress(progress)
             workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
@@ -103,7 +104,7 @@ internal class RouteProcessorRunnable(
         val previousLegIndex = previousStatus.legIndex
         val routeLegsSize = route.legs()?.size ?: 0
         val canUpdateLeg =
-                previousState == RouteState.COMPLETE && previousLegIndex < routeLegsSize - 1
+            previousState == RouteState.COMPLETE && previousLegIndex < routeLegsSize - 1
         val isValidDistanceRemaining = previousStatus.remainingLegDistance < ARRIVAL_ZONE_RADIUS
         if (autoIncrementEnabled && canUpdateLeg && isValidDistanceRemaining) {
             val newLegIndex = previousLegIndex + 1
@@ -147,8 +148,8 @@ internal class RouteProcessorRunnable(
         val fasterRoute = engineFactory.retrieveFasterRouteEngine()
         val fasterRouteDetectionEnabled = options.enableFasterRouteDetection()
         return (fasterRouteDetectionEnabled &&
-                !userOffRoute &&
-                fasterRoute.shouldCheckFasterRoute(rawLocation, routeProgress))
+            !userOffRoute &&
+            fasterRoute.shouldCheckFasterRoute(rawLocation, routeProgress))
     }
 
     private fun findTriggeredMilestones(
