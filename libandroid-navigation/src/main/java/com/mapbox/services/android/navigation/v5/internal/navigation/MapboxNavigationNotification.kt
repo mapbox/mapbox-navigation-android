@@ -29,7 +29,6 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLanguage
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime
-import java.util.*
 
 /**
  * This is in charge of creating the persistent navigation session notification and updating it.
@@ -93,7 +92,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     // Package private (no modifier) for testing purposes
-    fun generateArrivalTime(routeProgress: RouteProgress, time: Calendar): String? =
+    fun generateArrivalTime(routeProgress: RouteProgress, time: java.util.Calendar): String? =
             ifNonNull(mapboxNavigation) { mapboxNavigation ->
                 val options = mapboxNavigation.options()
                 val legDurationRemaining = routeProgress.currentLegProgress().durationRemaining()
@@ -110,7 +109,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         buildRemoteViews()
         updateInstructionText(routeProgress.bannerInstruction())
         updateDistanceText(routeProgress)
-        val time = Calendar.getInstance()
+        val time = java.util.Calendar.getInstance()
 
         generateArrivalTime(routeProgress, time)?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
