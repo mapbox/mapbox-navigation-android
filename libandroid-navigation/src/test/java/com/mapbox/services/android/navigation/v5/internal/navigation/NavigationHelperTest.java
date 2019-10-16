@@ -58,7 +58,7 @@ public class NavigationHelperTest extends BaseTest {
       null, routeProgress.currentLeg(), legDistanceRemaining
     );
 
-    assertEquals("moderate", newLegAnnotation.congestion());
+    assertEquals("moderate", newLegAnnotation.getCongestion());
   }
 
   @Test
@@ -70,8 +70,8 @@ public class NavigationHelperTest extends BaseTest {
       null, routeProgress.currentLeg(), legDistanceRemaining
     );
 
-    assertTrue(newLegAnnotation.distanceToAnnotation() < legDistanceRemaining);
-    assertEquals("heavy", newLegAnnotation.congestion());
+    assertTrue(newLegAnnotation.getDistanceToAnnotation() < legDistanceRemaining);
+    assertEquals("heavy", newLegAnnotation.getCongestion());
   }
 
   @Test
@@ -79,7 +79,7 @@ public class NavigationHelperTest extends BaseTest {
     RouteProgress routeProgress = buildDistanceCongestionAnnotationRouteProgress(0, 0, 0, 0, 0);
     Double legDistanceRemaining = routeProgress.currentLeg().distance() / 2;
     Double previousAnnotationDistance = routeProgress.currentLeg().distance() / 3;
-    CurrentLegAnnotation currentLegAnnotation = CurrentLegAnnotation.builder()
+    CurrentLegAnnotation currentLegAnnotation = CurrentLegAnnotation.Companion.builder()
       .distance(100d)
       .distanceToAnnotation(previousAnnotationDistance)
       .index(0)
@@ -89,7 +89,7 @@ public class NavigationHelperTest extends BaseTest {
       currentLegAnnotation, routeProgress.currentLeg(), legDistanceRemaining
     );
 
-    assertEquals(11, newLegAnnotation.index());
+    assertEquals(11, newLegAnnotation.getIndex());
   }
 
   private RouteProgress buildDistanceCongestionAnnotationRouteProgress(double stepDistanceRemaining, double legDistanceRemaining,
@@ -108,7 +108,7 @@ public class NavigationHelperTest extends BaseTest {
   }
 
   private CurrentLegAnnotation buildCurrentAnnotation() {
-    return CurrentLegAnnotation.builder()
+    return CurrentLegAnnotation.Companion.builder()
       .distance(54d)
       .distanceToAnnotation(100)
       .congestion("severe")
