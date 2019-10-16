@@ -425,7 +425,7 @@ public class NavigationCamera implements LifecycleObserver {
     if (routeProgress == null) {
       return new RouteInformation(null, null, null);
     }
-    return new RouteInformation(routeProgress.directionsRoute(), null, null);
+    return new RouteInformation(routeProgress.getDirectionsRoute(), null, null);
   }
 
   private void onCameraTransitionFinished() {

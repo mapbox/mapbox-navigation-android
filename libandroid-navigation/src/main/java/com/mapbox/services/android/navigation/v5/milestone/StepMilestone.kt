@@ -23,7 +23,7 @@ private constructor(
     ): Boolean {
         // Determine if the step index has changed and set called accordingly. This prevents multiple calls to
         // onMilestoneEvent per Step.
-        if (previousRouteProgress.currentLegProgress()?.stepIndex() != routeProgress.currentLegProgress()?.stepIndex()) {
+        if (previousRouteProgress.currentLegProgress.stepIndex() != routeProgress.currentLegProgress.stepIndex()) {
             called = false
         }
         // If milestone's been called already on current step, no need to check triggers.

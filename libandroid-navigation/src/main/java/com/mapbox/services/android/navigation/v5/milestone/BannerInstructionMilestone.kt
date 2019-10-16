@@ -36,8 +36,8 @@ private constructor(
 
     private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean =
         ifNonNull(
-            routeProgress.bannerInstruction(),
-            retrieveBannerFrom(routeProgress.bannerInstruction()?.primary)
+            routeProgress.bannerInstruction,
+            retrieveBannerFrom(routeProgress.bannerInstruction?.primary)
         ) { currentBannerInstruction, primaryBannerText ->
             val secondaryBannerText: BannerText? = retrieveBannerFrom(currentBannerInstruction.secondary)
             val subBannerText: BannerText? = retrieveBannerFrom(currentBannerInstruction.sub)

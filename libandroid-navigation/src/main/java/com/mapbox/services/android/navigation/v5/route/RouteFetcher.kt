@@ -127,7 +127,7 @@ class RouteFetcher {
         }
         val origin = Point.fromLngLat(location.longitude, location.latitude)
         val bearing = if (location.hasBearing()) java.lang.Float.valueOf(location.bearing).toDouble() else null
-        val options = routeProgress.directionsRoute()?.routeOptions()
+        val options = routeProgress.directionsRoute.routeOptions()
         var navigationRouteBuilder: NavigationRoute.Builder? = null
         options?.let { routeOptions ->
             navigationRouteBuilder = NavigationRoute.builder(context!!)
@@ -210,7 +210,7 @@ class RouteFetcher {
     }
 
     private fun calculateRemainingApproaches(routeProgress: RouteProgress): Array<String?>? =
-            ifNonNull(routeProgress.directionsRoute()?.routeOptions(), routeProgress.remainingWaypoints()) { routeOptions, remainingWaypoints ->
+            ifNonNull(routeProgress.directionsRoute.routeOptions(), routeProgress.remainingWaypoints()) { routeOptions, remainingWaypoints ->
                 when (!TextUtils.isEmpty(routeOptions.approaches())) {
                     true -> {
                         val allApproaches = routeOptions.approaches()

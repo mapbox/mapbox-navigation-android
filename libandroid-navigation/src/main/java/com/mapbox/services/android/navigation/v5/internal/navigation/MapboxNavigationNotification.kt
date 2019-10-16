@@ -95,7 +95,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     fun generateArrivalTime(routeProgress: RouteProgress, time: Calendar): String? =
         ifNonNull(
             mapboxNavigation,
-            routeProgress.currentLegProgress()
+            routeProgress.currentLegProgress
         ) { mapboxNavigation, currentLegProgress ->
             val options = mapboxNavigation.options()
             val legDurationRemaining = currentLegProgress.durationRemaining()
@@ -270,7 +270,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         if (currentDistanceText == null || newDistanceText(routeProgress)) {
             currentDistanceText = ifNonNull(
                 distanceFormatter,
-                routeProgress.currentLegProgress()
+                routeProgress.currentLegProgress
             ) { distanceFormatter, routeLegProgress ->
                 distanceFormatter.formatDistance(routeLegProgress.currentStepProgress().distanceRemaining())
             }
@@ -288,7 +288,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private fun newDistanceText(routeProgress: RouteProgress) =
         ifNonNull(
             distanceFormatter,
-            routeProgress.currentLegProgress(),
+            routeProgress.currentLegProgress,
             currentDistanceText
         ) { distanceFormatter, currentLegProgress, currentDistanceText ->
             val item = currentLegProgress.currentStepProgress().distanceRemaining()

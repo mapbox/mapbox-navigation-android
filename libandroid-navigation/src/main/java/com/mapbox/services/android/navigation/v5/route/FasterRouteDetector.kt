@@ -83,7 +83,7 @@ class FasterRouteDetector : FasterRoute() {
      * @return true if valid, false if not
      */
     private fun validSecondStep(secondStep: LegStep, routeProgress: RouteProgress): Boolean {
-        return routeProgress.currentLegProgress()?.upComingStep()?.let { legStep ->
+        return routeProgress.currentLegProgress.upComingStep()?.let { legStep ->
             legStep == secondStep
         } ?: false
     }
@@ -118,7 +118,7 @@ class FasterRouteDetector : FasterRoute() {
 
     private fun validStepDurationRemaining(routeProgress: RouteProgress) =
         // Current step duration remaining in seconds
-        ifNonNull(routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()) { currentStepDurationRemaining ->
+        ifNonNull(routeProgress.currentLegProgress.currentStepProgress()?.durationRemaining()) { currentStepDurationRemaining ->
             currentStepDurationRemaining > NAVIGATION_MEDIUM_ALERT_DURATION
         } ?: false
 
