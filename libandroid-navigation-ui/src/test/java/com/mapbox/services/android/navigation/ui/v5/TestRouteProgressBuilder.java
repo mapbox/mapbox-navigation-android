@@ -32,7 +32,7 @@ class TestRouteProgressBuilder {
       upcomingStepPoints = buildStepPointsFromGeometry(upcomingStepGeometry);
     }
 
-    return RouteProgress.builder()
+    return new RouteProgress.Builder()
       .stepDistanceRemaining(stepDistanceRemaining)
       .legDistanceRemaining(legDistanceRemaining)
       .legDurationRemaining(legDurationRemaining)

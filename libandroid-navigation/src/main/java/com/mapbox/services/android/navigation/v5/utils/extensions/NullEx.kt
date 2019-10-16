@@ -1,27 +1,27 @@
 package com.mapbox.services.android.navigation.v5.utils.extensions
 
-fun <R1, T> ifNonNull(r1: R1?, func: (R1) -> T): T? =
+inline fun <R1, T> ifNonNull(r1: R1?, func: (R1) -> T): T? =
     if (r1 != null) {
         func(r1)
     } else {
         null
     }
 
-fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
+inline fun <R1, R2, T> ifNonNull(r1: R1?, r2: R2?, func: (R1, R2) -> T): T? =
     if (r1 != null && r2 != null) {
         func(r1, r2)
     } else {
         null
     }
 
-fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R3) -> T): T? =
+inline fun <R1, R2, R3, T> ifNonNull(r1: R1?, r2: R2?, r3: R3?, func: (R1, R2, R3) -> T): T? =
     if (r1 != null && r2 != null && r3 != null) {
         func(r1, r2, r3)
     } else {
         null
     }
 
-fun <R1, R2, R3, R4, T> ifNonNull(
+inline fun <R1, R2, R3, R4, T> ifNonNull(
     r1: R1?,
     r2: R2?,
     r3: R3?,
@@ -34,7 +34,7 @@ fun <R1, R2, R3, R4, T> ifNonNull(
         null
     }
 
-fun <R1, R2, R3, R4, R5, T> ifNonNull(
+inline fun <R1, R2, R3, R4, R5, T> ifNonNull(
     r1: R1?,
     r2: R2?,
     r3: R3?,
@@ -48,7 +48,7 @@ fun <R1, R2, R3, R4, R5, T> ifNonNull(
         null
     }
 
-fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
+inline fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
     r1: R1?,
     r2: R2?,
     r3: R3?,
@@ -63,7 +63,7 @@ fun <R1, R2, R3, R4, R5, R6, T> ifNonNull(
         null
     }
 
-fun <R1, R2, R3, R4, R5, R6, R7, T> ifNonNull(
+inline fun <R1, R2, R3, R4, R5, R6, R7, T> ifNonNull(
     r1: R1?,
     r2: R2?,
     r3: R3?,

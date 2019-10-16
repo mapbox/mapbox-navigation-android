@@ -73,80 +73,91 @@ object TriggerProperty {
         previousRouteProgress: RouteProgress,
         routeProgress: RouteProgress
     ): SparseArray<Array<Number>> =
-        // Build hashMap matching the trigger properties to their corresponding current values.
-        SparseArray<Array<Number>>(STATEMENTS_COUNT).apply {
-            put(
-                STEP_DISTANCE_TOTAL_METERS,
-                arrayOf(routeProgress.currentLegProgress().currentStep().distance())
-            )
-            put(
-                STEP_DURATION_TOTAL_SECONDS,
-                arrayOf(routeProgress.currentLegProgress().currentStep().duration())
-            )
-            put(
-                STEP_DISTANCE_REMAINING_METERS,
-                arrayOf(routeProgress.currentLegProgress().currentStepProgress().distanceRemaining())
-            )
-            put(
-                STEP_DURATION_REMAINING_SECONDS,
-                arrayOf(routeProgress.currentLegProgress().currentStepProgress().durationRemaining())
-            )
-            put(
-                STEP_DISTANCE_TRAVELED_METERS,
-                arrayOf(routeProgress.currentLegProgress().currentStepProgress().distanceTraveled())
-            )
-            put(
-                STEP_INDEX,
-                arrayOf(routeProgress.currentLegProgress().stepIndex())
-            )
-            put(
-                NEW_STEP,
-                arrayOf(
-                    previousRouteProgress.currentLegProgress().stepIndex(),
-                    routeProgress.currentLegProgress().stepIndex()
-                )
-            )
-            put(
-                LAST_STEP,
-                arrayOf(
-                    routeProgress.currentLegProgress().stepIndex(),
-                    ifNonNull(routeProgress.currentLeg().steps()) {
-                        it.size - 2
-                    } ?: 0
-                )
-            )
-            put(
-                FIRST_STEP,
-                arrayOf(routeProgress.currentLegProgress().stepIndex(), 0)
-            )
-            put(
-                NEXT_STEP_DURATION_SECONDS,
-                arrayOf(
-                    ifNonNull(routeProgress.currentLegProgress().upComingStep()) {
-                        it.duration()
-                    } ?: 0.0
-                )
-            )
-            put(
-                NEXT_STEP_DISTANCE_METERS,
-                arrayOf(
-                    ifNonNull(routeProgress.currentLegProgress().upComingStep()) {
-                        it.distance()
-                    } ?: 0.0
-                )
-            )
-            put(
-                FIRST_LEG,
-                arrayOf(routeProgress.legIndex(), 0)
-            )
-            put(
-                LAST_LEG,
-                arrayOf(
-                    routeProgress.legIndex(),
-                    ifNonNull(routeProgress.directionsRoute().legs()) {
-                        it.size - 1
-                    } ?: 0
-                )
-            )
-        }
+            // Build hashMap matching the trigger properties to their corresponding current values.
+            SparseArray<Array<Number>>(STATEMENTS_COUNT).apply {
+                ifNonNull(routeProgress.currentLegProgress()?.currentStep()) { currentStep ->
+                    put(
+                            STEP_DISTANCE_TOTAL_METERS,
+                            arrayOf(currentStep.distance())
+                    )
+                    put(
+                            STEP_DURATION_TOTAL_SECONDS,
+                            arrayOf(currentStep.duration())
+                    )
+                }
+                ifNonNull(routeProgress.currentLegProgress()?.currentStepProgress()) { currentStepProgress ->
+                    put(
+                            STEP_DISTANCE_REMAINING_METERS,
+                            arrayOf(currentStepProgress.distanceRemaining())
+                    )
+                    put(
+                            STEP_DURATION_REMAINING_SECONDS,
+                            arrayOf(currentStepProgress.durationRemaining())
+                    )
+                    put(
+                            STEP_DISTANCE_TRAVELED_METERS,
+                            arrayOf(currentStepProgress.distanceTraveled())
+                    )
+                }
+                ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
+                    put(
+                            STEP_INDEX,
+                            arrayOf(currentLegProgress.stepIndex())
+                    )
+                    put(
+                            NEW_STEP,
+                            arrayOf(
+                                    currentLegProgress.stepIndex(),
+                                    currentLegProgress.stepIndex()
+                            )
+                    )
+                    put(
+                            LAST_STEP,
+                            arrayOf(
+                                    currentLegProgress.stepIndex(),
+                                    ifNonNull(routeProgress.currentLeg()?.steps()) {
+                                        it.size - 2
+                                    } ?: 0
+                            )
+                    )
+                    put(
+                            FIRST_STEP,
+                            arrayOf(currentLegProgress.stepIndex(), 0)
+                    )
+                    put(
+                            NEXT_STEP_DURATION_SECONDS,
+                            arrayOf(
+                                    ifNonNull(currentLegProgress.upComingStep()) {
+                                        it.duration()
+                                    } ?: 0.0
+                            )
+                    )
+                    put(
+                            NEXT_STEP_DISTANCE_METERS,
+                            arrayOf(
+                                    ifNonNull(currentLegProgress.upComingStep()) {
+                                        it.distance()
+                                    } ?: 0.0
+                            )
+                    )
+                }
+                ifNonNull(routeProgress, routeProgress.legIndex()) { routeProgress, legIndex ->
+                    put(
+                            FIRST_LEG,
+                            arrayOf(legIndex, 0)
+                    )
+                }
+
+                ifNonNull(routeProgress.directionsRoute(), routeProgress.legIndex()) { directionsRoute, legIndex ->
+                    put(
+                            LAST_LEG,
+                            arrayOf(
+                                    legIndex,
+                                    ifNonNull(directionsRoute.legs()) {
+                                        it.size - 1
+                                    } ?: 0
+                            )
+                    )
+                }
+            }
 }

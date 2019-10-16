@@ -144,7 +144,8 @@ public class RouteProgressTest extends BaseTest {
     DirectionsRoute route = buildTestDirectionsRoute();
     RouteProgress beginningRouteProgress = buildBeginningOfLegRouteProgress(route);
 
-    assertEquals(0, beginningRouteProgress.legIndex());
+    assert (beginningRouteProgress.legIndex() != null);
+    assertEquals(0, beginningRouteProgress.legIndex().intValue());
   }
 
   @Test
@@ -237,7 +238,8 @@ public class RouteProgressTest extends BaseTest {
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
     routeProgress = routeProgress.toBuilder().legIndex(1).build();
 
-    assertEquals(1, routeProgress.legIndex());
+    assert (routeProgress.legIndex() != null);
+    assertEquals(1, routeProgress.legIndex().intValue());
   }
 
   @Test
@@ -245,7 +247,8 @@ public class RouteProgressTest extends BaseTest {
     DirectionsRoute multiLegRoute = buildMultipleLegRoute();
     RouteProgress routeProgress = buildBeginningOfLegRouteProgress(multiLegRoute);
 
-    assertEquals(2, routeProgress.remainingWaypoints());
+    assert (routeProgress.remainingWaypoints() != null);
+    assertEquals(2, routeProgress.remainingWaypoints().intValue());
   }
 
   private DirectionsRoute buildMultipleLegRoute() throws Exception {
