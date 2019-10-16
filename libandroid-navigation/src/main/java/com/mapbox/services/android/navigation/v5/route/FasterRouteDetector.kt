@@ -9,7 +9,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class FasterRouteDetector : FasterRoute() {
@@ -128,11 +127,11 @@ class FasterRouteDetector : FasterRoute() {
 
     private fun secondsSinceLastCheck(location: Location): Long {
         return lastCheckedLocation?.let { loc ->
-            dateDiff(Date(loc.time), Date(location.time), TimeUnit.SECONDS)
+            dateDiff(java.util.Date(loc.time), java.util.Date(location.time), TimeUnit.SECONDS)
         } ?: 0L
     }
 
-    private fun dateDiff(firstDate: Date, secondDate: Date, timeUnit: TimeUnit): Long {
+    private fun dateDiff(firstDate: java.util.Date, secondDate: java.util.Date, timeUnit: TimeUnit): Long {
         val diffInMillis = secondDate.time - firstDate.time
         return timeUnit.convert(diffInMillis, TimeUnit.MILLISECONDS)
     }
