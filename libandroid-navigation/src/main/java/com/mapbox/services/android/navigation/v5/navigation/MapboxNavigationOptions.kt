@@ -1,7 +1,10 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import androidx.annotation.ColorRes
+import com.mapbox.services.android.navigation.R
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUTE_REFRESH_INTERVAL
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 
 /**
@@ -50,7 +53,8 @@ data class MapboxNavigationOptions(
     @TimeFormatType
     fun timeFormatType() = timeFormatType
 
-    fun navigationLocationEngineIntervalLagInMilliseconds() = navigationLocationEngineIntervalLagInMilliseconds
+    fun navigationLocationEngineIntervalLagInMilliseconds() =
+        navigationLocationEngineIntervalLagInMilliseconds
 
     /**
      * The color resource id for the default notification.  This will be ignored
@@ -64,24 +68,28 @@ data class MapboxNavigationOptions(
     fun toBuilder() = builder
 
     class Builder {
-        var defaultMilestonesEnabled = false
+        var defaultMilestonesEnabled = true
         var enableFasterRouteDetection = false
-        var enableAutoIncrementLegIndex = false
-        var enableRefreshRoute = false
-        var refreshIntervalInMilliseconds = 0L
+        var enableAutoIncrementLegIndex = true
+        var enableRefreshRoute = true
+        var refreshIntervalInMilliseconds = ROUTE_REFRESH_INTERVAL
         var isFromNavigationUi = false
         var isDebugLoggingEnabled = false
         var navigationNotification: NavigationNotification? = null
         var roundingIncrement = ROUNDING_INCREMENT_FIFTY
         var timeFormatType = NONE_SPECIFIED
-        var navigationLocationEngineIntervalLagInMilliseconds = 0
-        var defaultNotificationColorId = 0
+        var navigationLocationEngineIntervalLagInMilliseconds =
+            NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG
+        var defaultNotificationColorId = R.color.mapboxNotificationBlue
 
-        fun defaultMilestonesEnabled(defaultMilestonesEnabled: Boolean) = apply { this.defaultMilestonesEnabled = defaultMilestonesEnabled }
+        fun defaultMilestonesEnabled(defaultMilestonesEnabled: Boolean) =
+            apply { this.defaultMilestonesEnabled = defaultMilestonesEnabled }
 
-        fun enableFasterRouteDetection(enableFasterRouteDetection: Boolean) = apply { this.enableFasterRouteDetection = enableFasterRouteDetection }
+        fun enableFasterRouteDetection(enableFasterRouteDetection: Boolean) =
+            apply { this.enableFasterRouteDetection = enableFasterRouteDetection }
 
-        fun enableAutoIncrementLegIndex(enableAutoIncrementLegIndex: Boolean) = apply { this.enableAutoIncrementLegIndex = enableAutoIncrementLegIndex }
+        fun enableAutoIncrementLegIndex(enableAutoIncrementLegIndex: Boolean) =
+            apply { this.enableAutoIncrementLegIndex = enableAutoIncrementLegIndex }
 
         /**
          * This enables / disables refresh route. If not specified, it's enabled by default.
@@ -89,7 +97,8 @@ data class MapboxNavigationOptions(
          * @param enableRefreshRoute whether or not to enable route refresh
          * @return this builder for chaining options together
          */
-        fun enableRefreshRoute(enableRefreshRoute: Boolean) = apply { this.enableRefreshRoute = enableRefreshRoute }
+        fun enableRefreshRoute(enableRefreshRoute: Boolean) =
+            apply { this.enableRefreshRoute = enableRefreshRoute }
 
         /**
          * This sets the route refresh interval. If not specified, the interval is 5 minutes by default.
@@ -97,19 +106,28 @@ data class MapboxNavigationOptions(
          * @param intervalInMilliseconds for route refresh
          * @return this builder for chaining options together
          */
-        fun refreshIntervalInMilliseconds(intervalInMilliseconds: Long) = apply { this.refreshIntervalInMilliseconds = intervalInMilliseconds }
+        fun refreshIntervalInMilliseconds(intervalInMilliseconds: Long) =
+            apply { this.refreshIntervalInMilliseconds = intervalInMilliseconds }
 
-        fun isFromNavigationUi(isFromNavigationUi: Boolean) = apply { this.isFromNavigationUi = isFromNavigationUi }
+        fun isFromNavigationUi(isFromNavigationUi: Boolean) =
+            apply { this.isFromNavigationUi = isFromNavigationUi }
 
-        fun isDebugLoggingEnabled(debugLoggingEnabled: Boolean) = apply { this.isDebugLoggingEnabled = isDebugLoggingEnabled }
+        fun isDebugLoggingEnabled(debugLoggingEnabled: Boolean) =
+            apply { this.isDebugLoggingEnabled = isDebugLoggingEnabled }
 
-        fun navigationNotification(notification: NavigationNotification) = apply { this.navigationNotification = navigationNotification }
+        fun navigationNotification(notification: NavigationNotification) =
+            apply { this.navigationNotification = navigationNotification }
 
-        fun roundingIncrement(@NavigationConstants.RoundingIncrement roundingIncrement: Int) = apply { this.roundingIncrement = roundingIncrement }
+        fun roundingIncrement(@NavigationConstants.RoundingIncrement roundingIncrement: Int) =
+            apply { this.roundingIncrement = roundingIncrement }
 
-        fun timeFormatType(@TimeFormatType type: Int) = apply { this.timeFormatType = timeFormatType }
+        fun timeFormatType(@TimeFormatType type: Int) =
+            apply { this.timeFormatType = timeFormatType }
 
-        fun navigationLocationEngineIntervalLagInMilliseconds(lagInMilliseconds: Int) = apply { this.navigationLocationEngineIntervalLagInMilliseconds = navigationLocationEngineIntervalLagInMilliseconds }
+        fun navigationLocationEngineIntervalLagInMilliseconds(lagInMilliseconds: Int) = apply {
+            this.navigationLocationEngineIntervalLagInMilliseconds =
+                navigationLocationEngineIntervalLagInMilliseconds
+        }
 
         /**
          * Optionally, set the background color of the default notification.
@@ -117,23 +135,24 @@ data class MapboxNavigationOptions(
          * @param defaultNotificationColorId the color resource to be used
          * @return this builder for chaining operations together
          */
-        fun defaultNotificationColorId(@ColorRes defaultNotificationColorId: Int) = apply { this.defaultNotificationColorId = defaultNotificationColorId }
+        fun defaultNotificationColorId(@ColorRes defaultNotificationColorId: Int) =
+            apply { this.defaultNotificationColorId = defaultNotificationColorId }
 
         fun build(): MapboxNavigationOptions {
             return MapboxNavigationOptions(
-                    defaultMilestonesEnabled,
-                    enableFasterRouteDetection,
-                    enableAutoIncrementLegIndex,
-                    enableRefreshRoute,
-                    refreshIntervalInMilliseconds,
-                    isFromNavigationUi,
-                    isDebugLoggingEnabled,
-                    navigationNotification,
-                    roundingIncrement,
-                    timeFormatType,
-                    navigationLocationEngineIntervalLagInMilliseconds,
-                    defaultNotificationColorId,
-                    this
+                defaultMilestonesEnabled,
+                enableFasterRouteDetection,
+                enableAutoIncrementLegIndex,
+                enableRefreshRoute,
+                refreshIntervalInMilliseconds,
+                isFromNavigationUi,
+                isDebugLoggingEnabled,
+                navigationNotification,
+                roundingIncrement,
+                timeFormatType,
+                navigationLocationEngineIntervalLagInMilliseconds,
+                defaultNotificationColorId,
+                this
             )
         }
     }

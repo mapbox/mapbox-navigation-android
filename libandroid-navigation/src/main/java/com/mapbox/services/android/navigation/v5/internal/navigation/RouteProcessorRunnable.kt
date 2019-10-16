@@ -57,35 +57,34 @@ internal class RouteProcessorRunnable(
             options.enableAutoIncrementLegIndex()
         )
         val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
+        val routeRefresher = navigation.retrieveRouteRefresher()
 
-        ifNonNull(navigation.retrieveRouteRefresher(), routeProgress) { routeRefresher, progress ->
+        ifNonNull(routeRefresher, routeProgress) { routeRefresher, routeProgress ->
             if (routeRefresher.check(date)) {
-                routeRefresher.refresh(progress)
-            }
-            if (routeRefresher.check(date)) {
-                routeRefresher.refresh(progress)
+                routeRefresher.refresh(routeProgress)
             }
         }
 
-        val engineFactory = navigation.retrieveEngineFactory()
-        ifNonNull(routeProgress) { progress ->
+        ifNonNull(routeProgress) { routeProgress ->
+            val engineFactory = navigation.retrieveEngineFactory()
             val userOffRoute =
-                isUserOffRoute(options, status, rawLocation, progress, engineFactory)
-            val snappedLocation = findSnappedLocation(status, rawLocation, progress, engineFactory)
+                isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory)
+            val snappedLocation =
+                findSnappedLocation(status, rawLocation, routeProgress, engineFactory)
             val checkFasterRoute = checkFasterRoute(
-                options, snappedLocation, progress, engineFactory,
+                options, snappedLocation, routeProgress, engineFactory,
                 userOffRoute
             )
-            val milestones = findTriggeredMilestones(navigation, progress)
+            val milestones = findTriggeredMilestones(navigation, routeProgress)
 
             sendUpdateToResponseHandler(
                 userOffRoute,
                 milestones,
                 snappedLocation,
                 checkFasterRoute,
-                progress
+                routeProgress
             )
-            routeProcessor.updatePreviousRouteProgress(progress)
+            routeProcessor.updatePreviousRouteProgress(routeProgress)
             workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
         }
     }

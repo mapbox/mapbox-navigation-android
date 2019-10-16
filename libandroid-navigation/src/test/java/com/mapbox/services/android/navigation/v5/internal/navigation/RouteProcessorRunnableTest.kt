@@ -180,7 +180,7 @@ class RouteProcessorRunnableTest {
         status: NavigationStatus,
         route: DirectionsRoute
     ): RouteProcessorRunnable {
-        val options = MapboxNavigationOptions.builder().build()
+        val options = MapboxNavigationOptions.Builder().build()
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>(relaxed = true)
         every { navigation.options() } returns options
@@ -203,7 +203,7 @@ class RouteProcessorRunnableTest {
         route: DirectionsRoute,
         autoIncrementEnabled: Boolean
     ): RouteProcessorRunnable {
-        val options = MapboxNavigationOptions.builder()
+        val options = MapboxNavigationOptions.Builder()
             .enableAutoIncrementLegIndex(autoIncrementEnabled)
             .build()
         every { navigator.retrieveStatus(any(), any()) } returns status
@@ -229,7 +229,7 @@ class RouteProcessorRunnableTest {
         route: DirectionsRoute,
         autoIncrementEnabled: Boolean
     ): RouteProcessorRunnable {
-        val options = MapboxNavigationOptions.builder()
+        val options = MapboxNavigationOptions.Builder()
             .enableAutoIncrementLegIndex(autoIncrementEnabled)
             .build()
         every { navigator.retrieveStatus(any(), any()) } returns status
@@ -253,7 +253,7 @@ class RouteProcessorRunnableTest {
         factory: NavigationEngineFactory,
         status: NavigationStatus
     ): RouteProcessorRunnable {
-        val options = MapboxNavigationOptions.builder().build()
+        val options = MapboxNavigationOptions.Builder().build()
         val navigator = mockk<MapboxNavigator>()
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>(relaxed = true)
