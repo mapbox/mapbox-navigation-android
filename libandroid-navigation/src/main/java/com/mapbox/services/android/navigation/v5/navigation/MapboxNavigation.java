@@ -95,7 +95,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.5.0
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken) {
-    this(context, accessToken, MapboxNavigationOptions.builder().build());
+    this(context, accessToken, new MapboxNavigationOptions.Builder().build());
   }
 
   /**
@@ -153,7 +153,7 @@ public class MapboxNavigation implements ServiceConnection {
                           MapboxNavigator mapboxNavigator) {
     initializeContext(context);
     this.accessToken = accessToken;
-    this.options = MapboxNavigationOptions.builder().build();
+    this.options = new MapboxNavigationOptions.Builder().build();
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
     this.mapboxNavigator = mapboxNavigator;
@@ -883,7 +883,7 @@ public class MapboxNavigation implements ServiceConnection {
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
-    if (options.defaultMilestonesEnabled()) {
+    if (options.getDefaultMilestonesEnabled()) {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
       addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
     }
@@ -905,7 +905,7 @@ public class MapboxNavigation implements ServiceConnection {
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
-    if (options.defaultMilestonesEnabled()) {
+    if (options.getDefaultMilestonesEnabled()) {
       addMilestone(new VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build());
       addMilestone(new BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build());
     }
@@ -952,7 +952,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);

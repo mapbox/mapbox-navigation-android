@@ -121,7 +121,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
     Context context = getApplicationContext();
     CustomNavigationNotification customNotification = new CustomNavigationNotification(context);
-    MapboxNavigationOptions options = MapboxNavigationOptions.builder()
+    MapboxNavigationOptions options = new MapboxNavigationOptions.Builder()
       .navigationNotification(customNotification)
       .build();
 
