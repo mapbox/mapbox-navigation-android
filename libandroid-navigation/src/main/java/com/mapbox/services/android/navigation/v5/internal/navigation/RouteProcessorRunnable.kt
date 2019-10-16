@@ -11,7 +11,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute
-import java.util.ArrayList
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Date
 
 internal class RouteProcessorRunnable(
@@ -58,30 +58,36 @@ internal class RouteProcessorRunnable(
         )
         val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
 
-        val routeRefresher = navigation.retrieveRouteRefresher()
-        if (routeRefresher != null && routeRefresher.check(date)) {
-            routeRefresher.refresh(routeProgress)
+        ifNonNull(navigation.retrieveRouteRefresher(), routeProgress) { routeRefresher, progress ->
+            if (routeRefresher.check(date)) {
+                routeRefresher.refresh(progress)
+            }
+            if (routeRefresher.check(date)) {
+                routeRefresher.refresh(progress)
+            }
         }
 
         val engineFactory = navigation.retrieveEngineFactory()
-        val userOffRoute =
-            isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory)
-        val snappedLocation = findSnappedLocation(status, rawLocation, routeProgress, engineFactory)
-        val checkFasterRoute = checkFasterRoute(
-            options, snappedLocation, routeProgress, engineFactory,
-            userOffRoute
-        )
-        val milestones = findTriggeredMilestones(navigation, routeProgress)
+        ifNonNull(routeProgress) { progress ->
+            val userOffRoute =
+                isUserOffRoute(options, status, rawLocation, progress, engineFactory)
+            val snappedLocation = findSnappedLocation(status, rawLocation, progress, engineFactory)
+            val checkFasterRoute = checkFasterRoute(
+                options, snappedLocation, progress, engineFactory,
+                userOffRoute
+            )
+            val milestones = findTriggeredMilestones(navigation, progress)
 
-        sendUpdateToResponseHandler(
-            userOffRoute,
-            milestones,
-            snappedLocation,
-            checkFasterRoute,
-            routeProgress
-        )
-        routeProcessor.updatePreviousRouteProgress(routeProgress)
-        workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
+            sendUpdateToResponseHandler(
+                userOffRoute,
+                milestones,
+                snappedLocation,
+                checkFasterRoute,
+                progress
+            )
+            routeProcessor.updatePreviousRouteProgress(progress)
+            workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
+        }
     }
 
     private fun checkForNewLegIndex(
