@@ -12,7 +12,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteDetector
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
-import java.util.*
 
 internal class RouteProcessorRunnable(
     private val routeProcessor: NavigationRouteProcessor,
@@ -43,7 +42,7 @@ internal class RouteProcessorRunnable(
         val options = navigation.options()
         val route = navigation.route
 
-        val date = Date()
+        val date = java.util.Date()
         var status = mapboxNavigator.retrieveStatus(
                 date,
                 options.navigationLocationEngineIntervalLagInMilliseconds().toLong()
