@@ -8,7 +8,8 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_CHECK_FASTER_ROUTE_INTERVAL
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import java.util.Date
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class FasterRouteDetector : FasterRoute() {
@@ -118,10 +119,11 @@ class FasterRouteDetector : FasterRoute() {
     }
 
     private fun validStepDurationRemaining(routeProgress: RouteProgress): Boolean {
-        val currentStepProgress = routeProgress.currentLegProgress().currentStepProgress()
         // Current step duration remaining in seconds
-        val currentStepDurationRemaining = currentStepProgress.durationRemaining().toInt()
-        return currentStepDurationRemaining > NAVIGATION_MEDIUM_ALERT_DURATION
+        val currentStepProgress = routeProgress.currentLegProgress().currentStepProgress()
+        return ifNonNull(currentStepProgress?.durationRemaining()) { durationRemaining ->
+            durationRemaining.toInt() > NAVIGATION_MEDIUM_ALERT_DURATION
+        } ?: false
     }
 
     private fun secondsSinceLastCheck(location: Location): Long {
