@@ -18,15 +18,16 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
  *
  * @since 0.1.0
  */
-data class RouteLegProgress(var stepIndex: Int?,
-                            var distanceRemaining: Double?,
-                            var durationRemaining: Double?,
-                            var currentStep: LegStep?,
-                            var currentStepProgress: RouteStepProgress?,
-                            var currentStepPoints: List<Point>?,
-                            var upcomingStepPoints: List<Point>? = null
-                            var routeLeg: RouteLeg?,
-                            var stepDistanceRemaining: Double?
+data class RouteLegProgress(
+    var stepIndex: Int?,
+    var distanceRemaining: Double?,
+    var durationRemaining: Double?,
+    var currentStep: LegStep?,
+    var currentStepProgress: RouteStepProgress?,
+    var currentStepPoints: List<Point>?,
+    var upcomingStepPoints: List<Point>? = null,
+    var routeLeg: RouteLeg?,
+    var stepDistanceRemaining: Double?
 ) {
 
     /**
@@ -45,8 +46,8 @@ data class RouteLegProgress(var stepIndex: Int?,
      * @since 0.1.0
      */
     fun distanceTraveled() =
-            ifNonNull(routeLeg().distance()) { distance ->
-                var distanceTraveled = distance - distanceRemaining()
+            ifNonNull(routeLeg()?.distance(), distanceRemaining()) { distance, distanceRemaining ->
+                var distanceTraveled = distance - distanceRemaining
                 when (distanceTraveled < 0) {
                     true -> {
                         distanceTraveled = 0.0
@@ -85,7 +86,7 @@ data class RouteLegProgress(var stepIndex: Int?,
     fun fractionTraveled(): Float {
         var fractionTraveled = 1f
 
-        ifNonNull(routeLeg().distance()) { distance ->
+        ifNonNull(routeLeg()?.distance()) { distance ->
             if (distance > 0.0F) {
                 fractionTraveled = (distanceTraveled() / distance).toFloat()
                 if (fractionTraveled < 0) {
@@ -109,8 +110,8 @@ data class RouteLegProgress(var stepIndex: Int?,
             null
         }
         else -> {
-            ifNonNull(routeLeg().steps()) { steps ->
-                steps[stepIndex() - 1]
+            ifNonNull(routeLeg()?.steps(), stepIndex()) { steps, stepIndex ->
+                steps[stepIndex - 1]
             }
         }
     }
@@ -130,9 +131,9 @@ data class RouteLegProgress(var stepIndex: Int?,
      * @return a [LegStep] representing the next step the user will be on.
      * @since 0.1.0
      */
-    fun upComingStep() = ifNonNull(routeLeg().steps(), stepIndex()) { steps, stepIndex ->
+    fun upComingStep() = ifNonNull(routeLeg()?.steps(), stepIndex()) { steps, stepIndex ->
         if (steps.size - 1 > stepIndex) {
-            steps[stepIndex() + 1]
+            steps[stepIndex + 1]
         } else null
     }
 
@@ -143,9 +144,9 @@ data class RouteLegProgress(var stepIndex: Int?,
      * @return the [LegStep] after the [.upComingStep]
      * @since 0.5.0
      */
-    fun followOnStep() = ifNonNull(routeLeg().steps(), stepIndex()) { steps, stepIndex ->
+    fun followOnStep() = ifNonNull(routeLeg()?.steps(), stepIndex()) { steps, stepIndex ->
         if (steps.size - 2 > stepIndex) {
-            steps[stepIndex() + 2]
+            steps[stepIndex + 2]
         } else null
     }
 
@@ -234,13 +235,6 @@ data class RouteLegProgress(var stepIndex: Int?,
                     routeLeg,
                     stepDistanceRemaining
             )
-        }
-    }
-
-    companion object {
-
-        fun builder(): Builder {
-            return AutoValue_RouteLegProgress.Builder()
         }
     }
 }

@@ -268,7 +268,7 @@ public abstract class RouteProgress {
 
     public RouteProgress build() {
       RouteLeg currentLeg = directionsRoute().legs().get(legIndex());
-      RouteLegProgress legProgress = RouteLegProgress.Companion.builder()
+      RouteLegProgress legProgress = new RouteLegProgress.Builder()
         .routeLeg(currentLeg)
         .currentStep(currentStep())
         .stepIndex(stepIndex())

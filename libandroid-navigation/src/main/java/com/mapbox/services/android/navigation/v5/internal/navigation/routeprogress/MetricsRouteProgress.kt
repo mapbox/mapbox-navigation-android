@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
@@ -73,7 +74,7 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
             this.distanceTraveled = routeProgress.distanceTraveled().toInt()
             this.legIndex = routeProgress.legIndex()
             this.legCount = routeProgress.directionsRoute().legs()?.size ?: 0
-            this.stepIndex = routeProgress.currentLegProgress().stepIndex()
+            this.stepIndex = routeProgress.currentLegProgress().stepIndex() ?: 0
             this.stepCount = routeProgress.currentLeg().steps()?.size ?: 0
         } else {
             initDefaultValues()
@@ -102,11 +103,19 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
     }
 
     private fun obtainLegData(legProgress: RouteLegProgress) {
-        currentStepDistance = legProgress.currentStep().distance().toInt()
-        currentStepDuration = legProgress.currentStep().duration().toInt()
-        currentStepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining().toInt()
-        currentStepDurationRemaining = legProgress.currentStepProgress().durationRemaining().toInt()
-        currentStepName = legProgress.currentStep().name() ?: ""
+        currentStepDistance = ifNonNull(legProgress.currentStep()?.distance()) { currentStepDistance ->
+            currentStepDistance.toInt()
+        } ?: 0
+        currentStepDuration = ifNonNull(legProgress.currentStep()?.duration()) { currentStepDuration ->
+            currentStepDuration.toInt()
+        } ?: 0
+        currentStepDistanceRemaining = ifNonNull(legProgress.currentStepProgress()?.distanceRemaining()) { currentStepDistanceRemaining ->
+            currentStepDistanceRemaining.toInt()
+        } ?: 0
+        currentStepDurationRemaining = ifNonNull(legProgress.currentStepProgress()?.durationRemaining()) { currentStepDurationRemaining ->
+            currentStepDurationRemaining.toInt()
+        } ?: 0
+        currentStepName = legProgress.currentStep()?.name() ?: ""
     }
 
     private fun obtainStepData(routeProgress: RouteProgress) {
@@ -119,15 +128,15 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
                 upcomingStepModifier = it.modifier()
             }
         }
-        legProgress.currentStep().maneuver().let {
-            previousStepInstruction = it.instruction()
-            previousStepType = it.type()
-            previousStepModifier = it.modifier()
+        ifNonNull(legProgress.currentStep()?.maneuver()) { maneuver ->
+            previousStepInstruction = maneuver.instruction()
+            previousStepType = maneuver.type()
+            previousStepModifier = maneuver.modifier()
         }
         previousStepName = currentStepName
     }
 
     private fun retrieveRouteDestination(route: DirectionsRoute): Point =
-        route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
-            ?: DEFAULT_POINT
+            route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
+                    ?: DEFAULT_POINT
 }
