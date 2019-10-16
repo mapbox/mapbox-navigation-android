@@ -100,27 +100,6 @@ internal constructor(
         fun builder(): Builder = Builder()
     }
 
-    // /**
-    //  * Get the route the navigation session is currently using. When a reroute occurs and a new
-    //  * directions route gets obtained, with the next location update this directions route should
-    //  * reflect the new route. All direction route get passed in through
-    //  * [com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation.startNavigation].
-    //  *
-    //  * @return a [DirectionsRoute] currently being used for the navigation session
-    //  * @since 0.1.0
-    //  */
-    // fun directionsRoute() = directionsRoute
-    //
-    // /**
-    //  * Index representing the current leg the user is on. If the directions route currently in use
-    //  * contains more then two waypoints, the route is likely to have multiple legs representing the
-    //  * distance between the two points.
-    //  *
-    //  * @return an integer representing the current leg the user is on
-    //  * @since 0.1.0
-    //  */
-    // fun legIndex(): Int? = legIndex
-
     /**
      * Provides the current [RouteLeg] the user is on.
      *
@@ -178,14 +157,6 @@ internal constructor(
             }
         } ?: 1.0f
 
-    // /**
-    //  * Provides the distance remaining in meters till the user reaches the end of the route.
-    //  *
-    //  * @return `long` value representing the distance remaining till end of route, in unit meters
-    //  * @since 0.1.0
-    //  */
-    // fun distanceRemaining(): Double? = distanceRemaining
-
     /**
      * Number of waypoints remaining on the current route.
      *
@@ -194,78 +165,6 @@ internal constructor(
      */
     fun remainingWaypoints(): Int? =
         ifNonNull(directionsRoute.legs(), legIndex) { legs, legIndex -> legs.size - legIndex }
-
-    // /**
-    //  * Gives a [RouteLegProgress] object with information about the particular leg the user is
-    //  * currently on.
-    //  *
-    //  * @return a [RouteLegProgress] object
-    //  * @since 0.1.0
-    //  */
-    // fun currentLegProgress() = currentLegProgress
-
-    // /**
-    //  * Provides a list of points that represent the current step
-    //  * step geometry.
-    //  *
-    //  * @return list of points representing the current step
-    //  * @since 0.12.0
-    //  */
-    // fun currentStepPoints() = currentStepPoints
-
-    // /**
-    //  * Provides a list of points that represent the upcoming step
-    //  * step geometry.
-    //  *
-    //  * @return list of points representing the upcoming step
-    //  * @since 0.12.0
-    //  */
-    // fun upcomingStepPoints() = upcomingStepPoints
-
-    // /**
-    //  * Returns whether or not the location updates are
-    //  * considered in a tunnel along the route.
-    //  *
-    //  * @return true if in a tunnel, false otherwise
-    //  * @since 0.19.0
-    //  */
-    // fun inTunnel() = inTunnel
-
-    // /**
-    //  * Current voice instruction.
-    //  *
-    //  * @return current voice instruction
-    //  * @since 0.20.0
-    //  */
-    // fun voiceInstruction() = voiceInstruction
-
-    // /**
-    //  * Current banner instruction.
-    //  *
-    //  * @return current banner instruction
-    //  * @since 0.25.0
-    //  */
-    // fun bannerInstruction() = bannerInstruction
-
-    // /**
-    //  * Returns the current state of progress along the route.  Provides route and location tracking
-    //  * information.
-    //  *
-    //  * @return the current state of progress along the route.
-    //  */
-    // fun currentState() = currentState
-
-    // /**
-    //  * Returns the current [DirectionsRoute] geometry with a buffer
-    //  * that encompasses visible tile surface are while navigating.
-    //  *
-    //  *
-    //  * This [Geometry] is ideal for offline downloads of map or routing tile
-    //  * data.
-    //  *
-    //  * @return current route geometry with buffer
-    //  */
-    // fun routeGeometryWithBuffer() = routeGeometryWithBuffer
 
     fun toBuilder() = builder()
         .directionsRoute(directionsRoute)
@@ -397,7 +296,7 @@ internal constructor(
                 _distanceRemaining, _stepIndex,
                 _legDurationRemaining, _stepDistanceRemaining,
                 _legIndex, _inTunnel,
-                 _currentStepPoints, _currentStep ->
+                _currentStepPoints, _currentStep ->
 
                 val leg: RouteLeg? = _directionsRoute.let { directionRoute ->
                     directionRoute.legs()?.let { legs ->
