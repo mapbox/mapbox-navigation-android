@@ -58,8 +58,10 @@ internal class RouteProcessorRunnable(
         )
         val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
         val routeRefresher = navigation.retrieveRouteRefresher()
-
-        ifNonNull(routeRefresher, routeProgress) { routeRefresher, routeProgress ->
+        ifNonNull(
+            routeRefresher,
+            routeProgress
+        ) { routeRefresher, routeProgress ->
             if (routeRefresher.check(date)) {
                 routeRefresher.refresh(routeProgress)
             }
