@@ -234,8 +234,8 @@ class RouteFetcher {
 
     private fun updateListeners(response: DirectionsResponse?, routeProgress: RouteProgress?) {
         for (listener in routeListeners) {
-            ifNonNull(response, routeProgress) { directionsResponse, progress ->
-                listener.onResponseReceived(directionsResponse, progress)
+            ifNonNull(response) { directionsResponse ->
+                listener.onResponseReceived(directionsResponse, routeProgress)
             }
         }
     }
