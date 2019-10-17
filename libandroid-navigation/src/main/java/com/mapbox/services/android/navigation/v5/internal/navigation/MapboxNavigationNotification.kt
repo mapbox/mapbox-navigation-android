@@ -93,14 +93,17 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     // Package private (no modifier) for testing purposes
     fun generateArrivalTime(routeProgress: RouteProgress, time: Calendar): String? =
-            ifNonNull(mapboxNavigation, routeProgress.currentLegProgress()) { mapboxNavigation, currentLegProgress ->
-                val options = mapboxNavigation.options()
-                val legDurationRemaining = currentLegProgress.durationRemaining()
-                val timeFormatType = options.timeFormatType()
-                val arrivalTime =
-                        formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat)
-                String.format(etaFormat, arrivalTime)
-            }
+        ifNonNull(
+            mapboxNavigation,
+            routeProgress.currentLegProgress()
+        ) { mapboxNavigation, currentLegProgress ->
+            val options = mapboxNavigation.options()
+            val legDurationRemaining = currentLegProgress.durationRemaining() ?: 0.0
+            val timeFormatType = options.timeFormatType()
+            val arrivalTime =
+                formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat)
+            String.format(etaFormat, arrivalTime)
+        }
 
     // Package private (no modifier) for testing purposes
     fun updateNotificationViews(routeProgress: RouteProgress) {
@@ -133,9 +136,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
         etaFormat = applicationContext.getString(R.string.eta_format)
         initializeDistanceFormatter(applicationContext, mapboxNavigation)
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
-                ?.let { notificationService ->
-                    notificationManager = notificationService as NotificationManager
-                }
+            ?.let { notificationService ->
+                notificationManager = notificationService as NotificationManager
+            }
         isTwentyFourHourFormat = DateFormat.is24HourFormat(applicationContext)
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
@@ -164,15 +167,15 @@ internal class MapboxNavigationNotification : NavigationNotification {
         val roundingIncrement = mapboxNavigationOptions.roundingIncrement()
 
         distanceFormatter =
-                DistanceFormatter(applicationContext, language, unitType, roundingIncrement)
+            DistanceFormatter(applicationContext, language, unitType, roundingIncrement)
     }
 
     private fun createNotificationChannel(applicationContext: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                    NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL,
-                    applicationContext.getString(R.string.channel_name),
-                    NotificationManager.IMPORTANCE_LOW
+                NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL,
+                applicationContext.getString(R.string.channel_name),
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager?.createNotificationChannel(notificationChannel)
         }
@@ -180,14 +183,14 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun buildNotification(applicationContext: Context): Notification {
         val channelId =
-                NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
+            NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
-                .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setSmallIcon(R.drawable.ic_navigation)
-                .setCustomContentView(collapsedNotificationRemoteViews)
-                .setCustomBigContentView(expandedNotificationRemoteViews)
-                .setOngoing(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setSmallIcon(R.drawable.ic_navigation)
+            .setCustomContentView(collapsedNotificationRemoteViews)
+            .setCustomBigContentView(expandedNotificationRemoteViews)
+            .setOngoing(true)
 
         pendingOpenIntent?.let { pendingOpenIntent ->
             builder.setContentIntent(pendingOpenIntent)
@@ -229,8 +232,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun registerReceiver(applicationContext: Context?) {
         applicationContext?.registerReceiver(
-                endNavigationBtnReceiver,
-                IntentFilter(END_NAVIGATION_ACTION)
+            endNavigationBtnReceiver,
+            IntentFilter(END_NAVIGATION_ACTION)
         )
     }
 
@@ -246,8 +249,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun updateInstructionText(bannerInstruction: BannerInstruction?) {
         if (bannerInstruction != null && (instructionText == null || newInstructionText(
-                        bannerInstruction
-                ))
+                bannerInstruction
+            ))
         ) {
             updateViewsWithInstruction(bannerInstruction.primary.text)
             instructionText = bannerInstruction.primary.text
@@ -265,31 +268,42 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
         if (currentDistanceText == null || newDistanceText(routeProgress)) {
-            currentDistanceText = ifNonNull(distanceFormatter, routeProgress.currentLegProgress()) { distanceFormatter, routeLegProgress ->
-                distanceFormatter.formatDistance(routeLegProgress.currentStepProgress().distanceRemaining())
+            currentDistanceText = ifNonNull(
+                distanceFormatter,
+                routeProgress.currentLegProgress()
+            ) { distanceFormatter, routeLegProgress ->
+                routeLegProgress.currentStepProgress()?.distanceRemaining()?.let {
+                    distanceFormatter.formatDistance(it)
+                }
             }
             collapsedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationDistanceText,
-                    currentDistanceText
+                R.id.notificationDistanceText,
+                currentDistanceText
             )
             expandedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationDistanceText,
-                    currentDistanceText
+                R.id.notificationDistanceText,
+                currentDistanceText
             )
         }
     }
 
     private fun newDistanceText(routeProgress: RouteProgress) =
-            ifNonNull(distanceFormatter, routeProgress.currentLegProgress(), currentDistanceText) { distanceFormatter, currentLegProgress, currentDistanceText ->
-                val item = currentLegProgress.currentStepProgress().distanceRemaining()
-                // The call below can return an empty spanable string. toString() will cause a NPE and ?. will not catch it.
-                val str = distanceFormatter.formatDistance(item)
-                if (str == null) {
-                    val formattedDistance = str.toString()
-                    currentDistanceText.toString() != formattedDistance
-                } else
-                    false
-            } ?: false
+        ifNonNull(
+            distanceFormatter,
+            routeProgress.currentLegProgress(),
+            currentDistanceText
+        ) { distanceFormatter, currentLegProgress, currentDistanceText ->
+            val item = currentLegProgress.currentStepProgress()?.distanceRemaining()
+            // The call below can return an empty spanable string. toString() will cause a NPE and ?. will not catch it.
+            val str = item?.let {
+                distanceFormatter.formatDistance(it)
+            }
+            if (str == null) {
+                val formattedDistance = str.toString()
+                currentDistanceText.toString() != formattedDistance
+            } else
+                false
+        } ?: false
 
     private fun updateViewsWithArrival(time: String) {
         collapsedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
@@ -301,12 +315,12 @@ internal class MapboxNavigationNotification : NavigationNotification {
         if (currentManeuverId != maneuverResource) {
             currentManeuverId = maneuverResource
             collapsedNotificationRemoteViews?.setImageViewResource(
-                    R.id.maneuverImage,
-                    maneuverResource
+                R.id.maneuverImage,
+                maneuverResource
             )
             expandedNotificationRemoteViews?.setImageViewResource(
-                    R.id.maneuverImage,
-                    maneuverResource
+                R.id.maneuverImage,
+                maneuverResource
             )
         }
     }
@@ -318,10 +332,10 @@ internal class MapboxNavigationNotification : NavigationNotification {
         if (!TextUtils.isEmpty(maneuverModifier)) {
             val drivingSide = step.drivingSide()
             return if (isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                            maneuverType,
-                            maneuverModifier,
-                            drivingSide
-                    )
+                    maneuverType,
+                    maneuverModifier,
+                    drivingSide
+                )
             ) {
                 obtainManeuverResourceFrom(maneuverType + maneuverModifier + drivingSide)
             } else obtainManeuverResourceFrom(maneuverType + maneuverModifier)
@@ -397,9 +411,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
         drivingSide: String?
     ): Boolean {
         return NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT == drivingSide && (
-                NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
-                        NavigationConstants.STEP_MANEUVER_TYPE_ROTARY == maneuverType || NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
-                )
+            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
+                NavigationConstants.STEP_MANEUVER_TYPE_ROTARY == maneuverType || NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
+            )
     }
 
     private fun onEndNavigationBtnClick() {

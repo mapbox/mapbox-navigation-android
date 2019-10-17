@@ -81,16 +81,17 @@ data class RouteProgress internal constructor(
      * using unit meters
      * @since 0.1.0
      */
-    fun distanceTraveled(): Double? = ifNonNull(directionsRoute?.distance(), distanceRemaining) { distance, distanceRemaining ->
-        when (distance - distanceRemaining < 0) {
-            true -> {
-                0.0
-            }
-            false -> {
-                distance - distanceRemaining
+    fun distanceTraveled(): Double? =
+        ifNonNull(directionsRoute?.distance(), distanceRemaining) { distance, distanceRemaining ->
+            when (distance - distanceRemaining < 0) {
+                true -> {
+                    0.0
+                }
+                false -> {
+                    distance - distanceRemaining
+                }
             }
         }
-    }
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the route.
@@ -99,9 +100,10 @@ data class RouteProgress internal constructor(
      * seconds
      * @since 0.1.0
      */
-    fun durationRemaining(): Double? = ifNonNull(fractionTraveled(), directionsRoute()?.duration()) { fractionTraveled, duration ->
-        (1 - fractionTraveled) * duration
-    }
+    fun durationRemaining(): Double? =
+        ifNonNull(fractionTraveled(), directionsRoute()?.duration()) { fractionTraveled, duration ->
+            (1 - fractionTraveled) * duration
+        }
 
     /**
      * Get the fraction traveled along the current route, this is a float value between 0 and 1 and
@@ -111,16 +113,17 @@ data class RouteProgress internal constructor(
      * route
      * @since 0.1.0
      */
-    fun fractionTraveled(): Float? = ifNonNull(distanceTraveled(), directionsRoute()?.distance()) { distanceTraveled, distance ->
-        when (distance > 0) {
-            true -> {
-                (distanceTraveled / distance).toFloat()
+    fun fractionTraveled(): Float? =
+        ifNonNull(distanceTraveled(), directionsRoute()?.distance()) { distanceTraveled, distance ->
+            when (distance > 0) {
+                true -> {
+                    (distanceTraveled / distance).toFloat()
+                }
+                false -> {
+                    1.0f
+                }
             }
-            false -> {
-                1.0f
-            }
-        }
-    } ?: 1.0f
+        } ?: 1.0f
 
     /**
      * Provides the distance remaining in meters till the user reaches the end of the route.
@@ -136,7 +139,8 @@ data class RouteProgress internal constructor(
      * @return integer value representing the number of way points remaining along the route
      * @since 0.5.0
      */
-    fun remainingWaypoints(): Int? = ifNonNull(directionsRoute?.legs(), legIndex) { legs, legIndex -> legs.size - legIndex }
+    fun remainingWaypoints(): Int? =
+        ifNonNull(directionsRoute?.legs(), legIndex) { legs, legIndex -> legs.size - legIndex }
 
     /**
      * Gives a [RouteLegProgress] object with information about the particular leg the user is
@@ -189,6 +193,7 @@ data class RouteProgress internal constructor(
      * @since 0.25.0
      */
     fun bannerInstruction() = bannerInstruction
+
     /**
      * Returns the current state of progress along the route.  Provides route and location tracking
      * information.
@@ -238,22 +243,46 @@ data class RouteProgress internal constructor(
         private var stepDistanceRemaining: Double? = null
         private var legDurationRemaining: Double? = null
 
-        fun directionsRoute(directionsRoute: DirectionsRoute) = apply { this.directionsRoute = directionsRoute }
+        fun directionsRoute(directionsRoute: DirectionsRoute) =
+            apply { this.directionsRoute = directionsRoute }
+
         fun legIndex(legIndex: Int) = apply { this.legIndex = legIndex }
-        fun distanceRemaining(distanceRemaining: Double) = apply { this.distanceRemaining = distanceRemaining }
-        fun currentLegProgress(currentLegProgress: RouteLegProgress) = apply { this.currentLegProgress = currentLegProgress }
-        fun currentStepPoints(currentStepPoints: List<Point>?) = apply { this.currentStepPoints = currentStepPoints }
-        fun upcomingStepPoints(upcomingStepPoints: List<Point>?) = apply { this.upcomingStepPoints = upcomingStepPoints }
+        fun distanceRemaining(distanceRemaining: Double) =
+            apply { this.distanceRemaining = distanceRemaining }
+
+        fun currentLegProgress(currentLegProgress: RouteLegProgress) =
+            apply { this.currentLegProgress = currentLegProgress }
+
+        fun currentStepPoints(currentStepPoints: List<Point>?) =
+            apply { this.currentStepPoints = currentStepPoints }
+
+        fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
+            apply { this.upcomingStepPoints = upcomingStepPoints }
+
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
-        fun voiceInstruction(voiceInstruction: VoiceInstruction?) = apply { this.voiceInstruction = voiceInstruction }
-        fun bannerInstruction(bannerInstruction: BannerInstruction?) = apply { this.bannerInstruction = bannerInstruction }
-        fun currentState(currentState: RouteProgressState?) = apply { this.currentState = currentState }
-        fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) = apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
+        fun voiceInstruction(voiceInstruction: VoiceInstruction?) =
+            apply { this.voiceInstruction = voiceInstruction }
+
+        fun bannerInstruction(bannerInstruction: BannerInstruction?) =
+            apply { this.bannerInstruction = bannerInstruction }
+
+        fun currentState(currentState: RouteProgressState?) =
+            apply { this.currentState = currentState }
+
+        fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) =
+            apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
+
         fun currentStep(currentStep: LegStep?) = apply { this.currentStep = currentStep }
         fun stepIndex(stepIndex: Int) = apply { this.stepIndex = stepIndex }
-        fun legDistanceRemaining(legDistanceRemaining: Double) = apply { this.legDistanceRemaining = legDistanceRemaining }
-        fun stepDistanceRemaining(stepDistanceRemaining: Double) = apply { this.stepDistanceRemaining = stepDistanceRemaining }
-        fun legDurationRemaining(legDurationRemaining: Double) = apply { this.legDurationRemaining = legDurationRemaining }
+        fun legDistanceRemaining(legDistanceRemaining: Double) =
+            apply { this.legDistanceRemaining = legDistanceRemaining }
+
+        fun stepDistanceRemaining(stepDistanceRemaining: Double) =
+            apply { this.stepDistanceRemaining = stepDistanceRemaining }
+
+        fun legDurationRemaining(legDurationRemaining: Double) =
+            apply { this.legDurationRemaining = legDurationRemaining }
+
         private fun validate() {
             var missing = ""
             if (this.directionsRoute == null) {
@@ -289,7 +318,7 @@ data class RouteProgress internal constructor(
             if (this.legDurationRemaining == null) {
                 missing += " legDurationRemaining"
             }
-            check(missing.isEmpty()) { "Missing required properties:$missing" }
+            check(missing.isEmpty()) { "Missing required properties: $missing" }
         }
 
         fun build(): RouteProgress {
@@ -305,36 +334,37 @@ data class RouteProgress internal constructor(
                     legs[_legIndex]
                 }
             }
-            val legProgress = RouteLegProgress.builder()
-                    .routeLeg(leg)
-                    .currentStep(currentStep)
-                    .stepIndex(_stepIndex)
-                    .distanceRemaining(_legDistanceRemaining)
-                    .durationRemaining(_legDurationRemaining)
-                    .stepDistanceRemaining(_stepDistanceRemaining)
-                    .currentStepPoints(currentStepPoints)
-                    .upcomingStepPoints(upcomingStepPoints)
-                    .build()
+            val legProgress = RouteLegProgress.Builder()
+                .routeLeg(leg!!)
+                .currentStep(currentStep!!)
+                .stepIndex(_stepIndex)
+                .distanceRemaining(_legDistanceRemaining)
+                .durationRemaining(_legDurationRemaining)
+                .stepDistanceRemaining(_stepDistanceRemaining)
+                .currentStepPoints(currentStepPoints)
+                .upcomingStepPoints(upcomingStepPoints)
+                .build()
             currentLegProgress(legProgress)
             validate()
 
-            return RouteProgress(directionsRoute,
-                    legIndex,
-                    distanceRemaining,
-                    currentLegProgress,
-                    currentStepPoints,
-                    upcomingStepPoints,
-                    inTunnel,
-                    voiceInstruction,
-                    bannerInstruction,
-                    currentState,
-                    routeGeometryWithBuffer,
-                    currentStep,
-                    stepIndex,
-                    legDistanceRemaining,
-                    stepDistanceRemaining,
-                    legDurationRemaining,
-                    this
+            return RouteProgress(
+                directionsRoute,
+                legIndex,
+                distanceRemaining,
+                currentLegProgress,
+                currentStepPoints,
+                upcomingStepPoints,
+                inTunnel,
+                voiceInstruction,
+                bannerInstruction,
+                currentState,
+                routeGeometryWithBuffer,
+                currentStep,
+                stepIndex,
+                legDistanceRemaining,
+                stepDistanceRemaining,
+                legDurationRemaining,
+                this
             )
         }
     }
