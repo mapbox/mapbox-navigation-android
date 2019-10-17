@@ -57,7 +57,10 @@ internal class NavigationRouteProcessor {
         }
     }
 
-    private fun buildRouteProgressFrom(status: NavigationStatus, navigator: MapboxNavigator): RouteProgress? {
+    private fun buildRouteProgressFrom(
+        status: NavigationStatus,
+        navigator: MapboxNavigator
+    ): RouteProgress? {
         val legIndex = status.legIndex
         val stepIndex = status.stepIndex
         val upcomingStepIndex = stepIndex + ONE_INDEX
@@ -67,31 +70,35 @@ internal class NavigationRouteProcessor {
             updateStepPoints(route, legIndex, stepIndex, upcomingStepIndex)
 
             val legDistanceRemaining = status.remainingLegDistance.toDouble()
-            val routeDistanceRemaining = NavigationHelper.routeDistanceRemaining(legDistanceRemaining,
-                    legIndex, route)
+            val routeDistanceRemaining = NavigationHelper.routeDistanceRemaining(
+                legDistanceRemaining,
+                legIndex, route
+            )
             val stepDistanceRemaining = status.remainingStepDistance.toDouble()
             val legDurationRemaining = status.remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
 
             currentLegAnnotation = ifNonNull(currentLeg) { currentLeg ->
-                NavigationHelper.createCurrentAnnotation(currentLegAnnotation,
-                        currentLeg, legDistanceRemaining)
+                NavigationHelper.createCurrentAnnotation(
+                    currentLegAnnotation,
+                    currentLeg, legDistanceRemaining
+                )
             }
             val routeState = status.routeState
             val currentRouteState = progressStateMap[routeState]
 
             val progressBuilder = RouteProgress.Builder()
-                    .distanceRemaining(routeDistanceRemaining)
-                    .legDistanceRemaining(legDistanceRemaining)
-                    .legDurationRemaining(legDurationRemaining)
-                    .stepDistanceRemaining(stepDistanceRemaining)
-                    .directionsRoute(route)
-                    .currentStep(currentStep)
-                    .currentStepPoints(currentStepPoints)
-                    .upcomingStepPoints(upcomingStepPoints)
-                    .stepIndex(stepIndex)
-                    .legIndex(legIndex)
-                    .inTunnel(status.inTunnel)
-                    .currentState(currentRouteState)
+                .distanceRemaining(routeDistanceRemaining)
+                .legDistanceRemaining(legDistanceRemaining)
+                .legDurationRemaining(legDurationRemaining)
+                .stepDistanceRemaining(stepDistanceRemaining)
+                .directionsRoute(route)
+                .currentStep(currentStep)
+                .currentStepPoints(currentStepPoints)
+                .upcomingStepPoints(upcomingStepPoints)
+                .stepIndex(stepIndex)
+                .legIndex(legIndex)
+                .inTunnel(status.inTunnel)
+                .currentState(currentRouteState)
 
             addRouteGeometries(progressBuilder)
             addVoiceInstructions(status, progressBuilder)
@@ -106,7 +113,7 @@ internal class NavigationRouteProcessor {
             if (legIndex < legs.size) {
                 currentLeg = legs[legIndex]
             }
-            val steps = ifNonNull(currentLeg?.steps()) { steps ->
+            ifNonNull(currentLeg?.steps()) { steps ->
                 if (stepIndex < steps.size) {
                     currentStep = steps[stepIndex]
                 }
@@ -120,10 +127,14 @@ internal class NavigationRouteProcessor {
         stepIndex: Int,
         upcomingStepIndex: Int
     ) {
-        currentStepPoints = NavigationHelper.decodeStepPoints(route, currentStepPoints,
-                legIndex, stepIndex)
-        upcomingStepPoints = NavigationHelper.decodeStepPoints(route, null,
-                legIndex, upcomingStepIndex)
+        currentStepPoints = NavigationHelper.decodeStepPoints(
+            route, currentStepPoints,
+            legIndex, stepIndex
+        )
+        upcomingStepPoints = NavigationHelper.decodeStepPoints(
+            route, null,
+            legIndex, upcomingStepIndex
+        )
     }
 
     private fun addUpcomingStepPoints(progressBuilder: RouteProgress.Builder) {
