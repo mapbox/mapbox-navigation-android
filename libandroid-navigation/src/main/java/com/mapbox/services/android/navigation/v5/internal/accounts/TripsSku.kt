@@ -16,12 +16,10 @@ internal class TripsSku(
         ROTATE_ON_REQUEST_COUNT_EXPIRE
     }
 
-    private var rotateTripsType: RotateTripsType = RotateTripsType.INVALID
-
     companion object {
-        private const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.sku"
-        private const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.count"
-        private const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.time"
+        private const val MAPBOX_NAV_PREFERENCE_TRIPS_SKU = "com.mapbox.navigationsdk.accounts.trips.skuToken"
+        private const val MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT = "com.mapbox.navigationsdk.accounts.trips.request.count"
+        private const val MAPBOX_NAV_PREFERENCE_TRIPS_TIMESTAMP = "com.mapbox.navigationsdk.accounts.trips.timeStamp"
         private const val DEFAULT_TRIP_REQUEST_COUNT = 0
         private const val DEFAULT_TRIP_TOKEN_TIMER = 0L
     }
@@ -37,19 +35,11 @@ internal class TripsSku(
     }
 
     private fun refreshSkuToken() {
-        if (!shouldRefreshSku()) {
-            return
-        }
         var requestCount: Int
-        when (rotateTripsType) {
-            RotateTripsType.ROTATE_ON_TIMER_EXPIRE -> {
-                requestCount = getRouteRequestCountThreshold()
-                requestCount++
-                setTimerExpiry(getNow())
-                persistTripsSkuToken()
-            }
+        when (validateRotation()) {
+            RotateTripsType.ROTATE_ON_TIMER_EXPIRE,
             RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE -> {
-                requestCount = 0
+                requestCount = 1
                 setTimerExpiry(getNow())
                 persistTripsSkuToken()
             }
@@ -61,15 +51,14 @@ internal class TripsSku(
         setRouteRequestCountThreshold(requestCount)
     }
 
-    private fun shouldRefreshSku(): Boolean {
+    private fun validateRotation(): RotateTripsType {
         val routeReqCountExpired = validateRouteRequestCountExpiry()
         val timerExpired = validateTimerExpiry()
-        rotateTripsType = when {
+        return when {
             routeReqCountExpired -> RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE
             timerExpired -> RotateTripsType.ROTATE_ON_TIMER_EXPIRE
             else -> RotateTripsType.INVALID
         }
-        return routeReqCountExpired || timerExpired
     }
 
     private fun validateTimerExpiry(): Boolean {
