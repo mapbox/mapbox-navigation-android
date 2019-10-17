@@ -112,12 +112,12 @@ class RouteFetcher
         routeOptions?.let { options ->
             navigationRouteBuilder.routeOptions(options)
         }
-        val remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress)
+        val remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress)?.toMutableList()
         if (remainingWaypoints == null) {
             Timber.e("An error occurred fetching a new route")
             return null
         }
-        addDestination(remainingWaypoints.toMutableList(), navigationRouteBuilder)
+        addDestination(remainingWaypoints, navigationRouteBuilder)
         addWaypoints(remainingWaypoints, navigationRouteBuilder)
         addWaypointIndices(routeProgress, navigationRouteBuilder)
         addWaypointNames(routeProgress, navigationRouteBuilder)
