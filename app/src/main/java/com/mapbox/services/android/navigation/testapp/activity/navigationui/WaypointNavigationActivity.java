@@ -23,6 +23,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,8 +193,11 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
       .build()
       .getRoute(new SimplifiedCallback() {
         @Override
-        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-          startNavigation(response.body().routes().get(0));
+        public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
+          DirectionsResponse directionsResponse = response.body();
+          if (directionsResponse != null && !directionsResponse.routes().isEmpty()) {
+            startNavigation(directionsResponse.routes().get(0));
+          }
         }
       });
   }
