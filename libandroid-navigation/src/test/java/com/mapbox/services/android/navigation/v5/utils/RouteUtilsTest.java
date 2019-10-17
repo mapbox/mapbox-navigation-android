@@ -19,7 +19,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -140,6 +139,7 @@ public class RouteUtilsTest extends BaseTest {
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
+    assertNotNull(remainingWaypoints);
     assertEquals(1, remainingWaypoints.size());
     assertEquals(Point.fromLngLat(4.56789, 0.12345), remainingWaypoints.get(0));
   }
@@ -154,6 +154,7 @@ public class RouteUtilsTest extends BaseTest {
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
+    assertNotNull(remainingWaypoints);
     assertEquals(4, remainingWaypoints.size());
     assertEquals(Point.fromLngLat(7.89012, 3.45678), remainingWaypoints.get(0));
     assertEquals(Point.fromLngLat(9.01234, 5.67890), remainingWaypoints.get(1));
@@ -171,6 +172,7 @@ public class RouteUtilsTest extends BaseTest {
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
+    assertNotNull(remainingWaypoints);
     assertEquals(3, remainingWaypoints.size());
     assertEquals(Point.fromLngLat(9.01234, 5.67890), remainingWaypoints.get(0));
     assertEquals(Point.fromLngLat(2.34567, 8.90123), remainingWaypoints.get(1));
@@ -187,6 +189,7 @@ public class RouteUtilsTest extends BaseTest {
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
+    assertNotNull(remainingWaypoints);
     assertEquals(4, remainingWaypoints.size());
     assertEquals(Point.fromLngLat(7.89012, 3.45678), remainingWaypoints.get(0));
     assertEquals(Point.fromLngLat(9.01234, 5.67890), remainingWaypoints.get(1));
@@ -203,7 +206,7 @@ public class RouteUtilsTest extends BaseTest {
 
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
 
-    assertEquals(0, remainingWaypoints.size());
+    assertNull(remainingWaypoints);
   }
 
   @Test
@@ -216,6 +219,7 @@ public class RouteUtilsTest extends BaseTest {
 
     Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
+    assertNotNull(remainingWaypointIndices);
     assertEquals(2, remainingWaypointIndices.length);
     assertEquals(0, remainingWaypointIndices[0].intValue());
     assertEquals(1, remainingWaypointIndices[1].intValue());
@@ -231,6 +235,7 @@ public class RouteUtilsTest extends BaseTest {
 
     Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
+    assertNotNull(remainingWaypointIndices);
     assertEquals(3, remainingWaypointIndices.length);
     assertEquals(0, remainingWaypointIndices[0].intValue());
     assertEquals(1, remainingWaypointIndices[1].intValue());
@@ -247,6 +252,7 @@ public class RouteUtilsTest extends BaseTest {
 
     Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
+    assertNotNull(remainingWaypointIndices);
     assertEquals(3, remainingWaypointIndices.length);
     assertEquals(0, remainingWaypointIndices[0].intValue());
     assertEquals(1, remainingWaypointIndices[1].intValue());
@@ -263,6 +269,7 @@ public class RouteUtilsTest extends BaseTest {
 
     Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
+    assertNotNull(remainingWaypointIndices);
     assertEquals(4, remainingWaypointIndices.length);
     assertEquals(0, remainingWaypointIndices[0].intValue());
     assertEquals(1, remainingWaypointIndices[1].intValue());
@@ -279,7 +286,7 @@ public class RouteUtilsTest extends BaseTest {
 
     Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
-    assertEquals(0, remainingWaypointsIndices.length);
+    assertNull(remainingWaypointsIndices);
   }
 
   @Test
@@ -292,6 +299,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
+    assertNotNull(remainingWaypointNames);
     assertEquals(2, remainingWaypointNames.length);
     assertEquals("first", remainingWaypointNames[0]);
     assertEquals("seventh", remainingWaypointNames[1]);
@@ -307,6 +315,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
+    assertNotNull(remainingWaypointNames);
     assertEquals(3, remainingWaypointNames.length);
     assertEquals("first", remainingWaypointNames[0]);
     assertEquals("fourth", remainingWaypointNames[1]);
@@ -323,6 +332,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
+    assertNotNull(remainingWaypointNames);
     assertEquals(3, remainingWaypointNames.length);
     assertEquals("first", remainingWaypointNames[0]);
     assertEquals("fifth", remainingWaypointNames[1]);
@@ -339,6 +349,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
+    assertNotNull(remainingWaypointNames);
     assertEquals(4, remainingWaypointNames.length);
     assertEquals("first", remainingWaypointNames[0]);
     assertEquals("second", remainingWaypointNames[1]);
@@ -355,7 +366,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(routeProgress);
 
-    assertEquals(0, remainingWaypointNames.length);
+    assertNull(remainingWaypointNames);
   }
 
   @Test
@@ -368,6 +379,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
 
+    assertNotNull(remainingApproaches);
     assertEquals(2, remainingApproaches.length);
     assertEquals("curb", remainingApproaches[0]);
     assertEquals("unrestricted", remainingApproaches[1]);
@@ -383,6 +395,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
 
+    assertNotNull(remainingApproaches);
     assertEquals(3, remainingApproaches.length);
     assertEquals("curb", remainingApproaches[0]);
     assertEquals("curb", remainingApproaches[1]);
@@ -399,6 +412,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
 
+    assertNotNull(remainingApproaches);
     assertEquals(3, remainingApproaches.length);
     assertEquals("curb", remainingApproaches[0]);
     assertEquals("curb", remainingApproaches[1]);
@@ -415,6 +429,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
 
+    assertNotNull(remainingApproaches);
     assertEquals(4, remainingApproaches.length);
     assertEquals("curb", remainingApproaches[0]);
     assertEquals("curb", remainingApproaches[1]);
@@ -431,7 +446,7 @@ public class RouteUtilsTest extends BaseTest {
 
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(routeProgress);
 
-    assertEquals(0, remainingApproaches.length);
+    assertNull(remainingApproaches);
   }
 
   private List<Point> buildCoordinateList() {

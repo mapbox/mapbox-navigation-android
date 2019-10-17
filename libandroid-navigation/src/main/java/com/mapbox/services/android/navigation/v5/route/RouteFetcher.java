@@ -120,7 +120,7 @@ public class RouteFetcher {
       builder.routeOptions(options);
     }
     List<Point> remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress);
-    if (remainingWaypoints.isEmpty()) {
+    if (remainingWaypoints == null) {
       Timber.e("An error occurred fetching a new route");
       return null;
     }
@@ -175,17 +175,23 @@ public class RouteFetcher {
 
   private void addWaypointIndices(RouteProgress routeProgress, NavigationRoute.Builder builder) {
     Integer[] waypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
-    builder.addWaypointIndices(waypointIndices);
+    if (waypointIndices != null && waypointIndices.length != 0) {
+      builder.addWaypointIndices(waypointIndices);
+    }
   }
 
   private void addWaypointNames(RouteProgress progress, NavigationRoute.Builder builder) {
     String[] remainingWaypointNames = routeUtils.calculateRemainingWaypointNames(progress);
-    builder.addWaypointNames(remainingWaypointNames);
+    if (remainingWaypointNames != null) {
+      builder.addWaypointNames(remainingWaypointNames);
+    }
   }
 
   private void addApproaches(RouteProgress progress, NavigationRoute.Builder builder) {
     String[] remainingApproaches = routeUtils.calculateRemainingApproaches(progress);
-    builder.addApproaches(remainingApproaches);
+    if (remainingApproaches != null) {
+      builder.addApproaches(remainingApproaches);
+    }
   }
 
   private boolean invalid(Context context, Location location, RouteProgress routeProgress) {

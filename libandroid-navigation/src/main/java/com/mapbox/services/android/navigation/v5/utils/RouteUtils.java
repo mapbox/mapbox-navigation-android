@@ -12,8 +12,6 @@ import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,21 +68,21 @@ public class RouteUtils {
    * @return list of remaining waypoints as {@link Point}s
    * @since 0.10.0
    */
-  @NotNull
+  @Nullable
   public List<Point> calculateRemainingWaypoints(RouteProgress routeProgress) {
     RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
     if (routeOptions == null) {
-      return Collections.emptyList();
+      return null;
     }
     List<Point> coordinates = new ArrayList<>(routeOptions.coordinates());
     int coordinatesSize = coordinates.size();
     int remainingWaypointsCount = routeProgress.remainingWaypoints();
     if (coordinatesSize < remainingWaypointsCount) {
-      return Collections.emptyList();
+      return null;
     }
     String waypointIndices = routeOptions.waypointIndices();
     if (waypointIndices == null) {
-      return Collections.emptyList();
+      return null;
     }
     String[] allWaypointIndices = waypointIndices.split(SEMICOLON);
     String[] remainingWaypointIndices = Arrays.copyOfRange(allWaypointIndices,
@@ -94,7 +92,7 @@ public class RouteUtils {
       return coordinates.subList(firstRemainingWaypointIndex, coordinatesSize);
     } catch (NumberFormatException ex) {
       Timber.e("Fail to convert waypoint index to integer");
-      return Collections.emptyList();
+      return null;
     }
   }
 
@@ -109,15 +107,15 @@ public class RouteUtils {
    * @return Integer array including the origin waypoint index and the recalculated remaining ones
    * @since 0.43.0
    */
-  @NotNull
+  @Nullable
   public Integer[] calculateRemainingWaypointIndices(RouteProgress routeProgress) {
     RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
     if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointIndices())) {
-      return new Integer[0];
+      return null;
     }
     String waypointIndices = routeOptions.waypointIndices();
     if (waypointIndices == null) {
-      return new Integer[0];
+      return null;
     }
     int remainingWaypointsCount = routeProgress.remainingWaypoints();
     String[] allWaypointIndices = waypointIndices.split(SEMICOLON);
@@ -134,7 +132,7 @@ public class RouteUtils {
       return resultWaypointIndices;
     } catch (NumberFormatException ex) {
       Timber.e("Fail to convert waypoint index to integer");
-      return new Integer[0];
+      return null;
     }
   }
 
@@ -148,15 +146,15 @@ public class RouteUtils {
    * @return String array including the origin waypoint name and the remaining ones
    * @since 0.19.0
    */
-  @NotNull
+  @Nullable
   public String[] calculateRemainingWaypointNames(RouteProgress routeProgress) {
     RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
     if (routeOptions == null || TextUtils.isEmpty(routeOptions.waypointNames())) {
-      return new String[0];
+      return null;
     }
     String waypointNames = routeOptions.waypointNames();
     if (waypointNames == null) {
-      return new String[0];
+      return null;
     }
     int remainingWaypointsCount = routeProgress.remainingWaypoints();
     String[] allWaypointNames = waypointNames.split(SEMICOLON);
@@ -180,15 +178,15 @@ public class RouteUtils {
    * @return String array including the origin approach and the remaining ones
    * @since 0.19.0
    */
-  @NotNull
+  @Nullable
   public String[] calculateRemainingApproaches(RouteProgress routeProgress) {
     RouteOptions routeOptions = routeProgress.directionsRoute().routeOptions();
     if (routeOptions == null) {
-      return new String[0];
+      return null;
     }
     String approaches = routeOptions.approaches();
     if (approaches == null || TextUtils.isEmpty(routeOptions.approaches())) {
-      return new String[0];
+      return null;
     }
     int remainingWaypointsCount = routeProgress.remainingWaypoints();
     String[] allApproaches = approaches.split(SEMICOLON);
