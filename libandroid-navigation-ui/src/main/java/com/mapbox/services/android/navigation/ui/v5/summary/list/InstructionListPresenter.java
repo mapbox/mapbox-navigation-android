@@ -1,18 +1,21 @@
 package com.mapbox.services.android.navigation.ui.v5.summary.list;
 
-import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
+import androidx.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 class InstructionListPresenter {
@@ -22,14 +25,12 @@ class InstructionListPresenter {
   private static final float TWO_LINE_BIAS = 0.65f;
   private static final float ONE_LINE_BIAS = 0.5f;
   private static final int FIRST_INSTRUCTION_INDEX = 0;
-  private final RouteUtils routeUtils;
   private DistanceFormatter distanceFormatter;
   private List<BannerInstructions> instructions;
   private RouteLeg currentLeg;
   private String drivingSide;
 
-  InstructionListPresenter(RouteUtils routeUtils, DistanceFormatter distanceFormatter) {
-    this.routeUtils = routeUtils;
+  InstructionListPresenter(DistanceFormatter distanceFormatter) {
     this.distanceFormatter = distanceFormatter;
     instructions = new ArrayList<>();
   }
@@ -136,7 +137,7 @@ class InstructionListPresenter {
     RouteLegProgress legProgress = routeProgress.currentLegProgress();
     LegStep currentStep = legProgress.currentStep();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
-    BannerInstructions currentBannerInstructions = routeUtils.findCurrentBannerInstructions(
+    BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
       currentStep, stepDistanceRemaining
     );
     if (!instructions.contains(currentBannerInstructions)) {
@@ -155,5 +156,45 @@ class InstructionListPresenter {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Given the current step / current step distance remaining, this function will
+   * find the current instructions to be shown.
+   *
+   * @param currentStep           holding the current banner instructions
+   * @param stepDistanceRemaining to determine progress along the currentStep
+   * @return the current banner instructions based on the current distance along the step
+   * @since 0.13.0
+   */
+  @Nullable
+  BannerInstructions findCurrentBannerInstructions(@Nullable LegStep currentStep, double stepDistanceRemaining) {
+    if (currentStep == null) {
+      return null;
+    }
+    List<BannerInstructions> instructions = currentStep.bannerInstructions();
+    if (instructions != null && !instructions.isEmpty()) {
+      List<BannerInstructions> sortedInstructions = sortBannerInstructions(instructions);
+      for (BannerInstructions bannerInstructions : sortedInstructions) {
+        int distanceAlongGeometry = (int) bannerInstructions.distanceAlongGeometry();
+        if (distanceAlongGeometry >= (int) stepDistanceRemaining) {
+          return bannerInstructions;
+        }
+      }
+      return instructions.get(FIRST_INSTRUCTION_INDEX);
+    } else {
+      return null;
+    }
+  }
+
+  private List<BannerInstructions> sortBannerInstructions(List<BannerInstructions> instructions) {
+    List<BannerInstructions> sortedInstructions = new ArrayList<>(instructions);
+    Collections.sort(sortedInstructions, new Comparator<BannerInstructions>() {
+      @Override
+      public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
+        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+      }
+    });
+    return sortedInstructions;
   }
 }

@@ -3,9 +3,10 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 

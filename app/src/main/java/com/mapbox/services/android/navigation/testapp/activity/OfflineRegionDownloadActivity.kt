@@ -7,9 +7,6 @@ import android.graphics.PointF
 import android.os.Bundle
 import android.os.Environment
 import android.preference.PreferenceManager
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -17,6 +14,9 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.gson.GeometryGeoJson
@@ -24,17 +24,27 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.offline.*
+import com.mapbox.mapboxsdk.offline.OfflineManager
+import com.mapbox.mapboxsdk.offline.OfflineRegion
+import com.mapbox.mapboxsdk.offline.OfflineRegionError
+import com.mapbox.mapboxsdk.offline.OfflineRegionStatus
+import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.v5.navigation.*
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesRemovedCallback
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback
+import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import org.json.JSONObject
 import timber.log.Timber
 
-class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener, OnOfflineTilesRemovedCallback {
+class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener,
+    OnOfflineTilesRemovedCallback {
     lateinit var mapboxMap: MapboxMap
     private val EXTERNAL_STORAGE_PERMISSION = 1
     private val disabledGrey by lazy { resources.getColor(R.color.md_grey_700) }
@@ -48,13 +58,16 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
             val bottom = top + selectionBox.height
 
             val southWest = mapboxMap.projection.fromScreenLocation(
-                    PointF(left.toFloat(), bottom.toFloat()))
+                PointF(left.toFloat(), bottom.toFloat())
+            )
             val northEast = mapboxMap.projection.fromScreenLocation(
-                    PointF(right.toFloat(), top.toFloat()))
+                PointF(right.toFloat(), top.toFloat())
+            )
 
             return BoundingBox.fromLngLats(
-                    southWest.longitude, southWest.latitude,
-                    northEast.longitude, northEast.latitude)
+                southWest.longitude, southWest.latitude,
+                northEast.longitude, northEast.latitude
+            )
         }
     private val mapboxOfflineRouter: MapboxOfflineRouter
         get() {
@@ -80,10 +93,12 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
 
         override fun onStatusChanged(status: OfflineRegionStatus?) {
-            Timber.d("%s/%s resources; %s bytes downloaded.",
-                    status?.completedResourceCount,
-                    status?.requiredResourceCount,
-                    status?.completedResourceSize)
+            Timber.d(
+                "%s/%s resources; %s bytes downloaded.",
+                status?.completedResourceCount,
+                status?.requiredResourceCount,
+                status?.completedResourceSize
+            )
             if (status?.isComplete!!) {
                 downloadSelectedRegion()
             }
@@ -106,17 +121,19 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner() {
+        val token = Mapbox.getAccessToken() ?: return
         mapboxOfflineRouter
-                .fetchAvailableTileVersions(Mapbox.getAccessToken(),
-                        object : OnTileVersionsFoundCallback {
-                            override fun onVersionsFound(availableVersions: MutableList<String>) {
-                                setupSpinner(availableVersions)
-                            }
+            .fetchAvailableTileVersions(token,
+                object : OnTileVersionsFoundCallback {
+                    override fun onVersionsFound(availableVersions: List<String>) {
+                        setupSpinner(availableVersions)
+                    }
 
-                            override fun onError(error: OfflineError) {
-                                onVersionFetchFailed()
-                            }
-                        })
+                    override fun onError(error: OfflineError) {
+                        onVersionFetchFailed()
+                    }
+                }
+            )
     }
 
     fun onVersionFetchFailed() {
@@ -130,23 +147,27 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-
-    fun setupSpinner(versions: MutableList<String>) {
+    fun setupSpinner(versions: List<String>) {
         restartVersionFetchButton.visibility = GONE
         versionSpinnerContainer.visibility = VISIBLE
 
         ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
-                .also { arrayAdapter ->
-                    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    versionSpinner.adapter = arrayAdapter
-                }
+            .also { arrayAdapter ->
+                arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                versionSpinner.adapter = arrayAdapter
+            }
 
         versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 setDownloadButtonEnabled(false)
             }
 
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 setDownloadButtonEnabled(position != 0)
 
                 versionSpinner.selectedItem.run {
@@ -161,8 +182,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         mapView.getMapAsync { mapboxMap ->
             mapboxMap.setStyle(Style.LIGHT) {
                 it.addSource(GeoJsonSource("bounding-box-source"))
-                it.addLayer(FillLayer("bounding-box-layer", "bounding-box-source")
-                        .withProperties(fillColor(Color.parseColor("#50667F"))))
+                it.addLayer(
+                    FillLayer("bounding-box-layer", "bounding-box-source")
+                        .withProperties(fillColor(Color.parseColor("#50667F")))
+                )
                 offlineManager = OfflineManager.getInstance(this)
             }
             this.mapboxMap = mapboxMap
@@ -177,7 +200,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
 
         if (ContextCompat.checkSelfPermission(
-                        this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+                this, WRITE_EXTERNAL_STORAGE
+            ) != PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
         } else {
             downloadMapsRegion()
@@ -192,8 +217,11 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             EXTERNAL_STORAGE_PERMISSION -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED)) {
@@ -209,20 +237,28 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         showDownloading(false, "Requesting tiles....")
         // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
         val styleUrl: String? = "mapbox://styles/mapbox/navigation-guidance-day-v4"
-        //val styleUrl: String? = mapboxMap.style?.url
-        val bounds: LatLngBounds = LatLngBounds.from(boundingBox.north(), boundingBox.east(), boundingBox.south(), boundingBox.west())
+        // val styleUrl: String? = mapboxMap.style?.url
+        val bounds: LatLngBounds = LatLngBounds.from(
+            boundingBox.north(),
+            boundingBox.east(),
+            boundingBox.south(),
+            boundingBox.west()
+        )
         // TODO Testing downloading a Geometry
-        val geometry: Geometry = GeometryGeoJson.fromJson("{\"type\":\"Polygon\",\"coordinates\":[[[-77.152533,39.085537],[-77.152533,39.083038],[-77.150031,39.083038],[-77.150031,39.085537],[-77.147529,39.085537],[-77.147529,39.088039],[-77.147529,39.090538],[-77.150031,39.090538],[-77.150031,39.093037],[-77.150031,39.095539],[-77.150031,39.098038],[-77.150031,39.100540],[-77.150031,39.103039],[-77.152533,39.103039],[-77.152533,39.105537],[-77.155028,39.105537],[-77.155028,39.108040],[-77.155028,39.110538],[-77.157531,39.110538],[-77.157531,39.113037],[-77.160033,39.113037],[-77.160033,39.115536],[-77.162528,39.115540],[-77.162528,39.118038],[-77.165030,39.118038],[-77.165030,39.115536],[-77.167533,39.115536],[-77.167533,39.113037],[-77.167533,39.110538],[-77.165030,39.110538],[-77.165030,39.108040],[-77.162536,39.108036],[-77.162536,39.105537],[-77.162536,39.103039],[-77.160033,39.103039],[-77.160033,39.100540],[-77.157531,39.100536],[-77.157531,39.098038],[-77.157531,39.095535],[-77.157531,39.093037],[-77.157531,39.090538],[-77.157531,39.088039],[-77.155036,39.088036],[-77.155036,39.085537],[-77.152533,39.085537]]]}")
+        val geometry: Geometry = GeometryGeoJson.fromJson(
+            "{\"type\":\"Polygon\",\"coordinates\":[[[-77.152533,39.085537],[-77.152533,39.083038],[-77.150031,39.083038],[-77.150031,39.085537],[-77.147529,39.085537],[-77.147529,39.088039],[-77.147529,39.090538],[-77.150031,39.090538],[-77.150031,39.093037],[-77.150031,39.095539],[-77.150031,39.098038],[-77.150031,39.100540],[-77.150031,39.103039],[-77.152533,39.103039],[-77.152533,39.105537],[-77.155028,39.105537],[-77.155028,39.108040],[-77.155028,39.110538],[-77.157531,39.110538],[-77.157531,39.113037],[-77.160033,39.113037],[-77.160033,39.115536],[-77.162528,39.115540],[-77.162528,39.118038],[-77.165030,39.118038],[-77.165030,39.115536],[-77.167533,39.115536],[-77.167533,39.113037],[-77.167533,39.110538],[-77.165030,39.110538],[-77.165030,39.108040],[-77.162536,39.108036],[-77.162536,39.105537],[-77.162536,39.103039],[-77.160033,39.103039],[-77.160033,39.100540],[-77.157531,39.100536],[-77.157531,39.098038],[-77.157531,39.095535],[-77.157531,39.093037],[-77.157531,39.090538],[-77.157531,39.088039],[-77.155036,39.088036],[-77.155036,39.085537],[-77.152533,39.085537]]]}"
+        )
         // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
         val minZoom: Double = 11.0
         val maxZoom: Double = 17.0
-        //val minZoom: Double = mapboxMap.cameraPosition.zoom
-        //val maxZoom: Double = mapboxMap.maxZoomLevel
+        // val minZoom: Double = mapboxMap.cameraPosition.zoom
+        // val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
         val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
-                styleUrl, bounds, minZoom, maxZoom, pixelRatio)
+            styleUrl, bounds, minZoom, maxZoom, pixelRatio
+        )
         // TODO Testing downloading a Geometry using OfflineGeometryRegionDefinition as definition
-        //val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
+        // val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
         //        styleUrl, geometry, minZoom, maxZoom, pixelRatio)
 
         val metadata: ByteArray
@@ -239,10 +275,12 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     private fun downloadSelectedRegion() {
+        val token = Mapbox.getAccessToken() ?: return
+
         val builder = OfflineTiles.builder()
-                .accessToken(Mapbox.getAccessToken())
-                .version(versionSpinner.selectedItem as String)
-                .boundingBox(boundingBox)
+            .accessToken(token)
+            .version(versionSpinner.selectedItem as String)
+            .boundingBox(boundingBox)
 
         mapboxOfflineRouter.downloadTiles(builder.build(), this)
     }
@@ -256,7 +294,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     private fun retrieveOfflineVersionFromPreferences(): String {
         val context = application
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(context.getString(R.string.offline_version_key), "")
+            .getString(context.getString(R.string.offline_version_key), "")
     }
 
     private fun obtainOfflineDirectory(): String {
@@ -360,7 +398,9 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     private fun showToast(str: String) {
-        Toast.makeText(applicationContext, str,
-                Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            applicationContext, str,
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }

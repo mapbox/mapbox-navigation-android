@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -8,7 +10,7 @@ android {
   defaultConfig {
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     buildConfigField('String',
         "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-android")
@@ -37,6 +39,7 @@ android {
     unitTests.returnDefaultValues = true
     unitTests.includeAndroidResources = true
     unitTests.all {
+      maxHeapSize = "1024m"
       jacoco {
         includeNoLocationClasses = true
       }
@@ -52,6 +55,7 @@ android {
 }
 
 dependencies {
+  api project(':linavigation-base')
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
@@ -59,8 +63,13 @@ dependencies {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }
 
+  //ktlint
+  ktlint dependenciesList.ktlint
+
   // Navigator
   implementation dependenciesList.mapboxNavigator
+
+  implementation dependenciesList.kotlinStdLib
 
   // Support
   implementation dependenciesList.supportAppcompatV7
@@ -75,6 +84,7 @@ dependencies {
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.mockk
   testImplementation dependenciesList.hamcrest
   testImplementation dependenciesList.commonsIO
   testImplementation dependenciesList.robolectric

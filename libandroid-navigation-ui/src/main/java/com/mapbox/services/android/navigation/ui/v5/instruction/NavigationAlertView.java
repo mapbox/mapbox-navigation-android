@@ -2,11 +2,12 @@ package com.mapbox.services.android.navigation.ui.v5.instruction;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
@@ -14,8 +15,8 @@ import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 
 import timber.log.Timber;
 

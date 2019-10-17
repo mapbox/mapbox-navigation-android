@@ -1,14 +1,15 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.services.android.navigation.testapp.R;
 
 import butterknife.BindView;
@@ -72,8 +73,8 @@ public class FragmentNavigationActivity extends AppCompatActivity {
     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
     transaction.disallowAddToBackStack();
     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-    int fadeInAnimId = android.support.v7.appcompat.R.anim.abc_fade_in;
-    int fadeOutAnimId = android.support.v7.appcompat.R.anim.abc_fade_out;
+    int fadeInAnimId = androidx.appcompat.R.anim.abc_fade_in;
+    int fadeOutAnimId = androidx.appcompat.R.anim.abc_fade_out;
     transaction.setCustomAnimations(fadeInAnimId, fadeOutAnimId, fadeInAnimId, fadeOutAnimId);
     transaction.replace(R.id.navigation_fragment_frame, newFragment, tag);
     transaction.commit();

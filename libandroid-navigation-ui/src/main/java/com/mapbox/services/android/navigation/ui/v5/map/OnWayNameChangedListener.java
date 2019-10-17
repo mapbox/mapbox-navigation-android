@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * A listener that can be added to the {@link NavigationMapboxMap} with

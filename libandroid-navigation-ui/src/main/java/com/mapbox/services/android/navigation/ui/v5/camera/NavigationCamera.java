@@ -1,13 +1,13 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.location.Location;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -22,12 +22,12 @@ import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.utils.MathUtils;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.MathUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -273,7 +273,7 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
-   * Call in {@link FragmentActivity#onStart()} to properly add the {@link ProgressChangeListener}
+   * Call in {@link androidx.fragment.app.FragmentActivity#onStart()} to properly add the {@link ProgressChangeListener}
    * for the camera and prevent any leaks or further updates.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -284,7 +284,8 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   /**
-   * Call in {@link FragmentActivity#onStop()} to properly remove the {@link ProgressChangeListener}
+   * Call in {@link androidx.fragment.app.FragmentActivity#onStop()} to properly remove the
+   * {@link ProgressChangeListener}
    * for the camera and prevent any leaks or further updates.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -402,7 +403,7 @@ public class NavigationCamera implements LifecycleObserver {
    */
   @NonNull
   private RouteInformation buildRouteInformationFromRoute(DirectionsRoute route) {
-    return RouteInformation.create(route, null, null);
+    return new RouteInformation(route, null, null);
   }
 
   /**
@@ -416,15 +417,15 @@ public class NavigationCamera implements LifecycleObserver {
    */
   @NonNull
   private RouteInformation buildRouteInformationFromLocation(Location location, RouteProgress routeProgress) {
-    return RouteInformation.create(null, location, routeProgress);
+    return new RouteInformation(null, location, routeProgress);
   }
 
   @NonNull
   private RouteInformation buildRouteInformationFromProgress(RouteProgress routeProgress) {
     if (routeProgress == null) {
-      return RouteInformation.create(null, null, null);
+      return new RouteInformation(null, null, null);
     }
-    return RouteInformation.create(routeProgress.directionsRoute(), null, null);
+    return new RouteInformation(routeProgress.directionsRoute(), null, null);
   }
 
   private void onCameraTransitionFinished() {

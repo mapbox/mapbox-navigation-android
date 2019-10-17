@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.camera;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 

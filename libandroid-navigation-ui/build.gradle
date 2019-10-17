@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.jaredsburrows.license'
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -8,7 +9,7 @@ android {
   defaultConfig {
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
 
     buildConfigField('String',
@@ -35,6 +36,7 @@ android {
     unitTests.returnDefaultValues = true
     unitTests.includeAndroidResources = true
     unitTests.all {
+      maxHeapSize = "1024m"
       jacoco {
         includeNoLocationClasses = true
       }
@@ -50,6 +52,9 @@ android {
 }
 
 dependencies {
+  //ktlint
+  ktlint dependenciesList.ktlint
+
   // Navigation SDK
   api project(':libandroid-navigation')
 
@@ -83,6 +88,7 @@ dependencies {
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.mockk
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
 }

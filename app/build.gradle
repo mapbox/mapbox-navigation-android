@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.triplet.play'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
+apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
   compileSdkVersion androidVersions.compileSdkVersion
@@ -41,7 +42,7 @@ android {
     versionCode gitVersionCode
     versionName gitVersionName
     playAccountConfig = playAccountConfigs.defaultAccountConfig
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
     buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
   }
@@ -83,6 +84,9 @@ android {
 }
 
 dependencies {
+  //ktlint
+  ktlint dependenciesList.ktlint
+
   // Kotlin support
   implementation dependenciesList.kotlinStdLib
   implementation dependenciesList.ankoCommon
@@ -123,6 +127,7 @@ dependencies {
   // Unit Testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.mockk
 
   // Instrumentation testing
   androidTestImplementation dependenciesList.testRules

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.map;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;

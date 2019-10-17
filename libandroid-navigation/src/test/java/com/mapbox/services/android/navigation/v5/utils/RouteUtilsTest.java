@@ -217,12 +217,12 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildRouteProgress(route, 1);
     RouteUtils routeUtils = new RouteUtils();
 
-    Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+    int[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
     assertNotNull(remainingWaypointIndices);
     assertEquals(2, remainingWaypointIndices.length);
-    assertEquals(0, remainingWaypointIndices[0].intValue());
-    assertEquals(1, remainingWaypointIndices[1].intValue());
+    assertEquals(0, remainingWaypointIndices[0]);
+    assertEquals(1, remainingWaypointIndices[1]);
   }
 
   @Test
@@ -233,13 +233,13 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildRouteProgress(route, 2);
     RouteUtils routeUtils = new RouteUtils();
 
-    Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+    int[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
     assertNotNull(remainingWaypointIndices);
     assertEquals(3, remainingWaypointIndices.length);
-    assertEquals(0, remainingWaypointIndices[0].intValue());
-    assertEquals(1, remainingWaypointIndices[1].intValue());
-    assertEquals(4, remainingWaypointIndices[2].intValue());
+    assertEquals(0, remainingWaypointIndices[0]);
+    assertEquals(1, remainingWaypointIndices[1]);
+    assertEquals(4, remainingWaypointIndices[2]);
   }
 
   @Test
@@ -250,13 +250,13 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildRouteProgress(route, 2);
     RouteUtils routeUtils = new RouteUtils();
 
-    Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+    int[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
     assertNotNull(remainingWaypointIndices);
     assertEquals(3, remainingWaypointIndices.length);
-    assertEquals(0, remainingWaypointIndices[0].intValue());
-    assertEquals(1, remainingWaypointIndices[1].intValue());
-    assertEquals(3, remainingWaypointIndices[2].intValue());
+    assertEquals(0, remainingWaypointIndices[0]);
+    assertEquals(1, remainingWaypointIndices[1]);
+    assertEquals(3, remainingWaypointIndices[2]);
   }
 
   @Test
@@ -267,14 +267,14 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildRouteProgress(route, 3);
     RouteUtils routeUtils = new RouteUtils();
 
-    Integer[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+    int[] remainingWaypointIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
     assertNotNull(remainingWaypointIndices);
     assertEquals(4, remainingWaypointIndices.length);
-    assertEquals(0, remainingWaypointIndices[0].intValue());
-    assertEquals(1, remainingWaypointIndices[1].intValue());
-    assertEquals(2, remainingWaypointIndices[2].intValue());
-    assertEquals(4, remainingWaypointIndices[3].intValue());
+    assertEquals(0, remainingWaypointIndices[0]);
+    assertEquals(1, remainingWaypointIndices[1]);
+    assertEquals(2, remainingWaypointIndices[2]);
+    assertEquals(4, remainingWaypointIndices[3]);
   }
 
   @Test
@@ -284,7 +284,7 @@ public class RouteUtilsTest extends BaseTest {
     RouteProgress routeProgress = buildRouteProgress(route, 2);
     RouteUtils routeUtils = new RouteUtils();
 
-    Integer[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
+    int[] remainingWaypointsIndices = routeUtils.calculateRemainingWaypointIndices(routeProgress);
 
     assertNull(remainingWaypointsIndices);
   }

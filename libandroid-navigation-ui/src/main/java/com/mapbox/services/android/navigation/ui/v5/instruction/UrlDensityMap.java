@@ -4,7 +4,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
-import com.mapbox.services.android.navigation.v5.navigation.SdkVersionChecker;
+import com.mapbox.services.android.navigation.v5.internal.navigation.SdkVersionChecker;
 
 class UrlDensityMap extends SparseArray<String> {
 

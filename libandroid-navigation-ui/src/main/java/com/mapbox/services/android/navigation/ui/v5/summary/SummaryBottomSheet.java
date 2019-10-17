@@ -1,13 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.summary;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,20 +8,28 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.OnLifecycleEvent;
+
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import java.text.DecimalFormat;
 
 /**
- * A view with {@link android.support.design.widget.BottomSheetBehavior}
+ * A view with {@link com.google.android.material.bottomsheet.BottomSheetBehavior}
  * that displays route summary information during navigation.
  * <p>
  * Can be expanded / collapsed to show / hide the list of
@@ -44,7 +45,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
-  @NavigationTimeFormat.Type
+  @TimeFormatType
   private int timeFormatType;
   private DistanceFormatter distanceFormatter;
   private NavigationViewModel navigationViewModel;
@@ -76,7 +77,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * Subscribes to a {@link NavigationViewModel} for
-   * updates from {@link android.arch.lifecycle.LiveData}.
+   * updates from {@link androidx.lifecycle.LiveData}.
    * <p>
    * Updates all views with fresh data / shows &amp; hides re-route state.
    *
@@ -114,7 +115,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   /**
-   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
    * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
@@ -170,7 +171,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    *
    * @param type to use
    */
-  public void setTimeFormat(@NavigationTimeFormat.Type int type) {
+  public void setTimeFormat(@TimeFormatType int type) {
     this.timeFormatType = type;
   }
 
@@ -194,9 +195,8 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   private void initializeDistanceFormatter() {
-    LocaleUtils localeUtils = new LocaleUtils();
-    String language = localeUtils.inferDeviceLanguage(getContext());
-    String unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
+    String language = ContextEx.inferDeviceLanguage(getContext());
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
     distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
   }

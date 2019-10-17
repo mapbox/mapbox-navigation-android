@@ -3,7 +3,8 @@ package com.mapbox.services.android.navigation.ui.v5.map;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;

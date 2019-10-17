@@ -1,25 +1,9 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
-import android.support.transition.AutoTransition;
-import android.support.transition.TransitionManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,6 +13,23 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.AutoTransition;
+import androidx.transition.TransitionManager;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
@@ -47,16 +48,16 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import timber.log.Timber;
 
@@ -173,7 +174,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   /**
    * Subscribes to a {@link NavigationViewModel} for
-   * updates from {@link android.arch.lifecycle.LiveData}.
+   * updates from {@link androidx.lifecycle.LiveData}.
    * <p>
    * Updates all views with fresh data / shows &amp; hides re-route state.
    *
@@ -224,7 +225,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
-   * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
+   * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
    * previously added in {@link InstructionView#subscribe(NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
@@ -416,9 +417,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
-    LocaleUtils localeUtils = new LocaleUtils();
-    String language = localeUtils.inferDeviceLanguage(getContext());
-    String unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
+    String language = ContextEx.inferDeviceLanguage(getContext());
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
     distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
     inflate(getContext(), R.layout.instruction_view_layout, this);
@@ -489,8 +489,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Sets up the {@link RecyclerView} that is used to display the list of instructions.
    */
   private void initializeInstructionListRecyclerView() {
-    RouteUtils routeUtils = new RouteUtils();
-    instructionListAdapter = new InstructionListAdapter(routeUtils, distanceFormatter);
+    instructionListAdapter = new InstructionListAdapter(distanceFormatter);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));

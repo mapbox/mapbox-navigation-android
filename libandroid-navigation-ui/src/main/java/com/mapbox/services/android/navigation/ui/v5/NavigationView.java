@@ -1,24 +1,25 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LifecycleRegistry;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.view.ViewCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProviders;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -40,9 +41,10 @@ import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLoca
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 /**
  * View that creates the drop-in UI.
@@ -181,8 +183,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * <p>
    * In an {@link Activity} this should be in {@link Activity#onDestroy()}.
    * <p>
-   * In a {@link android.support.v4.app.Fragment}, this should
-   * be in {@link android.support.v4.app.Fragment#onDestroyView()}.
+   * In a {@link androidx.fragment.app.Fragment}, this should
+   * be in {@link androidx.fragment.app.Fragment#onDestroyView()}.
    */
   public void onDestroy() {
     shutdown();
@@ -651,14 +653,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void establish(NavigationViewOptions options) {
-    LocaleUtils localeUtils = new LocaleUtils();
-    establishDistanceFormatter(localeUtils, options);
+    establishDistanceFormatter(options);
     establishTimeFormat(options);
   }
 
-  private void establishDistanceFormatter(LocaleUtils localeUtils, NavigationViewOptions options) {
-    String unitType = establishUnitType(localeUtils, options);
-    String language = establishLanguage(localeUtils, options);
+  private void establishDistanceFormatter(NavigationViewOptions options) {
+    String unitType = establishUnitType(options);
+    String language = establishLanguage(options);
     int roundingIncrement = establishRoundingIncrement(options);
     DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
 
@@ -671,18 +672,19 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     return mapboxNavigationOptions.roundingIncrement();
   }
 
-  private String establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
-    return localeUtils.getNonEmptyLanguage(getContext(), options.directionsRoute().voiceLanguage());
+  private String establishLanguage(NavigationViewOptions options) {
+    String voiceLanguage = options.directionsRoute().voiceLanguage();
+    return voiceLanguage != null ? voiceLanguage : ContextEx.inferDeviceLanguage(getContext());
   }
 
-  private String establishUnitType(LocaleUtils localeUtils, NavigationViewOptions options) {
+  private String establishUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    return localeUtils.retrieveNonNullUnitType(getContext(), voiceUnits);
+    return voiceUnits != null ? voiceUnits : LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {
-    @NavigationTimeFormat.Type
+    @TimeFormatType
     int timeFormatType = options.navigationOptions().timeFormatType();
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
@@ -702,7 +704,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * Then, creates an instance of {@link NavigationViewSubscriber}, which takes a presenter.
    * <p>
    * The subscriber then subscribes to the view models, setting up the appropriate presenter / listener
-   * method calls based on the {@link android.arch.lifecycle.LiveData} updates.
+   * method calls based on the {@link androidx.lifecycle.LiveData} updates.
    */
   private void subscribeViewModels() {
     instructionView.subscribe(this, navigationViewModel);

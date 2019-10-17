@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 public class NavigationViewOfflineRouterTest {
 
@@ -43,8 +44,10 @@ public class NavigationViewOfflineRouterTest {
     NavigationViewRouter viewRouter = mock(NavigationViewRouter.class);
     NavigationViewOfflineRouter viewOfflineRouter = new NavigationViewOfflineRouter(offlineRouter, viewRouter);
     viewOfflineRouter.setIsConfigured(true);
+    NavigationRoute.Builder builder = mock(NavigationRoute.Builder.class);
+    when(builder.build()).thenReturn(mock(NavigationRoute.class));
 
-    viewOfflineRouter.findRouteWith(mock(NavigationRoute.Builder.class));
+    viewOfflineRouter.findRouteWith(builder);
 
     verify(offlineRouter).findRoute(any(OfflineRoute.class), any(OfflineRouteFoundCallback.class));
   }

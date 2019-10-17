@@ -3,10 +3,11 @@ package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -112,7 +113,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
   @Override
   public void onNavigationReady(boolean isRunning) {
-    fetchRoute(points.remove(0), points.remove(0));
+    fetchRoute(points.get(0), points.get(points.size() - 1));
   }
 
   @Override
@@ -187,7 +188,12 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     NavigationRoute.builder(this)
       .accessToken(Mapbox.getAccessToken())
       .origin(origin)
+//      .addWaypoint(Point.fromLngLat(-77.03847169876099, 38.91113678979344))
+      .addWaypoint(Point.fromLngLat(-77.03848242759705, 38.91040213277608))
+//      .addWaypoint(Point.fromLngLat(-77.03850388526917, 38.909650771013034))
       .destination(destination)
+//            .addWaypointIndices(0, 1, 2)
+//            .addWaypointNames("startt", "middlee", "finishh")
       .alternatives(true)
       .build()
       .getRoute(new SimplifiedCallback() {
@@ -208,8 +214,8 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     options.directionsRoute(directionsRoute)
       .navigationListener(this)
       .progressChangeListener(this)
-      .routeListener(this)
-      .shouldSimulateRoute(true);
+      .routeListener(this);
+//      .shouldSimulateRoute(true);
     return options.build();
   }
 

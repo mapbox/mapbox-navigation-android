@@ -5,10 +5,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +13,11 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
@@ -50,7 +51,8 @@ import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdat
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -80,7 +82,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
   private final NavigationLauncherLocationCallback callback = new NavigationLauncherLocationCallback(this);
-  private final LocaleUtils localeUtils = new LocaleUtils();
   private final List<Point> wayPoints = new ArrayList<>();
   private LocationEngine locationEngine;
   private NavigationMapboxMap map;
@@ -293,7 +294,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     String defaultUnitType = getString(R.string.default_unit_type);
     String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
     if (unitType.equals(defaultUnitType)) {
-      unitType = localeUtils.getUnitTypeForDeviceLocale(this);
+      unitType = LocaleEx.getUnitTypeForLocale( ContextEx.inferDeviceLocale(this));
     }
 
     return unitType;
@@ -304,7 +305,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     String defaultLanguage = getString(R.string.default_locale);
     String language = sharedPreferences.getString(getString(R.string.language_key), defaultLanguage);
     if (language.equals(defaultLanguage)) {
-      return localeUtils.inferDeviceLocale(this);
+      return ContextEx.inferDeviceLocale(this);
     } else {
       return new Locale(language);
     }

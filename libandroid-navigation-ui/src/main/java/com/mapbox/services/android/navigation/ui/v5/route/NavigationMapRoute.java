@@ -1,14 +1,15 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
-import android.support.annotation.StyleRes;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.StyleRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -295,8 +296,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link Activity#onStart()} or
-   * {@link android.support.v4.app.Fragment#onStart()} to handle adding and removing of listeners,
+   * This method should be added in your {@link AppCompatActivity#onStart()} or
+   * {@link androidx.fragment.app.Fragment#onStart()} to handle adding and removing of listeners,
    * preventing memory leaks.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -305,7 +306,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link Activity#onStop()} or {@link android.support.v4.app.Fragment#onStop()}
+   * This method should be added in your {@link AppCompatActivity#onStop()} or
+   * {@link androidx.fragment.app.Fragment#onStop()}
    * to handle adding and removing of listeners, preventing memory leaks.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

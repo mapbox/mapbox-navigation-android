@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.feedback;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +10,12 @@ import com.mapbox.services.android.navigation.ui.v5.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
+import androidx.recyclerview.widget.RecyclerView;
+
+import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 

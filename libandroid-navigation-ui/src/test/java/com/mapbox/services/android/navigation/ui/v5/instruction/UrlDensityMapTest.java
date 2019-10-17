@@ -1,18 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
-import android.content.Context;
-import android.util.DisplayMetrics;
-
-import com.mapbox.services.android.navigation.v5.navigation.SdkVersionChecker;
+import com.mapbox.services.android.navigation.v5.internal.navigation.SdkVersionChecker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class UrlDensityMapTest {

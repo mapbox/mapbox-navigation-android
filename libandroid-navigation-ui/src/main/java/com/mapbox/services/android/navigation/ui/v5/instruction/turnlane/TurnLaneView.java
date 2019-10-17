@@ -2,11 +2,12 @@ package com.mapbox.services.android.navigation.ui.v5.instruction.turnlane;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
 

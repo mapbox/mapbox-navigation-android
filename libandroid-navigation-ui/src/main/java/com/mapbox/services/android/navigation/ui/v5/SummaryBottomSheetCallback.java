@@ -1,8 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 class SummaryBottomSheetCallback extends BottomSheetBehavior.BottomSheetCallback {
 

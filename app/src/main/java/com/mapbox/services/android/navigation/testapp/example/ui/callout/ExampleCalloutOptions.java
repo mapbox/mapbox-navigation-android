@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.callout;
 
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
+
+import androidx.annotation.ColorInt;
+
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 

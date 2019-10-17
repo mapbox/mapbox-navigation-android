@@ -2,9 +2,6 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -12,6 +9,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.drawable.DrawableCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class SoundButton extends ConstraintLayout implements NavigationButton {
   private static final float ALPHA_VALUE_ZERO = 0;

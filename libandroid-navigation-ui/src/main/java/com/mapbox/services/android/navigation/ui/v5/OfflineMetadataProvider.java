@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 

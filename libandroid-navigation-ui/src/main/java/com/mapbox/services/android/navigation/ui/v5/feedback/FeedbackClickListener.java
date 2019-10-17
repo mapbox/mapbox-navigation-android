@@ -1,13 +1,14 @@
 package com.mapbox.services.android.navigation.ui.v5.feedback;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
