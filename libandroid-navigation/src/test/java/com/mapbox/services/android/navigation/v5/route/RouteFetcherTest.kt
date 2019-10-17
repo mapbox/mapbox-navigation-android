@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.Location
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -14,14 +13,12 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import java.util.ArrayList
+import java.util.Locale
+import junit.framework.TestCase.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-
-import java.util.ArrayList
-import java.util.Locale
-
-import junit.framework.TestCase.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class RouteFetcherTest {
