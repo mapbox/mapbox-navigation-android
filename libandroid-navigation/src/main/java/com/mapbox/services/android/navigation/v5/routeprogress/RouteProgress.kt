@@ -334,9 +334,14 @@ data class RouteProgress internal constructor(
                     legs[_legIndex]
                 }
             }
-            val legProgress = RouteLegProgress.Builder()
-                .routeLeg(leg!!)
-                .currentStep(currentStep!!)
+            val routeLegProgressBuilder = RouteLegProgress.Builder()
+            ifNonNull(leg) {
+                routeLegProgressBuilder.routeLeg(it)
+            }
+            ifNonNull(currentStep) {
+                routeLegProgressBuilder.currentStep(it)
+            }
+            val legProgress = routeLegProgressBuilder
                 .stepIndex(_stepIndex)
                 .distanceRemaining(_legDistanceRemaining)
                 .durationRemaining(_legDurationRemaining)
