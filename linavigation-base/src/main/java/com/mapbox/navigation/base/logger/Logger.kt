@@ -1,4 +1,4 @@
-package com.mapbox.navigation.logger
+package com.mapbox.navigation.base.logger
 
 interface Logger {
     /**
