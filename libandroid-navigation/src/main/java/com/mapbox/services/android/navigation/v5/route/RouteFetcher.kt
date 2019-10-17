@@ -204,12 +204,9 @@ class RouteFetcher
         response: DirectionsResponse?,
         routeProgress: RouteProgress?
     ) {
-        ifNonNull(
-            response,
-            routeProgress
-        ) { directionsResponse, progress ->
+        ifNonNull(response) { directionsResponse ->
             for (listener in routeListeners) {
-                listener.onResponseReceived(directionsResponse, progress)
+                listener.onResponseReceived(directionsResponse, routeProgress)
             }
         }
     }

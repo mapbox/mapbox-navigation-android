@@ -8,7 +8,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
  */
 interface RouteListener {
 
-    fun onResponseReceived(response: DirectionsResponse, routeProgress: RouteProgress)
+    fun onResponseReceived(response: DirectionsResponse, routeProgress: RouteProgress?)
 
     fun onErrorReceived(throwable: Throwable)
 }
