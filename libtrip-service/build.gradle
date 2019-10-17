@@ -16,8 +16,7 @@ android {
 
 dependencies {
 
-    api dependenciesList.mapboxSdkGeoJSON
-    api dependenciesList.mapboxCore
+    api(project(':linavigation-base'))
 
     //ktlint
     ktlint dependenciesList.ktlint
