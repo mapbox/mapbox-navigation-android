@@ -8,8 +8,6 @@ import com.mapbox.api.directions.v5.models.LegStep
  * The latest route step progress object can be obtained through either the [ProgressChangeListener]
  * or the [com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener] callbacks.
  * Note that the route step progress object's immutable.
- *
- * @since 0.1.0
  */
 data class RouteStepProgress internal constructor(
     var step: LegStep? = null,
@@ -25,7 +23,6 @@ data class RouteStepProgress internal constructor(
      *
      * @return double value representing the distance the user has remaining till they reach the end
      * of the current step. Uses unit meters.
-     * @since 0.1.0
      */
     fun distanceRemaining(): Double? = distanceRemaining
 
@@ -34,7 +31,6 @@ data class RouteStepProgress internal constructor(
      *
      * @return double value representing the distance the user has traveled so far along the current
      * step. Uses unit meters.
-     * @since 0.1.0
      */
     fun distanceTraveled(): Double? = distanceTraveled
 
@@ -44,7 +40,6 @@ data class RouteStepProgress internal constructor(
      *
      * @return a float value between 0 and 1 representing the fraction the user has traveled along
      * the current step.
-     * @since 0.1.0
      */
     fun fractionTraveled(): Float? = fractionTraveled
 
@@ -52,7 +47,6 @@ data class RouteStepProgress internal constructor(
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
      *
      * @return `long` value representing the duration remaining till end of step, in unit seconds.
-     * @since 0.1.0
      */
     fun durationRemaining(): Double? = durationRemaining
 

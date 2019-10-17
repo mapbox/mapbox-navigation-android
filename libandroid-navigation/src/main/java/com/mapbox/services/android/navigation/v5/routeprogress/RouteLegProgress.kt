@@ -13,8 +13,6 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
  * The latest route leg progress object can be obtained through either the [ProgressChangeListener]
  * or the [com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener] callbacks.
  * Note that the route leg progress object's immutable.
- *
- * @since 0.1.0
  */
 data class RouteLegProgress internal constructor(
     var stepIndex: Int? = null,
@@ -38,7 +36,6 @@ data class RouteLegProgress internal constructor(
      * Index representing the current step the user is on.
      *
      * @return an integer representing the current step the user is on
-     * @since 0.1.0
      */
     fun stepIndex(): Int? = stepIndex
 
@@ -47,7 +44,6 @@ data class RouteLegProgress internal constructor(
      *
      * @return a double value representing the total distance the user has traveled along the current
      * leg, using unit meters.
-     * @since 0.1.0
      */
     fun distanceTraveled(): Double? = distanceTraveled
 
@@ -55,7 +51,6 @@ data class RouteLegProgress internal constructor(
      * Provides the duration remaining in seconds till the user reaches the end of the route.
      *
      * @return long value representing the duration remaining till end of route, in unit seconds
-     * @since 0.1.0
      */
     fun distanceRemaining(): Double? = distanceRemaining
 
@@ -63,7 +58,6 @@ data class RouteLegProgress internal constructor(
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
      *
      * @return long value representing the duration remaining till end of step, in unit seconds.
-     * @since 0.1.0
      */
     fun durationRemaining(): Double? = durationRemaining
 
@@ -73,7 +67,6 @@ data class RouteLegProgress internal constructor(
      *
      * @return a float value between 0 and 1 representing the fraction the user has traveled along the
      * current leg
-     * @since 0.1.0
      */
     fun fractionTraveled(): Float? = fractionTraveled
 
@@ -83,7 +76,6 @@ data class RouteLegProgress internal constructor(
      *
      * @return a [LegStep] representing the previous step the user was on, if still on first
      * step in route, returns null
-     * @since 0.1.0
      */
     fun previousStep(): LegStep? = previousStep
 
@@ -91,7 +83,6 @@ data class RouteLegProgress internal constructor(
      * Returns the current step the user is traversing along.
      *
      * @return a [LegStep] representing the step the user is currently on
-     * @since 0.1.0
      */
     fun currentStep(): LegStep? = currentStep
 
@@ -100,7 +91,6 @@ data class RouteLegProgress internal constructor(
      * on the last leg, this will return null since a next step doesn't exist.
      *
      * @return a [LegStep] representing the next step the user will be on.
-     * @since 0.1.0
      */
     fun upComingStep(): LegStep? = upComingStep
 
@@ -109,7 +99,6 @@ data class RouteLegProgress internal constructor(
      * user's current step is within 2 steps of their final destination this will return null.
      *
      * @return the [LegStep] after the [.upComingStep]
-     * @since 0.5.0
      */
     fun followOnStep(): LegStep? = followOnStep
 
@@ -118,7 +107,6 @@ data class RouteLegProgress internal constructor(
      * is currently on.
      *
      * @return a [RouteStepProgress] object
-     * @since 0.1.0
      */
     fun currentStepProgress(): RouteStepProgress? = currentStepProgress
 
@@ -127,7 +115,6 @@ data class RouteLegProgress internal constructor(
      * step geometry.
      *
      * @return list of points representing the current step
-     * @since 0.12.0
      */
     fun currentStepPoints(): List<Point>? = currentStepPoints
 
@@ -136,7 +123,6 @@ data class RouteLegProgress internal constructor(
      * step geometry.
      *
      * @return list of points representing the upcoming step
-     * @since 0.12.0
      */
     fun upcomingStepPoints(): List<Point>? = upcomingStepPoints
 
