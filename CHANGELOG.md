@@ -1,7 +1,8 @@
 ## Changelog for the Mapbox Navigation SDK for Android
 
 Mapbox welcomes participation and contributions from everyone.
-
+### v0.42.1
+ * Roundabout maneuver icon depicts counterclockwise movement when driving on the left is fixed here: [#2228](https://github.com/mapbox/mapbox-navigation-android/pull/2228)
 ### v0.42.0 - September 20, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes. Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.42.0-Migration-Guide) for the necessary updates required.
