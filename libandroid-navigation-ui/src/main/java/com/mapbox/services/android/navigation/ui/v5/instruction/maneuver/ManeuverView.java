@@ -236,6 +236,9 @@ public class ManeuverView extends View {
       maneuverViewUpdate.updateManeuverView(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
     }
     boolean flip = SHOULD_FLIP_MODIFIERS.contains(maneuverModifier);
+    if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType)) {
+      flip = STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide);
+    }
     if (STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide) && STEP_MANEUVER_MODIFIER_UTURN.contains(maneuverModifier)) {
       setScaleX(flip ? 1 : -1);
     } else {
