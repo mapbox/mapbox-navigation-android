@@ -113,7 +113,7 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
 
   void configure(@NonNull File path, @NonNull String version) {
     OfflineNavigator offlineNavigator =
-      new OfflineNavigator(mapboxNavigator.getNavigator$libandroid_navigation_debug());
+      new OfflineNavigator(mapboxNavigator.getNavigator());
     String tilePath = new File(path, version).getAbsolutePath();
     offlineNavigator.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
       @Override
@@ -127,6 +127,11 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
         Timber.d("DEBUG: onConfigurationError %s", error.getMessage());
       }
     });
+  }
+
+  // TODO Remove when MapboxNavigation is refactored - added to get current tests to pass
+  LocationEngine getLocationEngine() {
+    return locationEngine;
   }
 
   @NonNull

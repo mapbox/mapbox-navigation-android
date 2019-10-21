@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.navigator.RouteState;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NavigationRouteProcessorTest extends BaseTest {
 
@@ -18,6 +20,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
   public void buildNewRouteProgress_routeProgressReturned() throws IOException {
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     NavigationStatus status = mock(NavigationStatus.class);
+    when(status.getRouteState()).thenReturn(mock(RouteState.class));
     NavigationRouteProcessor processor = new NavigationRouteProcessor();
 
     RouteProgress progress = processor.buildNewRouteProgress(navigator, status, buildTestDirectionsRoute());
@@ -29,6 +32,7 @@ public class NavigationRouteProcessorTest extends BaseTest {
   public void buildNewRouteProgress_previousStatusIsReturned() throws IOException {
     MapboxNavigator navigator = mock(MapboxNavigator.class);
     NavigationStatus status = mock(NavigationStatus.class);
+    when(status.getRouteState()).thenReturn(mock(RouteState.class));
     NavigationRouteProcessor processor = new NavigationRouteProcessor();
 
     processor.buildNewRouteProgress(navigator, status, buildTestDirectionsRoute());

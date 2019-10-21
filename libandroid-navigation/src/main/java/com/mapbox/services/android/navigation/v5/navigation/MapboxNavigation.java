@@ -127,6 +127,8 @@ public class MapboxNavigation implements ServiceConnection {
     this.accessToken = accessToken;
     this.options = options;
     this.mapboxNavigator = new MapboxNavigator(new Navigator());
+    this.locationEngine = new EnhancedLocationEngineDecorator(obtainLocationEngine(), mapboxNavigator,
+            Executors.newSingleThreadScheduledExecutor());
     initialize();
   }
 
@@ -164,7 +166,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.accessToken = accessToken;
     this.options = new MapboxNavigationOptions.Builder().build();
     this.navigationTelemetry = navigationTelemetry;
-    this.mapboxNavigator = new MapboxNavigator(new Navigator());
+    this.mapboxNavigator = mapboxNavigator;
     this.locationEngine = new EnhancedLocationEngineDecorator(locationEngine, mapboxNavigator,
             Executors.newSingleThreadScheduledExecutor());
     initializeForTest(context);
@@ -173,12 +175,12 @@ public class MapboxNavigation implements ServiceConnection {
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
                    @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine) {
+                   LocationEngine locationEngine, Navigator navigator) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
-    this.mapboxNavigator = new MapboxNavigator(new Navigator());
+    this.mapboxNavigator = new MapboxNavigator(navigator);
     this.locationEngine = new EnhancedLocationEngineDecorator(locationEngine, mapboxNavigator,
             Executors.newSingleThreadScheduledExecutor());
     initializeForTest(context);
@@ -322,6 +324,13 @@ public class MapboxNavigation implements ServiceConnection {
   @NonNull
   public LocationEngine getLocationEngine() {
     return locationEngine;
+  }
+
+  // Package private (no modifier) for testing purposes
+  // TODO Remove when MapboxNavigation is refactored - added to get current tests to pass
+  @NonNull
+  LocationEngine getOriginalLocationEngine() {
+    return locationEngine.getLocationEngine();
   }
 
   /**
@@ -953,6 +962,15 @@ public class MapboxNavigation implements ServiceConnection {
       return NavigationTelemetry.INSTANCE;
     }
     return navigationTelemetry;
+  }
+
+  @NonNull
+  private LocationEngine obtainLocationEngine() {
+    if (locationEngine == null) {
+      return LocationEngineProvider.getBestLocationEngine(applicationContext);
+    }
+
+    return locationEngine;
   }
 
   @NonNull
