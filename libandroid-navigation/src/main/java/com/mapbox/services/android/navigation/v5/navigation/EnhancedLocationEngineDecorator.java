@@ -12,10 +12,12 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.geojson.Point;
+import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
+import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -23,8 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
-
-import static com.mapbox.services.android.navigation.v5.navigation.MapboxNavigator.getSnappedLocation;
 
 class EnhancedLocationEngineDecorator implements LocationEngine {
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;

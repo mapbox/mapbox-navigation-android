@@ -208,7 +208,7 @@ public class MapboxNavigation implements ServiceConnection {
   /**
    * Navigation {@link Milestone}s provide a powerful way to give your user instructions at custom
    * defined locations along their route. Default milestones are automatically added unless
-   * {@link MapboxNavigationOptions#defaultMilestonesEnabled()} is set to false but they can also
+   * {@link MapboxNavigationOptions#getDefaultMilestonesEnabled()} is set to false but they can also
    * be individually removed using the {@link #removeMilestone(Milestone)} API. Once a custom
    * milestone is built, it will need to be passed into the navigation SDK through this method.
    * <p>
@@ -986,9 +986,9 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
-    locationEngine.onNavigationStarted();
-    ValidationUtils.validDirectionsRoute(directionsRoute, options.defaultMilestonesEnabled());
+    ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
+    locationEngine.onNavigationStarted();
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     if (!isBound) {
