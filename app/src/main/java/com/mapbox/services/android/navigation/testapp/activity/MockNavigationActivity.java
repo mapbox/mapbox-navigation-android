@@ -128,7 +128,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .navigationNotification(customNotification)
       .build();
 
-//    TODO: For metrics hook test
+    //  TODO: For metrics hook test
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options, this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
@@ -364,23 +364,26 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     isRefreshing = false;
   }
 
+  //    TODO: For metrics hook test
   @Override
   public void onStringMetricUpdated(@NotNull String eventName, @NotNull String stringData) {
-    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
     Timber.e("METRICS_LOG");
     Timber.e(stringData);
   }
 
+  //    TODO: For metrics hook test
   @Override
   public void onBundleMetricUpdated(@NotNull String eventName, @NotNull Bundle bundleData) {
-    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
     Timber.e("METRICS_LOG");
     Timber.e(bundleData.toString());
   }
 
+  //    TODO: For metrics hook test
   @Override
   public void onJsonStringMetricUpdated(@NotNull String eventName, @NotNull String jsonStringData) {
-    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
     Timber.e("METRICS_LOG");
     Timber.e(jsonStringData);
   }

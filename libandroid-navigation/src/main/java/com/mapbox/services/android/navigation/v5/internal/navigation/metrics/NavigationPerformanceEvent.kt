@@ -5,7 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.mapbox.android.telemetry.Event
 import com.mapbox.services.android.navigation.v5.internal.navigation.Attribute
-import com.mapbox.services.android.navigation.v5.internal.navigation.Counter
+import com.mapbox.services.android.navigation.v5.internal.navigation.DoubleCounter
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationPerformanceMetadata
 import java.text.SimpleDateFormat
 import java.util.ArrayList
@@ -28,7 +28,7 @@ internal open class NavigationPerformanceEvent(
 
     private val event: String
     private val created: String
-    private val counters: MutableList<Counter<out Number>>
+    private val counters: MutableList<DoubleCounter>
     private val attributes: MutableList<Attribute>
 
     init {
@@ -43,7 +43,7 @@ internal open class NavigationPerformanceEvent(
         return dateFormat.format(Date())
     }
 
-    fun addCounter(counter: Counter<out Number>) {
+    fun addCounter(counter: DoubleCounter) {
         counters.add(counter)
     }
 

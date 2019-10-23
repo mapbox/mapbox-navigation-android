@@ -9,12 +9,13 @@ import com.mapbox.navigation.metrics.MetricsObserver
 import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.InitialGpsEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRetrievalEvent
+import java.util.concurrent.atomic.AtomicReference
 
-internal object MapboxMetricsReporter: DirectionsMetrics, NavigationMetrics {
+internal object MapboxMetricsReporter : DirectionsMetrics, NavigationMetrics {
 
     private lateinit var gson: Gson
     private lateinit var mapboxTelemetry: MapboxTelemetry
-    private var metricsObserver: MetricsObserver? = null
+    private val metricsObserver: AtomicReference<MetricsObserver?> = AtomicReference()
 
     fun init(
         context: Context,
@@ -28,9 +29,7 @@ internal object MapboxMetricsReporter: DirectionsMetrics, NavigationMetrics {
     }
 
     fun disable() {
-        if (::mapboxTelemetry.isInitialized) {
-            mapboxTelemetry.disable()
-        }
+        mapboxTelemetry.disable()
     }
 
     override fun toggleLogging(isDebugLoggingEnabled: Boolean) {
@@ -40,61 +39,61 @@ internal object MapboxMetricsReporter: DirectionsMetrics, NavigationMetrics {
     override fun arriveEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, NavigationArriveEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onJsonStringMetricUpdated(eventName, eventJsonString)
+        metricsObserver.get()?.onJsonStringMetricUpdated(eventName, eventJsonString)
         mapboxTelemetry.push(event)
     }
 
     override fun cancelEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, NavigationCancelEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onJsonStringMetricUpdated(eventName, eventJsonString)
         mapboxTelemetry.push(event)
     }
 
     override fun departEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, NavigationDepartEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onJsonStringMetricUpdated(eventName, eventJsonString)
         mapboxTelemetry.push(event)
     }
 
     override fun rerouteEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, NavigationRerouteEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onStringMetricUpdated(eventName, event.toString())
         mapboxTelemetry.push(event)
     }
 
     override fun feedbackEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, NavigationFeedbackEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onStringMetricUpdated(eventName, event.toString())
         mapboxTelemetry.push(event)
     }
 
     override fun routeRetrievalEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, RouteRetrievalEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onStringMetricUpdated(eventName, event.toString())
         mapboxTelemetry.push(event)
     }
 
     override fun sendInitialGpsEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, InitialGpsEvent::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onStringMetricUpdated(eventName, event.toString())
         mapboxTelemetry.push(event)
     }
 
     override fun sendTurnstileEvent(eventName: String, eventJsonString: String) {
         val event = fromGson(eventJsonString, AppUserTurnstile::class.java)
         // TODO: Move metricsObserver call to separate thread
-        metricsObserver?.onStringMetricUpdated(eventName, event.toString())
+        metricsObserver.get()?.onStringMetricUpdated(eventName, event.toString())
         mapboxTelemetry.push(event)
     }
 
-    fun setMetricsObserver(metricsObserver: MetricsObserver?) {
-        this.metricsObserver = metricsObserver
+    fun setMetricsObserver(observer: MetricsObserver?) {
+        MapboxMetricsReporter.metricsObserver.set(observer)
     }
 
     private fun <T> fromGson(json: String, clazz: Class<T>): T =

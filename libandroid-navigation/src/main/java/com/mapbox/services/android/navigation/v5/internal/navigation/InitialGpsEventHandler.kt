@@ -17,6 +17,5 @@ internal class InitialGpsEventHandler {
             NavigationMetrics.INITIAL_GPS,
             gson.toJson(event)
         )
-        // NavigationMetricsWrapper.sendInitialGpsEvent(elapsedTime, sessionId, metadata)
     }
 }

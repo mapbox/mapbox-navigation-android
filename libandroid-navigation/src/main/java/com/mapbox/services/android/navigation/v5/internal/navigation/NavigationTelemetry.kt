@@ -15,13 +15,13 @@ import com.mapbox.navigation.metrics.DirectionsMetrics
 import com.mapbox.navigation.metrics.MetricsObserver
 import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.BuildConfig
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.RerouteEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
@@ -72,6 +72,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
         navigation: MapboxNavigation,
         metricsObserver: MetricsObserver?
     ) {
+        MapboxMetricsReporter.setMetricsObserver(metricsObserver)
         if (!isInitialized) {
             validateAccessToken(accessToken)
             val options = navigation.options()
@@ -84,7 +85,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
                 gson
             )
-            MapboxMetricsReporter.setMetricsObserver(metricsObserver)
 
             val departEventHandler = DepartEventHandler(context, gson, sdkIdentifier)
             this.departEventFactory = DepartEventFactory(departEventHandler)
