@@ -112,6 +112,6 @@ internal object MapboxMetricsReporter : DirectionsMetrics, NavigationMetrics {
     }
 
     fun setMetricsObserver(observer: MetricsObserver?) {
-        MapboxMetricsReporter.metricsObserver.set(observer)
+        metricsObserver = observer
     }
 }
