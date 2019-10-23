@@ -194,7 +194,7 @@ public class MapboxNavigation implements ServiceConnection {
    * also removes all listeners that have been attached.
    */
   public void onDestroy() {
-    stopNavigation();
+    killNavigation();
     removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
@@ -404,7 +404,17 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
-    locationEngine.onNavigationStopped();
+    locationEngine.onFreeDrive();
+    stopNavigationService();
+  }
+
+  private void killNavigation() {
+    Timber.d("MapboxNavigation killNavigation called");
+    locationEngine.onNavigationKilled();
+    stopNavigationService();
+  }
+
+  private void stopNavigationService() {
     if (isServiceAvailable()) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
@@ -988,7 +998,7 @@ public class MapboxNavigation implements ServiceConnection {
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    locationEngine.onNavigationStarted();
+    locationEngine.onActiveGuidance();
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     if (!isBound) {

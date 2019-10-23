@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
@@ -36,7 +35,6 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   private final ScheduledExecutorService executorService;
   private Location rawLocation;
   private Location enhancedLocation;
-  private AtomicBoolean isActive = new AtomicBoolean(false);
 
   EnhancedLocationEngineDecorator(@NonNull LocationEngine locationEngine,
                                   @NonNull MapboxNavigator mapboxNavigator,
@@ -44,6 +42,7 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     this.locationEngine = locationEngine;
     this.mapboxNavigator = mapboxNavigator;
     this.executorService = executorService;
+    onFreeDrive();
   }
 
   @Override
@@ -56,26 +55,6 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
                                      @NonNull final LocationEngineCallback<LocationEngineResult> callback,
                                      @Nullable Looper looper) throws SecurityException {
     locationEngine.requestLocationUpdates(request, callback, null);
-    if (isActive.get()) {
-      /// Don't start free drive in active mode
-      return;
-    }
-
-    final Handler handler = new Handler(Looper.getMainLooper());
-    future = executorService.scheduleAtFixedRate(new Runnable() {
-      @Override
-      public void run() {
-        if (rawLocation != null) {
-          enhancedLocation = getLocation(new Date(), 1500, rawLocation);
-          handler.post(new Runnable() {
-            @Override
-            public void run() {
-              callback.onSuccess(LocationEngineResult.create(enhancedLocation));
-            }
-          });
-        }
-      }
-    }, 1500, 1000, TimeUnit.MILLISECONDS);
   }
 
   @Override
@@ -87,11 +66,6 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   @Override
   public void removeLocationUpdates(@NonNull LocationEngineCallback<LocationEngineResult> callback) {
     locationEngine.removeLocationUpdates(callback);
-    if (isActive.get()) {
-      /// Don't stop free drive in active mode
-      return;
-    }
-    future.cancel(false);
   }
 
   @Override
@@ -99,18 +73,40 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     locationEngine.removeLocationUpdates(pendingIntent);
   }
 
-  void onNavigationStarted() {
-    if (isActive.compareAndSet(false, true)) {
+  void onActiveGuidance() {
+    removeLocationUpdates(callback);
+    future.cancel(false);
+    future = null;
+  }
+
+  void onFreeDrive() {
+    requestLocationUpdates(obtainLocationEngineRequest(), callback, null);
+    final Handler handler = new Handler(Looper.getMainLooper());
+    future = executorService.scheduleAtFixedRate(new Runnable() {
+      @Override
+      public void run() {
+        if (rawLocation != null) {
+          enhancedLocation = getLocation(new Date(), 0, rawLocation);
+          handler.post(new Runnable() {
+            @Override
+            public void run() {
+              callback.onSuccess(LocationEngineResult.create(enhancedLocation));
+            }
+          });
+        }
+      }
+    }, 1500, 1000, TimeUnit.MILLISECONDS);
+  }
+
+  void onNavigationKilled() {
+    if (future != null) {
       removeLocationUpdates(callback);
+      future.cancel(false);
+      future = null;
     }
   }
 
-  void onNavigationStopped() {
-    if (isActive.compareAndSet(true, false)) {
-      requestLocationUpdates(obtainLocationEngineRequest(), callback, null);
-    }
-  }
-
+  // TODO Do we want to call configure as part of EnhancedLocationEngineDecorator construction?
   void configure(@NonNull File path, @NonNull String version) {
     OfflineNavigator offlineNavigator =
       new OfflineNavigator(mapboxNavigator.getNavigator());
@@ -164,8 +160,8 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   }
 
   private Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
-    NavigationStatus status = mapboxNavigator.retrieveStatus(date, 0);
-    return isActive.get() ? getSnappedLocation(status, fallbackLocation) : fallbackLocation;
+    NavigationStatus status = mapboxNavigator.retrieveStatus(date, lagMillis);
+    return getSnappedLocation(status, fallbackLocation);
   }
 
   private static final class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {

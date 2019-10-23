@@ -52,6 +52,7 @@ import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -317,14 +318,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @SuppressLint("MissingPermission")
   private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
-    LocationEngineRequest request = buildEngineRequest();
-    locationEngine.requestLocationUpdates(request, callback, null);
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
 
   private void initializeNavigation(MapboxMap mapboxMap) {
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-    navigation.setLocationEngine(locationEngine);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(),
+      new MapboxNavigationOptions.Builder().build(), locationEngine);
+    addLocationEngineListener();
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
     navigation.addMilestoneEventListener(this);
@@ -416,7 +416,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(callback);
+      navigation.getLocationEngine().removeLocationUpdates(callback);
     }
   }
 
@@ -424,7 +424,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void addLocationEngineListener() {
     if (locationEngine != null) {
       LocationEngineRequest request = buildEngineRequest();
-      locationEngine.requestLocationUpdates(request, callback, null);
+      navigation.getLocationEngine().requestLocationUpdates(request, callback, null);
     }
   }
 
