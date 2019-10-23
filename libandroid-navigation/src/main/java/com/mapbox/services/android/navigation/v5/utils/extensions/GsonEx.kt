@@ -1,4 +1,4 @@
-@file:JvmName("ContextEx")
+@file:JvmName("GsonEx")
 
 package com.mapbox.services.android.navigation.v5.utils.extensions
 
