@@ -60,7 +60,6 @@ const val NONE = 99
 /**
  * Log level indicates which logs are allowed to be emitted by the Mapbox Maps SDK for Android.
  */
-// TODO: move to the base library as soon as it becomes android lib
 @IntDef(VERBOSE, DEBUG, INFO, WARN, ERROR, NONE)
 @Retention(AnnotationRetention.SOURCE)
 annotation class LogLevel

@@ -1,5 +1,5 @@
 package com.mapbox.navigation.logger
 
 interface LoggerObserver {
-    fun log(level: Int, entry: LogEntry)
+    fun log(@LogLevel level: Int, entry: LogEntry)
 }
