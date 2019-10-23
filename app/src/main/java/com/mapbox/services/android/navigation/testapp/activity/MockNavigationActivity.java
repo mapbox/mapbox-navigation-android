@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.metrics.MetricsObserver;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
@@ -56,6 +57,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.ref.WeakReference;
 
 import butterknife.BindView;
@@ -67,8 +70,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
-  MilestoneEventListener, OffRouteListener, RefreshCallback {
+        MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
+        MilestoneEventListener, OffRouteListener, RefreshCallback, MetricsObserver {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -125,7 +128,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .navigationNotification(customNotification)
       .build();
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
+//    TODO: For metrics hook test
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options, this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -358,6 +362,27 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onError(RefreshError error) {
     isRefreshing = false;
+  }
+
+  @Override
+  public void onStringMetricUpdated(@NotNull String eventName, @NotNull String stringData) {
+    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Timber.e("METRICS_LOG");
+    Timber.e(stringData);
+  }
+
+  @Override
+  public void onBundleMetricUpdated(@NotNull String eventName, @NotNull Bundle bundleData) {
+    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Timber.e("METRICS_LOG");
+    Timber.e(bundleData.toString());
+  }
+
+  @Override
+  public void onJsonStringMetricUpdated(@NotNull String eventName, @NotNull String jsonStringData) {
+    Toast.makeText(this, "Metric " + eventName + "sent", Toast.LENGTH_SHORT).show();
+    Timber.e("METRICS_LOG");
+    Timber.e(jsonStringData);
   }
 
   private static class BeginRouteInstruction extends Instruction {

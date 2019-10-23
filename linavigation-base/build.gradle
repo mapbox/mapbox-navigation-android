@@ -6,6 +6,9 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
 
+    // Support
+    implementation dependenciesList.supportAnnotation
+
     //ktlint
     ktlint dependenciesList.ktlint
 

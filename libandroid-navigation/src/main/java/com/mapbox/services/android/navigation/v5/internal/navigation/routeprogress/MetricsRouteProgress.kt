@@ -66,9 +66,11 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
     init {
         ifNonNull(
-            routeProgress, routeProgress?.directionsRoute(),
+            routeProgress,
+            routeProgress?.directionsRoute(),
             routeProgress?.currentLegProgress(),
-            routeProgress?.distanceRemaining(), routeProgress?.durationRemaining()
+            routeProgress?.distanceRemaining(),
+            routeProgress?.durationRemaining()
         ) { _routeProgress, _directionsRoute, _currentLegProgress, _distanceRemaining, _durationRemaining ->
             obtainRouteData(_directionsRoute)
             obtainLegData(_currentLegProgress)
@@ -107,10 +109,8 @@ class MetricsRouteProgress(routeProgress: RouteProgress?) {
     private fun obtainLegData(legProgress: RouteLegProgress) {
         currentStepDistance = legProgress.currentStep()?.distance()?.toInt() ?: 0
         currentStepDuration = legProgress.currentStep()?.duration()?.toInt() ?: 0
-        currentStepDistanceRemaining =
-            legProgress.currentStepProgress()?.distanceRemaining()?.toInt() ?: 0
-        currentStepDurationRemaining =
-            legProgress.currentStepProgress()?.durationRemaining()?.toInt() ?: 0
+        currentStepDistanceRemaining = legProgress.currentStepProgress()?.distanceRemaining()?.toInt() ?: 0
+        currentStepDurationRemaining = legProgress.currentStepProgress()?.durationRemaining()?.toInt() ?: 0
         currentStepName = legProgress.currentStep()?.name() ?: ""
     }
 

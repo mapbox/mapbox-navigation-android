@@ -1,0 +1,34 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+    buildToolsVersion androidVersions.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-consumer.pro'
+
+        buildConfigField('String',
+                "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
+        )
+    }
+}
+
+dependencies {
+    api(project(':linavigation-base'))
+
+    implementation dependenciesList.supportAnnotation
+
+    api (dependenciesList.mapboxEvents) {
+        exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
+    }
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    implementation dependenciesList.kotlinStdLib
+}

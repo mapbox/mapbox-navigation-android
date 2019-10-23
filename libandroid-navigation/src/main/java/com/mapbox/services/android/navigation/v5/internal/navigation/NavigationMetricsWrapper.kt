@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 import android.content.Context
 import android.location.Location
 import com.mapbox.android.telemetry.AppUserTurnstile
-import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
@@ -11,7 +10,6 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.Pho
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.RerouteEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 internal object NavigationMetricsWrapper {
     private lateinit var sdkIdentifier: String
@@ -41,23 +39,17 @@ internal object NavigationMetricsWrapper {
     }
 
     @JvmStatic
-    fun push(event: Event) {
-        mapboxTelemetry.push(event)
-    }
-
-    @JvmStatic
     fun arriveEvent(
         sessionState: SessionState,
-        routeProgress: RouteProgress,
+        metricProgress: MetricsRouteProgress,
         location: Location,
         context: Context
     ) {
-        val metricsRouteProgress = MetricsRouteProgress(routeProgress)
         val arriveEvent = NavigationEventFactory
             .buildNavigationArriveEvent(
                 PhoneState(context),
                 sessionState,
-                metricsRouteProgress,
+                metricProgress,
                 location,
                 sdkIdentifier
             )
@@ -106,9 +98,13 @@ internal object NavigationMetricsWrapper {
         location: Location,
         context: Context
     ) {
-        val sessionState = rerouteEvent.sessionState
         val navRerouteEvent = NavigationEventFactory.buildNavigationRerouteEvent(
-            PhoneState(context), sessionState, metricProgress, location, sdkIdentifier, rerouteEvent
+            PhoneState(context),
+            rerouteEvent.sessionState,
+            metricProgress,
+            location,
+            sdkIdentifier,
+            rerouteEvent
         )
         mapboxTelemetry.push(navRerouteEvent)
     }
@@ -145,7 +141,7 @@ internal object NavigationMetricsWrapper {
         sessionId: String,
         metadata: NavigationPerformanceMetadata
     ) {
-        push(RouteRetrievalEvent(elapsedTime, routeUuid, sessionId, metadata))
+        mapboxTelemetry.push(RouteRetrievalEvent(elapsedTime, routeUuid, sessionId, metadata))
     }
 
     @JvmStatic
@@ -154,11 +150,11 @@ internal object NavigationMetricsWrapper {
         sessionId: String,
         metadata: NavigationPerformanceMetadata
     ) {
-        push(InitialGpsEvent(elapsedTime, sessionId, metadata))
+        mapboxTelemetry.push(InitialGpsEvent(elapsedTime, sessionId, metadata))
     }
 
     @JvmStatic
-    fun turnstileEvent(): Event {
-        return AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
+    fun sendTurnstileEvent() {
+        mapboxTelemetry.push(AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME))
     }
 }

@@ -14,6 +14,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigation.metrics.MetricsObserver;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
@@ -75,6 +76,7 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
+  private MetricsObserver metricsObserver;
 
   static {
     NavigationLibraryLoader.Companion.load();
@@ -124,6 +126,15 @@ public class MapboxNavigation implements ServiceConnection {
     initialize();
   }
 
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          @NonNull MapboxNavigationOptions options, @NonNull MetricsObserver metricsObserver) {
+    initializeContext(context);
+    this.accessToken = accessToken;
+    this.options = options;
+    this.metricsObserver = metricsObserver;
+    initialize();
+  }
+
   /**
    * Constructs a new instance of this class using a custom built options class. Building a custom
    * {@link MapboxNavigationOptions} object and passing it in allows you to further customize the
@@ -143,6 +154,17 @@ public class MapboxNavigation implements ServiceConnection {
     this.accessToken = accessToken;
     this.options = options;
     this.locationEngine = locationEngine;
+    initialize();
+  }
+
+  public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
+                          @NonNull MapboxNavigationOptions options, @NonNull LocationEngine locationEngine,
+                          @NonNull MetricsObserver metricsObserver) {
+    initializeContext(context);
+    this.accessToken = accessToken;
+    this.options = options;
+    this.locationEngine = locationEngine;
+    this.metricsObserver = metricsObserver;
     initialize();
   }
 
@@ -920,7 +942,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   private void initializeTelemetry() {
     navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this);
+    navigationTelemetry.initialize(applicationContext, accessToken, this, metricsObserver);
   }
 
   private NavigationTelemetry obtainTelemetry() {
