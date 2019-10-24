@@ -16,6 +16,7 @@ android {
 
 dependencies {
     api(project(':libnavigation-base'))
+    implementation project(':libnavigation-util')
     implementation dependenciesList.supportAnnotation
     implementation dependenciesList.timber
 

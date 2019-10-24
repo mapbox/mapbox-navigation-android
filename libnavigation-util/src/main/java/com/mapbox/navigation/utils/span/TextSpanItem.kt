@@ -1,3 +1,3 @@
-package com.mapbox.services.android.navigation.v5.utils.span
+package com.mapbox.navigation.utils.span
 
 class TextSpanItem(override val span: Any, val spanText: String) : SpanItem

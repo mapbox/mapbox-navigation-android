@@ -7,7 +7,7 @@ internal inline fun mockkStaticSupport(vararg extension: Extensions) {
 }
 
 internal enum class Extensions(val path: String) {
-    ContextEx("com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx"),
-    LocaleEx("com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx"),
-    SpanEx("com.mapbox.services.android.navigation.v5.utils.extensions.SpanEx");
+    ContextEx("com.mapbox.navigation.utils.extensions.ContextEx"),
+    LocaleEx("com.mapbox.navigation.utils.extensions.LocaleEx"),
+    SpanEx("com.mapbox.navigation.utils.extensions.SpanEx");
 }
