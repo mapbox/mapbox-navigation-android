@@ -28,33 +28,29 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun getStatus(date: Date): TripStatus {
         val status = navigator.getStatus(date)
         return TripStatus(
-                status.location.toLocation(),
-                status.getRouteProgress()
+            status.location.toLocation(),
+            status.getRouteProgress()
         )
     }
 
-    private fun Location.toFixLocation(): FixLocation {
-        return FixLocation(
-                Point.fromLngLat(this.longitude, this.latitude),
-                Date(this.time),
-                this.speed,
-                this.bearing,
-                this.altitude.toFloat(),
-                this.accuracy,
-                this.provider
-        )
-    }
+    private fun Location.toFixLocation() = FixLocation(
+        Point.fromLngLat(this.longitude, this.latitude),
+        Date(this.time),
+        this.speed,
+        this.bearing,
+        this.altitude.toFloat(),
+        this.accuracy,
+        this.provider
+    )
 
-    private fun FixLocation.toLocation(): Location {
-        val location = Location(this.provider)
-        location.latitude = this.coordinate.latitude()
-        location.longitude = this.coordinate.longitude()
-        location.time = this.time.time
-        location.speed = this.speed ?: 0f
-        location.bearing = this.bearing ?: 0f
-        location.altitude = this.altitude?.toDouble() ?: 0.0
-        location.accuracy = this.accuracyHorizontal ?: 0f
-        return location
+    private fun FixLocation.toLocation(): Location = Location(this.provider).also {
+        it.latitude = this.coordinate.latitude()
+        it.longitude = this.coordinate.longitude()
+        it.time = this.time.time
+        it.speed = this.speed ?: 0f
+        it.bearing = this.bearing ?: 0f
+        it.altitude = this.altitude?.toDouble() ?: 0.0
+        it.accuracy = this.accuracyHorizontal ?: 0f
     }
 
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
