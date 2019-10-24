@@ -24,7 +24,6 @@ internal class MauSku(
     }
 
     override fun onNavigationStart() {
-
     }
 
     override fun onNavigationEnd() {

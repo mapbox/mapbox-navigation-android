@@ -25,6 +25,7 @@ internal class TripsSku(
     }
 
     private var isNavigating = false
+    private var refreshSkuToken: () -> Unit = { handleRotationOnNavInActive() }
 
     override fun generateToken(): String {
         refreshSkuToken()
@@ -33,37 +34,38 @@ internal class TripsSku(
 
     override fun onNavigationStart() {
         this.isNavigating = true
+        refreshSkuToken = { handleRotationOnNavActive() }
         setRouteRequestCount(DEFAULT_TRIP_REQUEST_COUNT)
     }
 
     override fun onNavigationEnd() {
         this.isNavigating = false
+        refreshSkuToken = { handleRotationOnNavInActive() }
         setTimerExpiry(DEFAULT_TRIP_TOKEN_TIMER)
     }
 
-    private fun refreshSkuToken() {
-        when(isNavigating) {
-            true -> {
-                if(validateTimerExpiry()) {
-                    setTimerExpiry(getNow())
-                    persistTripsSkuToken()
-                }
+    private fun handleRotationOnNavActive() {
+        if (validateTimerExpiry()) {
+            setTimerExpiry(getNow())
+            persistTripsSkuToken()
+        }
+    }
+
+    private fun handleRotationOnNavInActive() {
+        var requestCount: Int
+        when (validateRotation()) {
+            RotateTripsType.ROTATE_ON_TIMER_EXPIRE,
+            RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE -> {
+                requestCount = 1
+                setTimerExpiry(getNow())
+                persistTripsSkuToken()
             }
-            false -> {
-                var requestCount: Int
-                val rotateTripsType = validateRotation()
-                if (rotateTripsType == RotateTripsType.ROTATE_ON_TIMER_EXPIRE
-                        || rotateTripsType == RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE) {
-                    requestCount = 1
-                    setTimerExpiry(getNow())
-                    persistTripsSkuToken()
-                } else {
-                    requestCount = getRouteRequestCountThreshold()
-                    requestCount++
-                }
-                setRouteRequestCount(requestCount)
+            else -> {
+                requestCount = getRouteRequestCountThreshold()
+                requestCount++
             }
         }
+        setRouteRequestCount(requestCount)
     }
 
     private fun validateRotation(): RotateTripsType {

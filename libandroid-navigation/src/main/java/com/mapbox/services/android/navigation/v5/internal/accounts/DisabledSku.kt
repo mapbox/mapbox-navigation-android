@@ -7,7 +7,6 @@ internal class DisabledSku : SkuGenerator {
     }
 
     override fun onNavigationStart() {
-
     }
 
     override fun onNavigationEnd() {
