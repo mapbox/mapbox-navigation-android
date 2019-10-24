@@ -934,7 +934,8 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngineRequest = obtainLocationEngineRequest();
-    locationEngine.configure(applicationContext.getFilesDir(), "2019_04_13-00_00_11");
+    locationEngine.configure(applicationContext.getFilesDir(), "2019_04_13-00_00_11",
+      "https://api-routing-tiles-staging.tilestream.net", accessToken);
     initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.
@@ -998,10 +999,10 @@ public class MapboxNavigation implements ServiceConnection {
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
     ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    locationEngine.onActiveGuidance();
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     if (!isBound) {
+      locationEngine.onActiveGuidance();
       navigationTelemetry.startSession(directionsRoute, locationEngine);
       startNavigationService();
       navigationEventDispatcher.onNavigationEvent(true);

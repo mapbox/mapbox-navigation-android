@@ -2,8 +2,14 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.TileEndpointConfiguration
 
-internal class OfflineNavigator(private val navigator: Navigator) {
+internal class OfflineNavigator @JvmOverloads constructor(
+    private val navigator: Navigator,
+    private val version: String = "",
+    private val host: String = "",
+    private val accessToken: String = ""
+) {
 
     /**
      * Configures the navigator for getting offline routes
@@ -14,7 +20,12 @@ internal class OfflineNavigator(private val navigator: Navigator) {
      * can be called safely
      */
     fun configure(tilePath: String, callback: OnOfflineTilesConfiguredCallback) {
-        ConfigureRouterTask(navigator, tilePath, callback).execute()
+        ConfigureRouterTask(
+            navigator,
+            tilePath,
+            TileEndpointConfiguration(host, version, accessToken, ""),
+            callback
+        ).execute()
     }
 
     /**

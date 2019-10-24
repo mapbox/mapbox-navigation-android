@@ -18,6 +18,7 @@ import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -42,7 +43,6 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     this.locationEngine = locationEngine;
     this.mapboxNavigator = mapboxNavigator;
     this.executorService = executorService;
-    onFreeDrive();
   }
 
   @Override
@@ -54,7 +54,7 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   public void requestLocationUpdates(@NonNull LocationEngineRequest request,
                                      @NonNull final LocationEngineCallback<LocationEngineResult> callback,
                                      @Nullable Looper looper) throws SecurityException {
-    locationEngine.requestLocationUpdates(request, callback, null);
+    locationEngine.requestLocationUpdates(request, callback, looper);
   }
 
   @Override
@@ -75,8 +75,10 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
 
   void onActiveGuidance() {
     removeLocationUpdates(callback);
-    future.cancel(false);
-    future = null;
+    if (future != null) {
+      future.cancel(false);
+      future = null;
+    }
   }
 
   void onFreeDrive() {
@@ -103,19 +105,20 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
       removeLocationUpdates(callback);
       future.cancel(false);
       future = null;
+      executorService.shutdown();
     }
   }
 
-  // TODO Do we want to call configure as part of EnhancedLocationEngineDecorator construction?
-  void configure(@NonNull File path, @NonNull String version) {
+  void configure(@NonNull File path, @NonNull String version, @NonNull String host,
+                 @NonNull String accessToken) {
     OfflineNavigator offlineNavigator =
-      new OfflineNavigator(mapboxNavigator.getNavigator());
+      new OfflineNavigator(mapboxNavigator.getNavigator(), version, host, accessToken);
     String tilePath = new File(path, version).getAbsolutePath();
     offlineNavigator.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
       @Override
       public void onConfigured(int numberOfTiles) {
         Timber.d("DEBUG: onConfigured %d", numberOfTiles);
-        locationEngine.requestLocationUpdates(obtainLocationEngineRequest(), callback, null);
+        onFreeDrive();
       }
 
       @Override
@@ -165,16 +168,19 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   }
 
   private static final class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
-    private final EnhancedLocationEngineDecorator locationEngine;
+    private final WeakReference<EnhancedLocationEngineDecorator> locationEngine;
 
     CurrentLocationEngineCallback(@NonNull EnhancedLocationEngineDecorator locationEngine) {
-      this.locationEngine = locationEngine;
+      this.locationEngine = new WeakReference<>(locationEngine);
     }
 
     @Override
     public void onSuccess(LocationEngineResult result) {
-      Location location = result.getLastLocation();
-      locationEngine.onLocationChanged(location);
+      EnhancedLocationEngineDecorator enhancedLocationEngine = locationEngine.get();
+      if (enhancedLocationEngine != null) {
+        Location location = result.getLastLocation();
+        enhancedLocationEngine.onLocationChanged(location);
+      }
     }
 
     @Override
