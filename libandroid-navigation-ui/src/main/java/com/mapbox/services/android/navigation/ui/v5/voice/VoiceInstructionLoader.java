@@ -87,7 +87,6 @@ public class VoiceInstructionLoader {
     if (mapboxSpeechBuilder == null) {
       mapboxSpeechBuilder = MapboxSpeech.builder()
         .accessToken(accessToken)
-        .interceptor(new SkuInterceptor(context))
         .language(language)
         .cache(cache)
         .interceptor(provideOfflineCacheInterceptor());
@@ -98,6 +97,7 @@ public class VoiceInstructionLoader {
     if (!cache.isClosed() && mapboxSpeechBuilder != null) {
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .instruction(instruction)
+        .interceptor(new SkuInterceptor(context))
         .textType(textType)
         .build();
       mapboxSpeech.enqueueCall(callback);

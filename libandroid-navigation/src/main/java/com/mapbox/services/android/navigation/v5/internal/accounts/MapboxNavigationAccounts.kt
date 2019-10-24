@@ -40,4 +40,8 @@ class MapboxNavigationAccounts private constructor() {
     fun navigationStopped() {
         skuGenerator.onNavigationEnd()
     }
+
+    fun navigationStarted() {
+        skuGenerator.onNavigationStart()
+    }
 }

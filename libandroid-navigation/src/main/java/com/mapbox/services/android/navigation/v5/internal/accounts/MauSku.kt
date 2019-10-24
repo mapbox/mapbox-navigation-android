@@ -23,6 +23,10 @@ internal class MauSku(
         return retrieveMauSkuToken()
     }
 
+    override fun onNavigationStart() {
+
+    }
+
     override fun onNavigationEnd() {
         setTimerExpiry(DEFAULT_TOKEN_TIMER)
     }

@@ -6,6 +6,10 @@ internal class DisabledSku : SkuGenerator {
         return ""
     }
 
+    override fun onNavigationStart() {
+
+    }
+
     override fun onNavigationEnd() {
     }
 }

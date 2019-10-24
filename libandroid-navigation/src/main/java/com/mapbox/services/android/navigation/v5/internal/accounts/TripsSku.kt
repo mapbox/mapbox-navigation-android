@@ -24,31 +24,46 @@ internal class TripsSku(
         private const val DEFAULT_TRIP_TOKEN_TIMER = 0L
     }
 
+    private var isNavigating = false
+
     override fun generateToken(): String {
         refreshSkuToken()
         return retrieveTripsSkuToken()
     }
 
+    override fun onNavigationStart() {
+        this.isNavigating = true
+        setRouteRequestCount(DEFAULT_TRIP_REQUEST_COUNT)
+    }
+
     override fun onNavigationEnd() {
-        setRouteRequestCountThreshold(DEFAULT_TRIP_REQUEST_COUNT)
+        this.isNavigating = false
         setTimerExpiry(DEFAULT_TRIP_TOKEN_TIMER)
     }
 
     private fun refreshSkuToken() {
-        var requestCount: Int
-        when (validateRotation()) {
-            RotateTripsType.ROTATE_ON_TIMER_EXPIRE,
-            RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE -> {
-                requestCount = 1
-                setTimerExpiry(getNow())
-                persistTripsSkuToken()
+        when(isNavigating) {
+            true -> {
+                if(validateTimerExpiry()) {
+                    setTimerExpiry(getNow())
+                    persistTripsSkuToken()
+                }
             }
-            else -> {
-                requestCount = getRouteRequestCountThreshold()
-                requestCount++
+            false -> {
+                var requestCount: Int
+                val rotateTripsType = validateRotation()
+                if (rotateTripsType == RotateTripsType.ROTATE_ON_TIMER_EXPIRE
+                        || rotateTripsType == RotateTripsType.ROTATE_ON_REQUEST_COUNT_EXPIRE) {
+                    requestCount = 1
+                    setTimerExpiry(getNow())
+                    persistTripsSkuToken()
+                } else {
+                    requestCount = getRouteRequestCountThreshold()
+                    requestCount++
+                }
+                setRouteRequestCount(requestCount)
             }
         }
-        setRouteRequestCountThreshold(requestCount)
     }
 
     private fun validateRotation(): RotateTripsType {
@@ -71,7 +86,7 @@ internal class TripsSku(
         return routeRequestCount > routeRequestThreshold
     }
 
-    private fun setRouteRequestCountThreshold(count: Int) {
+    private fun setRouteRequestCount(count: Int) {
         preferences.edit().putInt(MAPBOX_NAV_PREFERENCE_ROUTE_REQ_COUNT, count).apply()
     }
 

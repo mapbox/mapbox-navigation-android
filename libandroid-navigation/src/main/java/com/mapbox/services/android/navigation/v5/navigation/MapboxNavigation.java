@@ -392,6 +392,8 @@ public class MapboxNavigation implements ServiceConnection {
    * @see MapboxNavigation#startNavigation(DirectionsRoute)
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute, @NonNull DirectionsRouteType routeType) {
+
+    MapboxNavigationAccounts.getInstance(applicationContext).navigationStarted();
     startNavigationWith(directionsRoute, routeType);
   }
 
