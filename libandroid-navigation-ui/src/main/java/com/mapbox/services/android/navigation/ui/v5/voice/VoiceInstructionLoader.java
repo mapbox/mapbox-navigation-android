@@ -95,9 +95,10 @@ public class VoiceInstructionLoader {
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
     if (!cache.isClosed() && mapboxSpeechBuilder != null) {
-      MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
+      mapboxSpeechBuilder
         .instruction(instruction)
-        .interceptor(new SkuInterceptor(context))
+        .interceptor(new SkuInterceptor(context));
+      MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .textType(textType)
         .build();
       mapboxSpeech.enqueueCall(callback);
