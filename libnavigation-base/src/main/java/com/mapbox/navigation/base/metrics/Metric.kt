@@ -1,6 +1,8 @@
-package com.mapbox.navigation.metrics
+package com.mapbox.navigation.base.metrics
 
 import androidx.annotation.StringDef
+import com.mapbox.navigation.base.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @StringDef(
     DirectionsMetrics.ROUTE_RETRIEVAL,

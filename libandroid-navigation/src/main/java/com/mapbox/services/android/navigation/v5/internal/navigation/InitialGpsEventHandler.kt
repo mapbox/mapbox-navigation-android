@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.metrics.NavigationMetrics
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 internal class InitialGpsEventHandler(
     private val metricsReporter: MetricsReporter

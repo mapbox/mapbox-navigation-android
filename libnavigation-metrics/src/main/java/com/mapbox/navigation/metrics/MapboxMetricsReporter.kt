@@ -4,6 +4,8 @@ import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.navigation.base.metrics.Metric
+import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 

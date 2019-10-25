@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
-import com.mapbox.navigation.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.metrics.DirectionsMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationPerformanceEvent
 
 @SuppressLint("ParcelCreator")

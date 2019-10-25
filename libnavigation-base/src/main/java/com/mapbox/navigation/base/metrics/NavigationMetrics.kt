@@ -1,4 +1,4 @@
-package com.mapbox.navigation.metrics
+package com.mapbox.navigation.base.metrics
 
 interface NavigationMetrics {
 

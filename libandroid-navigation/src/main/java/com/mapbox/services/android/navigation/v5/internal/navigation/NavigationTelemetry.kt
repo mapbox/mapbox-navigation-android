@@ -11,9 +11,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.metrics.DirectionsMetrics
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.navigation.metrics.NavigationMetrics
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException

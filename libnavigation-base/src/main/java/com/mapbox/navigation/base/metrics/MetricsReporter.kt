@@ -1,8 +1,6 @@
 package com.mapbox.navigation.base.metrics
 
 import com.mapbox.android.telemetry.Event
-import com.mapbox.navigation.metrics.Metric
-import com.mapbox.navigation.metrics.MetricsObserver
 
 interface MetricsReporter {
 
