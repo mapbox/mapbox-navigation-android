@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.route.NavigationRouteEventListener
+import com.mapbox.navigation.utils.time.ElapsedTime
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

@@ -17,6 +17,9 @@ android {
 dependencies {
     implementation project(':libnavigation-util')
 
+    // Support
+    implementation dependenciesList.supportAppcompatV7
+
     api(project(':libnavigation-base'))
 
     implementation dependenciesList.kotlinStdLib
