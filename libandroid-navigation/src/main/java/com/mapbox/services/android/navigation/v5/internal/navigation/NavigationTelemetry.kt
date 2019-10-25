@@ -9,6 +9,7 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
@@ -21,7 +22,6 @@ import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 import java.util.Date
 import java.util.Locale

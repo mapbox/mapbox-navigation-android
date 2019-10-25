@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
@@ -12,19 +13,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-consumer.pro'
     }
+
 }
 
 dependencies {
-    api(project(':libnavigation-base'))
-
-    // Navigator
-    api dependenciesList.mapboxNavigator
-
-    // mapbox-java GeoJSON
-    api dependenciesList.mapboxSdkGeoJSON
+    implementation dependenciesList.kotlinStdLib
 
     //ktlint
     ktlint dependenciesList.ktlint
-
-    implementation dependenciesList.kotlinStdLib
 }

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.logger
 
+import com.mapbox.navigation.base.logger.Logger
 import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
