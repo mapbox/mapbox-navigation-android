@@ -25,7 +25,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+          keys:
+            - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+            - jars-
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
@@ -148,7 +150,9 @@ jobs:
           path: app/build/reports
           destination: reports
       - restore_cache: # special step to restore the dependency cache
-          key: dependency-cache-{{ checksum "package.json" }}
+          keys:
+            - dependency-cache-{{ checksum "package.json" }}
+            - dependency-cache-
       - run:
           name: Setup Environment
           command: npm install
@@ -173,7 +177,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+          keys:
+            - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+            - jars-
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies

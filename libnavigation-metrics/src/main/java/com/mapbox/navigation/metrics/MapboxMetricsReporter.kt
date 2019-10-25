@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.InitialGpsEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRetrievalEvent
 import com.mapbox.services.android.navigation.v5.utils.extensions.fromJson

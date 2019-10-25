@@ -15,8 +15,9 @@ android {
 }
 
 dependencies {
+    implementation project(':libnavigation-util')
 
-    api(project(':linavigation-base'))
+    api(project(':libnavigation-base'))
 
     //ktlint
     ktlint dependenciesList.ktlint

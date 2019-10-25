@@ -15,7 +15,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.metrics.MetricsReporter;
+import com.mapbox.navigation.base.metrics.MetricsReporter;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;

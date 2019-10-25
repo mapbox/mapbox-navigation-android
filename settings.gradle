@@ -1,9 +1,13 @@
 include ':app',
         ':libandroid-navigation',
         ':libnavigator',
-        ':linavigation-base',
+        ':libnavigation-base',
         ':libdirections-onboard',
         ':libdirections-offboard',
         ':libdirections-hybrid',
-        ':libnavigation-metrics'
+        ':libnavigation-metrics',
+        ':libtrip-service',
+        ':libtrip-notification',
+        ':liblogger',
+        ':libnavigation-util'
 include ':libandroid-navigation-ui'

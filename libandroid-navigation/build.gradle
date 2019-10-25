@@ -55,8 +55,10 @@ android {
 }
 
 dependencies {
-  api project(':linavigation-base')
+  api project(':libnavigation-base')
   api project(':libnavigation-metrics')
+  implementation project(':libnavigator')
+  implementation project(':libnavigation-util')
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore

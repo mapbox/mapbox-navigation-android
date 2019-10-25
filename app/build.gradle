@@ -84,6 +84,8 @@ android {
 }
 
 dependencies {
+  implementation project(':libnavigation-util')
+
   //ktlint
   ktlint dependenciesList.ktlint
 

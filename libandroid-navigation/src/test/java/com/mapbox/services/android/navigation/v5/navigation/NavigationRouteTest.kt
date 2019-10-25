@@ -7,10 +7,10 @@ import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.BaseTest
 import com.mapbox.services.android.navigation.v5.testsupport.Extensions
 import com.mapbox.services.android.navigation.v5.testsupport.mockkStaticSupport
-import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
