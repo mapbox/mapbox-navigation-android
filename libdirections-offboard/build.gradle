@@ -23,10 +23,12 @@ dependencies {
 
     api(project(':libnavigation-base'))
 
+    implementation dependenciesList.kotlinStdLib
+
     //ktlint
     ktlint dependenciesList.ktlint
 
-    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.mapboxSdkServices
 
     testImplementation dependenciesList.junit
 }

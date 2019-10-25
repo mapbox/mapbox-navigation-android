@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.route.NavigationRouteWaypoint
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener
@@ -178,7 +179,8 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.origin = NavigationRouteWaypoint(origin, angle, tolerance)
+            this.origin =
+                NavigationRouteWaypoint(origin, angle, tolerance)
             return this
         }
 
@@ -192,7 +194,8 @@ internal constructor(
          * @since 0.50
          */
         fun destination(destination: Point): Builder {
-            this.destination = NavigationRouteWaypoint(destination, null, null)
+            this.destination =
+                NavigationRouteWaypoint(destination, null, null)
             return this
         }
 
@@ -214,7 +217,8 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.destination = NavigationRouteWaypoint(destination, angle, tolerance)
+            this.destination =
+                NavigationRouteWaypoint(destination, angle, tolerance)
             return this
         }
 
@@ -231,7 +235,13 @@ internal constructor(
          * @since 0.5.0
          */
         fun addWaypoint(waypoint: Point): Builder {
-            this.waypoints.add(NavigationRouteWaypoint(waypoint, null, null))
+            this.waypoints.add(
+                NavigationRouteWaypoint(
+                    waypoint,
+                    null,
+                    null
+                )
+            )
             return this
         }
 
@@ -262,7 +272,13 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.waypoints.add(NavigationRouteWaypoint(waypoint, angle, tolerance))
+            this.waypoints.add(
+                NavigationRouteWaypoint(
+                    waypoint,
+                    angle,
+                    tolerance
+                )
+            )
             return this
         }
 

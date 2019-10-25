@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
-import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException;
+import com.mapbox.navigation.exception.NavigationException;
 
 import org.junit.Test;
 
