@@ -27,7 +27,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
-import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.navigation.base.route.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime
 import java.util.Calendar
 
