@@ -12,7 +12,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.BuildConfig
-import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
+import com.mapbox.navigation.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationAppUserTurnstileEvent
