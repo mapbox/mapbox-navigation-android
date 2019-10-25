@@ -7,7 +7,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
+import com.mapbox.navigation.route.offboard.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import io.mockk.every
@@ -26,7 +26,7 @@ class RouteFetcherTest {
     @Test
     fun cancelRouteCall_cancelsWithNonNullNavigationRoute() {
         val context = mockk<Context>(relaxed = true)
-        val navigationRoute = mockk<NavigationRoute>(relaxed = true)
+        val navigationRoute = mockk<com.mapbox.navigation.route.offboard.NavigationRoute>(relaxed = true)
         val routeUtils = mockk<RouteUtils>(relaxed = true)
         val routeFetcher = RouteFetcher(context, "pk.xx", routeUtils, navigationRoute)
 
@@ -53,8 +53,8 @@ class RouteFetcherTest {
     @Test
     fun findRouteWith_callNavigationRoute() {
         val context = mockk<Context>(relaxed = true)
-        val navigationRoute = mockk<NavigationRoute>(relaxed = true)
-        val builder = mockk<NavigationRoute.Builder>(relaxed = true)
+        val navigationRoute = mockk<com.mapbox.navigation.route.offboard.NavigationRoute>(relaxed = true)
+        val builder = mockk<com.mapbox.navigation.route.offboard.NavigationRoute.Builder>(relaxed = true)
         every { builder.build() } returns navigationRoute
         val routeUtils = mockk<RouteUtils>(relaxed = true)
         val routeFetcher = RouteFetcher(context, "pk.xx", routeUtils, navigationRoute)

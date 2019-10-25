@@ -251,7 +251,7 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>(relaxed = true)
         every { routeCall.isExecuted } returns false
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute = com.mapbox.navigation.route.offboard.NavigationRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 
@@ -264,7 +264,7 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>()
         every { routeCall.isExecuted } returns true
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute = com.mapbox.navigation.route.offboard.NavigationRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 
@@ -274,7 +274,7 @@ class NavigationRouteTest {
     @Test
     fun builderInterceptor_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = com.mapbox.navigation.route.offboard.NavigationRoute.Builder(mapboxDirectionsBuilder)
         val eventListener = mockk<EventListener>(relaxed = true)
 
         builder.eventListener(eventListener)
@@ -285,7 +285,7 @@ class NavigationRouteTest {
     @Test
     fun builderEventListener_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = com.mapbox.navigation.route.offboard.NavigationRoute.Builder(mapboxDirectionsBuilder)
         val interceptor = mockk<Interceptor>(relaxed = true)
 
         builder.interceptor(interceptor)
@@ -296,7 +296,7 @@ class NavigationRouteTest {
     @Test
     fun builderContinueStraight_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = com.mapbox.navigation.route.offboard.NavigationRoute.Builder(mapboxDirectionsBuilder)
         val continueStraight = false
         val routeOptions =
             RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
