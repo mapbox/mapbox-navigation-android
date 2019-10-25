@@ -9,7 +9,7 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
+import com.mapbox.navigation.route.offboard.NavigationRoute
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
@@ -81,7 +81,7 @@ class OfflineRouteFinder(
     private fun buildOfflineRoute(location: Location, destination: Point): OfflineRoute {
         val origin = Point.fromLngLat(location.longitude, location.latitude)
         val bearing = location.bearing.toDouble()
-        return NavigationRoute.builder(NavigationApplication.instance)
+        return com.mapbox.navigation.route.offboard.NavigationRoute.builder(NavigationApplication.instance)
             .origin(origin, bearing, BEARING_TOLERANCE)
             .destination(destination)
             .accessToken(Mapbox.getAccessToken()!!)

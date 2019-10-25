@@ -111,10 +111,10 @@ class OfflineRouteTest {
         assertTrue(offlineUrlDecoded.contains("break;through;;break"))
     }
 
-    private fun provideOnlineRouteBuilder(): NavigationRoute.Builder {
+    private fun provideOnlineRouteBuilder(): com.mapbox.navigation.route.offboard.NavigationRoute.Builder {
         val context = mockk<Context>()
         every { context.inferDeviceLocale() } returns Locale.US
-        return NavigationRoute.builder(context)
+        return com.mapbox.navigation.route.offboard.NavigationRoute.builder(context)
             .accessToken("pk.XXX")
             .origin(Point.fromLngLat(1.0, 2.0))
             .addWaypoint(Point.fromLngLat(3.0, 2.0))
