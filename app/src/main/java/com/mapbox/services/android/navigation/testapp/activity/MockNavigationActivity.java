@@ -38,6 +38,7 @@ import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
+import com.mapbox.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -129,7 +130,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .build();
 
     //  TODO: For metrics hook test
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options, this);
+    MapboxMetricsReporter metricsReporter = MapboxMetricsReporter.INSTANCE;
+    metricsReporter.setMetricsObserver(this);
+    navigation = new MapboxNavigation(
+            this,
+            Mapbox.getAccessToken(),
+            options,
+            metricsReporter
+    );
+
+    navigation = new MapboxNavigation(
+            this,
+            Mapbox.getAccessToken(),
+            options
+    );
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -364,26 +378,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     isRefreshing = false;
   }
 
-  //    TODO: For metrics hook test
   @Override
-  public void onStringMetricUpdated(@NotNull String eventName, @NotNull String stringData) {
-    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
-    Timber.e("METRICS_LOG");
-    Timber.e(stringData);
-  }
-
-  //    TODO: For metrics hook test
-  @Override
-  public void onBundleMetricUpdated(@NotNull String eventName, @NotNull Bundle bundleData) {
-    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
-    Timber.e("METRICS_LOG");
-    Timber.e(bundleData.toString());
-  }
-
-  //    TODO: For metrics hook test
-  @Override
-  public void onJsonStringMetricUpdated(@NotNull String eventName, @NotNull String jsonStringData) {
-    Toast.makeText(this, "Metric " + eventName + " sent", Toast.LENGTH_SHORT).show();
+  public void onMetricUpdated(@NotNull String metric, @NotNull String jsonStringData) {
+    Toast.makeText(this, "Metric " + metric + " sent", Toast.LENGTH_SHORT).show();
     Timber.e("METRICS_LOG");
     Timber.e(jsonStringData);
   }

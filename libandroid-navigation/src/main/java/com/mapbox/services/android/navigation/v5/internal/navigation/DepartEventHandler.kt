@@ -2,8 +2,9 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.content.Context
 import com.google.gson.Gson
+import com.mapbox.navigation.metrics.MetricsReporter
+import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState
@@ -12,7 +13,8 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogre
 internal class DepartEventHandler(
     private val applicationContext: Context,
     private val gson: Gson,
-    private val sdkIdentifier: String
+    private val sdkIdentifier: String,
+    private val metricsReporter: MetricsReporter
 ) {
 
     fun send(
@@ -27,6 +29,6 @@ internal class DepartEventHandler(
             location.location,
             sdkIdentifier
         )
-        MapboxMetricsReporter.departEvent(event.getEventName(), gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.DEPART, gson.toJson(event))
     }
 }

@@ -10,12 +10,14 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.Gson;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.metrics.MetricsObserver;
+import com.mapbox.navigation.metrics.MetricsReporter;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
@@ -23,6 +25,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationS
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
+import com.mapbox.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -76,7 +79,8 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
-  private MetricsObserver metricsObserver;
+  private Gson gson;
+  private MetricsReporter metricsReporter;
 
   static {
     NavigationLibraryLoader.Companion.load();
@@ -141,16 +145,16 @@ public class MapboxNavigation implements ServiceConnection {
    * @param context     required in order to create and bind the navigation service
    * @param options     a custom built {@code MapboxNavigationOptions} class
    * @param accessToken a valid Mapbox access token
-   * @param metricsObserver a MetricsObserver to observe metrics sent
+   * @param metricsReporter a MetricsReporter to handle metric events
    * @see MapboxNavigationOptions
    * @since 1.0.0
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
-                          @NonNull MapboxNavigationOptions options, @NonNull MetricsObserver metricsObserver) {
+                          @NonNull MapboxNavigationOptions options, @NonNull MetricsReporter metricsReporter) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;
-    this.metricsObserver = metricsObserver;
+    this.metricsReporter = metricsReporter;
     initialize();
   }
 
@@ -186,18 +190,18 @@ public class MapboxNavigation implements ServiceConnection {
    * @param accessToken    a valid Mapbox access token
    * @param options        a custom built {@code MapboxNavigationOptions} class
    * @param locationEngine a LocationEngine to provide Location updates
-   * @param metricsObserver a MetricsObserver to observe metrics sent
+   * @param metricsReporter a MetricsReporter to handle metric events
    * @see MapboxNavigationOptions
    * @since 1.0.0
    */
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
                           @NonNull MapboxNavigationOptions options, @NonNull LocationEngine locationEngine,
-                          @NonNull MetricsObserver metricsObserver) {
+                          @NonNull MetricsReporter metricsReporter) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;
     this.locationEngine = locationEngine;
-    this.metricsObserver = metricsObserver;
+    this.metricsReporter = metricsReporter;
     initialize();
   }
 
@@ -442,6 +446,9 @@ public class MapboxNavigation implements ServiceConnection {
       applicationContext.unbindService(this);
       isBound = false;
       navigationService.endNavigation();
+      if (metricsReporter instanceof MapboxMetricsReporter) {
+        ((MapboxMetricsReporter) metricsReporter).disable();
+      }
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
     }
@@ -974,8 +981,24 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void initializeTelemetry() {
+    gson = new Gson();
     navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this, metricsObserver);
+    if (metricsReporter == null) {
+      metricsReporter = MapboxMetricsReporter.INSTANCE;
+      ((MapboxMetricsReporter) metricsReporter).init(
+              applicationContext,
+              accessToken,
+              BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
+              gson
+      );
+    }
+    navigationTelemetry.initialize(
+            applicationContext,
+            accessToken,
+            this,
+            gson,
+            metricsReporter
+    );
   }
 
   private NavigationTelemetry obtainTelemetry() {

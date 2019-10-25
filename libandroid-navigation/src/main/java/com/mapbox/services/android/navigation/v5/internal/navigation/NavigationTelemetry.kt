@@ -12,13 +12,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.metrics.DirectionsMetrics
-import com.mapbox.navigation.metrics.MetricsObserver
+import com.mapbox.navigation.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
@@ -64,36 +64,32 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private var routeRetrievalUuid: String = "" // empty string is treated as error
 
     private var sdkIdentifier: String? = null
-    private val gson = Gson()
+    private var gson = Gson()
+    private var metricsReporter: MetricsReporter = MapboxMetricsReporter
 
+    @JvmOverloads
     fun initialize(
         context: Context,
         accessToken: String,
         navigation: MapboxNavigation,
-        metricsObserver: MetricsObserver?
+        gson: Gson = Gson(),
+        metricsReporter: MetricsReporter = MapboxMetricsReporter
     ) {
-        MapboxMetricsReporter.setMetricsObserver(metricsObserver)
+        this.gson = gson
+        this.metricsReporter = metricsReporter
         if (!isInitialized) {
             validateAccessToken(accessToken)
             val options = navigation.options()
             val sdkIdentifier = obtainSdkIdentifier(options)
             this.sdkIdentifier = sdkIdentifier
 
-            MapboxMetricsReporter.init(
-                context,
-                accessToken,
-                BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
-                gson
-            )
-
-            val departEventHandler = DepartEventHandler(context, gson, sdkIdentifier)
+            val departEventHandler = DepartEventHandler(context, gson, sdkIdentifier, metricsReporter)
             this.departEventFactory = DepartEventFactory(departEventHandler)
-            this.gpsEventFactory = InitialGpsEventFactory(gson)
+            this.gpsEventFactory = InitialGpsEventFactory(gson, metricsReporter)
             this.context = context
 
-            MapboxMetricsReporter.toggleLogging(options.isDebugLoggingEnabled)
             val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
-            MapboxMetricsReporter.sendTurnstileEvent(NavigationMetrics.APP_USER_TURNSTILE, gson.toJson(turnstileEvent))
+            metricsReporter.addEvent(NavigationMetrics.APP_USER_TURNSTILE, gson.toJson(turnstileEvent))
             isInitialized = true
         }
         this.eventDispatcher = navigation.eventDispatcher
@@ -133,7 +129,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             metricLocation.location,
             sdkIdentifier ?: ""
         )
-        MapboxMetricsReporter.arriveEvent(event.getEventName(), gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.ARRIVE, gson.toJson(event))
     }
 
     /**
@@ -291,7 +287,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
     fun endSession() {
         flushEventQueues()
         lifecycleMonitor = null
-        MapboxMetricsReporter.disable()
         isInitialized = false
     }
 
@@ -306,10 +301,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 navigationSessionState.sessionIdentifier,
                 MetadataBuilder.getMetadata(context)
             )
-            MapboxMetricsReporter.routeRetrievalEvent(
-                DirectionsMetrics.ROUTE_RETRIEVAL,
-                gson.toJson(event)
-            )
+            metricsReporter.addEvent(DirectionsMetrics.ROUTE_RETRIEVAL, gson.toJson(event))
         } else {
             routeRetrievalElapsedTime = elapsedTime
             routeRetrievalUuid = routeUuid
@@ -349,7 +341,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 metricLocation.location,
                 sdkIdentifier ?: ""
             )
-            MapboxMetricsReporter.cancelEvent(event.getEventName(), gson.toJson(event))
+            metricsReporter.addEvent(NavigationMetrics.CANCEL_SESSION, gson.toJson(event))
         }
     }
 
@@ -483,7 +475,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             sdkIdentifier ?: "",
             rerouteEvent
         )
-        MapboxMetricsReporter.rerouteEvent(event.getEventName(), gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.REROUTE, gson.toJson(event))
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
@@ -505,7 +497,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             feedbackEvent.screenshot ?: "",
             feedbackEvent.feedbackSource
         )
-        MapboxMetricsReporter.feedbackEvent(event.getEventName(), gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.FEEDBACK, gson.toJson(event))
     }
 
     private fun dateDiff(

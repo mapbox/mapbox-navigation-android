@@ -1,11 +1,13 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.google.gson.Gson
+import com.mapbox.navigation.metrics.MetricsReporter
 
 internal class InitialGpsEventFactory @JvmOverloads constructor(
     private val gson: Gson,
+    metricsReporter: MetricsReporter,
     private var time: ElapsedTime = ElapsedTime(),
-    private val handler: InitialGpsEventHandler = InitialGpsEventHandler()
+    private val handler: InitialGpsEventHandler = InitialGpsEventHandler(metricsReporter)
 ) {
 
     private var sessionId = ""
