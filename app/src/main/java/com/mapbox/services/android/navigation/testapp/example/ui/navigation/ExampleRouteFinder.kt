@@ -4,7 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
+import com.mapbox.navigation.route.offboard.NavigationRoute
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,7 +36,7 @@ class ExampleRouteFinder(
     private fun find(location: Location, destination: Point) {
         val origin = Point.fromLngLat(location.longitude, location.latitude)
         val bearing = location.bearing.toDouble()
-        NavigationRoute.builder(NavigationApplication.instance)
+        com.mapbox.navigation.route.offboard.NavigationRoute.builder(NavigationApplication.instance)
             .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
             .profile(profile)

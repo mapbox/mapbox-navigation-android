@@ -13,7 +13,7 @@ import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.R
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
-import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.navigation.base.route.extensions.getUnitTypeForLocale
 import com.mapbox.turf.TurfConstants.UNIT_FEET
 import com.mapbox.turf.TurfConstants.UNIT_KILOMETERS
 import com.mapbox.turf.TurfConstants.UNIT_METERS

@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
 import com.mapbox.navigation.exception.NavigationException;
+import com.mapbox.navigation.utils.time.ElapsedTime;
 
 import org.junit.Test;
 
