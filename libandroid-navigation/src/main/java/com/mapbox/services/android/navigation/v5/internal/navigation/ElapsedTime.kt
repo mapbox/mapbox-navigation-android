@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
-import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
-import com.mapbox.services.android.navigation.v5.internal.utils.Time
+import com.mapbox.navigation.exception.NavigationException
+import com.mapbox.navigation.util.Time
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import kotlin.math.roundToLong
 
 class ElapsedTime(
