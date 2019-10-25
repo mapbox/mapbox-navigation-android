@@ -2,19 +2,15 @@ package com.mapbox.navigation.metrics
 
 import android.content.Context
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.services.android.navigation.v5.internal.navigation.InitialGpsEvent
-import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRetrievalEvent
-import com.mapbox.services.android.navigation.v5.utils.extensions.fromJson
-import com.mapbox.services.android.navigation.v5.utils.thread.WorkThreadHandler
+import com.mapbox.navigation.utils.thread.WorkThreadHandler
 
 object MapboxMetricsReporter : MetricsReporter {
 
-    private lateinit var gson: Gson
-    private var mapboxTelemetry: MapboxTelemetry? = null
+    private val gson = Gson()
+    private lateinit var mapboxTelemetry: MapboxTelemetry
     @Volatile
     private var metricsObserver: MetricsObserver? = null
     private val threadWorker = WorkThreadHandler("MapboxMetricsReporter")
@@ -22,40 +18,25 @@ object MapboxMetricsReporter : MetricsReporter {
     fun init(
         context: Context,
         accessToken: String,
-        userAgent: String,
-        gson: Gson
+        userAgent: String
     ) {
         mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
-        mapboxTelemetry?.enable()
-        MapboxMetricsReporter.gson = gson
+        mapboxTelemetry.enable()
     }
 
     fun disable() {
-        mapboxTelemetry?.disable()
+        mapboxTelemetry.disable()
     }
 
     override fun addEvent(@Metric metric: String, event: Event) {
-        when (metric) {
-            NavigationMetrics.ARRIVE -> gson.fromJson<NavigationArriveEvent>(eventJsonString)
-            NavigationMetrics.CANCEL_SESSION -> gson.fromJson<NavigationCancelEvent>(eventJsonString)
-            NavigationMetrics.DEPART -> gson.fromJson<NavigationDepartEvent>(eventJsonString)
-            NavigationMetrics.REROUTE -> gson.fromJson<NavigationRerouteEvent>(eventJsonString)
-            NavigationMetrics.FEEDBACK -> gson.fromJson<NavigationFeedbackEvent>(eventJsonString)
-            NavigationMetrics.INITIAL_GPS -> gson.fromJson<InitialGpsEvent>(eventJsonString)
-            NavigationMetrics.APP_USER_TURNSTILE -> gson.fromJson<AppUserTurnstile>(eventJsonString)
-            NavigationMetrics.PERFORMANCE -> gson.fromJson<NavigationPerformanceEvent>(eventJsonString)
-            DirectionsMetrics.ROUTE_RETRIEVAL -> gson.fromJson<RouteRetrievalEvent>(eventJsonString)
-            else -> null
-        }?.let {
-            mapboxTelemetry?.push(it)
+        mapboxTelemetry.push(event)
 
-            threadWorker.post {
-                metricsObserver?.onMetricUpdated(metric, eventJsonString)
-            }
+        threadWorker.post {
+            metricsObserver?.onMetricUpdated(metric, gson.toJson(event))
         }
     }
 
     override fun setMetricsObserver(metricsObserver: MetricsObserver) {
-        MapboxMetricsReporter.metricsObserver = metricsObserver
+        this.metricsObserver = metricsObserver
     }
 }

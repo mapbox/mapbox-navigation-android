@@ -1,8 +1,8 @@
-package com.mapbox.services.android.navigation.v5.utils.thread
+package com.mapbox.navigation.utils.thread
 
 import android.os.Handler
 import android.os.HandlerThread
-import com.mapbox.services.android.navigation.v5.utils.extensions.quitSafelySupport
+import com.mapbox.navigation.utils.extensions.quitSafelySupport
 import timber.log.Timber
 
 class WorkThreadHandler(
@@ -16,18 +16,26 @@ class WorkThreadHandler(
 
     override fun post(task: () -> Unit) {
         if (!isStarted) {
-            Timber.d("The thread was not started")
-            return
+            start()
+            // Timber.d("The thread was not started")
+            // return
         }
-        handler.post { task.invoke() }
+        handler.post {
+            task.invoke()
+            stop()
+        }
     }
 
     override fun postDelayed(task: () -> Unit, delayMillis: Long) {
         if (!isStarted) {
-            Timber.d("The thread was not started")
-            return
+            start()
+            // Timber.d("The thread was not started")
+            // return
         }
-        handler.postDelayed({ task.invoke() }, delayMillis)
+        handler.postDelayed({
+            task.invoke()
+            stop()
+        }, delayMillis)
     }
 
     override fun start() {
@@ -39,7 +47,7 @@ class WorkThreadHandler(
 
     override fun stop() {
         isStarted = false
-        handler.removeCallbacksAndMessages(null)
+        removeAllTasks()
 
         handlerThread.quitSafelySupport()
         try {

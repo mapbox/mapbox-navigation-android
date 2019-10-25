@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.content.Context
-import com.google.gson.Gson
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
@@ -12,7 +11,6 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogre
 
 internal class DepartEventHandler(
     private val applicationContext: Context,
-    private val gson: Gson,
     private val sdkIdentifier: String,
     private val metricsReporter: MetricsReporter
 ) {
@@ -29,6 +27,6 @@ internal class DepartEventHandler(
             location.location,
             sdkIdentifier
         )
-        metricsReporter.addEvent(NavigationMetrics.DEPART, gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.DEPART, event)
     }
 }

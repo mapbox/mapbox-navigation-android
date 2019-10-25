@@ -139,12 +139,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
             metricsReporter
     );
 
-    navigation = new MapboxNavigation(
-            this,
-            Mapbox.getAccessToken(),
-            options
-    );
-
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
       .setInstruction(new BeginRouteInstruction())
@@ -380,9 +374,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMetricUpdated(@NotNull String metric, @NotNull String jsonStringData) {
-    Toast.makeText(this, "Metric " + metric + " sent", Toast.LENGTH_SHORT).show();
-    Timber.e("METRICS_LOG");
-    Timber.e(jsonStringData);
+    Timber.d("METRICS_LOG: %s", metric);
+    Timber.d(jsonStringData);
   }
 
   private static class BeginRouteInstruction extends Instruction {

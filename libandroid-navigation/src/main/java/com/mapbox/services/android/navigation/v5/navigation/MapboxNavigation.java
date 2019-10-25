@@ -79,7 +79,6 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
-  private Gson gson;
   private MetricsReporter metricsReporter;
 
   static {
@@ -981,22 +980,19 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void initializeTelemetry() {
-    gson = new Gson();
     navigationTelemetry = obtainTelemetry();
     if (metricsReporter == null) {
       metricsReporter = MapboxMetricsReporter.INSTANCE;
       ((MapboxMetricsReporter) metricsReporter).init(
               applicationContext,
               accessToken,
-              BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
-              gson
+              BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
       );
     }
     navigationTelemetry.initialize(
             applicationContext,
             accessToken,
             this,
-            gson,
             metricsReporter
     );
   }

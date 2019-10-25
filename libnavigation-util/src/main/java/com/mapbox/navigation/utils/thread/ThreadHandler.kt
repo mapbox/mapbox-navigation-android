@@ -1,6 +1,5 @@
-package com.mapbox.services.android.navigation.v5.utils.thread
+package com.mapbox.navigation.utils.thread
 
-// TODO move to common util module
 interface ThreadHandler {
 
     val isStarted: Boolean

@@ -4,22 +4,21 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.location.Location
-import com.google.gson.Gson
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.metrics.DirectionsMetrics
 import com.mapbox.navigation.base.metrics.MetricsReporter
+import com.mapbox.navigation.metrics.DirectionsMetrics
+import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.NavigationMetrics
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
-import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
@@ -64,7 +63,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private var routeRetrievalUuid: String = "" // empty string is treated as error
 
     private var sdkIdentifier: String? = null
-    private var gson = Gson()
     private var metricsReporter: MetricsReporter = MapboxMetricsReporter
 
     @JvmOverloads
@@ -72,10 +70,8 @@ internal object NavigationTelemetry : NavigationMetricListener {
         context: Context,
         accessToken: String,
         navigation: MapboxNavigation,
-        gson: Gson = Gson(),
         metricsReporter: MetricsReporter = MapboxMetricsReporter
     ) {
-        this.gson = gson
         this.metricsReporter = metricsReporter
         if (!isInitialized) {
             validateAccessToken(accessToken)
@@ -83,13 +79,13 @@ internal object NavigationTelemetry : NavigationMetricListener {
             val sdkIdentifier = obtainSdkIdentifier(options)
             this.sdkIdentifier = sdkIdentifier
 
-            val departEventHandler = DepartEventHandler(context, gson, sdkIdentifier, metricsReporter)
+            val departEventHandler = DepartEventHandler(context, sdkIdentifier, metricsReporter)
             this.departEventFactory = DepartEventFactory(departEventHandler)
-            this.gpsEventFactory = InitialGpsEventFactory(gson, metricsReporter)
+            this.gpsEventFactory = InitialGpsEventFactory(metricsReporter)
             this.context = context
 
             val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
-            metricsReporter.addEvent(NavigationMetrics.APP_USER_TURNSTILE, gson.toJson(turnstileEvent))
+            metricsReporter.addEvent(NavigationMetrics.APP_USER_TURNSTILE, turnstileEvent)
             isInitialized = true
         }
         this.eventDispatcher = navigation.eventDispatcher
@@ -129,7 +125,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             metricLocation.location,
             sdkIdentifier ?: ""
         )
-        metricsReporter.addEvent(NavigationMetrics.ARRIVE, gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.ARRIVE, event)
     }
 
     /**
@@ -301,7 +297,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 navigationSessionState.sessionIdentifier,
                 MetadataBuilder.getMetadata(context)
             )
-            metricsReporter.addEvent(DirectionsMetrics.ROUTE_RETRIEVAL, gson.toJson(event))
+            metricsReporter.addEvent(DirectionsMetrics.ROUTE_RETRIEVAL, event)
         } else {
             routeRetrievalElapsedTime = elapsedTime
             routeRetrievalUuid = routeUuid
@@ -341,7 +337,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 metricLocation.location,
                 sdkIdentifier ?: ""
             )
-            metricsReporter.addEvent(NavigationMetrics.CANCEL_SESSION, gson.toJson(event))
+            metricsReporter.addEvent(NavigationMetrics.CANCEL_SESSION, event)
         }
     }
 
@@ -475,7 +471,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             sdkIdentifier ?: "",
             rerouteEvent
         )
-        metricsReporter.addEvent(NavigationMetrics.REROUTE, gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.REROUTE, event)
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
@@ -497,7 +493,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             feedbackEvent.screenshot ?: "",
             feedbackEvent.feedbackSource
         )
-        metricsReporter.addEvent(NavigationMetrics.FEEDBACK, gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.FEEDBACK, event)
     }
 
     private fun dateDiff(

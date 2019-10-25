@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
-import com.google.gson.Gson
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.NavigationMetrics
 
@@ -11,10 +10,9 @@ internal class InitialGpsEventHandler(
     fun send(
         elapsedTime: Double,
         sessionId: String,
-        metadata: NavigationPerformanceMetadata,
-        gson: Gson
+        metadata: NavigationPerformanceMetadata
     ) {
         val event = InitialGpsEvent(elapsedTime, sessionId, metadata)
-        metricsReporter.addEvent(NavigationMetrics.INITIAL_GPS, gson.toJson(event))
+        metricsReporter.addEvent(NavigationMetrics.INITIAL_GPS, event)
     }
 }

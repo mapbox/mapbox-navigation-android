@@ -1,10 +1,8 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
-import com.google.gson.Gson
 import com.mapbox.navigation.base.metrics.MetricsReporter
 
 internal class InitialGpsEventFactory @JvmOverloads constructor(
-    private val gson: Gson,
     metricsReporter: MetricsReporter,
     private var time: ElapsedTime = ElapsedTime(),
     private val handler: InitialGpsEventHandler = InitialGpsEventHandler(metricsReporter)
@@ -34,7 +32,7 @@ internal class InitialGpsEventFactory @JvmOverloads constructor(
     private fun send(time: ElapsedTime, metadata: NavigationPerformanceMetadata) {
         if (!hasSent && sessionId.isNotEmpty()) {
             val elapsedTime = time.elapsedTime
-            handler.send(elapsedTime, sessionId, metadata, gson)
+            handler.send(elapsedTime, sessionId, metadata)
             hasSent = true
         }
     }

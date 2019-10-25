@@ -20,12 +20,12 @@ android {
 
 dependencies {
     api(project(':libnavigation-base'))
-
-    implementation dependenciesList.supportAnnotation
-
+    implementation project(':libnavigation-util')
     api (dependenciesList.mapboxEvents) {
         exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
     }
+
+    implementation dependenciesList.supportAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint
