@@ -404,7 +404,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
-    locationEngine.onFreeDrive();
+    locationEngine.removeOriginalLocationUpdates();
     stopNavigationService();
   }
 

@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
@@ -35,7 +36,10 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   private ScheduledFuture future;
   private final ScheduledExecutorService executorService;
   private Location rawLocation;
-  private Location enhancedLocation;
+  private LocationEngineCallback<LocationEngineResult> originalCallback;
+  private Looper originalLooper;
+  private boolean isEnhancedInitialized = false;
+  private AtomicBoolean isConfigured = new AtomicBoolean(false);
 
   EnhancedLocationEngineDecorator(@NonNull LocationEngine locationEngine,
                                   @NonNull MapboxNavigator mapboxNavigator,
@@ -54,7 +58,14 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   public void requestLocationUpdates(@NonNull LocationEngineRequest request,
                                      @NonNull final LocationEngineCallback<LocationEngineResult> callback,
                                      @Nullable Looper looper) throws SecurityException {
-    locationEngine.requestLocationUpdates(request, callback, looper);
+    if (!isEnhancedInitialized) {
+      isEnhancedInitialized = true;
+      originalCallback = callback;
+      originalLooper = looper;
+      onFreeDrive();
+    } else {
+      locationEngine.requestLocationUpdates(request, callback, looper);
+    }
   }
 
   @Override
@@ -74,25 +85,27 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   }
 
   void onActiveGuidance() {
-    removeLocationUpdates(callback);
-    if (future != null) {
-      future.cancel(false);
-      future = null;
+    if (isConfigured.get()) {
+      removeLocationUpdates(callback);
+      if (future != null) {
+        future.cancel(false);
+        future = null;
+      }
     }
   }
 
   void onFreeDrive() {
     requestLocationUpdates(obtainLocationEngineRequest(), callback, null);
-    final Handler handler = new Handler(Looper.getMainLooper());
+    final Handler handler = new Handler(originalLooper.getMainLooper());
     future = executorService.scheduleAtFixedRate(new Runnable() {
-      @Override
-      public void run() {
+        @Override
+        public void run() {
         if (rawLocation != null) {
-          enhancedLocation = getLocation(new Date(), 0, rawLocation);
+          final Location enhancedLocation = getLocation(new Date(), 0, rawLocation);
           handler.post(new Runnable() {
-            @Override
-            public void run() {
-              callback.onSuccess(LocationEngineResult.create(enhancedLocation));
+              @Override
+              public void run() {
+              originalCallback.onSuccess(LocationEngineResult.create(enhancedLocation));
             }
           });
         }
@@ -100,12 +113,25 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
     }, 1500, 1000, TimeUnit.MILLISECONDS);
   }
 
+  void removeOriginalLocationUpdates() {
+    if (isConfigured.get()) {
+      if (originalCallback != null) {
+        removeLocationUpdates(originalCallback);
+        originalCallback = null;
+      }
+      isEnhancedInitialized = false;
+    }
+  }
+
   void onNavigationKilled() {
-    if (future != null) {
-      removeLocationUpdates(callback);
-      future.cancel(false);
-      future = null;
-      executorService.shutdown();
+    if (isConfigured.get()) {
+      if (future != null) {
+        removeLocationUpdates(callback);
+        future.cancel(false);
+        future = null;
+        executorService.shutdown();
+        removeOriginalLocationUpdates();
+      }
     }
   }
 
@@ -118,12 +144,13 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
       @Override
       public void onConfigured(int numberOfTiles) {
         Timber.d("DEBUG: onConfigured %d", numberOfTiles);
-        onFreeDrive();
+        isConfigured.set(true);
       }
 
       @Override
       public void onConfigurationError(@NonNull OfflineError error) {
         Timber.d("DEBUG: onConfigurationError %s", error.getMessage());
+        isConfigured.set(false);
       }
     });
   }
@@ -163,8 +190,11 @@ class EnhancedLocationEngineDecorator implements LocationEngine {
   }
 
   private Location getLocation(Date date, long lagMillis, Location fallbackLocation) {
-    NavigationStatus status = mapboxNavigator.retrieveStatus(date, lagMillis);
-    return getSnappedLocation(status, fallbackLocation);
+    if (isConfigured.get()) {
+      NavigationStatus status = mapboxNavigator.retrieveStatus(date, lagMillis);
+      return getSnappedLocation(status, fallbackLocation);
+    }
+    return fallbackLocation;
   }
 
   private static final class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {

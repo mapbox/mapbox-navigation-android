@@ -11,7 +11,7 @@ data class PhoneState(val context: Context) {
     val batteryLevel: Int = TelemetryUtils.obtainBatteryLevel(context)
     val screenBrightness: Int = NavigationUtils.obtainScreenBrightness(context)
     val isBatteryPluggedIn: Boolean = TelemetryUtils.isPluggedIn(context)
-    val connectivity: String = TelemetryUtils.obtainCellularNetworkType(context)
+    val connectivity: String? = TelemetryUtils.obtainCellularNetworkType(context)
     val audioType: String = NavigationUtils.obtainAudioType(context)
     val applicationState: String = TelemetryUtils.obtainApplicationState(context)
     val created: String = TelemetryUtils.obtainCurrentDate()
