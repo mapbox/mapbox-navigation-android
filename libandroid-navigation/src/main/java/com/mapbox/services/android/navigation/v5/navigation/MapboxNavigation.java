@@ -160,7 +160,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
     this.mapboxNavigator = mapboxNavigator;
-    initializeForTest();
+    initializeForTest(context);
   }
 
   // Package private (no modifier) for testing purposes
@@ -172,7 +172,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initializeForTest();
+    initializeForTest(context);
   }
 
   // Lifecycle
@@ -879,13 +879,13 @@ public class MapboxNavigation implements ServiceConnection {
     return routeRefresher;
   }
 
-  private void initializeForTest() {
+  private void initializeForTest(Context context) {
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
-    initializeTelemetry();
+    initializeTelemetryForTest(context);
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
@@ -928,6 +928,21 @@ public class MapboxNavigation implements ServiceConnection {
     navigationTelemetry = obtainTelemetry();
     MapboxMetricsReporter.init(
             applicationContext,
+            accessToken,
+            BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
+    );
+    navigationTelemetry.initialize(
+            applicationContext,
+            accessToken,
+            this,
+            MapboxMetricsReporter.INSTANCE
+    );
+  }
+
+  private void initializeTelemetryForTest(Context context) {
+    navigationTelemetry = obtainTelemetry();
+    MapboxMetricsReporter.init(
+            context,
             accessToken,
             BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
     );

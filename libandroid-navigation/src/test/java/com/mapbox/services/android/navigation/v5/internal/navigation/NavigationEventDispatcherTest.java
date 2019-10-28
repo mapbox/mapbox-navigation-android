@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -69,10 +70,14 @@ public class NavigationEventDispatcherTest extends BaseTest {
   @Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
-    Context context = mock(Context.class);
-    when(context.getApplicationContext()).thenReturn(mock(Context.class));
-    navigation = new MapboxNavigation(context, ACCESS_TOKEN, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class), mock(MapboxNavigator.class));
+    Context context = RuntimeEnvironment.application;
+    navigation = new MapboxNavigation(
+            context,
+            ACCESS_TOKEN,
+            mock(NavigationTelemetry.class),
+            mock(LocationEngine.class),
+            mock(MapboxNavigator.class)
+    );
     navigationEventDispatcher = navigation.getEventDispatcher();
 
     Gson gson = new GsonBuilder()
