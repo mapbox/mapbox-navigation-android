@@ -818,9 +818,11 @@ public class MapboxNavigation implements ServiceConnection {
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
     NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
-    navigationService = binder.getService();
-    navigationService.startNavigation(this);
-    isBound = true;
+    if (binder != null) {
+      navigationService = binder.getService();
+      navigationService.startNavigation(this);
+      isBound = true;
+    }
   }
 
   @Override

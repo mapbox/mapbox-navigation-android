@@ -44,8 +44,8 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private lateinit var context: Context
     private lateinit var eventDispatcher: NavigationEventDispatcher
     private lateinit var departEventFactory: DepartEventFactory
-    private lateinit var gpsEventFactory: InitialGpsEventFactory
 
+    private var gpsEventFactory: InitialGpsEventFactory? = null
     private val queuedRerouteEvents = ArrayList<RerouteEvent>()
     private val queuedFeedbackEvents = ArrayList<FeedbackEvent>()
     private val locationBuffer: RingBuffer<Location> = RingBuffer(LOCATION_BUFFER_MAX_SIZE)
@@ -151,12 +151,12 @@ internal object NavigationTelemetry : NavigationMetricListener {
             rerouteCount = 0
         }
         sendRouteRetrievalEventIfExists()
-        gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier)
+        gpsEventFactory?.navigationStarted(navigationSessionState.sessionIdentifier)
     }
 
     fun stopSession() {
         sendCancelEvent()
-        gpsEventFactory.reset()
+        gpsEventFactory?.reset()
         resetDepartFactory()
     }
 
@@ -204,7 +204,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     fun updateLocation(context: Context, location: Location) {
-        gpsEventFactory.gpsReceived(MetadataBuilder.getMetadata(context))
+        gpsEventFactory?.gpsReceived(MetadataBuilder.getMetadata(context))
         metricLocation = MetricsLocation(location)
         locationBuffer.addLast(location)
         checkRerouteQueue()
