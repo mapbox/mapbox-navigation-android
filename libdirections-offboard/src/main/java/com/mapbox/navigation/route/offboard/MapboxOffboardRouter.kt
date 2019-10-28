@@ -10,9 +10,6 @@ class MapboxOffboardRouter : Router {
         TODO("not implemented")
     }
 
-    override fun getRoute(origin: Point, waypoints: List<Point>, listener: Router.RouteListener) {
-    }
-
     override fun cancel() {
         TODO("not implemented")
     }

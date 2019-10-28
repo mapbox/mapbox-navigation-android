@@ -4,6 +4,7 @@ import androidx.annotation.FloatRange
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.exceptions.ServicesException
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigator.RouterResult
 import okhttp3.HttpUrl
@@ -13,7 +14,7 @@ import okhttp3.HttpUrl
  * could be set in order for an offline navigation session to successfully begin.
  */
 class OfflineRoute private constructor(
-    private val onlineRoute: com.mapbox.navigation.route.offboard.NavigationRoute,
+    private val onlineRoute: NavigationRoute,
     bicycleType: OfflineCriteria.BicycleType?,
     private val cyclingSpeed: Float?,
     private val cyclewayBias: Float?,
@@ -46,7 +47,7 @@ class OfflineRoute private constructor(
          * @return a [Builder] object for creating this object
          */
         @JvmStatic
-        fun builder(onlineRouteBuilder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder): Builder {
+        fun builder(onlineRouteBuilder: NavigationRoute.Builder): Builder {
             return Builder(onlineRouteBuilder)
         }
     }
@@ -118,7 +119,7 @@ class OfflineRoute private constructor(
     private fun obtainRouteFor(response: String): DirectionsRoute? =
         DirectionsResponse.fromJson(response).routes().firstOrNull()
 
-    class Builder internal constructor(private val navigationRouteBuilder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder) {
+    class Builder internal constructor(private val navigationRouteBuilder: NavigationRoute.Builder) {
         private var bicycleType: OfflineCriteria.BicycleType? = null
         private var cyclingSpeed: Float? = null
         private var cyclewayBias: Float? = null
