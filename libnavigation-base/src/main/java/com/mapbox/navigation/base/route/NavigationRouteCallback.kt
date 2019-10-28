@@ -1,13 +1,12 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.navigation.base.route.NavigationRouteEventListener
 import com.mapbox.navigation.utils.time.ElapsedTime
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-internal class NavigationRouteCallback(
+class NavigationRouteCallback(
     private val listener: NavigationRouteEventListener,
     private val callback: Callback<DirectionsResponse>
 ) : Callback<DirectionsResponse> {
@@ -32,7 +31,8 @@ internal class NavigationRouteCallback(
         return response.body()?.routes()?.isNotEmpty() ?: false
     }
 
+    //
     private fun sendEventWith(time: ElapsedTime, uuid: String) {
-        NavigationTelemetry.routeRetrievalEvent(time, uuid)
+        // NavigationTelemetry.routeRetrievalEvent(time, uuid)
     }
 }
