@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.navigation.base.metrics.Metric
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
@@ -43,13 +42,13 @@ object MapboxMetricsReporter : MetricsReporter {
         }
     }
 
-    override fun addEvent(@Metric metric: String, metricEvent: MetricEvent) {
-        MetricEventMapper.mapMetricEventToTelemetryEvent(metric, metricEvent)?.let {
+    override fun addEvent(metricEvent: MetricEvent) {
+        MetricEventMapper.mapMetricEventToTelemetryEvent(metricEvent.metric, metricEvent)?.let {
             mapboxTelemetry.push(it)
         }
 
         threadWorker.post {
-            metricsObserver?.onMetricUpdated(metric, metricEvent.toJson(gson))
+            metricsObserver?.onMetricUpdated(metricEvent.metric, metricEvent.toJson(gson))
         }
     }
 

@@ -19,7 +19,7 @@ internal open class NavigationPerformanceEvent(
     private val sessionId: String,
     eventName: String,
     open var metadata: NavigationPerformanceMetadata
-) : Event(), MetricEvent, Parcelable {
+) : Event(), Parcelable {
 
     companion object {
         private const val DATE_AND_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
@@ -56,6 +56,4 @@ internal open class NavigationPerformanceEvent(
     override fun describeContents(): Int = 0
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {}
-
-    override fun toJson(gson: Gson): String = gson.toJson(this)
 }

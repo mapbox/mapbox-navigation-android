@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.annotation.SuppressLint
-import com.google.gson.Gson
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
@@ -17,6 +16,4 @@ internal class NavigationCancelEvent(
     var comment: String = ""
 
     override fun getEventName(): String = NavigationMetrics.CANCEL_SESSION
-
-    override fun toJson(gson: Gson): String = gson.toJson(this)
 }

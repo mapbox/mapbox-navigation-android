@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.content.Context
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
@@ -27,6 +26,6 @@ internal class DepartEventHandler(
             location.location,
             sdkIdentifier
         )
-        metricsReporter.addEvent(NavigationMetrics.DEPART, event)
+        metricsReporter.addEvent(event)
     }
 }

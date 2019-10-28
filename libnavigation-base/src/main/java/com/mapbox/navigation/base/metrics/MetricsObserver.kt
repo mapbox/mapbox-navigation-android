@@ -2,5 +2,5 @@ package com.mapbox.navigation.base.metrics
 
 interface MetricsObserver {
 
-    fun onMetricUpdated(@Metric metric: String, jsonStringData: String)
+    fun onMetricUpdated(@MetricEvent.Metric metric: String, jsonStringData: String)
 }

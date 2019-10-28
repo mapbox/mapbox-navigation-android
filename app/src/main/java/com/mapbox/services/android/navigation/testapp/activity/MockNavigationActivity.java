@@ -32,8 +32,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.metrics.Metric;
+import com.mapbox.navigation.base.metrics.MetricEvent;
 import com.mapbox.navigation.base.metrics.MetricsObserver;
+import com.mapbox.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
@@ -134,7 +135,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
             Mapbox.getAccessToken(),
             options
     );
-    navigation.setMetricsObserver(this);
+    MapboxMetricsReporter.INSTANCE.setMetricsObserver(this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -370,7 +371,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onMetricUpdated(@NotNull @Metric String metric, @NotNull String jsonStringData) {
+  public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
     Timber.d("METRICS_LOG: %s", metric);
     Timber.d(jsonStringData);
   }

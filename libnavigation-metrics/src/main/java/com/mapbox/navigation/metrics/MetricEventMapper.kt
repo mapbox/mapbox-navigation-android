@@ -2,13 +2,15 @@ package com.mapbox.navigation.metrics
 
 import com.mapbox.android.telemetry.Event
 import com.mapbox.navigation.base.metrics.DirectionsMetrics
-import com.mapbox.navigation.base.metrics.Metric
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 object MetricEventMapper {
 
-    fun mapMetricEventToTelemetryEvent(@Metric metric: String, metricEvent: MetricEvent): Event? =
+    fun mapMetricEventToTelemetryEvent(
+        @MetricEvent.Metric metric: String,
+        metricEvent: MetricEvent
+    ): Event? =
         when (metric) {
             DirectionsMetrics.ROUTE_RETRIEVAL,
             NavigationMetrics.ARRIVE,

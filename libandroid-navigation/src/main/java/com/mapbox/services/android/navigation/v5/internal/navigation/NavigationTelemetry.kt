@@ -10,10 +10,8 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.base.metrics.DirectionsMetrics
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.BuildConfig
@@ -129,7 +127,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             metricLocation.location,
             sdkIdentifier ?: ""
         )
-        metricsReporter.addEvent(NavigationMetrics.ARRIVE, event)
+        metricsReporter.addEvent(event)
     }
 
     /**
@@ -305,7 +303,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 navigationSessionState.sessionIdentifier,
                 MetadataBuilder.getMetadata(context)
             )
-            metricsReporter.addEvent(DirectionsMetrics.ROUTE_RETRIEVAL, event)
+            metricsReporter.addEvent(event)
         } else {
             routeRetrievalElapsedTime = elapsedTime
             routeRetrievalUuid = routeUuid
@@ -345,7 +343,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
                 metricLocation.location,
                 sdkIdentifier ?: ""
             )
-            metricsReporter.addEvent(NavigationMetrics.CANCEL_SESSION, event)
+            metricsReporter.addEvent(event)
         }
     }
 
@@ -479,7 +477,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             sdkIdentifier ?: "",
             rerouteEvent
         )
-        metricsReporter.addEvent(NavigationMetrics.REROUTE, event)
+        metricsReporter.addEvent(event)
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
@@ -501,7 +499,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             feedbackEvent.screenshot ?: "",
             feedbackEvent.feedbackSource
         )
-        metricsReporter.addEvent(NavigationMetrics.FEEDBACK, event)
+        metricsReporter.addEvent(event)
     }
 
     private fun dateDiff(

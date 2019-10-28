@@ -17,9 +17,6 @@ android {
 dependencies {
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxCore
-//    api (dependenciesList.mapboxEvents) {
-//        exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
-//    }
 
     implementation dependenciesList.supportAnnotation
 

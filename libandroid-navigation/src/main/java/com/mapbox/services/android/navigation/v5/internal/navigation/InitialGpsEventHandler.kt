@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 internal class InitialGpsEventHandler(
     private val metricsReporter: MetricsReporter
@@ -13,6 +12,6 @@ internal class InitialGpsEventHandler(
         metadata: NavigationPerformanceMetadata
     ) {
         val event = InitialGpsEvent(elapsedTime, sessionId, metadata)
-        metricsReporter.addEvent(NavigationMetrics.INITIAL_GPS, event)
+        metricsReporter.addEvent(event)
     }
 }
