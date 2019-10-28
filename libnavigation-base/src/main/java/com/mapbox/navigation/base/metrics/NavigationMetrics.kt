@@ -10,6 +10,5 @@ interface NavigationMetrics {
         const val FEEDBACK = "navigation.feedback"
         const val INITIAL_GPS = "initial_gps_event"
         const val APP_USER_TURNSTILE = "appUserTurnstile"
-        const val PERFORMANCE = "mobile.performance_trace"
     }
 }

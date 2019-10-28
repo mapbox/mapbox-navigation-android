@@ -12,6 +12,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.utils.extensions.ifNonNull
@@ -84,8 +85,11 @@ internal object NavigationTelemetry : NavigationMetricListener {
             this.gpsEventFactory = InitialGpsEventFactory(metricsReporter)
             this.context = context
 
-            val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
-            metricsReporter.addEvent(NavigationMetrics.APP_USER_TURNSTILE, turnstileEvent)
+            // TODO: Do we need this event?
+            if (metricsReporter is MapboxMetricsReporter) {
+                val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
+                metricsReporter.addAppTurnstileEvent(turnstileEvent)
+            }
             isInitialized = true
         }
         this.eventDispatcher = navigation.eventDispatcher
@@ -278,6 +282,10 @@ internal object NavigationTelemetry : NavigationMetricListener {
         if (lifecycleMonitor == null) {
             lifecycleMonitor = NavigationLifecycleMonitor(application)
         }
+    }
+
+    fun setMetricsObserver(metricsObserver: MetricsObserver) {
+        metricsReporter.setMetricsObserver(metricsObserver)
     }
 
     fun endSession() {

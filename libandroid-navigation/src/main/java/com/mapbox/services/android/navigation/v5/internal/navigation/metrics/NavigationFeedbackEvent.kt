@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.annotation.SuppressLint
 import android.location.Location
+import com.google.gson.Gson
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 
@@ -25,4 +26,6 @@ internal class NavigationFeedbackEvent(
     var screenshot: String? = null
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
+
+    override fun toJson(gson: Gson): String = gson.toJson(this)
 }

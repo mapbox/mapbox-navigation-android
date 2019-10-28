@@ -32,13 +32,13 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.metrics.Metric;
 import com.mapbox.navigation.base.metrics.MetricsObserver;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
-import com.mapbox.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -129,15 +129,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .navigationNotification(customNotification)
       .build();
 
-    //  TODO: For metrics hook test
-    MapboxMetricsReporter metricsReporter = MapboxMetricsReporter.INSTANCE;
-    metricsReporter.setMetricsObserver(this);
     navigation = new MapboxNavigation(
             this,
             Mapbox.getAccessToken(),
-            options,
-            metricsReporter
+            options
     );
+    navigation.setMetricsObserver(this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -373,7 +370,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onMetricUpdated(@NotNull String metric, @NotNull String jsonStringData) {
+  public void onMetricUpdated(@NotNull @Metric String metric, @NotNull String jsonStringData) {
     Timber.d("METRICS_LOG: %s", metric);
     Timber.d(jsonStringData);
   }

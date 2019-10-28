@@ -17,8 +17,6 @@ class WorkThreadHandler(
     override fun post(task: () -> Unit) {
         if (!isStarted) {
             start()
-            // Timber.d("The thread was not started")
-            // return
         }
         handler.post {
             task.invoke()
@@ -29,8 +27,6 @@ class WorkThreadHandler(
     override fun postDelayed(task: () -> Unit, delayMillis: Long) {
         if (!isStarted) {
             start()
-            // Timber.d("The thread was not started")
-            // return
         }
         handler.postDelayed({
             task.invoke()
