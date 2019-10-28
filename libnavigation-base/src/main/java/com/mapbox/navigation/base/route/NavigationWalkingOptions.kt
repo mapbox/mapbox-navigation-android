@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.WalkingOptions
 
