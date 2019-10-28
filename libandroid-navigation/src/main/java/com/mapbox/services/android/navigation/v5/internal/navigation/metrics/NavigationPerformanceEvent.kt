@@ -3,9 +3,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 import android.annotation.SuppressLint
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
-import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.Attribute
 import com.mapbox.services.android.navigation.v5.internal.navigation.DoubleCounter
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationPerformanceMetadata

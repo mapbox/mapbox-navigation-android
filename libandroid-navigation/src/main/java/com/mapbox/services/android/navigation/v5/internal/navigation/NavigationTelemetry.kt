@@ -10,7 +10,6 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.utils.extensions.ifNonNull
