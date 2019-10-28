@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.offboard
+package com.mapbox.navigation.base.route
 
 import android.content.Context
 import androidx.annotation.FloatRange
@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.NavigationRouteEventListener
+import com.mapbox.navigation.base.route.extensions.getUnitTypeForLocale
 import com.mapbox.navigation.route.NavigationRouteWaypoint
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
