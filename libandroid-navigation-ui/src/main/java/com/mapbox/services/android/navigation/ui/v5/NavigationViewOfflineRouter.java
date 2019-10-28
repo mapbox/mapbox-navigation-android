@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
+import com.mapbox.navigation.base.route.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
 
 import timber.log.Timber;
