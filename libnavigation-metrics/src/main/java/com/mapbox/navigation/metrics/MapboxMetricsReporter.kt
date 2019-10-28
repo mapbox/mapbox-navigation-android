@@ -8,6 +8,7 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.metrics.NavigationMetrics
+import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 
 object MapboxMetricsReporter : MetricsReporter {
@@ -43,7 +44,7 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     override fun addEvent(metricEvent: MetricEvent) {
-        MetricEventMapper.mapMetricEventToTelemetryEvent(metricEvent.metric, metricEvent)?.let {
+        metricEvent.toTelemetryEvent()?.let {
             mapboxTelemetry.push(it)
         }
 
