@@ -31,4 +31,8 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    // Unit testing
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }
