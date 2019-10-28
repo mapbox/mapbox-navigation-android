@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.offboard
+package com.mapbox.navigation.base.route
 
 import android.content.Context
 import androidx.annotation.FloatRange
