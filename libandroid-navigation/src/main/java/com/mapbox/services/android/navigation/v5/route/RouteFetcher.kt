@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.navigation.route.offboard.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import java.lang.ref.WeakReference
@@ -101,13 +100,13 @@ class RouteFetcher
     fun buildRequestFrom(
         location: Location,
         routeProgress: RouteProgress
-    ): com.mapbox.navigation.route.offboard.NavigationRoute.Builder? {
+    ): NavigationRoute.Builder? {
         val context = contextWeakReference.get()
             ?: return null
         val origin = Point.fromLngLat(location.longitude, location.latitude)
         val bearing = if (location.hasBearing()) location.bearing.toDouble() else null
         val routeOptions = routeProgress.directionsRoute()?.routeOptions()
-        val navigationRouteBuilder = com.mapbox.navigation.route.offboard.NavigationRoute.builder(context)
+        val navigationRouteBuilder = NavigationRoute.builder(context)
             .accessToken(accessToken)
             .origin(origin, bearing, BEARING_TOLERANCE)
         routeOptions?.let { options ->
@@ -132,7 +131,7 @@ class RouteFetcher
      *
      * @param builder to be executed
      */
-    fun findRouteWith(builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder?) {
+    fun findRouteWith(builder: NavigationRoute.Builder?) {
         builder?.let { navigationRouteBuilder ->
             navigationRoute = navigationRouteBuilder.build()
             navigationRoute?.getRoute(directionsResponseCallback)
@@ -148,7 +147,7 @@ class RouteFetcher
 
     private fun addDestination(
         remainingWaypoints: MutableList<Point>,
-        builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder
+        builder: NavigationRoute.Builder
     ) {
         if (remainingWaypoints.isNotEmpty()) {
             builder.destination(retrieveDestinationWaypoint(remainingWaypoints))
@@ -162,7 +161,7 @@ class RouteFetcher
 
     private fun addWaypoints(
         remainingCoordinates: List<Point>,
-        builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder
+        builder: NavigationRoute.Builder
     ) {
         if (remainingCoordinates.isNotEmpty()) {
             for (coordinate in remainingCoordinates) {
@@ -173,7 +172,7 @@ class RouteFetcher
 
     private fun addWaypointIndices(
         routeProgress: RouteProgress,
-        builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder
+        builder: NavigationRoute.Builder
     ) {
         val remainingWaypointIndices: IntArray? = routeUtils.calculateRemainingWaypointIndices(routeProgress)
         if (remainingWaypointIndices != null && remainingWaypointIndices.isNotEmpty()) {
@@ -183,7 +182,7 @@ class RouteFetcher
 
     private fun addWaypointNames(
         progress: RouteProgress,
-        builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder
+        builder: NavigationRoute.Builder
     ) {
         val remainingWaypointNames: Array<String>? = routeUtils.calculateRemainingWaypointNames(progress)
         remainingWaypointNames?.let {
@@ -193,7 +192,7 @@ class RouteFetcher
 
     private fun addApproaches(
         progress: RouteProgress,
-        builder: com.mapbox.navigation.route.offboard.NavigationRoute.Builder
+        builder: NavigationRoute.Builder
     ) {
         val remainingApproaches: Array<String>? = routeUtils.calculateRemainingApproaches(progress)
         remainingApproaches?.let {
