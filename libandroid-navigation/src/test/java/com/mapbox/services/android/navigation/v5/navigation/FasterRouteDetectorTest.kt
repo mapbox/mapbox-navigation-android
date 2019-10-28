@@ -11,17 +11,15 @@ import com.mapbox.services.android.navigation.v5.route.FasterRoute
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import io.mockk.mockk
+import java.io.IOException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-
-import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 class FasterRouteDetectorTest : BaseTest() {

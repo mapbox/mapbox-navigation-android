@@ -5,29 +5,25 @@ import com.mapbox.services.android.navigation.v5.BaseTest
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone
-import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone
 import com.mapbox.services.android.navigation.v5.milestone.StepMilestone
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID
 import com.mapbox.services.android.navigation.v5.offroute.OffRoute
 import com.mapbox.services.android.navigation.v5.snap.Snap
 import com.mapbox.services.android.navigation.v5.snap.SnapToRoute
-
-import org.junit.Ignore
-import org.junit.Test
-
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID
-
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
-
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class MapboxNavigationTest : BaseTest() {
