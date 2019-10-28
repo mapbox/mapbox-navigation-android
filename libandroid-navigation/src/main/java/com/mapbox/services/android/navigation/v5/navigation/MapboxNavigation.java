@@ -831,10 +831,6 @@ public class MapboxNavigation implements ServiceConnection {
     isBound = false;
   }
 
-  public void setMetricsObserver(MetricsObserver metricsObserver) {
-    navigationTelemetry.setMetricsObserver(metricsObserver);
-  }
-
   // TODO public?
   public String obtainAccessToken() {
     return accessToken;

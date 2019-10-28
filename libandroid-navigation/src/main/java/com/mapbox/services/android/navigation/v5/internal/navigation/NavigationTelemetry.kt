@@ -282,10 +282,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
         }
     }
 
-    fun setMetricsObserver(metricsObserver: MetricsObserver) {
-        metricsReporter.setMetricsObserver(metricsObserver)
-    }
-
     fun endSession() {
         flushEventQueues()
         lifecycleMonitor = null
