@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.navigation.base.route.extensions.getUnitTypeForLocale
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.extensions.inferDeviceLanguage
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
@@ -27,7 +28,6 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
-import com.mapbox.navigation.base.route.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter.formatTime
 import java.util.Calendar
 

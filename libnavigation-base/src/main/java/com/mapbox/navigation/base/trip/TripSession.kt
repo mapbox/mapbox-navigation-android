@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.trip
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.navigation.base.route.Route
+import com.mapbox.navigation.base.route.model.Route
 
 interface TripSession {
 
