@@ -2,8 +2,8 @@ package com.mapbox.navigation
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
-import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.Route
 import java.util.concurrent.CopyOnWriteArrayList
 
 class DefaultDirectionsSession(private val router: Router, origin: Point, waypoints: List<Point>) : DirectionsSession {

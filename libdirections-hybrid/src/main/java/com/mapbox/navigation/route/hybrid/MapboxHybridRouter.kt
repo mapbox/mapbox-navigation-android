@@ -1,8 +1,8 @@
 package com.mapbox.navigation.route.hybrid
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 
