@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
 android {
@@ -15,12 +16,15 @@ android {
 }
 
 dependencies {
+    compileOnly(project(':annotations'))
+    kapt(project(':annotations-processor'))
     api(project(':libnavigation-base'))
-    implementation dependenciesList.supportAnnotation
     implementation dependenciesList.timber
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    testImplementation dependenciesList.junit
 }

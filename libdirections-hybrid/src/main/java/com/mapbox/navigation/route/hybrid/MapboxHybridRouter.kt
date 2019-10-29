@@ -1,14 +1,15 @@
 package com.mapbox.navigation.route.hybrid
 
+import com.mapbox.annotation.navigation.module.MapboxNavigationModule
+import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 
+@MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
 class MapboxHybridRouter(
-    private val onboardRouter: MapboxOnboardRouter,
-    private val offboardRouter: MapboxOffboardRouter = MapboxOffboardRouter()
+    private val onboardRouter: Router,
+    private val offboardRouter: Router
 ) : Router {
 
     override fun getRoute(origin: Point, waypoints: List<Point>, callback: (route: Route) -> Unit) {

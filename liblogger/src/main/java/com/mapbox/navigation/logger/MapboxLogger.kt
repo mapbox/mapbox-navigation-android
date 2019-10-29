@@ -1,10 +1,14 @@
 package com.mapbox.navigation.logger
 
+import com.mapbox.annotation.navigation.module.MapboxNavigationModule
+import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.logger.Logger
 import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
-object MapboxLogger : Logger {
+@MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
+class MapboxLogger : Logger {
+
     @LogLevel
     var logLevel: Int = VERBOSE
 

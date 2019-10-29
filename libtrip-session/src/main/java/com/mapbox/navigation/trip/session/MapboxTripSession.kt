@@ -1,4 +1,4 @@
-package com.mapbox.navigation
+package com.mapbox.navigation.trip.session
 
 import android.location.Location
 import android.os.Handler
@@ -7,6 +7,8 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.annotation.navigation.module.MapboxNavigationModule
+import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripService
@@ -16,7 +18,8 @@ import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
 
-class DefaultTripSession(
+@MapboxNavigationModule(MapboxNavigationModuleType.TripSession, skipConfiguration = true)
+class MapboxTripSession(
     override val tripService: TripService,
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
@@ -101,7 +104,7 @@ class DefaultTripSession(
         routeProgressObservers.remove(routeProgressObserver)
     }
 
-    private class MainLocationCallback(tripSession: DefaultTripSession) : LocationEngineCallback<LocationEngineResult> {
+    private class MainLocationCallback(tripSession: MapboxTripSession) : LocationEngineCallback<LocationEngineResult> {
 
         private val tripSessionReference = WeakReference(tripSession)
 
