@@ -82,7 +82,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
             this.gpsEventFactory = InitialGpsEventFactory(metricsReporter)
             this.context = context
 
-            // TODO: Do we need this event?
             if (metricsReporter is MapboxMetricsReporter) {
                 val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
                 metricsReporter.addAppTurnstileEvent(turnstileEvent)

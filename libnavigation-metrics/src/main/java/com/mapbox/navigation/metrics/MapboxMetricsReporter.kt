@@ -17,7 +17,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var mapboxTelemetry: MapboxTelemetry
     @Volatile
     private var metricsObserver: MetricsObserver? = null
-    private val threadWorker = WorkThreadHandler("MapboxMetricsReporter")
+    private var threadWorker = WorkThreadHandler("MapboxMetricsReporter")
 
     @JvmStatic
     fun init(
@@ -29,12 +29,21 @@ object MapboxMetricsReporter : MetricsReporter {
         mapboxTelemetry.enable()
     }
 
+    // For test purposes only
+    internal fun init(
+        mapboxTelemetry: MapboxTelemetry,
+        threadWorker: WorkThreadHandler
+    ) {
+        this.mapboxTelemetry = mapboxTelemetry
+        this.threadWorker = threadWorker
+        mapboxTelemetry.enable()
+    }
+
     @JvmStatic
     fun disable() {
         mapboxTelemetry.disable()
     }
 
-    // TODO: Do we need this event?
     fun addAppTurnstileEvent(event: AppUserTurnstile) {
         mapboxTelemetry.push(event)
 
