@@ -86,6 +86,7 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
+  private boolean isFreeDriveEnabled = false;
   private boolean isFreeDriveConfigured = false;
   private boolean isActiveGuidanceOnGoing = false;
 
@@ -402,7 +403,9 @@ public class MapboxNavigation implements ServiceConnection {
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
     isActiveGuidanceOnGoing = false;
-    enableFreeDrive();
+    if (isFreeDriveEnabled) {
+      enableFreeDrive();
+    }
     stopNavigationService();
   }
 
@@ -685,6 +688,7 @@ public class MapboxNavigation implements ServiceConnection {
    * added using {@link #addEnhancedLocationListener(EnhancedLocationListener)}.
    */
   public void enableFreeDrive() {
+    isFreeDriveEnabled = true;
     if (!isFreeDriveConfigured) {
       freeDriveLocationUpdater.configure(applicationContext.getFilesDir(), "2019_04_13-00_00_11",
           "https://api-routing-tiles-staging.tilestream.net", accessToken,
@@ -715,6 +719,7 @@ public class MapboxNavigation implements ServiceConnection {
    * Calling this method disables free drive mode.
    */
   public void disableFreeDrive() {
+    isFreeDriveEnabled = false;
     if (isFreeDriveConfigured) {
       freeDriveLocationUpdater.stop();
     }

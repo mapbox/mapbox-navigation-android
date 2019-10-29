@@ -28,6 +28,7 @@ internal class FreeDriveLocationUpdater(
     private val callback = CurrentLocationEngineCallback(this)
     private var future: ScheduledFuture<*>? = null
     private var rawLocation: Location? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     fun configure(
         path: File,
@@ -45,7 +46,6 @@ internal class FreeDriveLocationUpdater(
     fun start() {
         if (future == null) {
             locationEngine.requestLocationUpdates(locationEngineRequest, callback, null)
-            val handler = Handler(Looper.getMainLooper())
             future = executorService.scheduleAtFixedRate({
                 if (rawLocation != null) {
                     val enhancedLocation = getLocation(Date(), 0, rawLocation)
@@ -68,8 +68,8 @@ internal class FreeDriveLocationUpdater(
     fun kill() {
         future?.let {
             stopLocationUpdates()
-            executorService.shutdown()
         }
+        executorService.shutdown()
     }
 
     fun updateLocationEngine(locationEngine: LocationEngine) {
@@ -129,10 +129,8 @@ internal class FreeDriveLocationUpdater(
             WeakReference(locationUpdater)
 
         override fun onSuccess(result: LocationEngineResult) {
-            updaterWeakReference.get()?.let { locationUpdater ->
-                val location = result.lastLocation
-                locationUpdater.onLocationChanged(location)
-            }
+            val location = result.lastLocation
+            updaterWeakReference.get()?.onLocationChanged(location)
         }
 
         override fun onFailure(exception: Exception) {
