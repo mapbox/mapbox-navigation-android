@@ -16,7 +16,9 @@ android {
 
 dependencies {
 
-    api(project(':libnavigation-base'))
+    implementation project(path: ':libnavigation-base')
+    implementation dependenciesList.core
+    implementation dependenciesList.supportAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint

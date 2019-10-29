@@ -12,13 +12,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-consumer.pro'
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
+
+    api project(path: ':libnavigation-model')
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxCore
-
-    implementation dependenciesList.supportAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint

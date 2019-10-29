@@ -10,4 +10,5 @@ include ':app',
         ':libtrip-notification',
         ':liblogger',
         ':libnavigation-util'
+        ':libnavigation-model'
 include ':libandroid-navigation-ui'

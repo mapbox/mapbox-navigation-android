@@ -1,8 +1,8 @@
 package com.mapbox.navigation.base.trip
 
 import android.app.Notification
-import android.content.Context
 import android.location.Location
+import com.mapbox.navigation.model.RouteProgress
 
 interface TripNotification {
 
@@ -54,8 +54,6 @@ interface TripNotification {
      *
      *
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
-     *
-     * @param context to be used if needed for Android-related work
      */
-    fun onTripSessionStopped(context: Context)
+    fun onTripSessionStopped()
 }

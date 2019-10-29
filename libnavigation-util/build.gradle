@@ -17,7 +17,9 @@ android {
 }
 
 dependencies {
+
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.supportAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint
