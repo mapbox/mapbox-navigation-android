@@ -3,7 +3,6 @@ package com.mapbox.navigation.route.onboard
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
