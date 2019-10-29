@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
-import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.services.android.navigation.BuildConfig
 
 /**

@@ -23,7 +23,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationS
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
-import com.mapbox.navigation.metrics.MapboxMetricsReporter;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
