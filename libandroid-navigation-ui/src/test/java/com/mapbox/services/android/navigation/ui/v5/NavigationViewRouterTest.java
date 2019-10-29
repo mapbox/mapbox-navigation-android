@@ -13,7 +13,7 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.navigation.base.route.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
