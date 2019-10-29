@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.os.Build
 import android.os.Parcel
+import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.services.android.navigation.BuildConfig
 
@@ -10,7 +11,7 @@ import com.mapbox.services.android.navigation.BuildConfig
  */
 internal abstract class NavigationEvent(
     phoneState: PhoneState
-) : Event() {
+) : Event(), MetricEvent {
 
     companion object {
         private val OPERATING_SYSTEM = "Android - ${Build.VERSION.RELEASE}"
@@ -71,4 +72,9 @@ internal abstract class NavigationEvent(
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
     }
+
+    override fun toJson(gson: Gson): String = gson.toJson(this)
+
+    override val metric: String
+        get() = getEventName()
 }

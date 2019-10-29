@@ -1,8 +1,11 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter
+
 internal class InitialGpsEventFactory @JvmOverloads constructor(
+    metricsReporter: MetricsReporter,
     private var time: ElapsedTime = ElapsedTime(),
-    private val handler: InitialGpsEventHandler = InitialGpsEventHandler()
+    private val handler: InitialGpsEventHandler = InitialGpsEventHandler(metricsReporter)
 ) {
 
     private var sessionId = ""

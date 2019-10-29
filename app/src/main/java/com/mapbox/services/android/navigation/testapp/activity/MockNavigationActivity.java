@@ -32,6 +32,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsObserver;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.Utils;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
@@ -56,6 +59,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.ref.WeakReference;
 
 import butterknife.BindView;
@@ -67,8 +72,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
-  MilestoneEventListener, OffRouteListener, RefreshCallback {
+        MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
+        MilestoneEventListener, OffRouteListener, RefreshCallback, MetricsObserver {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -125,7 +130,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       .navigationNotification(customNotification)
       .build();
 
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(), options);
+    navigation = new MapboxNavigation(
+            this,
+            Mapbox.getAccessToken(),
+            options
+    );
+    MapboxMetricsReporter.INSTANCE.setMetricsObserver(this);
 
     navigation.addMilestone(new RouteMilestone.Builder()
       .setIdentifier(BEGIN_ROUTE_MILESTONE)
@@ -358,6 +368,12 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onError(RefreshError error) {
     isRefreshing = false;
+  }
+
+  @Override
+  public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
+    Timber.d("METRICS_LOG: %s", metric);
+    Timber.d(jsonStringData);
   }
 
   private static class BeginRouteInstruction extends Instruction {

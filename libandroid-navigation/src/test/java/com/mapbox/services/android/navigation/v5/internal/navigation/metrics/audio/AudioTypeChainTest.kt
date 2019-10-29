@@ -8,7 +8,8 @@ class AudioTypeChainTest {
 
     @Test
     fun checksChainIsCorrectWhenSetupCalled() {
-        val audioTypeChain = AudioTypeChain()
+        val audioTypeChain =
+            AudioTypeChain()
         val unknownAudioType = mockk<AudioTypeResolver.Unknown>(relaxed = true)
         val speakerAudioType = mockk<AudioTypeResolver.Speaker>(relaxed = true)
         val headphonesAudioType = mockk<AudioTypeResolver.Headphones>(relaxed = true)

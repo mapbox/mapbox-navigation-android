@@ -15,9 +15,10 @@ android {
 }
 
 dependencies {
-
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxCore
+
+    implementation dependenciesList.supportAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint

@@ -7,9 +7,5 @@ internal class NavigationArriveEvent(
     phoneState: PhoneState
 ) : NavigationEvent(phoneState) {
 
-    companion object {
-        private const val NAVIGATION_ARRIVE = "navigation.arrive"
-    }
-
-    override fun getEventName(): String = NAVIGATION_ARRIVE
+    override fun getEventName(): String = NavigationMetrics.ARRIVE
 }

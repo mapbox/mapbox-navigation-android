@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter;
+
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -15,7 +17,8 @@ public class InitialGpsEventFactoryTest {
   public void navigationStarted_elapsedTimeStarts() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
 
     factory.navigationStarted("some_session");
 
@@ -26,7 +29,8 @@ public class InitialGpsEventFactoryTest {
   public void gpsReceived_elapsedTimeEnds() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
     NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
 
     factory.gpsReceived(metadata);
@@ -38,9 +42,10 @@ public class InitialGpsEventFactoryTest {
   public void validData_sendsCorrectEvent() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
-    String sessionId = "some_session";
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
     NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
+    String sessionId = "some_session";
 
     factory.navigationStarted(sessionId);
     waitingForGps();
@@ -53,9 +58,10 @@ public class InitialGpsEventFactoryTest {
   public void validData_doesNotSendEventTwice() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
-    String sessionId = "some_session";
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
     NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
+    String sessionId = "some_session";
 
     factory.navigationStarted(sessionId);
     waitingForGps();
@@ -69,7 +75,8 @@ public class InitialGpsEventFactoryTest {
   public void invalidStart_doesNotSend() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
     NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
 
     factory.gpsReceived(metadata);
@@ -81,10 +88,11 @@ public class InitialGpsEventFactoryTest {
   public void reset_allowsNewEventToBeSent() {
     ElapsedTime time = mock(ElapsedTime.class);
     InitialGpsEventHandler handler = mock(InitialGpsEventHandler.class);
+    MetricsReporter metricsReporter = mock(MetricsReporter.class);
+    InitialGpsEventFactory factory = new InitialGpsEventFactory(metricsReporter, time, handler);
+    NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
     String firstSessionId = "first_session";
     String secondSessionId = "second_session";
-    InitialGpsEventFactory factory = new InitialGpsEventFactory(time, handler);
-    NavigationPerformanceMetadata metadata = mock(NavigationPerformanceMetadata.class);
 
     factory.navigationStarted(firstSessionId);
     waitingForGps();

@@ -21,4 +21,7 @@ dependencies {
 
     //ktlint
     ktlint dependenciesList.ktlint
+
+    // Logging
+    implementation dependenciesList.timber
 }

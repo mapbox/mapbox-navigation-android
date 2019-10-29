@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.annotation.SuppressLint
 import android.location.Location
+import com.google.gson.Gson
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 
 @SuppressLint("ParcelCreator")
@@ -30,4 +31,6 @@ internal class NavigationRerouteEvent(
     var screenshot: String? = null
 
     override fun getEventName(): String = NAVIGATION_REROUTE
+
+    override fun toJson(gson: Gson): String = gson.toJson(this)
 }

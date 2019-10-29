@@ -7,9 +7,5 @@ internal class NavigationDepartEvent(
     phoneState: PhoneState
 ) : NavigationEvent(phoneState) {
 
-    companion object {
-        private const val NAVIGATION_DEPART = "navigation.depart"
-    }
-
-    override fun getEventName(): String = NAVIGATION_DEPART
+    override fun getEventName(): String = NavigationMetrics.DEPART
 }

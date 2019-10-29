@@ -15,6 +15,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher;
@@ -22,6 +23,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationS
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -146,6 +148,7 @@ public class MapboxNavigation implements ServiceConnection {
     initialize();
   }
 
+
   // TODO public?
   // Package private (no modifier) for testing purposes
   public MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
@@ -157,7 +160,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
     this.mapboxNavigator = mapboxNavigator;
-    initializeForTest();
+    initializeForTest(context);
   }
 
   // Package private (no modifier) for testing purposes
@@ -169,7 +172,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
-    initializeForTest();
+    initializeForTest(context);
   }
 
   // Lifecycle
@@ -387,6 +390,7 @@ public class MapboxNavigation implements ServiceConnection {
       applicationContext.unbindService(this);
       isBound = false;
       navigationService.endNavigation();
+      MapboxMetricsReporter.disable();
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
     }
@@ -814,9 +818,11 @@ public class MapboxNavigation implements ServiceConnection {
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
     NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
-    navigationService = binder.getService();
-    navigationService.startNavigation(this);
-    isBound = true;
+    if (binder != null) {
+      navigationService = binder.getService();
+      navigationService.startNavigation(this);
+      isBound = true;
+    }
   }
 
   @Override
@@ -873,13 +879,13 @@ public class MapboxNavigation implements ServiceConnection {
     return routeRefresher;
   }
 
-  private void initializeForTest() {
+  private void initializeForTest(Context context) {
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
-    initializeTelemetry();
+    initializeTelemetryForTest(context);
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
@@ -920,7 +926,32 @@ public class MapboxNavigation implements ServiceConnection {
 
   private void initializeTelemetry() {
     navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this);
+    MapboxMetricsReporter.init(
+            applicationContext,
+            accessToken,
+            BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
+    );
+    navigationTelemetry.initialize(
+            applicationContext,
+            accessToken,
+            this,
+            MapboxMetricsReporter.INSTANCE
+    );
+  }
+
+  private void initializeTelemetryForTest(Context context) {
+    navigationTelemetry = obtainTelemetry();
+    MapboxMetricsReporter.init(
+            context,
+            accessToken,
+            BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
+    );
+    navigationTelemetry.initialize(
+            applicationContext,
+            accessToken,
+            this,
+            MapboxMetricsReporter.INSTANCE
+    );
   }
 
   private NavigationTelemetry obtainTelemetry() {

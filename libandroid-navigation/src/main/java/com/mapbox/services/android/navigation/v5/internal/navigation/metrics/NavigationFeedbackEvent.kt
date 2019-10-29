@@ -9,11 +9,6 @@ internal class NavigationFeedbackEvent(
     phoneState: PhoneState,
     metricsRouteProgress: MetricsRouteProgress
 ) : NavigationEvent(phoneState) {
-
-    companion object {
-        private const val NAVIGATION_FEEDBACK = "navigation.feedback"
-    }
-
     /*
      * Don't remove any fields, cause they are should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
@@ -28,5 +23,5 @@ internal class NavigationFeedbackEvent(
     var locationsAfter: Array<Location>? = null
     var screenshot: String? = null
 
-    override fun getEventName(): String = NAVIGATION_FEEDBACK
+    override fun getEventName(): String = NavigationMetrics.FEEDBACK
 }

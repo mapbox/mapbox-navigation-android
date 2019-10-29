@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
@@ -14,7 +15,11 @@ import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.RerouteEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.SessionState
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
@@ -40,13 +45,13 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private lateinit var eventDispatcher: NavigationEventDispatcher
     private lateinit var departEventFactory: DepartEventFactory
 
+    private var gpsEventFactory: InitialGpsEventFactory? = null
     private val queuedRerouteEvents = ArrayList<RerouteEvent>()
     private val queuedFeedbackEvents = ArrayList<FeedbackEvent>()
     private val locationBuffer: RingBuffer<Location> = RingBuffer(LOCATION_BUFFER_MAX_SIZE)
     private var metricProgress: MetricsRouteProgress = MetricsRouteProgress(null)
     private var navigationSessionState: SessionState = SessionState()
     private var metricLocation: MetricsLocation = MetricsLocation(null)
-    private val gpsEventFactory = InitialGpsEventFactory()
     private var isOffRoute: Boolean = false
     private var isInitialized = false
 
@@ -55,28 +60,32 @@ internal object NavigationTelemetry : NavigationMetricListener {
     private var routeRetrievalElapsedTime: ElapsedTime? = null
     private var routeRetrievalUuid: String = "" // empty string is treated as error
 
+    private var sdkIdentifier: String? = null
+    private var metricsReporter: MetricsReporter = MapboxMetricsReporter
+
+    @JvmOverloads
     fun initialize(
         context: Context,
         accessToken: String,
-        navigation: MapboxNavigation
+        navigation: MapboxNavigation,
+        metricsReporter: MetricsReporter = MapboxMetricsReporter
     ) {
+        this.metricsReporter = metricsReporter
         if (!isInitialized) {
             validateAccessToken(accessToken)
-            val departEventHandler = DepartEventHandler(context)
-            this.departEventFactory = DepartEventFactory(departEventHandler)
-            this.context = context
             val options = navigation.options()
-            NavigationMetricsWrapper.init(
-                context,
-                accessToken,
-                BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT,
-                obtainSdkIdentifier(options)
-            )
-            NavigationMetricsWrapper.toggleLogging(options.isDebugLoggingEnabled)
-            val navTurnstileEvent = NavigationMetricsWrapper.turnstileEvent()
-            // TODO Check if we are sending two turnstile events (Maps and Nav) and if so, do we want to track them
-            // separately?
-            NavigationMetricsWrapper.push(navTurnstileEvent)
+            val sdkIdentifier = obtainSdkIdentifier(options)
+            this.sdkIdentifier = sdkIdentifier
+
+            val departEventHandler = DepartEventHandler(context, sdkIdentifier, metricsReporter)
+            this.departEventFactory = DepartEventFactory(departEventHandler)
+            this.gpsEventFactory = InitialGpsEventFactory(metricsReporter)
+            this.context = context
+
+            if (metricsReporter is MapboxMetricsReporter) {
+                val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
+                metricsReporter.addAppTurnstileEvent(turnstileEvent)
+            }
             isInitialized = true
         }
         this.eventDispatcher = navigation.eventDispatcher
@@ -109,12 +118,14 @@ internal object NavigationTelemetry : NavigationMetricListener {
         }
         updateLifecyclePercentages()
         // Send arrival event
-        NavigationMetricsWrapper.arriveEvent(
+        val event = NavigationEventFactory.buildNavigationArriveEvent(
+            PhoneState(context),
             navigationSessionState,
-            routeProgress,
+            MetricsRouteProgress(routeProgress),
             metricLocation.location,
-            context
+            sdkIdentifier ?: ""
         )
+        metricsReporter.addEvent(event)
     }
 
     /**
@@ -139,12 +150,12 @@ internal object NavigationTelemetry : NavigationMetricListener {
             rerouteCount = 0
         }
         sendRouteRetrievalEventIfExists()
-        gpsEventFactory.navigationStarted(navigationSessionState.sessionIdentifier)
+        gpsEventFactory?.navigationStarted(navigationSessionState.sessionIdentifier)
     }
 
     fun stopSession() {
         sendCancelEvent()
-        gpsEventFactory.reset()
+        gpsEventFactory?.reset()
         resetDepartFactory()
     }
 
@@ -192,7 +203,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
     }
 
     fun updateLocation(context: Context, location: Location) {
-        gpsEventFactory.gpsReceived(MetadataBuilder.getMetadata(context))
+        gpsEventFactory?.gpsReceived(MetadataBuilder.getMetadata(context))
         metricLocation = MetricsLocation(location)
         locationBuffer.addLast(location)
         checkRerouteQueue()
@@ -272,7 +283,6 @@ internal object NavigationTelemetry : NavigationMetricListener {
     fun endSession() {
         flushEventQueues()
         lifecycleMonitor = null
-        NavigationMetricsWrapper.disable()
         isInitialized = false
     }
 
@@ -281,12 +291,13 @@ internal object NavigationTelemetry : NavigationMetricListener {
         routeUuid: String
     ) {
         if (navigationSessionState.sessionIdentifier.isNotEmpty()) {
-            NavigationMetricsWrapper.routeRetrievalEvent(
+            val event = RouteRetrievalEvent(
                 elapsedTime.elapsedTime,
                 routeUuid,
                 navigationSessionState.sessionIdentifier,
                 MetadataBuilder.getMetadata(context)
             )
+            metricsReporter.addEvent(event)
         } else {
             routeRetrievalElapsedTime = elapsedTime
             routeRetrievalUuid = routeUuid
@@ -319,12 +330,14 @@ internal object NavigationTelemetry : NavigationMetricListener {
 
     private fun sendCancelEvent() {
         ifNonNull(navigationSessionState.startTimestamp) {
-            NavigationMetricsWrapper.cancelEvent(
+            val event = NavigationEventFactory.buildNavigationCancelEvent(
+                PhoneState(context),
                 navigationSessionState,
                 metricProgress,
                 metricLocation.location,
-                context
+                sdkIdentifier ?: ""
             )
+            metricsReporter.addEvent(event)
         }
     }
 
@@ -450,12 +463,15 @@ internal object NavigationTelemetry : NavigationMetricListener {
         // Update session state with locations from before / after the reroute occurred
         rerouteSessionState.beforeEventLocations = createLocationListBeforeEvent(rerouteSessionState.eventDate)
         rerouteSessionState.afterEventLocations = createLocationListAfterEvent(rerouteSessionState.eventDate)
-        NavigationMetricsWrapper.rerouteEvent(
-            rerouteEvent,
+        val event = NavigationEventFactory.buildNavigationRerouteEvent(
+            PhoneState(context),
+            rerouteEvent.sessionState,
             metricProgress,
             rerouteSessionState.eventLocation,
-            context
+            sdkIdentifier ?: "",
+            rerouteEvent
         )
+        metricsReporter.addEvent(event)
     }
 
     private fun sendFeedbackEvent(feedbackEvent: FeedbackEvent) {
@@ -466,16 +482,18 @@ internal object NavigationTelemetry : NavigationMetricListener {
         // Update sessions state with locations from before / after feedback
         feedbackSessionState.beforeEventLocations = createLocationListBeforeEvent(feedbackSessionState.eventDate)
         feedbackSessionState.afterEventLocations = createLocationListAfterEvent(feedbackSessionState.eventDate)
-        NavigationMetricsWrapper.feedbackEvent(
+        val event = NavigationEventFactory.buildNavigationFeedbackEvent(
+            PhoneState(context),
             feedbackSessionState,
             metricProgress,
             feedbackSessionState.eventLocation,
+            sdkIdentifier ?: "",
             feedbackEvent.description ?: "",
             feedbackEvent.feedbackType,
             feedbackEvent.screenshot ?: "",
-            feedbackEvent.feedbackSource,
-            context
+            feedbackEvent.feedbackSource
         )
+        metricsReporter.addEvent(event)
     }
 
     private fun dateDiff(
