@@ -2,7 +2,7 @@ package com.mapbox.navigation.navigator
 
 import android.location.Location
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.Route
+import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus

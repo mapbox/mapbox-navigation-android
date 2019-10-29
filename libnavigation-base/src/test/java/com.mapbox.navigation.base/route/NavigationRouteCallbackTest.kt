@@ -2,12 +2,9 @@ package com.mapbox.navigation.base.route
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.route.NavigationRouteCallback
-import com.mapbox.navigation.base.route.NavigationRouteEventListener
 import com.mapbox.navigation.utils.time.ElapsedTime
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.verify
 import java.util.ArrayList
 import org.junit.Test

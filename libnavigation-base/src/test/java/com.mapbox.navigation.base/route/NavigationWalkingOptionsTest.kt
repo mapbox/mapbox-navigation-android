@@ -1,8 +1,7 @@
 package com.mapbox.navigation.base.route
 
-import org.junit.Test
-
 import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class NavigationWalkingOptionsTest {
 

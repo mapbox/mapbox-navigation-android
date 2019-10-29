@@ -115,8 +115,7 @@ internal constructor(
         constructor() : this(MapboxDirections.builder()) {}
 
         init {
-            this.eventListener =
-                EVENT_LISTENER
+            this.eventListener = EVENT_LISTENER
         }
 
         /**
