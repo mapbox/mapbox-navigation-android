@@ -18,4 +18,3 @@ interface Router {
         fun onFailure(throwable: Throwable)
     }
 }
-
