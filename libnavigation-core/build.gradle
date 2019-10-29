@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+    buildToolsVersion androidVersions.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-consumer.pro'
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+}
+
+dependencies {
+    compileOnly(project(':annotations'))
+    kapt(project(':annotations-processor'))
+
+    api(project(':libnavigation-base'))
+    implementation project(':libnavigation-util')
+    implementation project(':liblogger')
+    implementation project(':libdirections-session')
+    implementation project(':libtrip-session')
+    implementation(project(':libnavigator'))
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    implementation dependenciesList.kotlinStdLib
+
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
+    testImplementation dependenciesList.robolectric
+}

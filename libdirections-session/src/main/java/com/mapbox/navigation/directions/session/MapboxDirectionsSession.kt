@@ -1,12 +1,15 @@
-package com.mapbox.navigation
+package com.mapbox.navigation.directions.session
 
+import com.mapbox.annotation.navigation.module.MapboxNavigationModule
+import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
 import java.util.concurrent.CopyOnWriteArrayList
 
-class DefaultDirectionsSession(private val router: Router, origin: Point, waypoints: List<Point>) : DirectionsSession {
+@MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
+class MapboxDirectionsSession(private val router: Router) : DirectionsSession {
 
     override var currentRoute: Route? = null
         set(value) {
@@ -17,29 +20,25 @@ class DefaultDirectionsSession(private val router: Router, origin: Point, waypoi
             routeObservers.forEach { it.onRouteChanged(value) }
         }
 
-    override var origin: Point = origin
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-            requestRoute()
-        }
+    private lateinit var origin: Point
 
-    override var waypoints: List<Point> = waypoints
-        set(value) {
-            if (field == value) {
-                return
-            }
-            field = value
-            requestRoute()
-        }
+    private lateinit var waypoints: List<Point>
 
     private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
 
-    init {
+    override fun setOrigin(point: Point) {
+        origin = point
         requestRoute()
     }
+
+    override fun getOrigin() = origin
+
+    override fun setWaypoints(points: List<Point>) {
+        waypoints = points
+        requestRoute()
+    }
+
+    override fun getWaypoints() = waypoints
 
     override fun registerRouteObserver(routeObserver: DirectionsSession.RouteObserver) {
         routeObservers.add(routeObserver)
@@ -55,9 +54,12 @@ class DefaultDirectionsSession(private val router: Router, origin: Point, waypoi
     }
 
     private fun requestRoute() {
-        currentRoute = null
-        router.getRoute(origin, waypoints) {
-            currentRoute = it
+        if (::origin.isInitialized && ::waypoints.isInitialized) {
+            router.cancel()
+            currentRoute = null
+            router.getRoute(origin, waypoints) {
+                currentRoute = it
+            }
         }
     }
 }

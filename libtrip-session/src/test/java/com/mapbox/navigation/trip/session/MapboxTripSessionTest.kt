@@ -1,4 +1,4 @@
-package com.mapbox.navigation
+package com.mapbox.navigation.trip.session
 
 import android.location.Location
 import android.os.Handler
@@ -20,10 +20,13 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class DefaultTripSessionTest {
+@RunWith(RobolectricTestRunner::class)
+class MapboxTripSessionTest {
 
-    private lateinit var tripSession: DefaultTripSession
+    private lateinit var tripSession: MapboxTripSession
 
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
@@ -47,14 +50,7 @@ class DefaultTripSessionTest {
 
     @Before
     fun setUp() {
-        tripSession = DefaultTripSession(
-            tripService,
-            locationEngine,
-            locationEngineRequest,
-            navigator,
-            mainHandler,
-            workerHandler
-        )
+        tripSession = MapboxTripSession(tripService, locationEngine, locationEngineRequest, navigator, mainHandler, workerHandler)
 
         every { navigator.getStatus(any()) } returns tripStatus
         every { tripStatus.enhancedLocation } returns enhancedLocation

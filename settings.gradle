@@ -1,13 +1,21 @@
 include ':app',
         ':libandroid-navigation',
+        ':libandroid-navigation-ui',
         ':libnavigator',
         ':libnavigation-base',
         ':libdirections-onboard',
         ':libdirections-offboard',
         ':libdirections-hybrid',
-        ':libnavigation-metrics',
+       ':libnavigation-metrics',
         ':libtrip-service',
         ':libtrip-notification',
         ':liblogger',
-        ':libnavigation-util'
-include ':libandroid-navigation-ui'
+        ':libnavigation-util',
+        ':annotations',
+        ':annotations-processor',
+        ':libdirections-session',
+        ':libtrip-session',
+        ':libnavigation-core'
+
+project(":annotations").projectDir = new File("vendor/mapbox-events-android/annotations")
+project(":annotations-processor").projectDir = new File("vendor/mapbox-events-android/annotations-processor")

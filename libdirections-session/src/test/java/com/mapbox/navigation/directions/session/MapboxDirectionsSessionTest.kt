@@ -1,10 +1,9 @@
-package com.mapbox.navigation
+package com.mapbox.navigation.directions.session
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
@@ -12,9 +11,9 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
-class DefaultDirectionsSessionTest {
+class MapboxDirectionsSessionTest {
 
-    private lateinit var session: DefaultDirectionsSession
+    private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
     private val origin: Point = mockk(relaxUnitFun = true)
@@ -25,10 +24,9 @@ class DefaultDirectionsSessionTest {
 
     @Before
     fun setUp() {
-        every { router.getRoute(origin, waypoints, captureLambda()) } answers {
-            routeCallback = thirdArg()
-        }
-        session = DefaultDirectionsSession(router, origin, waypoints)
+        session = MapboxDirectionsSession(router)
+        session.setOrigin(origin)
+        session.setWaypoints(waypoints)
     }
 
     @Test
@@ -48,31 +46,31 @@ class DefaultDirectionsSessionTest {
 
     @Test
     fun getOrigin() {
-        assertEquals(origin, session.origin)
+        assertEquals(origin, session.getOrigin())
     }
 
     @Test
     fun setOrigin() {
         val newOrigin: Point = mockk()
-        session.origin = newOrigin
+        session.setOrigin(newOrigin)
 
         assertNull(session.currentRoute)
-        assertEquals(newOrigin, session.origin)
+        assertEquals(newOrigin, session.getOrigin())
         verify { router.getRoute(eq(newOrigin), eq(waypoints), any()) }
     }
 
     @Test
     fun getWaypoints() {
-        assertEquals(waypoints, session.waypoints)
+        assertEquals(waypoints, session.getWaypoints())
     }
 
     @Test
     fun setWaypoints() {
         val newWaypoints: List<Point> = mockk()
-        session.waypoints = newWaypoints
+        session.setWaypoints(newWaypoints)
 
         assertNull(session.currentRoute)
-        assertEquals(newWaypoints, session.waypoints)
+        assertEquals(newWaypoints, session.getWaypoints())
         verify { router.getRoute(eq(origin), eq(newWaypoints), any()) }
     }
 

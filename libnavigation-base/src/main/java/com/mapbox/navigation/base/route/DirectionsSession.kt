@@ -3,9 +3,12 @@ package com.mapbox.navigation.base.route
 import com.mapbox.geojson.Point
 
 interface DirectionsSession {
-    var origin: Point
-    var waypoints: List<Point>
     var currentRoute: Route?
+
+    fun setOrigin(point: Point)
+    fun getOrigin(): Point
+    fun setWaypoints(points: List<Point>)
+    fun getWaypoints(): List<Point>
 
     fun registerRouteObserver(routeObserver: RouteObserver)
     fun unregisterRouteObserver(routeObserver: RouteObserver)
