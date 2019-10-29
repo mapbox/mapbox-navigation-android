@@ -5,6 +5,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigator.Navigator
 import com.mapbox.services.android.navigation.v5.BaseTest
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry
 import com.mapbox.services.android.navigation.v5.route.FasterRoute
@@ -98,7 +99,8 @@ class FasterRouteDetectorTest : BaseTest() {
             ACCESS_TOKEN,
             options,
             mockk<NavigationTelemetry>(relaxed = true),
-            mockk<LocationEngine>(relaxed = true)
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true)
         )
     }
 

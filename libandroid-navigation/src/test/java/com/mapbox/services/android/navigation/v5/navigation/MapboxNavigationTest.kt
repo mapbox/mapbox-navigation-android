@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.navigator.Navigator
 import com.mapbox.services.android.navigation.v5.BaseTest
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry
@@ -340,7 +341,8 @@ class MapboxNavigationTest : BaseTest() {
             ACCESS_TOKEN,
             options,
             mockk<NavigationTelemetry>(relaxed = true),
-            mockk<LocationEngine>(relaxed = true)
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true)
         )
     }
 
