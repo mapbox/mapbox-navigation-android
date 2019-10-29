@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.every
 import io.mockk.mockk
@@ -110,10 +111,10 @@ class OfflineRouteTest {
         assertTrue(offlineUrlDecoded.contains("break;through;;break"))
     }
 
-    private fun provideOnlineRouteBuilder(): com.mapbox.navigation.route.offboard.NavigationRoute.Builder {
+    private fun provideOnlineRouteBuilder(): NavigationRoute.Builder {
         val context = mockk<Context>()
         every { context.inferDeviceLocale() } returns Locale.US
-        return com.mapbox.navigation.route.offboard.NavigationRoute.builder(context)
+        return NavigationRoute.builder(context)
             .accessToken("pk.XXX")
             .origin(Point.fromLngLat(1.0, 2.0))
             .addWaypoint(Point.fromLngLat(3.0, 2.0))
