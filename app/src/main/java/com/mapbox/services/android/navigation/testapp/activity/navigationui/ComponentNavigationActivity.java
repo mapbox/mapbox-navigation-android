@@ -51,6 +51,7 @@ import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -74,7 +75,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener, OffRouteListener {
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener,
+  OffRouteListener, EnhancedLocationListener {
 
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -211,6 +213,12 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     // Update InstructionView data from RouteProgress
     instructionView.updateDistanceWith(routeProgress);
+  }
+
+  @Override
+  public void onEnhancedLocationUpdate(Location location) {
+    checkFirstUpdate(location);
+    updateLocation(location);
   }
 
   @Override
@@ -416,15 +424,16 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-      navigation.getLocationEngine().removeLocationUpdates(callback);
+      navigation.disableFreeDrive();
+      navigation.removeEnhancedLocationListener(this);
     }
   }
 
   @SuppressLint("MissingPermission")
   private void addLocationEngineListener() {
     if (locationEngine != null) {
-      LocationEngineRequest request = buildEngineRequest();
-      navigation.getLocationEngine().requestLocationUpdates(request, callback, null);
+      navigation.addEnhancedLocationListener(this);
+      navigation.enableFreeDrive();
     }
   }
 

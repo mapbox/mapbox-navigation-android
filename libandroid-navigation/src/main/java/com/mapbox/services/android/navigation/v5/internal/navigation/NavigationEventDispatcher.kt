@@ -6,6 +6,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.Nav
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener
@@ -23,6 +24,7 @@ internal class NavigationEventDispatcher {
     private val offRouteListeners: CopyOnWriteArrayList<OffRouteListener>
     private val fasterRouteListeners: CopyOnWriteArrayList<FasterRouteListener>
     private val rawLocationListeners: CopyOnWriteArrayList<RawLocationListener>
+    private val enhancedLocationListeners: CopyOnWriteArrayList<EnhancedLocationListener>
     private val routeUtils: RouteUtils
     private var metricEventListener: NavigationMetricListener? = null
 
@@ -36,6 +38,7 @@ internal class NavigationEventDispatcher {
         offRouteListeners = CopyOnWriteArrayList()
         fasterRouteListeners = CopyOnWriteArrayList()
         rawLocationListeners = CopyOnWriteArrayList()
+        enhancedLocationListeners = CopyOnWriteArrayList()
     }
 
     fun addMilestoneEventListener(milestoneEventListener: MilestoneEventListener) {
@@ -146,6 +149,24 @@ internal class NavigationEventDispatcher {
         }
     }
 
+    fun addEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener) {
+        if (enhancedLocationListeners.contains(enhancedLocationListener)) {
+            Timber.w("The specified EnhancedLocationListener has already been added to the stack.")
+            return
+        }
+        enhancedLocationListeners.add(enhancedLocationListener)
+    }
+
+    fun removeEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener?) {
+        if (enhancedLocationListener == null) {
+            enhancedLocationListeners.clear()
+        } else if (!enhancedLocationListeners.contains(enhancedLocationListener)) {
+            Timber.w("The specified EnhancedLocationListener isn't found in stack, therefore, cannot be removed.")
+        } else {
+            enhancedLocationListeners.remove(enhancedLocationListener)
+        }
+    }
+
     fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
         checkForArrivalEvent(routeProgress)
         for (milestoneEventListener in milestoneEventListeners) {
@@ -182,6 +203,12 @@ internal class NavigationEventDispatcher {
     fun onLocationUpdate(location: Location) {
         for (listener in rawLocationListeners) {
             listener.onLocationUpdate(location)
+        }
+    }
+
+    fun onEnhancedLocationUpdate(location: Location) {
+        for (listener in enhancedLocationListeners) {
+            listener.onEnhancedLocationUpdate(location)
         }
     }
 
