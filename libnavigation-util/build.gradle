@@ -22,4 +22,9 @@ dependencies {
 
     //ktlint
     ktlint dependenciesList.ktlint
+
+    // Unit testing
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockito // deprecated
+    testImplementation dependenciesList.mockk
 }

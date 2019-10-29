@@ -8,11 +8,20 @@ import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 
 class MapboxHybridRouter(
     private val onboardRouter: MapboxOnboardRouter,
-    private val offboardRouter: MapboxOffboardRouter = MapboxOffboardRouter()
+    private val offboardRouter: MapboxOffboardRouter
 ) : Router {
 
     override fun getRoute(origin: Point, waypoints: List<Point>, callback: (route: Route) -> Unit) {
         TODO("not implemented")
+    }
+
+    override fun getRoute(
+        origin: Point,
+        waypoints: List<Point>?,
+        destination: Point,
+        listener: Router.RouteListener
+    ) {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun cancel() {
