@@ -31,7 +31,7 @@ class NavigationRouteCallback(
         return response.body()?.routes()?.isNotEmpty() ?: false
     }
 
-    //
+    // TODO move NavigationTelemetry to separate module
     private fun sendEventWith(time: ElapsedTime, uuid: String) {
         // NavigationTelemetry.routeRetrievalEvent(time, uuid)
     }
