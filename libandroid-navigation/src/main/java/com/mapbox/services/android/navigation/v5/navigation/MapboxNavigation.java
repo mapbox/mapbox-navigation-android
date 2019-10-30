@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import retrofit2.Callback;
 import timber.log.Timber;
@@ -86,9 +87,9 @@ public class MapboxNavigation implements ServiceConnection {
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
-  private boolean isFreeDriveEnabled = false;
-  private boolean isFreeDriveConfigured = false;
-  private boolean isActiveGuidanceOnGoing = false;
+  private AtomicBoolean isFreeDriveEnabled = new AtomicBoolean(false);
+  private AtomicBoolean isFreeDriveConfigured = new AtomicBoolean(false);
+  private AtomicBoolean isActiveGuidanceOnGoing = new AtomicBoolean(false);
 
   static {
     NavigationLibraryLoader.Companion.load();
@@ -402,8 +403,8 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void stopNavigation() {
     Timber.d("MapboxNavigation stopNavigation called");
-    isActiveGuidanceOnGoing = false;
-    if (isFreeDriveEnabled) {
+    isActiveGuidanceOnGoing.set(false);
+    if (isFreeDriveEnabled.get()) {
       enableFreeDrive();
     }
     stopNavigationService();
@@ -416,7 +417,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void killFreeDrive() {
-    if (isFreeDriveConfigured) {
+    if (isFreeDriveConfigured.get()) {
       freeDriveLocationUpdater.kill();
     }
   }
@@ -688,16 +689,16 @@ public class MapboxNavigation implements ServiceConnection {
    * added using {@link #addEnhancedLocationListener(EnhancedLocationListener)}.
    */
   public void enableFreeDrive() {
-    isFreeDriveEnabled = true;
-    if (!isFreeDriveConfigured) {
+    isFreeDriveEnabled.set(true);
+    if (!isFreeDriveConfigured.get()) {
       freeDriveLocationUpdater.configure(applicationContext.getFilesDir(), "2019_04_13-00_00_11",
           "https://api-routing-tiles-staging.tilestream.net", accessToken,
           new OnOfflineTilesConfiguredCallback() {
             @Override
             public void onConfigured(int numberOfTiles) {
               Timber.d("DEBUG: onConfigured %d", numberOfTiles);
-              isFreeDriveConfigured = true;
-              if (!isActiveGuidanceOnGoing) {
+              isFreeDriveConfigured.set(true);
+              if (!isActiveGuidanceOnGoing.get() && isFreeDriveEnabled.get()) {
                 freeDriveLocationUpdater.start();
               }
             }
@@ -705,11 +706,11 @@ public class MapboxNavigation implements ServiceConnection {
             @Override
             public void onConfigurationError(@NotNull OfflineError error) {
               Timber.e("Free drive: onConfigurationError %s", error.getMessage());
-              isFreeDriveConfigured = false;
+              isFreeDriveConfigured.set(false);
             }
           });
     } else {
-      if (!isActiveGuidanceOnGoing) {
+      if (!isActiveGuidanceOnGoing.get()) {
         freeDriveLocationUpdater.start();
       }
     }
@@ -719,8 +720,8 @@ public class MapboxNavigation implements ServiceConnection {
    * Calling this method disables free drive mode.
    */
   public void disableFreeDrive() {
-    isFreeDriveEnabled = false;
-    if (isFreeDriveConfigured) {
+    isFreeDriveEnabled.set(false);
+    if (isFreeDriveConfigured.get()) {
       freeDriveLocationUpdater.stop();
     }
   }
@@ -1096,7 +1097,7 @@ public class MapboxNavigation implements ServiceConnection {
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
-    isActiveGuidanceOnGoing = true;
+    isActiveGuidanceOnGoing.set(true);
     if (!isBound) {
       disableFreeDrive();
       navigationTelemetry.startSession(directionsRoute, locationEngine);
