@@ -5,8 +5,6 @@ import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
 import io.mockk.mockk

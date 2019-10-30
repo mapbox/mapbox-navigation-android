@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.internal.utils.extensions
 
 import com.mapbox.android.telemetry.Event
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.DirectionsMetrics
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationAppUserTurnstileEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 
 internal fun MetricEvent.toTelemetryEvent(): Event? =
     when (metric) {

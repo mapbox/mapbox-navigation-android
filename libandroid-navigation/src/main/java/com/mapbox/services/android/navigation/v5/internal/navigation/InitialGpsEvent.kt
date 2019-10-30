@@ -3,9 +3,9 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import com.google.gson.Gson
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationPerformanceEvent
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 
 @SuppressLint("ParcelCreator")
 internal data class InitialGpsEvent(
