@@ -1,7 +1,8 @@
-package com.mapbox.navigation.base.metrics
+package com.mapbox.navigation.base.internal.metrics
 
 /**
  * Interface for observe metric events handled.
+ *
  * @since 1.0.0
  */
 interface MetricsObserver {

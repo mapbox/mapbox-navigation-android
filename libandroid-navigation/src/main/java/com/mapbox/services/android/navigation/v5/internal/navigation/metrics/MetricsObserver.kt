@@ -1,7 +1,8 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 /**
  * Interface for observe metric events handled.
+ *
  * @since 0.43.0
  */
 interface MetricsObserver {

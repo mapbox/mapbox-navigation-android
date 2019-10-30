@@ -1,14 +1,14 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.content.Context
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
 
 /**
  * Default implementation of [MetricsReporter] interface.
+ *
  * @since 0.43.0
  */
 object MapboxMetricsReporter : MetricsReporter {
@@ -58,14 +58,6 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         mapboxTelemetry.disable()
         threadWorker.stop()
-    }
-
-    fun addAppTurnstileEvent(event: AppUserTurnstile) {
-        mapboxTelemetry.push(event)
-
-        threadWorker.post {
-            metricsObserver?.onMetricUpdated(NavigationMetrics.APP_USER_TURNSTILE, gson.toJson(event))
-        }
     }
 
     override fun addEvent(metricEvent: MetricEvent) {

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.metrics
+package com.mapbox.navigation.base.internal.metrics
 
 object DirectionsMetrics {
 

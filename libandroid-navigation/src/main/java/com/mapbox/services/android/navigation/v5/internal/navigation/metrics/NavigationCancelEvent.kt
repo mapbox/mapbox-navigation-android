@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.annotation.SuppressLint
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
 internal class NavigationCancelEvent(
