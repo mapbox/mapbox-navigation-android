@@ -5,10 +5,9 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import com.mapbox.navigation.utils.testsupport.Extensions
-import com.mapbox.navigation.utils.testsupport.mockkStaticSupport
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.Locale
@@ -23,7 +22,7 @@ class OfflineRouteTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            mockkStaticSupport(Extensions.ContextEx)
+            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
         }
     }
 
