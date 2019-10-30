@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

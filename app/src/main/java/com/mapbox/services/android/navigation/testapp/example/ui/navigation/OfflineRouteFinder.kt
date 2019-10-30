@@ -9,6 +9,7 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
