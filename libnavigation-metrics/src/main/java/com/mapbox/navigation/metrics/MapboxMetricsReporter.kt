@@ -4,13 +4,17 @@ import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
+import com.mapbox.navigation.base.internal.metrics.NavigationMetrics
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 
+/**
+ * Default implementation of [MetricsReporter] interface.
+ * @since 0.43.0
+ */
 object MapboxMetricsReporter : MetricsReporter {
 
     private val gson = Gson()
@@ -19,6 +23,14 @@ object MapboxMetricsReporter : MetricsReporter {
     private var metricsObserver: MetricsObserver? = null
     private var threadWorker = WorkThreadHandler("MapboxMetricsReporter")
 
+    /**
+     * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
+     *
+     * @param context Android context
+     * @param accessToken Mapbox access token
+     * @param userAgent Use agent indicate source of metrics
+     * @since 0.43.0
+     */
     @JvmStatic
     fun init(
         context: Context,
@@ -39,6 +51,11 @@ object MapboxMetricsReporter : MetricsReporter {
         mapboxTelemetry.enable()
     }
 
+    /**
+     * Disable [mapboxTelemetry] to finish telemetry session when it needed.
+     *
+     * @since 0.43.0
+     */
     @JvmStatic
     fun disable() {
         mapboxTelemetry.disable()

@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
+package com.mapbox.navigation.base.internal.metrics
 
 internal object DirectionsMetrics {
 

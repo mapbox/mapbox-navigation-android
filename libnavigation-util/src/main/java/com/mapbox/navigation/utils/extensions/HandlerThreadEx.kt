@@ -5,7 +5,7 @@ package com.mapbox.navigation.utils.extensions
 import android.os.Build
 import android.os.HandlerThread
 
-fun HandlerThread.quitSafelySupport() {
+internal fun HandlerThread.quitSafelySupport() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
         this.quitSafely()
     } else {

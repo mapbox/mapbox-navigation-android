@@ -1,12 +1,13 @@
-package com.mapbox.services.android.navigation.v5.utils.extensions
+package com.mapbox.services.android.navigation.v5.navigation.metrics
 
-import com.mapbox.android.telemetry.Event
+import androidx.annotation.StringDef
+import com.google.gson.Gson
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.DirectionsMetrics
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
 
-fun MetricEvent.toTelemetryEvent(): Event? =
-    when (metric) {
+interface MetricEvent {
+
+    @StringDef(
         DirectionsMetrics.ROUTE_RETRIEVAL,
         NavigationMetrics.ARRIVE,
         NavigationMetrics.CANCEL_SESSION,
@@ -14,6 +15,12 @@ fun MetricEvent.toTelemetryEvent(): Event? =
         NavigationMetrics.REROUTE,
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
-        NavigationMetrics.APP_USER_TURNSTILE -> this as Event
-        else -> null
-    }
+        NavigationMetrics.APP_USER_TURNSTILE
+    )
+    annotation class Metric
+
+    @Metric
+    val metric: String
+
+    fun toJson(gson: Gson): String
+}
