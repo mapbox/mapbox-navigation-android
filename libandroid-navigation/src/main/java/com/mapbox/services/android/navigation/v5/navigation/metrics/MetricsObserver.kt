@@ -1,9 +1,9 @@
-package com.mapbox.navigation.base.metrics
+package com.mapbox.services.android.navigation.v5.navigation.metrics
 
 /**
  * Interface for observe metric events handled.
  *
- * @since 1.0.0
+ * @since 0.43.0
  */
 interface MetricsObserver {
 
@@ -12,7 +12,7 @@ interface MetricsObserver {
      *
      * @param metric metric event name
      * @param jsonStringData metric data in JSON string representation
-     * @since 1.0.0
+     * @since 0.43.0
      */
     fun onMetricUpdated(@MetricEvent.Metric metric: String, jsonStringData: String)
 }

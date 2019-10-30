@@ -23,7 +23,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationS
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry;
 import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter;
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -61,6 +61,8 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  */
 public class MapboxNavigation implements ServiceConnection {
 
+  private static final String MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android";
+  private static final String MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android";
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
   private NavigationEventDispatcher navigationEventDispatcher;
@@ -885,7 +887,7 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
-    initializeTelemetryForTest(context);
+    initializeTelemetry(context);
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
@@ -907,7 +909,7 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
-    initializeTelemetry();
+    initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
@@ -924,27 +926,12 @@ public class MapboxNavigation implements ServiceConnection {
     applicationContext = context.getApplicationContext();
   }
 
-  private void initializeTelemetry() {
-    navigationTelemetry = obtainTelemetry();
-    MapboxMetricsReporter.init(
-            applicationContext,
-            accessToken,
-            BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
-    );
-    navigationTelemetry.initialize(
-            applicationContext,
-            accessToken,
-            this,
-            MapboxMetricsReporter.INSTANCE
-    );
-  }
-
-  private void initializeTelemetryForTest(Context context) {
+  private void initializeTelemetry(Context context) {
     navigationTelemetry = obtainTelemetry();
     MapboxMetricsReporter.init(
             context,
             accessToken,
-            BuildConfig.MAPBOX_NAVIGATION_EVENTS_USER_AGENT
+            obtainUserAgent(options)
     );
     navigationTelemetry.initialize(
             applicationContext,
@@ -1021,5 +1008,13 @@ public class MapboxNavigation implements ServiceConnection {
       return true;
     }
     return false;
+  }
+
+  private static String obtainUserAgent(MapboxNavigationOptions options) {
+    if (options.isFromNavigationUi()) {
+      return MAPBOX_NAVIGATION_UI_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME;
+    } else {
+      return MAPBOX_NAVIGATION_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME;
+    }
   }
 }

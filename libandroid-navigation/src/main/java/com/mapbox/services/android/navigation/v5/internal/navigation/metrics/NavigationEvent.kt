@@ -5,6 +5,7 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.services.android.navigation.BuildConfig
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 
 /**
  * Base Event class for navigation events, contains common properties.

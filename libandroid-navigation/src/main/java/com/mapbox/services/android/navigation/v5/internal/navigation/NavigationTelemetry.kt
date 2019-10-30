@@ -15,8 +15,7 @@ import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationAppUserTurnstileEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.PhoneState
@@ -26,6 +25,8 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogre
 import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsReporter
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import java.util.ArrayList
 import java.util.Date
@@ -82,10 +83,9 @@ internal object NavigationTelemetry : NavigationMetricListener {
             this.gpsEventFactory = InitialGpsEventFactory(metricsReporter)
             this.context = context
 
-            if (metricsReporter is MapboxMetricsReporter) {
-                val turnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
-                metricsReporter.addAppTurnstileEvent(turnstileEvent)
-            }
+            val appUserTurnstileEvent = AppUserTurnstile(sdkIdentifier, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
+            val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
+            metricsReporter.addEvent(event)
             isInitialized = true
         }
         this.eventDispatcher = navigation.eventDispatcher

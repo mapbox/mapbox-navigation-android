@@ -1,8 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
-interface DirectionsMetrics {
+internal object DirectionsMetrics {
 
-    companion object {
-        const val ROUTE_RETRIEVAL = "route_retrieval_event"
-    }
+    const val ROUTE_RETRIEVAL = "route_retrieval_event"
 }

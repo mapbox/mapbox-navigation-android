@@ -1,6 +1,6 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
+package com.mapbox.navigation.base.internal.metrics
 
-internal object NavigationMetrics {
+object NavigationMetrics {
 
     const val ARRIVE = "navigation.arrive"
     const val CANCEL_SESSION = "navigation.cancel"

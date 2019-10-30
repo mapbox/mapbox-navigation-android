@@ -1,12 +1,16 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
+package com.mapbox.services.android.navigation.v5.navigation.metrics
 
 import android.content.Context
 import com.google.gson.Gson
-import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
-import com.mapbox.services.android.navigation.v5.utils.extensions.toTelemetryEvent
+import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
 
+/**
+ * Default implementation of [MetricsReporter] interface.
+ *
+ * @since 0.43.0
+ */
 object MapboxMetricsReporter : MetricsReporter {
 
     private val gson = Gson()
@@ -15,6 +19,14 @@ object MapboxMetricsReporter : MetricsReporter {
     private var metricsObserver: MetricsObserver? = null
     private var threadWorker = WorkThreadHandler("MapboxMetricsReporter")
 
+    /**
+     * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
+     *
+     * @param context Android context
+     * @param accessToken Mapbox access token
+     * @param userAgent Use agent indicate source of metrics
+     * @since 0.43.0
+     */
     @JvmStatic
     fun init(
         context: Context,
@@ -23,6 +35,7 @@ object MapboxMetricsReporter : MetricsReporter {
     ) {
         mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
         mapboxTelemetry.enable()
+        threadWorker.start()
     }
 
     // For test purposes only
@@ -32,20 +45,19 @@ object MapboxMetricsReporter : MetricsReporter {
     ) {
         this.mapboxTelemetry = mapboxTelemetry
         this.threadWorker = threadWorker
+        this.threadWorker.start()
         mapboxTelemetry.enable()
     }
 
+    /**
+     * Disable [mapboxTelemetry] to finish telemetry session when it needed.
+     *
+     * @since 0.43.0
+     */
     @JvmStatic
     fun disable() {
         mapboxTelemetry.disable()
-    }
-
-    fun addAppTurnstileEvent(event: AppUserTurnstile) {
-        mapboxTelemetry.push(event)
-
-        threadWorker.post {
-            metricsObserver?.onMetricUpdated(NavigationMetrics.APP_USER_TURNSTILE, gson.toJson(event))
-        }
+        threadWorker.stop()
     }
 
     override fun addEvent(metricEvent: MetricEvent) {
