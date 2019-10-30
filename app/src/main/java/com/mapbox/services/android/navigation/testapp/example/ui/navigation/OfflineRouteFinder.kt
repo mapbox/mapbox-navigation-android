@@ -6,10 +6,10 @@ import android.widget.Toast
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
