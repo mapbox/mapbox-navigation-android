@@ -17,11 +17,9 @@ android {
 }
 
 dependencies {
+    implementation project(':liblogger')
     implementation dependenciesList.kotlinStdLib
 
     //ktlint
     ktlint dependenciesList.ktlint
-
-    // Logging
-    implementation dependenciesList.timber
 }

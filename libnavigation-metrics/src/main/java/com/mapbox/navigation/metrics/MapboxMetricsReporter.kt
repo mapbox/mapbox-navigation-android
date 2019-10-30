@@ -13,7 +13,7 @@ import com.mapbox.navigation.utils.thread.WorkThreadHandler
 
 /**
  * Default implementation of [MetricsReporter] interface.
- * @since 0.43.0
+ * @since 1.0.0
  */
 object MapboxMetricsReporter : MetricsReporter {
 
@@ -29,7 +29,7 @@ object MapboxMetricsReporter : MetricsReporter {
      * @param context Android context
      * @param accessToken Mapbox access token
      * @param userAgent Use agent indicate source of metrics
-     * @since 0.43.0
+     * @since 1.0.0
      */
     @JvmStatic
     fun init(
@@ -56,7 +56,7 @@ object MapboxMetricsReporter : MetricsReporter {
     /**
      * Disable [mapboxTelemetry] to finish telemetry session when it needed.
      *
-     * @since 0.43.0
+     * @since 1.0.0
      */
     @JvmStatic
     fun disable() {

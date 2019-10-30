@@ -2,14 +2,15 @@ package com.mapbox.navigation.utils.thread
 
 import android.os.Handler
 import android.os.HandlerThread
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.utils.extensions.quitSafelySupport
-import timber.log.Timber
 
 class WorkThreadHandler(
     private val handleThreadName: String = HANDLE_THREAD_NAME
 ) : ThreadHandler {
 
     companion object {
+        private const val TAG = "WORK_THREAD_HANDLER"
         private const val HANDLE_THREAD_NAME = "WorkingThread"
     }
 
@@ -20,7 +21,7 @@ class WorkThreadHandler(
 
     override fun post(task: () -> Unit) {
         if (!isStarted) {
-            Timber.e("Need to start handler before post event")
+            MapboxLogger.e(TAG, "Need to start handler before post event")
             return
         }
         handler.post {
@@ -30,7 +31,7 @@ class WorkThreadHandler(
 
     override fun postDelayed(task: () -> Unit, delayMillis: Long) {
         if (!isStarted) {
-            Timber.e("Need to start handler before post event")
+            MapboxLogger.e(TAG, "Need to start handler before post event")
             return
         }
         handler.postDelayed({
@@ -53,7 +54,7 @@ class WorkThreadHandler(
         try {
             handlerThread.join()
         } catch (e: InterruptedException) {
-            Timber.e(e)
+            MapboxLogger.e(TAG, e.localizedMessage, e)
         }
     }
 

@@ -1010,7 +1010,7 @@ public class MapboxNavigation implements ServiceConnection {
     return false;
   }
 
-  private String obtainUserAgent(MapboxNavigationOptions options) {
+  private static String obtainUserAgent(MapboxNavigationOptions options) {
     if (options.isFromNavigationUi()) {
       return MAPBOX_NAVIGATION_UI_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME;
     } else {
