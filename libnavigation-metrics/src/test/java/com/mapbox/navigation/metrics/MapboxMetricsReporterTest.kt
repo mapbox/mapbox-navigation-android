@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 import io.mockk.mockk
@@ -35,7 +36,7 @@ class MapboxMetricsReporterTest {
     @Test
     fun telemetryPushCalledWhenAddValidEvent() {
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
-        val metricEvent = StubNavigationEvent("navigation.arrive")
+        val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
         val event = metricEvent.toTelemetryEvent()
 
         MapboxMetricsReporter.addEvent(metricEvent)

@@ -35,7 +35,7 @@ class MapboxMetricsReporterTest {
     fun telemetryPushCalledWhenAddValidEvent() {
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
         val metricEvent =
-            StubNavigationEvent("navigation.arrive")
+            StubNavigationEvent(NavigationMetrics.ARRIVE)
         val event = metricEvent.toTelemetryEvent()
 
         MapboxMetricsReporter.addEvent(metricEvent)

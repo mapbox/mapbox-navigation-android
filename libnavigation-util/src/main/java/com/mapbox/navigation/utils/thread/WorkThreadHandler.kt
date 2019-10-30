@@ -9,6 +9,10 @@ class WorkThreadHandler(
     private val handleThreadName: String = HANDLE_THREAD_NAME
 ) : ThreadHandler {
 
+    companion object {
+        private const val HANDLE_THREAD_NAME = "WorkingThread"
+    }
+
     private lateinit var handlerThread: HandlerThread
     lateinit var handler: Handler
 
@@ -16,21 +20,21 @@ class WorkThreadHandler(
 
     override fun post(task: () -> Unit) {
         if (!isStarted) {
-            start()
+            Timber.e("Need to start handler before post event")
+            return
         }
         handler.post {
             task.invoke()
-            stop()
         }
     }
 
     override fun postDelayed(task: () -> Unit, delayMillis: Long) {
         if (!isStarted) {
-            start()
+            Timber.e("Need to start handler before post event")
+            return
         }
         handler.postDelayed({
             task.invoke()
-            stop()
         }, delayMillis)
     }
 
@@ -55,9 +59,5 @@ class WorkThreadHandler(
 
     override fun removeAllTasks() {
         handler.removeCallbacksAndMessages(null)
-    }
-
-    companion object {
-        private const val HANDLE_THREAD_NAME = "WorkingThread"
     }
 }

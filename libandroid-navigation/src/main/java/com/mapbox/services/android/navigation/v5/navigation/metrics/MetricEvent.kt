@@ -2,8 +2,6 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics
 
 import androidx.annotation.StringDef
 import com.google.gson.Gson
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.DirectionsMetrics
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
 
 interface MetricEvent {
 

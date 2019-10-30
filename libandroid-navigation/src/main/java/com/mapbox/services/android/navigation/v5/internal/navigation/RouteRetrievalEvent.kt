@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import com.google.gson.Gson
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.DirectionsMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationPerformanceEvent
+import com.mapbox.services.android.navigation.v5.navigation.metrics.DirectionsMetrics
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 
 @SuppressLint("ParcelCreator")

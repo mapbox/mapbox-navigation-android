@@ -1,6 +1,6 @@
 package com.mapbox.navigation.utils.thread
 
-internal interface ThreadHandler {
+interface ThreadHandler {
 
     val isStarted: Boolean
 

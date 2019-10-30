@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetrics
 import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
 
 /**
@@ -36,6 +35,7 @@ object MapboxMetricsReporter : MetricsReporter {
     ) {
         mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
         mapboxTelemetry.enable()
+        threadWorker.start()
     }
 
     // For test purposes only
@@ -45,6 +45,7 @@ object MapboxMetricsReporter : MetricsReporter {
     ) {
         this.mapboxTelemetry = mapboxTelemetry
         this.threadWorker = threadWorker
+        this.threadWorker.start()
         mapboxTelemetry.enable()
     }
 
@@ -56,6 +57,7 @@ object MapboxMetricsReporter : MetricsReporter {
     @JvmStatic
     fun disable() {
         mapboxTelemetry.disable()
+        threadWorker.stop()
     }
 
     fun addAppTurnstileEvent(event: AppUserTurnstile) {
