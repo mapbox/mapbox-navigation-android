@@ -5,8 +5,8 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import java.lang.ref.WeakReference
