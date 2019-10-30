@@ -15,8 +15,11 @@ android {
 }
 
 dependencies {
+    implementation project(':libnavigation-util')
+
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxCore
+    api dependenciesList.mapboxSdkServices
 
     implementation dependenciesList.supportAnnotation
 
