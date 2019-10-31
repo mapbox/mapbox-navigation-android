@@ -8,9 +8,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.route.common.NavigationRoute
 import com.mapbox.navigation.route.common.extension.mapToRoute
+import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
