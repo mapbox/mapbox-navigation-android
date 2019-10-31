@@ -6,7 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.exception.NavigationException
+import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.route.common.NavigationRoute
 import com.mapbox.navigation.route.common.extension.mapToRoute
 import retrofit2.Call
@@ -33,7 +33,9 @@ class MapboxOffboardRouter(
         destination: PointNavigation,
         listener: Router.RouteListener
     ) {
-        val builder = NavigationRoute.builder(context).accessToken(mapboxToken)
+        val builder = NavigationRoute
+            .builder(context)
+            .accessToken(mapboxToken)
             .origin(Point.fromLngLat(origin.longitude, origin.latitude))
             .destination(Point.fromLngLat(destination.longitude, destination.latitude))
         waypoints?.forEach { builder.addWaypoint(Point.fromLngLat(it.longitude, it.latitude)) }
