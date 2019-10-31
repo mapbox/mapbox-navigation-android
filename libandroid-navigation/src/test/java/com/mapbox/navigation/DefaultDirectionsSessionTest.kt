@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -18,29 +19,34 @@ class DefaultDirectionsSessionTest {
 
     private val router: Router = mockk(relaxUnitFun = true)
     private val origin: PointNavigation = mockk(relaxUnitFun = true)
+    private val destination: PointNavigation = mockk(relaxUnitFun = true)
     private val waypoints: List<PointNavigation> = mockk(relaxUnitFun = true)
     private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
-    private lateinit var routeCallback: ((route: Route) -> Unit)
+    private lateinit var routeListener: Router.RouteListener
     private val route: Route = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
-        every { router.getRoute(origin, waypoints, captureLambda()) } answers {
-            routeCallback = thirdArg()
+        val listener = slot<Router.RouteListener>()
+        every { router.getRoute(origin, waypoints, destination, capture(listener)) } answers {
+            routeListener = listener.captured
         }
-        session = DefaultDirectionsSession(router, origin, waypoints)
+        session = DefaultDirectionsSession(router, origin, waypoints, destination)
     }
 
     @Test
     fun initialRouteResponse() {
         assertNull(session.currentRoute)
-        routeCallback.invoke(route)
+
+        routeListener.onRouteReady(route)
+
         assertEquals(route, session.currentRoute)
     }
 
     @Test
     fun setCurrentRoute() {
         val newRoute: Route = mockk()
+
         session.currentRoute = newRoute
 
         assertEquals(newRoute, session.currentRoute)
@@ -54,11 +60,14 @@ class DefaultDirectionsSessionTest {
     @Test
     fun setOrigin() {
         val newOrigin: PointNavigation = mockk()
+        val newDestination: PointNavigation = mockk()
+
         session.origin = newOrigin
+        session.destination = newDestination
 
         assertNull(session.currentRoute)
         assertEquals(newOrigin, session.origin)
-        verify { router.getRoute(eq(newOrigin), eq(waypoints), any()) }
+        verify { router.getRoute(eq(newOrigin), eq(waypoints), eq(newDestination), any()) }
     }
 
     @Test
@@ -69,11 +78,12 @@ class DefaultDirectionsSessionTest {
     @Test
     fun setWaypoints() {
         val newWaypoints: List<PointNavigation> = mockk()
+
         session.waypoints = newWaypoints
 
         assertNull(session.currentRoute)
         assertEquals(newWaypoints, session.waypoints)
-        verify { router.getRoute(eq(origin), eq(newWaypoints), any()) }
+        verify { router.getRoute(eq(origin), eq(newWaypoints), eq(destination), any()) }
     }
 
     @Test
@@ -92,12 +102,14 @@ class DefaultDirectionsSessionTest {
         session.unregisterRouteObserver(observer)
         val newRoute: Route = mockk()
         session.currentRoute = newRoute
+
         verify(exactly = 0) { observer.onRouteChanged(newRoute) }
     }
 
     @Test
     fun cancel() {
         session.cancel()
+
         verify { router.cancel() }
     }
 }
