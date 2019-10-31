@@ -1,17 +1,17 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 
 interface Router {
 
-    @Deprecated("use [getRoute(Point, List<Point>, RouteListener)] instead")
-    fun getRoute(origin: Point, waypoints: List<Point>, callback: (route: Route) -> Unit)
+    @Deprecated("Will be removed in v1.0. Use [getRoute(Point, List<Point>, RouteListener)] instead")
+    fun getRoute(origin: PointNavigation, waypoints: List<PointNavigation>, callback: (route: Route) -> Unit)
 
     fun getRoute(
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
+        origin: PointNavigation,
+        waypoints: List<PointNavigation>?,
+        destination: PointNavigation,
         listener: RouteListener
     )
 

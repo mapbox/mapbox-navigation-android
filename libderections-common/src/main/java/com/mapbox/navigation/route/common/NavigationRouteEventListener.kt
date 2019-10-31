@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.route
+package com.mapbox.navigation.route.common
 
 import com.mapbox.navigation.utils.time.ElapsedTime
 import okhttp3.Call
