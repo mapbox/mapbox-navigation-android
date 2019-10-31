@@ -1,7 +1,7 @@
 package com.mapbox.navigation.utils.time
 
-import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.util.Time
+import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import kotlin.math.roundToLong
 
