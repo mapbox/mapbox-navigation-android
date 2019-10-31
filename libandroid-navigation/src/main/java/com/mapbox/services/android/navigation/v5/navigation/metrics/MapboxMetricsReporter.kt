@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
 
 /**
@@ -11,7 +12,8 @@ import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTel
  *
  * @since 0.43.0
  */
-object MapboxMetricsReporter : MetricsReporter {
+object MapboxMetricsReporter :
+    MetricsReporter {
 
     private val gson = Gson()
     private lateinit var mapboxTelemetry: MapboxTelemetry

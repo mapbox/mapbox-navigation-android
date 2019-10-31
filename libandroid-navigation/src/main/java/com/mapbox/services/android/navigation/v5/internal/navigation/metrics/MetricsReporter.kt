@@ -1,4 +1,7 @@
-package com.mapbox.services.android.navigation.v5.navigation.metrics
+package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
+
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
 
 /**
  * Interface for handling metric events.

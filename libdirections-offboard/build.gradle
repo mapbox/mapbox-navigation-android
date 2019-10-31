@@ -20,11 +20,11 @@ dependencies {
     kapt(project(':annotations-processor'))
 
     implementation project(':libnavigation-util')
+    implementation project(':libderections-common')
+    api(project(':libnavigation-base'))
 
     // Support
     implementation dependenciesList.supportAppcompatV7
-
-    api(project(':libnavigation-base'))
 
     implementation dependenciesList.kotlinStdLib
 
