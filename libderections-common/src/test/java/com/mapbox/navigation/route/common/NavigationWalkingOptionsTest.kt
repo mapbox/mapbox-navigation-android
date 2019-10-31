@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.route
+package com.mapbox.navigation.route.common
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
