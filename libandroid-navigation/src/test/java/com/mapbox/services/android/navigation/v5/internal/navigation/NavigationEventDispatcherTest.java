@@ -17,6 +17,7 @@ import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -35,6 +36,7 @@ import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -76,7 +78,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
             ACCESS_TOKEN,
             mock(NavigationTelemetry.class),
             mock(LocationEngine.class),
-            mock(MapboxNavigator.class)
+            mock(MapboxNavigator.class, RETURNS_DEEP_STUBS)
     );
     navigationEventDispatcher = navigation.getEventDispatcher();
 
@@ -388,7 +390,7 @@ public class NavigationEventDispatcherTest extends BaseTest {
   }
 
   @Test
-  public void onLocationUpdate_removedRawLocationListenerIsNotInvoked() {
+  public void onLocationUpdate_removeRawLocationListenerIsNotInvoked() {
     RawLocationListener listener = mock(RawLocationListener.class);
     Location location = mock(Location.class);
     NavigationEventDispatcher dispatcher = new NavigationEventDispatcher(mock(RouteUtils.class));
@@ -398,6 +400,31 @@ public class NavigationEventDispatcherTest extends BaseTest {
     dispatcher.onLocationUpdate(location);
 
     verify(listener, times(0)).onLocationUpdate(eq(location));
+  }
+
+  @Test
+  public void onEnhancedLocationUpdate_enhancedLocationListenerIsInvoked() {
+    EnhancedLocationListener listener = mock(EnhancedLocationListener.class);
+    Location location = mock(Location.class);
+    NavigationEventDispatcher dispatcher = new NavigationEventDispatcher(mock(RouteUtils.class));
+    dispatcher.addEnhancedLocationListener(listener);
+
+    dispatcher.onEnhancedLocationUpdate(location);
+
+    verify(listener).onEnhancedLocationUpdate(eq(location));
+  }
+
+  @Test
+  public void onEnhancedLocationUpdate_removeEnhancedLocationListenerIsNotInvoked() {
+    EnhancedLocationListener listener = mock(EnhancedLocationListener.class);
+    Location location = mock(Location.class);
+    NavigationEventDispatcher dispatcher = new NavigationEventDispatcher(mock(RouteUtils.class));
+    dispatcher.addEnhancedLocationListener(listener);
+    dispatcher.removeEnhancedLocationListener(listener);
+
+    dispatcher.onEnhancedLocationUpdate(location);
+
+    verify(listener, times(0)).onEnhancedLocationUpdate(eq(location));
   }
 
   @NonNull

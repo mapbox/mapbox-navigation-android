@@ -48,6 +48,18 @@ public class RouteProcessorThreadListenerTest {
   }
 
   @Test
+  public void onNewRouteProgress_eventDispatcherEnhancedIsUpdated() {
+    NavigationEventDispatcher dispatcher = mock(NavigationEventDispatcher.class);
+    RouteProcessorThreadListener listener = buildListener(dispatcher);
+    Location location = mock(Location.class);
+    RouteProgress routeProgress = mock(RouteProgress.class);
+
+    listener.onNewRouteProgress(location, routeProgress);
+
+    verify(dispatcher).onEnhancedLocationUpdate(eq(location));
+  }
+
+  @Test
   public void onMilestoneTrigger_eventDispatcherSendsMilestone() {
     List<Milestone> milestones = new ArrayList<>();
     StepMilestone stepMilestone = new StepMilestone.Builder().build();

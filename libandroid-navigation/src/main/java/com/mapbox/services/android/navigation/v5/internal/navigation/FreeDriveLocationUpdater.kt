@@ -10,7 +10,6 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigator
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
-import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.ScheduledExecutorService
@@ -23,6 +22,7 @@ internal class FreeDriveLocationUpdater(
     private var locationEngineRequest: LocationEngineRequest,
     private val navigationEventDispatcher: NavigationEventDispatcher,
     private val mapboxNavigator: MapboxNavigator,
+    private val offlineNavigator: OfflineNavigator,
     private val executorService: ScheduledExecutorService
 ) {
     private val callback = CurrentLocationEngineCallback(this)
@@ -31,15 +31,9 @@ internal class FreeDriveLocationUpdater(
     private val handler = Handler(Looper.getMainLooper())
 
     fun configure(
-        path: File,
-        version: String,
-        host: String,
-        accessToken: String,
+        tilePath: String,
         onOfflineTilesConfiguredCallback: OnOfflineTilesConfiguredCallback
     ) {
-        val offlineNavigator =
-            OfflineNavigator(mapboxNavigator.navigator, version, host, accessToken)
-        val tilePath = File(path, version).absolutePath
         offlineNavigator.configure(tilePath, onOfflineTilesConfiguredCallback)
     }
 
@@ -73,13 +67,21 @@ internal class FreeDriveLocationUpdater(
     }
 
     fun updateLocationEngine(locationEngine: LocationEngine) {
+        val currentFuture = future
+        stop()
         this.locationEngine = locationEngine
-        requestLocationUpdates()
+        currentFuture?.let {
+            start()
+        }
     }
 
     fun updateLocationEngineRequest(request: LocationEngineRequest) {
+        val currentFuture = future
+        stop()
         this.locationEngineRequest = request
-        requestLocationUpdates()
+        currentFuture?.let {
+            start()
+        }
     }
 
     private fun getLocation(date: Date, lagMillis: Long, rawLocation: Location?): Location {
@@ -106,13 +108,6 @@ internal class FreeDriveLocationUpdater(
         locationEngine.removeLocationUpdates(callback)
         future?.cancel(false)
         future = null
-    }
-
-    private fun requestLocationUpdates() {
-        future?.let {
-            stop()
-            start()
-        }
     }
 
     private fun onLocationChanged(location: Location?) {
