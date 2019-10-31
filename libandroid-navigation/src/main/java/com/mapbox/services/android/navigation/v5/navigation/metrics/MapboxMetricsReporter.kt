@@ -12,7 +12,8 @@ import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTel
  *
  * @since 0.43.0
  */
-object MapboxMetricsReporter : MetricsReporter {
+object MapboxMetricsReporter :
+    MetricsReporter {
 
     private val gson = Gson()
     private lateinit var mapboxTelemetry: MapboxTelemetry
