@@ -15,17 +15,11 @@ android {
 }
 
 dependencies {
-    api dependenciesList.mapboxSdkGeoJSON
-    api dependenciesList.mapboxCore
-
-    implementation dependenciesList.supportAnnotation
+    implementation project(':libnavigation-util')
+    implementation(project(':libnavigation-base'))
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
-
-    // Unit testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
 }
