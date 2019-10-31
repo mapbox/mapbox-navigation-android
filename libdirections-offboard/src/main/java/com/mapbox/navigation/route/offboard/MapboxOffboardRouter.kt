@@ -5,11 +5,12 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.mapToRoute
 import com.mapbox.navigation.exception.NavigationException
+import com.mapbox.navigation.route.common.NavigationRoute
+import com.mapbox.navigation.route.common.extension.mapToRoute
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,21 +22,22 @@ class MapboxOffboardRouter : Router
 ) : Router {
 
     override fun getRoute(
-        origin: Point,
-        waypoints: List<Point>,
+        origin: PointNavigation,
+        waypoints: List<PointNavigation>,
         callback: (route: Route) -> Unit
     ) {
     }
 
     override fun getRoute(
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
+        origin: PointNavigation,
+        waypoints: List<PointNavigation>?,
+        destination: PointNavigation,
         listener: Router.RouteListener
     ) {
-        val builder = NavigationRoute.builder(context).accessToken(mapboxToken).origin(origin)
-            .destination(destination)
-        waypoints?.forEach { builder.addWaypoint(it) }
+        val builder = NavigationRoute.builder(context).accessToken(mapboxToken)
+            .origin(Point.fromLngLat(origin.longitude, origin.latitude))
+            .destination(Point.fromLngLat(destination.longitude, destination.latitude))
+        waypoints?.forEach { builder.addWaypoint(Point.fromLngLat(it.longitude, it.latitude)) }
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {

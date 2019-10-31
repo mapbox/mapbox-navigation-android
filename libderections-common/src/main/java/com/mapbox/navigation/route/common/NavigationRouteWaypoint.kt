@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route
+package com.mapbox.navigation.route.common
 
 import com.mapbox.geojson.Point
 
