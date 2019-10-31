@@ -2,8 +2,8 @@ package com.mapbox.navigation.navigator
 
 import android.location.Location
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.Route
-import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.base.model.route.Route
+import com.mapbox.navigation.base.model.route.RouteProgress
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
@@ -54,6 +54,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
-        return RouteProgress()
+        return RouteProgress.Builder().build()
     }
 }

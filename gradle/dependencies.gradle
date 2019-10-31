@@ -75,6 +75,7 @@ ext {
       butterKnifeProcessor   : "com.jakewharton:butterknife-compiler:${version.butterknife}",
 
       // support
+      supportCore            : "androidx.core:core:${version.supportLibVersion}",
       supportAnnotation      : "androidx.annotation:annotation:${version.supportLibVersion}",
       supportAppcompatV7     : "androidx.appcompat:appcompat:${version.supportLibVersion}",
       supportV4              : "androidx.legacy:legacy-support-v4:${version.supportLibVersion}",

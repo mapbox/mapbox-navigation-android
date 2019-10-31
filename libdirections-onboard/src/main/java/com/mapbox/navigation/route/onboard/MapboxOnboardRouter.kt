@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.onboard
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.Route
+import com.mapbox.navigation.base.model.route.Route
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 

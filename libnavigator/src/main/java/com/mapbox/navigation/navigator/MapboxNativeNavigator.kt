@@ -1,7 +1,7 @@
 package com.mapbox.navigation.navigator
 
 import android.location.Location
-import com.mapbox.navigation.base.route.Route
+import com.mapbox.navigation.base.model.route.Route
 import java.util.Date
 
 interface MapboxNativeNavigator {

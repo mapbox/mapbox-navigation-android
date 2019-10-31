@@ -7,8 +7,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.route.Route
-import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.base.model.route.Route
 import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator

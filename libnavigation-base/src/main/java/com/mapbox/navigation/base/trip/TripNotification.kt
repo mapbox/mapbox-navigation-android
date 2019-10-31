@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.trip
 import android.app.Notification
 import android.content.Context
 import android.location.Location
+import com.mapbox.navigation.base.model.route.RouteProgress
 
 interface TripNotification {
 
