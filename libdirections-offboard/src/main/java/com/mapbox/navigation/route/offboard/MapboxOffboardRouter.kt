@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.PointNavigation
-import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.route.common.NavigationRoute
 import com.mapbox.navigation.route.common.extension.mapToRoute
 import com.mapbox.navigation.utils.exceptions.NavigationException
@@ -19,13 +18,6 @@ class MapboxOffboardRouter(
 ) : Router {
 
     private var navigationRoute: NavigationRoute? = null
-
-    override fun getRoute(
-        origin: PointNavigation,
-        waypoints: List<PointNavigation>,
-        callback: (route: Route) -> Unit
-    ) {
-    }
 
     override fun getRoute(
         origin: PointNavigation,
