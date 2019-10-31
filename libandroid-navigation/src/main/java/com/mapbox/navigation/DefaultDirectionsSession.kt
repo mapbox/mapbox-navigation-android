@@ -9,7 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 class DefaultDirectionsSession(
     private val router: Router,
     origin: PointNavigation,
-    waypoints: List<PointNavigation>
+    waypoints: List<PointNavigation>,
+    destination: PointNavigation
 ) : DirectionsSession {
 
     override var currentRoute: Route? = null
@@ -39,6 +40,15 @@ class DefaultDirectionsSession(
             requestRoute()
         }
 
+    override var destination: PointNavigation = destination
+        set(value) {
+            if (value == field) {
+                return
+            }
+            field = value
+            requestRoute()
+        }
+
     private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
 
     init {
@@ -60,8 +70,14 @@ class DefaultDirectionsSession(
 
     private fun requestRoute() {
         currentRoute = null
-        router.getRoute(origin, waypoints) {
-            currentRoute = it
-        }
+        router.getRoute(origin, waypoints, destination, object : Router.RouteListener {
+            override fun onRouteReady(route: Route) {
+                currentRoute = route
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                // TODO should be callback for error fetching callback
+            }
+        })
     }
 }
