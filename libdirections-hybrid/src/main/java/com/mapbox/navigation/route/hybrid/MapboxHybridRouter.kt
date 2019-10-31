@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.hybrid
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
@@ -11,14 +11,18 @@ class MapboxHybridRouter(
     private val offboardRouter: MapboxOffboardRouter
 ) : Router {
 
-    override fun getRoute(origin: Point, waypoints: List<Point>, callback: (route: Route) -> Unit) {
+    override fun getRoute(
+        origin: PointNavigation,
+        waypoints: List<PointNavigation>,
+        callback: (route: Route) -> Unit
+    ) {
         TODO("not implemented")
     }
 
     override fun getRoute(
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
+        origin: PointNavigation,
+        waypoints: List<PointNavigation>?,
+        destination: PointNavigation,
         listener: Router.RouteListener
     ) {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
