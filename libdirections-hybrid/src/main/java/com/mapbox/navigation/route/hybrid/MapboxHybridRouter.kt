@@ -15,14 +15,6 @@ class MapboxHybridRouter(
 
     override fun getRoute(
         origin: PointNavigation,
-        waypoints: List<PointNavigation>,
-        callback: (route: Route) -> Unit
-    ) {
-        TODO("not implemented")
-    }
-
-    override fun getRoute(
-        origin: PointNavigation,
         waypoints: List<PointNavigation>?,
         destination: PointNavigation,
         listener: Router.RouteListener
