@@ -6,6 +6,7 @@ import com.mapbox.navigation.base.route.model.Route
 interface DirectionsSession {
     var origin: PointNavigation
     var waypoints: List<PointNavigation>
+    var destination: PointNavigation
     var currentRoute: Route?
 
     fun setOrigin(point: Point)
