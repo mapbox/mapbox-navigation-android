@@ -13,7 +13,6 @@ import com.mapbox.navigation.base.model.route.RouteConstants.IMPERIAL
 import com.mapbox.navigation.base.model.route.RouteConstants.METRIC
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.VoiceUnitCriteria
-import com.mapbox.navigation.model.formatter.distance.getUnitTypeForLocale
 import com.mapbox.navigation.utils.R
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.turf.TurfConstants.UNIT_FEET

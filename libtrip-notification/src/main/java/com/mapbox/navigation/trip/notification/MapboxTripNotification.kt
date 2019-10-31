@@ -45,10 +45,10 @@ import com.mapbox.navigation.base.model.route.RouteConstants.STEP_MANEUVER_TYPE_
 import com.mapbox.navigation.base.model.route.RouteProgress
 import com.mapbox.navigation.base.options.TripNavigationOptions
 import com.mapbox.navigation.base.trip.TripNotification
-import com.mapbox.navigation.model.formatter.distance.getUnitTypeForLocale
 import com.mapbox.navigation.utils.extensions.inferDeviceLanguage
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.navigation.utils.formatter.distance.DistanceFormatter
+import com.mapbox.navigation.utils.formatter.distance.getUnitTypeForLocale
 import com.mapbox.navigation.utils.formatter.time.TimeFormatter.formatTime
 import java.util.Calendar
 

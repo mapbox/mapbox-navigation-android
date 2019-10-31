@@ -1,6 +1,6 @@
 @file:JvmName("LocaleEx")
 
-package com.mapbox.navigation.model.formatter.distance
+package com.mapbox.navigation.utils.formatter.distance
 
 import com.mapbox.navigation.base.model.route.RouteConstants.IMPERIAL
 import com.mapbox.navigation.base.model.route.RouteConstants.METRIC
