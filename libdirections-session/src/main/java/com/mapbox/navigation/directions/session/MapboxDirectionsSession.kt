@@ -10,7 +10,11 @@ import com.mapbox.navigation.base.route.model.Route
 import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
-class MapboxDirectionsSession(private val router: Router, origin: PointNavigation, waypoints: List<PointNavigation>) : DirectionsSession {
+class MapboxDirectionsSession(
+    private val router: Router,
+    origin: PointNavigation,
+    waypoints: List<PointNavigation>
+) : DirectionsSession {
 
     override var currentRoute: Route? = null
         set(value) {
