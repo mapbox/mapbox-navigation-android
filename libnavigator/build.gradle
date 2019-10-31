@@ -27,6 +27,14 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    implementation dependenciesList.supportAnnotation
+
+    implementation dependenciesList.mapboxSdkGeoJSON
+
+    // Unit testing
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
