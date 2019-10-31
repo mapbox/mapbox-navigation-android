@@ -5,9 +5,6 @@ import com.mapbox.navigation.base.route.model.Route
 
 interface Router {
 
-    @Deprecated("Will be removed in v1.0. Use [getRoute(Point, List<Point>, RouteListener)] instead")
-    fun getRoute(origin: PointNavigation, waypoints: List<PointNavigation>, callback: (route: Route) -> Unit)
-
     fun getRoute(
         origin: PointNavigation,
         waypoints: List<PointNavigation>?,
