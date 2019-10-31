@@ -10,7 +10,7 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.exception.NavigationException
+import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.time.ElapsedTime
 import com.mapbox.services.android.navigation.BuildConfig
