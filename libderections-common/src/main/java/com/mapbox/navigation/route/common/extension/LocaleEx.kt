@@ -1,6 +1,6 @@
 @file:JvmName("LocaleEx")
 
-package com.mapbox.navigation.base.route.extensions
+package com.mapbox.navigation.route.common.extension
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import java.util.Locale

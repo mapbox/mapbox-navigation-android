@@ -4,6 +4,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
