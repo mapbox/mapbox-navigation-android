@@ -360,7 +360,6 @@ public class NavigationViewModel extends AndroidViewModel {
     if (mapOfflineOptions == null) {
       return;
     }
-    String mapDatabasePath = mapOfflineOptions.getDatabasePath();
     String mapStyleUrl = mapOfflineOptions.getStyleUrl();
     Context applicationContext = getApplication().getApplicationContext();
     OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
@@ -370,8 +369,6 @@ public class NavigationViewModel extends AndroidViewModel {
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
       connectivityController, regionDownloadCallback);
-    NavigationOfflineDatabaseCallback callback = new NavigationOfflineDatabaseCallback(navigation, mapOfflineManager);
-    mapOfflineManager.loadDatabase(mapDatabasePath, callback);
   }
 
   private void initializeVoiceInstructionLoader() {
@@ -457,6 +454,7 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.startNavigation(route);
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.preCache(route);
+      navigation.addProgressChangeListener(mapOfflineManager);
     }
   }
 
