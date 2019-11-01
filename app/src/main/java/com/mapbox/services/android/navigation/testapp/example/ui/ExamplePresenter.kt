@@ -46,9 +46,9 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
     if (requestCode == NAVIGATION_PERMISSIONS_REQUEST) {
-      val granted = grantResults.isNotEmpty()
-          && grantResults[0] == PackageManager.PERMISSION_GRANTED
-          && grantResults[1] == PackageManager.PERMISSION_GRANTED
+      val granted = grantResults.isNotEmpty() &&
+          grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+          grantResults[1] == PackageManager.PERMISSION_GRANTED
       onPermissionsGranted(granted)
     }
   }

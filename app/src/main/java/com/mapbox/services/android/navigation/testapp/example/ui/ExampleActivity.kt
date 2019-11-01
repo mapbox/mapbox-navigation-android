@@ -101,8 +101,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     }
   }
 
-  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
-                                          grantResults: IntArray) {
+  override fun onRequestPermissionsResult(
+      requestCode: Int,
+      permissions: Array<out String>,
+      grantResults: IntArray
+  ) {
     presenter.onPermissionResult(requestCode, grantResults)
   }
 

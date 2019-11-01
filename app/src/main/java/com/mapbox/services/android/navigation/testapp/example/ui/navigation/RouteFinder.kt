@@ -11,11 +11,13 @@ import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
 import timber.log.Timber
 
-class RouteFinder(private val viewModel: ExampleViewModel,
-                  private val routes: MutableLiveData<List<DirectionsRoute>>,
-                  accessToken: String,
-                  private var tileVersion: String,
-                  profile: String) : OnRoutesFoundCallback {
+class RouteFinder(
+    private val viewModel: ExampleViewModel,
+    private val routes: MutableLiveData<List<DirectionsRoute>>,
+    accessToken: String,
+    private var tileVersion: String,
+    profile: String
+) : OnRoutesFoundCallback {
 
   private val routeFinder: ExampleRouteFinder = ExampleRouteFinder(accessToken, profile, this)
   private val offlineRouteFinder = OfflineRouteFinder(obtainOfflineDirectory(), tileVersion, this)

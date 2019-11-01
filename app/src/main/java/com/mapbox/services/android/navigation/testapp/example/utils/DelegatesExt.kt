@@ -3,12 +3,12 @@ package com.mapbox.services.android.navigation.testapp.example.utils
 import kotlin.reflect.KProperty
 
 object DelegatesExt {
-  fun<T> notNullSingleValue() = NotNullSingleValueVar<T>()
+  fun <T> notNullSingleValue() = NotNullSingleValueVar<T>()
 }
 
 class NotNullSingleValueVar<T> {
 
-  private var value:T? = null
+  private var value: T? = null
 
   operator fun getValue(thisRef: Any?, property: KProperty<*>): T =
       value ?: throw IllegalStateException("${property.name} " +
