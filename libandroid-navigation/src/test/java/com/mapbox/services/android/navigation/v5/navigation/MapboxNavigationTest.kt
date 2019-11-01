@@ -425,6 +425,123 @@ class MapboxNavigationTest : BaseTest() {
         assertTrue(tilePath.captured.contains("2019_04_13-00_00_11"))
     }
 
+    @Test
+    fun enableFreeDrive_freeDriveLocationUpdaterStartIsCalledWhenOnConfigured() {
+        val mockedFreeDriveLocationUpdater = mockk<FreeDriveLocationUpdater>(relaxed = true)
+        val navigation = MapboxNavigation(
+            RuntimeEnvironment.application,
+            ACCESS_TOKEN,
+            mockk<MapboxNavigationOptions>(relaxed = true),
+            mockk<NavigationTelemetry>(relaxed = true),
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true),
+            mockedFreeDriveLocationUpdater
+        )
+        val onOfflineTilesConfiguredCallback = slot<OnOfflineTilesConfiguredCallback>()
+
+        navigation.enableFreeDrive()
+
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.configure(
+                any(),
+                capture(onOfflineTilesConfiguredCallback)
+            )
+        }
+        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.start()
+        }
+    }
+
+    @Test
+    fun enableFreeDrive_freeDriveLocationUpdaterStartIsNotCalledWhenOnConfigurationError() {
+        val mockedFreeDriveLocationUpdater = mockk<FreeDriveLocationUpdater>(relaxed = true)
+        val navigation = MapboxNavigation(
+            RuntimeEnvironment.application,
+            ACCESS_TOKEN,
+            mockk<MapboxNavigationOptions>(relaxed = true),
+            mockk<NavigationTelemetry>(relaxed = true),
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true),
+            mockedFreeDriveLocationUpdater
+        )
+        val onOfflineTilesConfiguredCallback = slot<OnOfflineTilesConfiguredCallback>()
+
+        navigation.enableFreeDrive()
+
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.configure(
+                any(),
+                capture(onOfflineTilesConfiguredCallback)
+            )
+        }
+        onOfflineTilesConfiguredCallback.captured.onConfigurationError(OfflineError("test"))
+        verify(exactly = 0) {
+            mockedFreeDriveLocationUpdater.start()
+        }
+    }
+
+    @Test
+    fun enableFreeDrive_freeDriveLocationUpdaterStartIsCalledRightAwayIfAlreadyConfigured() {
+        val mockedFreeDriveLocationUpdater = mockk<FreeDriveLocationUpdater>(relaxed = true)
+        val navigation = MapboxNavigation(
+            RuntimeEnvironment.application,
+            ACCESS_TOKEN,
+            mockk<MapboxNavigationOptions>(relaxed = true),
+            mockk<NavigationTelemetry>(relaxed = true),
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true),
+            mockedFreeDriveLocationUpdater
+        )
+        val onOfflineTilesConfiguredCallback = slot<OnOfflineTilesConfiguredCallback>()
+        navigation.enableFreeDrive()
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.configure(
+                any(),
+                capture(onOfflineTilesConfiguredCallback)
+            )
+        }
+        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+
+        navigation.enableFreeDrive()
+
+        verify(exactly = 2) {
+            mockedFreeDriveLocationUpdater.start()
+        }
+    }
+
+    @Test
+    fun disableFreeDrive_freeDriveLocationUpdaterStopIsCalledIfAlreadyConfigured() {
+        val mockedFreeDriveLocationUpdater = mockk<FreeDriveLocationUpdater>(relaxed = true)
+        val navigation = MapboxNavigation(
+            RuntimeEnvironment.application,
+            ACCESS_TOKEN,
+            mockk<MapboxNavigationOptions>(relaxed = true),
+            mockk<NavigationTelemetry>(relaxed = true),
+            mockk<LocationEngine>(relaxed = true),
+            mockk<Navigator>(relaxed = true),
+            mockedFreeDriveLocationUpdater
+        )
+        val onOfflineTilesConfiguredCallback = slot<OnOfflineTilesConfiguredCallback>()
+        navigation.enableFreeDrive()
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.configure(
+                any(),
+                capture(onOfflineTilesConfiguredCallback)
+            )
+        }
+        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.start()
+        }
+
+        navigation.disableFreeDrive()
+
+        verify(exactly = 1) {
+            mockedFreeDriveLocationUpdater.stop()
+        }
+    }
+
     private fun buildMapboxNavigationWith(mapboxNavigator: MapboxNavigator): MapboxNavigation {
         val context = RuntimeEnvironment.application
         return MapboxNavigation(

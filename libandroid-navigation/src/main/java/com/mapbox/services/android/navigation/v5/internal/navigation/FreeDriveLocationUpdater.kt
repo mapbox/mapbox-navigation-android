@@ -113,7 +113,9 @@ internal class FreeDriveLocationUpdater(
     private fun onLocationChanged(location: Location?) {
         location?.let { currentLocation ->
             rawLocation = currentLocation
-            mapboxNavigator.updateLocation(currentLocation)
+            executorService.execute {
+                mapboxNavigator.updateLocation(currentLocation)
+            }
         }
     }
 

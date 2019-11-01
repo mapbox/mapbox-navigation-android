@@ -332,13 +332,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void initializeNavigation(MapboxMap mapboxMap) {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken(),
       new MapboxNavigationOptions.Builder().build(), locationEngine);
+    addNavigationForHistory(navigation);
     addLocationEngineListener();
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
     navigation.addMilestoneEventListener(this);
     navigation.addOffRouteListener(this);
     navigationMap.addProgressChangeListener(navigation);
-    addNavigationForHistory(navigation);
   }
 
   private void showSnackbar(String text, int duration) {
