@@ -24,4 +24,7 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    // Mock
+    testImplementation dependenciesList.mockk
 }
