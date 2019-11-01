@@ -2,7 +2,10 @@ package com.mapbox.services.android.navigation.v5.internal.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.MAPBOX_SHARED_PREFERENCES
+import com.mapbox.android.accounts.navigation.sku.v1.MauSku
+import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
+import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
+import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 
 class MapboxNavigationAccounts private constructor() {
 

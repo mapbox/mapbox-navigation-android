@@ -392,8 +392,6 @@ public class MapboxNavigation implements ServiceConnection {
    * @see MapboxNavigation#startNavigation(DirectionsRoute)
    */
   public void startNavigation(@NonNull DirectionsRoute directionsRoute, @NonNull DirectionsRouteType routeType) {
-
-    MapboxNavigationAccounts.getInstance(applicationContext).navigationStarted();
     startNavigationWith(directionsRoute, routeType);
   }
 
@@ -1136,6 +1134,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
+    MapboxNavigationAccounts.getInstance(applicationContext).navigationStarted();
     ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken, applicationContext));

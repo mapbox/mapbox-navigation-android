@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.v5.internal.accounts
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import com.mapbox.android.accounts.v1.AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
+import com.mapbox.android.accounts.v1.AccountsConstants.KEY_META_DATA_MANAGE_SKU
 import timber.log.Timber
 
 class Billing private constructor() {
@@ -13,10 +15,6 @@ class Billing private constructor() {
     }
 
     companion object {
-        // TODO uncomment when ready to release
-        // private const val ENABLE_MAU = "EnableMAU"
-        // private const val META_DATA = "com.mapbox.services.android.navigation.v5"
-        private const val ENABLE_MAU_META_DATA = "com.mapbox.ManageSkuToken"
         private var INSTANCE: Billing? = null
         private var billingType = BillingModel.TRIPS
 
@@ -44,9 +42,9 @@ class Billing private constructor() {
             val applicationInfo = getApplicationInfo(context)
             applicationInfo?.let { appInfo ->
                 appInfo.metaData?.let { metadata ->
-                    billingType = when (metadata.getBoolean(ENABLE_MAU_META_DATA, false)) {
-                        true -> BillingModel.MAU
-                        else -> BillingModel.TRIPS
+                    billingType = when (metadata.getBoolean(KEY_META_DATA_MANAGE_SKU, DEFAULT_TOKEN_MANAGE_SKU)) {
+                        true -> BillingModel.TRIPS
+                        else -> BillingModel.MAU
                     }
                 }
             }

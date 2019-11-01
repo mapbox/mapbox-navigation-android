@@ -12,11 +12,6 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.RouteProces
 object NavigationConstants {
 
     /**
-     * Mapbox shared preferences file name
-     */
-    const val MAPBOX_SHARED_PREFERENCES = "MapboxSharedPreferences"
-
-    /**
      * If default voice instructions are enabled, this identifier will be used to differentiate them
      * from custom milestones in the
      * [com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener].

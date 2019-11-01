@@ -63,7 +63,7 @@ ext {
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v8:${version.mapboxAnnotationPlugin}",
       mapboxSearchSdk           : "com.mapbox.mapboxsdk:mapbox-search-android:${version.mapboxSearchSdk}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
-      mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-android-accounts:${version.mapboxAccounts}",
+      mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxAnnotations}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxAnnotationsProcessor}",
 
