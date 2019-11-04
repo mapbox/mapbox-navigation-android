@@ -17,6 +17,7 @@ android {
 dependencies {
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkGeoJSON
+    api dependenciesList.mapboxSdkServices
 
     implementation dependenciesList.supportAnnotation
 
