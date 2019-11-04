@@ -94,7 +94,7 @@ public class VoiceInstructionLoader {
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
-    if (!cache.isClosed() && mapboxSpeechBuilder != null) {
+    if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
       mapboxSpeechBuilder
         .instruction(instruction)
         .interceptor(new SkuInterceptor(context));
