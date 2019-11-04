@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.services.android.navigation.ui.v5.ConnectivityStatusProvider;
+import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.mapbox.services.android.navigation.v5.navigation.SkuInterceptor;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Interceptor;

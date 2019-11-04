@@ -7,7 +7,7 @@ import com.mapbox.android.accounts.v1.AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
 import com.mapbox.android.accounts.v1.AccountsConstants.KEY_META_DATA_MANAGE_SKU
 import timber.log.Timber
 
-class Billing private constructor() {
+internal class Billing private constructor() {
 
     enum class BillingModel {
         TRIPS,

@@ -11,7 +11,7 @@ import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigat
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import timber.log.Timber
 
-class MapboxNavigationProvider : ContentProvider() {
+internal class MapboxNavigationProvider : ContentProvider() {
 
     companion object {
         private const val TAG = "MapboxNavigationProvider"

@@ -7,7 +7,7 @@ import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 
-class MapboxNavigationAccounts private constructor() {
+internal class MapboxNavigationAccounts private constructor() {
 
     companion object {
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
@@ -23,7 +23,7 @@ class MapboxNavigationAccounts private constructor() {
                     MapboxNavigationAccounts().also { mapboxNavigationAccount ->
                         INSTANCE = mapboxNavigationAccount
                         // TODO uncomment when ready to release as a part of 1.0
-                        init(context)
+                        // init(context)
                     }
                 }
 
