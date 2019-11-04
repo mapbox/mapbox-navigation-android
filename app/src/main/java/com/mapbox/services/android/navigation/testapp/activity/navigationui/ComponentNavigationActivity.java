@@ -51,7 +51,9 @@ import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -73,7 +75,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener, OffRouteListener {
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener,
+  OffRouteListener, EnhancedLocationListener {
 
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -213,6 +216,12 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   @Override
+  public void onEnhancedLocationUpdate(Location location) {
+    checkFirstUpdate(location);
+    updateLocation(location);
+  }
+
+  @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     playAnnouncement(milestone);
 
@@ -317,20 +326,19 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @SuppressLint("MissingPermission")
   private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
-    LocationEngineRequest request = buildEngineRequest();
-    locationEngine.requestLocationUpdates(request, callback, null);
     showSnackbar(SEARCHING_FOR_GPS_MESSAGE, BaseTransientBottomBar.LENGTH_SHORT);
   }
 
   private void initializeNavigation(MapboxMap mapboxMap) {
-    navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
-    navigation.setLocationEngine(locationEngine);
+    navigation = new MapboxNavigation(this, Mapbox.getAccessToken(),
+      new MapboxNavigationOptions.Builder().build(), locationEngine);
+    addNavigationForHistory(navigation);
+    addLocationEngineListener();
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
     navigation.addMilestoneEventListener(this);
     navigation.addOffRouteListener(this);
     navigationMap.addProgressChangeListener(navigation);
-    addNavigationForHistory(navigation);
   }
 
   private void showSnackbar(String text, int duration) {
@@ -416,15 +424,16 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-      locationEngine.removeLocationUpdates(callback);
+      navigation.disableFreeDrive();
+      navigation.removeEnhancedLocationListener(this);
     }
   }
 
   @SuppressLint("MissingPermission")
   private void addLocationEngineListener() {
     if (locationEngine != null) {
-      LocationEngineRequest request = buildEngineRequest();
-      locationEngine.requestLocationUpdates(request, callback, null);
+      navigation.addEnhancedLocationListener(this);
+      navigation.enableFreeDrive();
     }
   }
 

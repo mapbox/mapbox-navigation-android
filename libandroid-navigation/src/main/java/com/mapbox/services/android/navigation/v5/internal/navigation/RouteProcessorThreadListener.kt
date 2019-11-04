@@ -21,6 +21,7 @@ internal class RouteProcessorThreadListener(
     override fun onNewRouteProgress(location: Location, routeProgress: RouteProgress) {
         notificationProvider.updateNavigationNotification(routeProgress)
         eventDispatcher.onProgressChange(location, routeProgress)
+        eventDispatcher.onEnhancedLocationUpdate(location)
     }
 
     /**

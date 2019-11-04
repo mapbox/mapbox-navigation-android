@@ -4,6 +4,7 @@ package com.mapbox.services.android.navigation.testapp.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
@@ -18,6 +19,7 @@ public class HistoryActivity extends AppCompatActivity {
   private MapboxNavigation navigation;
   private String filename;
   private ProgressChangeListener progressHistoryListener = (location, routeProgress) -> executeStoreHistoryTask();
+  private EnhancedLocationListener enhancedLocationListener = (location) -> executeStoreHistoryTask();
 
   public void addNavigationForHistory(@NonNull MapboxNavigation navigation) {
     if (navigation == null) {
@@ -25,6 +27,7 @@ public class HistoryActivity extends AppCompatActivity {
     }
     this.navigation = navigation;
     navigation.addProgressChangeListener(progressHistoryListener);
+    navigation.addEnhancedLocationListener(enhancedLocationListener);
     navigation.toggleHistory(true);
     filename = buildFileName();
   }

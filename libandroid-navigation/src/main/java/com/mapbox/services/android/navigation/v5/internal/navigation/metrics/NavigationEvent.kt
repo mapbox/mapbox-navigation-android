@@ -26,7 +26,7 @@ internal abstract class NavigationEvent(
     val batteryLevel: Int = phoneState.batteryLevel
     val screenBrightness: Int = phoneState.screenBrightness
     val batteryPluggedIn: Boolean = phoneState.isBatteryPluggedIn
-    val connectivity: String = phoneState.connectivity
+    val connectivity: String? = phoneState.connectivity
     val audioType: String = phoneState.audioType
     val applicationState: String = phoneState.applicationState
     val event: String = getEventName()
