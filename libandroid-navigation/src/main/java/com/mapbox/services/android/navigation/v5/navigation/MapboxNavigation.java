@@ -403,7 +403,6 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.1.0
    */
   public void stopNavigation() {
-    Timber.d("MapboxNavigation stopNavigation called");
     isActiveGuidanceOnGoing.set(false);
     if (isFreeDriveEnabled.get()) {
       enableFreeDrive();
@@ -412,7 +411,6 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void killNavigation() {
-    Timber.d("MapboxNavigation killNavigation called");
     killFreeDrive();
     stopNavigationService();
   }
@@ -424,6 +422,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void stopNavigationService() {
+    Timber.d("MapboxNavigation stopped");
     if (isServiceAvailable()) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
