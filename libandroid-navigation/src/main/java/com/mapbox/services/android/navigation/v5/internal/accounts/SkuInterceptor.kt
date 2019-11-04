@@ -15,7 +15,7 @@ class SkuInterceptor(private val context: Context?) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         val skuToken = context?.let { ctx ->
-            return@let MapboxNavigationAccounts.getInstance(ctx).obtainSkuToken()
+            return@let MapboxNavigationAccounts.getInstance(ctx.applicationContext).obtainSkuToken()
         } ?: ""
         val url = request.url().newBuilder().addQueryParameter(SKU_KEY, skuToken).build()
         request = request.newBuilder().url(url).build()
