@@ -4,7 +4,6 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.route.common.NavigationRoute
 import com.mapbox.navigation.route.common.extension.mapToRoute
 import com.mapbox.navigation.utils.exceptions.NavigationException
@@ -20,17 +19,17 @@ class MapboxOffboardRouter(
     private var navigationRoute: NavigationRoute? = null
 
     override fun getRoute(
-        origin: PointNavigation,
-        waypoints: List<PointNavigation>?,
-        destination: PointNavigation,
+        origin: Point,
+        waypoints: List<Point>?,
+        destination: Point,
         listener: Router.RouteListener
     ) {
         val builder = NavigationRoute
             .builder(context)
             .accessToken(mapboxToken)
-            .origin(Point.fromLngLat(origin.longitude, origin.latitude))
-            .destination(Point.fromLngLat(destination.longitude, destination.latitude))
-        waypoints?.forEach { builder.addWaypoint(Point.fromLngLat(it.longitude, it.latitude)) }
+            .origin(origin)
+            .destination(destination)
+        waypoints?.forEach { builder.addWaypoint(it) }
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {

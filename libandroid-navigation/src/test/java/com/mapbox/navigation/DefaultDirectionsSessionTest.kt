@@ -1,8 +1,8 @@
 package com.mapbox.navigation
 
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 import io.mockk.every
 import io.mockk.mockk
@@ -18,9 +18,9 @@ class DefaultDirectionsSessionTest {
     private lateinit var session: DefaultDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
-    private val origin: PointNavigation = mockk(relaxUnitFun = true)
-    private val destination: PointNavigation = mockk(relaxUnitFun = true)
-    private val waypoints: List<PointNavigation> = mockk(relaxUnitFun = true)
+    private val origin: Point = mockk(relaxUnitFun = true)
+    private val destination: Point = mockk(relaxUnitFun = true)
+    private val waypoints: List<Point> = mockk(relaxUnitFun = true)
     private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
     private lateinit var routeListener: Router.RouteListener
     private val route: Route = mockk(relaxUnitFun = true)
@@ -59,8 +59,8 @@ class DefaultDirectionsSessionTest {
 
     @Test
     fun setOrigin() {
-        val newOrigin: PointNavigation = mockk()
-        val newDestination: PointNavigation = mockk()
+        val newOrigin: Point = mockk()
+        val newDestination: Point = mockk()
 
         session.origin = newOrigin
         session.destination = newDestination
@@ -77,7 +77,7 @@ class DefaultDirectionsSessionTest {
 
     @Test
     fun setWaypoints() {
-        val newWaypoints: List<PointNavigation> = mockk()
+        val newWaypoints: List<Point> = mockk()
 
         session.waypoints = newWaypoints
 

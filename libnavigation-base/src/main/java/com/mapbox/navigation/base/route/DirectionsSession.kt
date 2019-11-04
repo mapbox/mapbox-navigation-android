@@ -1,12 +1,12 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.navigation.base.route.model.PointNavigation
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 
 interface DirectionsSession {
-    var origin: PointNavigation
-    var waypoints: List<PointNavigation>
-    var destination: PointNavigation
+    var origin: Point
+    var waypoints: List<Point>
+    var destination: Point
     var currentRoute: Route?
 
     fun registerRouteObserver(routeObserver: RouteObserver)

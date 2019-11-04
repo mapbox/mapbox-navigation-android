@@ -1,16 +1,16 @@
 package com.mapbox.navigation
 
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.PointNavigation
 import com.mapbox.navigation.base.route.model.Route
 import java.util.concurrent.CopyOnWriteArrayList
 
 class DefaultDirectionsSession(
     private val router: Router,
-    origin: PointNavigation,
-    waypoints: List<PointNavigation>,
-    destination: PointNavigation
+    origin: Point,
+    waypoints: List<Point>,
+    destination: Point
 ) : DirectionsSession {
 
     override var currentRoute: Route? = null
@@ -22,7 +22,7 @@ class DefaultDirectionsSession(
             routeObservers.forEach { it.onRouteChanged(value) }
         }
 
-    override var origin: PointNavigation = origin
+    override var origin: Point = origin
         set(value) {
             if (field == value) {
                 return
@@ -31,7 +31,7 @@ class DefaultDirectionsSession(
             requestRoute()
         }
 
-    override var waypoints: List<PointNavigation> = waypoints
+    override var waypoints: List<Point> = waypoints
         set(value) {
             if (field == value) {
                 return
@@ -40,7 +40,7 @@ class DefaultDirectionsSession(
             requestRoute()
         }
 
-    override var destination: PointNavigation = destination
+    override var destination: Point = destination
         set(value) {
             if (value == field) {
                 return
