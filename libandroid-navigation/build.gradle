@@ -79,7 +79,6 @@ dependencies {
   testImplementation dependenciesList.commonsIO
   testImplementation dependenciesList.robolectric
 }
-
 apply from: 'javadoc.gradle'
 apply from: "${rootDir}/gradle/mvn-push-android.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"

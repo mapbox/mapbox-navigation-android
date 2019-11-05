@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 
@@ -25,6 +26,7 @@ import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
@@ -75,6 +77,8 @@ class MapRouteLine {
   private int primaryRouteIndex;
   private boolean isVisible = true;
   private boolean alternativesVisible = true;
+  private AtomicReference<FeatureProcessingTask> featureProcessingTask = new AtomicReference<>(null);
+  private Handler mainHandler;
 
   MapRouteLine(Context context,
                MapboxMap mapboxMap,
@@ -140,6 +144,7 @@ class MapRouteLine {
     mapboxMap.getStyle().addSource(routeLineSource);
 
     initializeLayers(mapboxMap, layerProvider);
+    mainHandler = new Handler(context.getMainLooper());
   }
 
   // For testing only
@@ -241,7 +246,19 @@ class MapRouteLine {
   }
 
   private void generateRouteFeatureCollectionsFrom(List<DirectionsRoute> routes) {
-    new FeatureProcessingTask(routes, routeFeaturesProcessedCallback).execute();
+    //Retrieve a possibly null task. The retrieve is atomic.
+    FeatureProcessingTask task = featureProcessingTask.getAndSet(new FeatureProcessingTask(routes, routeFeaturesProcessedCallback, mainHandler));
+    //If the previous task is valid, cancel it.
+    if (task != null){
+      task.cancel();
+    }
+    //Retrieve the newly created task again. Maybe null
+    task = featureProcessingTask.get();
+
+    //If the new task is not null, start it
+    if (task != null){
+      task.start();
+    }
   }
 
   private OnRouteFeaturesProcessedCallback routeFeaturesProcessedCallback = new OnRouteFeaturesProcessedCallback() {
