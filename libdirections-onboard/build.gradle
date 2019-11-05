@@ -21,6 +21,7 @@ dependencies {
 
     api(project(':libnavigation-base'))
     implementation(project(':libnavigator'))
+    implementation project(':liblogger')
     implementation(project(":libnavigation-util"))
 
     //ktlint
