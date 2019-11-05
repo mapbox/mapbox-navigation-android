@@ -369,6 +369,7 @@ public class NavigationViewModel extends AndroidViewModel {
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
       connectivityController, regionDownloadCallback);
+    navigation.addProgressChangeListener(mapOfflineManager);
   }
 
   private void initializeVoiceInstructionLoader() {
@@ -454,7 +455,6 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.startNavigation(route);
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.preCache(route);
-      navigation.addProgressChangeListener(mapOfflineManager);
     }
   }
 
