@@ -4,6 +4,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import java.io.File
 
 class MapboxOnboardRouter: Router {
@@ -13,10 +14,9 @@ class MapboxOnboardRouter: Router {
         private const val TILE_PATH_NAME = "tiles"
     }
 
-    // private val offlineNavigator: OfflineNavigator
     private val tilePath: String
     private val offlineTileVersions: OfflineTileVersions
-    private val navigator: MapboxNativeNavigator
+    private val navigatorNative: MapboxNativeNavigator
 
     /**
      * Creates an offline router which uses the specified offline path for storing and retrieving
@@ -32,7 +32,7 @@ class MapboxOnboardRouter: Router {
 
         this.tilePath = tileDir.absolutePath
         offlineTileVersions = OfflineTileVersions()
-        this.navigator = MapboxNativeNavigatorImpl
+        this.navigatorNative = MapboxNativeNavigatorImpl
     }
 
     // Package private for testing purposes
@@ -43,7 +43,7 @@ class MapboxOnboardRouter: Router {
     ) {
         this.tilePath = tilePath
         this.offlineTileVersions = offlineTileVersions
-        this.navigator = navigator
+        this.navigatorNative = navigator
     }
 
     override fun getRoute(
