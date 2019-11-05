@@ -15,7 +15,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         System.loadLibrary("navigator-android")
     }
 
-    private val navigator: Navigator = Navigator()
+    val navigator: Navigator = Navigator()
 
     override fun updateLocation(rawLocation: Location) {
         navigator.updateLocation(rawLocation.toFixLocation())
