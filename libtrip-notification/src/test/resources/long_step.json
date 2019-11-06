@@ -1,0 +1,72 @@
+{
+  "waypoints": [
+    {
+      "name": "Kendree Street",
+      "location": [
+        -121.848098,
+        38.002812
+      ]
+    },
+    {
+      "name": "Mountain Wood Lane",
+      "location": [
+        -122.261111,
+        37.420639
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "legs": [
+        {
+          "steps": [
+            {
+              "intersections": [
+                {
+                  "out": 0,
+                  "entry": [
+                    true
+                  ],
+                  "location": [
+                    -121.848098,
+                    38.002812
+                  ],
+                  "bearings": [
+                    19
+                  ]
+                }
+              ],
+              "geometry": "}jongAx``lgF|bpb@z`eX",
+              "duration": 4986.5,
+              "distance": 119541.2,
+              "name": "Kendree Street",
+              "weight": 5012.2,
+              "mode": "driving",
+              "maneuver": {
+                "bearing_after": 19,
+                "location": [
+                  -121.848098,
+                  38.002812
+                ],
+                "type": "depart",
+                "bearing_before": 0,
+                "modifier": "left",
+                "instruction": "Head north on Kendree Street"
+              }
+            }
+          ],
+          "weight": 5012.2,
+          "distance": 119541.2,
+          "summary": "CA 24, Junipero Serra Freeway",
+          "duration": 4986.5
+        }
+      ],
+      "weight_name": "routability",
+      "geometry": "}jongAx``lgF|bpb@z`eX",
+      "weight": 5012.2,
+      "distance": 119541.2,
+      "duration": 4986.5
+    }
+  ],
+  "code": "Ok"
+}

@@ -5,6 +5,7 @@ data class LegStep internal constructor(
     private var duration: Double? = null,
     private var name: String? = null,
     private var drivingSide: String? = null,
+    private var geometry: String? = null,
     private var stepManeuver: StepManeuver
 ) {
 
@@ -16,6 +17,8 @@ data class LegStep internal constructor(
 
     fun drivingSide(): String? = drivingSide
 
+    fun geometry(): String? = geometry
+
     fun stepManeuver(): StepManeuver = stepManeuver
 
     class Builder {
@@ -24,6 +27,7 @@ data class LegStep internal constructor(
         private var name: String? = null
         private lateinit var maneuver: StepManeuver
         private var drivingSide: String? = null
+        private var geometry: String? = null
 
         fun distance(distance: Double) =
                 apply { this.distance = distance }
@@ -37,12 +41,15 @@ data class LegStep internal constructor(
         fun drivingSide(drivingSide: String) =
                 apply { this.drivingSide = drivingSide }
 
+        fun geometry(geometry: String) =
+                apply { this.geometry = geometry }
+
         fun stepManeuver(maneuver: StepManeuver) =
                 apply { this.maneuver = maneuver }
 
         fun build(): LegStep {
             check(::maneuver.isInitialized) { "Missing property stepManeuver" }
-            return LegStep(distance, duration, name, drivingSide, maneuver)
+            return LegStep(distance, duration, name, drivingSide, geometry, maneuver)
         }
     }
 }

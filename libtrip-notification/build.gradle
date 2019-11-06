@@ -26,5 +26,6 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
 
     // Mock
+    testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
 }
