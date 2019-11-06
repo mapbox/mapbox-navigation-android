@@ -3,15 +3,15 @@ package com.mapbox.navigation.route.onboard.task
 import android.os.AsyncTask
 import com.google.gson.Gson
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.route.onboard.OnOfflineRouteFoundCallback
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
-import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouterResult
 
 internal class OfflineRouteRetrievalTask(
-    private val navigator: Navigator,
+    private val navigator: MapboxNativeNavigator,
     private val callback: OnOfflineRouteFoundCallback
 ) : AsyncTask<OfflineRoute, Void, DirectionsRoute>() {
 
@@ -19,7 +19,7 @@ internal class OfflineRouteRetrievalTask(
 
     // For testing only
     internal constructor(
-        navigator: Navigator,
+        navigator: MapboxNativeNavigator,
         callback: OnOfflineRouteFoundCallback,
         routerResult: RouterResult
     ) : this(navigator, callback) {
