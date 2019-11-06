@@ -4,10 +4,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import java.io.File
 
-class MapboxOnboardRouter: Router {
+class MapboxOnboardRouter : Router {
 
     companion object {
 
