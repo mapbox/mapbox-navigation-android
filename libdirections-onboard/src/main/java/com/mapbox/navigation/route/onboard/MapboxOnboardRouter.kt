@@ -5,7 +5,6 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import java.io.File
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
