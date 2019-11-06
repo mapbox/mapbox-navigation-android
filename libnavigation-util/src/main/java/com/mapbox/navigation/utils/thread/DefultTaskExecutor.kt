@@ -4,7 +4,7 @@ import android.os.Process
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
-object DefultTaskExecutor: TaskExecutor {
+object DefultTaskExecutor : TaskExecutor {
 
     private const val KEEP_THREAD_ALIVE_TIME = 60L
     private val backgroundTasksExecutor: PriorityThreadPoolExecutor

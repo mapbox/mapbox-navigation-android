@@ -30,7 +30,7 @@ class PriorityThreadPoolExecutor(
 
     private class PriorityFutureTask(
         private val priorityRunnable: PriorityRunnable
-    ): FutureTask<PriorityRunnable>(priorityRunnable, null),
+    ) : FutureTask<PriorityRunnable>(priorityRunnable, null),
         Comparable<PriorityFutureTask> {
 
         override fun compareTo(other: PriorityFutureTask): Int {
