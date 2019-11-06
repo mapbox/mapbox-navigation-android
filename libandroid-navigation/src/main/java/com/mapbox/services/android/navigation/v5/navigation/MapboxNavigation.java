@@ -1032,6 +1032,7 @@ public class MapboxNavigation implements ServiceConnection {
       }
     });
     navigationEngineFactory = new NavigationEngineFactory();
+    locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
             "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
