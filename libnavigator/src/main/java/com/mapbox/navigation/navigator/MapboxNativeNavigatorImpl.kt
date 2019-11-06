@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouterResult
 import java.util.Date
 
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
@@ -15,11 +16,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         System.loadLibrary("navigator-android")
     }
 
-    val navigator: Navigator = Navigator()
+    private val navigator: Navigator = Navigator()
 
     override fun updateLocation(rawLocation: Location) {
         navigator.updateLocation(rawLocation.toFixLocation())
     }
+
+    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
 
     override fun setRoute(route: Route) {
         TODO("not implemented")
