@@ -20,11 +20,11 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     implementation project(':libnavigation-util')
-    implementation project(':libderections-common')
+    implementation project(':libdirections-common')
     api(project(':libnavigation-base'))
 
     // Support
-    implementation dependenciesList.supportAppcompatV7
+    implementation dependenciesList.supportAnnotation
 
     implementation dependenciesList.kotlinStdLib
 
