@@ -1,8 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Looper;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -27,12 +25,12 @@ class FeatureProcessingTask extends Thread {
     private final WeakReference<OnRouteFeaturesProcessedCallback> callbackWeakReference;
     private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
     private AtomicBoolean cancelThread = new AtomicBoolean(false);
-    private Handler mainThreadHandler = null;
+    private Handler mainThreadHandler;
 
     FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback, Handler handler) {
         this.routes = routes;
         this.callbackWeakReference = new WeakReference<>(callback);
-        mainThreadHandler = handler;
+        this.mainThreadHandler = handler;
     }
 
     @Override
@@ -44,11 +42,13 @@ class FeatureProcessingTask extends Thread {
             boolean isPrimary = i == 0;
             FeatureCollection routeFeatureCollection = createRouteFeatureCollection(route, isPrimary);
             routeFeatureCollections.add(routeFeatureCollection);
+        }
+        if (!cancelThread.get()) {
             completion();
         }
     }
 
-    public void cancel() {
+    void cancel() {
         cancelThread.set(true);
     }
 

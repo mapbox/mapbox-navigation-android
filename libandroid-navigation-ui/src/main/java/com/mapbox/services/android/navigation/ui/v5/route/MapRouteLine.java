@@ -308,6 +308,14 @@ class MapRouteLine {
     if (task != null){
       task.cancel();
     }
+
+    //Retrieve the newly created task again. Maybe null
+    task = primaryRouteUpdateTask.get();
+
+    //If the new task is not null, start it
+    if (task != null){
+      task.start();
+    }
   }
 
   private OnPrimaryRouteUpdatedCallback primaryRouteUpdatedCallback = new OnPrimaryRouteUpdatedCallback() {

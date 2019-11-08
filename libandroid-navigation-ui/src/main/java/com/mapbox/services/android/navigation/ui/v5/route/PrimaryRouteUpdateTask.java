@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import android.os.AsyncTask;
 import android.os.Handler;
 
 import com.mapbox.geojson.Feature;
@@ -20,19 +19,20 @@ class PrimaryRouteUpdateTask extends Thread {
     private final List<FeatureCollection> routeFeatureCollections;
     private final WeakReference<OnPrimaryRouteUpdatedCallback> callbackWeakReference;
     private AtomicBoolean cancelThread = new AtomicBoolean(false);
-    private Handler mainThreadHandler = null;
+    private Handler mainThreadHandler;
 
     PrimaryRouteUpdateTask(int newPrimaryIndex, List<FeatureCollection> routeFeatureCollections,
                            OnPrimaryRouteUpdatedCallback callback, Handler handler) {
         this.newPrimaryIndex = newPrimaryIndex;
         this.routeFeatureCollections = routeFeatureCollections;
         this.callbackWeakReference = new WeakReference<>(callback);
-        mainThreadHandler = handler;
+        this.mainThreadHandler = handler;
     }
 
-    public void cancel(){
+    void cancel(){
         cancelThread.set(true);
     }
+
     @Override
     public void run() {
         List<FeatureCollection> updatedRouteCollections = new ArrayList<>(routeFeatureCollections);
@@ -41,7 +41,7 @@ class PrimaryRouteUpdateTask extends Thread {
         }
 
         // Update the primary new collection
-        if (cancelThread.get() == true)
+        if (cancelThread.get())
             return;
         FeatureCollection primaryCollection = updatedRouteCollections.remove(newPrimaryIndex);
         List<Feature> primaryFeatures = primaryCollection.features();
@@ -81,7 +81,7 @@ class PrimaryRouteUpdateTask extends Thread {
             mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!cancelThread.get())
+                    if (cancelThread.get())
                         return;
                     callback.onPrimaryRouteUpdated(updatedRouteCollections);
                 }
