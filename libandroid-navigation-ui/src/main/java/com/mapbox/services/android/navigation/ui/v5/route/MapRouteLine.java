@@ -78,6 +78,7 @@ class MapRouteLine {
   private boolean isVisible = true;
   private boolean alternativesVisible = true;
   private AtomicReference<FeatureProcessingTask> featureProcessingTask = new AtomicReference<>(null);
+  private AtomicReference<PrimaryRouteUpdateTask> primaryRouteUpdateTask = new AtomicReference<>(null);
   private Handler mainHandler;
 
   MapRouteLine(Context context,
@@ -303,7 +304,10 @@ class MapRouteLine {
     if (newPrimaryIndex < 0 || newPrimaryIndex > routeFeatureCollections.size() - 1) {
       return;
     }
-    new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, primaryRouteUpdatedCallback).execute();
+    PrimaryRouteUpdateTask task = primaryRouteUpdateTask.getAndSet(new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, primaryRouteUpdatedCallback, mainHandler));
+    if (task != null){
+      task.cancel();
+    }
   }
 
   private OnPrimaryRouteUpdatedCallback primaryRouteUpdatedCallback = new OnPrimaryRouteUpdatedCallback() {
