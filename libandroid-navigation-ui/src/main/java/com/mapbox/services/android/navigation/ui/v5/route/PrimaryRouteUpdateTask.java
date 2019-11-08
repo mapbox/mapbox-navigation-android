@@ -15,77 +15,83 @@ import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.
 
 class PrimaryRouteUpdateTask extends Thread {
 
-    private final int newPrimaryIndex;
-    private final List<FeatureCollection> routeFeatureCollections;
-    private final WeakReference<OnPrimaryRouteUpdatedCallback> callbackWeakReference;
-    private AtomicBoolean cancelThread = new AtomicBoolean(false);
-    private Handler mainThreadHandler;
+  private final int newPrimaryIndex;
+  private final List<FeatureCollection> routeFeatureCollections;
+  private final WeakReference<OnPrimaryRouteUpdatedCallback> callbackWeakReference;
+  private AtomicBoolean cancelThread = new AtomicBoolean(false);
+  private Handler mainThreadHandler;
 
-    PrimaryRouteUpdateTask(int newPrimaryIndex, List<FeatureCollection> routeFeatureCollections,
-                           OnPrimaryRouteUpdatedCallback callback, Handler handler) {
-        this.newPrimaryIndex = newPrimaryIndex;
-        this.routeFeatureCollections = routeFeatureCollections;
-        this.callbackWeakReference = new WeakReference<>(callback);
-        this.mainThreadHandler = handler;
+  PrimaryRouteUpdateTask(int newPrimaryIndex, List<FeatureCollection> routeFeatureCollections,
+                         OnPrimaryRouteUpdatedCallback callback, Handler handler) {
+    this.newPrimaryIndex = newPrimaryIndex;
+    this.routeFeatureCollections = routeFeatureCollections;
+    this.callbackWeakReference = new WeakReference<>(callback);
+    this.mainThreadHandler = handler;
+  }
+
+  void cancel() {
+    cancelThread.set(true);
+  }
+
+  @Override
+  public void run() {
+    List<FeatureCollection> updatedRouteCollections = new ArrayList<>(routeFeatureCollections);
+    if (updatedRouteCollections.isEmpty()) {
+      return;
     }
 
-    void cancel(){
-        cancelThread.set(true);
+    // Update the primary new collection
+    if (cancelThread.get()) {
+      return;
     }
-
-    @Override
-    public void run() {
-        List<FeatureCollection> updatedRouteCollections = new ArrayList<>(routeFeatureCollections);
-        if (updatedRouteCollections.isEmpty()) {
-            return;
-        }
-
-        // Update the primary new collection
-        if (cancelThread.get())
-            return;
-        FeatureCollection primaryCollection = updatedRouteCollections.remove(newPrimaryIndex);
-        List<Feature> primaryFeatures = primaryCollection.features();
-        if (primaryFeatures == null || primaryFeatures.isEmpty()) {
-            return;
-        }
-        for (Feature feature : primaryFeatures) {
-            if (cancelThread.get())
-                return;
-            feature.addBooleanProperty(PRIMARY_ROUTE_PROPERTY_KEY, true);
-        }
-        // Update non-primary collections (not including the primary)
-        for (FeatureCollection nonPrimaryCollection : updatedRouteCollections) {
-            if (cancelThread.get())
-                return;
-            List<Feature> nonPrimaryFeatures = nonPrimaryCollection.features();
-            if (nonPrimaryFeatures == null || nonPrimaryFeatures.isEmpty()) {
-                continue;
-            }
-            for (Feature feature : nonPrimaryFeatures) {
-                if (cancelThread.get())
-                    return;
-                feature.addBooleanProperty(PRIMARY_ROUTE_PROPERTY_KEY, false);
-            }
-        }
-        if (cancelThread.get())
-            return;
-        updatedRouteCollections.add(FIRST_COLLECTION_INDEX, primaryCollection);
-        if (!cancelThread.get()) {
-            complete(updatedRouteCollections);
-        }
+    FeatureCollection primaryCollection = updatedRouteCollections.remove(newPrimaryIndex);
+    List<Feature> primaryFeatures = primaryCollection.features();
+    if (primaryFeatures == null || primaryFeatures.isEmpty()) {
+      return;
     }
-
-    private void complete(final List<FeatureCollection> updatedRouteCollections) {
-        final OnPrimaryRouteUpdatedCallback callback = callbackWeakReference.get();
-        if (callback != null) {
-            mainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (cancelThread.get())
-                        return;
-                    callback.onPrimaryRouteUpdated(updatedRouteCollections);
-                }
-            });
-        }
+    for (Feature feature : primaryFeatures) {
+      if (cancelThread.get()) {
+        return;
+      }
+      feature.addBooleanProperty(PRIMARY_ROUTE_PROPERTY_KEY, true);
     }
+    // Update non-primary collections (not including the primary)
+    for (FeatureCollection nonPrimaryCollection : updatedRouteCollections) {
+      if (cancelThread.get()) {
+        return;
+      }
+      List<Feature> nonPrimaryFeatures = nonPrimaryCollection.features();
+      if (nonPrimaryFeatures == null || nonPrimaryFeatures.isEmpty()) {
+        continue;
+      }
+      for (Feature feature : nonPrimaryFeatures) {
+        if (cancelThread.get()) {
+          return;
+        }
+        feature.addBooleanProperty(PRIMARY_ROUTE_PROPERTY_KEY, false);
+      }
+    }
+    if (cancelThread.get()) {
+      return;
+    }
+    updatedRouteCollections.add(FIRST_COLLECTION_INDEX, primaryCollection);
+    if (!cancelThread.get()) {
+      complete(updatedRouteCollections);
+    }
+  }
+
+  private void complete(final List<FeatureCollection> updatedRouteCollections) {
+    final OnPrimaryRouteUpdatedCallback callback = callbackWeakReference.get();
+    if (callback != null) {
+      mainThreadHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          if (cancelThread.get()) {
+            return;
+          }
+          callback.onPrimaryRouteUpdated(updatedRouteCollections);
+        }
+      });
+    }
+  }
 }

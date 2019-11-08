@@ -5,6 +5,7 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.Size;
@@ -319,8 +320,9 @@ public class NavigationMapRoute implements LifecycleObserver {
     MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
     MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+    Handler handler = new Handler(context.getMainLooper());
     return new MapRouteLine(context, mapboxMap, styleRes, belowLayer,
-      drawableProvider, sourceProvider, layerProvider
+      drawableProvider, sourceProvider, layerProvider, handler
     );
   }
 

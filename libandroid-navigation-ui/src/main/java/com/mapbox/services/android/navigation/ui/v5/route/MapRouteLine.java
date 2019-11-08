@@ -77,8 +77,12 @@ class MapRouteLine {
   private int primaryRouteIndex;
   private boolean isVisible = true;
   private boolean alternativesVisible = true;
-  private AtomicReference<FeatureProcessingTask> featureProcessingTask = new AtomicReference<>(null);
-  private AtomicReference<PrimaryRouteUpdateTask> primaryRouteUpdateTask = new AtomicReference<>(null);
+  private AtomicReference<FeatureProcessingTask> featureProcessingTaskRef = new AtomicReference<>(null);
+  private FeatureProcessingTask featureProcessingTask;
+  private boolean isFeatureProcessingTaskInjected = false;
+  private AtomicReference<PrimaryRouteUpdateTask> primaryRouteUpdateTaskRef = new AtomicReference<>(null);
+  private PrimaryRouteUpdateTask primaryRouteUpdateTask;
+  private boolean isPrimaryRouteUpdateTaskInjected = false;
   private Handler mainHandler;
 
   MapRouteLine(Context context,
@@ -87,10 +91,12 @@ class MapRouteLine {
                String belowLayer,
                MapRouteDrawableProvider drawableProvider,
                MapRouteSourceProvider sourceProvider,
-               MapRouteLayerProvider layerProvider) {
+               MapRouteLayerProvider layerProvider,
+               Handler handler) {
     this.mapboxMap = mapboxMap;
     this.belowLayer = belowLayer;
     this.routeLayers = new ArrayList<>();
+    this.mainHandler = handler;
 
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
     // Primary Route attributes
@@ -145,7 +151,6 @@ class MapRouteLine {
     mapboxMap.getStyle().addSource(routeLineSource);
 
     initializeLayers(mapboxMap, layerProvider);
-    mainHandler = new Handler(context.getMainLooper());
   }
 
   // For testing only
@@ -247,19 +252,32 @@ class MapRouteLine {
   }
 
   private void generateRouteFeatureCollectionsFrom(List<DirectionsRoute> routes) {
-    //Retrieve a possibly null task. The retrieve is atomic.
-    FeatureProcessingTask task = featureProcessingTask.getAndSet(new FeatureProcessingTask(routes, routeFeaturesProcessedCallback, mainHandler));
-    //If the previous task is valid, cancel it.
-    if (task != null){
+    // Retrieve a possibly null task. The retrieve is atomic.
+    FeatureProcessingTask task = featureProcessingTaskRef.getAndSet(retrieveFeatureProcessingTask(routes));
+    // If the previous task is valid, cancel it.
+    if (task != null) {
       task.cancel();
     }
-    //Retrieve the newly created task again. Maybe null
-    task = featureProcessingTask.get();
+    // Retrieve the newly created task again. Maybe null
+    task = featureProcessingTaskRef.get();
 
-    //If the new task is not null, start it
-    if (task != null){
+    // If the new task is not null, start it
+    if (task != null) {
       task.start();
     }
+  }
+
+  // Testing only
+  void injectFeatureProcessingTask(FeatureProcessingTask featureProcessingTask) {
+    this.isFeatureProcessingTaskInjected = true;
+    this.featureProcessingTask = featureProcessingTask;
+  }
+
+  private FeatureProcessingTask retrieveFeatureProcessingTask(List<DirectionsRoute> routes) {
+    if (isFeatureProcessingTaskInjected) {
+      return featureProcessingTask;
+    }
+    return new FeatureProcessingTask(routes, routeFeaturesProcessedCallback, mainHandler);
   }
 
   private OnRouteFeaturesProcessedCallback routeFeaturesProcessedCallback = new OnRouteFeaturesProcessedCallback() {
@@ -275,6 +293,11 @@ class MapRouteLine {
       updateVisibilityTo(isVisible);
     }
   };
+
+  // Testing only
+  OnRouteFeaturesProcessedCallback retrieveRouteFeaturesProcessedCallback() {
+    return routeFeaturesProcessedCallback;
+  }
 
   private void drawWayPoints() {
     DirectionsRoute primaryRoute = directionsRoutes.get(primaryRouteIndex);
@@ -304,18 +327,32 @@ class MapRouteLine {
     if (newPrimaryIndex < 0 || newPrimaryIndex > routeFeatureCollections.size() - 1) {
       return;
     }
-    PrimaryRouteUpdateTask task = primaryRouteUpdateTask.getAndSet(new PrimaryRouteUpdateTask(newPrimaryIndex, routeFeatureCollections, primaryRouteUpdatedCallback, mainHandler));
-    if (task != null){
+    PrimaryRouteUpdateTask task = primaryRouteUpdateTaskRef.getAndSet(retrievePrimaryRouteUpdateTask(newPrimaryIndex));
+    if (task != null) {
       task.cancel();
     }
 
-    //Retrieve the newly created task again. Maybe null
-    task = primaryRouteUpdateTask.get();
+    // Retrieve the newly created task again. Maybe null
+    task = primaryRouteUpdateTaskRef.get();
 
-    //If the new task is not null, start it
-    if (task != null){
+    // If the new task is not null, start it
+    if (task != null) {
       task.start();
     }
+  }
+
+  // Testing only
+  void injectPrimaryRouteUpdateTask(PrimaryRouteUpdateTask primaryRouteUpdateTask) {
+    this.isPrimaryRouteUpdateTaskInjected = true;
+    this.primaryRouteUpdateTask = primaryRouteUpdateTask;
+  }
+
+  private PrimaryRouteUpdateTask retrievePrimaryRouteUpdateTask(int newPrimaryIndex) {
+    if (isPrimaryRouteUpdateTaskInjected) {
+      return primaryRouteUpdateTask;
+    }
+    return new PrimaryRouteUpdateTask(newPrimaryIndex,
+        routeFeatureCollections, primaryRouteUpdatedCallback, mainHandler);
   }
 
   private OnPrimaryRouteUpdatedCallback primaryRouteUpdatedCallback = new OnPrimaryRouteUpdatedCallback() {
@@ -324,6 +361,11 @@ class MapRouteLine {
       drawRoutes(updatedRouteCollections);
     }
   };
+
+  // Testing only
+  OnPrimaryRouteUpdatedCallback retrievePrimaryRouteUpdatedCallback() {
+    return primaryRouteUpdatedCallback;
+  }
 
   private void findRouteBelowLayerId() {
     if (belowLayer == null || belowLayer.isEmpty()) {
