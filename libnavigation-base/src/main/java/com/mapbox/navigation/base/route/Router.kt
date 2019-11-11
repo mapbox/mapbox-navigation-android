@@ -9,12 +9,12 @@ interface Router {
         origin: Point,
         waypoints: List<Point>?,
         destination: Point,
-        listener: RouteListener
+        callback: RouteCallback
     )
 
     fun cancel()
 
-    interface RouteListener {
+    interface RouteCallback {
         fun onRouteReady(route: Route)
 
         fun onFailure(throwable: Throwable)

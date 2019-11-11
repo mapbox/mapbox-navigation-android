@@ -23,7 +23,7 @@ class MapboxOffboardRouter : Router
         origin: Point,
         waypoints: List<Point>?,
         destination: Point,
-        listener: Router.RouteListener
+        callback: Router.RouteCallback
     ) {
         val builder = NavigationRoute
             .builder(context)
@@ -34,7 +34,7 @@ class MapboxOffboardRouter : Router
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                listener.onFailure(t)
+                callback.onFailure(t)
             }
 
             override fun onResponse(
@@ -43,9 +43,9 @@ class MapboxOffboardRouter : Router
             ) {
                 val route = response.body()?.routes()?.firstOrNull()
                 if (response.isSuccessful && route != null) {
-                    listener.onRouteReady(route.mapToRoute())
+                    callback.onRouteReady(route.mapToRoute())
                 } else {
-                    listener.onFailure(NavigationException("Error fetching route"))
+                    callback.onFailure(NavigationException("Error fetching route"))
                 }
             }
         })
