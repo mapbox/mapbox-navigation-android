@@ -8,6 +8,18 @@ Mapbox welcomes participation and contributions from everyone.
 * Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
 * Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
 
+### v0.42.3 - November 11, 2019
+
+* Fix synchronization issue in MapRouteLine / NavigationMapRoute [#2256](https://github.com/mapbox/mapbox-navigation-android/pull/2256)
+
+### v0.42.2 - November 6, 2019
+
+* Disable sideloading functionality in _Dynamic offline_ feature [#2248](https://github.com/mapbox/mapbox-navigation-android/pull/2248)
+
+### v0.42.1 - October 18, 2019
+
+* Roundabout maneuver icon depicts counterclockwise movement when driving on the left [#2228](https://github.com/mapbox/mapbox-navigation-android/pull/2228)
+
 ### v0.42.0 - September 20, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes. Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.42.0-Migration-Guide) for the necessary updates required.
