@@ -17,7 +17,7 @@ class MapboxHybridRouter(
         origin: Point,
         waypoints: List<Point>?,
         destination: Point,
-        listener: Router.RouteListener
+        callback: Router.RouteCallback
     ) {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
