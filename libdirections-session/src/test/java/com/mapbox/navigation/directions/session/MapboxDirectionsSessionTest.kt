@@ -44,6 +44,17 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun failRouteResponse() {
+        assertNull(session.currentRoute)
+        session.registerRouteObserver(observer)
+
+        routeCallback.onFailure(mockk())
+
+        assertNull(session.currentRoute)
+        verify { observer.onFailure(any()) }
+    }
+
+    @Test
     fun setCurrentRoute() {
         val newRoute: Route = mockk()
 

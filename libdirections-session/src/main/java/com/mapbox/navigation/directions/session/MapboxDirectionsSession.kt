@@ -59,12 +59,20 @@ class MapboxDirectionsSession(
     }
 
     private fun requestRoute() {
-        if (::origin.isInitialized && ::waypoints.isInitialized) {
-            router.cancel()
-            currentRoute = null
-            router.getRoute(origin, waypoints) {
-                currentRoute = it
-            }
+        if (!::origin.isInitialized || !::waypoints.isInitialized) {
+            return
         }
+        router.cancel()
+        currentRoute = null
+        router.getRoute(origin, waypoints, destination, object : Router.RouteCallback {
+            override fun onRouteReady(route: Route) {
+                currentRoute = route
+                routeObservers.forEach { it.onRouteChanged(route) }
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                routeObservers.forEach { it.onFailure(throwable) }
+            }
+        })
     }
 }
