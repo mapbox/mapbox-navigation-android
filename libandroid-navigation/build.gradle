@@ -58,7 +58,6 @@ dependencies {
   api project(':libnavigation-base')
   implementation project(':libnavigator')
   implementation project(':libnavigation-util')
-  implementation project(':libdirections-common')
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
