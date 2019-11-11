@@ -14,10 +14,12 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter : Router
+class MapboxOffboardRouter(
     private val context: Context,
     private val mapboxToken: String
 ) : Router {
+
+    private var navigationRoute: NavigationRoute? = null
 
     override fun getRoute(
         origin: Point,
