@@ -19,14 +19,14 @@ class PrimaryRouteUpdateTask extends Thread {
   private final List<FeatureCollection> routeFeatureCollections;
   private final WeakReference<OnPrimaryRouteUpdatedCallback> callbackWeakReference;
   private AtomicBoolean cancelThread = new AtomicBoolean(false);
-  private Handler mainThreadHandler;
+  private Handler postHandler;
 
   PrimaryRouteUpdateTask(int newPrimaryIndex, List<FeatureCollection> routeFeatureCollections,
                          OnPrimaryRouteUpdatedCallback callback, Handler handler) {
     this.newPrimaryIndex = newPrimaryIndex;
     this.routeFeatureCollections = routeFeatureCollections;
     this.callbackWeakReference = new WeakReference<>(callback);
-    this.mainThreadHandler = handler;
+    this.postHandler = handler;
   }
 
   void cancel() {
@@ -83,7 +83,7 @@ class PrimaryRouteUpdateTask extends Thread {
   private void complete(final List<FeatureCollection> updatedRouteCollections) {
     final OnPrimaryRouteUpdatedCallback callback = callbackWeakReference.get();
     if (callback != null) {
-      mainThreadHandler.post(new Runnable() {
+      postHandler.post(new Runnable() {
         @Override
         public void run() {
           if (cancelThread.get()) {

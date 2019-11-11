@@ -25,12 +25,12 @@ class FeatureProcessingTask extends Thread {
   private final WeakReference<OnRouteFeaturesProcessedCallback> callbackWeakReference;
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
   private AtomicBoolean cancelThread = new AtomicBoolean(false);
-  private Handler mainThreadHandler;
+  private Handler postHandler;
 
   FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback, Handler handler) {
     this.routes = routes;
     this.callbackWeakReference = new WeakReference<>(callback);
-    this.mainThreadHandler = handler;
+    this.postHandler = handler;
   }
 
   @Override
@@ -56,7 +56,7 @@ class FeatureProcessingTask extends Thread {
   private void completion() {
     final OnRouteFeaturesProcessedCallback callback = callbackWeakReference.get();
     if (callback != null) {
-      mainThreadHandler.post(new Runnable() {
+      postHandler.post(new Runnable() {
         @Override
         public void run() {
           if (cancelThread.get()) {
