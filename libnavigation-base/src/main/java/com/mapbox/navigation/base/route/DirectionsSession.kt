@@ -20,5 +20,7 @@ interface DirectionsSession {
 
     interface RouteObserver {
         fun onRouteChanged(route: Route?)
+
+        fun onFailure(throwable: Throwable)
     }
 }
