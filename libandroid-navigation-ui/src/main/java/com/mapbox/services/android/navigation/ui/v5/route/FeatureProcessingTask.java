@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
-import android.os.AsyncTask;
+import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -14,39 +14,57 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.PRIMARY_ROUTE_PROPERTY_KEY;
 
-class FeatureProcessingTask extends AsyncTask<Void, Void, Void> {
+class FeatureProcessingTask extends Thread {
 
   private final List<DirectionsRoute> routes;
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
   private final WeakReference<OnRouteFeaturesProcessedCallback> callbackWeakReference;
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
+  private AtomicBoolean cancelThread = new AtomicBoolean(false);
+  private Handler postHandler;
 
-  FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback) {
+  FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback, Handler handler) {
     this.routes = routes;
     this.callbackWeakReference = new WeakReference<>(callback);
+    this.postHandler = handler;
   }
 
   @Override
-  protected Void doInBackground(Void... voids) {
+  public void run() {
     for (int i = 0; i < routes.size(); i++) {
+      if (cancelThread.get()) {
+        return;
+      }
       DirectionsRoute route = routes.get(i);
       boolean isPrimary = i == 0;
       FeatureCollection routeFeatureCollection = createRouteFeatureCollection(route, isPrimary);
       routeFeatureCollections.add(routeFeatureCollection);
     }
-    return null;
+    if (!cancelThread.get()) {
+      completion();
+    }
   }
 
-  @Override
-  protected void onPostExecute(Void result) {
-    super.onPostExecute(result);
-    Runtime.getRuntime().gc();
-    OnRouteFeaturesProcessedCallback callback = callbackWeakReference.get();
+  void cancel() {
+    cancelThread.set(true);
+  }
+
+  private void completion() {
+    final OnRouteFeaturesProcessedCallback callback = callbackWeakReference.get();
     if (callback != null) {
-      callback.onRouteFeaturesProcessed(routeFeatureCollections, routeLineStrings);
+      postHandler.post(new Runnable() {
+        @Override
+        public void run() {
+          if (cancelThread.get()) {
+            return;
+          }
+          callback.onRouteFeaturesProcessed(routeFeatureCollections, routeLineStrings);
+        }
+      });
     }
   }
 
