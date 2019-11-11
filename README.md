@@ -85,7 +85,7 @@ We welcome feedback, translations, and code contributions! Please see [CONTRIBUT
 After cloning the repo, make sure to initialize vendor submodules:
 
 ```bash
-git submodule update --init --recursive
+git submodule update --init --recursive --remote
 ```
 
 ## License of Dependencies
