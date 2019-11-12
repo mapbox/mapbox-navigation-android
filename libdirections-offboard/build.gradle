@@ -34,4 +34,5 @@ dependencies {
     implementation dependenciesList.mapboxSdkServices
 
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }

@@ -13,8 +13,12 @@ class MapboxDirectionsSession(
     private val router: Router,
     origin: Point,
     waypoints: List<Point>,
-    destination: Point
+    private val destination: Point
 ) : DirectionsSession {
+
+    init {
+        requestRoute()
+    }
 
     override var currentRoute: Route? = null
         set(value) {
@@ -25,9 +29,9 @@ class MapboxDirectionsSession(
             routeObservers.forEach { it.onRouteChanged(value) }
         }
 
-    private lateinit var origin: Point
+    private var origin: Point = origin
 
-    private lateinit var waypoints: List<Point>
+    private var waypoints: List<Point> = waypoints
 
     private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
 
@@ -59,9 +63,6 @@ class MapboxDirectionsSession(
     }
 
     private fun requestRoute() {
-        if (!::origin.isInitialized || !::waypoints.isInitialized) {
-            return
-        }
         router.cancel()
         currentRoute = null
         router.getRoute(origin, waypoints, destination, object : Router.RouteCallback {
