@@ -43,9 +43,9 @@ class MapboxOffboardRouter(
                 call: Call<DirectionsResponse>,
                 response: Response<DirectionsResponse>
             ) {
-                val route = response.body()?.routes()?.firstOrNull()
+                val route = response.body()?.routes()
                 if (response.isSuccessful && route != null) {
-                    callback.onRouteReady(route.mapToRoute())
+                    callback.onRouteReady(route.map { it.mapToRoute() })
                 } else {
                     callback.onFailure(NavigationException("Error fetching route"))
                 }
