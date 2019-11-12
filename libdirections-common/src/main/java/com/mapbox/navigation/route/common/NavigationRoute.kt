@@ -26,7 +26,7 @@ import retrofit2.Callback
  *
  * Developer Note: MapboxDirections cannot be directly extended since it is an AutoValue class.
  *
- * 0.5.0
+ * 1.0
  */
 
 class NavigationRoute

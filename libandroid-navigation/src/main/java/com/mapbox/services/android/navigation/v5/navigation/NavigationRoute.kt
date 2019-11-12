@@ -12,6 +12,7 @@ import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
@@ -308,7 +309,7 @@ internal constructor(
          *
          * @since 0.5.0
          */
-        fun language(language: java.util.Locale): Builder {
+        fun language(language: Locale): Builder {
             directionsBuilder.language(language)
             return this
         }
