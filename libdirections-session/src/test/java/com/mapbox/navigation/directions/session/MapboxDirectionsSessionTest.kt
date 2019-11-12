@@ -40,7 +40,7 @@ class MapboxDirectionsSessionTest {
         session.registerRouteObserver(observer)
         session.setWaypoints(waypoints)
 
-        routeCallback.onRouteReady(route)
+        routeCallback.onRouteReady(listOf(route))
 
         assertEquals(route, session.currentRoute)
         verify { observer.onRouteChanged(route) }
