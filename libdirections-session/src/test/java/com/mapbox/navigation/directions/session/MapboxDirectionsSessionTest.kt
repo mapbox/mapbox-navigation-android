@@ -31,22 +31,26 @@ class MapboxDirectionsSessionTest {
         every { router.getRoute(origin, waypoints, destination, capture(listener)) } answers {
             routeCallback = listener.captured
         }
-        session = DefaultDirectionsSession(router, origin, waypoints, destination)
+        session = MapboxDirectionsSession(router, origin, waypoints, destination)
     }
 
     @Test
     fun initialRouteResponse() {
         assertNull(session.currentRoute)
+        session.registerRouteObserver(observer)
+        session.setWaypoints(waypoints)
 
         routeCallback.onRouteReady(route)
 
         assertEquals(route, session.currentRoute)
+        verify { observer.onRouteChanged(route) }
     }
 
     @Test
     fun failRouteResponse() {
         assertNull(session.currentRoute)
         session.registerRouteObserver(observer)
+        session.setWaypoints(waypoints)
 
         routeCallback.onFailure(mockk())
 
@@ -75,7 +79,7 @@ class MapboxDirectionsSessionTest {
 
         assertNull(session.currentRoute)
         assertEquals(newOrigin, session.getOrigin())
-        verify { router.getRoute(eq(newOrigin), eq(waypoints), any()) }
+        verify { router.getRoute(eq(newOrigin), eq(waypoints), any(), any()) }
     }
 
     @Test
@@ -90,7 +94,7 @@ class MapboxDirectionsSessionTest {
 
         assertNull(session.currentRoute)
         assertEquals(newWaypoints, session.getWaypoints())
-        verify { router.getRoute(eq(origin), eq(newWaypoints), any()) }
+        verify { router.getRoute(eq(origin), eq(newWaypoints), any(), any()) }
     }
 
     @Test

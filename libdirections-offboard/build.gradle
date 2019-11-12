@@ -34,5 +34,5 @@ dependencies {
     implementation dependenciesList.mapboxSdkServices
 
     testImplementation dependenciesList.junit
-}
-apply from: "${rootDir}/gradle/jacoco.gradle"
+    testImplementation dependenciesList.mockk
+}apply from: "${rootDir}/gradle/jacoco.gradle"
