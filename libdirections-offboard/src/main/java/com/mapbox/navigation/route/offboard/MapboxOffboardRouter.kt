@@ -1,8 +1,8 @@
 package com.mapbox.navigation.route.offboard
 
+import android.content.Context
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router

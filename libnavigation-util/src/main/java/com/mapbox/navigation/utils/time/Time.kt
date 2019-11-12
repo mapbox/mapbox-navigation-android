@@ -1,4 +1,4 @@
-package com.mapbox.navigation.util
+package com.mapbox.navigation.utils.time
 
 interface Time {
     fun nanoTime(): Long
