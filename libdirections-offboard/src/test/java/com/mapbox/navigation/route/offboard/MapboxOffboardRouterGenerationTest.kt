@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.offboard
 
+import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -10,7 +11,7 @@ class MapboxOffboardRouterGenerationTest {
 
     @Before
     fun setUp() {
-        offboardRouter = MapboxOffboardRouter()
+        offboardRouter = MapboxOffboardRouter(mockk(), "pk_token")
     }
 
     @Test
