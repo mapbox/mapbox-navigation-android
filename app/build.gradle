@@ -40,7 +40,7 @@ android {
 
 dependencies {
   // Mapbox Navigation SDK
-  implementation project(':libandroid-navigation-ui')
+  implementation project(':libandroid-navigation')
   implementation dependenciesList.mapboxMapSdk
   implementation dependenciesList.locationLayerPlugin
 

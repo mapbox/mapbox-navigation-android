@@ -1,3 +1,2 @@
 include ':app'
 include ':libandroid-navigation'
-include ':libandroid-navigation-ui'

@@ -14,19 +14,8 @@ import android.widget.Toast;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
-import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.EndNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationLauncherActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
@@ -38,59 +27,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
-      new SampleItem(
-        getString(R.string.title_navigation_launcher),
-        getString(R.string.description_navigation_launcher),
-        NavigationLauncherActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_end_navigation),
-        getString(R.string.description_end_navigation),
-        EndNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_dual_navigation_map),
-        getString(R.string.description_dual_navigation_map),
-        DualNavigationMapActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_mock_navigation),
-        getString(R.string.description_mock_navigation),
-        MockNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_reroute),
-        getString(R.string.description_reroute),
-        RerouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_navigation_route_ui),
-        getString(R.string.description_navigation_route_ui),
-        NavigationMapRouteActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_waypoint_navigation),
-        getString(R.string.description_waypoint_navigation),
-        WaypointNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_embedded_navigation),
-        getString(R.string.description_embedded_navigation),
-        EmbeddedNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_fragment_navigation),
-        getString(R.string.description_fragment_navigation),
-        FragmentNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_component_navigation),
-        getString(R.string.description_component_navigation),
-        ComponentNavigationActivity.class
-      )
-    ));
-
     // RecyclerView
     recyclerView = findViewById(R.id.recycler_view);
     recyclerView.setHasFixedSize(true);
@@ -100,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     recyclerView.setLayoutManager(layoutManager);
 
     // Specify an adapter
-    RecyclerView.Adapter adapter = new MainAdapter(samples);
+    RecyclerView.Adapter adapter = new MainAdapter(new ArrayList<>());
     recyclerView.setAdapter(adapter);
 
     // Check for location permission
