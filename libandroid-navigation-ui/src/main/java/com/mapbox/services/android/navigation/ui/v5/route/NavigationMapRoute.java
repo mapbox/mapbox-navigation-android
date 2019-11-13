@@ -12,12 +12,16 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.LineString;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -321,7 +325,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
     MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
-    return new MapRouteLine(context, mapboxMap, styleRes, belowLayer,
+    return new MapRouteLine(context, mapboxMap.getStyle(), styleRes, belowLayer,
       drawableProvider, sourceProvider, layerProvider
     );
   }
@@ -330,7 +334,12 @@ public class NavigationMapRoute implements LifecycleObserver {
     didFinishLoadingStyleListener = new MapView.OnDidFinishLoadingStyleListener() {
       @Override
       public void onDidFinishLoadingStyle() {
-        redraw();
+        mapboxMap.getStyle(new Style.OnStyleLoaded() {
+          @Override
+          public void onStyleLoaded(@NonNull Style style) {
+            redraw(style);
+          }
+        });
       }
     };
   }
@@ -363,18 +372,34 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
-  private void redraw() {
+  private void redraw(Style style) {
     routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
-    List<DirectionsRoute> routes = routeLine.retrieveDirectionsRoutes();
-    boolean alternativesVisible = routeLine.retrieveAlternativesVisible();
-    int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
-    boolean isVisible = routeLine.retrieveVisibility();
-    buildNewRouteLine();
-    routeLine.redraw(routes, alternativesVisible, primaryRouteIndex, isVisible);
+    recreateRouteLine(style);
   }
 
-  private void buildNewRouteLine() {
-    routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
+  private void recreateRouteLine(Style style) {
+    Context context = mapView.getContext();
+    MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
+    MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
+    MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+
+    routeLine = new MapRouteLine(
+            context,
+            style,
+            styleRes,
+            belowLayer,
+            drawableProvider,
+            sourceProvider,
+            layerProvider,
+            routeLine.retrieveDrawnRouteFeatureCollections(),
+            routeLine.retrieveDrawnWaypointsFeatureCollections(),
+            routeLine.retrieveDirectionsRoutes(),
+            routeLine.retrieveRouteFeatureCollections(),
+            routeLine.retrieveRouteLineStrings(),
+            routeLine.retrievePrimaryRouteIndex(),
+            routeLine.retrieveVisibility(),
+            routeLine.retrieveAlternativesVisible()
+    );
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
