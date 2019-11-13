@@ -2,26 +2,30 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.geojson.LineString;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.BaseTest;
 import com.mapbox.services.android.navigation.ui.v5.R;
 
-import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -29,10 +33,13 @@ import java.util.concurrent.TimeUnit;
 import edu.emory.mathcs.backport.java.util.Collections;
 
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_LAYER_ID;
+import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ROUTE_SHIELD_LAYER_ID;
+import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.WAYPOINT_LAYER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,6 +52,14 @@ import static org.mockito.Mockito.when;
 public class MapRouteLineTest extends BaseTest {
   // TODO explore making tasks as Runnables and create the thread in the call-site.
   //  That way we'll be able to execute the run synchronously, avoiding `CountDownLatch`
+
+  private Style style;
+
+  @Before
+  public void setUp() {
+    style = mock(Style.class);
+    when(style.getLayers()).thenReturn(Collections.emptyList());
+  }
 
   @Test
   public void onDraw_routeLineSourceIsSet() throws Exception {
@@ -107,63 +122,68 @@ public class MapRouteLineTest extends BaseTest {
   }
 
   @Test
-  public void onRedraw_routeLineSourceIsSet() throws Exception {
+  public void onStyleLoaded_recreateRouteLine() {
+    TypedArray typedArray = mock(TypedArray.class);
+    Context context = mock(Context.class);
+    when(context.obtainStyledAttributes(anyInt(), any(int[].class))).thenReturn(typedArray);
+
+    LineLayer routeShieldLayer = mock(LineLayer.class);
+    when(routeShieldLayer.getId()).thenReturn(ROUTE_SHIELD_LAYER_ID);
+    LineLayer routeLayer = mock(LineLayer.class);
+    when(routeLayer.getId()).thenReturn(ROUTE_LAYER_ID);
+    SymbolLayer wayPointLayer = mock(SymbolLayer.class);
+    when(wayPointLayer.getId()).thenReturn(WAYPOINT_LAYER_ID);
+    MapRouteLayerProvider mapRouteLayerProvider = mock(MapRouteLayerProvider.class);
+    when(mapRouteLayerProvider.initializeRouteLayer(
+      eq(style), anyBoolean(), anyFloat(), anyFloat(),
+      anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()))
+      .thenReturn(routeLayer);
+    when(mapRouteLayerProvider.initializeRouteShieldLayer(
+      eq(style), anyFloat(), anyFloat(), anyInt(), anyInt()
+    )).thenReturn(routeShieldLayer);
+    when(mapRouteLayerProvider.initializeWayPointLayer(
+      eq(style), any(Drawable.class), any(Drawable.class)
+    )).thenReturn(wayPointLayer);
+
+    FeatureCollection routesFeatureCollection = mock(FeatureCollection.class);
+    FeatureCollection waypointsFeatureCollection = mock(FeatureCollection.class);
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
-    List<DirectionsRoute> routes = new ArrayList<>();
-    routes.add(buildTestDirectionsRoute());
-    ArgumentCaptor<Runnable> runnableFeatures = ArgumentCaptor.forClass(Runnable.class);
-    ArgumentCaptor<Runnable> runnablePrimary = ArgumentCaptor.forClass(Runnable.class);
-    CountDownLatch latchRunnableFeatures = new CountDownLatch(1);
-    CountDownLatch latchRunnablePrimary = new CountDownLatch(1);
-    CountDownLatch latch = new CountDownLatch(1);
-    Handler handlerFeatures = mock(Handler.class);
-    buildFeatureProcessingTask(routes, routeLine, handlerFeatures);
-    Handler handlerPrimary = mock(Handler.class);
-    buildPrimaryRouteUpdateTask(routeLine, handlerPrimary);
+    MapRouteSourceProvider mapRouteSourceProvider = mock(MapRouteSourceProvider.class);
+    when(mapRouteSourceProvider.build(
+      eq(RouteConstants.ROUTE_SOURCE_ID), eq(routesFeatureCollection), any(GeoJsonOptions.class)
+    )).thenReturn(routeLineSource);
+    when(mapRouteSourceProvider.build(
+      eq(RouteConstants.WAYPOINT_SOURCE_ID), eq(waypointsFeatureCollection), any(GeoJsonOptions.class)
+    )).thenReturn(wayPointSource);
 
-    routeLine.redraw(routes, false, 0, true);
-    latchRunnableFeatures.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerFeatures).post(runnableFeatures.capture());
-    runnableFeatures.getValue().run();
-    latchRunnablePrimary.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerPrimary).post(runnablePrimary.capture());
-    runnablePrimary.getValue().run();
+    new MapRouteLine(
+      context,
+      style,
+      10,
+      null,
+      buildDrawableProvider(),
+      mapRouteSourceProvider,
+      mapRouteLayerProvider,
+      routesFeatureCollection,
+      waypointsFeatureCollection,
+      new ArrayList<DirectionsRoute>(),
+      new ArrayList<FeatureCollection>(),
+      new HashMap<LineString, DirectionsRoute>(),
+      0,
+      true,
+      true,
+      mock(Handler.class)
+    );
 
-    latch.await(25, TimeUnit.MILLISECONDS);
-    verify(routeLineSource, times(3)).setGeoJson(any(FeatureCollection.class));
-  }
+    verify(style).addLayer(routeLayer);
+    verify(style).addLayer(routeShieldLayer);
+    verify(style).addLayer(wayPointLayer);
+    verify(style).addSource(routeLineSource);
+    verify(style).addSource(wayPointSource);
 
-  @Test
-  public void onRedraw_wayPointSourceIsSet() throws Exception {
-    GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
-    GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
-    List<DirectionsRoute> routes = new ArrayList<>();
-    routes.add(buildTestDirectionsRoute());
-    ArgumentCaptor<Runnable> runnableFeatures = ArgumentCaptor.forClass(Runnable.class);
-    ArgumentCaptor<Runnable> runnablePrimary = ArgumentCaptor.forClass(Runnable.class);
-    CountDownLatch latchRunnableFeatures = new CountDownLatch(1);
-    CountDownLatch latchRunnablePrimary = new CountDownLatch(1);
-    CountDownLatch latch = new CountDownLatch(1);
-    Handler handlerFeatures = mock(Handler.class);
-    buildFeatureProcessingTask(routes, routeLine, handlerFeatures);
-    Handler handlerPrimary = mock(Handler.class);
-    buildPrimaryRouteUpdateTask(routeLine, handlerPrimary);
-
-    routeLine.redraw(routes, false, 0, true);
-    latchRunnableFeatures.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerFeatures).post(runnableFeatures.capture());
-    runnableFeatures.getValue().run();
-    latchRunnablePrimary.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerPrimary).post(runnablePrimary.capture());
-    runnablePrimary.getValue().run();
-
-    latch.await(25, TimeUnit.MILLISECONDS);
-    verify(wayPointSource, times(2)).setGeoJson(any(FeatureCollection.class));
+    verify(routeLineSource, times(0)).setGeoJson(any(FeatureCollection.class));
+    verify(wayPointSource, times(0)).setGeoJson(any(FeatureCollection.class));
   }
 
   @Test
@@ -286,15 +306,14 @@ public class MapRouteLineTest extends BaseTest {
     TypedArray typedArray = mock(TypedArray.class);
     when(context.obtainStyledAttributes(anyInt(), eq(R.styleable.NavigationMapRoute))).thenReturn(typedArray);
     when(typedArray.getBoolean(R.styleable.NavigationMapRoute_roundedLineCap, true)).thenReturn(true);
-    MapboxMap mapboxMap = buildMockMap();
-    MapRouteLayerProvider layerProvider = mock(MapRouteLayerProvider.class);
+    MapRouteLayerProvider layerProvider = buildLayerProvider();
     Handler handler = mock(Handler.class);
 
-    new MapRouteLine(context, mapboxMap, R.style.NavigationMapRoute, "",
-      mock(MapRouteDrawableProvider.class), mock(MapRouteSourceProvider.class), layerProvider, handler
+    new MapRouteLine(context, style, R.style.NavigationMapRoute, "",
+      buildDrawableProvider(), mock(MapRouteSourceProvider.class), layerProvider, handler
     );
 
-    verify(layerProvider).initializeRouteLayer(eq(mapboxMap), eq(true), anyFloat(), anyFloat(),
+    verify(layerProvider).initializeRouteLayer(eq(style), eq(true), anyFloat(), anyFloat(),
       anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()
     );
   }
@@ -305,15 +324,14 @@ public class MapRouteLineTest extends BaseTest {
     TypedArray typedArray = mock(TypedArray.class);
     when(context.obtainStyledAttributes(anyInt(), eq(R.styleable.NavigationMapRoute))).thenReturn(typedArray);
     when(typedArray.getBoolean(R.styleable.NavigationMapRoute_roundedLineCap, true)).thenReturn(false);
-    MapboxMap mapboxMap = buildMockMap();
-    MapRouteLayerProvider layerProvider = mock(MapRouteLayerProvider.class);
+    MapRouteLayerProvider layerProvider = buildLayerProvider();
     Handler handler = mock(Handler.class);
 
-    new MapRouteLine(context, mapboxMap, R.style.NavigationMapRoute, "",
-      mock(MapRouteDrawableProvider.class), mock(MapRouteSourceProvider.class), layerProvider, handler
+    new MapRouteLine(context, style, R.style.NavigationMapRoute, "",
+      buildDrawableProvider(), mock(MapRouteSourceProvider.class), layerProvider, handler
     );
 
-    verify(layerProvider).initializeRouteLayer(eq(mapboxMap), eq(false), anyFloat(), anyFloat(),
+    verify(layerProvider).initializeRouteLayer(eq(style), eq(false), anyFloat(), anyFloat(),
       anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()
     );
   }
@@ -330,13 +348,33 @@ public class MapRouteLineTest extends BaseTest {
     return routeLayers;
   }
 
-  @NotNull
-  private MapboxMap buildMockMap() {
-    Style style = mock(Style.class);
-    when(style.getLayers()).thenReturn(Collections.emptyList());
-    MapboxMap mapboxMap = mock(MapboxMap.class);
-    when(mapboxMap.getStyle()).thenReturn(style);
-    return mapboxMap;
+  private MapRouteLayerProvider buildLayerProvider() {
+    LineLayer routeShieldLayer = mock(LineLayer.class);
+    when(routeShieldLayer.getId()).thenReturn(ROUTE_SHIELD_LAYER_ID);
+    LineLayer routeLayer = mock(LineLayer.class);
+    when(routeLayer.getId()).thenReturn(ROUTE_LAYER_ID);
+    SymbolLayer wayPointLayer = mock(SymbolLayer.class);
+    when(wayPointLayer.getId()).thenReturn(WAYPOINT_LAYER_ID);
+    MapRouteLayerProvider mapRouteLayerProvider = mock(MapRouteLayerProvider.class);
+    when(mapRouteLayerProvider.initializeRouteLayer(
+      eq(style), anyBoolean(), anyFloat(), anyFloat(),
+      anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()))
+      .thenReturn(routeLayer);
+    when(mapRouteLayerProvider.initializeRouteShieldLayer(
+      eq(style), anyFloat(), anyFloat(), anyInt(), anyInt()
+    )).thenReturn(routeShieldLayer);
+    when(mapRouteLayerProvider.initializeWayPointLayer(
+      eq(style), any(Drawable.class), any(Drawable.class)
+    )).thenReturn(wayPointLayer);
+
+    return mapRouteLayerProvider;
+  }
+
+  private MapRouteDrawableProvider buildDrawableProvider() {
+    Drawable drawable = mock(Drawable.class);
+    MapRouteDrawableProvider mapRouteDrawableProvider = mock(MapRouteDrawableProvider.class);
+    when(mapRouteDrawableProvider.retrieveDrawable(anyInt())).thenReturn(drawable);
+    return mapRouteDrawableProvider;
   }
 
   private FeatureProcessingTask buildFeatureProcessingTask(List<DirectionsRoute> routes, MapRouteLine routeLine, Handler handler) {

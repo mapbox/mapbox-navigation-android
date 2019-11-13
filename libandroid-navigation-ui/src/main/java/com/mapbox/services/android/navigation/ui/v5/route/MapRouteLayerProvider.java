@@ -2,9 +2,7 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-
-import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
@@ -47,11 +45,11 @@ import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.
 
 class MapRouteLayerProvider {
 
-  LineLayer initializeRouteShieldLayer(MapboxMap mapboxMap, float routeScale, float alternativeRouteScale,
+  LineLayer initializeRouteShieldLayer(Style style, float routeScale, float alternativeRouteScale,
                                        int routeShieldColor, int alternativeRouteShieldColor) {
-    LineLayer shieldLayer = mapboxMap.getStyle().getLayerAs(ROUTE_SHIELD_LAYER_ID);
+    LineLayer shieldLayer = style.getLayerAs(ROUTE_SHIELD_LAYER_ID);
     if (shieldLayer != null) {
-      mapboxMap.getStyle().removeLayer(shieldLayer);
+      style.removeLayer(shieldLayer);
     }
 
     shieldLayer = new LineLayer(ROUTE_SHIELD_LAYER_ID, ROUTE_SOURCE_ID).withProperties(
@@ -89,13 +87,13 @@ class MapRouteLayerProvider {
     return shieldLayer;
   }
 
-  LineLayer initializeRouteLayer(MapboxMap mapboxMap, boolean roundedLineCap, float routeScale,
+  LineLayer initializeRouteLayer(Style style, boolean roundedLineCap, float routeScale,
                                  float alternativeRouteScale, int routeDefaultColor, int routeModerateColor,
                                  int routeSevereColor, int alternativeRouteDefaultColor,
                                  int alternativeRouteModerateColor, int alternativeRouteSevereColor) {
-    LineLayer routeLayer = mapboxMap.getStyle().getLayerAs(ROUTE_LAYER_ID);
+    LineLayer routeLayer = style.getLayerAs(ROUTE_LAYER_ID);
     if (routeLayer != null) {
-      mapboxMap.getStyle().removeLayer(routeLayer);
+      style.removeLayer(routeLayer);
     }
 
     String lineCap = Property.LINE_CAP_ROUND;
@@ -159,17 +157,17 @@ class MapRouteLayerProvider {
     return routeLayer;
   }
 
-  SymbolLayer initializeWayPointLayer(@NonNull MapboxMap mapboxMap, Drawable originIcon,
+  SymbolLayer initializeWayPointLayer(Style style, Drawable originIcon,
                                       Drawable destinationIcon) {
-    SymbolLayer wayPointLayer = mapboxMap.getStyle().getLayerAs(WAYPOINT_LAYER_ID);
+    SymbolLayer wayPointLayer = style.getLayerAs(WAYPOINT_LAYER_ID);
     if (wayPointLayer != null) {
-      mapboxMap.getStyle().removeLayer(wayPointLayer);
+      style.removeLayer(wayPointLayer);
     }
 
     Bitmap bitmap = MapImageUtils.getBitmapFromDrawable(originIcon);
-    mapboxMap.getStyle().addImage(ORIGIN_MARKER_NAME, bitmap);
+    style.addImage(ORIGIN_MARKER_NAME, bitmap);
     bitmap = MapImageUtils.getBitmapFromDrawable(destinationIcon);
-    mapboxMap.getStyle().addImage(DESTINATION_MARKER_NAME, bitmap);
+    style.addImage(DESTINATION_MARKER_NAME, bitmap);
 
     wayPointLayer = new SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
       iconImage(
