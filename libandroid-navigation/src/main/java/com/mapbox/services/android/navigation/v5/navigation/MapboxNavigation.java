@@ -1036,7 +1036,7 @@ public class MapboxNavigation implements ServiceConnection {
     locationEngineRequest = obtainLocationEngineRequest();
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
             "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
-            accessToken);
+            accessToken);// TODO Replace with an api-routing-tiles-staging valid one
     freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
         navigationEventDispatcher, mapboxNavigator, offlineNavigator,
         Executors.newSingleThreadScheduledExecutor());

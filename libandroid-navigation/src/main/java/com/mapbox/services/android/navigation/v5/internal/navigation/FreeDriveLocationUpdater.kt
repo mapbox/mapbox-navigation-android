@@ -42,7 +42,8 @@ internal class FreeDriveLocationUpdater(
             locationEngine.requestLocationUpdates(locationEngineRequest, callback, null)
             future = executorService.scheduleAtFixedRate({
                 if (rawLocation != null) {
-                    val enhancedLocation = getLocation(Date(), 0, rawLocation)
+                    // Pass the same lag as when in active guidance i.e. 1500 ms
+                    val enhancedLocation = getLocation(Date(), 1500, rawLocation)
                     handler.post {
                         navigationEventDispatcher.onEnhancedLocationUpdate(
                             enhancedLocation
@@ -94,7 +95,13 @@ internal class FreeDriveLocationUpdater(
         fallbackLocation: Location?
     ): Location {
         val snappedLocation = Location(fallbackLocation)
-        snappedLocation.provider = "enhanced"
+        // TODO This is for testing / debugging purposes
+        // route - active guidance
+        // mpp - free drive
+        // raw1 - mpp did not produce any result (failed with exception or something similar)
+        // raw2 - mpp returned status, but location is not valid
+        snappedLocation.provider = status.location.provider
+        // snappedLocation.provider = "enhanced"
         val fixLocation = status.location
         val coordinate = fixLocation.coordinate
         snappedLocation.latitude = coordinate.latitude()

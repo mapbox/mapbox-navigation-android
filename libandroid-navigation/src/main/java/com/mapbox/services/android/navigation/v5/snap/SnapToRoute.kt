@@ -23,6 +23,12 @@ class SnapToRoute : Snap() {
         snappedLocation.longitude = coordinate.longitude()
         fixLocation.bearing?.let { snappedLocation.bearing = it }
         snappedLocation.time = fixLocation.time.time
+        // TODO This is for testing / debugging purposes
+        // route - active guidance
+        // mpp - free drive
+        // raw1 - mpp did not produce any result (failed with exception or something similar)
+        // raw2 - mpp returned status, but location is not valid
+        snappedLocation.provider = status.location.provider
         return snappedLocation
     }
 }
