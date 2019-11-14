@@ -1,6 +1,6 @@
 package com.mapbox.navigation.directions.session
 
-import com.mapbox.geojson.Point
+import android.location.Location
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
@@ -18,9 +18,9 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
-    private val origin: Point = mockk(relaxUnitFun = true)
-    private val destination: Point = mockk(relaxUnitFun = true)
-    private val waypoints: List<Point> = mockk(relaxUnitFun = true)
+    private val origin: Location = mockk(relaxUnitFun = true)
+    private val destination: Location = mockk(relaxUnitFun = true)
+    private val waypoints: List<Location> = mockk(relaxUnitFun = true)
     private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
     private lateinit var routeCallback: Router.RouteCallback
     private val route: Route = mockk(relaxUnitFun = true)
@@ -74,7 +74,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun setOrigin() {
-        val newOrigin: Point = mockk()
+        val newOrigin: Location = mockk()
         session.setOrigin(newOrigin)
 
         assertNull(session.currentRoute)
@@ -89,7 +89,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun setWaypoints() {
-        val newWaypoints: List<Point> = mockk()
+        val newWaypoints: List<Location> = mockk()
         session.setWaypoints(newWaypoints)
 
         assertNull(session.currentRoute)

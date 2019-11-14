@@ -1,8 +1,8 @@
 package com.mapbox.navigation.directions.session
 
+import android.location.Location
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
@@ -11,9 +11,9 @@ import java.util.concurrent.CopyOnWriteArrayList
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
     private val router: Router,
-    origin: Point,
-    waypoints: List<Point>,
-    private val destination: Point
+    origin: Location,
+    waypoints: List<Location>,
+    private val destination: Location
 ) : DirectionsSession {
 
     init {
@@ -29,20 +29,20 @@ class MapboxDirectionsSession(
             routeObservers.forEach { it.onRouteChanged(value) }
         }
 
-    private var origin: Point = origin
+    private var origin: Location = origin
 
-    private var waypoints: List<Point> = waypoints
+    private var waypoints: List<Location> = waypoints
 
     private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
 
-    override fun setOrigin(point: Point) {
+    override fun setOrigin(point: Location) {
         origin = point
         requestRoute()
     }
 
     override fun getOrigin() = origin
 
-    override fun setWaypoints(points: List<Point>) {
+    override fun setWaypoints(points: List<Location>) {
         waypoints = points
         requestRoute()
     }

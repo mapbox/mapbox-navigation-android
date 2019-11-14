@@ -16,7 +16,7 @@ class NavigationRouteCallbackTest {
 
     @Test
     fun onResponse_callbackIsCalled() {
-        val listener = mockk<NavigationRouteEventListener>()
+        val listener = mockk<com.mapbox.navigation.route.offboard.router.NavigationRouteEventListener>()
         val elapsedTime = mockk<ElapsedTime>()
         every { listener.time } returns elapsedTime
         val callback = mockk<Callback<DirectionsResponse>>(relaxed = true)
@@ -24,7 +24,7 @@ class NavigationRouteCallbackTest {
         val uuid = "some_uuid"
         val response = buildMockResponse(uuid)
         val routeCallback =
-            NavigationRouteCallback(listener, callback)
+            com.mapbox.navigation.route.offboard.router.NavigationRouteCallback(listener, callback)
 
         routeCallback.onResponse(call, response)
 
@@ -52,12 +52,12 @@ class NavigationRouteCallbackTest {
 
     @Test
     fun onFailure_callbackIsCalled() {
-        val listener = mockk<NavigationRouteEventListener>()
+        val listener = mockk<com.mapbox.navigation.route.offboard.router.NavigationRouteEventListener>()
         val callback = mockk<Callback<DirectionsResponse>>(relaxed = true)
         val call = mockk<Call<DirectionsResponse>>()
         val throwable = mockk<Throwable>()
         val routeCallback =
-            NavigationRouteCallback(listener, callback)
+            com.mapbox.navigation.route.offboard.router.NavigationRouteCallback(listener, callback)
 
         routeCallback.onFailure(call, throwable)
 

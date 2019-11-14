@@ -1,6 +1,6 @@
 package com.mapbox.navigation.base.route.model
 
-import com.mapbox.api.directions.v5.models.RouteLeg
+// import com.mapbox.api.directions.v5.models.RouteLeg
 
 data class Route(
     val routeIndex: String?,
@@ -9,6 +9,10 @@ data class Route(
     val geometry: String?,
     val weight: Double?,
     val weightName: String?,
-    val legs: List<RouteLeg>?,
+    val legs: RouteLegsNavigation?,
     val voiceLanguage: String?
+)
+
+data class RouteLegsNavigation(
+    val legs: List<*>
 )
