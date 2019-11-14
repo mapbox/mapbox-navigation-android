@@ -35,8 +35,7 @@ internal constructor(
 ) {
 
     companion object {
-        private val EVENT_LISTENER =
-            NavigationRouteEventListener()
+        private val EVENT_LISTENER = NavigationRouteEventListener()
 
         /**
          * Build a new [NavigationRoute] object with the proper navigation parameters already setup.
@@ -120,8 +119,7 @@ internal constructor(
         constructor() : this(MapboxDirections.builder()) {}
 
         init {
-            this.eventListener =
-                EVENT_LISTENER
+            this.eventListener = EVENT_LISTENER
         }
 
         /**
