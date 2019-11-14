@@ -1,9 +1,10 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
+import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.LegStep;

@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation.camera;
 
 import android.location.Location;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;

@@ -1,9 +1,10 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
+import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegAnnotation;
@@ -298,7 +299,7 @@ public class NavigationHelper {
    */
   @NonNull
   public static List<Pair<StepIntersection, Double>> createDistancesToIntersections(List<Point> stepPoints,
-                                                                             List<StepIntersection> intersections) {
+                                                                                    List<StepIntersection> intersections) {
     boolean lessThanTwoStepPoints = stepPoints.size() < TWO_POINTS;
     boolean noIntersections = intersections.isEmpty();
     if (lessThanTwoStepPoints || noIntersections) {

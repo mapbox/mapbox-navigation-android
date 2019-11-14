@@ -3,11 +3,12 @@ package com.mapbox.services.android.navigation.v5.utils;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+
+import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;

@@ -7,7 +7,7 @@ android {
   defaultConfig {
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
-    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     buildConfigField('String',
         "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-android")

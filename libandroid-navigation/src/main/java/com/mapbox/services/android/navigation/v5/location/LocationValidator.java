@@ -1,7 +1,8 @@
 package com.mapbox.services.android.navigation.v5.location;
 
 import android.location.Location;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 public class LocationValidator {
 

@@ -10,10 +10,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
 import android.text.SpannableString;
 import android.text.format.DateFormat;
 import android.widget.RemoteViews;
+
+import androidx.core.app.NotificationCompat;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteOptions;
