@@ -67,11 +67,8 @@ class MapRouteLine {
   private final List<DirectionsRoute> directionsRoutes = new ArrayList<>();
   private final List<Layer> routeLayers;
 
-  private Drawable originIcon;
-  private Drawable destinationIcon;
-  private GeoJsonSource wayPointSource;
-  private GeoJsonSource routeLineSource;
-  private String belowLayer;
+  private final GeoJsonSource wayPointSource;
+  private final GeoJsonSource routeLineSource;
   private int primaryRouteIndex;
   private boolean isVisible = true;
   private boolean alternativesVisible = true;
@@ -112,7 +109,6 @@ class MapRouteLine {
                boolean isVisible,
                boolean alternativesVisible
   ) {
-    this.belowLayer = belowLayer;
     this.routeLayers = new ArrayList<>();
 
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
@@ -153,9 +149,9 @@ class MapRouteLine {
       R.styleable.NavigationMapRoute_destinationWaypointIcon, R.drawable.ic_route_destination);
     typedArray.recycle();
 
-    originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
-    destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
-    findRouteBelowLayerId(style);
+    Drawable originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
+    Drawable destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
+    belowLayer = findRouteBelowLayerId(belowLayer, style);
 
     GeoJsonOptions wayPointGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
     wayPointSource = sourceProvider.build(WAYPOINT_SOURCE_ID, waypointsFeatureCollection, wayPointGeoJsonOptions);
@@ -165,14 +161,14 @@ class MapRouteLine {
     routeLineSource = sourceProvider.build(ROUTE_SOURCE_ID, routesFeatureCollection, routeLineGeoJsonOptions);
     style.addSource(routeLineSource);
 
+    initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayer);
+
     this.directionsRoutes.addAll(directionsRoutes);
     this.routeFeatureCollections.addAll(routeFeatureCollections);
     this.routeLineStrings.putAll(routeLineStrings);
     updateAlternativeVisibilityTo(alternativesVisible);
     updateRoutesFor(primaryRouteIndex);
     updateVisibilityTo(isVisible);
-
-    initializeLayers(style, layerProvider);
   }
 
   // For testing only
@@ -333,20 +329,23 @@ class MapRouteLine {
     }
   };
 
-  private void findRouteBelowLayerId(Style style) {
+  private String findRouteBelowLayerId(String belowLayer, Style style) {
     if (belowLayer == null || belowLayer.isEmpty()) {
       List<Layer> styleLayers = style.getLayers();
       for (int i = 0; i < styleLayers.size(); i++) {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
           && !styleLayers.get(i).getId().contains(RouteConstants.MAPBOX_LOCATION_ID)) {
-          belowLayer = styleLayers.get(i).getId();
+          return styleLayers.get(i).getId();
         }
       }
     }
+    return belowLayer;
   }
 
-  private void initializeLayers(Style style, MapRouteLayerProvider layerProvider) {
+  private void initializeLayers(Style style, MapRouteLayerProvider layerProvider,
+                                Drawable originIcon, Drawable destinationIcon,
+                                String belowLayer) {
     LineLayer routeShieldLayer = layerProvider.initializeRouteShieldLayer(
       style, routeScale, alternativeRouteScale,
       routeShieldColor, alternativeRouteShieldColor
