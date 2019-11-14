@@ -1,14 +1,14 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.geojson.Point
+import android.location.Location
 import com.mapbox.navigation.base.route.model.Route
 
 interface Router {
 
     fun getRoute(
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
+        origin: Location,
+        waypoints: List<Location>?,
+        destination: Location,
         callback: RouteCallback
     )
 

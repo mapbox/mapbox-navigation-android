@@ -1,8 +1,8 @@
 package com.mapbox.navigation.route.hybrid
 
+import android.location.Location
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 
 @MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
@@ -12,9 +12,9 @@ class MapboxHybridRouter(
 ) : Router {
 
     override fun getRoute(
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
+        origin: Location,
+        waypoints: List<Location>?,
+        destination: Location,
         callback: Router.RouteCallback
     ) {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.

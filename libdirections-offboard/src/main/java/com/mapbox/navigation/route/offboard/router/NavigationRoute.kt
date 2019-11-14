@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.common
+package com.mapbox.navigation.route.offboard.router
 
 import android.content.Context
 import androidx.annotation.FloatRange
@@ -10,7 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.route.common.extension.getUnitTypeForLocale
+import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import okhttp3.EventListener
 import okhttp3.Interceptor
@@ -35,7 +35,8 @@ internal constructor(
 ) {
 
     companion object {
-        private val EVENT_LISTENER = NavigationRouteEventListener()
+        private val EVENT_LISTENER =
+            NavigationRouteEventListener()
 
         /**
          * Build a new [NavigationRoute] object with the proper navigation parameters already setup.
@@ -74,7 +75,12 @@ internal constructor(
      * @since 0.5.0
      */
     fun getRoute(callback: Callback<DirectionsResponse>) {
-        mapboxDirections.enqueueCall(NavigationRouteCallback(EVENT_LISTENER, callback))
+        mapboxDirections.enqueueCall(
+            NavigationRouteCallback(
+                EVENT_LISTENER,
+                callback
+            )
+        )
     }
 
     /**
@@ -114,7 +120,8 @@ internal constructor(
         constructor() : this(MapboxDirections.builder()) {}
 
         init {
-            this.eventListener = EVENT_LISTENER
+            this.eventListener =
+                EVENT_LISTENER
         }
 
         /**
@@ -154,7 +161,11 @@ internal constructor(
          * @since 0.5.0
          */
         fun origin(origin: Point): Builder {
-            this.origin = NavigationRouteWaypoint(origin, null, null)
+            this.origin = NavigationRouteWaypoint(
+                origin,
+                null,
+                null
+            )
             return this
         }
 
@@ -177,7 +188,11 @@ internal constructor(
             tolerance: Double?
         ): Builder {
             this.origin =
-                NavigationRouteWaypoint(origin, angle, tolerance)
+                NavigationRouteWaypoint(
+                    origin,
+                    angle,
+                    tolerance
+                )
             return this
         }
 
@@ -192,7 +207,11 @@ internal constructor(
          */
         fun destination(destination: Point): Builder {
             this.destination =
-                NavigationRouteWaypoint(destination, null, null)
+                NavigationRouteWaypoint(
+                    destination,
+                    null,
+                    null
+                )
             return this
         }
 
@@ -215,7 +234,11 @@ internal constructor(
             tolerance: Double?
         ): Builder {
             this.destination =
-                NavigationRouteWaypoint(destination, angle, tolerance)
+                NavigationRouteWaypoint(
+                    destination,
+                    angle,
+                    tolerance
+                )
             return this
         }
 
