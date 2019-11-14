@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.common
+package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.WalkingOptions
 
@@ -15,7 +15,9 @@ class NavigationWalkingOptions internal constructor(val walkingOptions: WalkingO
          */
         @JvmStatic
         fun builder(): Builder {
-            return Builder(WalkingOptions.builder())
+            return Builder(
+                WalkingOptions.builder()
+            )
         }
     }
 
@@ -29,7 +31,8 @@ class NavigationWalkingOptions internal constructor(val walkingOptions: WalkingO
          *
          * @return a NavigationWalkingOptions object
          */
-        fun build(): NavigationWalkingOptions = NavigationWalkingOptions(builder.build())
+        fun build(): NavigationWalkingOptions =
+            NavigationWalkingOptions(builder.build())
 
         /**
          * Walking speed in meters per second. Must be between 0.14 and 6.94 meters per second.

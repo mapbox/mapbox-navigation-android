@@ -7,21 +7,21 @@ class NavigationWalkingOptionsTest {
 
     @Test
     fun alleyBias_walkingOptionSet() {
-        val options = NavigationWalkingOptions.builder().alleyBias(0.7).build()
+        val options = com.mapbox.navigation.route.offboard.router.NavigationWalkingOptions.builder().alleyBias(0.7).build()
 
         assertEquals(java.lang.Double.valueOf(0.7), options.walkingOptions.alleyBias())
     }
 
     @Test
     fun walkwayBias_walkingOptionSet() {
-        val options = NavigationWalkingOptions.builder().walkwayBias(0.8).build()
+        val options = com.mapbox.navigation.route.offboard.router.NavigationWalkingOptions.builder().walkwayBias(0.8).build()
 
         assertEquals(java.lang.Double.valueOf(0.8), options.walkingOptions.walkwayBias())
     }
 
     @Test
     fun walkingSpeed_walkingOptionSet() {
-        val options = NavigationWalkingOptions.builder().walkingSpeed(2.0).build()
+        val options = com.mapbox.navigation.route.offboard.router.NavigationWalkingOptions.builder().walkingSpeed(2.0).build()
 
         assertEquals(java.lang.Double.valueOf(2.0), options.walkingOptions.walkingSpeed())
     }
