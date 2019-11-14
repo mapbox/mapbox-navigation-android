@@ -2,15 +2,11 @@
 
 package com.mapbox.navigation.route.offboard.extension
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.WalkingOptions
+import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegsNavigation
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
-import java.util.Locale
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),

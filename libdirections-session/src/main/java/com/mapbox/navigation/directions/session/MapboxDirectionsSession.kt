@@ -1,5 +1,6 @@
 package com.mapbox.navigation.directions.session
 
+import android.location.Location
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.DirectionsSession
