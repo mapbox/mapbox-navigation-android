@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -227,7 +228,8 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>(relaxed = true)
         every { routeCall.isExecuted } returns false
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute =
+            NavigationRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 
@@ -240,7 +242,8 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>()
         every { routeCall.isExecuted } returns true
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute =
+            NavigationRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 

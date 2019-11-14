@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.common
+package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.utils.time.ElapsedTime
