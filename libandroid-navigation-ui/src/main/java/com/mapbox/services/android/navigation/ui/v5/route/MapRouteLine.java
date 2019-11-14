@@ -154,18 +154,21 @@ class MapRouteLine {
     belowLayer = findRouteBelowLayerId(belowLayer, style);
 
     GeoJsonOptions wayPointGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
-    wayPointSource = sourceProvider.build(WAYPOINT_SOURCE_ID, waypointsFeatureCollection, wayPointGeoJsonOptions);
+    drawnWaypointsFeatureCollection = waypointsFeatureCollection;
+    wayPointSource = sourceProvider.build(WAYPOINT_SOURCE_ID, drawnWaypointsFeatureCollection, wayPointGeoJsonOptions);
     style.addSource(wayPointSource);
 
     GeoJsonOptions routeLineGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
-    routeLineSource = sourceProvider.build(ROUTE_SOURCE_ID, routesFeatureCollection, routeLineGeoJsonOptions);
+    drawnRouteFeatureCollection = routesFeatureCollection;
+    routeLineSource = sourceProvider.build(ROUTE_SOURCE_ID, drawnRouteFeatureCollection, routeLineGeoJsonOptions);
     style.addSource(routeLineSource);
-
-    initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayer);
 
     this.directionsRoutes.addAll(directionsRoutes);
     this.routeFeatureCollections.addAll(routeFeatureCollections);
     this.routeLineStrings.putAll(routeLineStrings);
+
+    initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayer);
+
     updateAlternativeVisibilityTo(alternativesVisible);
     updateRoutesFor(primaryRouteIndex);
     updateVisibilityTo(isVisible);
