@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: '../gradle/dependencies.gradle'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -17,9 +17,6 @@ android {
 }
 
 dependencies {
-    implementation project(':liblogger')
     implementation dependenciesList.kotlinStdLib
 
-    //ktlint
-    ktlint dependenciesList.ktlint
 }

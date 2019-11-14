@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: '../gradle/dependencies.gradle'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -15,16 +15,13 @@ android {
 }
 
 dependencies {
-    api(project(':libnavigation-base'))
+    api(project(':base'))
 
     // Navigator
     api dependenciesList.mapboxNavigator
 
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
-
-    //ktlint
-    ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
 }
