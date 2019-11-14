@@ -20,7 +20,7 @@ interface MetricEvent {
     @Metric
     val metricName: String
 
-    fun toJson(gson: Gson): String
+    fun toJson(jsonMapper: JsonMapper): String
 }
 
 object NavigationMetrics {

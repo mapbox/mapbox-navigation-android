@@ -2,14 +2,14 @@
 
 package com.mapbox.navigation.route.offboard.extension
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.WalkingOptions
+import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.route.model.LegStepNavigation
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
