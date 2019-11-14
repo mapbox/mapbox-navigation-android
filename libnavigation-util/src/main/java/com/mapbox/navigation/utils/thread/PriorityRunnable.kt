@@ -1,3 +1,9 @@
 package com.mapbox.navigation.utils.thread
 
-abstract class PriorityRunnable(val priority: Priority) : Runnable
+import android.os.Handler
+
+abstract class PriorityRunnable(
+    val id: String,
+    val priority: Priority,
+    val handler: Handler
+) : Runnable

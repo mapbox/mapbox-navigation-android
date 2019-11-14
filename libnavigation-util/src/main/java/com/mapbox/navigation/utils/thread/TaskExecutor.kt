@@ -2,11 +2,7 @@ package com.mapbox.navigation.utils.thread
 
 interface TaskExecutor {
 
-    fun run(
-        taskId: Int,
-        priority: Priority,
-        task: () -> Unit
-    )
+    fun run(task: PriorityRunnable)
 
-    fun cancel(taskId: Int)
+    fun cancel(taskId: String)
 }

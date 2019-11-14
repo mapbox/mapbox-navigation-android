@@ -8,13 +8,13 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 class PriorityThreadPoolExecutor(
-    corePoolSize: Int,
+    initialPoolSize: Int,
     maximumPoolSize: Int,
     keepAliveTime: Long,
     unit: TimeUnit,
     threadFactory: ThreadFactory
 ) : ThreadPoolExecutor(
-    corePoolSize,
+    initialPoolSize,
     maximumPoolSize,
     keepAliveTime,
     unit,
@@ -34,9 +34,9 @@ class PriorityThreadPoolExecutor(
         Comparable<PriorityFutureTask> {
 
         override fun compareTo(other: PriorityFutureTask): Int {
-            val priority1 = priorityRunnable.priority
-            val priority2 = other.priorityRunnable.priority
-            return priority2.priorityValue - priority1.priorityValue
+            val priorityCurrent = priorityRunnable.priority
+            val priorityOther = other.priorityRunnable.priority
+            return priorityOther.priorityValue - priorityCurrent.priorityValue
         }
     }
 }

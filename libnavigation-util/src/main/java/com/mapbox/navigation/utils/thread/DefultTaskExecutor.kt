@@ -8,7 +8,7 @@ object DefultTaskExecutor : TaskExecutor {
 
     private const val KEEP_THREAD_ALIVE_TIME = 60L
     private val backgroundTasksExecutor: PriorityThreadPoolExecutor
-    private val backgroundTaskQueue: MutableMap<Int, Future<*>> = mutableMapOf()
+    private val backgroundTaskQueue: MutableMap<String, Future<*>> = mutableMapOf()
 
     init {
         val backgroundPriorityThreadFactory = PriorityThreadFactory(Process.THREAD_PRIORITY_BACKGROUND)
@@ -23,23 +23,15 @@ object DefultTaskExecutor : TaskExecutor {
         )
     }
 
-    override fun run(
-        taskId: Int,
-        priority: Priority,
-        task: () -> Unit
-    ) {
-        val future = backgroundTasksExecutor.submit(object : PriorityRunnable(priority) {
-            override fun run() {
-                task.invoke()
-            }
-        })
-        backgroundTaskQueue[taskId]?.let {
-            cancel(taskId)
+    override fun run(task: PriorityRunnable) {
+        val future = backgroundTasksExecutor.submit(task)
+        backgroundTaskQueue[task.id]?.let {
+            cancel(task.id)
         }
-        backgroundTaskQueue[taskId] = future
+        backgroundTaskQueue[task.id] = future
     }
 
-    override fun cancel(taskId: Int) {
+    override fun cancel(taskId: String) {
         backgroundTaskQueue[taskId]?.cancel(true)
     }
 }
