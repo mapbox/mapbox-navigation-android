@@ -336,7 +336,7 @@ class MapRouteLine {
         if (!(styleLayers.get(i) instanceof SymbolLayer)
           // Avoid placing the route on top of the user location layer
           && !styleLayers.get(i).getId().contains(RouteConstants.MAPBOX_LOCATION_ID)) {
-          return styleLayers.get(i).getId();
+          belowLayer = styleLayers.get(i).getId();
         }
       }
     }
