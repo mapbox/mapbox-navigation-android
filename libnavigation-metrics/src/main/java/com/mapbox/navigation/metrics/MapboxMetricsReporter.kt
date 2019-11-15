@@ -70,9 +70,7 @@ object MapboxMetricsReporter : MetricsReporter {
         }
 
         threadWorker.post {
-            metricsObserver?.onMetricUpdated(metricEvent.metric, metricEvent.toJson(object : JsonMapper {
-                override fun <T> toJson(obj: T): String = gson.toJson(obj)
-            }))
+            metricsObserver?.onMetricUpdated(metricEvent.metric, metricEvent.toJson(JsonMapper.GsonImpl))
         }
     }
 
