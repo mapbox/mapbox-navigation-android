@@ -1,13 +1,12 @@
 package com.mapbox.navigation.route.offboard
 
 import android.content.Context
-import android.location.Location
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
-import com.mapbox.navigation.route.offboard.extension.toPoint
 import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
@@ -23,17 +22,17 @@ class MapboxOffboardRouter(
     private var navigationRoute: NavigationRoute? = null
 
     override fun getRoute(
-        origin: Location,
-        waypoints: List<Location>?,
-        destination: Location,
+        origin: Point,
+        waypoints: List<Point>?,
+        destination: Point,
         callback: Router.RouteCallback
     ) {
         val builder = NavigationRoute
             .builder(context)
             .accessToken(mapboxToken)
-            .origin(origin.toPoint())
-            .destination(destination.toPoint())
-        waypoints?.forEach { builder.addWaypoint(it.toPoint()) }
+            .origin(origin)
+            .destination(destination)
+        waypoints?.forEach { builder.addWaypoint(it) }
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
