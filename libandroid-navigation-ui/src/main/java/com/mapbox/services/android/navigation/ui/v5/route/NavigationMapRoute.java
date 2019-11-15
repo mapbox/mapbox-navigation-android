@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
+import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -321,8 +322,9 @@ public class NavigationMapRoute implements LifecycleObserver {
     MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
     MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+    Handler handler = new Handler(context.getMainLooper());
     return new MapRouteLine(context, mapboxMap, styleRes, belowLayer,
-      drawableProvider, sourceProvider, layerProvider
+      drawableProvider, sourceProvider, layerProvider, handler
     );
   }
 
