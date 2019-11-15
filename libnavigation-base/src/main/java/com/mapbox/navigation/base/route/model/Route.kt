@@ -10,7 +10,3 @@ data class Route(
     val legs: RouteLegsNavigation?,
     val voiceLanguage: String?
 )
-
-data class RouteLegsNavigation(
-    val legs: List<*>
-)
