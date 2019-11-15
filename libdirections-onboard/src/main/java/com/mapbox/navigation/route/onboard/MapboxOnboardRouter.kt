@@ -1,7 +1,10 @@
 package com.mapbox.navigation.route.onboard
 
+import android.app.Application
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
@@ -13,7 +16,7 @@ import com.mapbox.navigation.utils.exceptions.NavigationException
 import java.io.File
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
-class MapboxOnboardRouter(private val navigator: MapboxNativeNavigator) : Router {
+class MapboxOnboardRouter : Router {
 
     companion object {
 
@@ -80,11 +83,11 @@ class MapboxOnboardRouter(private val navigator: MapboxNativeNavigator) : Router
 
         OfflineRouteRetrievalTask(navigatorNative, object : OnOfflineRouteFoundCallback {
             override fun onRouteFound(route: DirectionsRoute) {
-                listener.onRouteReady(route.mapToRoute())
+                callback.onRouteReady(route.mapToRoute())
             }
 
             override fun onError(error: OfflineError) {
-                listener.onFailure(NavigationException(error.message))
+                callback.onFailure(NavigationException(error.message))
             }
         })
             .execute(offlineRouter)
