@@ -2,7 +2,6 @@
 
 package com.mapbox.navigation.route.offboard.extension
 
-import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
