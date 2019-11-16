@@ -13,7 +13,7 @@ class MapboxOnboardRouter(private val navigator: MapboxNativeNavigator) : Router
         origin: Point,
         waypoints: List<Point>?,
         destination: Point,
-        callback: Router.RouteCallback
+        callback: Router.Callback
     ) {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }

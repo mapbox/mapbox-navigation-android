@@ -65,7 +65,7 @@ class MapboxDirectionsSession(
     private fun requestRoute() {
         router.cancel()
         currentRoute = null
-        router.getRoute(origin, waypoints, destination, object : Router.RouteCallback {
+        router.getRoute(origin, waypoints, destination, object : Router.Callback {
             override fun onRouteReady(routes: List<Route>) {
                 val route = routes.firstOrNull()
                 currentRoute = route

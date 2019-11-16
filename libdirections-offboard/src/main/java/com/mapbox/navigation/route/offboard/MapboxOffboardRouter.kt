@@ -25,7 +25,7 @@ class MapboxOffboardRouter(
         origin: Point,
         waypoints: List<Point>?,
         destination: Point,
-        callback: Router.RouteCallback
+        callback: Router.Callback
     ) {
         val builder = NavigationRoute
             .builder(context)
