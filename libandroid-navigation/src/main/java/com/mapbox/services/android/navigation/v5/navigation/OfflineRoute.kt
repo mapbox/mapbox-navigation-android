@@ -4,7 +4,6 @@ import androidx.annotation.FloatRange
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.exceptions.ServicesException
-import com.mapbox.navigation.base.route.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigator.RouterResult
 import okhttp3.HttpUrl
