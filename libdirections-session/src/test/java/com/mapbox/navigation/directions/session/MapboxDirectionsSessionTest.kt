@@ -21,15 +21,14 @@ class MapboxDirectionsSessionTest {
     private val destination: Point = mockk(relaxUnitFun = true)
     private val waypoints: List<Point> = mockk(relaxUnitFun = true)
     private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
-    private val routeCallbackSlot = slot<((route: Route) -> Unit)>()
-    private lateinit var routeCallback: Router.RouteCallback
+    private lateinit var callback: Router.Callback
     private val route: Route = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
-        val listener = slot<Router.RouteCallback>()
+        val listener = slot<Router.Callback>()
         every { router.getRoute(origin, waypoints, destination, capture(listener)) } answers {
-            routeCallback = listener.captured
+            callback = listener.captured
         }
         session = MapboxDirectionsSession(router, origin, waypoints, destination)
     }
@@ -40,7 +39,7 @@ class MapboxDirectionsSessionTest {
         session.registerRouteObserver(observer)
         session.setWaypoints(waypoints)
 
-        routeCallback.onRouteReady(listOf(route))
+        callback.onRouteReady(listOf(route))
 
         assertEquals(route, session.currentRoute)
         verify { observer.onRouteChanged(route) }
@@ -52,7 +51,7 @@ class MapboxDirectionsSessionTest {
         session.registerRouteObserver(observer)
         session.setWaypoints(waypoints)
 
-        routeCallback.onFailure(mockk())
+        callback.onFailure(mockk())
 
         assertNull(session.currentRoute)
         verify { observer.onFailure(any()) }
