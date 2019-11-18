@@ -28,3 +28,5 @@ dependencies {
 
     testImplementation dependenciesList.junit
 }
+
+apply from: "${rootDir}/gradle/jacoco.gradle"
