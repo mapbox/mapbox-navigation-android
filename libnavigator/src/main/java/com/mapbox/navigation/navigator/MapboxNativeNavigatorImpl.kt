@@ -4,10 +4,12 @@ import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.navigator.model.RouterConfig
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouterResult
+import com.mapbox.navigator.TileEndpointConfiguration
 import java.util.Date
 
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
@@ -17,6 +19,22 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     private val navigator: Navigator = Navigator()
+
+    override fun configureRoute(routerConfig: RouterConfig) {
+        navigator.configureRouter(
+            routerConfig.tilePath,
+            routerConfig.inMemoryTileCache,
+            routerConfig.mapMatchingSpatialCache,
+            routerConfig.endpointConfig?.let {
+                TileEndpointConfiguration(
+                    it.host,
+                    it.version,
+                    it.token,
+                    it.userAgent
+                )
+            }
+        )
+    }
 
     override fun updateLocation(rawLocation: Location) {
         navigator.updateLocation(rawLocation.toFixLocation())
