@@ -42,6 +42,7 @@ dependencies {
   api dependenciesList.mapboxEvents
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
+  implementation dependenciesList.locationLayerPlugin
 
   // Support
   implementation dependenciesList.supportAppcompatV7
