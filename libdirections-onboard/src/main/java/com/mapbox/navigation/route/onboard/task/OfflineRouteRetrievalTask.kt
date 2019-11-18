@@ -2,9 +2,10 @@ package com.mapbox.navigation.route.onboard.task
 
 import android.os.AsyncTask
 import com.google.gson.Gson
-import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.google.gson.reflect.TypeToken
+import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.route.onboard.OnOfflineRouteFoundCallback
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
@@ -13,9 +14,13 @@ import com.mapbox.navigator.RouterResult
 internal class OfflineRouteRetrievalTask(
     private val navigator: MapboxNativeNavigator,
     private val callback: OnOfflineRouteFoundCallback
-) : AsyncTask<OfflineRoute, Void, DirectionsRoute>() {
+) : AsyncTask<String, Void, List<Route>>() {
 
-    @Volatile private lateinit var routerResult: RouterResult
+    @Volatile
+    private lateinit var routerResult: RouterResult
+
+    private val logger by lazy { MapboxLogger() }
+    private val gson = Gson()
 
     // For testing only
     internal constructor(
@@ -26,21 +31,18 @@ internal class OfflineRouteRetrievalTask(
         this.routerResult = routerResult
     }
 
-    companion object {
-        private const val FIRST_ROUTE = 0
-    }
-
-    override fun doInBackground(vararg offlineRoutes: OfflineRoute): DirectionsRoute? {
-        val url = offlineRoutes[FIRST_ROUTE].buildUrl()
+    override fun doInBackground(vararg params: String): List<Route>? {
+        val url = params.first()
 
         synchronized(navigator) {
             routerResult = navigator.getRoute(url)
         }
 
-        return offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult)
+        val routesType = object : TypeToken<List<Route>>() {}.type
+        return gson.fromJson(routerResult.json, routesType)
     }
 
-    public override fun onPostExecute(offlineRoute: DirectionsRoute?) {
+    public override fun onPostExecute(offlineRoute: List<Route>?) {
         if (offlineRoute != null) {
             callback.onRouteFound(offlineRoute)
         } else {
@@ -49,12 +51,14 @@ internal class OfflineRouteRetrievalTask(
     }
 
     private fun generateErrorMessage(): String {
-        val (_, _, error, errorCode) = Gson().fromJson(routerResult.json, OfflineRouteError::class.java)
+        val (_, _, error, errorCode) = gson.fromJson(
+            routerResult.json,
+            OfflineRouteError::class.java
+        )
 
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
 
-        // TODO LOGGER
-        // Timber.e(errorMessage)
+        logger.e("OfflineRouteRetrievalTask", errorMessage)
         return errorMessage
     }
 }
