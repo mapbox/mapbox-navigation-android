@@ -1,13 +1,9 @@
 package com.mapbox.navigation.route.onboard
 
+import android.net.Uri
 import androidx.annotation.FloatRange
-import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.core.exceptions.ServicesException
-import com.mapbox.navigation.route.common.NavigationRoute
+import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.navigator.RouterResult
-import okhttp3.HttpUrl
 
 /**
  * The [OfflineRoute] class wraps the [NavigationRoute] class with parameters which
@@ -15,7 +11,7 @@ import okhttp3.HttpUrl
  */
 class OfflineRoute
 private constructor(
-    private val onlineRoute: NavigationRoute,
+    private val routeUrl: RouteUrl,
     bicycleType: OfflineCriteria.BicycleType?,
     private val cyclingSpeed: Float?,
     private val cyclewayBias: Float?,
@@ -48,8 +44,8 @@ private constructor(
          * @return a [Builder] object for creating this object
          */
         @JvmStatic
-        fun builder(onlineRouteBuilder: NavigationRoute.Builder): Builder {
-            return Builder(onlineRouteBuilder)
+        fun builder(routeUrl: RouteUrl): Builder {
+            return Builder(routeUrl)
         }
     }
 
@@ -59,16 +55,7 @@ private constructor(
      * @return the offline url string
      */
     fun buildUrl(): String {
-        val onlineUrl = onlineRoute.call.request().url().toString()
-        return buildOfflineUrl(onlineUrl)
-    }
-
-    internal fun retrieveOfflineRoute(response: RouterResult): DirectionsRoute? {
-        return if (!response.success) {
-            null
-        } else {
-            obtainRouteFor(response.json)
-        }
+        return buildOfflineUrl(routeUrl.getRequest())
     }
 
     private fun checkWaypointTypes(waypointTypes: List<OfflineCriteria.WaypointType?>?): String? {
@@ -76,7 +63,7 @@ private constructor(
             null
         } else {
             formatWaypointTypes(waypointTypes)
-                ?: throw ServicesException("All waypoint types values must be one of break, through or null")
+                ?: throw IllegalStateException("All waypoint types values must be one of break, through or null")
         }
     }
 
@@ -85,42 +72,42 @@ private constructor(
         return waypointTypes.joinTo(StringBuilder(), ";").toString()
     }
 
-    private fun buildOfflineUrl(onlineUrl: String): String {
-        val offlineUrlBuilder = HttpUrl.get(onlineUrl).newBuilder()
+    private fun buildOfflineUrl(url: Uri): String {
+        val offlineUrlBuilder = url.buildUpon()
         ifNonNull(bicycleType) {
-            offlineUrlBuilder.addQueryParameter(BICYCLE_TYPE_QUERY_PARAMETER, it)
+            offlineUrlBuilder.appendQueryParameter(BICYCLE_TYPE_QUERY_PARAMETER, it)
         }
 
         ifNonNull(cyclingSpeed) {
-            offlineUrlBuilder.addQueryParameter(CYCLING_SPEED_QUERY_PARAMETER, it.toString())
+            offlineUrlBuilder.appendQueryParameter(CYCLING_SPEED_QUERY_PARAMETER, it.toString())
         }
 
         ifNonNull(cyclewayBias) {
-            offlineUrlBuilder.addQueryParameter(CYCLEWAY_BIAS_QUERY_PARAMETER, it.toString())
+            offlineUrlBuilder.appendQueryParameter(CYCLEWAY_BIAS_QUERY_PARAMETER, it.toString())
         }
 
         ifNonNull(hillBias) {
-            offlineUrlBuilder.addQueryParameter(HILL_BIAS_QUERY_PARAMETER, it.toString())
+            offlineUrlBuilder.appendQueryParameter(HILL_BIAS_QUERY_PARAMETER, it.toString())
         }
 
         ifNonNull(ferryBias) {
-            offlineUrlBuilder.addQueryParameter(FERRY_BIAS_QUERY_PARAMETER, it.toString())
+            offlineUrlBuilder.appendQueryParameter(FERRY_BIAS_QUERY_PARAMETER, it.toString())
         }
 
         ifNonNull(roughSurfaceBias) {
-            offlineUrlBuilder.addQueryParameter(ROUGH_SURFACE_BIAS_QUERY_PARAMETER, it.toString())
+            offlineUrlBuilder.appendQueryParameter(
+                ROUGH_SURFACE_BIAS_QUERY_PARAMETER,
+                it.toString()
+            )
         }
 
         ifNonNull(waypointTypes) {
-            offlineUrlBuilder.addQueryParameter(WAYPOINT_TYPES_QUERY_PARAMETER, it)
+            offlineUrlBuilder.appendQueryParameter(WAYPOINT_TYPES_QUERY_PARAMETER, it)
         }
         return offlineUrlBuilder.build().toString()
     }
 
-    private fun obtainRouteFor(response: String): DirectionsRoute? =
-        DirectionsResponse.fromJson(response).routes().firstOrNull()
-
-    class Builder internal constructor(private val navigationRouteBuilder: NavigationRoute.Builder) {
+    class Builder internal constructor(private val routeUrl: RouteUrl) {
         private var bicycleType: OfflineCriteria.BicycleType? = null
         private var cyclingSpeed: Float? = null
         private var cyclewayBias: Float? = null
@@ -238,7 +225,7 @@ private constructor(
          * @return a new instance of [OfflineRoute]
          */
         fun build(): OfflineRoute = OfflineRoute(
-            navigationRouteBuilder.build(),
+            routeUrl,
             bicycleType,
             cyclingSpeed,
             cyclewayBias,
