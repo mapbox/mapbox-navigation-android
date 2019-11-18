@@ -4,7 +4,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -19,11 +21,15 @@ class MapboxDirectionsSessionTest {
     private val origin: Point = mockk(relaxUnitFun = true)
     private val waypoints: List<Point> = mockk(relaxUnitFun = true)
     private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
+    private val routeCallbackSlot = slot<((route: Route) -> Unit)>()
     private lateinit var routeCallback: ((route: Route) -> Unit)
     private val route: Route = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
+        every { router.getRoute(origin, waypoints, capture(routeCallbackSlot)) } answers {
+            routeCallback = routeCallbackSlot.captured
+        }
         session = MapboxDirectionsSession(router)
         session.setOrigin(origin)
         session.setWaypoints(waypoints)

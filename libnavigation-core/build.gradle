@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compileOnly(project(':annotations'))
+    implementation(project(':annotations'))
     kapt(project(':annotations-processor'))
 
     api(project(':libnavigation-base'))
@@ -39,3 +39,5 @@ dependencies {
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
 }
+
+apply from: "${rootDir}/gradle/jacoco.gradle"
