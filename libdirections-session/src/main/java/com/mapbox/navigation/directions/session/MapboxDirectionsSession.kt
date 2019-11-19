@@ -47,12 +47,12 @@ class MapboxDirectionsSession(
 
     override fun getWaypoints() = waypoints
 
-    override fun setDestionation(point: Point) {
+    override fun setDestination(point: Point) {
         destination = point
         requestRoute()
     }
 
-    override fun getDestionation(): Point = destination
+    override fun getDestination(): Point = destination
 
     override fun registerRouteObserver(routeObserver: DirectionsSession.RouteObserver) {
         routeObservers.add(routeObserver)
