@@ -10,6 +10,8 @@ interface DirectionsSession {
     fun getOrigin(): Point
     fun setWaypoints(points: List<Point>)
     fun getWaypoints(): List<Point>
+    fun setDestionation(point: Point)
+    fun getDestionation(): Point
 
     fun registerRouteObserver(routeObserver: RouteObserver)
     fun unregisterRouteObserver(routeObserver: RouteObserver)
