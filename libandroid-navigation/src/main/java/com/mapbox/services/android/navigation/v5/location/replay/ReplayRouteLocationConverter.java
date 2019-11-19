@@ -118,16 +118,21 @@ class ReplayRouteLocationConverter {
         return pointList;
     }
 
-    private ArrayList<Point>  computeSubdivisions(List<Point> points, int count, int index) {
-        ArrayList<Point> retVal = new ArrayList<>();
-        Point thisPoint = Point.fromLngLat(points.get(index).longitude(), points.get(index).latitude());
-        Point nextPoint = Point.fromLngLat(points.get(index + 1).longitude(), points.get(index + 1).latitude());
-        //Compute the cosine of the angle between two line segments
+    private double computeCosine(Point thisPoint, Point nextPoint){
         double u = thisPoint.latitude() * thisPoint.latitude() + thisPoint.longitude() * thisPoint.longitude();
         double v = nextPoint.latitude() * nextPoint.latitude() + nextPoint.longitude() * nextPoint.longitude();
         double numerator = thisPoint.latitude() * nextPoint.latitude() + thisPoint.longitude() * thisPoint.latitude();
         double denominator = u * v;
         double cosine = numerator / denominator;
+        return cosine;
+    }
+
+    private ArrayList<Point>  computeSubdivisions(List<Point> points, int count, int index) {
+        ArrayList<Point> retVal = new ArrayList<>();
+        Point thisPoint = Point.fromLngLat(points.get(index).longitude(), points.get(index).latitude());
+        Point nextPoint = Point.fromLngLat(points.get(index + 1).longitude(), points.get(index + 1).latitude());
+        //Compute the cosine of the angle between two line segments
+        double cosine = computeCosine(thisPoint, nextPoint);
         if (cosine <= cosOf45) {
             List<Point> subdivisions = addSubdivisions(thisPoint, nextPoint, count);
             if (subdivisions != null) {
