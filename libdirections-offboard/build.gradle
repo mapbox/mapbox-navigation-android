@@ -34,4 +34,6 @@ dependencies {
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
-}apply from: "${rootDir}/gradle/jacoco.gradle"
+}
+
+apply from: "${rootDir}/gradle/jacoco.gradle"
