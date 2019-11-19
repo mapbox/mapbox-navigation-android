@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mapbox.android.core.location.LocationEngine;
-import com.mapbox.android.core.location.LocationEnginePriority;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
@@ -37,6 +36,7 @@ import java.util.Set;
 import retrofit2.Callback;
 import timber.log.Timber;
 
+import static com.mapbox.android.core.location.LocationEngineProvider.getBestLocationEngine;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.VOICE_INSTRUCTION_MILESTONE_ID;
@@ -61,7 +61,6 @@ public class MapboxNavigation implements ServiceConnection {
   private final String accessToken;
   private Context applicationContext;
   private boolean isBound;
-  private NavigationTelemetry navigationTelemetry = null;
 
   /**
    * Constructs a new instance of this class using the default options. This should be used over
@@ -131,23 +130,10 @@ public class MapboxNavigation implements ServiceConnection {
 
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
-                   @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine) {
-    initializeContext(context);
-    this.accessToken = accessToken;
-    this.options = options;
-    this.navigationTelemetry = navigationTelemetry;
-    this.locationEngine = locationEngine;
-    initialize();
-  }
-
-  // Package private (no modifier) for testing purposes
-  MapboxNavigation(@NonNull Context context, @NonNull String accessToken, NavigationTelemetry navigationTelemetry,
                    LocationEngine locationEngine) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = MapboxNavigationOptions.builder().build();
-    this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
     initialize();
   }
@@ -162,7 +148,6 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     initializeDefaultLocationEngine();
-    initializeTelemetry();
 
     // Create and add default milestones if enabled.
     milestones = new HashSet<>();
@@ -179,49 +164,21 @@ public class MapboxNavigation implements ServiceConnection {
     applicationContext = context.getApplicationContext();
   }
 
-  private void initializeTelemetry() {
-    navigationTelemetry = obtainTelemetry();
-    navigationTelemetry.initialize(applicationContext, accessToken, this, locationEngine);
-  }
-
-  private NavigationTelemetry obtainTelemetry() {
-    if (navigationTelemetry == null) {
-      return NavigationTelemetry.getInstance();
-    }
-    return navigationTelemetry;
-  }
-
   /**
    * Since navigation requires location information there should always be a valid location engine
    * which we can use to get information. Therefore, by default we build one.
    */
   private void initializeDefaultLocationEngine() {
     locationEngine = obtainLocationEngine();
-    locationEngine.setPriority(LocationEnginePriority.HIGH_ACCURACY);
-    locationEngine.setFastestInterval(1000);
-    locationEngine.setInterval(0);
-    locationEngine.activate();
   }
 
   private LocationEngine obtainLocationEngine() {
     if (locationEngine == null) {
-      return new LocationEngineProvider(applicationContext).obtainBestLocationEngineAvailable();
+      return getBestLocationEngine(applicationContext);
     }
 
     return locationEngine;
   }
-
-  /**
-   * When onDestroy gets called, it is safe to remove location updates and deactivate the engine.
-   */
-  private void disableLocationEngine() {
-    if (locationEngine != null) {
-      locationEngine.removeLocationUpdates();
-      locationEngine.deactivate();
-    }
-  }
-
-  // Lifecycle
 
   /**
    * Critical to place inside your navigation activity so that when your application gets destroyed
@@ -230,7 +187,6 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void onDestroy() {
     stopNavigation();
-    disableLocationEngine();
     removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
@@ -347,8 +303,6 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
-    // Setup telemetry with new engine
-    navigationTelemetry.updateLocationEngine(locationEngine);
     // Notify service to get new location engine.
     if (isServiceAvailable()) {
       navigationService.updateLocationEngine(locationEngine);
@@ -393,9 +347,6 @@ public class MapboxNavigation implements ServiceConnection {
     this.directionsRoute = directionsRoute;
     Timber.d("MapboxNavigation startNavigation called.");
     if (!isBound) {
-      // Begin telemetry session
-      navigationTelemetry.startSession(directionsRoute);
-
       // Start the NavigationService
       Intent intent = getServiceIntent();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -407,9 +358,6 @@ public class MapboxNavigation implements ServiceConnection {
 
       // Send navigation event running: true
       navigationEventDispatcher.onNavigationEvent(true);
-    } else {
-      // Update telemetry directions route
-      navigationTelemetry.updateSessionRoute(directionsRoute);
     }
   }
 
@@ -747,51 +695,6 @@ public class MapboxNavigation implements ServiceConnection {
   @NonNull
   public FasterRoute getFasterRouteEngine() {
     return navigationEngineFactory.retrieveFasterRouteEngine();
-  }
-
-  /**
-   * Creates a new {@link FeedbackEvent} with a given type, description, and source.
-   * <p>
-   * Returns a {@link String} feedbackId that can be used to update or cancel this feedback event.
-   * There is a 20 second time period set after this method is called to do so.
-   *
-   * @param feedbackType from list of set feedback types
-   * @param description  an option description to provide more detail about the feedback
-   * @param source       either from the drop-in UI or a reroute
-   * @return String feedbackId
-   * @since 0.7.0
-   */
-  public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
-                               String description, @FeedbackEvent.FeedbackSource String source) {
-    return navigationTelemetry.recordFeedbackEvent(feedbackType, description, source);
-  }
-
-  /**
-   * Updates an existing feedback event generated by {@link MapboxNavigation#recordFeedback(String, String, String)}.
-   * <p>
-   * Uses a feedback ID to find the correct event and then adjusts the feedbackType and description.
-   *
-   * @param feedbackId   generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
-   * @param feedbackType from list of set feedback types
-   * @param description  an optional description to provide more detail about the feedback
-   * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
-   * @since 0.8.0
-   */
-  public void updateFeedback(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
-                             String description, String screenshot) {
-    navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description, screenshot);
-  }
-
-  /**
-   * Cancels an existing feedback event generated by {@link MapboxNavigation#recordFeedback(String, String, String)}.
-   * <p>
-   * Uses a feedback ID to find the correct event and then cancels it (will no longer be recorded).
-   *
-   * @param feedbackId generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
-   * @since 0.7.0
-   */
-  public void cancelFeedback(String feedbackId) {
-    navigationTelemetry.cancelFeedback(feedbackId);
   }
 
   String obtainAccessToken() {

@@ -37,13 +37,17 @@ public final class MapUtils {
       collection = FeatureCollection.fromFeatures(new Feature[] {});
     }
 
-    GeoJsonSource source = mapboxMap.getSourceAs(sourceId);
-    if (source == null) {
-      GeoJsonOptions routeGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
-      GeoJsonSource routeSource = new GeoJsonSource(sourceId, collection, routeGeoJsonOptions);
-      mapboxMap.addSource(routeSource);
-    } else {
-      source.setGeoJson(collection);
+    try {
+      GeoJsonSource source = mapboxMap.getStyle().getSourceAs(sourceId);
+      if (source == null) {
+        GeoJsonOptions routeGeoJsonOptions = new GeoJsonOptions().withMaxZoom(16);
+        GeoJsonSource routeSource = new GeoJsonSource(sourceId, collection, routeGeoJsonOptions);
+        mapboxMap.getStyle().addSource(routeSource);
+      } else {
+        source.setGeoJson(collection);
+      }
+    } catch (Exception ex){
+      ex.printStackTrace();
     }
   }
 
@@ -57,13 +61,17 @@ public final class MapUtils {
    */
   public static void addLayerToMap(@NonNull MapboxMap mapboxMap, @NonNull Layer layer,
                                    @Nullable String idBelowLayer) {
-    if (mapboxMap.getLayer(layer.getId()) != null) {
-      return;
-    }
-    if (idBelowLayer == null) {
-      mapboxMap.addLayer(layer);
-    } else {
-      mapboxMap.addLayerBelow(layer, idBelowLayer);
+    try {
+      if (mapboxMap.getStyle().getLayer(layer.getId()) != null) {
+        return;
+      }
+      if (idBelowLayer == null) {
+        mapboxMap.getStyle().addLayer(layer);
+      } else {
+        mapboxMap.getStyle().addLayerBelow(layer, idBelowLayer);
+      }
+    } catch (Exception ex){
+      ex.printStackTrace();
     }
   }
 }

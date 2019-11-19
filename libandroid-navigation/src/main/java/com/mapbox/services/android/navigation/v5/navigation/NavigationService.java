@@ -49,7 +49,6 @@ public class NavigationService extends Service {
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    NavigationTelemetry.getInstance().initializeLifecycleMonitor(getApplication());
     return START_STICKY;
   }
 
@@ -122,8 +121,8 @@ public class NavigationService extends Service {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
-    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, mapboxNavigation, locationEngine, validator
+    NavigationLocationEngine listener = new NavigationLocationEngine(
+            thread, mapboxNavigation, locationEngine, validator
     );
     locationEngineUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }

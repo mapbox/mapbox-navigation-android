@@ -8,25 +8,23 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
 class NavigationLocationEngineUpdater {
 
-  private final NavigationLocationEngineListener listener;
+  private final NavigationLocationEngine listener;
   private RouteUtils routeUtils;
   private LocationEngine locationEngine;
 
-  NavigationLocationEngineUpdater(LocationEngine locationEngine, NavigationLocationEngineListener listener) {
+  NavigationLocationEngineUpdater(LocationEngine locationEngine, NavigationLocationEngine listener) {
     this.locationEngine = locationEngine;
     this.listener = listener;
-    locationEngine.addLocationEngineListener(listener);
   }
 
   void updateLocationEngine(LocationEngine locationEngine) {
-    removeLocationEngineListener();
     this.locationEngine = locationEngine;
-    locationEngine.addLocationEngineListener(listener);
+    listener.setLocationEngine(locationEngine);
   }
 
   @SuppressWarnings("MissingPermission")
   void forceLocationUpdate(DirectionsRoute route) {
-    Location location = locationEngine.getLastLocation();
+    Location location = listener.getLastLocation();
     if (!listener.isValidLocationUpdate(location)) {
       routeUtils = obtainRouteUtils();
       location = routeUtils.createFirstLocationFromRoute(route);
@@ -35,7 +33,7 @@ class NavigationLocationEngineUpdater {
   }
 
   void removeLocationEngineListener() {
-    locationEngine.removeLocationEngineListener(listener);
+    listener.onRemove();
   }
 
   private RouteUtils obtainRouteUtils() {
