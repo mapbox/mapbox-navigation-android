@@ -2,8 +2,9 @@ package com.mapbox.navigation.directions.session
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
-import io.mockk.every
+import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
