@@ -29,7 +29,7 @@ import retrofit2.Callback
  * 1.0
  */
 
-class NavigationRoute
+internal class NavigationRoute
 internal constructor(
     private val mapboxDirections: MapboxDirections
 ) {

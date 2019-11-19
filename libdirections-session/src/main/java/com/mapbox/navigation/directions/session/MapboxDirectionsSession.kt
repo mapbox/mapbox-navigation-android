@@ -11,12 +11,16 @@ import java.util.concurrent.CopyOnWriteArrayList
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
     private val router: Router,
-    origin: Point,
-    waypoints: List<Point>,
-    private val destination: Point
+    private var origin: Point,
+    private var waypoints: List<Point>,
+    private var destination: Point,
+    routeObserver: DirectionsSession.RouteObserver?
 ) : DirectionsSession {
 
+    private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
+
     init {
+        routeObserver?.let { registerRouteObserver(it) }
         requestRoute()
     }
 
@@ -28,12 +32,6 @@ class MapboxDirectionsSession(
             field = value
             routeObservers.forEach { it.onRouteChanged(value) }
         }
-
-    private var origin: Point = origin
-
-    private var waypoints: List<Point> = waypoints
-
-    private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
 
     override fun setOrigin(point: Point) {
         origin = point
@@ -48,6 +46,13 @@ class MapboxDirectionsSession(
     }
 
     override fun getWaypoints() = waypoints
+
+    override fun setDestionation(point: Point) {
+        destination = point
+        requestRoute()
+    }
+
+    override fun getDestionation(): Point = destination
 
     override fun registerRouteObserver(routeObserver: DirectionsSession.RouteObserver) {
         routeObservers.add(routeObserver)

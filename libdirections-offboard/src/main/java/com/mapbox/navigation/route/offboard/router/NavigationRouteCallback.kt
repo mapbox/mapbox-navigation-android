@@ -6,7 +6,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class NavigationRouteCallback(
+internal class NavigationRouteCallback(
     private val listener: NavigationRouteEventListener,
     private val callback: Callback<DirectionsResponse>
 ) : Callback<DirectionsResponse> {
