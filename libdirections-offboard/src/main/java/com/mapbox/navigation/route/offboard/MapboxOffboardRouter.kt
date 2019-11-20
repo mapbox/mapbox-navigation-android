@@ -23,7 +23,7 @@ class MapboxOffboardRouter(
 
     override fun getRoute(
         origin: Point,
-        waypoints: List<Point>?,
+        waypoints: List<Point>,
         destination: Point,
         callback: Router.Callback
     ) {
@@ -32,7 +32,7 @@ class MapboxOffboardRouter(
             .accessToken(mapboxToken)
             .origin(origin)
             .destination(destination)
-        waypoints?.forEach { builder.addWaypoint(it) }
+        waypoints.forEach { builder.addWaypoint(it) }
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {

@@ -11,7 +11,7 @@ class MapboxOnboardRouter(private val navigator: MapboxNativeNavigator) : Router
 
     override fun getRoute(
         origin: Point,
-        waypoints: List<Point>?,
+        waypoints: List<Point>,
         destination: Point,
         callback: Router.Callback
     ) = Unit
