@@ -15,6 +15,12 @@
 
     <string name="description_navigation_launcher">Інтерфейс для вводу місця призначення.</string>
 
+    <string name="title_end_navigation">Завершити навігацію</string>
+    <string name="description_end_navigation">Показати, як завершити навігацію використовуючи NavigationView</string>
+
+    <string name="title_dual_navigation_map">Карта з подвійною навігацією</string>
+    <string name="description_dual_navigation_map">Показати, як додати NavigationView та MapView в той самий шар</string>
+
     <string name="title_waypoint_navigation">Навігація з проміжними точками</string>
     <string name="description_waypoint_navigation">Навігація з проміжними точками до пункту призначення</string>
 
@@ -23,6 +29,9 @@
 
     <string name="title_fragment_navigation">NavigationView реалізовано через Fragment</string>
     <string name="description_fragment_navigation">NavigationView реалізовано через Fragment</string>
+
+    <string name="title_component_navigation">MapboxNavigation з компонентами інтерфейсу користувача</string>
+    <string name="description_component_navigation">MapboxNavigation з компонентами інтерфейсу користувача</string>
 
     <string name="settings">Налаштування</string>
     <string name="simulate_route">Імітация маршрута</string>
