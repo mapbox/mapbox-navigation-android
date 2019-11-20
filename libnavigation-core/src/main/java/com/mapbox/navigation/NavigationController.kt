@@ -2,7 +2,6 @@ package com.mapbox.navigation
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Point
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -15,6 +14,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.Hybrid
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.Logger as LoggerModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.OffboardRouter
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.OnboardRouter
+import com.mapbox.geojson.Point
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripNotification as TripNotificationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripService as TripServiceModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripSession as TripSessionModule
@@ -42,9 +42,9 @@ class NavigationController(
         HandlerThread("NavigationController").apply { start() }
     }
 
-    private val origin by lazy { Point() }
+    private val origin by lazy { Point.fromLngLat(0.0, 0.0) }
     private val waypoints by lazy { arrayListOf<Point>() }
-    private val destination by lazy { Point() }
+    private val destination by lazy { Point.fromLngLat(0.0, 0.0) }
 
     private val logger: Logger
     private val directionsSession: DirectionsSession
