@@ -69,7 +69,6 @@ class MapboxDirectionsSession(
 
     private fun requestRoute() {
         router.cancel()
-        currentRoute = null
         router.getRoute(origin, emptyList(), destination, object : Router.Callback {
             override fun onRouteReady(routes: List<Route>) {
                 val route = routes.firstOrNull()
@@ -78,6 +77,7 @@ class MapboxDirectionsSession(
             }
 
             override fun onFailure(throwable: Throwable) {
+                currentRoute = null
                 routeObservers.forEach { it.onFailure(throwable) }
             }
         })

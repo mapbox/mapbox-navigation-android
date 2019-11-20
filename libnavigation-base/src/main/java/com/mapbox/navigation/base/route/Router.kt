@@ -7,7 +7,7 @@ interface Router {
 
     fun getRoute(
         origin: Point,
-        waypoints: List<Point>?,
+        waypoints: List<Point>,
         destination: Point,
         callback: Callback
     )

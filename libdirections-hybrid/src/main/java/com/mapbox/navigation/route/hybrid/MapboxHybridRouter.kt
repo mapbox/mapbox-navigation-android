@@ -13,7 +13,7 @@ class MapboxHybridRouter(
 
     override fun getRoute(
         origin: Point,
-        waypoints: List<Point>?,
+        waypoints: List<Point>,
         destination: Point,
         callback: Router.Callback
     ) = Unit
