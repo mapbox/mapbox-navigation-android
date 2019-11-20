@@ -14,13 +14,9 @@ class MapboxOnboardRouter(private val navigator: MapboxNativeNavigator) : Router
         waypoints: List<Point>?,
         destination: Point,
         callback: Router.Callback
-    ) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-    }
+    ) = Unit
 
-    override fun cancel() {
-        TODO("not implemented")
-    }
+    override fun cancel() = Unit
 
     class Config {
         fun compile(): String = TODO("not implemented")

@@ -11,8 +11,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
     private val router: Router,
-    // private var waypoints: List<Point>,
     private var origin: Point,
+    private var waypoints: List<Point>,
     private var destination: Point,
     routeObserver: DirectionsSession.RouteObserver?
 ) : DirectionsSession {
@@ -45,7 +45,7 @@ class MapboxDirectionsSession(
         requestRoute()
     }
 
-    override fun getWaypoints() = emptyList<Point>() //waypoints
+    override fun getWaypoints() = waypoints
 
     override fun setDestination(point: Point) {
         destination = point

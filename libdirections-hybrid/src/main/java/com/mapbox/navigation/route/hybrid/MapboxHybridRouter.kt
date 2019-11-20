@@ -16,9 +16,7 @@ class MapboxHybridRouter(
         waypoints: List<Point>?,
         destination: Point,
         callback: Router.Callback
-    ) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-    }
+    ) = Unit
 
     override fun cancel() {
         onboardRouter.cancel()
