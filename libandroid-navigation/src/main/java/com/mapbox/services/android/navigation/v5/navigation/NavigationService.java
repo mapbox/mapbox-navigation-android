@@ -55,6 +55,7 @@ public class NavigationService extends Service {
   @Override
   public void onDestroy() {
     stopForeground(true);
+    locationEngineUpdater.removeLocationEngineListener();
     super.onDestroy();
   }
 
@@ -121,7 +122,7 @@ public class NavigationService extends Service {
     LocationEngine locationEngine = mapboxNavigation.getLocationEngine();
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
-    NavigationLocationEngine listener = new NavigationLocationEngine(
+    NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
             thread, mapboxNavigation, locationEngine, validator
     );
     locationEngineUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
