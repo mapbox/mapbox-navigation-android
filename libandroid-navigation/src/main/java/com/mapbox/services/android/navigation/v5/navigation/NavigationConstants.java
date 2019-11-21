@@ -123,6 +123,12 @@ public final class NavigationConstants {
    */
   static final int NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500;
 
+  static final float NAVIGATION_OFF_ROUTE_THRESHOLD = 50.0f;
+
+  static final float NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION = 25.0f;
+
+  static final float NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION = 40.0f;
+
   static final long ROUTE_REFRESH_INTERVAL = 5 * 60 * 1000L;
 
   /**
