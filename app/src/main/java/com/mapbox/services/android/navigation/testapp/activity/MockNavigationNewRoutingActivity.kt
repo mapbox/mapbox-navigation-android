@@ -33,8 +33,8 @@ import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification
+import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.mapbox.services.android.navigation.testapp.utils.bindView
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.instruction.Instruction
@@ -58,8 +58,8 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import timber.log.Timber
 import java.lang.ref.WeakReference
+import timber.log.Timber
 
 class MockNavigationNewRoutingActivity : AppCompatActivity(),
     OnMapReadyCallback,
@@ -173,11 +173,16 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
 
     override fun onMapClick(point: LatLng): Boolean {
         when {
-            destination == null -> destination = Point.fromLngLat(point.longitude, point.latitude)
-            waypoint == null -> waypoint = Point.fromLngLat(point.longitude, point.latitude)
+            destination == null -> {
+                destination = Point.fromLngLat(point.longitude, point.latitude)
+                mapboxMap?.addMarker(MarkerOptions().position(point))
+            }
+            waypoint == null -> {
+                waypoint = Point.fromLngLat(point.longitude, point.latitude)
+                mapboxMap?.addMarker(MarkerOptions().position(point))
+            }
             else -> Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show()
         }
-        mapboxMap?.addMarker(MarkerOptions().position(point))
         calculateRoute()
         return false
     }
@@ -234,9 +239,9 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
                 return
             }
 
-            var waypoints: MutableList<Point>? = null
+            val waypoints = mutableListOf<Point>()
             waypoint?.let {
-                waypoints = mutableListOf(it)
+                waypoints.add(it)
             }
             val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
             directionsSession = MapboxDirectionsSession(
