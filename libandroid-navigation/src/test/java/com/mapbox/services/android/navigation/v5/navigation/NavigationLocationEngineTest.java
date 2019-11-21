@@ -13,12 +13,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-public class NavigationLocationEngineListenerTest {
+public class NavigationLocationEngineTest {
 
   @Test
   public void onConnected_engineRequestsUpdates() {
     LocationEngine locationEngine = mock(LocationEngine.class);
-    NavigationLocationEngineListener listener = buildListener(locationEngine);
+    NavigationLocationEngine listener = buildListener(locationEngine);
 
     listener.onConnected();
 
@@ -30,7 +30,7 @@ public class NavigationLocationEngineListenerTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationValidator validator = mock(LocationValidator.class);
     when(validator.isValidUpdate(any(Location.class))).thenReturn(true);
-    NavigationLocationEngineListener listener = buildListener(thread, validator);
+    NavigationLocationEngine listener = buildListener(thread, validator);
 
     listener.onLocationChanged(mock(Location.class));
 
@@ -42,25 +42,25 @@ public class NavigationLocationEngineListenerTest {
     RouteProcessorBackgroundThread thread = mock(RouteProcessorBackgroundThread.class);
     LocationValidator validator = mock(LocationValidator.class);
     when(validator.isValidUpdate(any(Location.class))).thenReturn(false);
-    NavigationLocationEngineListener listener = buildListener(thread, validator);
+    NavigationLocationEngine listener = buildListener(thread, validator);
 
     listener.onLocationChanged(mock(Location.class));
 
     verifyZeroInteractions(thread);
   }
 
-  private NavigationLocationEngineListener buildListener(RouteProcessorBackgroundThread thread,
-                                                         LocationValidator validator) {
+  private NavigationLocationEngine buildListener(RouteProcessorBackgroundThread thread,
+                                                 LocationValidator validator) {
     MapboxNavigation mapboxNavigation = mock(MapboxNavigation.class);
     when(mapboxNavigation.options()).thenReturn(MapboxNavigationOptions.builder().build());
-    return new NavigationLocationEngineListener(thread, mapboxNavigation,
+    return new NavigationLocationEngine(thread, mapboxNavigation,
       mock(LocationEngine.class), validator);
   }
 
-  private NavigationLocationEngineListener buildListener(LocationEngine locationEngine) {
+  private NavigationLocationEngine buildListener(LocationEngine locationEngine) {
     MapboxNavigation mapboxNavigation = mock(MapboxNavigation.class);
     when(mapboxNavigation.options()).thenReturn(MapboxNavigationOptions.builder().build());
-    return new NavigationLocationEngineListener(mock(RouteProcessorBackgroundThread.class),
+    return new NavigationLocationEngine(mock(RouteProcessorBackgroundThread.class),
       mapboxNavigation, locationEngine, mock(LocationValidator.class));
   }
 }

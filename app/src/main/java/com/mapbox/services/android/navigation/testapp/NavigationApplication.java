@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp;
 
 import android.app.Application;
+import android.app.NotificationChannel;
 import android.text.TextUtils;
 import android.util.Log;
 

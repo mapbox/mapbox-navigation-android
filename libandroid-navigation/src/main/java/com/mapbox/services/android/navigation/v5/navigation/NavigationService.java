@@ -49,13 +49,13 @@ public class NavigationService extends Service {
    */
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-    NavigationTelemetry.getInstance().initializeLifecycleMonitor(getApplication());
     return START_STICKY;
   }
 
   @Override
   public void onDestroy() {
     stopForeground(true);
+    locationEngineUpdater.removeLocationEngineListener();
     super.onDestroy();
   }
 
@@ -123,7 +123,7 @@ public class NavigationService extends Service {
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
     NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, mapboxNavigation, locationEngine, validator
+            thread, mapboxNavigation, locationEngine, validator
     );
     locationEngineUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }

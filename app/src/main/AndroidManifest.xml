@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.mapbox.services.android.navigation.testapp">
+    package="com.mapbox.services.android.navigation.testapp">
 
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".NavigationApplication"
@@ -12,104 +13,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
         <activity
-            android:name=".activity.MockNavigationActivity"
+            android:name=".MockNavigationActivity"
             android:label="@string/title_mock_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <activity
-            android:name=".activity.RerouteActivity"
-            android:label="@string/title_reroute">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-
-        <activity
-            android:name=".activity.navigationui.NavigationMapRouteActivity"
-            android:label="@string/title_navigation_route_ui">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.EndNavigationActivity"
-            android:label="@string/title_end_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.DualNavigationMapActivity"
-            android:label="@string/title_dual_navigation_map">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.NavigationLauncherActivity"
-            android:label="@string/title_navigation_launcher">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.NavigationViewSettingsActivity"
-            android:label="@string/settings">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.navigationui.NavigationLauncherActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.WaypointNavigationActivity"
-            android:label="@string/title_waypoint_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.EmbeddedNavigationActivity"
-            android:label="@string/title_embedded_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.fragment.FragmentNavigationActivity"
-            android:label="@string/title_fragment_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.ComponentNavigationActivity"
-            android:label="@string/title_component_navigation"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <!-- Testing -->
-        <activity android:name=".test.TestNavigationActivity"/>
     </application>
+
 </manifest>
