@@ -22,6 +22,7 @@ buildscript {
     classpath pluginDependencies.googleServices
     classpath pluginDependencies.crashlytics
     classpath pluginDependencies.license
+    classpath pluginDependencies.mapboxSdkVersions
   }
 }
 

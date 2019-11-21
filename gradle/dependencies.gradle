@@ -137,7 +137,8 @@ ext {
       jacoco           : '0.8.2',
       playPublisher    : '1.2.2',
       googleServices   : '4.2.0',
-      crashlytics      : '1.26.1'
+      crashlytics      : '1.26.1',
+      mapboxSdkVersions: '1.0.0'
   ]
 
   pluginDependencies = [
@@ -153,6 +154,7 @@ ext {
       jacoco           : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.jacoco}",
       playPublisher    : "com.github.triplet.gradle:play-publisher:${pluginVersion.playPublisher}",
       googleServices   : "com.google.gms:google-services:${pluginVersion.googleServices}",
-      crashlytics      : "io.fabric.tools:gradle:${pluginVersion.crashlytics}"
+      crashlytics      : "io.fabric.tools:gradle:${pluginVersion.crashlytics}",
+      mapboxSdkVersions: "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}"
   ]
 }
