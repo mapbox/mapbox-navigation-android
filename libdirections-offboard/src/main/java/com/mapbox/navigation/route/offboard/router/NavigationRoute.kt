@@ -74,12 +74,7 @@ internal constructor(
      * @since 0.5.0
      */
     fun getRoute(callback: Callback<DirectionsResponse>) {
-        mapboxDirections.enqueueCall(
-            NavigationRouteCallback(
-                EVENT_LISTENER,
-                callback
-            )
-        )
+        mapboxDirections.enqueueCall(callback)
     }
 
     /**
@@ -107,9 +102,9 @@ internal constructor(
      */
     class Builder internal constructor(private val directionsBuilder: MapboxDirections.Builder) {
         private val eventListener: NavigationRouteEventListener
-        private var origin: NavigationRouteWaypoint? = null
-        private var destination: NavigationRouteWaypoint? = null
-        private val waypoints = ArrayList<NavigationRouteWaypoint>()
+        private var origin: NavigationRoutePoint? = null
+        private var destination: NavigationRoutePoint? = null
+        private val waypoints = ArrayList<NavigationRoutePoint>()
         private val SEMICOLON = ";"
         private val COMMA = ","
 
@@ -159,7 +154,7 @@ internal constructor(
          * @since 0.5.0
          */
         fun origin(origin: Point): Builder {
-            this.origin = NavigationRouteWaypoint(
+            this.origin = NavigationRoutePoint(
                 origin,
                 null,
                 null
@@ -186,7 +181,7 @@ internal constructor(
             tolerance: Double?
         ): Builder {
             this.origin =
-                NavigationRouteWaypoint(
+                NavigationRoutePoint(
                     origin,
                     angle,
                     tolerance
@@ -205,7 +200,7 @@ internal constructor(
          */
         fun destination(destination: Point): Builder {
             this.destination =
-                NavigationRouteWaypoint(
+                NavigationRoutePoint(
                     destination,
                     null,
                     null
@@ -232,7 +227,7 @@ internal constructor(
             tolerance: Double?
         ): Builder {
             this.destination =
-                NavigationRouteWaypoint(
+                NavigationRoutePoint(
                     destination,
                     angle,
                     tolerance
@@ -254,7 +249,7 @@ internal constructor(
          */
         fun addWaypoint(waypoint: Point): Builder {
             this.waypoints.add(
-                NavigationRouteWaypoint(
+                NavigationRoutePoint(
                     waypoint,
                     null,
                     null
@@ -291,7 +286,7 @@ internal constructor(
             tolerance: Double?
         ): Builder {
             this.waypoints.add(
-                NavigationRouteWaypoint(
+                NavigationRoutePoint(
                     waypoint,
                     angle,
                     tolerance
