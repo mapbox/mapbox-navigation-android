@@ -6,8 +6,8 @@ import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
-    distance = distance(),
-    duration = duration()?.toLong(),
+    distance = distance()!!,
+    duration = duration()?.toLong()!!,
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
