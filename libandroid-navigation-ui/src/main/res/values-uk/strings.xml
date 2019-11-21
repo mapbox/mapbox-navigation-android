@@ -12,6 +12,13 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Увімкнено</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Надіслати відгук</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Не ефективний\n
+або поганий маршрут</string>
+
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Незрозумілі\nінструкції</string>
 
@@ -29,6 +36,9 @@
 
     <!-- Shown after a feedback type has been submitted -->
     <string name="feedback_submitted">Відгук надіслано</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Повідомити про проблему</string>
 
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Бажаєте продовжити подорож до наступного пункту призначення?</string>

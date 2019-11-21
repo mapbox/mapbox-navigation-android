@@ -12,6 +12,12 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Tiếng Mở</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Gửi phản hồi</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Đường Sai hoặc\nĐi Vòng vòng</string>
+
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Hướng dẫn\nKhó hiểu</string>
 
