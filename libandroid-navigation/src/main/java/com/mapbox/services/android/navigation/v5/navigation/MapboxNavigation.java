@@ -16,6 +16,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
@@ -1022,7 +1023,7 @@ public class MapboxNavigation implements ServiceConnection {
    * to prevent users from removing it.
    */
   private void initialize() {
-    mapboxNavigator = new MapboxNavigator(new Navigator());
+    mapboxNavigator = new MapboxNavigator(configureNavigator());
     // Initialize event dispatcher and add internal listeners
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEventDispatcher.addProgressChangeListener(new ProgressChangeListener() {
@@ -1055,6 +1056,17 @@ public class MapboxNavigation implements ServiceConnection {
       throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
     }
     applicationContext = context.getApplicationContext();
+  }
+
+  @NotNull
+  private Navigator configureNavigator() {
+    Navigator navigator = new Navigator();
+    NavigatorConfig navigatorConfig = navigator.getConfig();
+    navigatorConfig.setOffRouteThreshold(options.getOffRouteThreshold());
+    navigatorConfig.setOffRouteThresholdWhenNearIntersection(options.getOffRouteThresholdWhenNearIntersection());
+    navigatorConfig.setIntersectionRadiusForOffRouteDetection(options.getIntersectionRadiusForOffRouteDetection());
+    navigator.setConfig(navigatorConfig);
+    return navigator;
   }
 
   private void initializeTelemetry(Context context) {
