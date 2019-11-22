@@ -15,7 +15,7 @@ interface Router {
     fun cancel()
 
     interface Callback {
-        fun onRouteReady(routes: List<Route>)
+        fun onResponse(routes: List<Route>)
 
         fun onFailure(throwable: Throwable)
     }

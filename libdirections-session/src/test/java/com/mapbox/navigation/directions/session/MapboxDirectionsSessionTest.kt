@@ -39,7 +39,7 @@ class MapboxDirectionsSessionTest {
     fun initialRouteResponse() {
         assertNull(session.currentRoute)
 
-        callback.onRouteReady(listOf(route))
+        callback.onResponse(listOf(route))
 
         assertEquals(route, session.currentRoute)
         verify { observer.onRouteChanged(route) }
