@@ -33,7 +33,6 @@ import com.mapbox.services.android.navigation.v5.navigation.*
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import com.mapbox.services.android.navigation.v5.utils.safeLet
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
@@ -92,11 +91,11 @@ class MockNavigationActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         startRouteButton.setOnClickListener {
-            safeLet(navigation, route) { nav, route ->
+            route?.let { route ->
                 startRouteButton.visibility = View.INVISIBLE
 
                 // Attach all of our navigation listeners.
-                nav.apply {
+                navigation.apply {
                     addNavigationEventListener(this@MockNavigationActivity)
                     addProgressChangeListener(this@MockNavigationActivity)
                     addMilestoneEventListener(this@MockNavigationActivity)
@@ -189,44 +188,48 @@ class MockNavigationActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun calculateRoute() {
         val userLocation = locationEngine.lastLocation
+        val accesstoken = Mapbox.getAccessToken()
+        val destination = destination
         if (userLocation == null) {
             Timber.d("calculateRoute: User location is null, therefore, origin can't be set.")
             return
         }
 
-        safeLet(userLocation, destination, Mapbox.getAccessToken()) { userLocation, destination, accesstoken ->
-            val origin = Point.fromLngLat(userLocation.longitude, userLocation.latitude)
-            if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
-                startRouteButton.visibility = View.GONE
-                return@safeLet
-            }
+        if (destination == null || accesstoken == null) {
+            return
+        }
 
-            val navigationRouteBuilder = NavigationRoute.builder(this).apply {
-                this.accessToken(accesstoken)
-                this.origin(origin)
-                this.destination(destination)
-                this.voiceUnits(DirectionsCriteria.METRIC)
-                this.alternatives(true)
-                this.baseUrl(BASE_URL)
-            }
+        val origin = Point.fromLngLat(userLocation.longitude, userLocation.latitude)
+        if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) < 50) {
+            startRouteButton.visibility = View.GONE
+            return
+        }
 
-            navigationRouteBuilder.build().getRoute(object : Callback<DirectionsResponse> {
-                override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
-                    Timber.d("Url: %s", call.request().url().toString())
-                    response.body()?.let { response ->
-                        if (response.routes().isNotEmpty()) {
-                            val directionsRoute = response.routes().first()
-                            this@MockNavigationActivity.route = directionsRoute
-                            navigationMapRoute?.addRoutes(response.routes())
-                        }
+        val navigationRouteBuilder = NavigationRoute.builder(this).apply {
+            this.accessToken(accesstoken)
+            this.origin(origin)
+            this.destination(destination)
+            this.voiceUnits(DirectionsCriteria.METRIC)
+            this.alternatives(true)
+            this.baseUrl(BASE_URL)
+        }
+
+        navigationRouteBuilder.build().getRoute(object : Callback<DirectionsResponse> {
+            override fun onResponse(call: Call<DirectionsResponse>, response: Response<DirectionsResponse>) {
+                Timber.d("Url: %s", call.request().url().toString())
+                response.body()?.let { response ->
+                    if (response.routes().isNotEmpty()) {
+                        val directionsRoute = response.routes().first()
+                        this@MockNavigationActivity.route = directionsRoute
+                        navigationMapRoute?.addRoutes(response.routes())
                     }
                 }
+            }
 
-                override fun onFailure(call: Call<DirectionsResponse>, throwable: Throwable) {
-                    Timber.e(throwable, "onFailure: navigation.getRoute()")
-                }
-            })
-        } ?: return
+            override fun onFailure(call: Call<DirectionsResponse>, throwable: Throwable) {
+                Timber.e(throwable, "onFailure: navigation.getRoute()")
+            }
+        })
     }
 
     override fun onProgressChange(location: Location?, routeProgress: RouteProgress?) {
