@@ -6,62 +6,53 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
-import java.util.concurrent.CopyOnWriteArrayList
 
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
     private val router: Router,
     private var origin: Point,
-    private var waypoints: List<Point>,
+    private var waypoints: List<Point> = listOf(),
     private var destination: Point,
-    routeObserver: DirectionsSession.RouteObserver?
+    private val routeObserver: DirectionsSession.RouteObserver
 ) : DirectionsSession {
 
-    private val routeObservers = CopyOnWriteArrayList<DirectionsSession.RouteObserver>()
-
-    init {
-        routeObserver?.let { registerRouteObserver(it) }
-        requestRoute()
-    }
-
-    override var currentRoute: Route? = null
+    private var currentRoutes: List<Route> = listOf()
         set(value) {
             if (field == value) {
                 return
             }
             field = value
-            routeObservers.forEach { it.onRouteChanged(value) }
+            routeObserver.onRoutesChanged(value)
         }
+
+    override fun getRoutes() = currentRoutes
 
     override fun setOrigin(point: Point) {
         origin = point
-        requestRoute()
+        if (origin != point) {
+            requestRoute()
+        }
     }
 
     override fun getOrigin() = origin
 
     override fun setWaypoints(points: List<Point>) {
         waypoints = points
-        requestRoute()
+        if (waypoints != points) { //todo verify equals
+            requestRoute()
+        }
     }
 
     override fun getWaypoints() = waypoints
 
     override fun setDestination(point: Point) {
         destination = point
-        requestRoute()
+        if (destination != point) {
+            requestRoute()
+        }
     }
 
     override fun getDestination(): Point = destination
-
-    override fun registerRouteObserver(routeObserver: DirectionsSession.RouteObserver) {
-        routeObservers.add(routeObserver)
-        routeObserver.onRouteChanged(currentRoute)
-    }
-
-    override fun unregisterRouteObserver(routeObserver: DirectionsSession.RouteObserver) {
-        routeObservers.remove(routeObserver)
-    }
 
     override fun cancel() {
         router.cancel()
@@ -69,16 +60,15 @@ class MapboxDirectionsSession(
 
     private fun requestRoute() {
         router.cancel()
+        currentRoutes = listOf()
+        routeObserver.onRoutesRequested()
         router.getRoute(origin, waypoints, destination, object : Router.Callback {
             override fun onResponse(routes: List<Route>) {
-                val route = routes.firstOrNull()
-                currentRoute = route
-                routeObservers.forEach { it.onRouteChanged(route) }
+                currentRoutes = routes
             }
 
             override fun onFailure(throwable: Throwable) {
-                currentRoute = null
-                routeObservers.forEach { it.onFailure(throwable) }
+                routeObserver.onRoutesRequestFailure(throwable)
             }
         })
     }
