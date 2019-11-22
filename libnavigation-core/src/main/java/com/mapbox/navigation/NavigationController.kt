@@ -25,7 +25,6 @@ import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.util.rawType
 
 class NavigationController(
     private val application: Application,
@@ -51,7 +50,8 @@ class NavigationController(
 
     init {
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
-        directionsSession = NavigationModuleProvider.createModule(DirectionsSessionModule, ::paramsProvider)
+        directionsSession =
+            NavigationModuleProvider.createModule(DirectionsSessionModule, ::paramsProvider)
         tripSession = NavigationModuleProvider.createModule(TripSessionModule, ::paramsProvider)
     }
 
@@ -83,7 +83,7 @@ class NavigationController(
                     ::paramsProvider
                 ),
                 Point::class.java to origin,
-                rawType<List<Point>>() to waypoints,
+                List::class.java to waypoints,
                 Point::class.java to destination,
                 DirectionsSession.RouteObserver::class.java to null
             )
