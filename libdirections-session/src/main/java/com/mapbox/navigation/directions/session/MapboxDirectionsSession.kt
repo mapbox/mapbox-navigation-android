@@ -28,28 +28,19 @@ class MapboxDirectionsSession(
     override fun getRoutes() = currentRoutes
 
     override fun setOrigin(point: Point) {
-        if (origin != point) {
-            origin = point
-            requestRoutes()
-        }
+        origin = point
     }
 
     override fun getOrigin() = origin
 
     override fun setWaypoints(points: List<Point>) {
-        if (waypoints != points) {
-            waypoints = points
-            requestRoutes()
-        }
+        waypoints = points
     }
 
     override fun getWaypoints() = waypoints
 
     override fun setDestination(point: Point) {
-        if (destination != point) {
-            destination = point
-            requestRoutes()
-        }
+        destination = point
     }
 
     override fun getDestination(): Point = destination

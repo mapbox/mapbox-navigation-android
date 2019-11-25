@@ -64,7 +64,6 @@ class MapboxDirectionsSessionTest {
         session.setOrigin(newOrigin)
 
         assertEquals(newOrigin, session.getOrigin())
-        verify { router.getRoute(eq(newOrigin), eq(waypoints), any(), any()) }
     }
 
     @Test
@@ -78,7 +77,6 @@ class MapboxDirectionsSessionTest {
         session.setWaypoints(newWaypoints)
 
         assertEquals(newWaypoints, session.getWaypoints())
-        verify { router.getRoute(eq(origin), eq(newWaypoints), any(), any()) }
     }
 
     @Test
@@ -92,7 +90,6 @@ class MapboxDirectionsSessionTest {
         session.setDestination(newDestination)
 
         assertEquals(newDestination, session.getDestination())
-        verify { router.getRoute(any(), any(), eq(newDestination), any()) }
     }
 
     @Test
