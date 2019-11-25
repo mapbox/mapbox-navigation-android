@@ -230,10 +230,7 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
                 return
             }
 
-            val waypoints = mutableListOf<Point>()
-            waypoint?.let {
-                waypoints.add(it)
-            }
+            val waypoints = mutableListOf(waypoint).filterNotNull()
             val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
             directionsSession = MapboxDirectionsSession(
                 offboardRouter,
@@ -242,7 +239,7 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
                 destinationPoint,
                 this
             )
-            (directionsSession as MapboxDirectionsSession).requestRoutes()
+            directionsSession?.requestRoutes()
         }
     }
 
