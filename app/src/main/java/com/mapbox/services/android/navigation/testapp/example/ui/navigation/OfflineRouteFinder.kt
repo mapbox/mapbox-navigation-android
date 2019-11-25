@@ -84,7 +84,7 @@ class OfflineRouteFinder(
         return NavigationRoute.builder(NavigationApplication.instance)
             .origin(origin, bearing, BEARING_TOLERANCE)
             .destination(destination)
-            .accessToken(Mapbox.getAccessToken()!!) //OZ: Ok to use "!!". This code should crash if getAccessToken() returns null
+            .accessToken(Mapbox.getAccessToken()!!) // OZ: Ok to use "!!". This code should crash if getAccessToken() returns null
             .let {
                 OfflineRoute.builder(it).build()
             }
