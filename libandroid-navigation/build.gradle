@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
@@ -91,6 +92,8 @@ dependencies {
   testImplementation dependenciesList.hamcrest
   testImplementation dependenciesList.commonsIO
   testImplementation dependenciesList.robolectric
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply from: 'javadoc.gradle'
@@ -101,3 +104,6 @@ apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/dependency-updates.gradle"
 apply from: "${rootDir}/gradle/download-schema.gradle"
+repositories {
+    mavenCentral()
+}
