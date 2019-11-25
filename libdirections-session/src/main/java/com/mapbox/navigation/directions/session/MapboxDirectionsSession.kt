@@ -11,12 +11,12 @@ import com.mapbox.navigation.base.route.model.Route
 class MapboxDirectionsSession(
     private val router: Router,
     private var origin: Point,
-    private var waypoints: List<Point> = listOf(),
+    private var waypoints: List<Point> = emptyList(),
     private var destination: Point,
     private val routeObserver: DirectionsSession.RouteObserver
 ) : DirectionsSession {
 
-    private var currentRoutes: List<Route> = listOf()
+    private var currentRoutes: List<Route> = emptyList()
         set(value) {
             if (field == value) {
                 return
@@ -28,27 +28,27 @@ class MapboxDirectionsSession(
     override fun getRoutes() = currentRoutes
 
     override fun setOrigin(point: Point) {
-        origin = point
         if (origin != point) {
-            requestRoute()
+            origin = point
+            requestRoutes()
         }
     }
 
     override fun getOrigin() = origin
 
     override fun setWaypoints(points: List<Point>) {
-        waypoints = points
-        if (waypoints != points) { //todo verify equals
-            requestRoute()
+        if (waypoints != points) {
+            waypoints = points
+            requestRoutes()
         }
     }
 
     override fun getWaypoints() = waypoints
 
     override fun setDestination(point: Point) {
-        destination = point
         if (destination != point) {
-            requestRoute()
+            destination = point
+            requestRoutes()
         }
     }
 
@@ -58,9 +58,9 @@ class MapboxDirectionsSession(
         router.cancel()
     }
 
-    private fun requestRoute() {
+    override fun requestRoutes() {
         router.cancel()
-        currentRoutes = listOf()
+        currentRoutes = emptyList()
         routeObserver.onRoutesRequested()
         router.getRoute(origin, waypoints, destination, object : Router.Callback {
             override fun onResponse(routes: List<Route>) {

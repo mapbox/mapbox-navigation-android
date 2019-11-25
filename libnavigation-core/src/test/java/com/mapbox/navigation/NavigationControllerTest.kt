@@ -3,6 +3,7 @@ package com.mapbox.navigation
 import android.app.Application
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import io.mockk.mockk
 import org.junit.Assert
@@ -17,6 +18,7 @@ class NavigationControllerTest {
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
+    private val routeObserver: DirectionsSession.RouteObserver = mockk()
 
     @Before
     fun setUp() {
@@ -26,7 +28,8 @@ class NavigationControllerTest {
                 token,
                 navigator,
                 locationEngine,
-                locationEngineRequest
+                locationEngineRequest,
+                routeObserver
             )
     }
 

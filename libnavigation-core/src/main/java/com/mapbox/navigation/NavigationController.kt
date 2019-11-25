@@ -31,7 +31,8 @@ class NavigationController(
     private val mapboxToken: String,
     private val navigator: MapboxNativeNavigator,
     private val locationEngine: LocationEngine,
-    private val locationEngineRequest: LocationEngineRequest
+    private val locationEngineRequest: LocationEngineRequest,
+    private val routeObserver: DirectionsSession.RouteObserver
 ) {
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
@@ -85,7 +86,7 @@ class NavigationController(
                 Point::class.java to origin,
                 List::class.java to waypoints,
                 Point::class.java to destination,
-                DirectionsSession.RouteObserver::class.java to null
+                DirectionsSession.RouteObserver::class.java to routeObserver
             )
             TripNotificationModule -> arrayOf()
             TripServiceModule -> arrayOf(
