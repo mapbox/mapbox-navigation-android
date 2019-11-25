@@ -11,6 +11,7 @@ interface DirectionsSession {
     fun getWaypoints(): List<Point>
     fun setDestination(point: Point)
     fun getDestination(): Point
+    fun requestRoutes()
     fun cancel()
 
     interface RouteObserver {
