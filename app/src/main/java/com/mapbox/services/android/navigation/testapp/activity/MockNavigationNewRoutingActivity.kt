@@ -258,16 +258,20 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
      * DirectionSessions.RouteObserver
      */
 
-    override fun onRouteChanged(route: Route?) {
-        if (route != null) {
-            this.route = mapRouteToDirectionsRoute(route)
+    override fun onRoutesChanged(routes: List<Route>) {
+        routes.firstOrNull()?.let {
+            this.route = mapRouteToDirectionsRoute(it)
             navigationMapRoute.addRoute(this.route)
             startRouteButton.visibility = View.VISIBLE
         }
     }
 
-    override fun onFailure(throwable: Throwable) {
-        Timber.e(throwable, "onFailure: navigation.getRoute()")
+    override fun onRoutesRequested() {
+        Timber.d("onRoutesRequested: navigation.getRoute()")
+    }
+
+    override fun onRoutesRequestFailure(throwable: Throwable) {
+        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
     }
 
     /*
