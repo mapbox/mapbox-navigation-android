@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".activity.MockNavigationNewRoutingActivity"
+            android:name=".activity.MockNavigationOffboardRouterActivity"
             android:label="@string/title_mock_navigation">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

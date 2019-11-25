@@ -7,10 +7,8 @@ import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -23,7 +21,6 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
@@ -35,7 +32,6 @@ import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification
 import com.mapbox.services.android.navigation.testapp.utils.Utils
-import com.mapbox.services.android.navigation.testapp.utils.bindView
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.instruction.Instruction
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
@@ -58,10 +54,11 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import java.lang.ref.WeakReference
 import timber.log.Timber
 
-class MockNavigationNewRoutingActivity : AppCompatActivity(),
+class MockNavigationOffboardRouterActivity : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     ProgressChangeListener,
@@ -76,11 +73,6 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
         private const val BEGIN_ROUTE_MILESTONE = 1001
         private const val TWENTY_FIVE_METERS = 25.0
     }
-
-    // Map variables
-    private val mapView by bindView<MapView>(R.id.mapView)
-    private val newLocationFab by bindView<FloatingActionButton>(R.id.newLocationFab)
-    private val startRouteButton by bindView<Button>(R.id.startRouteButton)
 
     private var mapboxMap: MapboxMap? = null
 
@@ -112,8 +104,7 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val context = applicationContext
-        val customNotification = CustomNavigationNotification(context)
+        val customNotification = CustomNavigationNotification(applicationContext)
         val options = MapboxNavigationOptions.Builder()
             .navigationNotification(customNotification)
             .defaultMilestonesEnabled(false)
@@ -138,7 +129,7 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
                     )
                 ).build()
         )
-        customNotification.register(MyBroadcastReceiver(navigation), context)
+        customNotification.register(MyBroadcastReceiver(navigation), applicationContext)
 
         startRouteButton.setOnClickListener { onStartRouteClick() }
         newLocationFab.setOnClickListener { onNewLocationClick() }
@@ -251,6 +242,7 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
                 destinationPoint,
                 this
             )
+            (directionsSession as MapboxDirectionsSession).requestRoutes()
         }
     }
 
@@ -357,7 +349,7 @@ class MockNavigationNewRoutingActivity : AppCompatActivity(),
     }
 
     private fun mapRouteToDirectionsRoute(route: Route): DirectionsRoute {
-        val duration = route.duration?.toDouble() ?: 0.0
+        val duration = route.duration.toDouble()
         val legs = route.legs?.legs?.let { it as List<RouteLeg> }
 
         return DirectionsRoute.builder()

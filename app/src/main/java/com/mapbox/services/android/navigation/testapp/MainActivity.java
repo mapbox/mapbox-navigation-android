@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.MockNavigationNewRoutingActivity;
+import com.mapbox.services.android.navigation.testapp.activity.MockNavigationOffboardRouterActivity;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         MockNavigationActivity.class
       ),
       new SampleItem(
-        getString(R.string.title_mock_navigation_new_routing),
-        getString(R.string.description_mock_navigation_new_routing),
-        MockNavigationNewRoutingActivity.class
+        getString(R.string.title_mock_navigation_offboard_router),
+        getString(R.string.description_mock_navigation_offboard_router),
+        MockNavigationOffboardRouterActivity.class
       ),
       new SampleItem(
         getString(R.string.title_reroute),

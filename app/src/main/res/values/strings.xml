@@ -4,8 +4,8 @@
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 
-    <string name="title_mock_navigation_new_routing">Mock Navigation New Routing</string>
-    <string name="description_mock_navigation_new_routing">Mock a navigation session using a mock location engine and new routing api.</string>
+    <string name="title_mock_navigation_offboard_router">Mock Navigation New Routing</string>
+    <string name="description_mock_navigation_offboard_router">Mock a navigation session using a mock location engine and new routing api.</string>
 
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
