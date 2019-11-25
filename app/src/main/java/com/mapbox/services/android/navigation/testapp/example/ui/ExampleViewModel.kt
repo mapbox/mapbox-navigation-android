@@ -96,11 +96,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun findRouteToDestination() {
-        ifNonNull(location.value, destination.value) {location, destination ->
+        ifNonNull(location.value, destination.value) { location, destination ->
             routeFinder.findRoute(location, destination)
         }
     }
-
 
     fun updatePrimaryRoute(primaryRoute: DirectionsRoute) {
         this.primaryRoute = primaryRoute
@@ -110,10 +109,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         return primaryRoute != null
     }
 
-    fun startNavigation(){
-        primaryRoute?.let {primaryRoute->
+    fun startNavigation() {
+        primaryRoute?.let { primaryRoute ->
             when (shouldSimulateRoute()) {
-                true ->{
+                true -> {
                     val replayRouteLocationEngine = ReplayRouteLocationEngine()
                     replayRouteLocationEngine.assign(primaryRoute)
                     navigation.locationEngine = replayRouteLocationEngine
@@ -122,7 +121,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
                     navigation.locationEngine = locationEngine
                 }
             }
-            navigation.startNavigation(it)
+            navigation.startNavigation(primaryRoute)
             removeLocation()
         }
     }

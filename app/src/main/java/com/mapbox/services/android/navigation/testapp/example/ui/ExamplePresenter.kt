@@ -121,7 +121,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
 
     fun onDestinationFound(feature: CarmenFeature) {
-        feature.center()?.let {point->
+        feature.center()?.let { point ->
             viewModel.destination.value = point
             view.hideSoftKeyboard()
             view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
