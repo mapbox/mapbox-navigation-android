@@ -14,6 +14,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -29,6 +30,8 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -879,7 +882,8 @@ public class MapboxNavigation implements ServiceConnection {
    */
   private void initialize() {
     // Initialize event dispatcher and add internal listeners
-    mapboxNavigator = new MapboxNavigator(new Navigator());
+    Navigator navigator = configureNavigator();
+    mapboxNavigator = new MapboxNavigator(navigator);
     navigationEventDispatcher = new NavigationEventDispatcher();
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
@@ -899,6 +903,17 @@ public class MapboxNavigation implements ServiceConnection {
       throw new IllegalArgumentException(NON_NULL_APPLICATION_CONTEXT_REQUIRED);
     }
     applicationContext = context.getApplicationContext();
+  }
+
+  @NotNull
+  private Navigator configureNavigator() {
+    Navigator navigator = new Navigator();
+    NavigatorConfig navigatorConfig = navigator.getConfig();
+    navigatorConfig.setOffRouteThreshold(options.offRouteThreshold());
+    navigatorConfig.setOffRouteThresholdWhenNearIntersection(options.offRouteThresholdWhenNearIntersection());
+    navigatorConfig.setIntersectionRadiusForOffRouteDetection(options.intersectionRadiusForOffRouteDetection());
+    navigator.setConfig(navigatorConfig);
+    return navigator;
   }
 
   private void initializeTelemetry() {

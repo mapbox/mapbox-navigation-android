@@ -7,7 +7,10 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.R;
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
 
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_OFF_ROUTE_THRESHOLD;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUTE_REFRESH_INTERVAL;
 
@@ -61,6 +64,27 @@ public abstract class MapboxNavigationOptions {
   @ColorRes
   public abstract int defaultNotificationColorId();
 
+  /**
+   * This value indicates the off route threshold.
+   *
+   * @return off route threshold in meters
+   */
+  public abstract float offRouteThreshold();
+
+  /**
+   * This value indicates the off route threshold in meters when near an intersection.
+   *
+   * @return off route threshold in meters when near an intersection
+   */
+  public abstract float offRouteThresholdWhenNearIntersection();
+
+  /**
+   * This value indicates the radius in meters for off route detection near intersection.
+   *
+   * @return radius in meters for off route detection near intersection
+   */
+  public abstract float intersectionRadiusForOffRouteDetection();
+
   public abstract Builder toBuilder();
 
   @AutoValue.Builder
@@ -108,6 +132,32 @@ public abstract class MapboxNavigationOptions {
      */
     public abstract Builder defaultNotificationColorId(@ColorRes int defaultNotificationColorId);
 
+    /**
+     * This sets the off route threshold in meters. If not specified, the threshold is 50 meters by default.
+     *
+     * @param thresholdInMeters the off route threshold in meters to be used
+     * @return this builder for chaining options together
+     */
+    public abstract Builder offRouteThreshold(float thresholdInMeters);
+
+    /**
+     * This sets the off route threshold in meters when near an intersection which is more prone
+     * to inaccurate gps fixes. If not specified, the threshold is 25 meters by default.
+     *
+     * @param thresholdInMeters the off route threshold in meters when near an intersection to be used
+     * @return this builder for chaining options together
+     */
+    public abstract Builder offRouteThresholdWhenNearIntersection(float thresholdInMeters);
+
+    /**
+     * This sets the radius in meters for off route detection near intersection. If not specified,
+     * the radius is 40 meters by default.
+     *
+     * @param radiusInMeters the radius in meters for off route detection near intersection to be used
+     * @return this builder for chaining options together
+     */
+    public abstract Builder intersectionRadiusForOffRouteDetection(float radiusInMeters);
+
     public abstract MapboxNavigationOptions build();
   }
 
@@ -123,6 +173,9 @@ public abstract class MapboxNavigationOptions {
       .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
       .timeFormatType(NavigationTimeFormat.NONE_SPECIFIED)
       .navigationLocationEngineIntervalLagInMilliseconds(NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG)
-      .defaultNotificationColorId(R.color.mapboxNotificationBlue);
+      .defaultNotificationColorId(R.color.mapboxNotificationBlue)
+      .offRouteThreshold(NAVIGATION_OFF_ROUTE_THRESHOLD)
+      .offRouteThresholdWhenNearIntersection(NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION)
+      .intersectionRadiusForOffRouteDetection(NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION);
   }
 }
