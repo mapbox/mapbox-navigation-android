@@ -11,6 +11,7 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleMilestoneEventListener
@@ -95,12 +96,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun findRouteToDestination() {
-        location.value?.let { location ->
-            destination.value?.let { destination ->
-                routeFinder.findRoute(location, destination)
-            }
+        ifNonNull(location.value, destination.value) {location, destination ->
+            routeFinder.findRoute(location, destination)
         }
     }
+
 
     fun updatePrimaryRoute(primaryRoute: DirectionsRoute) {
         this.primaryRoute = primaryRoute
@@ -110,16 +110,18 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         return primaryRoute != null
     }
 
-    fun startNavigation() {
-        primaryRoute?.let {
-            if (shouldSimulateRoute()) {
-                val replayRouteLocationEngine = ReplayRouteLocationEngine()
-                replayRouteLocationEngine.assign(it)
-                navigation.locationEngine = replayRouteLocationEngine
-            } else {
-                navigation.locationEngine = locationEngine
+    fun startNavigation(){
+        primaryRoute?.let {primaryRoute->
+            when (shouldSimulateRoute()) {
+                true ->{
+                    val replayRouteLocationEngine = ReplayRouteLocationEngine()
+                    replayRouteLocationEngine.assign(primaryRoute)
+                    navigation.locationEngine = replayRouteLocationEngine
+                }
+                false -> {
+                    navigation.locationEngine = locationEngine
+                }
             }
-
             navigation.startNavigation(it)
             removeLocation()
         }

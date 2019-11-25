@@ -93,16 +93,17 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
             Timber.e("Mapbox tile count limit exceeded: %s", limit)
         }
 
-        override fun onStatusChanged(status: OfflineRegionStatus?) {
-            Timber.d(
-                "%s/%s resources; %s bytes downloaded.",
-                status?.completedResourceCount,
-                status?.requiredResourceCount,
-                status?.completedResourceSize
-            )
-            if (status?.isComplete == true && !isDownloadCompleted) {
-                isDownloadCompleted = true
-                downloadSelectedRegion()
+        override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
+            offlineRegionStatus?.let {status->
+                Timber.d(
+                        "%s/%s resources; %s bytes downloaded.",
+                        status.completedResourceCount,
+                        status.requiredResourceCount,
+                        status.completedResourceSize
+                )
+                if (status.isComplete) {
+                    downloadSelectedRegion()
+                }
             }
         }
 
@@ -272,8 +273,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     private fun launchMapsDownload() {
-        offlineRegion?.setObserver(offlineRegionObserver)
-        offlineRegion?.setDownloadState(OfflineRegion.STATE_ACTIVE)
+        offlineRegion?.let { offlineRegion ->
+            offlineRegion.setObserver(offlineRegionObserver)
+            offlineRegion.setDownloadState(OfflineRegion.STATE_ACTIVE)
+        }
     }
 
     private fun downloadSelectedRegion() {
@@ -289,11 +292,12 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun removeSelectedRegion() {
         showRemoving(true, "Removing tiles....")
-        val version: String = retrieveOfflineVersionFromPreferences()
-        mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+        retrieveOfflineVersionFromPreferences()?.let {version->
+            mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+        }
     }
 
-    private fun retrieveOfflineVersionFromPreferences(): String {
+    private fun retrieveOfflineVersionFromPreferences(): String? {
         val context = application
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString(context.getString(R.string.offline_version_key), "")

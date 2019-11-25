@@ -219,20 +219,15 @@ class RouteUtils {
     fun findCurrentBannerInstructions(
         currentStep: LegStep?,
         stepDistanceRemaining: Double
-    ): BannerInstructions? {
-        currentStep?.bannerInstructions()?.let {
+    ) = currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
-            for (instruction in instructions) {
-                val distanceAlongGeometry = instruction.distanceAlongGeometry().toInt()
-                if (distanceAlongGeometry >= stepDistanceRemaining.toInt()) {
-                    return instruction
-                }
+            instructions.firstOrNull {instruction->
+                instruction.distanceAlongGeometry().toInt() >= stepDistanceRemaining.toInt()
+            } ?: when (instructions.isNotEmpty()) {
+                true ->instructions[FIRST_INSTRUCTION]
+                else -> null
             }
-            return if (instructions.isNotEmpty()) {
-                instructions[FIRST_INSTRUCTION]
-            } else null
-        } ?: return null
-    }
+        }
 
     private fun sortBannerInstructions(instructions: List<BannerInstructions>): List<BannerInstructions> =
         instructions.toMutableList()

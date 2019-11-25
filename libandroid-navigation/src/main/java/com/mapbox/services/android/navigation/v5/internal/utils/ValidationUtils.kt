@@ -14,7 +14,7 @@ internal class ValidationUtils {
             if (defaultMilestonesEnabled) {
                 val routeOptions = directionsRoute.routeOptions()
                 checkNullRouteOptions(routeOptions)
-                checkInvalidVoiceInstructions(routeOptions!!)
+                checkInvalidVoiceInstructions(routeOptions)
                 checkInvalidBannerInstructions(routeOptions)
             }
         }
@@ -25,20 +25,25 @@ internal class ValidationUtils {
             }
         }
 
-        private fun checkInvalidVoiceInstructions(routeOptions: RouteOptions) {
-            val instructions = routeOptions.voiceInstructions()
-            val isValidVoiceInstructions = instructions != null && instructions
-            check(isValidVoiceInstructions) {
-                throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
-            }
+        private fun checkInvalidVoiceInstructions(routeOptions: RouteOptions?) {
+            routeOptions?.let {options->
+                val instructions = options.voiceInstructions()
+                val isValidVoiceInstructions = instructions != null && instructions
+                check(isValidVoiceInstructions) {
+                    throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
+                }
+            } ?: throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
+
         }
 
-        private fun checkInvalidBannerInstructions(routeOptions: RouteOptions) {
-            val instructions = routeOptions.bannerInstructions()
-            val isValidBannerInstructions = instructions != null && instructions
-            check(isValidBannerInstructions) {
-                throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with banner instructions enabled.")
-            }
+        private fun checkInvalidBannerInstructions(routeOptions: RouteOptions?) {
+            routeOptions?.let {options->
+                val instructions = options.bannerInstructions()
+                val isValidBannerInstructions = instructions != null && instructions
+                check(isValidBannerInstructions) {
+                    throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with banner instructions enabled.")
+                }
+            } ?: throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with banner instructions enabled.")
         }
     }
 }
