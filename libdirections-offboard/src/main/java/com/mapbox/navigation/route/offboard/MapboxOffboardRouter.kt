@@ -14,12 +14,39 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter(
-    private val context: Context,
-    private val mapboxToken: String
-) : Router {
+class MapboxOffboardRouter : Router {
 
+    companion object {
+        const val ERROR_FETCHING_ROUTE = "Error fetching route"
+    }
+
+    private val context: Context
+    private val mapboxToken: String
+    private val routeBuilderProvider: () -> NavigationRoute.Builder
     private var navigationRoute: NavigationRoute? = null
+
+    constructor(
+        context: Context,
+        mapboxToken: String
+    ) : this(
+        context,
+        mapboxToken,
+        {
+            NavigationRoute
+                .builder(context)
+                .accessToken(mapboxToken)
+        }
+    )
+
+    internal constructor(
+        context: Context,
+        mapboxToken: String,
+        routeBuilderProvider: () -> NavigationRoute.Builder
+    ) {
+        this.context = context
+        this.mapboxToken = mapboxToken
+        this.routeBuilderProvider = routeBuilderProvider
+    }
 
     override fun getRoute(
         origin: Point,
@@ -27,28 +54,28 @@ class MapboxOffboardRouter(
         destination: Point,
         callback: Router.Callback
     ) {
-        val builder = NavigationRoute
-            .builder(context)
-            .accessToken(mapboxToken)
+        val builder = routeBuilderProvider.invoke()
+        builder
             .origin(origin)
             .destination(destination)
         waypoints.forEach { builder.addWaypoint(it) }
         navigationRoute = builder.build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
-            override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                callback.onFailure(t)
-            }
 
             override fun onResponse(
                 call: Call<DirectionsResponse>,
                 response: Response<DirectionsResponse>
             ) {
-                val route = response.body()?.routes()
-                if (response.isSuccessful && !route.isNullOrEmpty()) {
-                    callback.onResponse(route.map { it.mapToRoute() })
+                val routes = response.body()?.routes()
+                if (response.isSuccessful && !routes.isNullOrEmpty()) {
+                    callback.onResponse(routes.map { it.mapToRoute() })
                 } else {
-                    callback.onFailure(NavigationException("Error fetching route"))
+                    callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
                 }
+            }
+
+            override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                callback.onFailure(t)
             }
         })
     }
