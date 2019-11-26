@@ -221,10 +221,10 @@ class RouteUtils {
         stepDistanceRemaining: Double
     ) = currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
-            instructions.firstOrNull {instruction->
+            instructions.firstOrNull { instruction ->
                 instruction.distanceAlongGeometry().toInt() >= stepDistanceRemaining.toInt()
             } ?: when (instructions.isNotEmpty()) {
-                true ->instructions[FIRST_INSTRUCTION]
+                true -> instructions[FIRST_INSTRUCTION]
                 else -> null
             }
         }
