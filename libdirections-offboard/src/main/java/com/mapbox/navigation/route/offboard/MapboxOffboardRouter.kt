@@ -55,7 +55,6 @@ class MapboxOffboardRouter : Router {
         callback: Router.Callback
     ) {
         val builder = routeBuilderProvider.invoke()
-        builder
             .origin(origin)
             .destination(destination)
         waypoints.forEach { builder.addWaypoint(it) }
