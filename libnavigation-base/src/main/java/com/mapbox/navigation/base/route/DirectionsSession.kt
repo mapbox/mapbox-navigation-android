@@ -8,6 +8,7 @@ interface DirectionsSession {
     fun getOrigin(): Point?
     fun getWaypoints(): List<Point>
     fun getDestination(): Point?
+    // note: write in javadoc for java devs about default param waypoints
     fun requestRoutes(origin: Point, waypoints: List<Point> = emptyList(), destination: Point)
     fun cancel()
 
