@@ -1,9 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -37,16 +34,15 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
 
-class MockNavigationOffboardRouterActivity : AppCompatActivity(),
+class OffboardRouterActivity : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     MetricsObserver,
-    DirectionsSession.RouteObserver {
-
+    DirectionsSession.RouteObserver
+{
     private var mapboxMap: MapboxMap? = null
 
     // Navigation related variables
@@ -57,15 +53,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
     private var route: DirectionsRoute? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
-
-    private class MyBroadcastReceiver internal constructor(navigation: MapboxNavigation) : BroadcastReceiver() {
-        private val weakNavigation: WeakReference<MapboxNavigation> = WeakReference(navigation)
-
-        override fun onReceive(context: Context, intent: Intent) {
-            val navigation = weakNavigation.get()
-            navigation?.stopNavigation()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,7 +161,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
             if (TurfMeasurement.distance(origin, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
                 return
             }
-
             val waypoints = mutableListOf(waypoint).filterNotNull()
             val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
             directionsSession = MapboxDirectionsSession(
