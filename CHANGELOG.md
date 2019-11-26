@@ -8,6 +8,13 @@ Mapbox welcomes participation and contributions from everyone.
 * Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
 * Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
 
+### v0.42.4 - November 25, 2019
+
+* Bumped Java SDK dependency to `4.9.0` [#2043](https://github.com/mapbox/mapbox-navigation-android/pull/2043)
+* Update translations to latest Transifex [#2273](https://github.com/mapbox/mapbox-navigation-android/pull/2273) [#2277](https://github.com/mapbox/mapbox-navigation-android/pull/2277)
+* Persist routes across style changes [#2262](https://github.com/mapbox/mapbox-navigation-android/pull/2262)
+* Off-route threshold options [#2276](https://github.com/mapbox/mapbox-navigation-android/pull/2276)
+
 ### v0.42.3 - November 11, 2019
 
 * Fix synchronization issue in MapRouteLine / NavigationMapRoute [#2256](https://github.com/mapbox/mapbox-navigation-android/pull/2256)
