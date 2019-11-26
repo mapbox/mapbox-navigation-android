@@ -7,6 +7,8 @@
     <string name="meters">м</string>
     <string name="miles">mi</string>
     <string name="feet">фт</string>
+    <string name="eta_format">До прибуття %s</string>
+
     <!-- Time formatting -->
     <plurals name="numberOfDays">
         <item quantity="one">день</item>

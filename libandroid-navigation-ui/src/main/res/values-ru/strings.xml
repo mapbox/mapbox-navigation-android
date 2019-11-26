@@ -4,13 +4,19 @@
     <string name="rerouting">Пересчёт маршрута…</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">Возобновить</string>
+    <string name="re_center">По центру</string>
 
     <!-- Indicates voice instructions are muted -->
     <string name="muted">Не проговаривать</string>
 
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Проговаривать</string>
+
+    <!-- Feedback -->
+    <string name="report_feedback">Сообщить об ошибке</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Неоптимальный или\nплохой маршрут</string>
 
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Непонятная\nинструкция</string>
