@@ -47,5 +47,6 @@ fun RouteOptions.mapToRouteOptionsNavigation() = RouteOptionsNavigation(
 
 fun WalkingOptions.mapToWalkingOptionsNavigation() = WalkingOptionsNavigation(
     walkingSpeed = walkingSpeed(),
-    walkwayBias = walkwayBias()
+    walkwayBias = walkwayBias(),
+    alleyBias = alleyBias()
 )

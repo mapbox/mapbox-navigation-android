@@ -26,5 +26,4 @@ class RouteOptionsNavigation(
     @SerializedName("waypoint_names") val waypointNames: String?,
     @SerializedName("waypoint_targets") val waypointTargets: String?,
     val walkingOptions: WalkingOptionsNavigation?
-
 )
