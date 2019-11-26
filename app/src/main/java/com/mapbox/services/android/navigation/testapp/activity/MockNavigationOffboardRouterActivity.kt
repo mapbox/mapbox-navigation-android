@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
@@ -28,64 +26,37 @@ import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification
 import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
-import com.mapbox.services.android.navigation.v5.instruction.Instruction
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
-import com.mapbox.services.android.navigation.v5.milestone.RouteMilestone
-import com.mapbox.services.android.navigation.v5.milestone.Trigger
-import com.mapbox.services.android.navigation.v5.milestone.TriggerProperty
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
-import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener
-import com.mapbox.services.android.navigation.v5.navigation.RefreshCallback
-import com.mapbox.services.android.navigation.v5.navigation.RefreshError
-import com.mapbox.services.android.navigation.v5.navigation.RouteRefresh
-import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import java.lang.ref.WeakReference
+import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
 
 class MockNavigationOffboardRouterActivity : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
-    ProgressChangeListener,
-    NavigationEventListener,
-    MilestoneEventListener,
-    OffRouteListener,
-    RefreshCallback,
     MetricsObserver,
     DirectionsSession.RouteObserver {
-
-    companion object {
-        private const val BEGIN_ROUTE_MILESTONE = 1001
-        private const val TWENTY_FIVE_METERS = 25.0
-    }
 
     private var mapboxMap: MapboxMap? = null
 
     // Navigation related variables
     private lateinit var locationEngine: LocationEngine
     private lateinit var navigation: MapboxNavigation
-    private lateinit var routeRefresh: RouteRefresh
     private lateinit var navigationMapRoute: NavigationMapRoute
     private var directionsSession: DirectionsSession? = null
     private var route: DirectionsRoute? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
-    private var isRefreshing = false
 
     private class MyBroadcastReceiver internal constructor(navigation: MapboxNavigation) : BroadcastReceiver() {
         private val weakNavigation: WeakReference<MapboxNavigation> = WeakReference(navigation)
@@ -99,7 +70,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mock_navigation)
-        routeRefresh = RouteRefresh(Utils.getMapboxAccessToken(this))
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
@@ -115,28 +85,13 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
             Utils.getMapboxAccessToken(this),
             options
         )
-        MapboxMetricsReporter.setMetricsObserver(this)
 
-        navigation.addMilestone(
-            RouteMilestone.Builder()
-                .setIdentifier(BEGIN_ROUTE_MILESTONE)
-                .setInstruction(BeginRouteInstruction())
-                .setTrigger(
-                    Trigger.all(
-                        Trigger.lt(TriggerProperty.STEP_INDEX, 3),
-                        Trigger.gt(TriggerProperty.STEP_DISTANCE_TOTAL_METERS, 200),
-                        Trigger.gte(TriggerProperty.STEP_DISTANCE_TRAVELED_METERS, 75)
-                    )
-                ).build()
-        )
-        customNotification.register(MyBroadcastReceiver(navigation), applicationContext)
-
-        startRouteButton.setOnClickListener { onStartRouteClick() }
         newLocationFab.setOnClickListener { onNewLocationClick() }
     }
 
     private fun newOrigin() {
         mapboxMap?.let { map ->
+            clearMap(map)
             val latLng = Utils.getRandomLatLng(doubleArrayOf(-77.1825, 38.7825, -76.9790, 39.0157))
             (locationEngine as ReplayRouteLocationEngine).assignLastLocation(
                 Point.fromLngLat(latLng.longitude, latLng.latitude)
@@ -167,37 +122,28 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
             destination == null -> {
                 destination = Point.fromLngLat(point.longitude, point.latitude)
                 mapboxMap?.addMarker(MarkerOptions().position(point))
+                calculateRoute()
             }
             waypoint == null -> {
                 waypoint = Point.fromLngLat(point.longitude, point.latitude)
                 mapboxMap?.addMarker(MarkerOptions().position(point))
+                calculateRoute()
             }
-            else -> Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show()
+            else -> {
+                Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show()
+                mapboxMap?.let { clearMap(it) }
+            }
         }
-        calculateRoute()
         return false
     }
 
-    private fun onStartRouteClick() {
-        ifNonNull(route, locationEngine) { route, locationEngine ->
-            val isValidRoute = route.distance()?.let { it > TWENTY_FIVE_METERS } ?: false
-            if (isValidRoute) {
-                // Hide the start button
-                startRouteButton.visibility = View.INVISIBLE
-
-                // Attach all of our navigation listeners.
-                navigation.addNavigationEventListener(this)
-                navigation.addProgressChangeListener(this)
-                navigation.addMilestoneEventListener(this)
-                navigation.addOffRouteListener(this)
-
-                (locationEngine as ReplayRouteLocationEngine).assign(route)
-                navigation.locationEngine = locationEngine
-                mapboxMap?.let { it.locationComponent.isLocationComponentEnabled = true }
-                navigation.startNavigation(route)
-                mapboxMap?.removeOnMapClickListener(this)
-            }
-        }
+    private fun clearMap(map: MapboxMap) {
+        map.clear()
+        route = null
+        destination = null
+        waypoint = null
+        navigationMapRoute.updateRouteVisibilityTo(false)
+        navigationMapRoute.updateRouteArrowVisibilityTo(false)
     }
 
     private fun onNewLocationClick() {
@@ -226,7 +172,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
         val origin = Point.fromLngLat(userLocation.longitude, userLocation.latitude)
         destination?.let { destinationPoint ->
             if (TurfMeasurement.distance(origin, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
-                startRouteButton.visibility = View.GONE
                 return
             }
 
@@ -251,7 +196,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
         routes.firstOrNull()?.let {
             this.route = mapRouteToDirectionsRoute(it)
             navigationMapRoute.addRoute(this.route)
-            startRouteButton.visibility = View.VISIBLE
         }
     }
 
@@ -261,32 +205,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
 
     override fun onRoutesRequestFailure(throwable: Throwable) {
         Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
-    }
-
-    /*
-     * Navigation listeners
-     */
-
-    override fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
-        Timber.d("Milestone Event Occurred with id: %d", milestone.identifier)
-        Timber.d("Voice instruction: %s", instruction)
-    }
-
-    override fun onRunning(running: Boolean) {
-        Timber.d("onRunning: ${if (running) "Started" else "Stopped"}")
-    }
-
-    override fun userOffRoute(location: Location) {
-        Toast.makeText(this, "off-route called", Toast.LENGTH_LONG).show()
-    }
-
-    override fun onProgressChange(location: Location, routeProgress: RouteProgress) {
-        mapboxMap?.locationComponent?.forceLocationUpdate(location)
-        if (!isRefreshing) {
-            isRefreshing = true
-            routeRefresh.refresh(routeProgress, this)
-        }
-        Timber.d("onProgressChange: fraction of route traveled: ${routeProgress.fractionTraveled()}")
     }
 
     /*
@@ -331,15 +249,6 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
         mapView.onSaveInstanceState(outState)
     }
 
-    override fun onRefresh(directionsRoute: DirectionsRoute) {
-        navigation.startNavigation(directionsRoute)
-        isRefreshing = false
-    }
-
-    override fun onError(error: RefreshError) {
-        isRefreshing = false
-    }
-
     override fun onMetricUpdated(@MetricEvent.Metric metric: String, jsonStringData: String) {
         Timber.d("METRICS_LOG: $metric")
         Timber.d(jsonStringData)
@@ -358,12 +267,5 @@ class MockNavigationOffboardRouterActivity : AppCompatActivity(),
             .voiceLanguage(route.voiceLanguage)
             .legs(legs)
             .build()
-    }
-
-    private class BeginRouteInstruction : Instruction() {
-
-        override fun buildInstruction(routeProgress: RouteProgress): String {
-            return "Have a safe trip!"
-        }
     }
 }
