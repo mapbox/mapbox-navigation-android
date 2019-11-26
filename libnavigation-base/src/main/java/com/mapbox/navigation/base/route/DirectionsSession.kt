@@ -5,13 +5,10 @@ import com.mapbox.navigation.base.route.model.Route
 
 interface DirectionsSession {
     fun getRoutes(): List<Route>
-    fun setOrigin(point: Point)
-    fun getOrigin(): Point
-    fun setWaypoints(points: List<Point>)
+    fun getOrigin(): Point?
     fun getWaypoints(): List<Point>
-    fun setDestination(point: Point)
-    fun getDestination(): Point
-    fun requestRoutes()
+    fun getDestination(): Point?
+    fun requestRoutes(origin: Point, waypoints: List<Point> = emptyList(), destination: Point)
     fun cancel()
 
     interface RouteObserver {

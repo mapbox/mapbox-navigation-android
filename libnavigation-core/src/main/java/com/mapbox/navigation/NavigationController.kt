@@ -83,9 +83,6 @@ class NavigationController(
                     HybridRouter,
                     ::paramsProvider
                 ),
-                Point::class.java to origin,
-                List::class.java to waypoints,
-                Point::class.java to destination,
                 DirectionsSession.RouteObserver::class.java to routeObserver
             )
             TripNotificationModule -> arrayOf()

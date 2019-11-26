@@ -8,5 +8,6 @@ data class Route(
     val weight: Double?,
     val weightName: String?,
     val legs: RouteLegsNavigation?,
+    val routeOptions: RouteOptionsNavigation?,
     val voiceLanguage: String?
 )
