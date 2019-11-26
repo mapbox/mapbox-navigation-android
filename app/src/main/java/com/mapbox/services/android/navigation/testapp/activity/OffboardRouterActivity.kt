@@ -41,8 +41,8 @@ class OffboardRouterActivity : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     MetricsObserver,
-    DirectionsSession.RouteObserver
-{
+    DirectionsSession.RouteObserver {
+
     private var mapboxMap: MapboxMap? = null
 
     // Navigation related variables
