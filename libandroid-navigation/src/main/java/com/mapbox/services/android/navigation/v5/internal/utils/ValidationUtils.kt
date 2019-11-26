@@ -8,8 +8,8 @@ internal class ValidationUtils {
     companion object {
         @JvmStatic
         fun validDirectionsRoute(
-                directionsRoute: DirectionsRoute,
-                defaultMilestonesEnabled: Boolean
+            directionsRoute: DirectionsRoute,
+            defaultMilestonesEnabled: Boolean
         ) {
             if (defaultMilestonesEnabled) {
                 val routeOptions = directionsRoute.routeOptions()
