@@ -1,8 +1,26 @@
 ## Changelog for the Mapbox Navigation SDK for Android
 
 Mapbox welcomes participation and contributions from everyone.
-### v0.42.1
- * Roundabout maneuver icon depicts counterclockwise movement when driving on the left is fixed here: [#2228](https://github.com/mapbox/mapbox-navigation-android/pull/2228)
+
+### v0.42.4 - November 25, 2019
+
+* Bumped Java SDK dependency to `4.9.0` [#2043](https://github.com/mapbox/mapbox-navigation-android/pull/2043)
+* Update translations to latest Transifex [#2273](https://github.com/mapbox/mapbox-navigation-android/pull/2273) [#2277](https://github.com/mapbox/mapbox-navigation-android/pull/2277)
+* Persist routes across style changes [#2262](https://github.com/mapbox/mapbox-navigation-android/pull/2262)
+* Off-route threshold options [#2276](https://github.com/mapbox/mapbox-navigation-android/pull/2276)
+
+### v0.42.3 - November 11, 2019
+
+* Fix synchronization issue in MapRouteLine / NavigationMapRoute [#2256](https://github.com/mapbox/mapbox-navigation-android/pull/2256)
+
+### v0.42.2 - November 6, 2019
+
+* Disable sideloading functionality in _Dynamic offline_ feature [#2248](https://github.com/mapbox/mapbox-navigation-android/pull/2248)
+
+### v0.42.1 - October 18, 2019
+
+* Roundabout maneuver icon depicts counterclockwise movement when driving on the left [#2228](https://github.com/mapbox/mapbox-navigation-android/pull/2228)
+
 ### v0.42.0 - September 20, 2019
 
 Note: This release breaks `SEMVER` / contains API breaking changes. Please consult this [migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/0.42.0-Migration-Guide) for the necessary updates required.
