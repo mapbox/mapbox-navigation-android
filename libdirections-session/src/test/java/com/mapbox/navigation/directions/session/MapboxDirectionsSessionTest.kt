@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -31,12 +32,20 @@ class MapboxDirectionsSessionTest {
         every { router.getRoute(origin, waypoints, destination, capture(listener)) } answers {
             callback = listener.captured
         }
-        session = MapboxDirectionsSession(router, origin, waypoints, destination, observer)
+        session = MapboxDirectionsSession(router, observer)
+    }
+
+    @Test
+    fun initialState() {
+        assertNull(session.getDestination())
+        assertNull(session.getOrigin())
+        assertEquals(session.getWaypoints(), emptyList<Point>())
+        assertEquals(session.getRoutes(), emptyList<Route>())
     }
 
     @Test
     fun routeResponse() {
-        session.requestRoutes()
+        session.requestRoutes(origin, waypoints, destination)
         callback.onResponse(routes)
 
         assertEquals(routes, session.getRoutes())
@@ -46,7 +55,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun failRouteResponse() {
-        session.requestRoutes()
+        session.requestRoutes(origin, waypoints, destination)
         callback.onFailure(mockk())
 
         verify { observer.onRoutesRequested() }
@@ -55,41 +64,26 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun getOrigin() {
+        val origin: Point = mockk()
+        session.requestRoutes(origin, waypoints, destination)
+
         assertEquals(origin, session.getOrigin())
     }
 
     @Test
-    fun setOrigin() {
-        val newOrigin: Point = mockk()
-        session.setOrigin(newOrigin)
-
-        assertEquals(newOrigin, session.getOrigin())
-    }
-
-    @Test
     fun getWaypoints() {
+        val waypoints: List<Point> = mockk()
+        session.requestRoutes(origin, waypoints, destination)
+
         assertEquals(waypoints, session.getWaypoints())
     }
 
     @Test
-    fun setWaypoints() {
-        val newWaypoints: List<Point> = mockk()
-        session.setWaypoints(newWaypoints)
-
-        assertEquals(newWaypoints, session.getWaypoints())
-    }
-
-    @Test
     fun getDestination() {
+        val destination: Point = mockk()
+        session.requestRoutes(origin, waypoints, destination)
+
         assertEquals(destination, session.getDestination())
-    }
-
-    @Test
-    fun setDestination() {
-        val newDestination: Point = mockk()
-        session.setDestination(newDestination)
-
-        assertEquals(newDestination, session.getDestination())
     }
 
     @Test
