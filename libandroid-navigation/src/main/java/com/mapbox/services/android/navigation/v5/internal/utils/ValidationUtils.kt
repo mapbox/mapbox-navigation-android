@@ -26,7 +26,7 @@ internal class ValidationUtils {
         }
 
         private fun checkInvalidVoiceInstructions(routeOptions: RouteOptions?) {
-            routeOptions?.let {options->
+            routeOptions?.let { options ->
                 val instructions = options.voiceInstructions()
                 val isValidVoiceInstructions = instructions != null && instructions
                 check(isValidVoiceInstructions) {
@@ -37,7 +37,7 @@ internal class ValidationUtils {
         }
 
         private fun checkInvalidBannerInstructions(routeOptions: RouteOptions?) {
-            routeOptions?.let {options->
+            routeOptions?.let { options ->
                 val instructions = options.bannerInstructions()
                 val isValidBannerInstructions = instructions != null && instructions
                 check(isValidBannerInstructions) {
