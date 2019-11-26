@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.route.model.Route
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
     private val router: Router,
-    private val routeObserver: DirectionsSession.RouteObserver
+    private val routeObserver: DirectionsSession.RouteObserver // TODO investigate inject routeObserver through setter
 ) : DirectionsSession {
 
     private var _origin: Point? = null
