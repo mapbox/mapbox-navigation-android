@@ -33,7 +33,6 @@ internal class ValidationUtils {
                     throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
                 }
             } ?: throw MissingFormatArgumentException("Using the default milestones requires the " + "directions route to be requested with voice instructions enabled.")
-
         }
 
         private fun checkInvalidBannerInstructions(routeOptions: RouteOptions?) {
