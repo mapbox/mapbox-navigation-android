@@ -27,7 +27,7 @@ import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
 
-class OffboardRouterActivity : AppCompatActivity(),
+class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     DirectionsSession.RouteObserver {
@@ -54,7 +54,7 @@ class OffboardRouterActivity : AppCompatActivity(),
 
     private fun newOrigin() {
         mapboxMap?.let { map ->
-            clearMap(map)
+            clearMap()
             val latLng = Utils.getRandomLatLng(doubleArrayOf(-77.1825, 38.7825, -76.9790, 39.0157))
             origin = Point.fromLngLat(latLng.longitude, latLng.latitude)
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
@@ -86,19 +86,21 @@ class OffboardRouterActivity : AppCompatActivity(),
             }
             else -> {
                 Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show()
-                mapboxMap?.let { clearMap(it) }
+                clearMap()
             }
         }
         return false
     }
 
-    private fun clearMap(map: MapboxMap) {
-        map.clear()
-        route = null
-        destination = null
-        waypoint = null
-        navigationMapRoute.updateRouteVisibilityTo(false)
-        navigationMapRoute.updateRouteArrowVisibilityTo(false)
+    private fun clearMap() {
+        mapboxMap?.let { map ->
+            map.clear()
+            route = null
+            destination = null
+            waypoint = null
+            navigationMapRoute.updateRouteVisibilityTo(false)
+            navigationMapRoute.updateRouteArrowVisibilityTo(false)
+        }
     }
 
     private fun onNewLocationClick() {
@@ -107,7 +109,10 @@ class OffboardRouterActivity : AppCompatActivity(),
 
     private fun findRoute() {
         if (directionsSession == null) {
-            val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
+            val offboardRouter = MapboxOffboardRouter(
+                this,
+                Utils.getMapboxAccessToken(this)
+            )
             directionsSession = MapboxDirectionsSession(
                 offboardRouter,
                 this
@@ -132,8 +137,8 @@ class OffboardRouterActivity : AppCompatActivity(),
 
     override fun onRoutesChanged(routes: List<Route>) {
         routes.firstOrNull()?.let {
-            this.route = it.mapToDirectionsRoute()
-            navigationMapRoute.addRoute(this.route)
+            route = it.mapToDirectionsRoute()
+            navigationMapRoute.addRoute(route)
         }
     }
 

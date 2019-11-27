@@ -42,8 +42,16 @@
         </activity>
 
         <activity
-            android:name=".activity.OffboardRouterActivity"
-            android:label="@string/title_mock_navigation">
+            android:name=".activity.OffboardRouterActivityKt"
+            android:label="@string/title_offboard_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OffboardRouterActivityJava"
+            android:label="@string/title_offboard_router_java">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
