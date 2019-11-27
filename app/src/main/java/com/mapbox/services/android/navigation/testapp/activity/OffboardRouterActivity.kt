@@ -106,26 +106,23 @@ class OffboardRouterActivity : AppCompatActivity(),
     }
 
     private fun findRoute() {
-        ifNonNull(origin, destination) { originPoint, destinationPoint ->
+        if (directionsSession == null) {
+            val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
+            directionsSession = MapboxDirectionsSession(
+                offboardRouter,
+                this
+            )
+        }
+        ifNonNull(directionsSession, origin, destination) { session, originPoint, destinationPoint ->
             if (TurfMeasurement.distance(originPoint, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
                 return
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()
-            if (directionsSession != null) {
-                directionsSession?.setOrigin(originPoint)
-                directionsSession?.setDestination(destinationPoint)
-                directionsSession?.setWaypoints(waypoints)
-            } else {
-                val offboardRouter = MapboxOffboardRouter(this, Utils.getMapboxAccessToken(this))
-                directionsSession = MapboxDirectionsSession(
-                    offboardRouter,
-                    originPoint,
-                    waypoints,
-                    destinationPoint,
-                    this
-                )
-            }
-            directionsSession?.requestRoutes()
+            session.requestRoutes(
+                originPoint,
+                waypoints,
+                destinationPoint
+            )
         }
     }
 
