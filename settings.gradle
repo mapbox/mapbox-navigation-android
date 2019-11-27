@@ -6,16 +6,11 @@ include ':app',
         ':libdirections-onboard',
         ':libdirections-offboard',
         ':libdirections-hybrid',
-       ':libnavigation-metrics',
+        ':libnavigation-metrics',
         ':libtrip-service',
         ':libtrip-notification',
         ':liblogger',
         ':libnavigation-util',
-        ':annotations',
-        ':annotations-processor',
         ':libdirections-session',
         ':libtrip-session',
         ':libnavigation-core'
-
-project(":annotations").projectDir = new File("vendor/mapbox-events-android/annotations")
-project(":annotations-processor").projectDir = new File("vendor/mapbox-events-android/annotations-processor")

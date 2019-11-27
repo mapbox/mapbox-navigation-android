@@ -1,4 +1,0 @@
-[submodule "vendor/mapbox-events-android"]
-	path = vendor/mapbox-events-android
-	url = git@github.com:mapbox/mapbox-events-android.git
-	branch = android-base
