@@ -16,8 +16,8 @@ android {
 }
 
 dependencies {
-    compileOnly(project(':annotations'))
-    kapt(project(':annotations-processor'))
+    compileOnly dependenciesList.mapboxAnnotations
+    kapt dependenciesList.mapboxAnnotationsProcessor
     api(project(':libnavigation-base'))
     implementation dependenciesList.timber
 

@@ -29,9 +29,6 @@ jobs:
             - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
             - jars-
       - run:
-          name: Checkout vendor submodules
-          command: git submodule update --init --recursive
-      - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
@@ -127,9 +124,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Checkout vendor submodules
-          command: git submodule update --init --recursive
-      - run:
           name: Generate and Validate License
           command: |
             make nitpick
@@ -182,9 +176,6 @@ jobs:
       GOOGLE_PLAY_TRACK: internal
     steps:
       - checkout
-      - run:
-          name: Checkout vendor submodules
-          command: git submodule update --init --recursive
       - restore_cache:
           keys:
             - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
