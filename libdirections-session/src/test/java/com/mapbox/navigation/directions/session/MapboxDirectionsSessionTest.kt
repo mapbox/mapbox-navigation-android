@@ -1,9 +1,9 @@
 package com.mapbox.navigation.directions.session
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -18,9 +18,7 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
-    private val origin: Point = mockk(relaxUnitFun = true)
-    private val destination: Point = mockk(relaxUnitFun = true)
-    private val waypoints: List<Point> = mockk(relaxUnitFun = true)
+    private val routeOptions: RouteOptionsNavigation = mockk(relaxUnitFun = true)
     private lateinit var observer: DirectionsSession.RouteObserver
     private lateinit var callback: Router.Callback
     private val routes: List<Route> = listOf(mockk())
@@ -29,7 +27,7 @@ class MapboxDirectionsSessionTest {
     fun setUp() {
         val listener = slot<Router.Callback>()
         observer = mockk(relaxUnitFun = true)
-        every { router.getRoute(origin, waypoints, destination, capture(listener)) } answers {
+        every { router.getRoute(routeOptions, capture(listener)) } answers {
             callback = listener.captured
         }
         session = MapboxDirectionsSession(router, observer)
@@ -37,15 +35,13 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun initialState() {
-        assertNull(session.getDestination())
-        assertNull(session.getOrigin())
-        assertEquals(session.getWaypoints(), emptyList<Point>())
+        assertNull(session.getRouteOptions())
         assertEquals(session.getRoutes(), emptyList<Route>())
     }
 
     @Test
     fun routeResponse() {
-        session.requestRoutes(origin, waypoints, destination)
+        session.requestRoutes(routeOptions)
         callback.onResponse(routes)
 
         assertEquals(routes, session.getRoutes())
@@ -55,7 +51,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun failRouteResponse() {
-        session.requestRoutes(origin, waypoints, destination)
+        session.requestRoutes(routeOptions)
         callback.onFailure(mockk())
 
         verify { observer.onRoutesRequested() }
@@ -63,27 +59,11 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun getOrigin() {
-        val origin: Point = mockk()
-        session.requestRoutes(origin, waypoints, destination)
+    fun getRouteOptions() {
+        val routeOptions: RouteOptionsNavigation = mockk()
+        session.requestRoutes(routeOptions)
 
-        assertEquals(origin, session.getOrigin())
-    }
-
-    @Test
-    fun getWaypoints() {
-        val waypoints: List<Point> = mockk()
-        session.requestRoutes(origin, waypoints, destination)
-
-        assertEquals(waypoints, session.getWaypoints())
-    }
-
-    @Test
-    fun getDestination() {
-        val destination: Point = mockk()
-        session.requestRoutes(origin, waypoints, destination)
-
-        assertEquals(destination, session.getDestination())
+        assertEquals(routeOptions, session.getRouteOptions())
     }
 
     @Test

@@ -1,8 +1,8 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.navigation.base.route.model
 
 import com.mapbox.geojson.Point
 
-internal data class NavigationRouteWaypoint(
+data class RoutePointNavigation(
     val point: Point,
     val bearingAngle: Double?,
     val tolerance: Double?
