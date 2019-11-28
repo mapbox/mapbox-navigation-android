@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
 import com.mapbox.navigation.route.offboard.router.NavigationRoute
@@ -27,6 +28,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     private val navigationRouteBuilder = mockk<NavigationRoute.Builder>(relaxed = true)
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
+    private val routeOptions: RouteOptionsNavigation = RouteOptionsNavigation.builder().build()
     private val origin = Point.fromLngLat(1.0, 2.0)
     private val waypoints = listOf<Point>()
     private val destination = Point.fromLngLat(1.0, 5.0)
@@ -128,9 +130,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
     private fun getRoute(routerCallback: Router.Callback) {
         offboardRouter.getRoute(
-            origin,
-            waypoints,
-            destination,
+            routeOptions,
             routerCallback
         )
     }

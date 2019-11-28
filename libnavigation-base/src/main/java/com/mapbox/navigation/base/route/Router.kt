@@ -1,14 +1,12 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
 interface Router {
 
     fun getRoute(
-        origin: Point,
-        waypoints: List<Point> = emptyList(),
-        destination: Point,
+        routeOptions: RouteOptionsNavigation,
         callback: Callback
     )
 

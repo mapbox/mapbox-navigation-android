@@ -1,15 +1,13 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
 interface DirectionsSession {
     fun getRoutes(): List<Route>
-    fun getOrigin(): Point?
-    fun getWaypoints(): List<Point>
-    fun getDestination(): Point?
+    fun getRouteOptions(): RouteOptionsNavigation?
     // note: write in javadoc for java devs about default param waypoints
-    fun requestRoutes(origin: Point, waypoints: List<Point> = emptyList(), destination: Point)
+    fun requestRoutes(routeOptions: RouteOptionsNavigation)
     fun cancel()
 
     interface RouteObserver {

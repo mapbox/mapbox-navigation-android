@@ -2,8 +2,8 @@ package com.mapbox.navigation.route.hybrid
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
 @MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
 class MapboxHybridRouter(
@@ -12,9 +12,7 @@ class MapboxHybridRouter(
 ) : Router {
 
     override fun getRoute(
-        origin: Point,
-        waypoints: List<Point>,
-        destination: Point,
+        routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) = Unit
 

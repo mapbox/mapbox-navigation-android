@@ -765,17 +765,17 @@ internal constructor(
 
         private fun assembleWaypoints() {
             origin?.let { origin ->
-                directionsBuilder.origin(origin.waypoint)
+                directionsBuilder.origin(origin.point)
                 directionsBuilder.addBearing(origin.bearingAngle, origin.tolerance)
             }
 
             for (waypoint in waypoints) {
-                directionsBuilder.addWaypoint(waypoint.waypoint)
+                directionsBuilder.addWaypoint(waypoint.point)
                 directionsBuilder.addBearing(waypoint.bearingAngle, waypoint.tolerance)
             }
 
             destination?.let { destination ->
-                directionsBuilder.destination(destination.waypoint)
+                directionsBuilder.destination(destination.point)
                 directionsBuilder.addBearing(destination.bearingAngle, destination.tolerance)
             }
         }

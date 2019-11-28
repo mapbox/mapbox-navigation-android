@@ -6,6 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
 @MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
 class MapboxDirectionsSession(
@@ -13,9 +14,7 @@ class MapboxDirectionsSession(
     private val routeObserver: DirectionsSession.RouteObserver // TODO investigate inject routeObserver through setter
 ) : DirectionsSession {
 
-    private var _origin: Point? = null
-    private var _waypoints: List<Point> = emptyList()
-    private var _destination: Point? = null
+    private var _routeOptions: RouteOptionsNavigation? = null
 
     private var currentRoutes: List<Route> = emptyList()
         set(value) {
@@ -28,25 +27,19 @@ class MapboxDirectionsSession(
 
     override fun getRoutes() = currentRoutes
 
-    override fun getOrigin(): Point? = _origin
-
-    override fun getWaypoints(): List<Point> = _waypoints
-
-    override fun getDestination(): Point? = _destination
+    override fun getRouteOptions(): RouteOptionsNavigation? = _routeOptions
 
     override fun cancel() {
         router.cancel()
     }
 
-    override fun requestRoutes(origin: Point, waypoints: List<Point>, destination: Point) {
-        this._origin = origin
-        this._waypoints = waypoints
-        this._destination = destination
+    override fun requestRoutes(routeOptions: RouteOptionsNavigation) {
+        this._routeOptions = routeOptions
 
         router.cancel()
         currentRoutes = emptyList()
         routeObserver.onRoutesRequested()
-        router.getRoute(origin, waypoints, destination, object : Router.Callback {
+        router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<Route>) {
                 currentRoutes = routes
             }
