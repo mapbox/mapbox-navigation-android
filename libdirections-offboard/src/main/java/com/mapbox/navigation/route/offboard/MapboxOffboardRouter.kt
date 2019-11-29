@@ -4,7 +4,6 @@ import android.content.Context
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
@@ -23,7 +22,7 @@ class MapboxOffboardRouter : Router {
 
     private val context: Context
     private val mapboxToken: String
-    private val routeBuilderProvider: () -> NavigationRoute.Builder
+    private val routeBuilderProvider: NavigationRoute.Builder
     private var navigationRoute: NavigationRoute? = null
 
     constructor(
@@ -32,16 +31,13 @@ class MapboxOffboardRouter : Router {
     ) : this(
         context,
         mapboxToken,
-        {
-            NavigationRoute
-                .builder(context)
-        }
+        NavigationRoute.builder(context)
     )
 
     internal constructor(
         context: Context,
         mapboxToken: String,
-        routeBuilderProvider: () -> NavigationRoute.Builder
+        routeBuilderProvider: NavigationRoute.Builder
     ) {
         this.context = context
         this.mapboxToken = mapboxToken
@@ -52,11 +48,7 @@ class MapboxOffboardRouter : Router {
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
-        val builder = routeBuilderProvider().apply {
-            routeOptions(routeOptions)
-        }
-
-        navigationRoute = builder.build()
+        navigationRoute = routeBuilderProvider.routeOptions(routeOptions).build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
 
             override fun onResponse(
