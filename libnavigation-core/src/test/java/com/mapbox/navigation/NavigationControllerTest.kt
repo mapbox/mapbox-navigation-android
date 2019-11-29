@@ -5,9 +5,14 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.utils.extensions.inferDeviceLocale
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import java.util.Locale
 import org.junit.Assert
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class NavigationControllerTest {
@@ -20,8 +25,18 @@ class NavigationControllerTest {
     private val locationEngineRequest: LocationEngineRequest = mockk()
     private val routeObserver: DirectionsSession.RouteObserver = mockk()
 
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun initialize() {
+            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
+        }
+    }
+
     @Before
     fun setUp() {
+        every { application.inferDeviceLocale() } returns Locale.US
+
         navigationController =
             NavigationController(
                 application,
