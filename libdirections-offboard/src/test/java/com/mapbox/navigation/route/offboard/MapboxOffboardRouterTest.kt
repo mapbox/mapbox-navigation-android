@@ -25,10 +25,11 @@ class MapboxOffboardRouterTest : BaseTest() {
     }
 
     private val navigationRoute = mockk<NavigationRoute>(relaxed = true)
+    // private val navigationRoute = NavigationRoute.builder(mockk(relaxed = true)).build()
     private val navigationRouteBuilder = mockk<NavigationRoute.Builder>(relaxed = true)
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
-    private val routeOptions: RouteOptionsNavigation = RouteOptionsNavigation.builder().build()
+    private val routeOptions: RouteOptionsNavigation = mockk(relaxed = true)
     private val origin = Point.fromLngLat(1.0, 2.0)
     private val waypoints = listOf<Point>()
     private val destination = Point.fromLngLat(1.0, 5.0)
@@ -37,10 +38,11 @@ class MapboxOffboardRouterTest : BaseTest() {
     fun setUp() {
         val listener = slot<Callback<DirectionsResponse>>()
         every { navigationRouteBuilder.build() } returns navigationRoute
+        every { navigationRouteBuilder.routeOptions(any()) } returns navigationRouteBuilder
         every { navigationRoute.getRoute(capture(listener)) } answers {
             callback = listener.captured
         }
-        offboardRouter = MapboxOffboardRouter(mockk(), ACCESS_TOKEN) { navigationRouteBuilder }
+        offboardRouter = MapboxOffboardRouter(mockk(), ACCESS_TOKEN, navigationRouteBuilder)
     }
 
     @Test
@@ -129,10 +131,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     }
 
     private fun getRoute(routerCallback: Router.Callback) {
-        offboardRouter.getRoute(
-            routeOptions,
-            routerCallback
-        )
+        offboardRouter.getRoute(routeOptions, routerCallback)
     }
 
     private fun buildResponse(

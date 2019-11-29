@@ -12,11 +12,11 @@ import com.mapbox.navigation.base.route.model.RoutePointNavigation
 import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
 import com.mapbox.navigation.route.offboard.extension.mapToWalkingOptions
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
+import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
 import retrofit2.Callback
-import java.util.Locale
 
 /**
  * The NavigationRoute class wraps the [MapboxDirections] class with parameters which
@@ -31,7 +31,7 @@ import java.util.Locale
  */
 
 internal class NavigationRoute
-internal constructor(
+constructor(
     private val mapboxDirections: MapboxDirections
 ) {
 
@@ -394,10 +394,14 @@ internal constructor(
          */
         fun routeOptions(options: RouteOptionsNavigation): Builder {
             origin = options.coordinates.first()
+
+            waypoints.addAll(options.coordinates.toMutableList().also {
+                it.remove(options.coordinates.first())
+                it.remove(options.coordinates.last())
+            })
+
             destination = options.coordinates.last()
 
-            waypoints.addAll(options.coordinates.toMutableList())
-            
             if (!TextUtils.isEmpty(options.baseUrl)) {
                 directionsBuilder.baseUrl(options.baseUrl)
             }
@@ -407,7 +411,6 @@ internal constructor(
             }
 
             directionsBuilder.geometries(options.geometries)
-
 
             options.profile?.let {
                 directionsBuilder.profile(it)
@@ -467,6 +470,10 @@ internal constructor(
 
             options.walkingOptions?.let {
                 directionsBuilder.walkingOptions(it.mapToWalkingOptions())
+            }
+
+            options.continueStraight?.let {
+                directionsBuilder.continueStraight(it)
             }
 
             return this
