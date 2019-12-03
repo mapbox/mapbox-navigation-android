@@ -1,6 +1,6 @@
 # Contributing
 
-If you have a usage question pertaining to the Mapbox Navigation SDK for Android, or any of our other products, contact us through [our support page](https://www.mapbox.com/contact/).
+If you have a usage question pertaining to the Flitsmeister Navigation SDK for Android, or any of our other products, contact us through [our support page](https://www.mapbox.com/contact/).
 
 If you want to contribute code:
 
@@ -14,7 +14,7 @@ If you want to contribute code:
 
 ## Adding or updating a localization
 
-The Mapbox Navigation SDK for Android features several translations contributed through [Transifex](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/). If your language already has a translation, feel free to complete or proofread it. Otherwise, please [request your language](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/) so you can start translating. Note that we’re primarily interested in languages that Android supports as system languages.
+The Flitsmeister Navigation SDK for Android features several translations contributed through [Transifex](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/). If your language already has a translation, feel free to complete or proofread it. Otherwise, please [request your language](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/) so you can start translating. Note that we’re primarily interested in languages that Android supports as system languages.
 
 While you’re there, please consider also translating the following related projects:
 

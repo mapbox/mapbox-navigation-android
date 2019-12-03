@@ -7,7 +7,7 @@ Hello and thanks for contributing! To help us diagnose your problem quickly, ple
 -->
 
 **Android API:**
-**Mapbox Navigation SDK version:**
+**Flitsmeister Navigation SDK version:**
 
 ### Steps to trigger behavior
 

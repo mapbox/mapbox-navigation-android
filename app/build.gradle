@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-    // Mapbox Navigation SDK
+    // Flitsmeister Navigation SDK
     implementation project(':libandroid-navigation')
     implementation dependenciesList.mapboxMapSdk
     api dependenciesList.mapboxSdkCore
