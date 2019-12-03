@@ -25,6 +25,7 @@ test:
 	./gradlew :libtrip-notification:test
 	./gradlew :libtrip-service:test
 	./gradlew :libtrip-session:test
+	./gradlew :libnavigation-core:test
 
 build-release:
 	./gradlew :libandroid-navigation:assembleRelease

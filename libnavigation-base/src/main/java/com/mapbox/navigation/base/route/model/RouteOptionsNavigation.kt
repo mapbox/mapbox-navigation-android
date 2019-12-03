@@ -14,7 +14,7 @@ class RouteOptionsNavigation private constructor(
     val bearings: String?,
     @SerializedName("continue_straight") val continueStraight: Boolean?,
     @SerializedName("roundabout_exits") val roundaboutExits: Boolean?,
-    val geometries: String,
+    val geometries: String?,
     val overview: String?,
     val steps: Boolean?,
     val annotations: String?,
@@ -53,7 +53,7 @@ class RouteOptionsNavigation private constructor(
         private var bearings: String? = null
         private var continueStraight: Boolean? = null
         private var roundaboutExits: Boolean? = null
-        private var geometries: String = "polyline6"
+        private var geometries: String? = null
         private var overview: String? = null
         private var steps: Boolean? = null
         private var annotations: String? = null

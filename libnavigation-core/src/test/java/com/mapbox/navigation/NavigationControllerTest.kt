@@ -1,15 +1,12 @@
 package com.mapbox.navigation
 
-import android.app.Application
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import io.mockk.every
+import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import java.util.Locale
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
@@ -18,8 +15,7 @@ import org.junit.Test
 class NavigationControllerTest {
 
     private lateinit var navigationController: NavigationController
-    private val application: Application = mockk()
-    private val token = "pk_*"
+    private val routeBuilderProvider: NavigationRoute.Builder = mockk()
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
@@ -35,12 +31,9 @@ class NavigationControllerTest {
 
     @Before
     fun setUp() {
-        every { application.inferDeviceLocale() } returns Locale.US
-
         navigationController =
             NavigationController(
-                application,
-                token,
+                routeBuilderProvider,
                 navigator,
                 locationEngine,
                 locationEngineRequest,

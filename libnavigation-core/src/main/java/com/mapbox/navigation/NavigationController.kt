@@ -1,7 +1,5 @@
 package com.mapbox.navigation
 
-import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -16,7 +14,6 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.Onboar
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripNotification as TripNotificationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripService as TripServiceModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripSession as TripSessionModule
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
@@ -25,10 +22,10 @@ import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.route.offboard.router.NavigationRoute
 
 class NavigationController(
-    private val application: Application,
-    private val mapboxToken: String,
+    private val routeBuilderProvider: NavigationRoute.Builder,
     private val navigator: MapboxNativeNavigator,
     private val locationEngine: LocationEngine,
     private val locationEngineRequest: LocationEngineRequest,
@@ -40,10 +37,6 @@ class NavigationController(
     private val workerThread: HandlerThread by lazy {
         HandlerThread("NavigationController").apply { start() }
     }
-
-    private val origin by lazy { Point.fromLngLat(0.0, 0.0) }
-    private val waypoints by lazy { arrayListOf<Point>() }
-    private val destination by lazy { Point.fromLngLat(0.0, 0.0) }
 
     private val logger: Logger
     private val directionsSession: DirectionsSession
@@ -72,8 +65,7 @@ class NavigationController(
                 )
             )
             OffboardRouter -> arrayOf(
-                Context::class.java to application,
-                String::class.java to mapboxToken
+                NavigationRoute.Builder::class.java to routeBuilderProvider
             )
             OnboardRouter -> arrayOf(
                 MapboxNativeNavigator::class.java to navigator

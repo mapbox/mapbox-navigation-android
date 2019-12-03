@@ -66,11 +66,11 @@ class NavigationRouteTest {
     @Throws(Exception::class)
     fun changingDefaultValueToCustomWorksProperly() {
         val navigationRoute = NavigationRoute.builder(context)
-            .profile(DirectionsCriteria.PROFILE_CYCLING)
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
                     .destination(destination)
+                    .profile(DirectionsCriteria.PROFILE_CYCLING)
                     .build()
             )
             .build()
