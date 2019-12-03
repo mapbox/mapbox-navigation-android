@@ -428,7 +428,13 @@ public final class NavigationRoute {
         }
 
         /**
-         * Optionally add an intercepter to the OKhttp call.
+         * Required to call when this is being built. If no access token provided,
+         * {@link ServicesException} will be thrown.
+         *
+         * @param accessToken Mapbox access token, You must have a Mapbox account inorder to use
+         *                    the Optimization API
+         * @return this builder for chaining options together
+         * @since 0.5.0
          */
         public Builder accessToken(@NonNull String accessToken) {
             directionsBuilder.accessToken(accessToken);
