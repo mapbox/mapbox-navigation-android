@@ -13,7 +13,7 @@ When your users want to get from one location to another, don’t push them out 
 
 The Flitsmeister Navigation SDK for Android is built on a fork of [the mapbox Navigation SDK v0.19](https://github.com/flitsmeister/flitsmeister-navigation-android/tree/v0.19.0) which is build on top of [the Mapbox Directions API](https://www.mapbox.com/directions) and contains logic needed to get timed navigation instructions.
 
-The Flitsmeister Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets. We are designing new maps specifically for navigation that highlight traffic conditions and helpful landmarks. The calculations use the user's current location and compare it to the current route that the user's traversing to provide critical information at any given moment. _You control the entire experience, from the time your user chooses a destination to when they arrive._
+The Flitsmeister Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets.
 
 # Why have we forked
 
