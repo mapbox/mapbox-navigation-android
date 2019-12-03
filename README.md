@@ -21,7 +21,7 @@ The Flitsmeister Navigation SDK is a precise and flexible platform which enables
 - We completely removed the UI part from the SDK so it will only contain the logics for navigation and not the visuals.
 - We upgraded [the mapbox map sdk](https://github.com/mapbox/mapbox-gl-native/tree/master/platform/android) to the latest version  available.
 - We upgraded [the mapbox core](https://github.com/mapbox/mapbox-events-android) to the to the latest version available.
-- We upgraded the [NavigationRoute](https://github.com/flitsmeister/flitsmeister-navigation-android/blob/master/libandroid-navigation/src/main/java/com/mapbox/services/android/navigation/v5/navigation/NavigationRoute.java) 
+- We upgraded the [NavigationRoute](https://github.com/flitsmeister/flitsmeister-navigation-android/blob/master/libandroid-navigation/src/main/java/com/mapbox/services/android/navigation/v5/navigation/NavigationRoute.java#L425) 
  with the possibility to add an intercepter to the request.
 - We changed [the locationLayerPlugin](https://github.com/mapbox/mapbox-plugins-android) to [the location component](https://docs.mapbox.com/android/api/map-sdk/8.5.0/com/mapbox/mapboxsdk/location/LocationComponent.html)
 - We updated the logic around the implementation of the locationEngine so it can be used with the new locationEngine from [the mapbox sdk](https://github.com/mapbox/mapbox-gl-native/tree/master/platform/android).
