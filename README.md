@@ -99,7 +99,7 @@ To run the [sample code](#sample-code) on a device or emulator, include your [de
 
 ## <a name="sample-code">Sample code
 
-[We've added one navigation example to this repo's test app. We are planning to add more](https://github.com/flitsmeister/flitsmeister-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/) to help you get started with the SDK and to inspire you.
+We've added one [navigation example](https://github.com/flitsmeister/flitsmeister-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/) to this repo's test app. We are planning to add more to help you get started with the SDK and to inspire you.
 
 In order to see the map or calculate a route you need your own Maptile and Direction services.
 
