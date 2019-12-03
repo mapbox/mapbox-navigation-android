@@ -219,7 +219,8 @@ class RouteUtils {
     fun findCurrentBannerInstructions(
         currentStep: LegStep?,
         stepDistanceRemaining: Double
-    ) = currentStep?.bannerInstructions()?.let {
+    ) : BannerInstructions? {
+        currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
             instructions.firstOrNull { instruction ->
                 instruction.distanceAlongGeometry().toInt() >= stepDistanceRemaining.toInt()
