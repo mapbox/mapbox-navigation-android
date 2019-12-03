@@ -43,8 +43,13 @@ internal object NavigationModuleProvider {
                 } catch (ex: NoSuchMethodException) {
                     // try find default arguments for Mapbox default module
                     val params = paramsProvider.invoke(type)
-                    val constructor = implClass.getConstructor(*params.map { it.first }.toTypedArray())
-                    constructor.newInstance(*params.map { it.second }.toTypedArray())
+                    try {
+                        val constructor = implClass.getConstructor(*params.map { it.first }.toTypedArray())
+                        constructor.newInstance(*params.map { it.second }.toTypedArray())
+                    } catch (ex: NoSuchMethodException) {
+                        // try to create instance of Kotlin object, it returns null if Kotlin class is not an object
+                        implClass.kotlin.objectInstance ?: throw MapboxInvalidModuleException(type)
+                    }
                 }
             } else {
                 val providerField = configurationClass.getDeclaredField(MODULE_CONFIGURATION_PROVIDER_VARIABLE_NAME)

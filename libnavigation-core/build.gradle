@@ -35,6 +35,7 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.kotlinReflect
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk

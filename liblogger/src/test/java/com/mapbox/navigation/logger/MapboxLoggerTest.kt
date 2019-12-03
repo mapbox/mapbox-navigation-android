@@ -3,34 +3,25 @@ package com.mapbox.navigation.logger
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import timber.log.Timber
 
 class MapboxLoggerTest {
 
-    private lateinit var logger: MapboxLogger
-
     @Before
     fun setUp() {
         mockkStatic(Timber::class)
-        logger = MapboxLogger.instance
-    }
-
-    @Test
-    fun generationSanityTest() {
-        assertNotNull(logger)
     }
 
     @Test
     fun verboseTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = VERBOSE
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = VERBOSE
 
-        logger.v("TAG", "some message", throwable)
+        MapboxLogger.v("TAG", "some message", throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.v(throwable, "some message") }
@@ -41,10 +32,10 @@ class MapboxLoggerTest {
     fun verboseTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = DEBUG
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = DEBUG
 
-        logger.v("TAG", "some message", throwable)
+        MapboxLogger.v("TAG", "some message", throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.v(any<Throwable>(), any()) }
@@ -55,10 +46,10 @@ class MapboxLoggerTest {
     fun debugTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = DEBUG
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = DEBUG
 
-        logger.d("TAG", "some message", throwable)
+        MapboxLogger.d("TAG", "some message", throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.d(throwable, "some message") }
@@ -69,10 +60,10 @@ class MapboxLoggerTest {
     fun debugTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = INFO
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = INFO
 
-        logger.d("TAG", "some message", throwable)
+        MapboxLogger.d("TAG", "some message", throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.d(any<Throwable>(), any()) }
@@ -83,10 +74,10 @@ class MapboxLoggerTest {
     fun infoTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = INFO
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = INFO
 
-        logger.i("TAG", "some message", throwable)
+        MapboxLogger.i("TAG", "some message", throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.i(throwable, "some message") }
@@ -97,10 +88,10 @@ class MapboxLoggerTest {
     fun infoTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = WARN
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = WARN
 
-        logger.i("TAG", "some message", throwable)
+        MapboxLogger.i("TAG", "some message", throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.i(any<Throwable>(), any()) }
@@ -111,10 +102,10 @@ class MapboxLoggerTest {
     fun warningTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = WARN
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = WARN
 
-        logger.w("TAG", "some message", throwable)
+        MapboxLogger.w("TAG", "some message", throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.w(throwable, "some message") }
@@ -125,10 +116,10 @@ class MapboxLoggerTest {
     fun warningTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = ERROR
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = ERROR
 
-        logger.w("TAG", "some message", throwable)
+        MapboxLogger.w("TAG", "some message", throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.w(any<Throwable>(), any()) }
@@ -139,10 +130,10 @@ class MapboxLoggerTest {
     fun errorTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = ERROR
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = ERROR
 
-        logger.e("TAG", "some message", throwable)
+        MapboxLogger.e("TAG", "some message", throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.e(throwable, "some message") }
@@ -153,10 +144,10 @@ class MapboxLoggerTest {
     fun errorTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        logger.setObserver(loggerObserver)
-        logger.logLevel = NONE
+        MapboxLogger.setObserver(loggerObserver)
+        MapboxLogger.logLevel = NONE
 
-        logger.e("TAG", "some message", throwable)
+        MapboxLogger.e("TAG", "some message", throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.e(any<Throwable>(), any()) }
@@ -165,35 +156,35 @@ class MapboxLoggerTest {
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToVerboseCall() {
-        logger.v(null, "some message", mockk())
+        MapboxLogger.v(null, "some message", mockk())
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToDebugCall() {
-        logger.d(null, "some message", mockk())
+        MapboxLogger.d(null, "some message", mockk())
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToInfoCall() {
-        logger.i(null, "some message", mockk())
+        MapboxLogger.i(null, "some message", mockk())
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToWarningCall() {
-        logger.w(null, "some message", mockk())
+        MapboxLogger.w(null, "some message", mockk())
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToErrorCall() {
-        logger.e(null, "some message", mockk())
+        MapboxLogger.e(null, "some message", mockk())
 
         verify(exactly = 0) { Timber.tag(any()) }
     }

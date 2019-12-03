@@ -7,12 +7,7 @@ import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
 @MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
-class MapboxLogger private constructor() : Logger {
-
-    companion object {
-        @JvmStatic
-        val instance: MapboxLogger by lazy { MapboxLogger() }
-    }
+object MapboxLogger : Logger {
 
     @LogLevel
     @Volatile
