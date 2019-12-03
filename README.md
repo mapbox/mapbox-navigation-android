@@ -103,7 +103,7 @@ We welcome feedback, translations, and code contributions! Please see [CONTRIBUT
 # License
 
 ```
-Copyright 2019 flitmeister
+Copyright 2019 Flitmeister
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
