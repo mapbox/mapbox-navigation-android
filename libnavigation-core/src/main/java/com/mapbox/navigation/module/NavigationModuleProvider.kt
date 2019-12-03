@@ -47,8 +47,17 @@ internal object NavigationModuleProvider {
                         val constructor = implClass.getConstructor(*params.map { it.first }.toTypedArray())
                         constructor.newInstance(*params.map { it.second }.toTypedArray())
                     } catch (ex: NoSuchMethodException) {
-                        // try to create instance of Kotlin object, it returns null if Kotlin class is not an object
-                        implClass.kotlin.objectInstance ?: throw MapboxInvalidModuleException(type)
+                        // try to create instance of Kotlin object
+                        try {
+                            implClass.getDeclaredField("INSTANCE").get(null)
+                        } catch (ex: NoSuchMethodException) {
+                            // try to get instance of singleton
+                            try {
+                                implClass.getDeclaredMethod("getInstance").invoke(null)
+                            } catch (ex: NoSuchMethodException) {
+                                throw MapboxInvalidModuleException(type)
+                            }
+                        }
                     }
                 }
             } else {
