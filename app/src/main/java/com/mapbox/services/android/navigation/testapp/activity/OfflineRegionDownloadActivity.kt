@@ -292,7 +292,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun removeSelectedRegion() {
         showRemoving(true, "Removing tiles....")
-        retrieveOfflineVersionFromPreferences()?.let {version->
+        retrieveOfflineVersionFromPreferences()?.let { version ->
             mapboxOfflineRouter.removeTiles(version, boundingBox, this)
         }
     }
