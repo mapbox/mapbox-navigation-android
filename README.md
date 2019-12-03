@@ -81,12 +81,12 @@ To run the [sample code](#sample-code) on a device or emulator, include your [de
 
 ## Getting Help
 
-- **Have a bug to report?** [Open an issue](https://github.com/mapbox/mapbox-navigation-android/issues). If possible, include the version of Flitsmeister Services, a full log, and a project that shows the issue.
-- **Have a feature request?** [Open an issue](https://github.com/mapbox/mapbox-navigation-android/issues/new). Tell us what the feature should do and why you want the feature.
+- **Have a bug to report?** [Open an issue](https://github.com/flitsmeister/flitsmeister-navigation-android/issues). If possible, include the version of Flitsmeister Services, a full log, and a project that shows the issue.
+- **Have a feature request?** [Open an issue](https://github.com/flitsmeister/flitsmeister-navigation-android/issues/new). Tell us what the feature should do and why you want the feature.
 
 ## <a name="sample-code">Sample code
 
-[We've added one navigation examples to this repo's test app](https://github.com/flitsmeister/flitsmeister-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
+[We've added one navigation examples to this repo's test app](https://github.com/flitsmeister/flitsmeister-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/) to help you get started with the SDK and to inspire you.
 
 ## Contributing
 
