@@ -74,18 +74,24 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
+    private var isDownloadCompleted: Boolean = false
     private val offlineRegionObserver = object : OfflineRegion.OfflineRegionObserver {
         override fun mapboxTileCountLimitExceeded(limit: Long) {
             Timber.e("Mapbox tile count limit exceeded: %s", limit)
         }
 
-        override fun onStatusChanged(status: OfflineRegionStatus?) {
-            Timber.d("%s/%s resources; %s bytes downloaded.",
-                    status?.completedResourceCount,
-                    status?.requiredResourceCount,
-                    status?.completedResourceSize)
-            if (status?.isComplete!!) {
-                downloadSelectedRegion()
+        override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
+            offlineRegionStatus?.let { status ->
+                Timber.d(
+                    "%s/%s resources; %s bytes downloaded.",
+                    status.completedResourceCount,
+                    status.requiredResourceCount,
+                    status.completedResourceSize
+                )
+                if (status.isComplete && !isDownloadCompleted) {
+                    isDownloadCompleted = true
+                    downloadSelectedRegion()
+                }
             }
         }
 
@@ -234,8 +240,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     private fun launchMapsDownload() {
-        offlineRegion?.setObserver(offlineRegionObserver)
-        offlineRegion?.setDownloadState(OfflineRegion.STATE_ACTIVE)
+        offlineRegion?.let { offlineRegion ->
+            offlineRegion.setObserver(offlineRegionObserver)
+            offlineRegion.setDownloadState(OfflineRegion.STATE_ACTIVE)
+        }
     }
 
     private fun downloadSelectedRegion() {
@@ -249,11 +257,12 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun removeSelectedRegion() {
         showRemoving(true, "Removing tiles....")
-        val version: String = retrieveOfflineVersionFromPreferences()
-        mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+        retrieveOfflineVersionFromPreferences()?.let { version ->
+            mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+        }
     }
 
-    private fun retrieveOfflineVersionFromPreferences(): String {
+    private fun retrieveOfflineVersionFromPreferences(): String? {
         val context = application
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(context.getString(R.string.offline_version_key), "")
@@ -302,7 +311,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     override fun onError(error: OfflineError) {
         setDownloadButtonEnabled(true)
-        showToast("There was an error with the download. Please try again.")
+        isDownloadCompleted = false
+        showToast("There was an error with the download: ${error.message}. Please try again.")
     }
 
     override fun onProgressUpdate(percent: Int) {
@@ -311,6 +321,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     override fun onCompletion() {
         setDownloadButtonEnabled(true)
+        isDownloadCompleted = false
         showToast("Download complete")
     }
 
