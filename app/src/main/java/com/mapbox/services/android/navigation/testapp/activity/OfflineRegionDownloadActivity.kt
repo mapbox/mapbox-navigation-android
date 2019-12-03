@@ -87,6 +87,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
     }
 
+    private var isDownloadCompleted: Boolean = false
     private val offlineRegionObserver = object : OfflineRegion.OfflineRegionObserver {
         override fun mapboxTileCountLimitExceeded(limit: Long) {
             Timber.e("Mapbox tile count limit exceeded: %s", limit)
@@ -99,7 +100,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 status?.requiredResourceCount,
                 status?.completedResourceSize
             )
-            if (status?.isComplete!!) {
+            if (status?.isComplete == true && !isDownloadCompleted) {
+                isDownloadCompleted = true
                 downloadSelectedRegion()
             }
         }
@@ -340,7 +342,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     override fun onError(error: OfflineError) {
         setDownloadButtonEnabled(true)
-        showToast("There was an error with the download. Please try again.")
+        isDownloadCompleted = false
+        showToast("There was an error with the download: ${error.message}. Please try again.")
     }
 
     override fun onProgressUpdate(percent: Int) {
@@ -349,6 +352,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     override fun onCompletion() {
         setDownloadButtonEnabled(true)
+        isDownloadCompleted = false
         showToast("Download complete")
     }
 

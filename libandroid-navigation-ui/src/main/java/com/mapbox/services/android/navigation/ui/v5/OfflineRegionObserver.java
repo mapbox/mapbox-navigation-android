@@ -7,6 +7,7 @@ import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
 class OfflineRegionObserver implements OfflineRegion.OfflineRegionObserver {
 
   private final OfflineRegionDownloadCallback callback;
+  private boolean isCompleted = false;
 
   OfflineRegionObserver(OfflineRegionDownloadCallback callback) {
     this.callback = callback;
@@ -14,7 +15,8 @@ class OfflineRegionObserver implements OfflineRegion.OfflineRegionObserver {
 
   @Override
   public void onStatusChanged(OfflineRegionStatus status) {
-    if (status.isComplete()) {
+    if (status.isComplete() && !isCompleted) {
+      isCompleted = true;
       callback.onComplete();
     }
   }

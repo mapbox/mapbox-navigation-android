@@ -3,7 +3,6 @@ package com.mapbox.services.android.navigation.v5.utils
 import android.os.AsyncTask
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import okhttp3.ResponseBody
@@ -28,8 +27,8 @@ constructor(
 ) : AsyncTask<ResponseBody, Void, File>() {
 
     companion object {
-        private const val END_OF_FILE_DENOTER = -1
         private var uniqueId = 0
+        private const val BUFFER_SIZE = 4096
     }
 
     override fun doInBackground(vararg responseBodies: ResponseBody): File? =
@@ -46,43 +45,30 @@ constructor(
             return null
         }
 
-        try {
-            val filePath = StringBuilder().append(destDirectory)
-                .append(File.separator)
-                .append(fileName)
-                .append(retrieveUniqueId())
-                .append(".")
-                .append(extension)
-                .toString()
+        val filePath = StringBuilder().append(destDirectory)
+            .append(File.separator)
+            .append(fileName)
+            .append(retrieveUniqueId())
+            .append(".")
+            .append(extension)
+            .toString()
+        val file = File(filePath)
+        val inputStream: InputStream = responseBody.byteStream()
+        val outputStream: OutputStream = FileOutputStream(file)
+        val buffer = ByteArray(BUFFER_SIZE)
 
-            val file = File(filePath)
-            var inputStream: InputStream? = null
-            var outputStream: OutputStream? = null
-
-            try {
-                inputStream = responseBody.byteStream()
-                outputStream = FileOutputStream(file)
-                val buffer = ByteArray(4096)
-                var numOfBufferedBytes = 0
-
-                while (numOfBufferedBytes != END_OF_FILE_DENOTER) {
-                    numOfBufferedBytes = inputStream.read(buffer)
-                    outputStream.write(buffer, 0, numOfBufferedBytes)
+        inputStream.use { input ->
+            outputStream.use { fileOut ->
+                while (true) {
+                    val length = input.read(buffer)
+                    if (length <= 0)
+                        break
+                    fileOut.write(buffer, 0, length)
                 }
-
-                outputStream.flush()
-                return file
-            } catch (exception: IOException) {
-                return null
-            } catch (exception: Exception) {
-                return null
-            } finally {
-                inputStream?.close()
-                outputStream?.close()
+                fileOut.flush()
             }
-        } catch (exception: IOException) {
-            return null
         }
+        return file
     }
 
     private fun retrieveUniqueId(): String =
