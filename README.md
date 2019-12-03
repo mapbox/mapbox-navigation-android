@@ -102,4 +102,4 @@ We welcome feedback, translations, and code contributions! Please see [CONTRIBUT
 
 # License
 
-[100% MIT License][LICENSE]
+[100% MIT License](LICENSE)
