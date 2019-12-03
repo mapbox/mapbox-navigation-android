@@ -2,7 +2,6 @@ package com.mapbox.navigation.route.offboard
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.base.BaseTest
@@ -20,19 +19,12 @@ import retrofit2.Response
 
 class MapboxOffboardRouterTest : BaseTest() {
 
-    companion object {
-        private const val ACCESS_TOKEN = "pk.token"
-    }
-
     private val navigationRoute = mockk<NavigationRoute>(relaxed = true)
     // private val navigationRoute = NavigationRoute.builder(mockk(relaxed = true)).build()
     private val navigationRouteBuilder = mockk<NavigationRoute.Builder>(relaxed = true)
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptionsNavigation = mockk(relaxed = true)
-    private val origin = Point.fromLngLat(1.0, 2.0)
-    private val waypoints = listOf<Point>()
-    private val destination = Point.fromLngLat(1.0, 5.0)
 
     @Before
     fun setUp() {
@@ -42,7 +34,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { navigationRoute.getRoute(capture(listener)) } answers {
             callback = listener.captured
         }
-        offboardRouter = MapboxOffboardRouter(mockk(), ACCESS_TOKEN, navigationRouteBuilder)
+        offboardRouter = MapboxOffboardRouter(navigationRouteBuilder)
     }
 
     @Test

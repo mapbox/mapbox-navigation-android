@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.RoutePointNavigation
@@ -30,7 +29,7 @@ import retrofit2.Callback
  * 1.0
  */
 
-internal class NavigationRoute
+class NavigationRoute
 constructor(
     private val mapboxDirections: MapboxDirections
 ) {
@@ -47,7 +46,20 @@ constructor(
         @JvmStatic
         fun builder(context: Context): Builder =
             Builder()
+                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .language(context)
+                .continueStraight(true)
+                .roundaboutExits(true)
+                .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
+                .overview(DirectionsCriteria.OVERVIEW_FULL)
+                .steps(true)
+                .annotations(
+                    DirectionsCriteria.ANNOTATION_CONGESTION,
+                    DirectionsCriteria.ANNOTATION_DISTANCE
+                )
+                .voiceInstructions(true)
+                .bannerInstructions(true)
+                .enableRefresh(true)
                 .voiceUnits(context)
     }
 
@@ -113,20 +125,6 @@ constructor(
         }
 
         /**
-         * The username for the account that the directions engine runs on. In most cases, this should
-         * always remain the default value of [DirectionsCriteria.PROFILE_DEFAULT_USER].
-         *
-         * @param user a non-null string which will replace the default user used in the directions
-         * request
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun user(user: String): Builder {
-            directionsBuilder.user(user)
-            return this
-        }
-
-        /**
          * This selects which mode of transportation the user will be using while navigating from the
          * origin to the final destination. The options include driving, driving considering traffic,
          * walking, and cycling. Using each of these profiles will result in different routing biases.
@@ -135,197 +133,63 @@ constructor(
          * @return this builder for chaining options together
          * @since 0.5.0
          */
-        fun profile(@DirectionsCriteria.ProfileCriteria profile: String): Builder {
+        internal fun profile(@DirectionsCriteria.ProfileCriteria profile: String): Builder {
             directionsBuilder.profile(profile)
             return this
         }
 
         /**
-         * This sets the starting point on the map where the route will begin. It is one of the
-         * required parameters which must be set for a successful directions response.
+         * Sets allowed direction of travel when departing intermediate waypoints. If true the route
+         * will continue in the same direction of travel. If false the route may continue in the
+         * opposite direction of travel. API defaults to true for
+         * [DirectionsCriteria.PROFILE_DRIVING] and false for
+         * [DirectionsCriteria.PROFILE_WALKING] and [DirectionsCriteria.PROFILE_CYCLING].
          *
-         * @param origin a GeoJson [Point] object representing the starting location for the route
+         * @param continueStraight boolean true if you want to always continue straight, else false.
          * @return this builder for chaining options together
-         * @since 0.5.0
          */
-        fun origin(origin: Point): Builder {
-            this.origin = RoutePointNavigation(
-                origin,
-                null,
-                null
-            )
-            return this
-        }
-
-        /**
-         * This sets the starting point on the map where the route will begin. It is one of the
-         * required parameters which must be set for a successful directions response.
-         *
-         * @param origin a GeoJson [Point] object representing the starting location for the
-         * route
-         * @param angle double value used for setting the corresponding coordinate's angle of travel
-         * when determining the route
-         * @param tolerance the deviation the bearing angle can vary while determining the route,
-         * recommended to be either 45 or 90 degree tolerance
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun origin(
-            origin: Point,
-            angle: Double?,
-            tolerance: Double?
-        ): Builder {
-            this.origin =
-                RoutePointNavigation(
-                    origin,
-                    angle,
-                    tolerance
-                )
-            return this
-        }
-
-        /**
-         * This sets the ending point on the map where the route will end. It is one of the required
-         * parameters which must be set for a successful directions response.
-         *
-         * @param destination a GeoJson [Point] object representing the starting location for the
-         * route
-         * @return this builder for chaining options together
-         * @since 0.50
-         */
-        fun destination(destination: Point): Builder {
-            this.destination =
-                RoutePointNavigation(
-                    destination,
-                    null,
-                    null
-                )
-            return this
-        }
-
-        /**
-         * This sets the ending point on the map where the route will end. It is one of the required
-         * parameters which must be set for a successful directions response.
-         *
-         * @param destination a GeoJson [Point] object representing the starting location for the
-         * route
-         * @param angle double value used for setting the corresponding coordinate's angle of travel
-         * when determining the route
-         * @param tolerance the deviation the bearing angle can vary while determining the route,
-         * recommended to be either 45 or 90 degree tolerance
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun destination(
-            destination: Point,
-            angle: Double?,
-            tolerance: Double?
-        ): Builder {
-            this.destination =
-                RoutePointNavigation(
-                    destination,
-                    angle,
-                    tolerance
-                )
-            return this
-        }
-
-        /**
-         * This can be used to set up to 23 additional in-between points which will act as pit-stops
-         * along the users route. Note that if you are using the
-         * [DirectionsCriteria.PROFILE_DRIVING_TRAFFIC] that the max number of waypoints allowed
-         * in the request is currently limited to 1.
-         *
-         * @param waypoint a [Point] which represents the pit-stop or waypoint where you'd like
-         * one of the [com.mapbox.api.directions.v5.models.RouteLeg] to
-         * navigate the user to
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun addWaypoint(waypoint: Point): Builder {
-            this.waypoints.add(
-                RoutePointNavigation(
-                    waypoint,
-                    null,
-                    null
-                )
-            )
-            return this
-        }
-
-        /**
-         * This can be used to set up to 23 additional in-between points which will act as pit-stops
-         * along the users route.
-         *
-         *
-         * Note that if you are using the
-         * [DirectionsCriteria.PROFILE_DRIVING_TRAFFIC] that the max number of waypoints allowed
-         * in the request is currently limited to 1.
-         *
-         *
-         * These waypoints are added to the request in the order you add them to the builder with this method.
-         *
-         * @param waypoint a [Point] which represents the pit-stop or waypoint where you'd like
-         * one of the [com.mapbox.api.directions.v5.models.RouteLeg] to
-         * navigate the user to
-         * @param angle double value used for setting the corresponding coordinate's angle of travel
-         * when determining the route
-         * @param tolerance the deviation the bearing angle can vary while determining the route,
-         * recommended to be either 45 or 90 degree tolerance
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun addWaypoint(
-            waypoint: Point,
-            angle: Double?,
-            tolerance: Double?
-        ): Builder {
-            this.waypoints.add(
-                RoutePointNavigation(
-                    waypoint,
-                    angle,
-                    tolerance
-                )
-            )
-            return this
-        }
-
-        /**
-         * Optionally set whether to try to return alternative routes. An alternative is classified as a
-         * route that is significantly different then the fastest route, but also still reasonably fast.
-         * Not in all circumstances such a route exists. At the moment at most one alternative can be
-         * returned.
-         *
-         * @param alternatives true if you'd like to receive an alternative route, otherwise false or
-         * null to use the APIs default value
-         * @return this builder for chaining options together
-         * @since 0.5.0
-         */
-        fun alternatives(alternatives: Boolean?): Builder {
-            directionsBuilder.alternatives(alternatives)
-            return this
-        }
-
-        /**
-         * Set the instruction language for the directions request, the default is english. Only a
-         * select number of languages are currently supported, reference the table provided in the see
-         * link below.
-         *
-         * @param language a Locale representing the language you'd like the instructions to be
-         * written in when returned
-         * @return this builder for chaining options together
-         * @see [Supported
-         * Languages](https://www.mapbox.com/api-documentation/.instructions-languages)
-         *
-         * @since 0.5.0
-         */
-        fun language(language: Locale): Builder {
-            directionsBuilder.language(language)
+        internal fun continueStraight(continueStraight: Boolean): Builder {
+            directionsBuilder.continueStraight(continueStraight)
             return this
         }
 
         internal fun language(context: Context): Builder {
             directionsBuilder.language(context.inferDeviceLocale())
+            return this
+        }
+
+        internal fun roundaboutExits(roundaboutExits: Boolean): Builder {
+            directionsBuilder.roundaboutExits(roundaboutExits)
+            return this
+        }
+
+        internal fun geometries(@DirectionsCriteria.GeometriesCriteria geometry: String): Builder {
+            directionsBuilder.geometries(geometry)
+            return this
+        }
+
+        internal fun overview(@DirectionsCriteria.OverviewCriteria overview: String): Builder {
+            directionsBuilder.overview(overview)
+            return this
+        }
+
+        internal fun steps(steps: Boolean): Builder {
+            directionsBuilder.steps(steps)
+            return this
+        }
+
+        internal fun annotations(@DirectionsCriteria.AnnotationCriteria vararg annotations: String?): Builder {
+            directionsBuilder.annotations(*annotations)
+            return this
+        }
+
+        internal fun voiceInstructions(voiceInstructions: Boolean): Builder {
+            directionsBuilder.voiceInstructions(voiceInstructions)
+            return this
+        }
+
+        internal fun bannerInstructions(bannerInstructions: Boolean): Builder {
+            directionsBuilder.bannerInstructions(bannerInstructions)
             return this
         }
 
@@ -363,7 +227,7 @@ constructor(
          * @param eventListener to set for OkHttp
          * @return this builder for chaining options together
          */
-        fun eventListener(eventListener: EventListener): Builder {
+        internal fun eventListener(eventListener: EventListener): Builder {
             directionsBuilder.eventListener(eventListener)
             return this
         }
@@ -392,7 +256,19 @@ constructor(
          * @return this builder for chaining options together
          * @since 0.9.0
          */
-        fun routeOptions(options: RouteOptionsNavigation): Builder {
+        internal fun routeOptions(options: RouteOptionsNavigation): Builder {
+            options.baseUrl?.let {
+                directionsBuilder.baseUrl(it)
+            }
+
+            options.user?.let {
+                directionsBuilder.user(it)
+            }
+
+            options.profile?.let {
+                directionsBuilder.profile(it)
+            }
+
             origin = options.coordinates.first()
 
             waypoints.addAll(options.coordinates.toMutableList().also {
@@ -402,38 +278,78 @@ constructor(
 
             destination = options.coordinates.last()
 
-            if (!TextUtils.isEmpty(options.baseUrl)) {
-                directionsBuilder.baseUrl(options.baseUrl)
-            }
-
-            if (!TextUtils.isEmpty(options.language)) {
-                directionsBuilder.language(Locale(options.language))
-            }
-
-            directionsBuilder.geometries(options.geometries)
-
-            options.profile?.let {
-                directionsBuilder.profile(it)
-            }
-
             options.alternatives?.let {
                 directionsBuilder.alternatives(it)
+            }
+
+            options.language?.let {
+                directionsBuilder.language(Locale(it))
+            }
+
+            options.radiuses?.let { radiuses ->
+                if (radiuses.isNotEmpty()) {
+                    val result =
+                        // TODO Convert from String separated by ; into an array of double
+                        radiuses.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() } as DoubleArray
+                    directionsBuilder.radiuses(*result)
+                }
+            }
+
+            options.bearings?.let { bearings ->
+                if (bearings.isNotEmpty()) {
+                    // TODO Convert from String separated by ; into pairs of angle and tolerance
+                    bearings.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.forEach {
+                        directionsBuilder.addBearing(it.toDouble(), it.toDouble())
+                    }
+                }
+            }
+
+            options.continueStraight?.let {
+                directionsBuilder.continueStraight(it)
+            }
+
+            options.roundaboutExits?.let {
+                directionsBuilder.roundaboutExits(it)
+            }
+
+            options.geometries?.let {
+                directionsBuilder.geometries(it)
+            }
+
+            options.overview?.let {
+                directionsBuilder.overview(it)
+            }
+
+            options.steps?.let {
+                directionsBuilder.steps(it)
+            }
+
+            options.annotations?.let {
+                directionsBuilder.annotations(it)
+            }
+
+            options.voiceInstructions?.let {
+                directionsBuilder.voiceInstructions(it)
+            }
+
+            options.bannerInstructions?.let {
+                directionsBuilder.bannerInstructions(it)
             }
 
             options.voiceUnits?.let {
                 directionsBuilder.voiceUnits(it)
             }
 
-            options.user?.let {
-                directionsBuilder.user(it)
-            }
-
             options.accessToken?.let {
                 directionsBuilder.accessToken(it)
             }
 
-            options.annotations?.let {
-                directionsBuilder.annotations(it)
+            options.requestUuid?.let {
+                // TODO Check if needed as it is only set at response time
+            }
+
+            options.exclude?.let {
+                directionsBuilder.exclude(it)
             }
 
             options.approaches?.let { approaches ->
@@ -472,10 +388,6 @@ constructor(
                 directionsBuilder.walkingOptions(it.mapToWalkingOptions())
             }
 
-            options.continueStraight?.let {
-                directionsBuilder.continueStraight(it)
-            }
-
             return this
         }
 
@@ -490,14 +402,7 @@ constructor(
             // Set the default values which the user cannot alter.
             assembleWaypoints()
             directionsBuilder
-                .steps(true)
-                .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
-                .overview(DirectionsCriteria.OVERVIEW_FULL)
-                .voiceInstructions(true)
-                .bannerInstructions(true)
-                .roundaboutExits(true)
                 .eventListener(eventListener)
-                .enableRefresh(true)
             return NavigationRoute(directionsBuilder.build())
         }
 

@@ -4,12 +4,9 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.base.route.model.RoutePointNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
 
@@ -20,41 +17,10 @@ fun DirectionsRoute.mapToRoute() = Route(
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
-    voiceLanguage = voiceLanguage(),
     legs = legs()?.let { RouteLegsNavigation(it) },
-    routeOptions = routeOptions()?.mapToRouteOptionsNavigation()
+    routeOptions = routeOptions()?.mapToRouteOptionsNavigation(),
+    voiceLanguage = voiceLanguage()
 )
-
-fun RouteOptionsNavigation.mapToRouteOptions() = RouteOptions
-    .builder()
-    .baseUrl(baseUrl ?: Constants.BASE_API_URL)
-    .user(user ?: Constants.MAPBOX_USER)
-    .profile(profile ?: DirectionsCriteria.PROFILE_DRIVING)
-    .coordinates(coordinates.map { it.mapToPoint() })
-    .alternatives(alternatives)
-    .language(language)
-    .radiuses(radiuses)
-    .continueStraight(continueStraight)
-    .roundaboutExits(roundaboutExits)
-    .geometries(geometries)
-    .overview(overview)
-    .steps(steps)
-    .annotations(annotations)
-    .voiceInstructions(voiceInstructions)
-    .bannerInstructions(bannerInstructions)
-    .voiceUnits(voiceUnits)
-    .accessToken(accessToken ?: "")
-    .requestUuid(requestUuid ?: "")
-    .exclude(exclude ?: "")
-    ?.approaches(approaches)
-    ?.waypointIndices(waypointIndices)
-    ?.waypointNames(waypointNames)
-    ?.waypointTargets(waypointTargets)
-    ?.walkingOptions(walkingOptions?.mapToWalkingOptions()!!)
-    ?.build()
-
-fun RoutePointNavigation.mapToPoint() =
-    Point.fromLngLat(point.longitude(), point.latitude(), point.altitude(), point.bbox())
 
 fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
     val routeOptionsNavigationBuilder = RouteOptionsNavigation
@@ -64,10 +30,8 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .profile(profile())
         .origin(coordinates().first())
         .destination(coordinates().last())
-
     coordinates().drop(1).dropLast(1)
         .forEach { routeOptionsNavigationBuilder.addWaypoint(it) }
-
     return routeOptionsNavigationBuilder
         .alternatives(alternatives() ?: true)
         .language(language() ?: Locale.getDefault().language)
@@ -75,10 +39,15 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .bearings(bearings() ?: "")
         .continueStraight(continueStraight() ?: true)
         .roundaboutExits(roundaboutExits() ?: true)
-        .geometries(geometries())
-        .overview(overview() ?: "")
+        .geometries(geometries() ?: DirectionsCriteria.GEOMETRY_POLYLINE6)
+        .overview(overview() ?: DirectionsCriteria.OVERVIEW_FULL)
         .steps(steps() ?: true)
-        .annotations(annotations() ?: "")
+        .annotations(
+            annotations() ?: arrayOf(
+                DirectionsCriteria.ANNOTATION_CONGESTION,
+                DirectionsCriteria.ANNOTATION_DISTANCE
+            ).joinToString(separator = ",")
+        )
         .voiceInstructions(voiceInstructions() ?: true)
         .bannerInstructions(bannerInstructions() ?: true)
         .voiceUnits(voiceUnits() ?: "")
@@ -100,8 +69,9 @@ fun WalkingOptionsNavigation.mapToWalkingOptions(): WalkingOptions = WalkingOpti
     .alleyBias(alleyBias)
     .build()
 
-fun WalkingOptions.mapToWalkingOptionsNavigation(): WalkingOptionsNavigation = WalkingOptionsNavigation(
-    walkingSpeed = walkingSpeed(),
-    walkwayBias = walkwayBias(),
-    alleyBias = alleyBias()
-)
+fun WalkingOptions.mapToWalkingOptionsNavigation(): WalkingOptionsNavigation =
+    WalkingOptionsNavigation(
+        walkingSpeed = walkingSpeed(),
+        walkwayBias = walkwayBias(),
+        alleyBias = alleyBias()
+    )
