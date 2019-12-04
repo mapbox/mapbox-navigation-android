@@ -42,7 +42,8 @@ internal class FreeDriveLocationUpdater(
             locationEngine.requestLocationUpdates(locationEngineRequest, callback, null)
             future = executorService.scheduleAtFixedRate({
                 if (rawLocation != null) {
-                    val enhancedLocation = getLocation(Date(), 0, rawLocation)
+                    // Pass the same lag as when in active guidance i.e. 1500 ms
+                    val enhancedLocation = getLocation(Date(), 1500, rawLocation)
                     handler.post {
                         navigationEventDispatcher.onEnhancedLocationUpdate(
                             enhancedLocation

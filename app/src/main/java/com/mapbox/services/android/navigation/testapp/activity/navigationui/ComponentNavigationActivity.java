@@ -109,6 +109,9 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @BindView(R.id.cancelNavigationFab)
   FloatingActionButton cancelNavigationFab;
 
+  @BindView(R.id.sendAnomalyFab)
+  FloatingActionButton sendAnomalyFab;
+
   private final ComponentActivityLocationCallback callback = new ComponentActivityLocationCallback(this);
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
@@ -202,6 +205,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     addLocationEngineListener();
   }
 
+  @OnClick(R.id.sendAnomalyFab)
+  public void onSendAnomalyClick(FloatingActionButton floatingActionButton) {
+    addEventToHistoryFile("anomaly");
+  }
+
   /*
    * Navigation listeners
    */
@@ -209,6 +217,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // Cache "snapped" Locations for re-route Directions API requests
+    // TODO This is for testing / debugging purposes
+    Timber.d("DEBUG snapped %s", location.toString());
     updateLocation(location);
 
     // Update InstructionView data from RouteProgress
@@ -217,6 +227,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @Override
   public void onEnhancedLocationUpdate(Location location) {
+    // TODO This is for testing / debugging purposes
+    Timber.d("DEBUG enhanced %s", location.toString());
     checkFirstUpdate(location);
     updateLocation(location);
   }
@@ -334,6 +346,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       new MapboxNavigationOptions.Builder().build(), locationEngine);
     addNavigationForHistory(navigation);
     addLocationEngineListener();
+    sendAnomalyFab.show();
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
     navigation.addMilestoneEventListener(this);
