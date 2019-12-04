@@ -1,6 +1,5 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 

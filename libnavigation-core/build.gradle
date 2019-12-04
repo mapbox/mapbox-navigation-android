@@ -30,6 +30,7 @@ dependencies {
     implementation project(':libtrip-session')
     implementation(project(':libnavigator'))
     implementation(project(':libdirections-offboard'))
+    implementation(project(':libdirections-onboard'))
 
     //ktlint
     ktlint dependenciesList.ktlint
