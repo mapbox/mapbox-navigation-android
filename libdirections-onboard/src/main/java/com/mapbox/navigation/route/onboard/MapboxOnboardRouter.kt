@@ -2,17 +2,13 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.Config
-import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.model.mapToRouteConfig
-import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
-import com.mapbox.navigation.utils.exceptions.NavigationException
 import java.io.File
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
@@ -60,11 +56,6 @@ class MapboxOnboardRouter : Router {
     override fun getRoute(
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
-    ) = Unit
-        origin: Point,
-        waypoints: List<Point>?,
-        destination: Point,
-        callback: Router.RouteCallback
     ) {
         val offlineRouter = OfflineRoute.builder(
             RouteUrl(
@@ -88,5 +79,4 @@ class MapboxOnboardRouter : Router {
     }
 
     override fun cancel() = Unit
-
 }
