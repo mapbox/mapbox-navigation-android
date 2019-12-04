@@ -153,8 +153,7 @@ class NavigationRouteTest {
                         arrayOf(
                             Point.fromLngLat(0.99, 4.99),
                             Point.fromLngLat(1.99, 5.99)
-                        )
-                            .joinToString(separator = ";") { "${it?.latitude()},${it?.longitude()}" }
+                        ).joinToString(separator = ";") { "${it?.latitude()},${it?.longitude()}" }
                     ).build()
             )
             .build()

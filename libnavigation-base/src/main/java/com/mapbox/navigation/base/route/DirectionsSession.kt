@@ -6,7 +6,6 @@ import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 interface DirectionsSession {
     fun getRoutes(): List<Route>
     fun getRouteOptions(): RouteOptionsNavigation?
-    // note: write in javadoc for java devs about default param waypoints
     fun requestRoutes(routeOptions: RouteOptionsNavigation)
     fun cancel()
 

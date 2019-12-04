@@ -20,7 +20,6 @@ import retrofit2.Response
 class MapboxOffboardRouterTest : BaseTest() {
 
     private val navigationRoute = mockk<NavigationRoute>(relaxed = true)
-    // private val navigationRoute = NavigationRoute.builder(mockk(relaxed = true)).build()
     private val navigationRouteBuilder = mockk<NavigationRoute.Builder>(relaxed = true)
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
