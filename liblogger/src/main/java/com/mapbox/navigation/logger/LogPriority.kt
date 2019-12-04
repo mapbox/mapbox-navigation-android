@@ -1,7 +1,8 @@
+@file:JvmName("LogPriority")
+
 package com.mapbox.navigation.logger
 
 import android.util.Log
-import androidx.annotation.IntDef
 
 /**
  * Priority constant for the println method; use Logger.v
@@ -56,10 +57,3 @@ const val ERROR = Log.ERROR
  *
  */
 const val NONE = 99
-
-/**
- * Log level indicates which logs are allowed to be emitted by the Mapbox Maps SDK for Android.
- */
-@IntDef(VERBOSE, DEBUG, INFO, WARN, ERROR, NONE)
-@Retention(AnnotationRetention.SOURCE)
-annotation class LogLevel

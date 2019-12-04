@@ -9,7 +9,7 @@ interface Logger {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    fun v(tag: String? = null, msg: String, tr: Throwable? = null)
+    fun v(msg: String, tag: String? = null, tr: Throwable? = null)
 
     /**
      * Send a debug log message and log the exception.
@@ -19,7 +19,7 @@ interface Logger {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    fun d(tag: String? = null, msg: String, tr: Throwable? = null)
+    fun d(msg: String, tag: String? = null, tr: Throwable? = null)
 
     /**
      * Send an info log message and log the exception.
@@ -29,7 +29,7 @@ interface Logger {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    fun i(tag: String? = null, msg: String, tr: Throwable? = null)
+    fun i(msg: String, tag: String? = null, tr: Throwable? = null)
 
     /**
      * Send a warning log message and log the exception.
@@ -39,7 +39,7 @@ interface Logger {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    fun w(tag: String? = null, msg: String, tr: Throwable? = null)
+    fun w(msg: String, tag: String? = null, tr: Throwable? = null)
 
     /**
      * Send an error log message and log the exception.
@@ -49,5 +49,5 @@ interface Logger {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    fun e(tag: String? = null, msg: String, tr: Throwable? = null)
+    fun e(msg: String, tag: String? = null, tr: Throwable? = null)
 }

@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.android.core.location.LocationEngine;
@@ -32,6 +31,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.logger.LogEntry;
+import com.mapbox.navigation.logger.LogPriority;
+import com.mapbox.navigation.logger.LoggerObserver;
 import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent;
@@ -70,10 +72,12 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapClickListener, ProgressChangeListener, NavigationEventListener,
-        MilestoneEventListener, OffRouteListener, RefreshCallback, MetricsObserver {
+        MilestoneEventListener, OffRouteListener, RefreshCallback, MetricsObserver,
+        LoggerObserver {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -81,9 +85,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   // Map variables
   @BindView(R.id.mapView)
   MapView mapView;
-
-  @BindView(R.id.newLocationFab)
-  FloatingActionButton newLocationFab;
 
   @BindView(R.id.startRouteButton)
   Button startRouteButton;
@@ -119,6 +120,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
+    MapboxLogger.INSTANCE.setLogLevel(LogPriority.DEBUG);
+    MapboxLogger.INSTANCE.addObserver(this);
     routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
 
     mapView.onCreate(savedInstanceState);
@@ -230,7 +233,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Exception exception) {
-        MapboxLogger.INSTANCE.e(null, exception.getLocalizedMessage(), exception);
+        MapboxLogger.INSTANCE.e(exception.getLocalizedMessage(), null, exception);
       }
     });
   }
@@ -239,8 +242,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     Location userLocation = result.getLastLocation();
     if (userLocation == null) {
       MapboxLogger.INSTANCE.d(
-              null,
               "calculateRoute: User location is null, therefore, origin can't be set.",
+              null,
               null
       );
       return;
@@ -262,7 +265,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-        MapboxLogger.INSTANCE.d(null, "Url: " + call.request().url().toString(), null);
+        MapboxLogger.INSTANCE.d("Url: " + call.request().url().toString(), null, null);
         if (response.body() != null) {
           if (!response.body().routes().isEmpty()) {
             MockNavigationActivity.this.route = response.body().routes().get(0);
@@ -274,7 +277,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-        MapboxLogger.INSTANCE.e(null, "onFailure: navigation.getRoute()", throwable);
+        MapboxLogger.INSTANCE.e("onFailure: navigation.getRoute()", null, throwable);
       }
     });
   }
@@ -286,13 +289,13 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     MapboxLogger.INSTANCE.d(
-            null,
             "Milestone Event Occurred with id: " + milestone.getIdentifier(),
+            null,
             null
     );
     MapboxLogger.INSTANCE.d(
-            null,
             "Voice instruction: " + instruction,
+            null,
             null
     );
   }
@@ -300,9 +303,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   public void onRunning(boolean running) {
     if (running) {
-      MapboxLogger.INSTANCE.d(null, "onRunning: Started", null);
+      MapboxLogger.INSTANCE.d("onRunning: Started", null, null);
     } else {
-      MapboxLogger.INSTANCE.d(null, "onRunning: Stopped", null);
+      MapboxLogger.INSTANCE.d("onRunning: Stopped", null, null);
     }
   }
 
@@ -319,8 +322,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       routeRefresh.refresh(routeProgress, this);
     }
     MapboxLogger.INSTANCE.d(
-            null,
             "onProgressChange: fraction of route traveled: " + routeProgress.fractionTraveled(),
+            null,
             null
     );
   }
@@ -362,6 +365,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    MapboxLogger.INSTANCE.removeObserver(this);
     navigation.onDestroy();
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
@@ -388,8 +392,33 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
-    MapboxLogger.INSTANCE.d("METRICS_LOG", metric, null);
-    MapboxLogger.INSTANCE.d("METRICS_LOG", jsonStringData, null);
+    MapboxLogger.INSTANCE.d(metric, "METRICS_LOG", null);
+    MapboxLogger.INSTANCE.d(jsonStringData, "METRICS_LOG", null);
+  }
+
+  @Override
+  public void log(int level, @NotNull LogEntry entry) {
+    if (entry.getTag() != null) {
+      Timber.tag(entry.getTag());
+    }
+    switch (level) {
+      case LogPriority.VERBOSE:
+        Timber.v(entry.getThrowable(), entry.getMessage());
+        break;
+      case LogPriority.DEBUG:
+        Timber.d(entry.getThrowable(), entry.getMessage());
+        break;
+      case LogPriority.INFO:
+        Timber.i(entry.getThrowable(), entry.getMessage());
+        break;
+      case LogPriority.WARN:
+        Timber.w(entry.getThrowable(), entry.getMessage());
+        break;
+      case LogPriority.ERROR:
+        Timber.e(entry.getThrowable(), entry.getMessage());
+        break;
+      default: break;
+    }
   }
 
   private static class BeginRouteInstruction extends Instruction {
