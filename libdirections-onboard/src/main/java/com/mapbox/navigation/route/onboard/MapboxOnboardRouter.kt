@@ -2,7 +2,6 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -50,32 +49,31 @@ class MapboxOnboardRouter : Router {
         this.navigatorNative = navigator
         this.accessToken = accessToken
         this.config = config
-        MapboxNativeNavigatorImpl.configureRoute(config.mapToRouteConfig())
     }
 
     override fun getRoute(
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
-        val offlineRouter = OfflineRoute.builder(
-            RouteUrl(
-                accessToken = accessToken,
-                orgin = origin,
-                waypoints = waypoints,
-                destination = destination
-            )
-        ).build()
-
-        OfflineRouteRetrievalTask(navigatorNative, object : OnOfflineRouteFoundCallback {
-            override fun onRouteFound(routes: List<Route>) {
-                callback.onRouteReady(routes)
-            }
-
-            override fun onError(error: OfflineError) {
-                callback.onFailure(NavigationException(error.message))
-            }
-        })
-            .execute(offlineRouter.buildUrl())
+        // val offlineRouter = OfflineRoute.builder(
+        //     RouteUrl(
+        //         accessToken = accessToken,
+        //         orgin = origin,
+        //         waypoints = waypoints,
+        //         destination = destination
+        //     )
+        // ).build()
+        //
+        // OfflineRouteRetrievalTask(navigatorNative, object : OnOfflineRouteFoundCallback {
+        //     override fun onRouteFound(routes: List<Route>) {
+        //         callback.onRouteReady(routes)
+        //     }
+        //
+        //     override fun onError(error: OfflineError) {
+        //         callback.onFailure(NavigationException(error.message))
+        //     }
+        // })
+        //     .execute(offlineRouter.buildUrl())
     }
 
     override fun cancel() = Unit

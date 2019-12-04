@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.offboard.router.NavigationRoute
+import com.mapbox.navigation.route.onboard.model.Config
 
 class NavigationController(
     private val routeBuilderProvider: NavigationRoute.Builder,
@@ -41,6 +42,8 @@ class NavigationController(
     private val logger: Logger
     private val directionsSession: DirectionsSession
     private val tripSession: TripSession
+
+    private val config = Config("tilePath")
 
     init {
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
@@ -68,7 +71,9 @@ class NavigationController(
                 NavigationRoute.Builder::class.java to routeBuilderProvider
             )
             OnboardRouter -> arrayOf(
-                MapboxNativeNavigator::class.java to navigator
+                MapboxNativeNavigator::class.java to navigator,
+                String::class.java to "token",
+                Config::class.java to config
             )
             DirectionsSessionModule -> arrayOf(
                 Router::class.java to NavigationModuleProvider.createModule(
