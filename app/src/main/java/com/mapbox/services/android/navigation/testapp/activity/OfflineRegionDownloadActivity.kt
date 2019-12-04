@@ -101,7 +101,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                         status.requiredResourceCount,
                         status.completedResourceSize
                 )
-                if (status.isComplete) {
+                if (status.isComplete && !isDownloadCompleted) {
+                    isDownloadCompleted = true
                     downloadSelectedRegion()
                 }
             }
