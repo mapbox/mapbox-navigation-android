@@ -105,6 +105,9 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @BindView(R.id.cancelNavigationFab)
   FloatingActionButton cancelNavigationFab;
 
+  @BindView(R.id.sendAnomalyFab)
+  FloatingActionButton sendAnomalyFab;
+
   private final ComponentActivityLocationCallback callback = new ComponentActivityLocationCallback(this);
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
@@ -196,6 +199,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     // Add back regular location listener
     addLocationEngineListener();
+  }
+
+  @OnClick(R.id.sendAnomalyFab)
+  public void onSendAnomalyClick(FloatingActionButton floatingActionButton) {
+    addEventToHistoryFile("anomaly");
   }
 
   /*
@@ -324,6 +332,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void initializeNavigation(MapboxMap mapboxMap) {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken());
     navigation.setLocationEngine(locationEngine);
+    sendAnomalyFab.show();
     navigation.setCameraEngine(new DynamicCamera(mapboxMap));
     navigation.addProgressChangeListener(this);
     navigation.addMilestoneEventListener(this);

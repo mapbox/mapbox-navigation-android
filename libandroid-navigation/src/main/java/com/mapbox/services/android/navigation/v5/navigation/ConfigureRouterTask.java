@@ -18,13 +18,13 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   @Override
   protected Long doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      return navigator.configureRouter(tilePath);
+      return navigator.configureRouter(tilePath, null, null, null, null);
     }
   }
 
   @Override
   protected void onPostExecute(Long numberOfTiles) {
-    if (numberOfTiles > 0) {
+    if (numberOfTiles >= 0) {
       callback.onConfigured(numberOfTiles.intValue());
     } else {
       OfflineError error = new OfflineError("Offline tile configuration error: 0 tiles found in directory");
