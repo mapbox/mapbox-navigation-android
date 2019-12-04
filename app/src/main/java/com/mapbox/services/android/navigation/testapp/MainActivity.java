@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.OffboardRouterActivityJava;
 import com.mapbox.services.android.navigation.testapp.activity.OffboardRouterActivityKt;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
       new SampleItem(
         getString(R.string.title_offboard_router_java),
         getString(R.string.description_offboard_router_java),
-        OffboardRouterActivityKt.class
+        OffboardRouterActivityJava.class
       ),
       new SampleItem(
         getString(R.string.title_reroute),
