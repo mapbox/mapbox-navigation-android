@@ -15,13 +15,15 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.offboard.extension.mapToDirectionsRoute
+import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import com.mapbox.services.android.navigation.v5.utils.extensions.mapToDirectionsRoute
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
@@ -34,7 +36,6 @@ class OffboardRouterActivityKt : AppCompatActivity(),
 
     private var mapboxMap: MapboxMap? = null
 
-    // Navigation related variables
     private lateinit var navigationMapRoute: NavigationMapRoute
     private var directionsSession: DirectionsSession? = null
     private var route: DirectionsRoute? = null
@@ -108,26 +109,26 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     }
 
     private fun findRoute() {
-        if (directionsSession == null) {
-            val offboardRouter = MapboxOffboardRouter(
-                this,
-                Utils.getMapboxAccessToken(this)
-            )
-            directionsSession = MapboxDirectionsSession(
-                offboardRouter,
-                this
-            )
-        }
+        val offboardRouter = MapboxOffboardRouter(
+            NavigationRoute.builder(this)
+        )
+        directionsSession = MapboxDirectionsSession(
+            offboardRouter,
+            this
+        )
         ifNonNull(directionsSession, origin, destination) { session, originPoint, destinationPoint ->
             if (TurfMeasurement.distance(originPoint, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
                 return
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()
-            session.requestRoutes(
-                originPoint,
-                waypoints,
-                destinationPoint
-            )
+            val options = RouteOptionsNavigation.builder().apply {
+                accessToken(Utils.getMapboxAccessToken(this@OffboardRouterActivityKt))
+                origin(originPoint)
+                destination(destinationPoint)
+                waypoints.forEach { addWaypoint(it) }
+            }.build()
+
+            session.requestRoutes(options)
         }
     }
 

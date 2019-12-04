@@ -58,7 +58,7 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .waypointIndices(waypointIndices() ?: "")
         .waypointNames(waypointNames() ?: "")
         .waypointTargets(waypointTargets() ?: "")
-        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation()!!)
+        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation())
         .build()
 }
 

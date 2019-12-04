@@ -20,12 +20,14 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.route.DirectionsSession;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.route.model.Route;
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
 import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
-import com.mapbox.navigation.route.offboard.extension.MappersKt;
+import com.mapbox.navigation.route.offboard.router.NavigationRoute;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.utils.Utils;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.utils.extensions.Mappers;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
@@ -50,7 +52,6 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
 
   private MapboxMap mapboxMap;
 
-  // Navigation related variables
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
   private DirectionsSession directionsSession;
@@ -123,27 +124,27 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
   }
 
   private void findRoute() {
-    if (directionsSession == null) {
-      Router offboardRouter = new MapboxOffboardRouter(
-        this,
-        Utils.getMapboxAccessToken(this)
-      );
-      directionsSession = new MapboxDirectionsSession(
-        offboardRouter,
-        this
-      );
-    }
+    Router offboardRouter = new MapboxOffboardRouter(
+      NavigationRoute.builder(this)
+    );
+    directionsSession = new MapboxDirectionsSession(
+      offboardRouter,
+      this
+    );
     if (origin != null && destination != null) {
       if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
         List<Point> waypoints = new ArrayList<>();
         if (waypoint != null) {
           waypoints.add(waypoint);
         }
-        directionsSession.requestRoutes(
-          origin,
-          waypoints,
-          destination
-        );
+        RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder();
+        optionsBuilder.accessToken((Utils.getMapboxAccessToken(this)));
+        optionsBuilder.origin(origin);
+        optionsBuilder.destination(destination);
+        for (Point waypointPoint : waypoints) {
+          optionsBuilder.addWaypoint(waypointPoint);
+        }
+        directionsSession.requestRoutes(optionsBuilder.build());
       }
     }
   }
@@ -155,7 +156,7 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
   @Override
   public void onRoutesChanged(@NotNull List<Route> routes) {
     if (!routes.isEmpty()) {
-      route = MappersKt.mapToDirectionsRoute(routes.get(0));
+      route = Mappers.mapToDirectionsRoute(routes.get(0));
       navigationMapRoute.addRoute(route);
     }
   }
