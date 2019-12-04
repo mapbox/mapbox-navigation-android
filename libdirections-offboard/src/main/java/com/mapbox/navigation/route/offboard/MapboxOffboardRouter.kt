@@ -14,7 +14,7 @@ import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
 class MapboxOffboardRouter(
-    private val routeBuilderProvider: NavigationRoute.Builder
+    private val routeBuilder: NavigationRoute.Builder
 ) : Router {
 
     companion object {
@@ -27,7 +27,7 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
-        navigationRoute = routeBuilderProvider.routeOptions(routeOptions).build()
+        navigationRoute = routeBuilder.routeOptions(routeOptions).build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
 
             override fun onResponse(
