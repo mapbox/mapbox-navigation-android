@@ -32,6 +32,7 @@ class RouteProcessorThreadListener implements RouteProcessorBackgroundThread.Lis
   public void onNewRouteProgress(Location location, RouteProgress routeProgress) {
     notificationProvider.updateNavigationNotification(routeProgress);
     eventDispatcher.onProgressChange(location, routeProgress);
+    eventDispatcher.onEnhancedLocationUpdate(location);
   }
 
   /**

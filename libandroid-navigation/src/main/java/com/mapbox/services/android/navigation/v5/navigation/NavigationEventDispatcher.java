@@ -27,6 +27,7 @@ class NavigationEventDispatcher {
   private CopyOnWriteArrayList<OffRouteListener> offRouteListeners;
   private CopyOnWriteArrayList<FasterRouteListener> fasterRouteListeners;
   private CopyOnWriteArrayList<RawLocationListener> rawLocationListeners;
+  private CopyOnWriteArrayList<EnhancedLocationListener> enhancedLocationListeners;
   private NavigationMetricListener metricEventListener;
   private RouteUtils routeUtils;
 
@@ -41,6 +42,7 @@ class NavigationEventDispatcher {
     offRouteListeners = new CopyOnWriteArrayList<>();
     fasterRouteListeners = new CopyOnWriteArrayList<>();
     rawLocationListeners = new CopyOnWriteArrayList<>();
+    enhancedLocationListeners = new CopyOnWriteArrayList<>();
     this.routeUtils = routeUtils;
   }
 
@@ -152,6 +154,24 @@ class NavigationEventDispatcher {
     }
   }
 
+  void addEnhancedLocationListener(@NonNull EnhancedLocationListener enhancedLocationListener) {
+    if (enhancedLocationListeners.contains(enhancedLocationListener)) {
+      Timber.w("The specified EnhancedLocationListener has already been added to the stack.");
+      return;
+    }
+    enhancedLocationListeners.add(enhancedLocationListener);
+  }
+
+  void removeEnhancedLocationListener(@Nullable EnhancedLocationListener enhancedLocationListener) {
+    if (enhancedLocationListener == null) {
+      enhancedLocationListeners.clear();
+    } else if (!enhancedLocationListeners.contains(enhancedLocationListener)) {
+      Timber.w("The specified EnhancedLocationListener isn't found in stack, therefore, cannot be removed.");
+    } else {
+      enhancedLocationListeners.remove(enhancedLocationListener);
+    }
+  }
+
   void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
     checkForArrivalEvent(routeProgress);
     for (MilestoneEventListener milestoneEventListener : milestoneEventListeners) {
@@ -190,6 +210,12 @@ class NavigationEventDispatcher {
   void onLocationUpdate(Location location) {
     for (RawLocationListener listener : rawLocationListeners) {
       listener.onLocationUpdate(location);
+    }
+  }
+
+  void onEnhancedLocationUpdate(Location location) {
+    for (EnhancedLocationListener listener : enhancedLocationListeners) {
+      listener.onEnhancedLocationUpdate(location);
     }
   }
 

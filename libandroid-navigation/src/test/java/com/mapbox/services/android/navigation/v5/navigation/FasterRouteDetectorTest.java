@@ -9,6 +9,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteDetector;
@@ -22,6 +23,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -115,8 +117,9 @@ public class FasterRouteDetectorTest extends BaseTest {
       .build();
     Context context = mock(Context.class);
     when(context.getApplicationContext()).thenReturn(mock(Context.class));
-    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
+    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class, RETURNS_DEEP_STUBS),
+        mock(LocationEngine.class, RETURNS_DEEP_STUBS), mock(Navigator.class, RETURNS_DEEP_STUBS),
+        mock(FreeDriveLocationUpdater.class, RETURNS_DEEP_STUBS));
   }
 
   private RouteProgress obtainDefaultRouteProgress() throws Exception {

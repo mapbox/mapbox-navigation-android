@@ -5,6 +5,7 @@ import android.content.Context;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigator.Navigator;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -29,6 +30,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -355,8 +357,9 @@ public class MapboxNavigationTest extends BaseTest {
   private MapboxNavigation buildMapboxNavigationWithOptions(MapboxNavigationOptions options) {
     Context context = mock(Context.class);
     when(context.getApplicationContext()).thenReturn(context);
-    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
+    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class, RETURNS_DEEP_STUBS),
+      mock(LocationEngine.class, RETURNS_DEEP_STUBS), mock(Navigator.class, RETURNS_DEEP_STUBS),
+      mock(FreeDriveLocationUpdater.class, RETURNS_DEEP_STUBS));
   }
 
   private int searchForVoiceInstructionMilestone(MapboxNavigation navigation) {

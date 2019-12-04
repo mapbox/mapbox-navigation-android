@@ -2,12 +2,23 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.TileEndpointConfiguration;
 
 class OfflineNavigator {
   private final Navigator navigator;
+  private final String version;
+  private final String host;
+  private final String accessToken;
 
   OfflineNavigator(Navigator navigator) {
+    this(navigator, "", "", "");
+  }
+
+  OfflineNavigator(Navigator navigator, String version, String host, String accessToken) {
     this.navigator = navigator;
+    this.version = version;
+    this.host = host;
+    this.accessToken = accessToken;
   }
 
   /**
@@ -19,7 +30,9 @@ class OfflineNavigator {
    *                 can be called safely
    */
   void configure(String tilePath, OnOfflineTilesConfiguredCallback callback) {
-    new ConfigureRouterTask(navigator, tilePath, callback).execute();
+    new ConfigureRouterTask(navigator, tilePath,
+      new TileEndpointConfiguration(host, version, accessToken, ""),
+      callback).execute();
   }
 
   /**

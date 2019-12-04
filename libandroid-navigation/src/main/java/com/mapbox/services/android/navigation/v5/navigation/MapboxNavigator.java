@@ -103,6 +103,10 @@ class MapboxNavigator {
     return GeometryGeoJson.fromJson(routeGeometryWithBuffer);
   }
 
+  Navigator getNavigator() {
+    return navigator;
+  }
+
   private FixLocation buildFixLocationFromLocation(Location location) {
     Date time = new Date();
     Point rawPoint = Point.fromLngLat(location.getLongitude(), location.getLatitude());

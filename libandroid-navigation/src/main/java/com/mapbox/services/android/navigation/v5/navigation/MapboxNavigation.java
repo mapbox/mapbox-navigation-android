@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -28,15 +29,19 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.route.FasterRoute;
 import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
 import com.mapbox.services.android.navigation.v5.utils.ValidationUtils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import retrofit2.Callback;
 import timber.log.Timber;
@@ -66,12 +71,16 @@ public class MapboxNavigation implements ServiceConnection {
   private DirectionsRoute directionsRoute;
   private MapboxNavigationOptions options;
   private LocationEngine locationEngine;
+  private FreeDriveLocationUpdater freeDriveLocationUpdater;
   private LocationEngineRequest locationEngineRequest;
   private Set<Milestone> milestones;
   private final String accessToken;
   private Context applicationContext;
   private boolean isBound;
   private RouteRefresher routeRefresher;
+  private AtomicBoolean isFreeDriveEnabled = new AtomicBoolean(false);
+  private AtomicBoolean isFreeDriveConfigured = new AtomicBoolean(false);
+  private AtomicBoolean isActiveGuidanceOnGoing = new AtomicBoolean(false);
 
   static {
     NavigationLibraryLoader.load();
@@ -146,13 +155,16 @@ public class MapboxNavigation implements ServiceConnection {
   // Package private (no modifier) for testing purposes
   MapboxNavigation(@NonNull Context context, @NonNull String accessToken,
                    @NonNull MapboxNavigationOptions options, NavigationTelemetry navigationTelemetry,
-                   LocationEngine locationEngine) {
+                   LocationEngine locationEngine, Navigator navigator,
+                   FreeDriveLocationUpdater freeDriveLocationUpdater) {
     initializeContext(context);
     this.accessToken = accessToken;
     this.options = options;
     this.navigationTelemetry = navigationTelemetry;
     this.locationEngine = locationEngine;
+    this.mapboxNavigator = new MapboxNavigator(navigator);
     initializeForTest();
+    this.freeDriveLocationUpdater = freeDriveLocationUpdater;
   }
 
   // Package private (no modifier) for testing purposes
@@ -175,13 +187,14 @@ public class MapboxNavigation implements ServiceConnection {
    * also removes all listeners that have been attached.
    */
   public void onDestroy() {
-    stopNavigation();
+    killNavigation();
     removeOffRouteListener(null);
     removeProgressChangeListener(null);
     removeMilestoneEventListener(null);
     removeNavigationEventListener(null);
     removeFasterRouteListener(null);
     removeRawLocationListener(null);
+    removeEnhancedLocationListener(null);
   }
 
   // Public APIs
@@ -283,6 +296,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
+    freeDriveLocationUpdater.updateLocationEngine(locationEngine);
     // Setup telemetry with new engine
     navigationTelemetry.updateLocationEngineNameAndSimulation(locationEngine);
     // Notify service to get new location engine.
@@ -321,7 +335,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void setLocationEngineRequest(@NonNull LocationEngineRequest locationEngineRequest) {
     this.locationEngineRequest = locationEngineRequest;
-
+    freeDriveLocationUpdater.updateLocationEngineRequest(locationEngineRequest);
     if (isServiceAvailable()) {
       navigationService.updateLocationEngineRequest(locationEngineRequest);
     }
@@ -376,7 +390,26 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.1.0
    */
   public void stopNavigation() {
-    Timber.d("MapboxNavigation stopNavigation called");
+    isActiveGuidanceOnGoing.set(false);
+    if (isFreeDriveEnabled.get()) {
+      enableFreeDrive();
+    }
+    stopNavigationService();
+  }
+
+  private void killNavigation() {
+    killFreeDrive();
+    stopNavigationService();
+  }
+
+  private void killFreeDrive() {
+    if (isFreeDriveConfigured.get()) {
+      freeDriveLocationUpdater.kill();
+    }
+  }
+
+  private void stopNavigationService() {
+    Timber.d("MapboxNavigation stopped");
     if (isServiceAvailable()) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
@@ -576,7 +609,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   /**
-   * This adds a new raw location listener which is invoked when a new {@link android.location.Location}
+   * This adds a new raw location listener which is invoked when a new {@link Location}
    * has been pushed by the {@link LocationEngine}.
    * <p>
    * It is not possible to add the same listener implementation more then once and a warning will be
@@ -600,6 +633,83 @@ public class MapboxNavigation implements ServiceConnection {
    */
   public void removeRawLocationListener(@Nullable RawLocationListener rawLocationListener) {
     navigationEventDispatcher.removeRawLocationListener(rawLocationListener);
+  }
+
+  /**
+   * This adds a new enhanced location listener which is invoked when the best enhanced
+   * {@link Location} has been pushed. Either snapped (active guidance),
+   * map matched (free drive) or raw.
+   * <p>
+   * The behavior that causes this listeners callback to get invoked vary depending on whether
+   * free drive has been enabled using {@link #enableFreeDrive()} or disabled using
+   * {@link #disableFreeDrive()}.
+   * </p><p>
+   * It is not possible to add the same listener implementation more then once and a warning will be
+   * printed in the log if attempted.
+   * </p>
+   *
+   * @param enhancedLocationListener an implementation of {@code EnhancedLocationListener}
+   */
+  public void addEnhancedLocationListener(@NonNull EnhancedLocationListener enhancedLocationListener) {
+    navigationEventDispatcher.addEnhancedLocationListener(enhancedLocationListener);
+  }
+
+  /**
+   * This removes a specific enhanced location listener by passing in the instance of it or you can
+   * pass in null to remove all the listeners. When {@link #onDestroy()} is called, all listeners
+   * get removed automatically, removing the requirement for developers to manually handle this.
+   * <p>
+   * If the listener you are trying to remove does not exist in the list, a warning will be printed
+   * in the log.
+   *
+   * @param enhancedLocationListener an implementation of {@code EnhancedLocationListener}
+   */
+  public void removeEnhancedLocationListener(@Nullable EnhancedLocationListener enhancedLocationListener) {
+    navigationEventDispatcher.removeEnhancedLocationListener(enhancedLocationListener);
+  }
+
+  /**
+   * Calling this method enables free drive mode.
+   * <p>
+   * Best enhanced {@link Location} updates are received if an {@link EnhancedLocationListener} has been
+   * added using {@link #addEnhancedLocationListener(EnhancedLocationListener)}.
+   */
+  public void enableFreeDrive() {
+    isFreeDriveEnabled.set(true);
+    if (!isFreeDriveConfigured.get()) {
+      String tilePath = new File(applicationContext.getFilesDir(), "2019_04_13-00_00_11")
+          .getAbsolutePath();
+      freeDriveLocationUpdater.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
+        @Override
+        public void onConfigured(int numberOfTiles) {
+          Timber.d("DEBUG: onConfigured %d", numberOfTiles);
+          isFreeDriveConfigured.set(true);
+          if (!isActiveGuidanceOnGoing.get() && isFreeDriveEnabled.get()) {
+            freeDriveLocationUpdater.start();
+          }
+        }
+
+        @Override
+        public void onConfigurationError(@NotNull OfflineError error) {
+          Timber.e("Free drive: onConfigurationError %s", error.getMessage());
+          isFreeDriveConfigured.set(false);
+        }
+      });
+    } else {
+      if (!isActiveGuidanceOnGoing.get()) {
+        freeDriveLocationUpdater.start();
+      }
+    }
+  }
+
+  /**
+   * Calling this method disables free drive mode.
+   */
+  public void disableFreeDrive() {
+    isFreeDriveEnabled.set(false);
+    if (isFreeDriveConfigured.get()) {
+      freeDriveLocationUpdater.stop();
+    }
   }
 
   // Custom engines
@@ -865,6 +975,12 @@ public class MapboxNavigation implements ServiceConnection {
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
+    OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
+        "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
+        accessToken);
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
+        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
+        Executors.newSingleThreadScheduledExecutor());
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
@@ -881,13 +997,24 @@ public class MapboxNavigation implements ServiceConnection {
    * to prevent users from removing it.
    */
   private void initialize() {
+    mapboxNavigator = new MapboxNavigator(configureNavigator());
     // Initialize event dispatcher and add internal listeners
-    Navigator navigator = configureNavigator();
-    mapboxNavigator = new MapboxNavigator(navigator);
     navigationEventDispatcher = new NavigationEventDispatcher();
+    navigationEventDispatcher.addProgressChangeListener(new ProgressChangeListener() {
+      @Override
+      public void onProgressChange(@NotNull Location location, @NotNull RouteProgress routeProgress) {
+        navigationEventDispatcher.onEnhancedLocationUpdate(location);
+      }
+    });
     navigationEngineFactory = new NavigationEngineFactory();
     locationEngine = obtainLocationEngine();
     locationEngineRequest = obtainLocationEngineRequest();
+    OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
+        "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
+        accessToken); // TODO Replace with an api-routing-tiles-staging valid one
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
+        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
+        Executors.newSingleThreadScheduledExecutor());
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
@@ -954,7 +1081,9 @@ public class MapboxNavigation implements ServiceConnection {
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
+    isActiveGuidanceOnGoing.set(true);
     if (!isBound) {
+      disableFreeDrive();
       navigationTelemetry.startSession(directionsRoute, locationEngine);
       startNavigationService();
       navigationEventDispatcher.onNavigationEvent(true);
