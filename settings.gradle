@@ -14,6 +14,3 @@ include ':app',
         ':libdirections-session',
         ':libtrip-session',
         ':libnavigation-core'
-
-project(":annotations").projectDir = new File("vendor/mapbox-events-android/annotations")
-project(":annotations-processor").projectDir = new File("vendor/mapbox-events-android/annotations-processor")
