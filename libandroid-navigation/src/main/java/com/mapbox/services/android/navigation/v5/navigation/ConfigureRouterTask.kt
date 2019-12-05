@@ -17,6 +17,7 @@ internal class ConfigureRouterTask(
             tilePath,
             null,
             null,
+            2, // Two threads for downloading tiles simultaneously
             tileEndpointConfiguration
         )
 
