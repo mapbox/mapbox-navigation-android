@@ -30,9 +30,9 @@ class RouteUtils {
      * @return true if in arrival state, false if not
      */
     fun isArrivalEvent(routeProgress: RouteProgress): Boolean =
-        routeProgress.currentState()?.let { currentState ->
-            currentState == RouteProgressState.ROUTE_ARRIVED
-        } ?: false
+            routeProgress.currentState()?.let { currentState ->
+                currentState == RouteProgressState.ROUTE_ARRIVED
+            } ?: false
 
     /**
      * Looks at the current [RouteProgress] list of legs and
@@ -63,23 +63,23 @@ class RouteUtils {
      */
     fun calculateRemainingWaypoints(routeProgress: RouteProgress?): List<Point>? {
         val routeOptions = routeProgress?.directionsRoute()?.routeOptions()
-            ?: return null
+                ?: return null
         val coordinates = ArrayList(routeOptions.coordinates())
         val coordinatesSize = coordinates.size
         val remainingWaypointsCount = routeProgress.remainingWaypoints()
-            ?: return null
+                ?: return null
         if (coordinatesSize < remainingWaypointsCount) {
             return null
         }
         val waypointIndices = routeOptions.waypointIndices()
-            ?: return null
+                ?: return null
 
         val allWaypointIndices = waypointIndices.split(SEMICOLON).toTypedArray()
         val remainingWaypointIndices: Array<String> =
-            allWaypointIndices.copyOfRange(
-                allWaypointIndices.size - remainingWaypointsCount,
-                allWaypointIndices.size
-            )
+                allWaypointIndices.copyOfRange(
+                        allWaypointIndices.size - remainingWaypointsCount,
+                        allWaypointIndices.size
+                )
         return try {
             val firstRemainingWaypointIndex = remainingWaypointIndices[FIRST_POSITION].toInt()
             coordinates.subList(firstRemainingWaypointIndex, coordinatesSize)
@@ -106,16 +106,16 @@ class RouteUtils {
             return null
         }
         val waypointIndices = routeOptions.waypointIndices()
-            ?: return null
+                ?: return null
         val remainingWaypointsCount = routeProgress.remainingWaypoints()
-            ?: return null
+                ?: return null
 
         val allWaypointIndices = waypointIndices.split(SEMICOLON).toTypedArray()
         val remainingWaypointIndices: Array<String> =
-            allWaypointIndices.copyOfRange(
-                allWaypointIndices.size - remainingWaypointsCount,
-                allWaypointIndices.size
-            )
+                allWaypointIndices.copyOfRange(
+                        allWaypointIndices.size - remainingWaypointsCount,
+                        allWaypointIndices.size
+                )
         return try {
             val firstRemainingWaypointIndex = remainingWaypointIndices[FIRST_POSITION].toInt()
             val traveledCoordinatesCount = firstRemainingWaypointIndex - ORIGIN_WAYPOINT_INDEX_THRESHOLD
@@ -147,25 +147,25 @@ class RouteUtils {
             return null
         }
         val waypointNames = routeOptions.waypointNames()
-            ?: return null
+                ?: return null
         val remainingWaypointsCount = routeProgress.remainingWaypoints()
-            ?: return null
+                ?: return null
 
         val allWaypointNames = waypointNames.split(SEMICOLON).toTypedArray()
         val remainingWaypointNames: Array<String> =
-            allWaypointNames.copyOfRange(
-                allWaypointNames.size - remainingWaypointsCount,
-                allWaypointNames.size
-        )
+                allWaypointNames.copyOfRange(
+                        allWaypointNames.size - remainingWaypointsCount,
+                        allWaypointNames.size
+                )
         val resultWaypointNames =
-            arrayOfNulls<String>(remainingWaypointNames.size + ORIGIN_WAYPOINT_NAME_THRESHOLD)
+                arrayOfNulls<String>(remainingWaypointNames.size + ORIGIN_WAYPOINT_NAME_THRESHOLD)
         resultWaypointNames[ORIGIN_WAYPOINT_INDEX] = allWaypointNames[ORIGIN_WAYPOINT_INDEX]
         System.arraycopy(
-            remainingWaypointNames,
-            FIRST_POSITION,
-            resultWaypointNames,
-            SECOND_POSITION,
-            remainingWaypointNames.size
+                remainingWaypointNames,
+                FIRST_POSITION,
+                resultWaypointNames,
+                SECOND_POSITION,
+                remainingWaypointNames.size
         )
         return resultWaypointNames.map { it ?: "" }.toTypedArray()
     }
@@ -186,26 +186,30 @@ class RouteUtils {
             return null
         }
         val approaches = routeOptions.approaches()
-            ?: return null
+                ?: return null
         val remainingWaypointsCount = routeProgress.remainingWaypoints()
-            ?: return null
+                ?: return null
 
         val allApproaches = approaches.split(SEMICOLON).toTypedArray()
         val remainingApproaches: Array<String> = allApproaches.copyOfRange(
-            allApproaches.size - remainingWaypointsCount,
-            allApproaches.size
+                allApproaches.size - remainingWaypointsCount,
+                allApproaches.size
         )
         val resultApproaches = arrayOfNulls<String>(remainingApproaches.size + ORIGIN_APPROACH_THRESHOLD)
         resultApproaches[ORIGIN_APPROACH_INDEX] = allApproaches[ORIGIN_APPROACH_INDEX]
         System.arraycopy(
-            remainingApproaches,
-            FIRST_POSITION,
-            resultApproaches,
-            SECOND_POSITION,
-            remainingApproaches.size
+                remainingApproaches,
+                FIRST_POSITION,
+                resultApproaches,
+                SECOND_POSITION,
+                remainingApproaches.size
         )
         return resultApproaches.map { it ?: "" }.toTypedArray()
     }
+
+    private fun sortBannerInstructions(instructions: List<BannerInstructions>): List<BannerInstructions> =
+            instructions.toMutableList()
+                    .sortedBy { it.distanceAlongGeometry() }
 
     /**
      * Given the current step / current step distance remaining, this function will
@@ -217,9 +221,9 @@ class RouteUtils {
      * @since 0.13.0
      */
     fun findCurrentBannerInstructions(
-        currentStep: LegStep?,
-        stepDistanceRemaining: Double
-    ) : BannerInstructions? {
+            currentStep: LegStep?,
+            stepDistanceRemaining: Double
+    ) =
         currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
             instructions.firstOrNull { instruction ->
@@ -229,8 +233,5 @@ class RouteUtils {
                 else -> null
             }
         }
+    }
 
-    private fun sortBannerInstructions(instructions: List<BannerInstructions>): List<BannerInstructions> =
-        instructions.toMutableList()
-            .sortedBy { it.distanceAlongGeometry() }
-}

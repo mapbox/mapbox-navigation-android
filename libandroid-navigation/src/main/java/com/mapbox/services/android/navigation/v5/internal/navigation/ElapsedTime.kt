@@ -5,7 +5,7 @@ import com.mapbox.services.android.navigation.v5.internal.exception.NavigationEx
 import com.mapbox.services.android.navigation.v5.internal.utils.Time
 import kotlin.math.roundToLong
 
-internal class ElapsedTime(
+class ElapsedTime(
     private val timeProvider: Time = Time.SystemImpl
 ) {
     var start: Long? = null

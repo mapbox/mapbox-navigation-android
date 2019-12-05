@@ -33,8 +33,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-@SuppressLint("StaticFieldLeak")
-internal object NavigationTelemetry : NavigationMetricListener {
+@SuppressLint("StaticFieldLeak") object NavigationTelemetry : NavigationMetricListener {
     private const val MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android"
     private const val MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android"
     private const val MOCK_PROVIDER =

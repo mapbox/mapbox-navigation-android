@@ -5,7 +5,7 @@ import com.mapbox.services.android.navigation.v5.navigation.RouteRefresh
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import java.util.Date
 
-internal class RouteRefresher(
+class RouteRefresher(
     private val mapboxNavigation: MapboxNavigation,
     private val routeRefresh: RouteRefresh
 ) {

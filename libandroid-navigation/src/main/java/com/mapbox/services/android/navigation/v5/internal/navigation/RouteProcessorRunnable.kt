@@ -61,32 +61,32 @@ internal class RouteProcessorRunnable(
         ifNonNull(
             routeRefresher,
             routeProgress
-        ) { routeRefresher, routeProgress ->
-            if (routeRefresher.check(date)) {
-                routeRefresher.refresh(routeProgress)
+        ) { refresher, progress ->
+            if (refresher.check(date)) {
+                refresher.refresh(progress)
             }
         }
 
-        ifNonNull(routeProgress) { routeProgress ->
+        ifNonNull(routeProgress) { progress ->
             val engineFactory = navigation.retrieveEngineFactory()
             val userOffRoute =
-                isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory)
+                isUserOffRoute(options, status, rawLocation, progress, engineFactory)
             val snappedLocation =
-                findSnappedLocation(status, rawLocation, routeProgress, engineFactory)
+                findSnappedLocation(status, rawLocation, progress, engineFactory)
             val checkFasterRoute = checkFasterRoute(
-                options, snappedLocation, routeProgress, engineFactory,
+                options, snappedLocation, progress, engineFactory,
                 userOffRoute
             )
-            val milestones = findTriggeredMilestones(navigation, routeProgress)
+            val milestones = findTriggeredMilestones(navigation, progress)
 
             sendUpdateToResponseHandler(
                 userOffRoute,
                 milestones,
                 snappedLocation,
                 checkFasterRoute,
-                routeProgress
+                progress
             )
-            routeProcessor.updatePreviousRouteProgress(routeProgress)
+            routeProcessor.updatePreviousRouteProgress(progress)
             workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
         }
     }

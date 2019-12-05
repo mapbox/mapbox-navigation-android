@@ -207,10 +207,10 @@ class MapboxNavigationTest : BaseTest() {
         val locationEngine = mockk<LocationEngine>(relaxed = true)
         val locationEngineInstanceNotUsed = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = locationEngine
+        navigation._locationEngine = locationEngine
 
-        assertNotSame(locationEngineInstanceNotUsed, navigation.locationEngine)
-        assertEquals(locationEngine, navigation.locationEngine)
+        assertNotSame(locationEngineInstanceNotUsed, navigation._locationEngine)
+        assertEquals(locationEngine, navigation._locationEngine)
     }
 
     @Test
@@ -288,9 +288,9 @@ class MapboxNavigationTest : BaseTest() {
         val navigation = buildMapboxNavigationWith(locationEngine)
         val newLocationEngine = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = newLocationEngine
+        navigation._locationEngine = newLocationEngine
 
-        val currentLocationEngine = navigation.locationEngine
+        val currentLocationEngine = navigation._locationEngine
         assertNotSame(locationEngine, currentLocationEngine)
     }
 
@@ -308,7 +308,7 @@ class MapboxNavigationTest : BaseTest() {
         )
         val anotherLocationEngine = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = anotherLocationEngine
+        navigation._locationEngine = anotherLocationEngine
 
         verify {
             mockedFreeDriveLocationUpdater.updateLocationEngine(eq(anotherLocationEngine))

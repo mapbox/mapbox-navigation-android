@@ -87,8 +87,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
         rebuildNotification()
     }
 
-    override fun onNavigationStopped(applicationContext: Context) {
-        unregisterReceiver(applicationContext)
+    override fun onNavigationStopped(context: Context) {
+        unregisterReceiver(context)
     }
 
     // Package private (no modifier) for testing purposes
