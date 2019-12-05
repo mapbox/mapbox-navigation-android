@@ -6,7 +6,7 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObser
 /**
  * Interface for handling metric events.
  *
- * @since 1.0.0
+ * @since 0.43.0
  */
 interface MetricsReporter {
 
@@ -14,7 +14,7 @@ interface MetricsReporter {
      * Add event to metrics reporter when this event occurs.
      *
      * @param metricEvent event that should be handled
-     * @since 1.0.0
+     * @since 0.43.0
      */
     fun addEvent(metricEvent: MetricEvent)
 
@@ -22,7 +22,7 @@ interface MetricsReporter {
      * Add observer that triggered when metric event handled
      *
      * @param metricsObserver metric event handle observer
-     * @since 1.0.0
+     * @since 0.43.0
      */
     fun setMetricsObserver(metricsObserver: MetricsObserver)
 }
