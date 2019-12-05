@@ -14,6 +14,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigator.Navigator
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.navigation.*
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService.LocalBinder
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackSource
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackType
@@ -84,7 +85,6 @@ class MapboxNavigation : ServiceConnection {
     private val isActiveGuidanceOnGoing = AtomicBoolean(false)
     private var serviceIntent: Intent
 
-
     companion object {
         private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
         private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -115,8 +115,8 @@ class MapboxNavigation : ServiceConnection {
      * [.setLocationEngine].
      *
      *
-     * @param context     required in order to create and bind the navigation service
-     * @param options     a custom built `MapboxNavigationOptions` class
+     * @param context required in order to create and bind the navigation service
+     * @param options a custom built `MapboxNavigationOptions` class
      * @param accessToken a valid Mapbox access token
      * @see MapboxNavigationOptions
      *
@@ -133,13 +133,16 @@ class MapboxNavigation : ServiceConnection {
      * [.setLocationEngine].
      *
      *
-     * @param context     required in order to create and bind the navigation service
+     * @param context required in order to create and bind the navigation service
      * @param accessToken a valid Mapbox access token
      * @since 0.5.0
      */
     @JvmOverloads
-    constructor(context: Context, accessToken: String,
-                options: MapboxNavigationOptions = MapboxNavigationOptions.Builder().build()) {
+    constructor(
+        context: Context,
+        accessToken: String,
+        options: MapboxNavigationOptions = MapboxNavigationOptions.Builder().build()
+    ) {
         applicationContext = context
         this.accessToken = accessToken
         this.options = options
@@ -155,16 +158,20 @@ class MapboxNavigation : ServiceConnection {
      * user experience. Once this class is initialized, the options specified
      * through the options class cannot be modified.
      *
-     * @param context        required in order to create and bind the navigation service
-     * @param accessToken    a valid Mapbox access token
-     * @param options        a custom built `MapboxNavigationOptions` class
+     * @param context required in order to create and bind the navigation service
+     * @param accessToken a valid Mapbox access token
+     * @param options a custom built `MapboxNavigationOptions` class
      * @param locationEngine a LocationEngine to provide Location updates
      * @see MapboxNavigationOptions
      *
      * @since 0.19.0
      */
-    constructor(context: Context, accessToken: String,
-                options: MapboxNavigationOptions, locationEngine: LocationEngine) {
+    constructor(
+        context: Context,
+        accessToken: String,
+        options: MapboxNavigationOptions,
+        locationEngine: LocationEngine
+    ) {
         applicationContext = context
         this.accessToken = accessToken
         this.options = options
@@ -176,9 +183,13 @@ class MapboxNavigation : ServiceConnection {
 
     // TODO public?
 // Package private (no modifier) for testing purposes
-    constructor(context: Context, accessToken: String,
-                navigationTelemetry: NavigationTelemetry, locationEngine: LocationEngine,
-                mapboxNavigator: MapboxNavigator) {
+    constructor(
+        context: Context,
+        accessToken: String,
+        navigationTelemetry: NavigationTelemetry,
+        locationEngine: LocationEngine,
+        mapboxNavigator: MapboxNavigator
+    ) {
         applicationContext = context
         this.accessToken = accessToken
         options = MapboxNavigationOptions.Builder().build()
@@ -191,10 +202,15 @@ class MapboxNavigation : ServiceConnection {
     }
 
     // Package private (no modifier) for testing purposes
-    internal constructor(context: Context, accessToken: String,
-                         options: MapboxNavigationOptions, navigationTelemetry: NavigationTelemetry,
-                         locationEngine: LocationEngine, navigator: Navigator,
-                         freeDriveLocationUpdater: FreeDriveLocationUpdater?) {
+    internal constructor(
+        context: Context,
+        accessToken: String,
+        options: MapboxNavigationOptions,
+        navigationTelemetry: NavigationTelemetry,
+        locationEngine: LocationEngine,
+        navigator: Navigator,
+        freeDriveLocationUpdater: FreeDriveLocationUpdater?
+    ) {
         applicationContext = context
         this.accessToken = accessToken
         this.options = options
@@ -386,7 +402,7 @@ class MapboxNavigation : ServiceConnection {
      *
      * @param directionsRoute a [DirectionsRoute] that makes up the path your user should
      * traverse along
-     * @param routeType       either new or fresh to determine what data navigation should consider
+     * @param routeType either new or fresh to determine what data navigation should consider
      * @see MapboxNavigation.startNavigation
      */
     fun startNavigation(directionsRoute: DirectionsRoute, routeType: DirectionsRouteType) {
@@ -880,13 +896,16 @@ class MapboxNavigation : ServiceConnection {
      * There is a 20 second time period set after this method is called to do so.
      *
      * @param feedbackType from list of set feedback types
-     * @param description  an option description to provide more detail about the feedback
-     * @param source       either from the drop-in UI or a reroute
+     * @param description an option description to provide more detail about the feedback
+     * @param source either from the drop-in UI or a reroute
      * @return String feedbackId
      * @since 0.7.0
      */
-    fun recordFeedback(@FeedbackType feedbackType: String,
-                       description: String, @FeedbackSource source: String): String {
+    fun recordFeedback(
+        @FeedbackType feedbackType: String,
+        description: String,
+        @FeedbackSource source: String
+    ): String {
         return navigationTelemetry.recordFeedbackEvent(feedbackType, description, source)
     }
 
@@ -896,14 +915,18 @@ class MapboxNavigation : ServiceConnection {
      *
      * Uses a feedback ID to find the correct event and then adjusts the feedbackType and description.
      *
-     * @param feedbackId   generated from [MapboxNavigation.recordFeedback]
+     * @param feedbackId generated from [MapboxNavigation.recordFeedback]
      * @param feedbackType from list of set feedback types
-     * @param description  an optional description to provide more detail about the feedback
-     * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
+     * @param description an optional description to provide more detail about the feedback
+     * @param screenshot an optional encoded screenshot to provide more detail about the feedback
      * @since 0.8.0
      */
-    fun updateFeedback(feedbackId: String, @FeedbackType feedbackType: String,
-                       description: String, screenshot: String) {
+    fun updateFeedback(
+        feedbackId: String,
+        @FeedbackType feedbackType: String,
+        description: String,
+        screenshot: String
+    ) {
         navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description, screenshot)
     }
 
