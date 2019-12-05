@@ -87,7 +87,7 @@ public class MapboxNavigation implements ServiceConnection {
   private Set<Milestone> milestones;
   private final String accessToken;
   private Context applicationContext;
-  private boolean isBound;
+  private AtomicBoolean isBound = new AtomicBoolean(false);
   private RouteRefresher routeRefresher;
   private AtomicBoolean isFreeDriveEnabled = new AtomicBoolean(false);
   private AtomicBoolean isFreeDriveConfigured = new AtomicBoolean(false);
@@ -314,7 +314,7 @@ public class MapboxNavigation implements ServiceConnection {
     // Setup telemetry with new engine
     navigationTelemetry.updateLocationEngineNameAndSimulation(locationEngine);
     // Notify service to get new location engine.
-    if (isServiceAvailable()) {
+    if (isBound.get()) {
       navigationService.updateLocationEngine(locationEngine);
     }
   }
@@ -350,7 +350,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void setLocationEngineRequest(@NonNull LocationEngineRequest locationEngineRequest) {
     this.locationEngineRequest = locationEngineRequest;
     freeDriveLocationUpdater.updateLocationEngineRequest(locationEngineRequest);
-    if (isServiceAvailable()) {
+    if (isBound.get()) {
       navigationService.updateLocationEngineRequest(locationEngineRequest);
     }
   }
@@ -424,10 +424,9 @@ public class MapboxNavigation implements ServiceConnection {
 
   private void stopNavigationService() {
     Timber.d("MapboxNavigation stopped");
-    if (isServiceAvailable()) {
+    if (isBound.compareAndSet(true, false)) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
-      isBound = false;
       navigationService.endNavigation();
       MapboxMetricsReporter.disable();
       navigationService.stopSelf();
@@ -933,11 +932,15 @@ public class MapboxNavigation implements ServiceConnection {
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     Timber.d("Connected to service.");
-    NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
-    if (binder != null) {
-      navigationService = binder.getService();
-      navigationService.startNavigation(this);
-      isBound = true;
+    if (isBound.compareAndSet(false, true)) {
+      NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
+      if (binder != null) {
+        navigationService = binder.getService();
+        navigationService.startNavigation(this);
+      }
+      else {
+        isBound.set(false);
+      }
     }
   }
 
@@ -945,7 +948,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void onServiceDisconnected(ComponentName name) {
     Timber.d("Disconnected from service.");
     navigationService = null;
-    isBound = false;
+    isBound.set(false);
   }
 
   // TODO public?
@@ -1118,7 +1121,7 @@ public class MapboxNavigation implements ServiceConnection {
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     isActiveGuidanceOnGoing.set(true);
-    if (!isBound) {
+    if (!isBound.get()) {
       disableFreeDrive();
       navigationTelemetry.startSession(directionsRoute, locationEngine);
       startNavigationService();
@@ -1140,10 +1143,6 @@ public class MapboxNavigation implements ServiceConnection {
 
   private Intent getServiceIntent() {
     return new Intent(applicationContext, NavigationService.class);
-  }
-
-  private boolean isServiceAvailable() {
-    return navigationService != null && isBound;
   }
 
   private boolean checkInvalidLegIndex(int legIndex) {
