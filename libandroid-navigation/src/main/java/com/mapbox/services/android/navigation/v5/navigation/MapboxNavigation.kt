@@ -39,7 +39,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.snap.Snap
 import timber.log.Timber
 import java.io.File
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -65,15 +64,15 @@ class MapboxNavigation : ServiceConnection {
         private set
     private var options: MapboxNavigationOptions
     private var _locationEngine: LocationEngine
-    val locationEngine : LocationEngine
+    val locationEngine: LocationEngine
         get() {
             return _locationEngine
         }
     private lateinit var freeDriveLocationUpdater: FreeDriveLocationUpdater
     private lateinit var locationEngineRequest: LocationEngineRequest
     private val _milestones = mutableSetOf<Milestone>()
-    val milestones : Set<Milestone>
-        get(){
+    val milestones: Set<Milestone>
+        get() {
             return _milestones
         }
     private val accessToken: String
@@ -83,7 +82,7 @@ class MapboxNavigation : ServiceConnection {
     private val isFreeDriveEnabled = AtomicBoolean(false)
     private val isFreeDriveConfigured = AtomicBoolean(false)
     private val isActiveGuidanceOnGoing = AtomicBoolean(false)
-    private var serviceIntent:Intent
+    private var serviceIntent: Intent
 
 
     companion object {
@@ -1007,7 +1006,7 @@ class MapboxNavigation : ServiceConnection {
         return routeRefresher
     }
 
-    private fun initializeForTest(context: Context, freeDrive: FreeDriveLocationUpdater?=null) { // Initialize event dispatcher and add internal listeners
+    private fun initializeForTest(context: Context, freeDrive: FreeDriveLocationUpdater? = null) { // Initialize event dispatcher and add internal listeners
         eventDispatcher = NavigationEventDispatcher()
         navigationEngineFactory = NavigationEngineFactory()
         routeRefresher = RouteRefresher(this, RouteRefresh(accessToken))
@@ -1020,9 +1019,10 @@ class MapboxNavigation : ServiceConnection {
         val offlineNavigator = OfflineNavigator(mapboxNavigator.navigator,
                 "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
                 accessToken)
-        freeDriveLocationUpdater = freeDrive ?: FreeDriveLocationUpdater(_locationEngine, locationEngineRequest,
-                eventDispatcher, mapboxNavigator, offlineNavigator,
-                Executors.newSingleThreadScheduledExecutor())
+        freeDriveLocationUpdater = freeDrive
+                ?: FreeDriveLocationUpdater(_locationEngine, locationEngineRequest,
+                        eventDispatcher, mapboxNavigator, offlineNavigator,
+                        Executors.newSingleThreadScheduledExecutor())
         initializeTelemetry(context)
         // Create and add default milestones if enabled.
         _milestones.clear()
@@ -1037,7 +1037,7 @@ class MapboxNavigation : ServiceConnection {
      * be changed later on using their corresponding setter. An internal progressChangeListeners used
      * to prevent users from removing it.
      */
-    private fun initialize(context:Context) {
+    private fun initialize(context: Context) {
         navigationEngineFactory = NavigationEngineFactory()
         _locationEngine = LocationEngineProvider.getBestLocationEngine(context)
         mapboxNavigator = MapboxNavigator(configureNavigator())
@@ -1119,12 +1119,12 @@ class MapboxNavigation : ServiceConnection {
     }
 
     private fun checkInvalidLegIndex(legIndex: Int) =
-        route.legs()?.size?.let { legSize ->
-            if (legIndex < 0 || legIndex > legSize - 1) {
-                Timber.e("Invalid leg index update: %s Current leg index size: %s", legIndex, legSize)
-                true
-            } else {
-                false
-            }
-        } ?: false
+            route.legs()?.size?.let { legSize ->
+                if (legIndex < 0 || legIndex > legSize - 1) {
+                    Timber.e("Invalid leg index update: %s Current leg index size: %s", legIndex, legSize)
+                    true
+                } else {
+                    false
+                }
+            } ?: false
 }
