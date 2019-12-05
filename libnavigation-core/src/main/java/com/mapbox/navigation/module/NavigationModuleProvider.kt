@@ -49,11 +49,11 @@ internal object NavigationModuleProvider {
                     } catch (ex: NoSuchMethodException) {
                         // try to create instance of Kotlin object
                         try {
-                            implClass.getDeclaredField("INSTANCE").get(null)
+                            implClass.getField("INSTANCE").get(null)
                         } catch (ex: NoSuchMethodException) {
                             // try to get instance of singleton
                             try {
-                                implClass.getDeclaredMethod("getInstance").invoke(null)
+                                implClass.getMethod("getInstance").invoke(null)
                             } catch (ex: NoSuchMethodException) {
                                 throw MapboxInvalidModuleException(type)
                             }

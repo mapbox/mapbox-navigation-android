@@ -8,7 +8,7 @@ import android.util.Log
  * Priority constant for the println method; use Logger.v
  *
  *
- * This log level will print all logs.
+ * This log priority will print all logs.
  *
  */
 const val VERBOSE = Log.VERBOSE
@@ -17,7 +17,7 @@ const val VERBOSE = Log.VERBOSE
  * Priority constant for the println method; use Logger.d.
  *
  *
- * This log level will print all logs except verbose.
+ * This log priority will print all logs except verbose.
  *
  */
 const val DEBUG = Log.DEBUG
@@ -26,7 +26,7 @@ const val DEBUG = Log.DEBUG
  * Priority constant for the println method; use Logger.i.
  *
  *
- * This log level will print all logs except verbose and debug.
+ * This log priority will print all logs except verbose and debug.
  *
  */
 const val INFO = Log.INFO
@@ -35,7 +35,7 @@ const val INFO = Log.INFO
  * Priority constant for the println method; use Logger.w.
  *
  *
- * This log level will print only warn and error logs.
+ * This log priority will print only warn and error logs.
  *
  */
 const val WARN = Log.WARN
@@ -44,7 +44,7 @@ const val WARN = Log.WARN
  * Priority constant for the println method; use Logger.e.
  *
  *
- * This log level will print only error logs.
+ * This log priority will print only error logs.
  *
  */
 const val ERROR = Log.ERROR
@@ -53,7 +53,7 @@ const val ERROR = Log.ERROR
  * Priority constant for the println method.
  *
  *
- * This log level won't print any logs.
+ * This log priority won't print any logs.
  *
  */
 const val NONE = 99
