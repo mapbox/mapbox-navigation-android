@@ -221,8 +221,8 @@ class RouteUtils {
      * @since 0.13.0
      */
     fun findCurrentBannerInstructions(
-            currentStep: LegStep?,
-            stepDistanceRemaining: Double
+        currentStep: LegStep?,
+        stepDistanceRemaining: Double
     ) =
         currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
@@ -234,4 +234,3 @@ class RouteUtils {
             }
         }
     }
-

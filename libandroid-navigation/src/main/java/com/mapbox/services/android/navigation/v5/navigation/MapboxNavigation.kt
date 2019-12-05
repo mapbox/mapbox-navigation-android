@@ -13,8 +13,13 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigator.Navigator
 import com.mapbox.services.android.navigation.BuildConfig
-import com.mapbox.services.android.navigation.v5.internal.navigation.*
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEventDispatcher
+import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry
+import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator
+import com.mapbox.services.android.navigation.v5.internal.navigation.RouteRefresher
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService.LocalBinder
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackSource
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackType
@@ -184,11 +189,11 @@ class MapboxNavigation : ServiceConnection {
     // TODO public?
 // Package private (no modifier) for testing purposes
     constructor(
-        context: Context,
-        accessToken: String,
-        navigationTelemetry: NavigationTelemetry,
-        locationEngine: LocationEngine,
-        mapboxNavigator: MapboxNavigator
+            context: Context,
+            accessToken: String,
+            navigationTelemetry: NavigationTelemetry,
+            locationEngine: LocationEngine,
+            mapboxNavigator: MapboxNavigator
     ) {
         applicationContext = context
         this.accessToken = accessToken
