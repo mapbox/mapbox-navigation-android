@@ -7,19 +7,18 @@ import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
-    distance = distance()!!,
-    duration = duration()?.toLong()!!,
+    distance = distance() ?: .0,
+    duration = duration()?.toLong() ?: 0,
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
-    legs = legs()?.let { RouteLegsNavigation(it) },
+    legs = legs(),
     routeOptions = routeOptions()?.mapToRouteOptionsNavigation(),
     voiceLanguage = voiceLanguage()
 )
