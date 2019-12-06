@@ -18,7 +18,7 @@ class MapboxLoggerTest {
     fun verboseTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = VERBOSE
 
         MapboxLogger.v("some message", "TAG", throwable)
@@ -32,7 +32,7 @@ class MapboxLoggerTest {
     fun verboseTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
         MapboxLogger.v("some message", "TAG", throwable)
@@ -46,7 +46,7 @@ class MapboxLoggerTest {
     fun debugTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
         MapboxLogger.d("some message", "TAG", throwable)
@@ -60,7 +60,7 @@ class MapboxLoggerTest {
     fun debugTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
         MapboxLogger.d("some message", "TAG", throwable)
@@ -74,7 +74,7 @@ class MapboxLoggerTest {
     fun infoTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
         MapboxLogger.i("some message", "TAG", throwable)
@@ -88,7 +88,7 @@ class MapboxLoggerTest {
     fun infoTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
         MapboxLogger.i("some message", "TAG", throwable)
@@ -102,7 +102,7 @@ class MapboxLoggerTest {
     fun warningTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
         MapboxLogger.w("some message", "TAG", throwable)
@@ -116,7 +116,7 @@ class MapboxLoggerTest {
     fun warningTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
         MapboxLogger.w("some message", "TAG", throwable)
@@ -130,7 +130,7 @@ class MapboxLoggerTest {
     fun errorTestSuccessful() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
         MapboxLogger.e("some message", "TAG", throwable)
@@ -144,7 +144,7 @@ class MapboxLoggerTest {
     fun errorTestIncorrectLogLevel() {
         val throwable = mockk<Throwable>()
         val loggerObserver = mockk<LoggerObserver>(relaxed = true)
-        MapboxLogger.addObserver(loggerObserver)
+        MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = NONE
 
         MapboxLogger.e("some message", "TAG", throwable)

@@ -121,7 +121,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
     MapboxLogger.INSTANCE.setLogLevel(LogPriority.DEBUG);
-    MapboxLogger.INSTANCE.addObserver(this);
+    MapboxLogger.INSTANCE.setObserver(this);
     routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
 
     mapView.onCreate(savedInstanceState);
@@ -241,11 +241,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private void findRouteWith(LocationEngineResult result) {
     Location userLocation = result.getLastLocation();
     if (userLocation == null) {
-      MapboxLogger.INSTANCE.d(
-              "calculateRoute: User location is null, therefore, origin can't be set.",
-              null,
-              null
-      );
+      MapboxLogger.INSTANCE.d("calculateRoute: User location is null, therefore, origin can't be set.");
       return;
     }
     Point origin = Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude());
@@ -265,7 +261,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-        MapboxLogger.INSTANCE.d("Url: " + call.request().url().toString(), null, null);
+        MapboxLogger.INSTANCE.d("Url: " + call.request().url().toString());
         if (response.body() != null) {
           if (!response.body().routes().isEmpty()) {
             MockNavigationActivity.this.route = response.body().routes().get(0);
@@ -277,7 +273,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-        MapboxLogger.INSTANCE.e("onFailure: navigation.getRoute()", null, throwable);
+        MapboxLogger.INSTANCE.e("onFailure: navigation.getRoute()", throwable);
       }
     });
   }
@@ -288,24 +284,16 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    MapboxLogger.INSTANCE.d(
-            "Milestone Event Occurred with id: " + milestone.getIdentifier(),
-            null,
-            null
-    );
-    MapboxLogger.INSTANCE.d(
-            "Voice instruction: " + instruction,
-            null,
-            null
-    );
+    MapboxLogger.INSTANCE.d("Milestone Event Occurred with id: " + milestone.getIdentifier());
+    MapboxLogger.INSTANCE.d("Voice instruction: " + instruction);
   }
 
   @Override
   public void onRunning(boolean running) {
     if (running) {
-      MapboxLogger.INSTANCE.d("onRunning: Started", null, null);
+      MapboxLogger.INSTANCE.d("onRunning: Started");
     } else {
-      MapboxLogger.INSTANCE.d("onRunning: Stopped", null, null);
+      MapboxLogger.INSTANCE.d("onRunning: Stopped");
     }
   }
 
@@ -321,11 +309,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       isRefreshing = true;
       routeRefresh.refresh(routeProgress, this);
     }
-    MapboxLogger.INSTANCE.d(
-            "onProgressChange: fraction of route traveled: " + routeProgress.fractionTraveled(),
-            null,
-            null
-    );
+    MapboxLogger.INSTANCE.d("onProgressChange: fraction of route traveled: " + routeProgress.fractionTraveled());
   }
 
   /*
@@ -365,7 +349,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    MapboxLogger.INSTANCE.removeObserver(this);
     navigation.onDestroy();
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
@@ -392,8 +375,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
-    MapboxLogger.INSTANCE.d(metric, "METRICS_LOG", null);
-    MapboxLogger.INSTANCE.d(jsonStringData, "METRICS_LOG", null);
+    MapboxLogger.INSTANCE.d(metric, "METRICS_LOG");
+    MapboxLogger.INSTANCE.d(jsonStringData, "METRICS_LOG");
   }
 
   @Override
