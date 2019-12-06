@@ -1,3 +1,5 @@
+@file:JvmName("Mappers")
+
 package com.mapbox.navigation.route.offboard.extension
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -58,7 +60,7 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .waypointIndices(waypointIndices() ?: "")
         .waypointNames(waypointNames() ?: "")
         .waypointTargets(waypointTargets() ?: "")
-        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation()!!)
+        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation())
         .build()
 }
 
