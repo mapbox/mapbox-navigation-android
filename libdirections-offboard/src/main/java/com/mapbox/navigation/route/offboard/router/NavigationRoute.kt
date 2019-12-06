@@ -288,19 +288,18 @@ constructor(
 
             options.radiuses?.let { radiuses ->
                 if (radiuses.isNotEmpty()) {
-                    val result =
-                        // TODO Convert from String separated by ; into an array of double
-                        radiuses.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() } as DoubleArray
-                    directionsBuilder.radiuses(*result)
+                    radiuses.convertToListOfDoubles(SEMICOLON[0])?.toDoubleArray()?.let { result ->
+                        directionsBuilder.radiuses(*result)
+                    }
                 }
             }
 
             options.bearings?.let { bearings ->
                 if (bearings.isNotEmpty()) {
-                    // TODO Convert from String separated by ; into pairs of angle and tolerance
-                    bearings.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }.forEach {
-                        directionsBuilder.addBearing(it.toDouble(), it.toDouble())
-                    }
+                    bearings.convertToListOfPairsOfDoubles(SEMICOLON[0], COMMA[0])
+                        ?.forEach { pair ->
+                            directionsBuilder.addBearing(pair.first, pair.second)
+                        }
                 }
             }
 
@@ -455,5 +454,30 @@ constructor(
                 directionsBuilder.addBearing(destination.bearingAngle, destination.tolerance)
             }
         }
+
+        private fun String.convertToListOfDoubles(separator: Char = ';'): List<Double>? =
+            try {
+                this.split(separator).map { token ->
+                    token.toDouble()
+                }
+            } catch (e: Exception) {
+                null
+            }
+
+        private fun String.convertToListOfPairsOfDoubles(
+            firstSeparator: Char = ';',
+            secondSeparator: Char = ','
+        ): List<Pair<Double, Double>>? =
+            try {
+                val pairs = split(firstSeparator)
+                val result = mutableListOf<Pair<Double, Double>>()
+                pairs.forEach { pair ->
+                    val parts = pair.split(secondSeparator)
+                    result.add(Pair(parts[0].toDouble(), parts[1].toDouble()))
+                }
+                result.toList()
+            } catch (e: Exception) {
+                null
+            }
     }
 }
