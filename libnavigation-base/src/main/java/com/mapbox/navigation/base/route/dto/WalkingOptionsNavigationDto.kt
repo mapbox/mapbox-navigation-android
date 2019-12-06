@@ -1,6 +1,7 @@
-package com.mapbox.navigation.base.route.model
+package com.mapbox.navigation.base.route.dto
 
 import com.google.gson.annotations.SerializedName
+import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 
 /**
  * Class for specifying options for use with the walking profile.
@@ -17,16 +18,16 @@ import com.google.gson.annotations.SerializedName
  * allowed range of values is from -1 to 1, where -1 indicates indicates preference to avoid
  * alleys, 1 indicates preference to favor alleys, and 0 indicates no preference (the default).
  */
-data class WalkingOptionsNavigation(
-    val walkingSpeed: Double? = null,
-    val walkwayBias: Double? = null,
-    val alleyBias: Double? = null
+data class WalkingOptionsNavigationDto(
+    @SerializedName("walking_speed") val walkingSpeed: Double? = null,
+    @SerializedName("walkway_bias") val walkwayBias: Double? = null,
+    @SerializedName("alley_bias") val alleyBias: Double? = null
 ) {
     companion object {
         /**
-         * Build a new [WalkingOptionsNavigation] object with no defaults.
+         * Build a new [WalkingOptionsNavigationDto] object with no defaults.
          *
-         * @return a [Builder] object for creating a [WalkingOptionsNavigation] object
+         * @return a [Builder] object for creating a [WalkingOptionsNavigationDto] object
          */
         @JvmStatic
         fun builder(): Builder {
@@ -43,11 +44,11 @@ data class WalkingOptionsNavigation(
         var alleyBias: Double? = null
 
         /**
-         * Builds a [WalkingOptionsNavigation] object with the specified configurations.
+         * Builds a [WalkingOptionsNavigationDto] object with the specified configurations.
          *
          * @return a WalkingOptionsNavigation object
          */
-        fun build(): WalkingOptionsNavigation = WalkingOptionsNavigation(
+        fun build(): WalkingOptionsNavigationDto = WalkingOptionsNavigationDto(
             walkingSpeed = walkingSpeed,
             walkwayBias = walkwayBias,
             alleyBias = alleyBias
@@ -93,3 +94,9 @@ data class WalkingOptionsNavigation(
         }
     }
 }
+
+fun WalkingOptionsNavigationDto.mapToModel() = WalkingOptionsNavigation(
+    walkingSpeed = walkingSpeed,
+    walkwayBias = walkwayBias,
+    alleyBias = alleyBias
+)

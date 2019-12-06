@@ -44,8 +44,8 @@ fun RouteLeg.mapToRouteLeg() = RouteLegNavigation.Builder()
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
-    distance = distance()!!,
-    duration = duration()?.toLong()!!,
+    distance = distance() ?: .0,
+    duration = duration()?.toLong() ?: 0,
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
