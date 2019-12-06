@@ -4,8 +4,8 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.logger.annotations.LogLevel
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
+import timber.log.Timber
 
 @MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
 object MapboxLogger : Logger {
