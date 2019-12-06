@@ -233,7 +233,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Exception exception) {
-        MapboxLogger.INSTANCE.e(exception.getLocalizedMessage(), null, exception);
+        MapboxLogger.INSTANCE.e(exception.getLocalizedMessage(), exception);
       }
     });
   }
