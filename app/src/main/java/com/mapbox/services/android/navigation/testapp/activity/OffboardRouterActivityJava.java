@@ -106,7 +106,7 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
       mapboxMap.addMarker(new MarkerOptions().position(point));
       findRoute();
     } else {
-      Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show();
+      Toast.makeText(this, "Only 2 waypoints supported for this example", Toast.LENGTH_LONG).show();
       clearMap();
     }
     return false;
@@ -138,7 +138,7 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
           waypoints.add(waypoint);
         }
         RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder();
-        optionsBuilder.accessToken((Utils.getMapboxAccessToken(this)));
+        optionsBuilder.accessToken(Utils.getMapboxAccessToken(this));
         optionsBuilder.origin(origin);
         optionsBuilder.destination(destination);
         for (Point waypointPoint : waypoints) {

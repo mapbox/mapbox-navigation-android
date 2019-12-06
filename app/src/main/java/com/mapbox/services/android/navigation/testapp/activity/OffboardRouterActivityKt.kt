@@ -86,7 +86,7 @@ class OffboardRouterActivityKt : AppCompatActivity(),
                 findRoute()
             }
             else -> {
-                Toast.makeText(this, "Only 2 waypoints supported", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Only 2 waypoints supported for this example", Toast.LENGTH_LONG).show()
                 clearMap()
             }
         }

@@ -1,3 +1,5 @@
+@file:JvmName("Mappers")
+
 package com.mapbox.navigation.route.offboard.extension
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
