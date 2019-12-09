@@ -10,10 +10,11 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteCallback
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.services.android.navigation.v5.utils.extensions.mapToWalkingOptions
+import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
@@ -178,7 +179,8 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.origin = NavigationRouteWaypoint(origin, angle, tolerance)
+            this.origin =
+                NavigationRouteWaypoint(origin, angle, tolerance)
             return this
         }
 
@@ -192,7 +194,8 @@ internal constructor(
          * @since 0.50
          */
         fun destination(destination: Point): Builder {
-            this.destination = NavigationRouteWaypoint(destination, null, null)
+            this.destination =
+                NavigationRouteWaypoint(destination, null, null)
             return this
         }
 
@@ -214,7 +217,8 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.destination = NavigationRouteWaypoint(destination, angle, tolerance)
+            this.destination =
+                NavigationRouteWaypoint(destination, angle, tolerance)
             return this
         }
 
@@ -231,7 +235,13 @@ internal constructor(
          * @since 0.5.0
          */
         fun addWaypoint(waypoint: Point): Builder {
-            this.waypoints.add(NavigationRouteWaypoint(waypoint, null, null))
+            this.waypoints.add(
+                NavigationRouteWaypoint(
+                    waypoint,
+                    null,
+                    null
+                )
+            )
             return this
         }
 
@@ -262,7 +272,13 @@ internal constructor(
             angle: Double?,
             tolerance: Double?
         ): Builder {
-            this.waypoints.add(NavigationRouteWaypoint(waypoint, angle, tolerance))
+            this.waypoints.add(
+                NavigationRouteWaypoint(
+                    waypoint,
+                    angle,
+                    tolerance
+                )
+            )
             return this
         }
 
@@ -295,7 +311,7 @@ internal constructor(
          *
          * @since 0.5.0
          */
-        fun language(language: java.util.Locale): Builder {
+        fun language(language: Locale): Builder {
             directionsBuilder.language(language)
             return this
         }
@@ -598,8 +614,8 @@ internal constructor(
          * @param navigationWalkingOptions object holding walking options
          * @return this builder for chaining options together
          */
-        fun walkingOptions(navigationWalkingOptions: NavigationWalkingOptions): Builder {
-            directionsBuilder.walkingOptions(navigationWalkingOptions.walkingOptions)
+        fun walkingOptions(navigationWalkingOptions: WalkingOptionsNavigation): Builder {
+            directionsBuilder.walkingOptions(navigationWalkingOptions.mapToWalkingOptions())
             return this
         }
 
@@ -751,17 +767,17 @@ internal constructor(
 
         private fun assembleWaypoints() {
             origin?.let { origin ->
-                directionsBuilder.origin(origin.waypoint)
+                directionsBuilder.origin(origin.point)
                 directionsBuilder.addBearing(origin.bearingAngle, origin.tolerance)
             }
 
             for (waypoint in waypoints) {
-                directionsBuilder.addWaypoint(waypoint.waypoint)
+                directionsBuilder.addWaypoint(waypoint.point)
                 directionsBuilder.addBearing(waypoint.bearingAngle, waypoint.tolerance)
             }
 
             destination?.let { destination ->
-                directionsBuilder.destination(destination.waypoint)
+                directionsBuilder.destination(destination.point)
                 directionsBuilder.addBearing(destination.bearingAngle, destination.tolerance)
             }
         }

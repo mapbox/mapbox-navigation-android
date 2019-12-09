@@ -15,8 +15,8 @@ android {
 }
 
 dependencies {
-    api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxCore
+    api dependenciesList.mapboxSdkGeoJSON
 
     implementation dependenciesList.supportAnnotation
 
@@ -24,4 +24,8 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    // Unit testing
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }

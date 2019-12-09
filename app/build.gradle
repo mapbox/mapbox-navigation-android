@@ -84,6 +84,8 @@ android {
 }
 
 dependencies {
+  implementation project(':libdirections-session')
+  implementation project(':libdirections-offboard')
   implementation project(':libnavigation-util')
 
   //ktlint

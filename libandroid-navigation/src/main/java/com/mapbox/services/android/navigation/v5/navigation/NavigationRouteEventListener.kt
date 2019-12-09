@@ -1,9 +1,12 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.services.android.navigation.v5.navigation
 
+import com.mapbox.navigation.utils.time.ElapsedTime
 import okhttp3.Call
 import okhttp3.EventListener
 
-internal class NavigationRouteEventListener @JvmOverloads constructor(
+class NavigationRouteEventListener
+@JvmOverloads
+constructor(
     val time: ElapsedTime = ElapsedTime()
 ) : EventListener() {
 

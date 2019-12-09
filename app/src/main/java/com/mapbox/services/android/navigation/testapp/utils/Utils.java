@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp;
+package com.mapbox.services.android.navigation.testapp.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;

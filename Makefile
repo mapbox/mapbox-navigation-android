@@ -12,6 +12,20 @@ test:
 	# See libandroid-navigation/build.gradle for details
 	./gradlew :libandroid-navigation:test
 	./gradlew :libandroid-navigation-ui:test
+	./gradlew :libdirections-hybrid:test
+	./gradlew :libdirections-offboard:test
+	./gradlew :libdirections-onboard:test
+	./gradlew :libdirections-session:test
+	./gradlew :liblogger:test
+	./gradlew :libnavigation-base:test
+	./gradlew :libnavigation-core:test
+	./gradlew :libnavigation-metrics:test
+	./gradlew :libnavigation-util:test
+	./gradlew :libnavigator:test
+	./gradlew :libtrip-notification:test
+	./gradlew :libtrip-service:test
+	./gradlew :libtrip-session:test
+	./gradlew :libnavigation-core:test
 
 build-release:
 	./gradlew :libandroid-navigation:assembleRelease

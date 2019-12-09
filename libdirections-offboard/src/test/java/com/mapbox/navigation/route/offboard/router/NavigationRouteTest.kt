@@ -1,22 +1,19 @@
-package com.mapbox.services.android.navigation.v5.navigation
+package com.mapbox.navigation.route.offboard.router
 
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
-import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import com.mapbox.services.android.navigation.v5.BaseTest
-import com.mapbox.services.android.navigation.v5.testsupport.Extensions
-import com.mapbox.services.android.navigation.v5.testsupport.mockkStaticSupport
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.verify
-import java.util.ArrayList
 import java.util.Locale
 import junit.framework.Assert.assertNotNull
 import okhttp3.EventListener
@@ -28,15 +25,20 @@ import org.junit.BeforeClass
 import org.junit.Test
 import retrofit2.Call
 
-class NavigationRouteTest : BaseTest() {
+class NavigationRouteTest {
 
     companion object {
         @BeforeClass
         @JvmStatic
         fun init() {
-            mockkStaticSupport(Extensions.ContextEx)
+            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
         }
+
+        const val ACESS_TOKEN = "pk.XXX"
     }
+
+    val origin: Point = Point.fromLngLat(0.0, 0.0)
+    val destination: Point = Point.fromLngLat(1.0, 1.0)
 
     @MockK
     private lateinit var context: Context
@@ -51,9 +53,11 @@ class NavigationRouteTest : BaseTest() {
     @Throws(Exception::class)
     fun sanityTest() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
+            .routeOptions(
+                RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
+                    .origin(origin)
+                    .destination(destination).build()
+            )
             .build()
         assertNotNull(navigationRoute)
     }
@@ -62,10 +66,13 @@ class NavigationRouteTest : BaseTest() {
     @Throws(Exception::class)
     fun changingDefaultValueToCustomWorksProperly() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .profile(DirectionsCriteria.PROFILE_CYCLING)
+            .routeOptions(
+                RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
+                    .origin(origin)
+                    .destination(destination)
+                    .profile(DirectionsCriteria.PROFILE_CYCLING)
+                    .build()
+            )
             .build()
 
         assertThat(
@@ -77,13 +84,17 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun addApproachesIncludedInRequest() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .profile(DirectionsCriteria.PROFILE_CYCLING)
-            .addApproaches(
-                DirectionsCriteria.APPROACH_CURB,
-                DirectionsCriteria.APPROACH_UNRESTRICTED
+            .routeOptions(
+                RouteOptionsNavigation.builder()
+                    .accessToken(ACESS_TOKEN)
+                    .origin(origin)
+                    .profile(DirectionsCriteria.PROFILE_CYCLING)
+                    .destination(destination)
+                    .approaches(
+                        DirectionsCriteria.APPROACH_CURB,
+                        DirectionsCriteria.APPROACH_UNRESTRICTED
+                    )
+                    .build()
             )
             .build()
 
@@ -96,12 +107,16 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun checksWaypointIndicesIncludedInRequest() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .addWaypoint(Point.fromLngLat(1.0, 3.0))
-            .addWaypoint(Point.fromLngLat(1.0, 3.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .addWaypointIndices(0, 2, 3)
+            .routeOptions(
+                RouteOptionsNavigation.builder()
+                    .origin(origin)
+                    .destination(destination)
+                    .addWaypoint(Point.fromLngLat(1.0, 3.0))
+                    .addWaypoint(Point.fromLngLat(1.0, 3.0))
+                    .accessToken(ACESS_TOKEN)
+                    .waypointIndices(arrayOf(0, 2, 3).joinToString(separator = ";"))
+                    .build()
+            )
             .build()
 
         assertThat(
@@ -113,13 +128,14 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun addWaypointNamesIncludedInRequest() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .profile(DirectionsCriteria.PROFILE_CYCLING)
-            .addWaypointNames("Origin", "Destination")
+            .routeOptions(
+                RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
+                    .origin(origin)
+                    .profile(DirectionsCriteria.PROFILE_CYCLING)
+                    .destination(destination)
+                    .waypointNames("Origin; Destination").build()
+            )
             .build()
-
         assertThat(
             navigationRoute.call.request().url().toString(),
             containsString("Destination")
@@ -129,10 +145,17 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun addWaypointTargetsIncludedInRequest() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .addWaypointTargets(null, Point.fromLngLat(0.99, 4.99))
+            .routeOptions(
+                RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
+                    .origin(origin)
+                    .destination(destination)
+                    .waypointTargets(
+                        arrayOf(
+                            Point.fromLngLat(0.99, 4.99),
+                            Point.fromLngLat(1.99, 5.99)
+                        ).joinToString(separator = ";") { "${it?.latitude()},${it?.longitude()}" }
+                    ).build()
+            )
             .build()
 
         assertThat(
@@ -144,9 +167,12 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun reverseOriginDestination_bearingsAreFormattedCorrectly() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .destination(Point.fromLngLat(1.0, 5.0), 1.0, 5.0)
-            .origin(Point.fromLngLat(1.0, 2.0), 90.0, 90.0)
+            .routeOptions(
+                RouteOptionsNavigation.builder()
+                    .destination(Point.fromLngLat(1.0, 5.0), 1.0, 5.0)
+                    .origin(Point.fromLngLat(1.0, 2.0), 90.0, 90.0)
+                    .accessToken(ACESS_TOKEN).build()
+            )
             .build()
 
         val requestUrl = navigationRoute.call.request().url().toString()
@@ -157,11 +183,15 @@ class NavigationRouteTest : BaseTest() {
     @Test
     fun addWaypointsThenOriginDestination_bearingsAreFormattedCorrectly() {
         val navigationRoute = NavigationRoute.builder(context)
-            .accessToken(BaseTest.ACCESS_TOKEN)
-            .addWaypoint(Point.fromLngLat(3.0, 4.0), 20.0, 20.0)
-            .addWaypoint(Point.fromLngLat(5.0, 6.0), 30.0, 30.0)
-            .destination(Point.fromLngLat(7.0, 8.0), 40.0, 40.0)
-            .origin(Point.fromLngLat(1.0, 2.0), 10.0, 10.0)
+            .routeOptions(
+                RouteOptionsNavigation.builder()
+                    .accessToken(ACESS_TOKEN)
+                    .addWaypoint(Point.fromLngLat(3.0, 4.0), 20.0, 20.0)
+                    .addWaypoint(Point.fromLngLat(5.0, 6.0), 30.0, 30.0)
+                    .destination(Point.fromLngLat(7.0, 8.0), 40.0, 40.0)
+                    .origin(Point.fromLngLat(1.0, 2.0), 10.0, 10.0)
+                    .build()
+            )
             .build()
 
         val requestUrl = navigationRoute.call.request().url().toString()
@@ -171,44 +201,38 @@ class NavigationRouteTest : BaseTest() {
 
     @Test
     fun addRouteOptionsIncludedInRequest() {
-        val coordinates = ArrayList<Point>()
-        coordinates.add(Point.fromLngLat(1.0, 2.0))
-        coordinates.add(Point.fromLngLat(1.0, 3.0))
-        coordinates.add(Point.fromLngLat(1.0, 5.0))
-
-        val routeOptions = RouteOptions.builder()
-            .accessToken(BaseTest.ACCESS_TOKEN)
+        val routeOptions = RouteOptionsNavigation.builder()
+            .accessToken(ACESS_TOKEN)
             .baseUrl("https://api-directions-traf.com")
             .requestUuid("XYZ_UUID")
             .alternatives(true)
             .language(Locale.US.language)
             .profile(DirectionsCriteria.PROFILE_WALKING)
-            .coordinates(coordinates)
+            .origin(Point.fromLngLat(1.0, 2.0))
+            .addWaypoint(Point.fromLngLat(1.0, 3.0))
+            .destination(Point.fromLngLat(1.0, 5.0))
             .voiceUnits(DirectionsCriteria.METRIC)
             .user("example_user")
             .geometries("mocked_geometries")
-            .approaches("curb;;unrestricted")!!
-            .waypointNames("Origin;Pickup;Destination")!!
-            .waypointTargets(";;0.99,4.99")!!
-            .waypointIndices("0;2")!!
+            .approaches("curb;;unrestricted")
+            .waypointNames("Origin;Pickup;Destination")
+            .waypointTargets(";;0.99,4.99")
+            .waypointIndices("0;2")
             .walkingOptions(
-                WalkingOptions.builder().alleyBias(0.6).walkwayBias(0.7).walkingSpeed(
+                WalkingOptionsNavigation.builder().alleyBias(0.6).walkwayBias(0.7).walkingSpeed(
                     1.0
                 ).build()
             )
             .build()
 
         val navigationRoute = NavigationRoute.builder(context)
-            .origin(coordinates[0])
-            .addWaypoint(coordinates[1])
-            .destination(coordinates[2])
             .routeOptions(routeOptions)
             .build()
 
         val request = navigationRoute.call.request().url().toString()
         assertThat(request, containsString("https://api-directions-traf.com"))
         assertThat(request, containsString("alternatives=true"))
-        assertThat(request, containsString(BaseTest.ACCESS_TOKEN))
+        assertThat(request, containsString(ACESS_TOKEN))
         assertThat(request, containsString("voice_units=metric"))
         assertThat(request, containsString("example_user"))
         assertThat(request, containsString("language=en"))
@@ -274,8 +298,13 @@ class NavigationRouteTest : BaseTest() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
         val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
         val continueStraight = false
-
-        builder.continueStraight(continueStraight)
+        val routeOptions =
+            RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
+                .origin(origin)
+                .destination(destination)
+                .continueStraight(continueStraight)
+                .build()
+        builder.routeOptions(routeOptions)
 
         verify { mapboxDirectionsBuilder.continueStraight(continueStraight) }
     }

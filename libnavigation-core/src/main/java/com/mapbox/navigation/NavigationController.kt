@@ -22,11 +22,14 @@ import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.route.offboard.router.NavigationRoute
 
 class NavigationController(
+    private val routeBuilderProvider: NavigationRoute.Builder,
     private val navigator: MapboxNativeNavigator,
     private val locationEngine: LocationEngine,
-    private val locationEngineRequest: LocationEngineRequest
+    private val locationEngineRequest: LocationEngineRequest,
+    private val routeObserver: DirectionsSession.RouteObserver
 ) {
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
@@ -41,7 +44,8 @@ class NavigationController(
 
     init {
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
-        directionsSession = NavigationModuleProvider.createModule(DirectionsSessionModule, ::paramsProvider)
+        directionsSession =
+            NavigationModuleProvider.createModule(DirectionsSessionModule, ::paramsProvider)
         tripSession = NavigationModuleProvider.createModule(TripSessionModule, ::paramsProvider)
     }
 
@@ -51,27 +55,45 @@ class NavigationController(
     private fun paramsProvider(type: MapboxNavigationModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
             HybridRouter -> arrayOf(
-                Pair(Router::class.java, NavigationModuleProvider.createModule(OnboardRouter, ::paramsProvider)),
-                Pair(Router::class.java, NavigationModuleProvider.createModule(OffboardRouter, ::paramsProvider))
+                Router::class.java to NavigationModuleProvider.createModule(
+                    OnboardRouter,
+                    ::paramsProvider
+                ),
+                Router::class.java to NavigationModuleProvider.createModule(
+                    OffboardRouter,
+                    ::paramsProvider
+                )
             )
-            OffboardRouter -> arrayOf()
+            OffboardRouter -> arrayOf(
+                NavigationRoute.Builder::class.java to routeBuilderProvider
+            )
             OnboardRouter -> arrayOf(
-                Pair(MapboxNativeNavigator::class.java, navigator)
+                MapboxNativeNavigator::class.java to navigator
             )
             DirectionsSessionModule -> arrayOf(
-                Pair(Router::class.java, NavigationModuleProvider.createModule(HybridRouter, ::paramsProvider))
+                Router::class.java to NavigationModuleProvider.createModule(
+                    HybridRouter,
+                    ::paramsProvider
+                ),
+                DirectionsSession.RouteObserver::class.java to routeObserver
             )
             TripNotificationModule -> arrayOf()
             TripServiceModule -> arrayOf(
-                Pair(TripNotification::class.java, NavigationModuleProvider.createModule(TripNotificationModule, ::paramsProvider))
+                TripNotification::class.java to NavigationModuleProvider.createModule(
+                    TripNotificationModule,
+                    ::paramsProvider
+                )
             )
             TripSessionModule -> arrayOf(
-                Pair(TripService::class.java, NavigationModuleProvider.createModule(TripServiceModule, ::paramsProvider)),
-                Pair(LocationEngine::class.java, locationEngine),
-                Pair(LocationEngineRequest::class.java, locationEngineRequest),
-                Pair(MapboxNativeNavigator::class.java, navigator),
-                Pair(Handler::class.java, mainHandler),
-                Pair(Handler::class.java, workerHandler)
+                TripService::class.java to NavigationModuleProvider.createModule(
+                    TripServiceModule,
+                    ::paramsProvider
+                ),
+                LocationEngine::class.java to locationEngine,
+                LocationEngineRequest::class.java to locationEngineRequest,
+                MapboxNativeNavigator::class.java to navigator,
+                Handler::class.java to mainHandler,
+                Handler::class.java to workerHandler
             )
             LoggerModule -> arrayOf()
         }

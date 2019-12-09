@@ -1,6 +1,8 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.navigation.utils.time.ElapsedTime
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationTelemetry
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

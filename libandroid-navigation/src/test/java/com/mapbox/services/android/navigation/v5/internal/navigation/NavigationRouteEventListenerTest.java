@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
-import com.mapbox.services.android.navigation.v5.internal.navigation.ElapsedTime;
-import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationRouteEventListener;
+import com.mapbox.navigation.utils.time.ElapsedTime;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRouteEventListener;
 
 import org.junit.Test;
 

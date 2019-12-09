@@ -20,15 +20,20 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     implementation project(':libnavigation-util')
-
     api(project(':libnavigation-base'))
+
+    // Support
+    implementation dependenciesList.supportAnnotation
+
+    implementation dependenciesList.kotlinStdLib
 
     //ktlint
     ktlint dependenciesList.ktlint
 
-    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.mapboxSdkServices
 
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"

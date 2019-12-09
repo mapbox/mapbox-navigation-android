@@ -8,6 +8,7 @@ import com.mapbox.android.search.MapboxSearchOptions
 import com.mapbox.crashmonitor.CrashMonitor
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.services.android.navigation.testapp.example.utils.DelegatesExt
+import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 

@@ -1,9 +1,9 @@
 package com.mapbox.navigation.directions.session
 
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.DirectionsSession
-import com.mapbox.navigation.base.route.Route
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -18,90 +18,58 @@ class MapboxDirectionsSessionTest {
     private lateinit var session: MapboxDirectionsSession
 
     private val router: Router = mockk(relaxUnitFun = true)
-    private val origin: Point = mockk(relaxUnitFun = true)
-    private val waypoints: List<Point> = mockk(relaxUnitFun = true)
-    private val observer: DirectionsSession.RouteObserver = mockk(relaxUnitFun = true)
-    private val routeCallbackSlot = slot<((route: Route) -> Unit)>()
-    private lateinit var routeCallback: ((route: Route) -> Unit)
-    private val route: Route = mockk(relaxUnitFun = true)
+    private val routeOptions: RouteOptionsNavigation = mockk(relaxUnitFun = true)
+    private lateinit var observer: DirectionsSession.RouteObserver
+    private lateinit var callback: Router.Callback
+    private val routes: List<Route> = listOf(mockk())
 
     @Before
     fun setUp() {
-        every { router.getRoute(origin, waypoints, capture(routeCallbackSlot)) } answers {
-            routeCallback = routeCallbackSlot.captured
+        val listener = slot<Router.Callback>()
+        observer = mockk(relaxUnitFun = true)
+        every { router.getRoute(routeOptions, capture(listener)) } answers {
+            callback = listener.captured
         }
-        session = MapboxDirectionsSession(router)
-        session.setOrigin(origin)
-        session.setWaypoints(waypoints)
+        session = MapboxDirectionsSession(router, observer)
     }
 
     @Test
-    fun initialRouteResponse() {
-        assertNull(session.currentRoute)
-        routeCallback.invoke(route)
-        assertEquals(route, session.currentRoute)
+    fun initialState() {
+        assertNull(session.getRouteOptions())
+        assertEquals(session.getRoutes(), emptyList<Route>())
     }
 
     @Test
-    fun setCurrentRoute() {
-        val newRoute: Route = mockk()
-        session.currentRoute = newRoute
+    fun routeResponse() {
+        session.requestRoutes(routeOptions)
+        callback.onResponse(routes)
 
-        assertEquals(newRoute, session.currentRoute)
+        assertEquals(routes, session.getRoutes())
+        verify { observer.onRoutesRequested() }
+        verify { observer.onRoutesChanged(routes) }
     }
 
     @Test
-    fun getOrigin() {
-        assertEquals(origin, session.getOrigin())
+    fun failRouteResponse() {
+        session.requestRoutes(routeOptions)
+        callback.onFailure(mockk())
+
+        verify { observer.onRoutesRequested() }
+        verify { observer.onRoutesRequestFailure(any()) }
     }
 
     @Test
-    fun setOrigin() {
-        val newOrigin: Point = mockk()
-        session.setOrigin(newOrigin)
+    fun getRouteOptions() {
+        val routeOptions: RouteOptionsNavigation = mockk()
+        session.requestRoutes(routeOptions)
 
-        assertNull(session.currentRoute)
-        assertEquals(newOrigin, session.getOrigin())
-        verify { router.getRoute(eq(newOrigin), eq(waypoints), any()) }
-    }
-
-    @Test
-    fun getWaypoints() {
-        assertEquals(waypoints, session.getWaypoints())
-    }
-
-    @Test
-    fun setWaypoints() {
-        val newWaypoints: List<Point> = mockk()
-        session.setWaypoints(newWaypoints)
-
-        assertNull(session.currentRoute)
-        assertEquals(newWaypoints, session.getWaypoints())
-        verify { router.getRoute(eq(origin), eq(newWaypoints), any()) }
-    }
-
-    @Test
-    fun registerObserver() {
-        session.registerRouteObserver(observer)
-        verify { observer.onRouteChanged(null) }
-        val newRoute: Route = mockk()
-        session.currentRoute = newRoute
-        verify { observer.onRouteChanged(newRoute) }
-    }
-
-    @Test
-    fun unregisterObserver() {
-        session.registerRouteObserver(observer)
-        verify { observer.onRouteChanged(null) }
-        session.unregisterRouteObserver(observer)
-        val newRoute: Route = mockk()
-        session.currentRoute = newRoute
-        verify(exactly = 0) { observer.onRouteChanged(newRoute) }
+        assertEquals(routeOptions, session.getRouteOptions())
     }
 
     @Test
     fun cancel() {
         session.cancel()
+
         verify { router.cancel() }
     }
 }

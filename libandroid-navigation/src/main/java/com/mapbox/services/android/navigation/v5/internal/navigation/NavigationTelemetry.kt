@@ -10,11 +10,13 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.time.ElapsedTime
 import com.mapbox.services.android.navigation.BuildConfig
-import com.mapbox.services.android.navigation.v5.internal.exception.NavigationException
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent
+import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationAppUserTurnstileEvent
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationEventFactory
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
@@ -26,7 +28,6 @@ import com.mapbox.services.android.navigation.v5.internal.utils.RingBuffer
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsReporter
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import java.util.ArrayList
 import java.util.Date
