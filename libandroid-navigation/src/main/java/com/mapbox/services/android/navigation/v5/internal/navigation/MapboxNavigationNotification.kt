@@ -87,8 +87,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
         rebuildNotification()
     }
 
-    override fun onNavigationStopped(applicationContext: Context) {
-        unregisterReceiver(applicationContext)
+    override fun onNavigationStopped(context: Context) {
+        unregisterReceiver(context)
     }
 
     // Package private (no modifier) for testing purposes
@@ -155,7 +155,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         applicationContext: Context,
         mapboxNavigation: MapboxNavigation
     ) {
-        val routeOptions = mapboxNavigation.route.routeOptions()
+        val routeOptions = mapboxNavigation.route?.routeOptions()
         var language: String = applicationContext.inferDeviceLanguage()
         var unitType: String = applicationContext.inferDeviceLocale().getUnitTypeForLocale()
         routeOptions?.let { options ->

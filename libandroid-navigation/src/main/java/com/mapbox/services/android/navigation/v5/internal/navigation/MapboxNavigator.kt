@@ -14,7 +14,7 @@ import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType
 import java.util.Date
 
 // TODO Put navigator internal modifier back when MapboxNavigation is converted to Kotlin
-internal class MapboxNavigator(val navigator: Navigator) {
+class MapboxNavigator(val navigator: Navigator) {
 
     companion object {
         private const val INDEX_FIRST_ROUTE = 0

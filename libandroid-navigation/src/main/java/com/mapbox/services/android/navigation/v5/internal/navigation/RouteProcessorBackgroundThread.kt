@@ -39,7 +39,7 @@ internal class RouteProcessorBackgroundThread(
     }
 
     fun updateLocation(rawLocation: Location) {
-        navigation.retrieveMapboxNavigator().updateLocation(rawLocation)
+        navigation.retrieveMapboxNavigator()?.updateLocation(rawLocation)
         if (!isAlive) {
             start()
         }

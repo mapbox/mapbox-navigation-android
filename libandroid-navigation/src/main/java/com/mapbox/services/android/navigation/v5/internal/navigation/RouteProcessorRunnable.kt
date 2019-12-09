@@ -30,7 +30,9 @@ internal class RouteProcessorRunnable(
 
     override fun run() {
         if (::rawLocation.isInitialized) {
-            process()
+            navigation.route?.let{route->
+                process(route)
+            }
         }
     }
 
@@ -38,10 +40,9 @@ internal class RouteProcessorRunnable(
         this.rawLocation = rawLocation
     }
 
-    private fun process() {
+    private fun process(route: DirectionsRoute) {
         val mapboxNavigator = navigation.retrieveMapboxNavigator()
         val options = navigation.options()
-        val route = navigation.route
 
         val date = Date()
         var status = mapboxNavigator.retrieveStatus(
