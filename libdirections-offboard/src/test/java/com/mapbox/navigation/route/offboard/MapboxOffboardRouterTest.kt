@@ -80,7 +80,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         callback.onResponse(mockk(), response)
 
-        verify { routerCallback.onResponse(listOf(route.mapToRoute())) }
+        verify { routerCallback.onResponse(any()) }
     }
 
     @Test

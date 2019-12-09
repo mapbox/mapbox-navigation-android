@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.route.dto
 import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.base.route.model.RoutePointNavigation
 
 internal data class RouteOptionsNavigationDto(
     val baseUrl: String?,
@@ -37,9 +36,9 @@ internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     baseUrl = baseUrl ?: RouteUrl.BASE_URL,
     user = user ?: RouteUrl.PROFILE_DEFAULT_USER,
     profile = profile ?: RouteUrl.PROFILE_DRIVING,
-    origin = coordinates.map(RoutePointNavigationDto::mapToModel).retriveOrigin(),
-    waypoints = coordinates.map(RoutePointNavigationDto::mapToModel).retriveWaypoints(),
-    destination = coordinates.map(RoutePointNavigationDto::mapToModel).retriveDestination(),
+    origin = coordinates.retrieveOrigin().mapToModel(),
+    waypoints = coordinates.retrieveWaypoints().map(RoutePointNavigationDto::mapToModel),
+    destination = coordinates.retrieveDestination().mapToModel(),
     alternatives = alternatives ?: false,
     language = language,
     radiuses = radiuses,
@@ -48,7 +47,7 @@ internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     roundaboutExits = roundaboutExits,
     geometries = geometries,
     overview = overview,
-    steps = steps,
+    steps = steps ?: true,
     annotations = annotations,
     voiceInstructions = voiceInstructions,
     bannerInstructions = bannerInstructions,
@@ -63,8 +62,10 @@ internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     walkingOptions = walkingOptions?.mapToModel()
 )
 
-private fun List<RoutePointNavigation>.retriveOrigin(): RoutePointNavigation = this.first()
+private fun List<RoutePointNavigationDto>.retrieveOrigin(): RoutePointNavigationDto = this.first()
 
-private fun List<RoutePointNavigation>.retriveWaypoints(): List<RoutePointNavigation> = this.drop(1).dropLast(1)
+private fun List<RoutePointNavigationDto>.retrieveWaypoints(): List<RoutePointNavigationDto> =
+    this.drop(1).dropLast(1)
 
-private fun List<RoutePointNavigation>.retriveDestination(): RoutePointNavigation = this.first()
+private fun List<RoutePointNavigationDto>.retrieveDestination(): RoutePointNavigationDto =
+    this.first()

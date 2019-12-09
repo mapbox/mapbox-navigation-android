@@ -58,6 +58,12 @@ fun DirectionsRoute.mapToRoute() = Route(
     voiceLanguage = voiceLanguage()
 )
 
+fun RouteLeg.mapToRouteLegNavigation() = RouteLegNavigation(
+    distance = distance(),
+    duration = duration(),
+    summary = summary()
+)
+
 fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
     val routeOptionsNavigationBuilder = RouteOptionsNavigation
         .builder()

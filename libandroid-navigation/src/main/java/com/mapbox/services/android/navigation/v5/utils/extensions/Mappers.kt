@@ -11,3 +11,18 @@ fun WalkingOptionsNavigation.mapToWalkingOptions(): WalkingOptions = WalkingOpti
     .walkwayBias(walkwayBias)
     .alleyBias(alleyBias)
     .build()
+
+fun Route.mapToDirectionsRoute(): DirectionsRoute {
+    val duration = duration.toDouble()
+    val legs = legs?.let { it as List<RouteLeg> }
+
+    return DirectionsRoute.builder()
+        .distance(distance)
+        .duration(duration)
+        .geometry(geometry)
+        .weight(weight)
+        .weightName(weightName)
+        .voiceLanguage(voiceLanguage)
+        .legs(legs)
+        .build()
+}
