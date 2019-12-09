@@ -5,8 +5,10 @@ package com.mapbox.navigation.route.offboard.extension
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.model.RouteLegNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
@@ -18,9 +20,15 @@ fun DirectionsRoute.mapToRoute() = Route(
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
-    legs = legs(),
+    legs = legs()?.map(RouteLeg::mapToRouteLegNavigation),
     routeOptions = routeOptions()?.mapToRouteOptionsNavigation(),
     voiceLanguage = voiceLanguage()
+)
+
+fun RouteLeg.mapToRouteLegNavigation() = RouteLegNavigation(
+    distance = distance(),
+    duration = duration(),
+    summary = summary()
 )
 
 fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
@@ -59,7 +67,9 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .waypointIndices(waypointIndices() ?: "")
         .waypointNames(waypointNames() ?: "")
         .waypointTargets(waypointTargets() ?: "")
-        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation())
+        .walkingOptions(
+            walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation()
+        )
         .build()
 }
 

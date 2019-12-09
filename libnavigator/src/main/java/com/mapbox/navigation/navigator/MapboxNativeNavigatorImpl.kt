@@ -25,6 +25,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             routerConfig.tilePath,
             routerConfig.inMemoryTileCache,
             routerConfig.mapMatchingSpatialCache,
+            routerConfig.threadsCount,
             routerConfig.endpointConfig?.let {
                 TileEndpointConfiguration(
                     it.host,

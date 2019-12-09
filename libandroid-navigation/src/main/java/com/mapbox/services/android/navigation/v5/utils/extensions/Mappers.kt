@@ -17,7 +17,7 @@ fun WalkingOptionsNavigation.mapToWalkingOptions(): WalkingOptions = WalkingOpti
 
 fun Route.mapToDirectionsRoute(): DirectionsRoute {
     val duration = duration.toDouble()
-    val legs = legs?.legs?.let { it as List<RouteLeg> }
+    val legs = legs?.let { it as List<RouteLeg> }
 
     return DirectionsRoute.builder()
         .distance(distance)

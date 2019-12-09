@@ -269,16 +269,13 @@ constructor(
                 directionsBuilder.profile(it)
             }
 
-            origin = options.coordinates.first()
+            origin = options.origin
 
-            waypoints.addAll(options.coordinates.toMutableList().also {
-                it.remove(options.coordinates.first())
-                it.remove(options.coordinates.last())
-            })
+            waypoints.addAll(options.waypoints)
 
-            destination = options.coordinates.last()
+            destination = options.destination
 
-            options.alternatives?.let {
+            options.alternatives.let {
                 directionsBuilder.alternatives(it)
             }
 
