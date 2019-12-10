@@ -4,6 +4,9 @@ package com.mapbox.navigation.route.offboard.extension
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
+import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -61,7 +64,29 @@ fun DirectionsRoute.mapToRoute() = Route(
 fun RouteLeg.mapToRouteLegNavigation() = RouteLegNavigation(
     distance = distance(),
     duration = duration(),
-    summary = summary()
+    summary = summary(),
+    steps = steps()?.map(LegStep::mapToLegStepNavigation),
+    annotation = annotation()?.mapToLegAnnotationNavigation()
+)
+
+fun LegStep.mapToLegStepNavigation() = LegStepNavigation(
+    distance = distance(),
+    duration = duration(),
+    geometry = geometry(),
+    name = name(),
+    ref = ref(),
+    destinations = destinations(),
+    mode = mode(),
+    pronunciation = pronunciation(),
+    rotaryName = rotaryName(),
+    rotaryPronunciation = rotaryPronunciation(),
+    maneuver = maneuver().mapToStepManeuverNavigation(),
+    voiceInstructions = voiceInstructions()?.map { it.mapToVoiceInstructionsNavigation() },
+    bannerInstructions = bannerInstructions()?.map { it.mapToBannerInstructionsNavigation() },
+    drivingSide = drivingSide(),
+    weight = weight(),
+    intersections = intersections()?.map { it.mapToStepIntersectionNavigation() },
+    exits = exits()
 )
 
 fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
@@ -105,6 +130,78 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         )
         .build()
 }
+
+fun VoiceInstructions.mapToVoiceInstructionsNavigation() = VoiceInstructionsNavigation(
+    distanceAlongGeometry = distanceAlongGeometry(),
+    announcement = announcement(),
+    ssmlAnnouncement = ssmlAnnouncement()
+)
+
+fun BannerInstructions.mapToBannerInstructionsNavigation() = BannerInstructionsNavigation(
+distanceAlongGeometry = distanceAlongGeometry(),
+    primary = primary().mapToBannerTextNavigation(),
+    secondary = secondary()?.mapToBannerTextNavigation(),
+    sub = sub()?.mapToBannerTextNavigation()
+)
+
+fun BannerText.mapToBannerTextNavigation() = BannerTextNavigation(
+    text = text(),
+    components = components()?.map { it.mapToBannerComponentsNavigation() },
+    type = type(),
+    modifier = modifier(),
+    degrees = degrees(),
+    drivingSide = drivingSide()
+)
+
+fun BannerComponents.mapToBannerComponentsNavigation() = BannerComponentsNavigation(
+    text = text(),
+    type = type(),
+    abbreviation = abbreviation(),
+    abbreviationPriority = abbreviationPriority(),
+    imageBaseUrl = imageBaseUrl(),
+    directions = directions(),
+    active = active()
+)
+
+fun StepManeuver.mapToStepManeuverNavigation() = StepManeuverNavigation(
+    location = location(),
+    bearingBefore = bearingBefore(),
+    bearingAfter = bearingAfter(),
+    instruction = instruction(),
+    type = type(),
+    modifier = modifier(),
+    exit = exit()
+)
+
+fun StepIntersection.mapToStepIntersectionNavigation() = StepIntersectionNavigation(
+    location = location(),
+    bearings = bearings(),
+    classes = classes(),
+    entry = entry(),
+    into = `in`(),
+    out = out(),
+    lanes = lanes()?.map { it.mapToIntersectionLanesNavigation() }
+)
+
+fun IntersectionLanes.mapToIntersectionLanesNavigation() = IntersectionLanesNavigation(
+    valid = valid(),
+    indications = indications()
+)
+
+fun LegAnnotation.mapToLegAnnotationNavigation() = LegAnnotationNavigation(
+    distance = distance(),
+    duration = duration(),
+    speed = speed(),
+    maxspeed = maxspeed()?.map(MaxSpeed::mapToMaxSpeedNavigation),
+    congestion = congestion()
+)
+
+fun MaxSpeed.mapToMaxSpeedNavigation() = MaxSpeedNavigation(
+    speed = speed(),
+    unit = unit(),
+    unknown = unknown(),
+    none = none()
+)
 
 fun WalkingOptionsNavigation.mapToWalkingOptions(): WalkingOptions = WalkingOptions
     .builder()

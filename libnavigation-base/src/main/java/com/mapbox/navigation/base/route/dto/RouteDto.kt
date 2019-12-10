@@ -14,14 +14,14 @@ internal class RouteDto(
     val voiceLanguage: String?
 )
 
-internal fun RouteDto.mapToModel() = Route(
+internal fun RouteDto.mapToModelRoute() = Route(
     routeIndex = routeIndex,
     distance = distance,
     duration = duration,
     geometry = geometry,
     weight = weight,
     weightName = weightName,
-    legs = legs?.map(RouteLegNavigationDto::mapToModel),
+    legs = legs?.map { it.mapToModelRouteLeg() },
     routeOptions = routeOptions?.mapToModel(),
     voiceLanguage = voiceLanguage
 )

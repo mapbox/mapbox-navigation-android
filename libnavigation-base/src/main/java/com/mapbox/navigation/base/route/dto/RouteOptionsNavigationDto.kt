@@ -37,7 +37,7 @@ internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     user = user ?: RouteUrl.PROFILE_DEFAULT_USER,
     profile = profile ?: RouteUrl.PROFILE_DRIVING,
     origin = coordinates.retrieveOrigin().mapToModel(),
-    waypoints = coordinates.retrieveWaypoints().map(RoutePointNavigationDto::mapToModel),
+    waypoints = coordinates.retrieveWaypoints().map { it.mapToModel() },
     destination = coordinates.retrieveDestination().mapToModel(),
     alternatives = alternatives ?: false,
     language = language,
@@ -62,10 +62,11 @@ internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     walkingOptions = walkingOptions?.mapToModel()
 )
 
-private fun List<RoutePointNavigationDto>.retrieveOrigin(): RoutePointNavigationDto = this.first()
+private fun List<RoutePointNavigationDto>.retrieveOrigin(): RoutePointNavigationDto =
+    this.first()
 
 private fun List<RoutePointNavigationDto>.retrieveWaypoints(): List<RoutePointNavigationDto> =
     this.drop(1).dropLast(1)
 
 private fun List<RoutePointNavigationDto>.retrieveDestination(): RoutePointNavigationDto =
-    this.first()
+    this.last()
