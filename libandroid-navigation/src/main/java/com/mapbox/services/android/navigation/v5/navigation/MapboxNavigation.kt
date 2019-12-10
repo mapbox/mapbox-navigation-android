@@ -14,6 +14,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigator.Navigator
 import com.mapbox.services.android.navigation.BuildConfig
 import com.mapbox.services.android.navigation.v5.internal.navigation.*
+import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService.LocalBinder
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackSource
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FeedbackType
@@ -38,12 +39,11 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.snap.Snap
-import timber.log.Timber
 import java.io.File
 import java.lang.IllegalArgumentException
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
+import timber.log.Timber
 
 /**
  * A MapboxNavigation class for interacting with and customizing a navigation session.
@@ -68,7 +68,7 @@ class MapboxNavigation : ServiceConnection {
         private set
     private var options: MapboxNavigationOptions
     private var _locationEngine: LocationEngine
-        set(value){
+        set(value) {
             freeDriveLocationUpdater?.updateLocationEngine(value)
             // Setup telemetry with new engine
             navigationTelemetry.updateLocationEngineNameAndSimulation(value)
@@ -78,8 +78,8 @@ class MapboxNavigation : ServiceConnection {
             }
         }
 
-    val locationEngine : LocationEngine
-        get () = _locationEngine
+    val locationEngine: LocationEngine
+        get() = _locationEngine
 
     private var freeDriveLocationUpdater: FreeDriveLocationUpdater? = null
     private var locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
@@ -860,7 +860,8 @@ class MapboxNavigation : ServiceConnection {
      * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
      * @since 0.8.0
      */
-    fun updateFeedback(feedbackId: String, @FeedbackType feedbackType: String,
+    fun updateFeedback(feedbackId: String,
+                       @FeedbackType feedbackType: String,
                        description: String, screenshot: String) {
         navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description, screenshot)
     }
@@ -1081,8 +1082,8 @@ class MapboxNavigation : ServiceConnection {
         get() = isBound.get()
 
     private fun checkInvalidLegIndex(legIndex: Int): Boolean {
-        route?.legs()?.let {routeLegs->
-            if (legIndex < 0 || (routeLegs.size > 0  && legIndex > routeLegs.size - 1)) {
+        route?.legs()?.let { routeLegs ->
+            if (legIndex < 0 || (routeLegs.size > 0 && legIndex > routeLegs.size - 1)) {
                 Timber.e("Invalid leg index update: %s Current leg index size: %s", legIndex, routeLegs.size)
                 return true
             }
