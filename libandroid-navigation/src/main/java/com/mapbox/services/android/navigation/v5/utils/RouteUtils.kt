@@ -72,7 +72,7 @@ class RouteUtils {
             return null
         }
         val waypointIndices = routeOptions.waypointIndices()
-            ?: return null
+            ?: return coordinates.subList(coordinatesSize - remainingWaypointsCount, coordinatesSize)
 
         val allWaypointIndices = waypointIndices.split(SEMICOLON).toTypedArray()
         val remainingWaypointIndices: Array<String> =
@@ -219,7 +219,7 @@ class RouteUtils {
     fun findCurrentBannerInstructions(
         currentStep: LegStep?,
         stepDistanceRemaining: Double
-    ) = currentStep?.bannerInstructions()?.let {
+    ): BannerInstructions? = currentStep?.bannerInstructions()?.let {
             val instructions: List<BannerInstructions> = sortBannerInstructions(it)
             instructions.firstOrNull { instruction ->
                 instruction.distanceAlongGeometry().toInt() >= stepDistanceRemaining.toInt()
