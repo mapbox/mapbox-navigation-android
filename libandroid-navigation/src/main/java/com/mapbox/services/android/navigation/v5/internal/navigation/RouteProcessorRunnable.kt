@@ -30,7 +30,7 @@ internal class RouteProcessorRunnable(
 
     override fun run() {
         if (::rawLocation.isInitialized) {
-            navigation.route?.let{route ->
+            navigation.route?.let { route ->
                 process(route)
             }
         }
