@@ -91,9 +91,8 @@ class MapboxNavigation : ServiceConnection {
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
             .build()
-    private var _milestones = HashSet<Milestone>()
-    val milestones: HashSet<Milestone>
-        get() = _milestones
+    private var milestones = mutableSetOf<Milestone>()
+
     private val accessToken: String
     private var applicationContext: Context
     private var isBound = AtomicBoolean(false)
@@ -125,7 +124,7 @@ class MapboxNavigation : ServiceConnection {
      * fit your needs.
      *
      *
-     * Initialization will also add the default _milestones and create a new location engine
+     * Initialization will also add the default milestones and create a new location engine
      * which will be used during navigation unless a different engine gets passed in through
      * [.setLocationEngine].
      *
@@ -228,13 +227,14 @@ class MapboxNavigation : ServiceConnection {
         removeRawLocationListener(null)
         removeEnhancedLocationListener(null)
     }
+
     // Public APIs
     fun setLocationEngine(engine: LocationEngine) {
         _locationEngine = engine
     }
     /**
      * Navigation [Milestone]s provide a powerful way to give your user instructions at custom
-     * defined locations along their route. Default _milestones are automatically added unless
+     * defined locations along their route. Default milestones are automatically added unless
      * [MapboxNavigationOptions.getDefaultMilestonesEnabled] is set to false but they can also
      * be individually removed using the [.removeMilestone] API. Once a custom
      * milestone is built, it will need to be passed into the navigation SDK through this method.
@@ -248,7 +248,7 @@ class MapboxNavigation : ServiceConnection {
      * @since 0.4.0
      */
     fun addMilestone(milestone: Milestone) {
-        val milestoneAdded = _milestones.add(milestone)
+        val milestoneAdded = milestones.add(milestone)
         if (!milestoneAdded) {
             Timber.w("Milestone has already been added to the stack.")
         }
@@ -262,47 +262,47 @@ class MapboxNavigation : ServiceConnection {
      * desired.
      *
      *
-     * @param _milestones a list of custom built milestone
+     * @param milestones a list of custom built milestone
      * @since 0.14.0
      */
-    fun addMilestones(_milestones: List<Milestone>) {
-        val milestonesAdded = this._milestones.addAll(_milestones)
+    fun addMilestones(milestones: List<Milestone>) {
+        val milestonesAdded = this.milestones.addAll(milestones)
         if (!milestonesAdded) {
-            Timber.w("These _milestones have already been added to the stack.")
+            Timber.w("These milestones have already been added to the stack.")
         }
     }
 
     /**
-     * Remove a specific milestone by passing in the instance of it. Removal of all the _milestones can
+     * Remove a specific milestone by passing in the instance of it. Removal of all the milestones can
      * be achieved by passing in null rather than a specific milestone.
      *
      * @param milestone a milestone you'd like to have removed or null if you'd like to remove all
-     * _milestones
+     * milestones
      * @since 0.4.0
      */
     // Public exposed for usage outside SDK
     fun removeMilestone(milestone: Milestone?) {
         if (milestone == null) {
-            _milestones.clear()
+            milestones.clear()
             return
-        } else if (!_milestones.contains(milestone)) {
+        } else if (!milestones.contains(milestone)) {
             Timber.w("Milestone attempting to remove does not exist in stack.")
             return
         }
-        _milestones.remove(milestone)
+        milestones.remove(milestone)
     }
 
     /**
      * Remove a specific milestone by passing in the identifier associated with the milestone you'd
-     * like to remove. If the identifier passed in does not match one of the _milestones in the list,
+     * like to remove. If the identifier passed in does not match one of the milestones in the list,
      * a warning will return in the log.
      *
-     * @param milestoneIdentifier identifier matching one of the _milestones
+     * @param milestoneIdentifier identifier matching one of the milestones
      * @since 0.5.0
      */
     // Public exposed for usage outside SDK
     fun removeMilestone(milestoneIdentifier: Int) {
-        for (milestone in _milestones) {
+        for (milestone in milestones) {
             if (milestoneIdentifier == milestone.identifier) {
                 removeMilestone(milestone)
                 return
@@ -419,9 +419,9 @@ class MapboxNavigation : ServiceConnection {
     /**
      * This adds a new milestone event listener which is invoked when a milestone gets triggered. If
      * more then one milestone gets triggered on a location update, each milestone event listener will
-     * be invoked for each of those _milestones. This is important to consider if you are using voice
+     * be invoked for each of those milestones. This is important to consider if you are using voice
      * instructions since this would cause multiple instructions to be said at once. Ideally the
-     * _milestones setup should avoid triggering too close to each other.
+     * milestones setup should avoid triggering too close to each other.
      *
      *
      * It is not possible to add the same listener implementation more then once and a warning will be
@@ -961,7 +961,7 @@ class MapboxNavigation : ServiceConnection {
 
     // TODO public?
     fun getMilestones(): List<Milestone> {
-        return ArrayList(_milestones)
+        return ArrayList(milestones)
     }
 
     // TODO public?
@@ -1000,8 +1000,8 @@ class MapboxNavigation : ServiceConnection {
                 eventDispatcher, mapboxNavigator, offlineNavigator,
                 Executors.newSingleThreadScheduledExecutor())
         initializeTelemetry(context)
-        // Create and add default _milestones if enabled.
-        _milestones = HashSet()
+        // Create and add default milestones if enabled.
+        milestones = HashSet()
         if (options.defaultMilestonesEnabled) {
             addMilestone(VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build())
             addMilestone(BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build())
@@ -1030,7 +1030,7 @@ class MapboxNavigation : ServiceConnection {
                 eventDispatcher, mapboxNavigator, offlineNavigator,
                 Executors.newSingleThreadScheduledExecutor())
         initializeTelemetry(applicationContext)
-        // Create and add default _milestones if enabled.
+        // Create and add default milestones if enabled.
         if (options.defaultMilestonesEnabled) {
             addMilestone(VoiceInstructionMilestone.Builder().setIdentifier(VOICE_INSTRUCTION_MILESTONE_ID).build())
             addMilestone(BannerInstructionMilestone.Builder().setIdentifier(BANNER_INSTRUCTION_MILESTONE_ID).build())

@@ -70,7 +70,7 @@ class MapboxNavigationTest : BaseTest() {
         val options = MapboxNavigationOptions.Builder().defaultMilestonesEnabled(false).build()
         val navigationWithOptions = buildMapboxNavigationWith(options)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -94,7 +94,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigation.addMilestone(milestone)
 
-        assertTrue(navigation.milestones.contains(milestone))
+        assertTrue(navigation.getMilestones().contains(milestone))
     }
 
     @Test
@@ -106,7 +106,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(milestone)
         navigationWithOptions.addMilestone(milestone)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -118,7 +118,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(milestone)
         navigationWithOptions.removeMilestone(milestone)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -130,7 +130,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(StepMilestone.Builder().build())
         navigationWithOptions.removeMilestone(milestone)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -144,7 +144,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(null)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -157,7 +157,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(removedMilestoneIdentifier)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -169,7 +169,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(removedMilestoneIdentifier)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -183,7 +183,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.addMilestones(milestones)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -198,7 +198,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.addMilestones(milestones)
 
-        assertEquals(2, navigationWithOptions.milestones.size)
+        assertEquals(2, navigationWithOptions.getMilestones().size)
     }
 
     @Ignore
@@ -591,7 +591,7 @@ class MapboxNavigationTest : BaseTest() {
 
     private fun searchForBannerInstructionMilestone(navigation: MapboxNavigation): Int {
         var identifier = -1
-        navigation.milestones.forEach {
+        navigation.getMilestones().forEach {
             if (it is BannerInstructionMilestone) {
                 identifier = it.identifier
             }
@@ -601,7 +601,7 @@ class MapboxNavigationTest : BaseTest() {
 
     private fun searchForVoiceInstructionMilestone(navigation: MapboxNavigation): Int {
         var identifier = -1
-        navigation.milestones.forEach {
+        navigation.getMilestones().forEach {
             if (it is VoiceInstructionMilestone) {
                 identifier = it.identifier
             }

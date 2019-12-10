@@ -163,7 +163,7 @@ internal class RouteProcessorRunnable(
             previousRouteProgress = routeProgress
         }
         val milestones = ArrayList<Milestone>()
-        for (milestone in mapboxNavigation.milestones) {
+        for (milestone in mapboxNavigation.getMilestones()) {
             if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
                 milestones.add(milestone)
             }
