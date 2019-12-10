@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.base.BaseTest
-import com.mapbox.navigation.route.offboard.extension.mapToRoute
 import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import io.mockk.every
 import io.mockk.mockk

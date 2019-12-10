@@ -1,19 +1,17 @@
 package com.mapbox.navigation.base.route.model
 
-import com.google.gson.annotations.SerializedName
-
 /**
  * Class for specifying options for use with the walking profile.
  *
- * @param walkingSpeed Walking speed in meters per second. Must be between 0.14 and 6.94 meters per second.
+ * @property walkingSpeed Walking speed in meters per second. Must be between 0.14 and 6.94 meters per second.
  * Defaults to 1.42 meters per second
  *
- * @param walkwayBias A bias which determines whether the route should prefer or avoid the use of roads or paths
+ * @property walkwayBias A bias which determines whether the route should prefer or avoid the use of roads or paths
  * that are set aside for pedestrian-only use (walkways). The allowed range of values is from
  * -1 to 1, where -1 indicates indicates preference to avoid walkways, 1 indicates preference
  * to favor walkways, and 0 indicates no preference (the default).
  *
- * @param alleyBias A bias which determines whether the route should prefer or avoid the use of alleys. The
+ * @property alleyBias A bias which determines whether the route should prefer or avoid the use of alleys. The
  * allowed range of values is from -1 to 1, where -1 indicates indicates preference to avoid
  * alleys, 1 indicates preference to favor alleys, and 0 indicates no preference (the default).
  */
@@ -57,7 +55,7 @@ data class WalkingOptionsNavigation(
          * Walking speed in meters per second. Must be between 0.14 and 6.94 meters per second.
          * Defaults to 1.42 meters per second
          *
-         * @param walkingSpeed in meters per second
+         * @property walkingSpeed in meters per second
          * @return this builder
          */
         fun walkingSpeed(walkingSpeed: Double?): Builder {
@@ -71,7 +69,7 @@ data class WalkingOptionsNavigation(
          * -1 to 1, where -1 indicates preference to avoid walkways, 1 indicates preference to favor
          * walkways, and 0 indicates no preference (the default).
          *
-         * @param walkwayBias bias to prefer or avoid walkways
+         * @property walkwayBias bias to prefer or avoid walkways
          * @return this builder
          */
         fun walkwayBias(walkwayBias: Double?): Builder {
@@ -84,7 +82,7 @@ data class WalkingOptionsNavigation(
          * allowed range of values is from -1 to 1, where -1 indicates preference to avoid alleys, 1
          * indicates preference to favor alleys, and 0 indicates no preference (the default).
          *
-         * @param alleyBias bias to prefer or avoid alleys
+         * @property alleyBias bias to prefer or avoid alleys
          * @return this builder
          */
         fun alleyBias(alleyBias: Double?): Builder {
