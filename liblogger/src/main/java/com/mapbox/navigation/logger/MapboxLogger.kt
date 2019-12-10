@@ -21,82 +21,82 @@ object MapboxLogger : Logger {
     }
 
     fun v(msg: String) {
-        v(msg, null, null)
+        v(null, msg, null)
     }
 
     fun v(msg: String, tr: Throwable) {
-        v(msg, null, tr)
+        v(null, msg, tr)
     }
 
-    fun v(msg: String, tag: String) {
-        v(msg, tag, null)
+    fun v(tag: String, msg: String) {
+        v(tag, msg, null)
     }
 
-    override fun v(msg: String, tag: String?, tr: Throwable?) {
+    override fun v(tag: String?, msg: String, tr: Throwable?) {
         log(VERBOSE, tag, msg, tr) { Timber.v(tr, msg) }
     }
 
     fun d(msg: String) {
-        d(msg, null, null)
+        d(null, msg, null)
     }
 
     fun d(msg: String, tr: Throwable) {
-        d(msg, null, tr)
+        d(null, msg, tr)
     }
 
-    fun d(msg: String, tag: String) {
-        d(msg, tag, null)
+    fun d(tag: String, msg: String) {
+        d(tag, msg, null)
     }
 
-    override fun d(msg: String, tag: String?, tr: Throwable?) {
+    override fun d(tag: String?, msg: String, tr: Throwable?) {
         log(DEBUG, tag, msg, tr) { Timber.d(tr, msg) }
     }
 
     fun i(msg: String) {
-        i(msg, null, null)
+        i(null, msg, null)
     }
 
     fun i(msg: String, tr: Throwable) {
-        i(msg, null, tr)
+        i(null, msg, tr)
     }
 
-    fun i(msg: String, tag: String) {
-        i(msg, tag, null)
+    fun i(tag: String, msg: String) {
+        i(tag, msg, null)
     }
 
-    override fun i(msg: String, tag: String?, tr: Throwable?) {
+    override fun i(tag: String?, msg: String, tr: Throwable?) {
         log(INFO, tag, msg, tr) { Timber.i(tr, msg) }
     }
 
     fun w(msg: String) {
-        w(msg, null, null)
+        w(null, msg, null)
     }
 
     fun w(msg: String, tr: Throwable) {
-        w(msg, null, tr)
+        w(null, msg, tr)
     }
 
-    fun w(msg: String, tag: String) {
-        w(msg, tag, null)
+    fun w(tag: String, msg: String) {
+        w(tag, msg, null)
     }
 
-    override fun w(msg: String, tag: String?, tr: Throwable?) {
+    override fun w(tag: String?, msg: String, tr: Throwable?) {
         log(WARN, tag, msg, tr) { Timber.w(tr, msg) }
     }
 
     fun e(msg: String) {
-        e(msg, null, null)
+        e(null, msg, null)
     }
 
     fun e(msg: String, tr: Throwable) {
-        e(msg, null, tr)
+        e(null, msg, tr)
     }
 
-    fun e(msg: String, tag: String) {
-        e(msg, tag, null)
+    fun e(tag: String, msg: String) {
+        e(tag, msg, null)
     }
 
-    override fun e(msg: String, tag: String?, tr: Throwable?) {
+    override fun e(tag: String?, msg: String, tr: Throwable?) {
         log(ERROR, tag, msg, tr) { Timber.e(tr, msg) }
     }
 
