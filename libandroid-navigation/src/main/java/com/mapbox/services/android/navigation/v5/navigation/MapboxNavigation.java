@@ -18,6 +18,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
+import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonRequestBuilder;
 import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
@@ -1006,7 +1007,7 @@ public class MapboxNavigation implements ServiceConnection {
             accessToken);
     freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
         navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+        Executors.newSingleThreadScheduledExecutor(), ElectronicHorizonRequestBuilder.INSTANCE);
     initializeTelemetry(context);
 
     // Create and add default milestones if enabled.
@@ -1040,7 +1041,7 @@ public class MapboxNavigation implements ServiceConnection {
             accessToken); // TODO Replace with an api-routing-tiles-staging valid one
     freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
         navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+        Executors.newSingleThreadScheduledExecutor(), ElectronicHorizonRequestBuilder.INSTANCE);
     initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.
