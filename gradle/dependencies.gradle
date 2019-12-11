@@ -139,7 +139,7 @@ ext {
       kotlin           : '1.3.60',
       license          : '0.8.5',
       jacoco           : '0.8.2',
-      playPublisher    : '1.2.2',
+      playPublisher    : '2.3.0',
       googleServices   : '4.2.0',
       crashlytics      : '1.26.1',
       mapboxSdkVersions: '1.0.0'
