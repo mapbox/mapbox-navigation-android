@@ -1,6 +1,7 @@
 package com.mapbox.navigation.metrics
 
 import android.os.Parcel
+import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -86,6 +87,6 @@ class MapboxMetricsReporterTest {
 
         override fun describeContents(): Int = 0
 
-        override fun toJson(jsonMapper: JsonMapper): String = jsonMapper.toJson(this)
+        override fun toJson(gson: Gson): String = gson.toJson(this)
     }
 }

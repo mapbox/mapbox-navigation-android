@@ -2,6 +2,8 @@ package com.mapbox.navigation.base.metrics
 
 import androidx.annotation.StringDef
 import com.google.gson.Gson
+import com.mapbox.navigation.base.internal.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.internal.metrics.NavigationMetrics
 
 interface MetricEvent {
 
@@ -20,7 +22,7 @@ interface MetricEvent {
     @Metric
     val metricName: String
 
-    fun toJson(jsonMapper: JsonMapper): String
+    fun toJson(gson: Gson): String
 }
 
 object NavigationMetrics {
