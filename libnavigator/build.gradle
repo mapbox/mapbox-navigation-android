@@ -31,10 +31,6 @@ dependencies {
 
     implementation dependenciesList.supportAnnotation
 
-    implementation dependenciesList.mapboxSdkGeoJSON
-    implementation dependenciesList.mapboxCore
-    implementation dependenciesList.mapboxSdkServices
-
     // Unit testing
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
