@@ -41,7 +41,7 @@ class FasterRouteDetectorTest : BaseTest() {
     fun defaultFasterRouteEngine_didGetAddedOnInitialization() {
         val navigation = buildNavigationWithFasterRouteEnabled()
 
-        assertNotNull(navigation.fasterRouteEngine)
+        assertNotNull(navigation.getFasterRouteEngine())
     }
 
     @Test
@@ -49,15 +49,15 @@ class FasterRouteDetectorTest : BaseTest() {
         val navigation = buildNavigationWithFasterRouteEnabled()
         val fasterRouteEngine = mockk<FasterRoute>(relaxed = true)
 
-        navigation.fasterRouteEngine = fasterRouteEngine
+        navigation.setFasterRouteEngine(fasterRouteEngine)
 
-        assertEquals(navigation.fasterRouteEngine, fasterRouteEngine)
+        assertEquals(navigation.getFasterRouteEngine(), fasterRouteEngine)
     }
 
     @Test
     fun onFasterRouteResponse_isFasterRouteIsTrue() {
         val navigation = buildNavigationWithFasterRouteEnabled()
-        val fasterRouteEngine = navigation.fasterRouteEngine
+        val fasterRouteEngine = navigation.getFasterRouteEngine()
         var currentProgress = obtainDefaultRouteProgress()
         val longerRoute = currentProgress.directionsRoute()!!.toBuilder()
             .duration(10000000.0)
@@ -75,7 +75,7 @@ class FasterRouteDetectorTest : BaseTest() {
     @Test
     fun onSlowerRouteResponse_isFasterRouteIsFalse() {
         val navigation = buildNavigationWithFasterRouteEnabled()
-        val fasterRouteEngine = navigation.fasterRouteEngine
+        val fasterRouteEngine = navigation.getFasterRouteEngine()
         var currentProgress = obtainDefaultRouteProgress()
         val longerRoute = currentProgress.directionsRoute()!!.toBuilder()
             .duration(1000.0)

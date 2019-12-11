@@ -70,21 +70,21 @@ class MapboxNavigationTest : BaseTest() {
         val options = MapboxNavigationOptions.Builder().defaultMilestonesEnabled(false).build()
         val navigationWithOptions = buildMapboxNavigationWith(options)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
     fun defaultEngines_offRouteEngineDidGetInitialized() {
         val navigation = buildMapboxNavigation()
 
-        assertNotNull(navigation.offRouteEngine)
+        assertNotNull(navigation.getOffRouteEngine())
     }
 
     @Test
     fun defaultEngines_snapEngineDidGetInitialized() {
         val navigation = buildMapboxNavigation()
 
-        assertNotNull(navigation.snapEngine)
+        assertNotNull(navigation.getSnapEngine())
     }
 
     @Test
@@ -94,7 +94,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigation.addMilestone(milestone)
 
-        assertTrue(navigation.milestones.contains(milestone))
+        assertTrue(navigation.getMilestones().contains(milestone))
     }
 
     @Test
@@ -106,7 +106,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(milestone)
         navigationWithOptions.addMilestone(milestone)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -118,7 +118,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(milestone)
         navigationWithOptions.removeMilestone(milestone)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -130,7 +130,7 @@ class MapboxNavigationTest : BaseTest() {
         navigationWithOptions.addMilestone(StepMilestone.Builder().build())
         navigationWithOptions.removeMilestone(milestone)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -144,7 +144,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(null)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -157,7 +157,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(removedMilestoneIdentifier)
 
-        assertEquals(0, navigationWithOptions.milestones.size)
+        assertEquals(0, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -169,7 +169,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.removeMilestone(removedMilestoneIdentifier)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -183,7 +183,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.addMilestones(milestones)
 
-        assertEquals(1, navigationWithOptions.milestones.size)
+        assertEquals(1, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -198,7 +198,7 @@ class MapboxNavigationTest : BaseTest() {
 
         navigationWithOptions.addMilestones(milestones)
 
-        assertEquals(2, navigationWithOptions.milestones.size)
+        assertEquals(2, navigationWithOptions.getMilestones().size)
     }
 
     @Test
@@ -207,10 +207,10 @@ class MapboxNavigationTest : BaseTest() {
         val locationEngine = mockk<LocationEngine>(relaxed = true)
         val locationEngineInstanceNotUsed = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = locationEngine
+        navigation.setLocationEngine(locationEngine)
 
-        assertNotSame(locationEngineInstanceNotUsed, navigation.locationEngine)
-        assertEquals(locationEngine, navigation.locationEngine)
+        assertNotSame(locationEngineInstanceNotUsed, navigation.getLocationEngine())
+        assertEquals(locationEngine, navigation.getLocationEngine())
     }
 
     @Test
@@ -230,9 +230,9 @@ class MapboxNavigationTest : BaseTest() {
         val navigation = buildMapboxNavigation()
 
         val snap = mockk<Snap>(relaxed = true)
-        navigation.snapEngine = snap
+        navigation.setSnapEngine(snap)
 
-        assertTrue(navigation.snapEngine !is SnapToRoute)
+        assertTrue(navigation.getSnapEngine() !is SnapToRoute)
     }
 
     @Test
@@ -240,9 +240,9 @@ class MapboxNavigationTest : BaseTest() {
         val navigation = buildMapboxNavigation()
 
         val offRoute = mockk<OffRoute>(relaxed = true)
-        navigation.offRouteEngine = offRoute
+        navigation.setOffRouteEngine(offRoute)
 
-        assertEquals(offRoute, navigation.offRouteEngine)
+        assertEquals(offRoute, navigation.getOffRouteEngine())
     }
 
     @Test
@@ -288,9 +288,9 @@ class MapboxNavigationTest : BaseTest() {
         val navigation = buildMapboxNavigationWith(locationEngine)
         val newLocationEngine = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = newLocationEngine
+        navigation.setLocationEngine(newLocationEngine)
 
-        val currentLocationEngine = navigation.locationEngine
+        val currentLocationEngine = navigation.getLocationEngine()
         assertNotSame(locationEngine, currentLocationEngine)
     }
 
@@ -308,7 +308,7 @@ class MapboxNavigationTest : BaseTest() {
         )
         val anotherLocationEngine = mockk<LocationEngine>(relaxed = true)
 
-        navigation.locationEngine = anotherLocationEngine
+        navigation.setLocationEngine(anotherLocationEngine)
 
         verify {
             mockedFreeDriveLocationUpdater.updateLocationEngine(eq(anotherLocationEngine))
@@ -590,7 +590,7 @@ class MapboxNavigationTest : BaseTest() {
 
     private fun searchForBannerInstructionMilestone(navigation: MapboxNavigation): Int {
         var identifier = -1
-        navigation.milestones.forEach {
+        navigation.getMilestones().forEach {
             if (it is BannerInstructionMilestone) {
                 identifier = it.identifier
             }
@@ -600,7 +600,7 @@ class MapboxNavigationTest : BaseTest() {
 
     private fun searchForVoiceInstructionMilestone(navigation: MapboxNavigation): Int {
         var identifier = -1
-        navigation.milestones.forEach {
+        navigation.getMilestones().forEach {
             if (it is VoiceInstructionMilestone) {
                 identifier = it.identifier
             }

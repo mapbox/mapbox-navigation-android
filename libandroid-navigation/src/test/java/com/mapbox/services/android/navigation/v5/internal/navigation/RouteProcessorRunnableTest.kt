@@ -184,7 +184,7 @@ class RouteProcessorRunnableTest {
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>(relaxed = true)
         every { navigation.options() } returns options
-        every { navigation.route } returns route
+        every { navigation.getRoute()} returns route
         every { navigation.retrieveMapboxNavigator() } returns navigator
         every { navigation.retrieveEngineFactory() } returns NavigationEngineFactory()
         return RouteProcessorRunnable(
@@ -209,7 +209,7 @@ class RouteProcessorRunnableTest {
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>()
         every { navigation.options() } returns options
-        every { navigation.route } returns route
+        every { navigation.getRoute() } returns route
         every { navigation.retrieveMapboxNavigator() } returns navigator
         every { navigation.retrieveEngineFactory() } returns factory
         return RouteProcessorRunnable(
@@ -235,7 +235,7 @@ class RouteProcessorRunnableTest {
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>(relaxed = true)
         every { navigation.options() } returns options
-        every { navigation.route } returns route
+        every { navigation.getRoute() } returns route
         every { navigation.retrieveMapboxNavigator() } returns navigator
         every { navigation.retrieveEngineFactory() } returns factory
         val routeProcessor = mockk<NavigationRouteProcessor>(relaxed = true)
@@ -258,7 +258,7 @@ class RouteProcessorRunnableTest {
         every { navigator.retrieveStatus(any(), any()) } returns status
         val navigation = mockk<MapboxNavigation>(relaxed = true)
         every { navigation.options() } returns options
-        every { navigation.route } returns mockk<DirectionsRoute>(relaxed = true)
+        every { navigation.getRoute() } returns mockk<DirectionsRoute>(relaxed = true)
         every { navigation.retrieveMapboxNavigator() } returns navigator
         every { navigation.retrieveEngineFactory() } returns factory
         return RouteProcessorRunnable(
