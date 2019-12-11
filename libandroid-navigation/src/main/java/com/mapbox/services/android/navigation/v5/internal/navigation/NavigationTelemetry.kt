@@ -89,7 +89,7 @@ internal object NavigationTelemetry : NavigationMetricListener {
             metricsReporter.addEvent(event)
             isInitialized = true
         }
-        this.eventDispatcher = navigation.eventDispatcher
+        this.eventDispatcher = navigation.getEventDispatcher()
         this.eventDispatcher.addMetricEventListeners(this)
     }
 

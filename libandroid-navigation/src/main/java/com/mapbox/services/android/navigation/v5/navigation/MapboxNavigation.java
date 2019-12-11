@@ -68,7 +68,7 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * @see <a href="https://www.mapbox.com/android-docs/navigation/">Navigation documentation</a>
  * @since 0.1.0
  */
-public class MapboxNavigation implements ServiceConnection {
+public class MapboxNavigation implements ServiceConnection, MapboxNavigationInterface {
 
   private static final String MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android";
   private static final String MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android";
@@ -227,6 +227,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param milestone a custom built milestone
    * @since 0.4.0
    */
+  @Override
   public void addMilestone(@NonNull Milestone milestone) {
     boolean milestoneAdded = milestones.add(milestone);
     if (!milestoneAdded) {
@@ -244,8 +245,8 @@ public class MapboxNavigation implements ServiceConnection {
    * @param milestones a list of custom built milestone
    * @since 0.14.0
    */
-  public void addMilestones(@NonNull List<Milestone> milestones) {
-    boolean milestonesAdded = this.milestones.addAll(milestones);
+  public void addMilestones(@NotNull List<? extends Milestone> stones) {
+    boolean milestonesAdded = this.milestones.addAll(stones);
     if (!milestonesAdded) {
       Timber.w("These milestones have already been added to the stack.");
     }
@@ -260,6 +261,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.4.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void removeMilestone(@Nullable Milestone milestone) {
     if (milestone == null) {
       milestones.clear();
@@ -280,6 +282,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.5.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void removeMilestone(int milestoneIdentifier) {
     for (Milestone milestone : milestones) {
       if (milestoneIdentifier == milestone.getIdentifier()) {
@@ -308,6 +311,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param locationEngine a {@link LocationEngine} used for the navigation session
    * @since 0.1.0
    */
+  @Override
   public void setLocationEngine(@NonNull LocationEngine locationEngine) {
     this.locationEngine = locationEngine;
     freeDriveLocationUpdater.updateLocationEngine(locationEngine);
@@ -330,6 +334,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
   @NonNull
+  @Override
   public LocationEngine getLocationEngine() {
     return locationEngine;
   }
@@ -373,6 +378,7 @@ public class MapboxNavigation implements ServiceConnection {
    *                        traverse along
    * @since 0.1.0
    */
+  @Override
   public void startNavigation(@NonNull DirectionsRoute directionsRoute) {
     startNavigationWith(directionsRoute, DirectionsRouteType.NEW_ROUTE);
   }
@@ -387,6 +393,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param routeType       either new or fresh to determine what data navigation should consider
    * @see MapboxNavigation#startNavigation(DirectionsRoute)
    */
+  @Override
   public void startNavigation(@NonNull DirectionsRoute directionsRoute, @NonNull DirectionsRouteType routeType) {
     startNavigationWith(directionsRoute, routeType);
   }
@@ -403,6 +410,7 @@ public class MapboxNavigation implements ServiceConnection {
    *
    * @since 0.1.0
    */
+  @Override
   public void stopNavigation() {
     isActiveGuidanceOnGoing.set(false);
     if (isFreeDriveEnabled.get()) {
@@ -453,6 +461,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see MilestoneEventListener
    * @since 0.4.0
    */
+  @Override
   public void addMilestoneEventListener(@NonNull MilestoneEventListener milestoneEventListener) {
     navigationEventDispatcher.addMilestoneEventListener(milestoneEventListener);
   }
@@ -472,6 +481,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.4.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void removeMilestoneEventListener(@Nullable MilestoneEventListener milestoneEventListener) {
     navigationEventDispatcher.removeMilestoneEventListener(milestoneEventListener);
   }
@@ -489,6 +499,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see ProgressChangeListener
    * @since 0.1.0
    */
+  @Override
   public void addProgressChangeListener(@NonNull ProgressChangeListener progressChangeListener) {
     navigationEventDispatcher.addProgressChangeListener(progressChangeListener);
   }
@@ -507,6 +518,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see ProgressChangeListener
    * @since 0.1.0
    */
+  @Override
   public void removeProgressChangeListener(@Nullable ProgressChangeListener progressChangeListener) {
     navigationEventDispatcher.removeProgressChangeListener(progressChangeListener);
   }
@@ -527,6 +539,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see OffRouteListener
    * @since 0.2.0
    */
+  @Override
   public void addOffRouteListener(@NonNull OffRouteListener offRouteListener) {
     navigationEventDispatcher.addOffRouteListener(offRouteListener);
   }
@@ -546,6 +559,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.2.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void removeOffRouteListener(@Nullable OffRouteListener offRouteListener) {
     navigationEventDispatcher.removeOffRouteListener(offRouteListener);
   }
@@ -563,6 +577,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see NavigationEventListener
    * @since 0.1.0
    */
+  @Override
   public void addNavigationEventListener(@NonNull NavigationEventListener navigationEventListener) {
     navigationEventDispatcher.addNavigationEventListener(navigationEventListener);
   }
@@ -581,6 +596,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see NavigationEventListener
    * @since 0.1.0
    */
+  @Override
   public void removeNavigationEventListener(@Nullable NavigationEventListener navigationEventListener) {
     navigationEventDispatcher.removeNavigationEventListener(navigationEventListener);
   }
@@ -600,6 +616,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @see FasterRouteListener
    * @since 0.9.0
    */
+  @Override
   public void addFasterRouteListener(@NonNull FasterRouteListener fasterRouteListener) {
     navigationEventDispatcher.addFasterRouteListener(fasterRouteListener);
   }
@@ -619,6 +636,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.9.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void removeFasterRouteListener(@Nullable FasterRouteListener fasterRouteListener) {
     navigationEventDispatcher.removeFasterRouteListener(fasterRouteListener);
   }
@@ -632,6 +650,7 @@ public class MapboxNavigation implements ServiceConnection {
    *
    * @param rawLocationListener an implementation of {@code RawLocationListener}
    */
+  @Override
   public void addRawLocationListener(@NonNull RawLocationListener rawLocationListener) {
     navigationEventDispatcher.addRawLocationListener(rawLocationListener);
   }
@@ -646,6 +665,7 @@ public class MapboxNavigation implements ServiceConnection {
    *
    * @param rawLocationListener an implementation of {@code RawLocationListener}
    */
+  @Override
   public void removeRawLocationListener(@Nullable RawLocationListener rawLocationListener) {
     navigationEventDispatcher.removeRawLocationListener(rawLocationListener);
   }
@@ -665,6 +685,7 @@ public class MapboxNavigation implements ServiceConnection {
    *
    * @param enhancedLocationListener an implementation of {@code EnhancedLocationListener}
    */
+  @Override
   public void addEnhancedLocationListener(@NonNull EnhancedLocationListener enhancedLocationListener) {
     navigationEventDispatcher.addEnhancedLocationListener(enhancedLocationListener);
   }
@@ -679,6 +700,7 @@ public class MapboxNavigation implements ServiceConnection {
    *
    * @param enhancedLocationListener an implementation of {@code EnhancedLocationListener}
    */
+  @Override
   public void removeEnhancedLocationListener(@Nullable EnhancedLocationListener enhancedLocationListener) {
     navigationEventDispatcher.removeEnhancedLocationListener(enhancedLocationListener);
   }
@@ -689,6 +711,7 @@ public class MapboxNavigation implements ServiceConnection {
    * Best enhanced {@link Location} updates are received if an {@link EnhancedLocationListener} has been
    * added using {@link #addEnhancedLocationListener(EnhancedLocationListener)}.
    */
+  @Override
   public void enableFreeDrive() {
     isFreeDriveEnabled.set(true);
     if (!isFreeDriveConfigured.get()) {
@@ -720,6 +743,7 @@ public class MapboxNavigation implements ServiceConnection {
   /**
    * Calling this method disables free drive mode.
    */
+  @Override
   public void disableFreeDrive() {
     isFreeDriveEnabled.set(false);
     if (isFreeDriveConfigured.get()) {
@@ -737,6 +761,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param cameraEngine camera engine used to configure camera position while routing
    * @since 0.10.0
    */
+  @Override
   public void setCameraEngine(@NonNull Camera cameraEngine) {
     navigationEngineFactory.updateCameraEngine(cameraEngine);
   }
@@ -749,6 +774,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.10.0
    */
   @NonNull
+  @Override
   public Camera getCameraEngine() {
     return navigationEngineFactory.retrieveCameraEngine();
   }
@@ -769,6 +795,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.5.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void setSnapEngine(@NonNull Snap snapEngine) {
     navigationEngineFactory.updateSnapEngine(snapEngine);
   }
@@ -782,6 +809,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.5.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public Snap getSnapEngine() {
     return navigationEngineFactory.retrieveSnapEngine();
   }
@@ -799,6 +827,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.5.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void setOffRouteEngine(@NonNull OffRoute offRouteEngine) {
     navigationEngineFactory.updateOffRouteEngine(offRouteEngine);
   }
@@ -814,6 +843,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
   @NonNull
+  @Override
   public OffRoute getOffRouteEngine() {
     return navigationEngineFactory.retrieveOffRouteEngine();
   }
@@ -831,6 +861,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @since 0.9.0
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
+  @Override
   public void setFasterRouteEngine(@NonNull FasterRoute fasterRouteEngine) {
     navigationEngineFactory.updateFasterRouteEngine(fasterRouteEngine);
   }
@@ -846,6 +877,7 @@ public class MapboxNavigation implements ServiceConnection {
    */
   @SuppressWarnings("WeakerAccess") // Public exposed for usage outside SDK
   @NonNull
+  @Override
   public FasterRoute getFasterRouteEngine() {
     return navigationEngineFactory.retrieveFasterRouteEngine();
   }
@@ -862,6 +894,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @return String feedbackId
    * @since 0.7.0
    */
+  @Override
   public String recordFeedback(@FeedbackEvent.FeedbackType String feedbackType,
                                String description, @FeedbackEvent.FeedbackSource String source) {
     return navigationTelemetry.recordFeedbackEvent(feedbackType, description, source);
@@ -878,6 +911,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param screenshot   an optional encoded screenshot to provide more detail about the feedback
    * @since 0.8.0
    */
+  @Override
   public void updateFeedback(String feedbackId, @FeedbackEvent.FeedbackType String feedbackType,
                              String description, String screenshot) {
     navigationTelemetry.updateFeedbackEvent(feedbackId, feedbackType, description, screenshot);
@@ -891,6 +925,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param feedbackId generated from {@link MapboxNavigation#recordFeedback(String, String, String)}
    * @since 0.7.0
    */
+  @Override
   public void cancelFeedback(String feedbackId) {
     navigationTelemetry.cancelFeedback(feedbackId);
   }
@@ -906,6 +941,7 @@ public class MapboxNavigation implements ServiceConnection {
    * @param legIndex to be set
    * @return true if leg index updated, false otherwise
    */
+  @Override
   public boolean updateRouteLegIndex(int legIndex) {
     if (checkInvalidLegIndex(legIndex)) {
       return false;
@@ -914,18 +950,22 @@ public class MapboxNavigation implements ServiceConnection {
     return true;
   }
 
+  @Override
   public String retrieveHistory() {
     return mapboxNavigator.retrieveHistory();
   }
 
+  @Override
   public void toggleHistory(boolean isEnabled) {
     mapboxNavigator.toggleHistory(isEnabled);
   }
 
+  @Override
   public void addHistoryEvent(String eventType, String eventJsonProperties) {
     mapboxNavigator.addHistoryEvent(eventType, eventJsonProperties);
   }
 
+  @Override
   public String retrieveSsmlAnnouncementInstruction(int index) {
     return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
   }
@@ -949,48 +989,57 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   // TODO public?
+  @Override
   public String obtainAccessToken() {
     return accessToken;
   }
 
   // TODO public?
+  @Override
   public DirectionsRoute getRoute() {
     return directionsRoute;
   }
 
   // TODO public?
+  @Override
   public List<Milestone> getMilestones() {
     return new ArrayList<>(milestones);
   }
 
   // TODO public?
+  @Override
   public MapboxNavigationOptions options() {
     return options;
   }
 
   // TODO public?
+  @Override
   public NavigationEventDispatcher getEventDispatcher() {
     return navigationEventDispatcher;
   }
 
   // TODO public?
+  @Override
   public NavigationEngineFactory retrieveEngineFactory() {
     return navigationEngineFactory;
   }
 
   // TODO public?
+  @Override
   public MapboxNavigator retrieveMapboxNavigator() {
     return mapboxNavigator;
   }
 
   // TODO public?
   @NonNull
+  @Override
   public LocationEngineRequest retrieveLocationEngineRequest() {
     return locationEngineRequest;
   }
 
   // TODO public?
   @Nullable
+  @Override
   public RouteRefresher retrieveRouteRefresher() {
     return routeRefresher;
   }

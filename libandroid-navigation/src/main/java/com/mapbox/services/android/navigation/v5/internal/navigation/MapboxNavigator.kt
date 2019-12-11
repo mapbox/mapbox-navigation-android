@@ -14,7 +14,7 @@ import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType
 import java.util.Date
 
 // TODO Put navigator internal modifier back when MapboxNavigation is converted to Kotlin
-internal class MapboxNavigator(val navigator: Navigator) {
+internal class MapboxNavigator(val navigator: Navigator) : MapboxNavigatorInterface {
 
     companion object {
         private const val INDEX_FIRST_ROUTE = 0
@@ -24,12 +24,12 @@ internal class MapboxNavigator(val navigator: Navigator) {
 
     private val routeHandler: RouteHandler = RouteHandler(this)
 
-    fun updateRoute(route: DirectionsRoute, routeType: DirectionsRouteType) {
+    override fun updateRoute(route: DirectionsRoute, routeType: DirectionsRouteType) {
         routeHandler.updateRoute(route, routeType)
     }
 
     @Synchronized
-    fun updateLegIndex(index: Int): NavigationStatus {
+    override fun updateLegIndex(index: Int): NavigationStatus {
         return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index)
     }
 
@@ -41,7 +41,7 @@ internal class MapboxNavigator(val navigator: Navigator) {
      * history was toggled on
      */
     @Synchronized
-    fun retrieveHistory(): String {
+    override fun retrieveHistory(): String {
         return navigator.history
     }
 
@@ -53,32 +53,32 @@ internal class MapboxNavigator(val navigator: Navigator) {
      * to retain a copy
      */
     @Synchronized
-    fun toggleHistory(isEnabled: Boolean) {
+    override fun toggleHistory(isEnabled: Boolean) {
         navigator.toggleHistory(isEnabled)
     }
 
     @Synchronized
-    fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
+    override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
         navigator.pushHistory(eventType, eventJsonProperties)
     }
 
     @Synchronized
-    fun retrieveVoiceInstruction(index: Int): VoiceInstruction? {
+    override fun retrieveVoiceInstruction(index: Int): VoiceInstruction? {
         return navigator.getVoiceInstruction(index)
     }
 
     @Synchronized
-    fun setRoute(routeJson: String, routeIndex: Int, legIndex: Int): NavigationStatus {
+    override fun setRoute(routeJson: String, routeIndex: Int, legIndex: Int): NavigationStatus {
         return navigator.setRoute(routeJson, routeIndex, legIndex)
     }
 
     @Synchronized
-    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int): Boolean {
+    override fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int): Boolean {
         return navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
     }
 
     @Synchronized
-    fun retrieveStatus(date: Date, lagInMilliseconds: Long): NavigationStatus {
+    override fun retrieveStatus(date: Date, lagInMilliseconds: Long): NavigationStatus {
         // We ask for a point slightly in the future to account for lag in location services
         if (lagInMilliseconds > 0) {
             date.time = date.time + lagInMilliseconds
@@ -86,7 +86,7 @@ internal class MapboxNavigator(val navigator: Navigator) {
         return navigator.getStatus(date)
     }
 
-    fun updateLocation(raw: Location) {
+    override fun updateLocation(raw: Location) {
         val fixedLocation = buildFixLocationFromLocation(raw)
         synchronized(this) {
             navigator.updateLocation(fixedLocation)
@@ -94,12 +94,12 @@ internal class MapboxNavigator(val navigator: Navigator) {
     }
 
     @Synchronized
-    fun retrieveBannerInstruction(index: Int): BannerInstruction? {
+    override fun retrieveBannerInstruction(index: Int): BannerInstruction? {
         return navigator.getBannerInstruction(index)
     }
 
     @Synchronized
-    fun retrieveRouteGeometryWithBuffer(): Geometry? {
+    override fun retrieveRouteGeometryWithBuffer(): Geometry? {
         val routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) ?: return null
         return GeometryGeoJson.fromJson(routeGeometryWithBuffer)
     }

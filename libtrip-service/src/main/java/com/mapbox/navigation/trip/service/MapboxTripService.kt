@@ -6,13 +6,13 @@ import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
-class MapboxTripService(override val tripNotification: TripNotification) : TripService {
+class MapboxTripService : TripService {
 
-    override fun startService(stateListener: TripService.StateListener) {
-        TODO("not implemented")
+    override fun startNavigation(tripNotification: TripNotification): Boolean {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun stopService() {
-        TODO("not implemented")
+    override fun stopNavigation() {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }

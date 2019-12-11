@@ -1,7 +1,6 @@
 package com.mapbox.navigation.trip.notification
 
 import android.app.Notification
-import android.content.Context
 import android.location.Location
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
@@ -26,7 +25,7 @@ class MapboxTripNotification : TripNotification {
         TODO("not implemented")
     }
 
-    override fun onTripSessionStopped(context: Context) {
-        TODO("not implemented")
+    override fun onTripSessionStopped() {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }

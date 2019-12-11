@@ -8,13 +8,13 @@ import java.util.Date
 internal class RouteRefresher(
     private val mapboxNavigation: MapboxNavigation,
     private val routeRefresh: RouteRefresh
-) {
+) : RouteRefresherInterface {
     private val refreshIntervalInMilliseconds: Long = mapboxNavigation.options().refreshIntervalInMilliseconds()
     private val isRefreshRouteEnabled: Boolean = mapboxNavigation.options().enableRefreshRoute()
     private var lastRefreshedDate = Date()
     private var isChecking: Boolean = false
 
-    fun check(currentDate: Date): Boolean {
+    override fun check(currentDate: Date): Boolean {
         if (isChecking || !isRefreshRouteEnabled) {
             return false
         }
@@ -22,16 +22,16 @@ internal class RouteRefresher(
         return millisSinceLastRefresh > refreshIntervalInMilliseconds
     }
 
-    fun refresh(routeProgress: RouteProgress) {
+    override fun refresh(routeProgress: RouteProgress) {
         updateIsChecking(true)
         routeRefresh.refresh(routeProgress, RouteRefresherCallback(mapboxNavigation, this))
     }
 
-    fun updateLastRefresh(date: Date) {
+    override fun updateLastRefresh(date: Date) {
         lastRefreshedDate = date
     }
 
-    fun updateIsChecking(isChecking: Boolean) {
+    override fun updateIsChecking(isChecking: Boolean) {
         this.isChecking = isChecking
     }
 }

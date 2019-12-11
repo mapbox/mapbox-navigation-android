@@ -92,7 +92,7 @@ internal class NavigationService : Service() {
     }
 
     private fun initialize(mapboxNavigation: MapboxNavigation) {
-        val dispatcher = mapboxNavigation.eventDispatcher
+        val dispatcher = mapboxNavigation.getEventDispatcher()
         val accessToken = mapboxNavigation.obtainAccessToken()
         initializeRouteFetcher(dispatcher, accessToken, mapboxNavigation.retrieveEngineFactory())
         initializeNotificationProvider(mapboxNavigation)
@@ -128,9 +128,9 @@ internal class NavigationService : Service() {
     }
 
     private fun initializeLocationUpdater(mapboxNavigation: MapboxNavigation) {
-        val locationEngine = mapboxNavigation.locationEngine
+        val locationEngine = mapboxNavigation.getLocationEngine()
         val locationEngineRequest = mapboxNavigation.retrieveLocationEngineRequest()
-        val dispatcher = mapboxNavigation.eventDispatcher
+        val dispatcher = mapboxNavigation.getEventDispatcher()
         locationUpdater = LocationUpdater(applicationContext, thread, dispatcher,
                 locationEngine, locationEngineRequest)
     }

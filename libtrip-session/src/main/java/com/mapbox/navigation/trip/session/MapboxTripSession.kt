@@ -1,5 +1,6 @@
 package com.mapbox.navigation.trip.session
 
+import android.app.Notification
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
@@ -11,6 +12,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -45,9 +47,25 @@ class MapboxTripSession(
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
 
-    private val serviceStateListener = object : TripService.StateListener {
-        override fun onStateChanged(state: Any) {
-            TODO("not implemented")
+    private val serviceStateListener = object : TripNotification {
+        override fun getNotification(): Notification {
+            TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun getNotificationId(): Int {
+            TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun updateRouteProgress(routeProgress: RouteProgress?) {
+            TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun updateLocation(rawLocation: Location, enhancedLocation: Location) {
+            TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onTripSessionStopped() {
+            TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
         }
     }
 
@@ -73,13 +91,13 @@ class MapboxTripSession(
     override fun getRouteProgress() = routeProgress
 
     override fun start() {
-        tripService.startService(serviceStateListener)
+        tripService.startNavigation(serviceStateListener)
         locationEngine.requestLocationUpdates(locationEngineRequest, mainLocationCallback, Looper.getMainLooper())
         workerHandler.postDelayed(navigatorPollingRunnable, STATUS_POLLING_INTERVAL)
     }
 
     override fun stop() {
-        tripService.stopService()
+        tripService.stopNavigation()
         locationEngine.removeLocationUpdates(mainLocationCallback)
         workerHandler.removeCallbacks(navigatorPollingRunnable)
         workerHandler.removeCallbacks(navigatorLocationUpdateRunnable)

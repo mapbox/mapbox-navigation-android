@@ -16,7 +16,7 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import java.util.concurrent.CopyOnWriteArrayList
 import timber.log.Timber
 
-internal class NavigationEventDispatcher {
+internal class NavigationEventDispatcher : NavigationEventDispatcherInterface {
 
     private val navigationEventListeners: CopyOnWriteArrayList<NavigationEventListener>
     private val milestoneEventListeners: CopyOnWriteArrayList<MilestoneEventListener>
@@ -41,7 +41,7 @@ internal class NavigationEventDispatcher {
         enhancedLocationListeners = CopyOnWriteArrayList()
     }
 
-    fun addMilestoneEventListener(milestoneEventListener: MilestoneEventListener) {
+    override fun addMilestoneEventListener(milestoneEventListener: MilestoneEventListener) {
         if (milestoneEventListeners.contains(milestoneEventListener)) {
             Timber.w("The specified MilestoneEventListener has already been added to the stack.")
             return
@@ -49,7 +49,7 @@ internal class NavigationEventDispatcher {
         milestoneEventListeners.add(milestoneEventListener)
     }
 
-    fun removeMilestoneEventListener(milestoneEventListener: MilestoneEventListener?) {
+    override fun removeMilestoneEventListener(milestoneEventListener: MilestoneEventListener?) {
         if (milestoneEventListener == null) {
             milestoneEventListeners.clear()
         } else if (!milestoneEventListeners.contains(milestoneEventListener)) {
@@ -59,7 +59,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addProgressChangeListener(progressChangeListener: ProgressChangeListener) {
+    override fun addProgressChangeListener(progressChangeListener: ProgressChangeListener) {
         if (progressChangeListeners.contains(progressChangeListener)) {
             Timber.w("The specified ProgressChangeListener has already been added to the stack.")
             return
@@ -67,7 +67,7 @@ internal class NavigationEventDispatcher {
         progressChangeListeners.add(progressChangeListener)
     }
 
-    fun removeProgressChangeListener(progressChangeListener: ProgressChangeListener?) {
+    override fun removeProgressChangeListener(progressChangeListener: ProgressChangeListener?) {
         if (progressChangeListener == null) {
             progressChangeListeners.clear()
         } else if (!progressChangeListeners.contains(progressChangeListener)) {
@@ -77,7 +77,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addOffRouteListener(offRouteListener: OffRouteListener) {
+    override fun addOffRouteListener(offRouteListener: OffRouteListener) {
         if (offRouteListeners.contains(offRouteListener)) {
             Timber.w("The specified OffRouteListener has already been added to the stack.")
             return
@@ -85,7 +85,7 @@ internal class NavigationEventDispatcher {
         offRouteListeners.add(offRouteListener)
     }
 
-    fun removeOffRouteListener(offRouteListener: OffRouteListener?) {
+    override fun removeOffRouteListener(offRouteListener: OffRouteListener?) {
         if (offRouteListener == null) {
             offRouteListeners.clear()
         } else if (!offRouteListeners.contains(offRouteListener)) {
@@ -95,7 +95,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addNavigationEventListener(navigationEventListener: NavigationEventListener) {
+    override fun addNavigationEventListener(navigationEventListener: NavigationEventListener) {
         if (navigationEventListeners.contains(navigationEventListener)) {
             Timber.w("The specified NavigationEventListener has already been added to the stack.")
             return
@@ -103,7 +103,7 @@ internal class NavigationEventDispatcher {
         this.navigationEventListeners.add(navigationEventListener)
     }
 
-    fun removeNavigationEventListener(navigationEventListener: NavigationEventListener?) {
+    override fun removeNavigationEventListener(navigationEventListener: NavigationEventListener?) {
         if (navigationEventListener == null) {
             navigationEventListeners.clear()
         } else if (!navigationEventListeners.contains(navigationEventListener)) {
@@ -113,7 +113,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addFasterRouteListener(fasterRouteListener: FasterRouteListener) {
+    override fun addFasterRouteListener(fasterRouteListener: FasterRouteListener) {
         if (fasterRouteListeners.contains(fasterRouteListener)) {
             Timber.w("The specified FasterRouteListener has already been added to the stack.")
             return
@@ -121,7 +121,7 @@ internal class NavigationEventDispatcher {
         fasterRouteListeners.add(fasterRouteListener)
     }
 
-    fun removeFasterRouteListener(fasterRouteListener: FasterRouteListener?) {
+    override fun removeFasterRouteListener(fasterRouteListener: FasterRouteListener?) {
         if (fasterRouteListener == null) {
             fasterRouteListeners.clear()
         } else if (!fasterRouteListeners.contains(fasterRouteListener)) {
@@ -131,7 +131,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addRawLocationListener(rawLocationListener: RawLocationListener) {
+    override fun addRawLocationListener(rawLocationListener: RawLocationListener) {
         if (rawLocationListeners.contains(rawLocationListener)) {
             Timber.w("The specified RawLocationListener has already been added to the stack.")
             return
@@ -139,7 +139,7 @@ internal class NavigationEventDispatcher {
         rawLocationListeners.add(rawLocationListener)
     }
 
-    fun removeRawLocationListener(rawLocationListener: RawLocationListener?) {
+    override fun removeRawLocationListener(rawLocationListener: RawLocationListener?) {
         if (rawLocationListener == null) {
             rawLocationListeners.clear()
         } else if (!rawLocationListeners.contains(rawLocationListener)) {
@@ -149,7 +149,7 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun addEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener) {
+    override fun addEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener) {
         if (enhancedLocationListeners.contains(enhancedLocationListener)) {
             Timber.w("The specified EnhancedLocationListener has already been added to the stack.")
             return
@@ -157,7 +157,7 @@ internal class NavigationEventDispatcher {
         enhancedLocationListeners.add(enhancedLocationListener)
     }
 
-    fun removeEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener?) {
+    override fun removeEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener?) {
         if (enhancedLocationListener == null) {
             enhancedLocationListeners.clear()
         } else if (!enhancedLocationListeners.contains(enhancedLocationListener)) {
@@ -167,52 +167,52 @@ internal class NavigationEventDispatcher {
         }
     }
 
-    fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
+    override fun onMilestoneEvent(routeProgress: RouteProgress, instruction: String, milestone: Milestone) {
         checkForArrivalEvent(routeProgress)
         for (milestoneEventListener in milestoneEventListeners) {
             milestoneEventListener.onMilestoneEvent(routeProgress, instruction, milestone)
         }
     }
 
-    fun onProgressChange(location: Location, routeProgress: RouteProgress) {
+    override fun onProgressChange(location: Location, routeProgress: RouteProgress) {
         sendMetricProgressUpdate(routeProgress)
         for (progressChangeListener in progressChangeListeners) {
             progressChangeListener.onProgressChange(location, routeProgress)
         }
     }
 
-    fun onNavigationEvent(isRunning: Boolean) {
+    override fun onNavigationEvent(isRunning: Boolean) {
         for (navigationEventListener in navigationEventListeners) {
             navigationEventListener.onRunning(isRunning)
         }
     }
 
-    fun onUserOffRoute(location: Location) {
+    override fun onUserOffRoute(location: Location) {
         for (offRouteListener in offRouteListeners) {
             offRouteListener.userOffRoute(location)
         }
         metricEventListener?.onOffRouteEvent(location)
     }
 
-    fun onFasterRouteEvent(directionsRoute: DirectionsRoute) {
+    override fun onFasterRouteEvent(directionsRoute: DirectionsRoute) {
         for (fasterRouteListener in fasterRouteListeners) {
             fasterRouteListener.fasterRouteFound(directionsRoute)
         }
     }
 
-    fun onLocationUpdate(location: Location) {
+    override fun onLocationUpdate(location: Location) {
         for (listener in rawLocationListeners) {
             listener.onLocationUpdate(location)
         }
     }
 
-    fun onEnhancedLocationUpdate(location: Location) {
+    override fun onEnhancedLocationUpdate(location: Location) {
         for (listener in enhancedLocationListeners) {
             listener.onEnhancedLocationUpdate(location)
         }
     }
 
-    fun addMetricEventListeners(eventListeners: NavigationMetricListener) {
+    override fun addMetricEventListeners(eventListeners: NavigationMetricListener) {
         if (metricEventListener == null) {
             metricEventListener = eventListeners
         }

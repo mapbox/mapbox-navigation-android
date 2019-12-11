@@ -41,7 +41,7 @@ internal class RouteProcessorRunnable(
     private fun process() {
         val mapboxNavigator = navigation.retrieveMapboxNavigator()
         val options = navigation.options()
-        val route = navigation.route
+        val route = navigation.getRoute()
 
         val date = Date()
         var status = mapboxNavigator.retrieveStatus(
@@ -162,7 +162,7 @@ internal class RouteProcessorRunnable(
             previousRouteProgress = routeProgress
         }
         val milestones = ArrayList<Milestone>()
-        for (milestone in mapboxNavigation.milestones) {
+        for (milestone in mapboxNavigation.getMilestones()) {
             if (milestone.isOccurring(previousRouteProgress, routeProgress)) {
                 milestones.add(milestone)
             }

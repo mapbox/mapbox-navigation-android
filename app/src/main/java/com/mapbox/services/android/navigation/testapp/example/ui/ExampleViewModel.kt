@@ -65,7 +65,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
         // Initialize navigation and pass the LocationEngine
         navigation = MapboxNavigation(getApplication(), accessToken)
-        navigation.locationEngine = locationEngine
+        navigation.setLocationEngine(locationEngine)
 
         // Initialize the speech player and pass to milestone event listener for instructions
         val english = US.language // TODO localization
@@ -115,10 +115,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
                 true -> {
                     val replayRouteLocationEngine = ReplayRouteLocationEngine()
                     replayRouteLocationEngine.assign(primaryRoute)
-                    navigation.locationEngine = replayRouteLocationEngine
+                    navigation.setLocationEngine(replayRouteLocationEngine)
                 }
                 false -> {
-                    navigation.locationEngine = locationEngine
+                    navigation.setLocationEngine(locationEngine)
                 }
             }
             navigation.startNavigation(primaryRoute)
@@ -147,7 +147,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun shutdown() {
-        val cameraEngine = navigation.cameraEngine
+        val cameraEngine = navigation.getCameraEngine()
         if (cameraEngine is DynamicCamera) {
             cameraEngine.clearMap()
         }

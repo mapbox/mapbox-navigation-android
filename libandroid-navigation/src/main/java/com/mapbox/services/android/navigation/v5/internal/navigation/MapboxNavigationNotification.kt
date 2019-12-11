@@ -155,7 +155,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         applicationContext: Context,
         mapboxNavigation: MapboxNavigation
     ) {
-        val routeOptions = mapboxNavigation.route.routeOptions()
+        val routeOptions = mapboxNavigation.getRoute().routeOptions()
         var language: String = applicationContext.inferDeviceLanguage()
         var unitType: String = applicationContext.inferDeviceLocale().getUnitTypeForLocale()
         routeOptions?.let { options ->

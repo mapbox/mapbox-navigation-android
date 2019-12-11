@@ -209,7 +209,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
     }
 
     fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
-        viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
+        viewModel.retrieveNavigation().setCameraEngine(DynamicCamera(mapboxMap))
     }
 
     private fun buildCameraUpdateFrom(location: Location): CameraUpdate {
