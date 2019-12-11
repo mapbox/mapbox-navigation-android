@@ -13,10 +13,9 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
-  playAccountConfigs {
+  playConfigs {
     defaultAccountConfig {
-      serviceAccountEmail = 'navigation-testapp-publisher@android-gl-native.iam.gserviceaccount.com'
-      jsonFile = file("$project.rootDir/android-gl-native-15d95ab30d0f.json")
+      serviceAccountCredentials = file("$project.rootDir/android-gl-native-15d95ab30d0f.json")
     }
   }
 
@@ -40,7 +39,6 @@ android {
     multiDexEnabled true
     versionCode gitVersionCode
     versionName gitVersionName
-    playAccountConfig = playAccountConfigs.defaultAccountConfig
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
     buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
@@ -78,6 +76,7 @@ android {
   }
 
   play {
+    serviceAccountCredentials = playConfigs.defaultAccountConfig.serviceAccountCredentials
     track = System.getenv("GOOGLE_PLAY_TRACK") ?: "internal"
   }
 }
