@@ -188,9 +188,9 @@ class RouteOptionsNavigation(
         }
 
         private fun checkFields() {
-            check(!::_origin.isInitialized) { "Property origin hasn't been inited" }
+            check(::_origin.isInitialized) { "Property origin hasn't been inited" }
 
-            check(!::_destination.isInitialized) { "Property destination hasn't been inited" }
+            check(::_destination.isInitialized) { "Property destination hasn't been inited" }
         }
     }
 }

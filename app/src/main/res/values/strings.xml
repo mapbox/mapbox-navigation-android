@@ -10,6 +10,12 @@
     <string name="title_offboard_router_java">Offboard Router Java</string>
     <string name="description_offboard_router_java">Shows routes using offboard routing api in Java code.</string>
 
+    <string name="title_onboard_router_kotlin" translatable="false">Onboard Router Kotlin</string>
+    <string name="description_onboard_router_kotlin" translatable="false">Shows routes using onboard routing api in Kotlin code.</string>
+
+    <string name="title_onboard_router_java" translatable="false">Onboard Router Java</string>
+    <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
+
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
 

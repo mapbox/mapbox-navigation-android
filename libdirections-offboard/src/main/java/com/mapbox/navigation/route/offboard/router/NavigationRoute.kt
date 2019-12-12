@@ -256,7 +256,7 @@ constructor(
          * @return this builder for chaining options together
          * @since 0.9.0
          */
-        internal fun routeOptions(options: RouteOptionsNavigation): Builder {
+        fun routeOptions(options: RouteOptionsNavigation): Builder {
             options.baseUrl?.let {
                 directionsBuilder.baseUrl(it)
             }
