@@ -15,7 +15,7 @@
         android:paddingEnd="@dimen/report_feedback_padding_24"
         android:paddingStart="@dimen/report_feedback_padding_24"
         android:textStyle="bold"
-        android:textSize="24sp"
+        android:textSize="?attr/navigationViewReportFeedbackTextSizeLandscape"
         android:textColor="?attr/navigationViewPrimaryText"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -46,6 +46,32 @@
     <attr name="navigationViewBannerSecondaryText" format="color"/>
     <attr name="navigationViewBannerManeuverPrimary" format="color"/>
     <attr name="navigationViewBannerManeuverSecondary" format="color"/>
+    <attr name="navigationViewBannerStepDistanceTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewBannerStepDistanceTextSizeLandscape" format="dimension"/>
+    <attr name="navigationViewBannerStepPrimaryTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewBannerStepPrimaryTextSizeLandscape" format="dimension"/>
+    <attr name="navigationViewBannerStepSecondaryTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewBannerStepSecondaryTextSizeLandscape" format="dimension"/>
+    <attr name="navigationViewBannerSubStepTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewBannerSubStepTextSizeLandscape" format="dimension"/>
+
+    <!-- Bottom Instruction -->
+    <attr name="navigationViewTimeRemainingTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewTimeRemainingTextSizeLandscape" format="dimension"/>
+    <attr name="navigationViewDistanceRemainingTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewDistanceRemainingTextSizeLandscape" format="dimension"/>
+    <attr name="navigationViewArrivalTimeTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewArrivalTimeTextSizeLandscape" format="dimension"/>
+
+    <!-- Exit Sign -->
+    <attr name="navigationViewExitTextSize" format="dimension"/>
+    
+    <!-- Feedback Bottom -->
+    <attr name="navigationViewReportFeedbackTextSizePortrait" format="dimension"/>
+    <attr name="navigationViewReportFeedbackTextSizeLandscape" format="dimension"/>
+
+    <!-- Alert -->
+    <attr name="navigationViewAlertTextSize" format="dimension"/>
 
     <!-- Progress Bars -->
     <attr name="navigationViewProgress" format="color"/>

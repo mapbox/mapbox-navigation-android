@@ -17,7 +17,7 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:textColor="?attr/navigationViewPrimaryText"
-        android:textSize="26sp"
+        android:textSize="?attr/navigationViewTimeRemainingTextSizePortrait"
         app:autoSizeMaxTextSize="26sp"
         app:autoSizeMinTextSize="20sp"
         app:autoSizeStepGranularity="1sp"
@@ -37,7 +37,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewSecondaryText"
-            android:textSize="18sp"
+            android:textSize="?attr/navigationViewDistanceRemainingTextSizePortrait"
             tools:text="17 miles"/>
 
         <TextView
@@ -50,7 +50,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewSecondaryText"
-            android:textSize="18sp"
+            android:textSize="?attr/navigationViewArrivalTimeTextSizePortrait"
             tools:text="10:38am"/>
 
     </LinearLayout>

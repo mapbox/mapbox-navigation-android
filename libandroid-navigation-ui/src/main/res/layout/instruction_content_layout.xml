@@ -43,7 +43,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="22sp"
+            android:textSize="?attr/navigationViewBannerStepDistanceTextSizePortrait"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +74,7 @@
             android:maxLines="1"
             android:minHeight="35dp"
             android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="30sp"
+            android:textSize="?attr/navigationViewBannerStepPrimaryTextSizePortrait"
             android:textStyle="bold"
             tools:text="I-580 South"/>
 
@@ -89,7 +89,7 @@
             android:maxLines="1"
             android:minHeight="31dp"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="26sp"
+            android:textSize="?attr/navigationViewBannerStepSecondaryTextSizePortrait"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino"/>
 

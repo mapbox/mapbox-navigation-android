@@ -39,7 +39,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="20sp"
+            android:textSize="?attr/navigationViewBannerStepDistanceTextSizeLandscape"
             tools:text="302 mi"/>
 
     </LinearLayout>
@@ -63,7 +63,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="28sp"
+            android:textSize="?attr/navigationViewBannerStepPrimaryTextSizeLandscape"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -81,7 +81,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="22sp"
+            android:textSize="?attr/navigationViewBannerStepSecondaryTextSizeLandscape"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

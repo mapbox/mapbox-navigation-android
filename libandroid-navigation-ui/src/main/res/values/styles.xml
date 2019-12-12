@@ -16,7 +16,30 @@
         <item name="roundedLineCap">true</item>
     </style>
 
-    <style name="NavigationViewLight" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="NavigationView" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="navigationViewBannerStepDistanceTextSizePortrait">22sp</item>
+        <item name="navigationViewBannerStepDistanceTextSizeLandscape">20sp</item>
+        <item name="navigationViewBannerStepPrimaryTextSizePortrait">30sp</item>
+        <item name="navigationViewBannerStepPrimaryTextSizeLandscape">28sp</item>
+        <item name="navigationViewBannerStepSecondaryTextSizePortrait">26sp</item>
+        <item name="navigationViewBannerStepSecondaryTextSizeLandscape">22sp</item>
+        <item name="navigationViewBannerSubStepTextSizePortrait">18sp</item>
+        <item name="navigationViewBannerSubStepTextSizeLandscape">18sp</item>
+        <item name="navigationViewTimeRemainingTextSizePortrait">26sp</item>
+        <item name="navigationViewTimeRemainingTextSizeLandscape">26sp</item>
+        <item name="navigationViewDistanceRemainingTextSizePortrait">18sp</item>
+        <item name="navigationViewDistanceRemainingTextSizeLandscape">24sp</item>
+        <item name="navigationViewArrivalTimeTextSizePortrait">18sp</item>
+        <item name="navigationViewArrivalTimeTextSizeLandscape">24sp</item>
+
+        <item name="navigationViewReportFeedbackTextSizePortrait">24sp</item>
+        <item name="navigationViewReportFeedbackTextSizeLandscape">24sp</item>
+
+        <item name="navigationViewExitTextSize">20sp</item>
+        <item name="navigationViewAlertTextSize">18sp</item>
+    </style>
+
+    <style name="NavigationViewLight" parent="NavigationView">
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
@@ -46,7 +69,7 @@
         <item name="navigationViewMapStyle">@string/navigation_guidance_day</item>
     </style>
 
-    <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="NavigationViewDark" parent="NavigationView">
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent_dark</item>

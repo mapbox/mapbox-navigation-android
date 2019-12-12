@@ -31,7 +31,7 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:textColor="?attr/navigationViewBannerSecondaryText"
-        android:textSize="18sp"
+        android:textSize="?attr/navigationViewBannerSubStepTextSizeLandscape"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

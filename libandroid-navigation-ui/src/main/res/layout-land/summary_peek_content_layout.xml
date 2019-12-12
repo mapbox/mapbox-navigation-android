@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:textColor="?attr/navigationViewPrimaryText"
         android:includeFontPadding="false"
-        android:textSize="26sp"
+        android:textSize="?attr/navigationViewTimeRemainingTextSizeLandscape"
         tools:text="5 min"/>
 
     <ImageView
@@ -36,7 +36,7 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="24sp"
+        android:textSize="?attr/navigationViewDistanceRemainingTextSizeLandscape"
         tools:text="17 miles"/>
 
     <ImageView
@@ -57,7 +57,7 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="24sp"
+        android:textSize="?attr/navigationViewArrivalTimeTextSizeLandscape"
         tools:text="10:38am"/>
 
 </LinearLayout>

@@ -40,7 +40,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="20sp"
+            android:textSize="?attr/navigationViewBannerStepDistanceTextSizeLandscape"
             tools:text="3.2 mi"/>
 
     </LinearLayout>
@@ -69,7 +69,7 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerPrimaryText"
-            android:textSize="28sp"
+            android:textSize="?attr/navigationViewBannerStepPrimaryTextSizeLandscape"
             android:textStyle="bold"
             tools:text="Fulton St."/>
 
@@ -81,7 +81,7 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textColor="?attr/navigationViewBannerSecondaryText"
-            android:textSize="22sp"
+            android:textSize="?attr/navigationViewBannerStepSecondaryTextSizeLandscape"
             android:textStyle="bold"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1"/>
 

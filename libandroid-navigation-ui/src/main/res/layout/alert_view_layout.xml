@@ -18,7 +18,7 @@
         android:gravity="center"
         android:textColor="?attr/navigationViewBannerPrimaryText"
         android:textStyle="bold"
-        android:textSize="18sp"
+        android:textSize="?attr/navigationViewAlertTextSize"
         android:maxLines="1"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
