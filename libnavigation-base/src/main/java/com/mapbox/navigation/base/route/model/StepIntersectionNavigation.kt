@@ -63,4 +63,7 @@ class StepIntersectionNavigation(
     val into: Int?,
     val out: Int?,
     val lanes: List<IntersectionLanesNavigation>?
-)
+) {
+    val rawLocation: DoubleArray
+        get() = doubleArrayOf(location.longitude(), location.latitude())
+}

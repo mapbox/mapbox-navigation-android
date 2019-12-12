@@ -52,8 +52,8 @@ package com.mapbox.navigation.base.route.model
  * @since 1.0
  */
 data class BannerComponentsNavigation(
-    val text: String?,
-    val type: String?,
+    val text: String,
+    val type: String,
     val abbreviation: String?,
     val abbreviationPriority: Int?,
     val imageBaseUrl: String?,
