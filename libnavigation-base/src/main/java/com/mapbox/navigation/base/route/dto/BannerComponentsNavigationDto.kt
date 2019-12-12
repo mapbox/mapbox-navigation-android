@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.base.route.model.BannerComponentsNavigation
 
 class BannerComponentsNavigationDto(
-    val text: String?,
-    val type: String?,
+    val text: String,
+    val type: String,
     @SerializedName("abbr")
     val abbreviation: String?,
     @SerializedName("abbr_priority")

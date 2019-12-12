@@ -200,4 +200,7 @@ class StepManeuverNavigation(
         EXIT_ROTARY
     )
     annotation class StepManeuverTypeNavigation
+
+    val rawLocation: DoubleArray
+        get() = doubleArrayOf(location.longitude(), location.latitude())
 }

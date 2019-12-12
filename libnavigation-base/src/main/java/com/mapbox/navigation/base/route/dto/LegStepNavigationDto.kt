@@ -11,13 +11,13 @@ internal class LegStepNavigationDto(
     val name: String?,
     val ref: String?,
     val destinations: String?,
-    val mode: String?,
+    val mode: String,
     val pronunciation: String?,
     @SerializedName("rotary_name")
     val rotaryName: String?,
     @SerializedName("rotary_pronunciation")
     val rotaryPronunciation: String?,
-    val maneuver: StepManeuverNavigation?,
+    val maneuver: StepManeuverNavigation,
     val voiceInstructions: List<VoiceInstructionsNavigationDto>?,
     val bannerInstructions: List<BannerInstructionsNavigationDto>?,
     @SerializedName("driving_side")

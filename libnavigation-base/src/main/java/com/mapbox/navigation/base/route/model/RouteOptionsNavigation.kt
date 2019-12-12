@@ -40,6 +40,9 @@ class RouteOptionsNavigation(
         }
     }
 
+    val coordinates: List<Point>
+        get() = listOf(origin.point) + waypoints.map { it.point } + destination.point
+
     class Builder internal constructor() {
         private lateinit var _origin: RoutePointNavigation
         private lateinit var _destination: RoutePointNavigation
