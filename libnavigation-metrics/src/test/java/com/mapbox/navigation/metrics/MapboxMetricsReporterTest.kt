@@ -55,6 +55,22 @@ class MapboxMetricsReporterTest {
         verify(exactly = 0) { mapboxTelemetry.push(event) }
     }
 
+    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
+        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val isDebugLoggingEnabled = true
+        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
+
+        verify { mapboxTelemetry.updateDebugLoggingEnabled(true) }
+    }
+
+    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
+        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val isDebugLoggingEnabled = false
+        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
+
+        verify { mapboxTelemetry.updateDebugLoggingEnabled(false) }
+    }
+
     private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
         val threadWorker = mockk<WorkThreadHandler>(relaxed = true)
