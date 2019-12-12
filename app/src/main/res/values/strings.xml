@@ -4,6 +4,24 @@
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 
+    <string name="title_offboard_router_kotlin">Offboard Router Kotlin</string>
+    <string name="description_offboard_router_kotlin">Shows routes using offboard routing api in Kotlin code.</string>
+
+    <string name="title_offboard_router_java">Offboard Router Java</string>
+    <string name="description_offboard_router_java">Shows routes using offboard routing api in Java code.</string>
+
+    <string name="title_onboard_router_kotlin" translatable="false">Onboard Router Kotlin</string>
+    <string name="description_onboard_router_kotlin" translatable="false">Shows routes using onboard routing api in Kotlin code.</string>
+
+    <string name="title_onboard_router_java" translatable="false">Onboard Router Java</string>
+    <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
+
+    <string name="title_trip_service_kotlin">Trip Service Kotlin</string>
+    <string name="description_trip_service_kotlin">Shows how to use the Service to push notifications in Kotlin code.</string>
+
+    <string name="title_trip_service_java">Trip Service Java</string>
+    <string name="description_trip_service_java">Shows how to use the Service to push notifications in Java code.</string>
+
     <string name="title_off_route_detection">Off route detection</string>
     <string name="description_off_route_detection">Uses the Route Utils class to determine if a users off route.</string>
 

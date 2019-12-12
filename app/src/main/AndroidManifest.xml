@@ -46,6 +46,38 @@
         </activity>
 
         <activity
+            android:name=".activity.OffboardRouterActivityKt"
+            android:label="@string/title_offboard_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OffboardRouterActivityJava"
+            android:label="@string/title_offboard_router_java">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OnboardRouterActivityKt"
+            android:label="@string/title_onboard_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.OnboardRouterActivityJava"
+            android:label="@string/title_onboard_router_java">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
             android:name=".activity.RerouteActivity"
             android:label="@string/title_reroute">
             <meta-data

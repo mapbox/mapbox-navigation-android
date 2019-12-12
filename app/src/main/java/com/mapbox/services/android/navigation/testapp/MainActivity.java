@@ -66,6 +66,31 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         MockNavigationActivity.class
       ),
       new SampleItem(
+        getString(R.string.title_offboard_router_kotlin),
+        getString(R.string.description_offboard_router_kotlin),
+        OffboardRouterActivityKt.class
+      ),
+      new SampleItem(
+        getString(R.string.title_offboard_router_java),
+        getString(R.string.description_offboard_router_java),
+        OffboardRouterActivityJava.class
+      ),
+      new SampleItem(
+        getString(R.string.title_trip_service_kotlin),
+        getString(R.string.description_trip_service_kotlin),
+        TripServiceActivityKt.class
+      ),
+      new SampleItem(
+        getString(R.string.title_onboard_router_kotlin),
+        getString(R.string.description_onboard_router_kotlin),
+        OnboardRouterActivityKt.class
+      ),
+      new SampleItem(
+        getString(R.string.title_onboard_router_java),
+        getString(R.string.description_onboard_router_java),
+        OnboardRouterActivityJava.class
+      ),
+      new SampleItem(
         getString(R.string.title_reroute),
         getString(R.string.description_reroute),
         RerouteActivity.class
