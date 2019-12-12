@@ -371,8 +371,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
-    Timber.d("METRICS_LOG: %s", metric);
+  public void onMetricUpdated(@NotNull @MetricEvent.Metric String metricName, @NotNull String jsonStringData) {
+    Timber.d("METRICS_LOG: %s", metricName);
     Timber.d(jsonStringData);
   }
 
