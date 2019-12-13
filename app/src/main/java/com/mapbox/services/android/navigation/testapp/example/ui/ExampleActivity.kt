@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.logger.DEBUG
 import com.mapbox.navigation.logger.ERROR
 import com.mapbox.navigation.logger.INFO
@@ -131,6 +132,7 @@ class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver {
     override fun onMapReady(mapboxMap: MapboxMap) {
         MapboxLogger.e("Map is ready")
         mapboxMap.setStyle(Style.Builder().fromUrl(getString(R.string.navigation_guidance_day))) {
+            MapboxLogger.d("Style setting is finished", Tag("EXAMPLE_TAG"))
             map = NavigationMapboxMap(mapView, mapboxMap)
             map?.setOnRouteSelectionChangeListener(this)
             map?.updateLocationLayerRenderMode(RenderMode.NORMAL)

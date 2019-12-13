@@ -1,5 +1,6 @@
 package com.mapbox.navigation.logger
 
+import com.mapbox.navigation.base.logger.model.Tag
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
@@ -21,7 +22,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = VERBOSE
 
-        MapboxLogger.v("TAG", "some message", throwable)
+        MapboxLogger.v("some message", Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.v(throwable, "some message") }
@@ -35,7 +36,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
-        MapboxLogger.v("TAG", "some message", throwable)
+        MapboxLogger.v("some message", Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.v(any<Throwable>(), any()) }
@@ -49,7 +50,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
-        MapboxLogger.d("TAG", "some message", throwable)
+        MapboxLogger.d("some message", Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.d(throwable, "some message") }
@@ -63,7 +64,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
-        MapboxLogger.d("TAG", "some message", throwable)
+        MapboxLogger.d("some message", Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.d(any<Throwable>(), any()) }
@@ -77,7 +78,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
-        MapboxLogger.i("TAG", "some message", throwable)
+        MapboxLogger.i("some message", Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.i(throwable, "some message") }
@@ -91,7 +92,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
-        MapboxLogger.i("TAG", "some message", throwable)
+        MapboxLogger.i("some message", Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.i(any<Throwable>(), any()) }
@@ -105,7 +106,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
-        MapboxLogger.w("TAG", "some message", throwable)
+        MapboxLogger.w("some message", Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.w(throwable, "some message") }
@@ -119,7 +120,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
-        MapboxLogger.w("TAG", "some message", throwable)
+        MapboxLogger.w("some message", Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.w(any<Throwable>(), any()) }
@@ -133,7 +134,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
-        MapboxLogger.e("TAG", "some message", throwable)
+        MapboxLogger.e("some message", Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.e(throwable, "some message") }
@@ -147,7 +148,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = NONE
 
-        MapboxLogger.e("TAG", "some message", throwable)
+        MapboxLogger.e("some message", Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.e(any<Throwable>(), any()) }

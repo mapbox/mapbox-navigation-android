@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Tag;
 import com.mapbox.navigation.logger.LogEntry;
 import com.mapbox.navigation.logger.LogPriority;
 import com.mapbox.navigation.logger.LoggerObserver;
@@ -375,8 +376,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
-    MapboxLogger.INSTANCE.d(metric, "METRICS_LOG");
-    MapboxLogger.INSTANCE.d(jsonStringData, "METRICS_LOG");
+    MapboxLogger.INSTANCE.d(metric, new Tag("METRICS_LOG"));
+    MapboxLogger.INSTANCE.d(jsonStringData, new Tag("METRICS_LOG"));
   }
 
   @Override
