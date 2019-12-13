@@ -12,23 +12,23 @@ import com.mapbox.navigation.route.onboard.model.Config;
 
 public class OnboardRouterActivityJava extends AppCompatActivity {
 
-    private Router offboardRouter;
+  private Router offboardRouter;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Override
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        setupRouter();
-    }
+    setupRouter();
+  }
 
-    private void setupRouter() {
-        Config config = new Config(
-                this.getApplication().getExternalFilesDir(null).getPath(),
-                null,
-                null,
-                null,
-                null);
+  private void setupRouter() {
+    Config config = new Config(
+            this.getApplication().getExternalFilesDir(null).getPath(),
+            null,
+            null,
+            null,
+            null);
 
-        offboardRouter = new MapboxOnboardRouter(Mapbox.getAccessToken(), config);
-    }
+    offboardRouter = new MapboxOnboardRouter(Mapbox.getAccessToken(), config);
+  }
 }
