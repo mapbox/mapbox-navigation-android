@@ -17,6 +17,7 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.Property;
@@ -85,7 +86,7 @@ class MapRouteArrow {
   @ColorInt
   private final int arrowBorderColor;
 
-  private List<Layer> arrowLayers;
+  private List<String> arrowLayerIds;
   private GeoJsonSource arrowShaftGeoJsonSource;
   private GeoJsonSource arrowHeadGeoJsonSource;
 
@@ -123,10 +124,16 @@ class MapRouteArrow {
   }
 
   void updateVisibilityTo(boolean visible) {
-    for (Layer layer : arrowLayers) {
-      String targetVisibility = visible ? VISIBLE : NONE;
-      if (!targetVisibility.equals(layer.getVisibility().getValue())) {
-        layer.setProperties(visibility(targetVisibility));
+    Style style = mapboxMap.getStyle();
+    if (style != null) {
+      for (String layerId : arrowLayerIds) {
+        Layer layer = style.getLayer(layerId);
+        if (layer != null) {
+          String targetVisibility = visible ? VISIBLE : NONE;
+          if (!targetVisibility.equals(layer.getVisibility().getValue())) {
+            layer.setProperties(visibility(targetVisibility));
+          }
+        }
       }
     }
   }
@@ -186,7 +193,7 @@ class MapRouteArrow {
   private void initializeArrowShaft() {
     arrowShaftGeoJsonSource = new GeoJsonSource(
       ARROW_SHAFT_SOURCE_ID,
-      FeatureCollection.fromFeatures(new Feature[] {}),
+      FeatureCollection.fromFeatures(new Feature[]{}),
       new GeoJsonOptions().withMaxZoom(16)
     );
     mapboxMap.getStyle().addSource(arrowShaftGeoJsonSource);
@@ -195,7 +202,7 @@ class MapRouteArrow {
   private void initializeArrowHead() {
     arrowHeadGeoJsonSource = new GeoJsonSource(
       ARROW_HEAD_SOURCE_ID,
-      FeatureCollection.fromFeatures(new Feature[] {}),
+      FeatureCollection.fromFeatures(new Feature[]{}),
       new GeoJsonOptions().withMaxZoom(16)
     );
     mapboxMap.getStyle().addSource(arrowHeadGeoJsonSource);
@@ -336,10 +343,10 @@ class MapRouteArrow {
 
   private void createArrowLayerList(LineLayer shaftLayer, LineLayer shaftCasingLayer, SymbolLayer headLayer,
                                     SymbolLayer headCasingLayer) {
-    arrowLayers = new ArrayList<>();
-    arrowLayers.add(shaftCasingLayer);
-    arrowLayers.add(shaftLayer);
-    arrowLayers.add(headCasingLayer);
-    arrowLayers.add(headLayer);
+    arrowLayerIds = new ArrayList<>();
+    arrowLayerIds.add(shaftCasingLayer.getId());
+    arrowLayerIds.add(shaftLayer.getId());
+    arrowLayerIds.add(headCasingLayer.getId());
+    arrowLayerIds.add(headLayer.getId());
   }
 }
