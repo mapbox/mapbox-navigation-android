@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.offboard
 
+import android.content.Context
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
@@ -13,9 +14,9 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter(
-    private val routeBuilder: NavigationRoute.Builder
-) : Router {
+class MapboxOffboardRouter(private val routeBuilder: NavigationRoute.Builder) : Router {
+
+    constructor(context: Context) : this(NavigationRoute.builder(context))
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"

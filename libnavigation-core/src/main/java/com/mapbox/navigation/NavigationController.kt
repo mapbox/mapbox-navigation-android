@@ -1,5 +1,6 @@
 package com.mapbox.navigation
 
+import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -22,10 +23,9 @@ import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.route.offboard.router.NavigationRoute
 
 class NavigationController(
-    private val routeBuilderProvider: NavigationRoute.Builder,
+    private val context: Context,
     private val navigator: MapboxNativeNavigator,
     private val locationEngine: LocationEngine,
     private val locationEngineRequest: LocationEngineRequest,
@@ -65,7 +65,7 @@ class NavigationController(
                 )
             )
             OffboardRouter -> arrayOf(
-                NavigationRoute.Builder::class.java to routeBuilderProvider
+                Context::class.java to context
             )
             OnboardRouter -> arrayOf(
                 MapboxNativeNavigator::class.java to navigator
