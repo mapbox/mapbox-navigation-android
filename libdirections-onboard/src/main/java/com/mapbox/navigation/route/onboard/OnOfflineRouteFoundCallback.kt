@@ -6,7 +6,7 @@ import com.mapbox.navigation.route.onboard.model.OfflineError
 /**
  * Callback used for finding offline routes.
  */
-interface OnOfflineRouteFoundCallback {
+internal interface OnOfflineRouteFoundCallback {
 
     /**
      * Called when an offline routes are found.

@@ -22,6 +22,9 @@ class RouteUrl(
     companion object {
         const val BASE_URL = "https://api.mapbox.com"
 
+        const val BASE_URL_P0 = "directions"
+        const val BASE_URL_P1 = "v5"
+
         private const val QUERY_PARAM_ACCESS_TOKEN = "access_token"
         private const val QUERY_PARAM_STEPS = "steps"
         private const val QUERY_PARAM_GEOMERTY = "geometries"
@@ -109,8 +112,8 @@ class RouteUrl(
     fun getRequest(): Uri =
         Uri.Builder()
             .authority(BASE_URL)
-            .appendPath("directions")
-            .appendPath("v5")
+            .appendPath(BASE_URL_P0)
+            .appendPath(BASE_URL_P1)
             .appendPath(user)
             .appendPath(profile)
             .appendPath(retrieveCoordinates())
@@ -125,10 +128,7 @@ class RouteUrl(
             .build()
 
     private fun retrieveCoordinates(): String {
-        val route: List<Point> = mutableListOf(orgin).also { mList ->
-            waypoints?.let { mList.addAll(it) }
-            mList.add(destination)
-        }
+        val route: List<Point> = listOf(orgin) + (waypoints ?: emptyList()) + destination
 
         return route.joinToString(separator = ";") { "${it.longitude()},${it.latitude()}" }
     }

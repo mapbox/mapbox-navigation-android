@@ -8,7 +8,7 @@ import java.util.Date
 
 interface MapboxNativeNavigator {
 
-    fun configureRoute(routerConfig: RouterConfig)
+    fun configureRouter(routerConfig: RouterConfig)
     fun getRoute(url: String): RouterResult
     fun updateLocation(rawLocation: Location)
     fun getStatus(date: Date): TripStatus

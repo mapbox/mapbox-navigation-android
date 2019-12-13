@@ -20,7 +20,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     private val navigator: Navigator = Navigator()
 
-    override fun configureRoute(routerConfig: RouterConfig) {
+    override fun configureRouter(routerConfig: RouterConfig) {
         navigator.configureRouter(
             routerConfig.tilePath,
             routerConfig.inMemoryTileCache,

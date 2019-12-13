@@ -42,7 +42,7 @@ class MapboxOnboardRouter : Router {
         this.navigatorNative = MapboxNativeNavigatorImpl
         this.accessToken = accessToken
         this.config = config
-        MapboxNativeNavigatorImpl.configureRoute(config.mapToRouteConfig())
+        MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig())
     }
 
     // Package private for testing purposes
@@ -80,8 +80,7 @@ class MapboxOnboardRouter : Router {
             override fun onError(error: OfflineError) {
                 callback.onFailure(NavigationException(error.message))
             }
-        })
-            .execute(offlineRouter.buildUrl())
+        }).execute(offlineRouter.buildUrl())
     }
 
     override fun cancel() = Unit
