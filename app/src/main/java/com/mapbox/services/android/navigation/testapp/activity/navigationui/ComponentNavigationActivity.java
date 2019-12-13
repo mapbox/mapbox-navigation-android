@@ -121,6 +121,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private DirectionsRoute route;
   private Point destination;
   private MapState mapState;
+  private boolean isFreeDriveCameraConfigured = false;
 
   private enum MapState {
     INFO,
@@ -322,6 +323,20 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   void updateLocation(Location location) {
     lastLocation = location;
     navigationMap.updateLocation(location);
+
+    if (navigation.isFreeDriveEnabled()) {
+      if (!isFreeDriveCameraConfigured) {
+        navigationMap.retrieveMap().getLocationComponent().zoomWhileTracking(DEFAULT_ZOOM);
+        int currentZoom = (int) Math.round(navigationMap.retrieveMap().getCameraPosition().zoom);
+        if (currentZoom == DEFAULT_ZOOM) {
+          isFreeDriveCameraConfigured = true;
+        }
+      } else {
+        if (!navigationMap.retrieveCamera().isTrackingEnabled()) {
+          navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
+        }
+      }
+    }
   }
 
   private void initializeSpeechPlayer() {
@@ -410,12 +425,17 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @NonNull
   private CameraPosition buildCameraPositionFrom(Location location, double bearing) {
+    return buildCameraPositionFrom(location, bearing, DEFAULT_ZOOM);
+  }
+
+  @NonNull
+  private CameraPosition buildCameraPositionFrom(Location location, double bearing, double zoom) {
     return new CameraPosition.Builder()
-      .zoom(DEFAULT_ZOOM)
-      .target(new LatLng(location.getLatitude(), location.getLongitude()))
-      .bearing(bearing)
-      .tilt(DEFAULT_TILT)
-      .build();
+            .zoom(zoom)
+            .target(new LatLng(location.getLatitude(), location.getLongitude()))
+            .bearing(bearing)
+            .tilt(DEFAULT_TILT)
+            .build();
   }
 
   private void adjustMapPaddingForNavigation() {

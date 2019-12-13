@@ -1164,4 +1164,8 @@ public class MapboxNavigation implements ServiceConnection {
       return MAPBOX_NAVIGATION_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME;
     }
   }
+
+  public boolean isFreeDriveEnabled() {
+    return isFreeDriveEnabled.get();
+  }
 }
