@@ -12,7 +12,7 @@ ext {
       mapboxSdkServices         : '4.9.0',
       mapboxEvents              : '4.5.1',
       mapboxCore                : '1.3.0',
-      mapboxNavigator           : '7.0.0',
+      mapboxNavigator           : '8.1.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.7.0',
       mapboxSearchSdk           : '0.1.0-SNAPSHOT',
@@ -36,6 +36,7 @@ ext {
       spoonRunner               : '1.6.2',
       commonsIO                 : '2.6',
       robolectric               : '4.1',
+      mockwebserver             : '3.12.0',
       lifecycle                 : '2.0.0-rc01',
       picasso                   : '2.71828',
       gmsLocation               : '16.0.0',
@@ -114,6 +115,7 @@ ext {
       hamcrest                  : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
       commonsIO                 : "commons-io:commons-io:${version.commonsIO}",
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
+      mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
 
       // play services

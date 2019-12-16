@@ -82,6 +82,8 @@ dependencies {
   annotationProcessor dependenciesList.autoValue
   compileOnly dependenciesList.autoValue
 
+  implementation dependenciesList.timber
+
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
@@ -89,6 +91,7 @@ dependencies {
   testImplementation dependenciesList.hamcrest
   testImplementation dependenciesList.commonsIO
   testImplementation dependenciesList.robolectric
+  testImplementation dependenciesList.mockwebserver
 }
 
 apply from: 'javadoc.gradle'
