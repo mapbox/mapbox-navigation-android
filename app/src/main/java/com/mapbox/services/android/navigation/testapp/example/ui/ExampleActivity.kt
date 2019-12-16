@@ -53,7 +53,7 @@ private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 private const val CHANGE_SETTING_REQUEST_CODE = 1
 
-class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver {
+class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver, MetricsObserver {
 
     private var map: NavigationMapboxMap? = null
     private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
@@ -316,6 +316,11 @@ class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver {
                 ERROR -> Timber.e(throwable, message)
             }
         }
+    }
+
+    override fun onMetricUpdated(metricName: String, jsonStringData: String) {
+        MapboxLogger.d(Message(metricName), Tag("METRICS_LOG"))
+        MapboxLogger.d(Message(jsonStringData), Tag("METRICS_LOG"))
     }
 
     private fun setupWith(savedInstanceState: Bundle?) {
