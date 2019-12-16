@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 import android.annotation.SuppressLint
 import android.os.Parcelable
 import com.google.gson.Gson
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.DirectionsMetrics
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationPerformanceEvent
+import com.mapbox.services.android.navigation.v5.navigation.metrics.DirectionsMetrics
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent
 
 @SuppressLint("ParcelCreator")
@@ -27,6 +27,6 @@ internal data class RouteRetrievalEvent(
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
 
-    override val metric: String
+    override val metricName: String
         get() = DirectionsMetrics.ROUTE_RETRIEVAL
 }

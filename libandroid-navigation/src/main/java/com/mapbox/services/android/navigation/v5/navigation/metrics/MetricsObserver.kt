@@ -14,5 +14,5 @@ interface MetricsObserver {
      * @param jsonStringData metric data in JSON string representation
      * @since 0.43.0
      */
-    fun onMetricUpdated(@MetricEvent.Metric metric: String, jsonStringData: String)
+    fun onMetricUpdated(@MetricEvent.Metric metricName: String, jsonStringData: String)
 }

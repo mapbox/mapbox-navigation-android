@@ -76,6 +76,6 @@ internal abstract class NavigationEvent(
 
     override fun toJson(gson: Gson): String = gson.toJson(this)
 
-    override val metric: String
+    override val metricName: String
         get() = getEventName()
 }

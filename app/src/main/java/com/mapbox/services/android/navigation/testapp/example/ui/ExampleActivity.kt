@@ -33,14 +33,18 @@ import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_example.*
+import timber.log.Timber
 
 private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 private const val CHANGE_SETTING_REQUEST_CODE = 1
 
-class ExampleActivity : HistoryActivity(), ExampleView {
+class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
+
     private var map: NavigationMapboxMap? = null
     private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
         ViewModelProviders.of(this).get(ExampleViewModel::class.java)
@@ -54,6 +58,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
         setContentView(R.layout.activity_example)
         setupWith(savedInstanceState)
         addNavigationForHistory(viewModel.retrieveNavigation())
+        MapboxMetricsReporter.setMetricsObserver(this)
     }
 
     public override fun onStart() {
@@ -284,6 +289,11 @@ class ExampleActivity : HistoryActivity(), ExampleView {
 
     override fun updateCameraTrackingMode(trackingMode: Int) {
         map?.updateCameraTrackingMode(trackingMode)
+    }
+
+    override fun onMetricUpdated(metricName: String, jsonStringData: String) {
+        Timber.d("METRICS_LOG: %s", metricName)
+        Timber.d(jsonStringData)
     }
 
     private fun setupWith(savedInstanceState: Bundle?) {

@@ -51,6 +51,17 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
+     * Set flag to determine is need to log [mapboxTelemetry] events.
+     *
+     * @param isDebugLoggingEnabled true to enable logging, false to disable logging
+     * @since 0.43.0
+     */
+    @JvmStatic
+    fun toggleLogging(isDebugLoggingEnabled: Boolean) {
+        mapboxTelemetry.updateDebugLoggingEnabled(isDebugLoggingEnabled)
+    }
+
+    /**
      * Disable [mapboxTelemetry] to finish telemetry session when it needed.
      *
      * @since 0.43.0
@@ -67,7 +78,7 @@ object MapboxMetricsReporter : MetricsReporter {
         }
 
         threadWorker.post {
-            metricsObserver?.onMetricUpdated(metricEvent.metric, metricEvent.toJson(gson))
+            metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
         }
     }
 

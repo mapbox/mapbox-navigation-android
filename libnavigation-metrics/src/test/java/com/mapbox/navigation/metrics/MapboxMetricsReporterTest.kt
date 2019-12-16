@@ -4,8 +4,8 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.navigation.base.internal.metrics.NavigationMetrics
 import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
 import com.mapbox.navigation.utils.thread.WorkThreadHandler
 import io.mockk.mockk
@@ -55,6 +55,22 @@ class MapboxMetricsReporterTest {
         verify(exactly = 0) { mapboxTelemetry.push(event) }
     }
 
+    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
+        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val isDebugLoggingEnabled = true
+        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
+
+        verify { mapboxTelemetry.updateDebugLoggingEnabled(true) }
+    }
+
+    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
+        val mapboxTelemetry = initMetricsReporterWithTelemetry()
+        val isDebugLoggingEnabled = false
+        MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
+
+        verify { mapboxTelemetry.updateDebugLoggingEnabled(false) }
+    }
+
     private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
         val threadWorker = mockk<WorkThreadHandler>(relaxed = true)
@@ -64,7 +80,7 @@ class MapboxMetricsReporterTest {
     }
 
     private class StubNavigationEvent(
-        override val metric: String
+        override val metricName: String
     ) : Event(), MetricEvent {
 
         override fun writeToParcel(dest: Parcel?, flags: Int) {}

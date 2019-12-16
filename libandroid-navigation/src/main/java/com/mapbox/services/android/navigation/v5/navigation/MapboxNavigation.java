@@ -1076,6 +1076,7 @@ public class MapboxNavigation implements ServiceConnection {
             accessToken,
             obtainUserAgent(options)
     );
+    MapboxMetricsReporter.toggleLogging(options.isDebugLoggingEnabled());
     navigationTelemetry.initialize(
         applicationContext,
         accessToken,
