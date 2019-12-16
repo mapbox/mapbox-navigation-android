@@ -27,6 +27,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -58,9 +59,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private View spacer;
   private TextView speedWidget;
   private FloatingActionButton fabNightModeToggle;
+  private FloatingActionButton fabStyleToggle;
 
   private boolean bottomSheetVisible = true;
   private boolean instructionListShown = false;
+
+  private StyleCycle styleCycle = new StyleCycle();
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +74,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     setContentView(R.layout.activity_embedded_navigation);
     navigationView = findViewById(R.id.navigationView);
     fabNightModeToggle = findViewById(R.id.fabToggleNightMode);
+    fabStyleToggle = findViewById(R.id.fabToggleStyle);
     speedWidget = findViewById(R.id.speed_limit);
     spacer = findViewById(R.id.spacer);
     setSpeedWidgetAnchor(R.id.summaryBottomSheet);
@@ -202,6 +207,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .offlineRoutingTilesPath(obtainOfflineDirectory())
         .offlineRoutingTilesVersion(obtainOfflineTileVersion());
     setBottomSheetCallback(options);
+    setupStyleFab();
     setupNightModeFab();
 
     navigationView.startNavigation(options.build());
@@ -284,6 +290,34 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private void setupNightModeFab() {
     fabNightModeToggle.setOnClickListener(view -> toggleNightMode());
+  }
+
+  private void setupStyleFab() {
+    fabStyleToggle.setOnClickListener(view -> navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
+  }
+
+  private static class StyleCycle {
+    private static final String[] STYLES = new String[]{
+      Style.MAPBOX_STREETS,
+      Style.OUTDOORS,
+      Style.LIGHT,
+      Style.DARK,
+      Style.SATELLITE_STREETS
+    };
+
+    private int index;
+
+    private String getNextStyle() {
+      index++;
+      if (index == STYLES.length) {
+        index = 0;
+      }
+      return getStyle();
+    }
+
+    private String getStyle() {
+      return STYLES[index];
+    }
   }
 
   private void toggleNightMode() {
