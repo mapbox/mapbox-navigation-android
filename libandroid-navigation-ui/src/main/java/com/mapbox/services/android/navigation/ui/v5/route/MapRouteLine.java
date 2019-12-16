@@ -3,10 +3,10 @@ package com.mapbox.services.android.navigation.ui.v5.route;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 
 import androidx.annotation.ColorInt;
 import androidx.core.content.ContextCompat;
-import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -64,10 +64,12 @@ class MapRouteLine {
   private float alternativeRouteScale;
   private boolean roundedLineCap;
 
+  private Style style;
+
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
   private final List<DirectionsRoute> directionsRoutes = new ArrayList<>();
-  private final List<Layer> routeLayers;
+  private final List<String> routeLayerIds;
 
   private final GeoJsonSource wayPointSource;
   private final GeoJsonSource routeLineSource;
@@ -121,8 +123,9 @@ class MapRouteLine {
                boolean alternativesVisible,
                Handler handler
   ) {
-    this.routeLayers = new ArrayList<>();
+    this.routeLayerIds = new ArrayList<>();
     this.mainHandler = handler;
+    this.style = style;
 
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
     // Primary Route attributes
@@ -188,10 +191,10 @@ class MapRouteLine {
   }
 
   // For testing only
-  MapRouteLine(GeoJsonSource routeLineSource, GeoJsonSource wayPointSource, List<Layer> routeLayers) {
+  MapRouteLine(GeoJsonSource routeLineSource, GeoJsonSource wayPointSource, List<String> routeLayerIds) {
     this.routeLineSource = routeLineSource;
     this.wayPointSource = wayPointSource;
-    this.routeLayers = routeLayers;
+    this.routeLayerIds = routeLayerIds;
   }
 
   void draw(DirectionsRoute directionsRoute) {
@@ -390,7 +393,7 @@ class MapRouteLine {
       return primaryRouteUpdateTask;
     }
     return new PrimaryRouteUpdateTask(newPrimaryIndex,
-        routeFeatureCollections, primaryRouteUpdatedCallback, mainHandler);
+      routeFeatureCollections, primaryRouteUpdatedCallback, mainHandler);
   }
 
   private OnPrimaryRouteUpdatedCallback primaryRouteUpdatedCallback = new OnPrimaryRouteUpdatedCallback() {
@@ -427,7 +430,7 @@ class MapRouteLine {
       routeShieldColor, alternativeRouteShieldColor
     );
     MapUtils.addLayerToMap(style, routeShieldLayer, belowLayer);
-    routeLayers.add(routeShieldLayer);
+    routeLayerIds.add(routeShieldLayer.getId());
 
     LineLayer routeLayer = layerProvider.initializeRouteLayer(
       style, roundedLineCap, routeScale, alternativeRouteScale,
@@ -436,25 +439,29 @@ class MapRouteLine {
       alternativeRouteSevereColor
     );
     MapUtils.addLayerToMap(style, routeLayer, belowLayer);
-    routeLayers.add(routeLayer);
+    routeLayerIds.add(routeLayer.getId());
 
     SymbolLayer wayPointLayer = layerProvider.initializeWayPointLayer(
       style, originIcon, destinationIcon
     );
     MapUtils.addLayerToMap(style, wayPointLayer, belowLayer);
-    routeLayers.add(wayPointLayer);
+    routeLayerIds.add(wayPointLayer.getId());
   }
 
   private void updateAlternativeVisibilityTo(boolean isAlternativeVisible) {
     this.alternativesVisible = isAlternativeVisible;
-    for (Layer layer : routeLayers) {
-      String layerId = layer.getId();
-      if (layerId.equals(ROUTE_LAYER_ID) || layerId.equals(ROUTE_SHIELD_LAYER_ID)) {
-        LineLayer route = (LineLayer) layer;
-        if (isAlternativeVisible) {
-          route.setFilter(literal(true));
-        } else {
-          route.setFilter(Expression.eq(Expression.get(PRIMARY_ROUTE_PROPERTY_KEY), true));
+    if (style != null && style.isFullyLoaded()) {
+      for (String layerId : routeLayerIds) {
+        if (layerId.equals(ROUTE_LAYER_ID) || layerId.equals(ROUTE_SHIELD_LAYER_ID)) {
+          Layer layer = style.getLayer(layerId);
+          if (layer != null) {
+            LineLayer route = (LineLayer) layer;
+            if (isAlternativeVisible) {
+              route.setFilter(literal(true));
+            } else {
+              route.setFilter(Expression.eq(Expression.get(PRIMARY_ROUTE_PROPERTY_KEY), true));
+            }
+          }
         }
       }
     }
@@ -462,10 +469,15 @@ class MapRouteLine {
 
   private void updateAllLayersVisibilityTo(boolean isVisible) {
     this.isVisible = isVisible;
-    for (Layer layer : routeLayers) {
-      layer.setProperties(
-        visibility(isVisible ? VISIBLE : NONE)
-      );
+    if (style != null && style.isFullyLoaded()) {
+      for (String layerId : routeLayerIds) {
+        Layer layer = style.getLayer(layerId);
+        if (layer != null) {
+          layer.setProperties(
+            visibility(isVisible ? VISIBLE : NONE)
+          );
+        }
+      }
     }
   }
 

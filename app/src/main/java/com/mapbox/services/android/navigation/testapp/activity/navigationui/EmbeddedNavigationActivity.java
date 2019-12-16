@@ -294,7 +294,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   private void setupStyleFab() {
-    fabStyleToggle.setOnClickListener(view -> navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
+    fabStyleToggle.setOnClickListener(view ->
+      navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
   }
 
   private static class StyleCycle {
