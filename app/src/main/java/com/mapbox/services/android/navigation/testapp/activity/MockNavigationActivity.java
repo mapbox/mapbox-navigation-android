@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.base.logger.model.Tag;
 import com.mapbox.navigation.logger.LogEntry;
 import com.mapbox.navigation.logger.LogPriority;
@@ -234,7 +235,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Exception exception) {
-        MapboxLogger.INSTANCE.e(exception.getLocalizedMessage(), exception);
+        MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
       }
     });
   }
@@ -242,7 +243,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   private void findRouteWith(LocationEngineResult result) {
     Location userLocation = result.getLastLocation();
     if (userLocation == null) {
-      MapboxLogger.INSTANCE.d("calculateRoute: User location is null, therefore, origin can't be set.");
+      MapboxLogger.INSTANCE.d(new Message("calculateRoute: User location is null, therefore, origin can't be set."));
       return;
     }
     Point origin = Point.fromLngLat(userLocation.getLongitude(), userLocation.getLatitude());
@@ -262,7 +263,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     navigationRouteBuilder.build().getRoute(new Callback<DirectionsResponse>() {
       @Override
       public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-        MapboxLogger.INSTANCE.d("Url: " + call.request().url().toString());
+        MapboxLogger.INSTANCE.d(new Message("Url: " + call.request().url().toString()));
         if (response.body() != null) {
           if (!response.body().routes().isEmpty()) {
             MockNavigationActivity.this.route = response.body().routes().get(0);
@@ -274,7 +275,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       @Override
       public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-        MapboxLogger.INSTANCE.e("onFailure: navigation.getRoute()", throwable);
+        MapboxLogger.INSTANCE.e(new Message("onFailure: navigation.getRoute()"), throwable);
       }
     });
   }
@@ -284,33 +285,35 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
    */
 
   @Override
-  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-    MapboxLogger.INSTANCE.d("Milestone Event Occurred with id: " + milestone.getIdentifier());
-    MapboxLogger.INSTANCE.d("Voice instruction: " + instruction);
+  public void onMilestoneEvent(@NotNull RouteProgress routeProgress, @NotNull String instruction, Milestone milestone) {
+    MapboxLogger.INSTANCE.d(new Message("Milestone Event Occurred with id: " + milestone.getIdentifier()));
+    MapboxLogger.INSTANCE.d(new Message("Voice instruction: " + instruction));
   }
 
   @Override
   public void onRunning(boolean running) {
     if (running) {
-      MapboxLogger.INSTANCE.d("onRunning: Started");
+      MapboxLogger.INSTANCE.d(new Message("onRunning: Started"));
     } else {
-      MapboxLogger.INSTANCE.d("onRunning: Stopped");
+      MapboxLogger.INSTANCE.d(new Message("onRunning: Stopped"));
     }
   }
 
   @Override
-  public void userOffRoute(Location location) {
+  public void userOffRoute(@NotNull Location location) {
     Toast.makeText(this, "off-route called", Toast.LENGTH_LONG).show();
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
+  public void onProgressChange(@NotNull Location location, @NotNull RouteProgress routeProgress) {
     mapboxMap.getLocationComponent().forceLocationUpdate(location);
     if (!isRefreshing) {
       isRefreshing = true;
       routeRefresh.refresh(routeProgress, this);
     }
-    MapboxLogger.INSTANCE.d("onProgressChange: fraction of route traveled: " + routeProgress.fractionTraveled());
+    MapboxLogger.INSTANCE.d(
+      new Message("onProgressChange: fraction of route traveled: " + routeProgress.fractionTraveled())
+    );
   }
 
   /*
@@ -364,20 +367,20 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onRefresh(DirectionsRoute directionsRoute) {
+  public void onRefresh(@NotNull DirectionsRoute directionsRoute) {
     navigation.startNavigation(directionsRoute);
     isRefreshing = false;
   }
 
   @Override
-  public void onError(RefreshError error) {
+  public void onError(@NotNull RefreshError error) {
     isRefreshing = false;
   }
 
   @Override
   public void onMetricUpdated(@NotNull @MetricEvent.Metric String metric, @NotNull String jsonStringData) {
-    MapboxLogger.INSTANCE.d(metric, new Tag("METRICS_LOG"));
-    MapboxLogger.INSTANCE.d(jsonStringData, new Tag("METRICS_LOG"));
+    MapboxLogger.INSTANCE.d(new Message(metric), new Tag("METRICS_LOG"));
+    MapboxLogger.INSTANCE.d(new Message(jsonStringData), new Tag("METRICS_LOG"));
   }
 
   @Override
@@ -407,8 +410,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   private static class BeginRouteInstruction extends Instruction {
 
+    @NotNull
     @Override
-    public String buildInstruction(RouteProgress routeProgress) {
+    public String buildInstruction(@NotNull RouteProgress routeProgress) {
       return "Have a safe trip!";
     }
   }

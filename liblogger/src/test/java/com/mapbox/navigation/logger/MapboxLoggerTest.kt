@@ -1,5 +1,6 @@
 package com.mapbox.navigation.logger
 
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -22,7 +23,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = VERBOSE
 
-        MapboxLogger.v("some message", Tag("TAG"), throwable)
+        MapboxLogger.v(Message("some message"), Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.v(throwable, "some message") }
@@ -36,7 +37,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
-        MapboxLogger.v("some message", Tag("TAG"), throwable)
+        MapboxLogger.v(Message("some message"), Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.v(any<Throwable>(), any()) }
@@ -50,7 +51,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = DEBUG
 
-        MapboxLogger.d("some message", Tag("TAG"), throwable)
+        MapboxLogger.d(Message("some message"), Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.d(throwable, "some message") }
@@ -64,7 +65,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
-        MapboxLogger.d("some message", Tag("TAG"), throwable)
+        MapboxLogger.d(Message("some message"), Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.d(any<Throwable>(), any()) }
@@ -78,7 +79,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = INFO
 
-        MapboxLogger.i("some message", Tag("TAG"), throwable)
+        MapboxLogger.i(Message("some message"), Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.i(throwable, "some message") }
@@ -92,7 +93,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
-        MapboxLogger.i("some message", Tag("TAG"), throwable)
+        MapboxLogger.i(Message("some message"), Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.i(any<Throwable>(), any()) }
@@ -106,7 +107,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = WARN
 
-        MapboxLogger.w("some message", Tag("TAG"), throwable)
+        MapboxLogger.w(Message("some message"), Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.w(throwable, "some message") }
@@ -120,7 +121,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
-        MapboxLogger.w("some message", Tag("TAG"), throwable)
+        MapboxLogger.w(Message("some message"), Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.w(any<Throwable>(), any()) }
@@ -134,7 +135,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = ERROR
 
-        MapboxLogger.e("some message", Tag("TAG"), throwable)
+        MapboxLogger.e(Message("some message"), Tag("TAG"), throwable)
 
         verify { Timber.tag("TAG") }
         verify { Timber.e(throwable, "some message") }
@@ -148,7 +149,7 @@ class MapboxLoggerTest {
         MapboxLogger.setObserver(loggerObserver)
         MapboxLogger.logLevel = NONE
 
-        MapboxLogger.e("some message", Tag("TAG"), throwable)
+        MapboxLogger.e(Message("some message"), Tag("TAG"), throwable)
 
         verify(exactly = 0) { Timber.tag(any()) }
         verify(exactly = 0) { Timber.e(any<Throwable>(), any()) }
@@ -157,35 +158,35 @@ class MapboxLoggerTest {
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToVerboseCall() {
-        MapboxLogger.v("some message")
+        MapboxLogger.v(Message("some message"))
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToDebugCall() {
-        MapboxLogger.d("some message")
+        MapboxLogger.d(Message("some message"))
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToInfoCall() {
-        MapboxLogger.i("some message")
+        MapboxLogger.i(Message("some message"))
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToWarningCall() {
-        MapboxLogger.w("some message")
+        MapboxLogger.w(Message("some message"))
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
 
     @Test
     fun tagSetupNotCalledWhenNullTagPassedToErrorCall() {
-        MapboxLogger.e("some message")
+        MapboxLogger.e(Message("some message"))
 
         verify(exactly = 0) { Timber.tag(any()) }
     }
