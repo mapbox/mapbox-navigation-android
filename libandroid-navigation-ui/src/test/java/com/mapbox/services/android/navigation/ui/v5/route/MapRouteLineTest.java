@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
@@ -65,8 +64,8 @@ public class MapRouteLineTest extends BaseTest {
   public void onDraw_routeLineSourceIsSet() throws Exception {
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
+    List<String> routeLayerIds = buildMockLayers();
+    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
     List<DirectionsRoute> routes = new ArrayList<>();
     routes.add(buildTestDirectionsRoute());
     ArgumentCaptor<Runnable> runnableFeatures = ArgumentCaptor.forClass(Runnable.class);
@@ -95,8 +94,8 @@ public class MapRouteLineTest extends BaseTest {
   public void onDraw_wayPointSourceIsSet() throws Exception {
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
+    List<String> routeLayerIds = buildMockLayers();
+    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
     List<DirectionsRoute> routes = new ArrayList<>();
     routes.add(buildTestDirectionsRoute());
     ArgumentCaptor<Runnable> runnableFeatures = ArgumentCaptor.forClass(Runnable.class);
@@ -190,8 +189,8 @@ public class MapRouteLineTest extends BaseTest {
   public void updatePrimaryIndex_routeLineSourceIsSet() throws Exception {
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
+    List<String> routeLayerIds = buildMockLayers();
+    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
     List<DirectionsRoute> routes = new ArrayList<>();
     routes.add(buildTestDirectionsRoute());
     routes.add(buildTestDirectionsRoute());
@@ -228,8 +227,8 @@ public class MapRouteLineTest extends BaseTest {
   public void updatePrimaryIndex_newPrimaryRouteIndexUpdated() throws Exception {
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
+    List<String> routeLayerIds = buildMockLayers();
+    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
     List<DirectionsRoute> routes = new ArrayList<>();
     routes.add(buildTestDirectionsRoute());
     routes.add(buildTestDirectionsRoute());
@@ -269,8 +268,8 @@ public class MapRouteLineTest extends BaseTest {
   public void updatePrimaryIndex_newPrimaryRouteIndexIsNotUpdated() throws Exception {
     GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
     GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<Layer> routeLayers = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayers);
+    List<String> routeLayerIds = buildMockLayers();
+    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
     List<DirectionsRoute> routes = new ArrayList<>();
     routes.add(buildTestDirectionsRoute());
     routes.add(buildTestDirectionsRoute());
@@ -337,14 +336,10 @@ public class MapRouteLineTest extends BaseTest {
   }
 
   @NonNull
-  private List<Layer> buildMockLayers() {
-    List<Layer> routeLayers = new ArrayList<>();
-    LineLayer lineLayerOne = mock(LineLayer.class);
-    when(lineLayerOne.getId()).thenReturn(ROUTE_LAYER_ID);
-    routeLayers.add(lineLayerOne);
-    LineLayer lineLayerTwo = mock(LineLayer.class);
-    when(lineLayerTwo.getId()).thenReturn(ROUTE_LAYER_ID);
-    routeLayers.add(lineLayerTwo);
+  private List<String> buildMockLayers() {
+    List<String> routeLayers = new ArrayList<>();
+    routeLayers.add(ROUTE_LAYER_ID);
+    routeLayers.add(ROUTE_LAYER_ID);
     return routeLayers;
   }
 
