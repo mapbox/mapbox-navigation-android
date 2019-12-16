@@ -24,7 +24,8 @@ internal class FreeDriveLocationUpdater(
     private val mapboxNavigator: MapboxNavigator,
     private val offlineNavigator: OfflineNavigator,
     private val executorService: ScheduledExecutorService,
-    private val electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder
+    private val electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder,
+    private val electronicHorizonParams: ElectronicHorizonParams
 ) {
     private val callback = CurrentLocationEngineCallback(this)
     private var future: ScheduledFuture<*>? = null
@@ -32,12 +33,6 @@ internal class FreeDriveLocationUpdater(
     private var rawLocation: Location? = null
     private val handler = Handler(Looper.getMainLooper())
     private val cachedLocations = mutableListOf<Location>()
-
-    companion object {
-        private const val ELECTRONIC_HORIZON_DELAY = 20_000L
-        private const val ELECTRONIC_HORIZON_INTERVAL = 20_000L
-        private const val LOCATIONS_CACHE_MAX_SIZE = 5
-    }
 
     fun configure(
         tilePath: String,
@@ -66,7 +61,7 @@ internal class FreeDriveLocationUpdater(
             electronicHorizonFuture = executorService.scheduleAtFixedRate({
                 val request = electronicHorizonRequestBuilder.build(ElectronicHorizonRequestBuilder.Expansion._1D, cachedLocations)
                 mapboxNavigator.retrieveElectronicHorizon(request)
-            }, ELECTRONIC_HORIZON_DELAY, ELECTRONIC_HORIZON_INTERVAL, TimeUnit.MILLISECONDS)
+            }, electronicHorizonParams.delay, electronicHorizonParams.interval, TimeUnit.MILLISECONDS)
         }
     }
 
@@ -75,14 +70,18 @@ internal class FreeDriveLocationUpdater(
             stopLocationUpdates()
         }
 
-        stopRetrieveElectronicHorizon()
+        electronicHorizonFuture?.let {
+            stopRetrieveElectronicHorizon()
+        }
     }
 
     fun kill() {
         future?.let {
             stopLocationUpdates()
         }
-        stopRetrieveElectronicHorizon()
+        electronicHorizonFuture?.let {
+            stopRetrieveElectronicHorizon()
+        }
         executorService.shutdown()
     }
 
@@ -148,7 +147,7 @@ internal class FreeDriveLocationUpdater(
 
     private fun cacheLocation(location: Location) {
         // remove the oldest location to fit the max cache size
-        if (cachedLocations.size == LOCATIONS_CACHE_MAX_SIZE) {
+        if (cachedLocations.size == electronicHorizonParams.locationsCacheSize) {
             cachedLocations.removeAt(0)
         }
 

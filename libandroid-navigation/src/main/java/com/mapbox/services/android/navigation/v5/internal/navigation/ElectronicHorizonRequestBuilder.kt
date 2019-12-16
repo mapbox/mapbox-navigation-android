@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.location.Location
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 
 internal object ElectronicHorizonRequestBuilder {
     private val gson = Gson()
@@ -35,6 +36,7 @@ internal object ElectronicHorizonRequestBuilder {
 
     private data class ElectronicHorizonRequest(
         val shape: List<Position>,
-        val eh_options: Map<String, Any>
+        @SerializedName("eh_options")
+        val options: Map<String, Any>
     )
 }

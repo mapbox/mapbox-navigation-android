@@ -61,7 +61,8 @@ class FreeDriveLocationUpdaterTest {
         val mockedScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true)
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
-                executorService = mockedScheduledExecutorService
+                executorService = mockedScheduledExecutorService,
+                electronicHorizonParams = ElectronicHorizonParams()
             )
 
         theFreeDriveLocationUpdater.start()
@@ -113,7 +114,8 @@ class FreeDriveLocationUpdaterTest {
         val mockedScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true)
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
-                executorService = mockedScheduledExecutorService
+                executorService = mockedScheduledExecutorService,
+                electronicHorizonParams = ElectronicHorizonParams()
             )
 
         theFreeDriveLocationUpdater.start()
@@ -371,7 +373,8 @@ class FreeDriveLocationUpdaterTest {
         mapboxNavigator: MapboxNavigator = mockk<MapboxNavigator>(relaxed = true),
         offlineNavigator: OfflineNavigator = mockk<OfflineNavigator>(relaxed = true),
         executorService: ScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true),
-        electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder = mockk(relaxed = true)
+        electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder = mockk(relaxed = true),
+        electronicHorizonParams: ElectronicHorizonParams = mockk(relaxed = true)
     ): FreeDriveLocationUpdater {
         return FreeDriveLocationUpdater(
             locationEngine,
@@ -380,7 +383,8 @@ class FreeDriveLocationUpdaterTest {
             mapboxNavigator,
             offlineNavigator,
             executorService,
-            electronicHorizonRequestBuilder
+            electronicHorizonRequestBuilder,
+            electronicHorizonParams
         )
     }
 }

@@ -88,7 +88,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private static final String COMPONENT_NAVIGATION_INSTRUCTION_CACHE = "component-navigation-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
   private static final int ZERO_PADDING = 0;
-  private static final double DEFAULT_ZOOM = 12.0;
+  private static final double DEFAULT_ZOOM = 18.0;
   private static final double DEFAULT_TILT = 0d;
   private static final double DEFAULT_BEARING = 0d;
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
@@ -121,6 +121,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private DirectionsRoute route;
   private Point destination;
   private MapState mapState;
+  private boolean isFreeDriveEnabled = false;
   private boolean isFreeDriveCameraConfigured = false;
 
   private enum MapState {
@@ -324,7 +325,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     lastLocation = location;
     navigationMap.updateLocation(location);
 
-    if (navigation.isFreeDriveEnabled()) {
+    if (isFreeDriveEnabled) {
       if (!isFreeDriveCameraConfigured) {
         navigationMap.retrieveMap().getLocationComponent().zoomWhileTracking(DEFAULT_ZOOM);
         int currentZoom = (int) Math.round(navigationMap.retrieveMap().getCameraPosition().zoom);
@@ -431,11 +432,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @NonNull
   private CameraPosition buildCameraPositionFrom(Location location, double bearing, double zoom) {
     return new CameraPosition.Builder()
-            .zoom(zoom)
-            .target(new LatLng(location.getLatitude(), location.getLongitude()))
-            .bearing(bearing)
-            .tilt(DEFAULT_TILT)
-            .build();
+      .zoom(zoom)
+      .target(new LatLng(location.getLatitude(), location.getLongitude()))
+      .bearing(bearing)
+      .tilt(DEFAULT_TILT)
+      .build();
   }
 
   private void adjustMapPaddingForNavigation() {
@@ -458,6 +459,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
       navigation.disableFreeDrive();
+      isFreeDriveEnabled = false;
       navigation.removeEnhancedLocationListener(this);
     }
   }
@@ -467,6 +469,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     if (locationEngine != null) {
       navigation.addEnhancedLocationListener(this);
       navigation.enableFreeDrive();
+      isFreeDriveEnabled = true;
     }
   }
 
