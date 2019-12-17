@@ -133,7 +133,7 @@ class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver, MetricsO
     override fun onMapReady(mapboxMap: MapboxMap) {
         MapboxLogger.e(Message("Map is ready"))
         mapboxMap.setStyle(Style.Builder().fromUrl(getString(R.string.navigation_guidance_day))) {
-            MapboxLogger.d(Message("Style setting is finished"), Tag("EXAMPLE_TAG"))
+            MapboxLogger.d(Tag("EXAMPLE_TAG"), Message("Style setting is finished"))
             map = NavigationMapboxMap(mapView, mapboxMap)
             map?.setOnRouteSelectionChangeListener(this)
             map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
@@ -319,8 +319,8 @@ class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver, MetricsO
     }
 
     override fun onMetricUpdated(metricName: String, jsonStringData: String) {
-        MapboxLogger.d(Message(metricName), Tag("METRICS_LOG"))
-        MapboxLogger.d(Message(jsonStringData), Tag("METRICS_LOG"))
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(metricName))
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(jsonStringData))
     }
 
     private fun setupWith(savedInstanceState: Bundle?) {

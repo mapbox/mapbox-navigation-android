@@ -379,8 +379,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onMetricUpdated(@NotNull @MetricEvent.Metric String metricName, @NotNull String jsonStringData) {
-    MapboxLogger.INSTANCE.d(new Message(metricName), new Tag("METRICS_LOG"));
-    MapboxLogger.INSTANCE.d(new Message(jsonStringData), new Tag("METRICS_LOG"));
+    MapboxLogger.INSTANCE.d(new Tag("METRICS_LOG"), new Message(metricName));
+    MapboxLogger.INSTANCE.d(new Tag("METRICS_LOG"), new Message(jsonStringData));
   }
 
   @Override

@@ -7,50 +7,50 @@ interface Logger {
     /**
      * Send a verbose log message and log the exception.
      *
-     * @param msg is [Message] you would like logged.
      * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
      * the class or activity where the log call occurs.
+     * @param msg is [Message] you would like logged.
      * @param tr An exception to log
      */
-    fun v(msg: Message, tag: Tag? = null, tr: Throwable? = null)
+    fun v(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
     /**
      * Send a debug log message and log the exception.
      *
-     * @param msg is [Message] you would like logged.
      * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
      * the class or activity where the log call occurs.
+     * @param msg is [Message] you would like logged.
      * @param tr An exception to log
      */
-    fun d(msg: Message, tag: Tag? = null, tr: Throwable? = null)
+    fun d(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
     /**
      * Send an info log message and log the exception.
      *
-     * @param msg is [Message] you would like logged.
      * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
      * the class or activity where the log call occurs.
+     * @param msg is [Message] you would like logged.
      * @param tr An exception to log
      */
-    fun i(msg: Message, tag: Tag? = null, tr: Throwable? = null)
+    fun i(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
     /**
      * Send a warning log message and log the exception.
      *
-     * @param msg is [Message] you would like logged.
      * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
      * the class or activity where the log call occurs.
+     * @param msg is [Message] you would like logged.
      * @param tr An exception to log
      */
-    fun w(msg: Message, tag: Tag? = null, tr: Throwable? = null)
+    fun w(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
     /**
      * Send an error log message and log the exception.
      *
-     * @param msg is [Message] you would like logged.
      * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
      * the class or activity where the log call occurs.
+     * @param msg is [Message] you would like logged.
      * @param tr An exception to log
      */
-    fun e(msg: Message, tag: Tag? = null, tr: Throwable? = null)
+    fun e(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 }
