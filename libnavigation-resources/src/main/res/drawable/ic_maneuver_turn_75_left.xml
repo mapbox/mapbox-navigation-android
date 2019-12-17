@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="arrow75left"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="50"
+    android:viewportWidth="50">
+    <group
+        android:name="group2"
+        android:translateX="27.12"
+        android:translateY="27.5"
+        android:scaleX="-1">>
+        <path
+            android:name="bezier"
+            android:fillColor="#000000"
+            android:pathData="M -2.66,1.57 L 12.12,4.5 L 10.35,-10.47 C 10.35,-10.59 10.31,-10.71 10.22,-10.81 C 10.04,-11.01 9.72,-11.03 9.52,-10.84 C 9.49,-10.81 9.44,-10.75 9.44,-10.75 L 6.56,-5.41 C 6.54,-5.37 6.51,-5.33 6.47,-5.3 C 6.27,-5.11 5.96,-5.12 5.78,-5.31 C 5.53,-5.57 4.08,-7.15 4.08,-7.15 L 2.61,-5.79 L 1.14,-4.43 C 1.14,-4.43 2.6,-2.86 2.84,-2.59 C 3.02,-2.4 3,-2.08 2.8,-1.9 C 2.77,-1.86 2.72,-1.84 2.68,-1.82 L -2.87,0.64 C -2.87,0.64 -2.94,0.68 -2.96,0.7 C -3.17,0.89 -3.18,1.21 -2.99,1.41 C -2.9,1.51 -2.78,1.56 -2.66,1.57 Z"/>
+        <path
+            android:name="bezier3"
+            android:pathData="M -12.12,-7 C -12.12,-7 -12.33,-11.5 -7.62,-11.5 C -2.92,-11.5 0.88,-7.5 0.88,-7.5 L 3.88,-4.5 M -12.12,-7.5 L -12.12,-1.5 M -12.12,-1.5 L -12.12,0.5 M -12.12,0.5 L -12.12,11.5 "
+            android:strokeColor="#000000"
+            android:strokeWidth="4"/>
+    </group>
+</vector>

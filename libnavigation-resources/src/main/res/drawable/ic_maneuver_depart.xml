@@ -1,0 +1,31 @@
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="arrive2"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="50"
+    android:viewportWidth="50">
+    <group
+        android:name="group2"
+        android:translateX="25"
+        android:translateY="24.57">
+        <path
+            android:name="bezier"
+            android:pathData="M 0.06,0.6 L 0.06,10.6 "
+            android:strokeColor="#000000"
+            android:strokeLineJoin="round"
+            android:strokeWidth="4"/>
+        <path
+            android:name="bezier2"
+            android:fillColor="#000000"
+            android:pathData="M -2,-3.52 C -2,-3.52 -2,-3.91 -2,-4.27 C -2,-4.54 -2.23,-4.88 -2.5,-4.88 C -2.55,-4.88 -2.6,-4.93 -2.64,-4.92 L -7.39,-3.98 C -7.39,-3.98 -7.46,-3.99 -7.5,-3.99 C -7.78,-3.99 -8,-4.22 -8,-4.49 C -8,-4.63 -7.95,-4.75 -7.86,-4.84 L 0,-15.03 L 7.86,-4.84 C 7.95,-4.75 8,-4.63 8,-4.5 C 8,-4.23 7.78,-4 7.5,-4 C 7.46,-4 7.39,-4.01 7.39,-4.01 L 2.64,-4.98 C 2.6,-4.99 2.55,-5 2.5,-5 C 2.23,-5 2,-4.54 2,-4.27 C 2,-3.91 2,-3.52 2,-3.52 "/>
+        <path
+            android:name="oval"
+            android:fillColor="#000000"
+            android:pathData="M 3.1,16.45 C 3.1,18.13 1.73,19.5 0.05,19.5 C -1.63,19.5 -3,18.13 -3,16.45 C -3,14.77 -1.63,13.4 0.05,13.4 C 1.73,13.4 3.1,14.77 3.1,16.45 Z"/>
+        <path
+            android:name="rectangle"
+            android:fillColor="#000000"
+            android:pathData="M -2,-0.43 L 2,-0.43 L 2,-2.38 L -2,-2.38 L -2,-0.43 Z"/>
+    </group>
+</vector>
