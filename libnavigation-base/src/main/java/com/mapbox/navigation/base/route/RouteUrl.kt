@@ -110,8 +110,8 @@ class RouteUrl(
     }
 
     fun getRequest(): Uri =
-        Uri.Builder()
-            .authority(BASE_URL)
+        Uri.parse(BASE_URL)
+            .buildUpon()
             .appendPath(BASE_URL_P0)
             .appendPath(BASE_URL_P1)
             .appendPath(user)

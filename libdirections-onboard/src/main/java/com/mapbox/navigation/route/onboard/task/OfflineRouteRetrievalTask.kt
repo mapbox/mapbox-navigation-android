@@ -2,7 +2,8 @@ package com.mapbox.navigation.route.onboard.task
 
 import android.os.AsyncTask
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.mapbox.navigation.base.route.dto.RouteResponseDto
+import com.mapbox.navigation.base.route.dto.mapToModel
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -38,8 +39,7 @@ internal class OfflineRouteRetrievalTask(
             routerResult = navigator.getRoute(url)
         }
 
-        val routesType = object : TypeToken<List<Route>>() {}.type
-        return gson.fromJson(routerResult.json, routesType)
+        return gson.fromJson(routerResult.json, RouteResponseDto::class.java)?.mapToModel()?.routes
     }
 
     public override fun onPostExecute(offlineRoute: List<Route>?) {
