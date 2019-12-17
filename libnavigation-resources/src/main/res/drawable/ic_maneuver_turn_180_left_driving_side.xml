@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="arrow180"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="50"
+    android:viewportWidth="50">
+    <group
+        android:name="group2"
+        android:translateX="24.5"
+        android:translateY="26.5">
+        <path
+            android:name="bezier"
+            android:fillColor="#000000"
+            android:pathData="M -2.36,1.3 L 6.51,13.49 L 15.37,1.3 C 15.45,1.21 15.51,1.09 15.51,0.96 C 15.51,0.69 15.28,0.46 15.01,0.46 C 14.97,0.46 14.89,0.47 14.89,0.47 L 9.15,2.44 C 9.11,2.45 9.06,2.46 9.01,2.46 C 8.74,2.46 8.51,2.26 8.51,2 C 8.51,1.63 8.51,-0.5 8.51,-0.5 L 6.51,-0.5 L 4.5,-0.5 C 4.5,-0.5 4.51,1.63 4.51,2 C 4.51,2.26 4.28,2.47 4.01,2.47 C 3.96,2.47 3.91,2.46 3.86,2.45 L -1.88,0.48 C -1.88,0.48 -1.95,0.46 -1.99,0.46 C -2.27,0.46 -2.49,0.69 -2.49,0.96 C -2.49,1.09 -2.44,1.21 -2.36,1.3 Z"/>
+        <path
+            android:name="bezier2"
+            android:pathData="M -6.5,13.5 L -6.5,-6.66 C -6.5,-10.41 -3.55,-13.5 0,-13.5 C 3.59,-13.5 6.5,-10.22 6.5,-6.65 L 6.5,2.5 "
+            android:strokeColor="#000000"
+            android:strokeWidth="4"/>
+    </group>
+</vector>

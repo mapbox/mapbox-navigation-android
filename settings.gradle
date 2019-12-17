@@ -1,4 +1,4 @@
-include ':app',
+include ':app', ':libnavigation-resources',
         ':libandroid-navigation',
         ':libandroid-navigation-ui',
         ':libnavigator',

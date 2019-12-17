@@ -2,7 +2,6 @@ package com.mapbox.navigation.base.trip
 
 import android.app.Notification
 import android.content.Context
-import android.location.Location
 
 interface TripNotification {
 
@@ -34,20 +33,7 @@ interface TripNotification {
      *
      * @param routeProgress with the latest progress data
      */
-    fun updateRouteProgress(routeProgress: RouteProgress?)
-
-    /**
-     * If enabled, this method will be called every time a
-     * new [Location] is available.
-     *
-     *
-     * This method can serve as a cue to update a [Notification]
-     * with a specific notification id.
-     *
-     * @param rawLocation raw location
-     * @param enhancedLocation if possible, location snapped to road
-     */
-    fun updateLocation(rawLocation: Location, enhancedLocation: Location)
+    fun updateNotification(routeProgress: RouteProgress)
 
     /**
      * Callback for when trip session is stopped via [TripSession.stop].
