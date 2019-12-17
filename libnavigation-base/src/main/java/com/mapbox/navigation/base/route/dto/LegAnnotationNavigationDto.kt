@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.route.dto
 
 import com.mapbox.navigation.base.route.model.LegAnnotationNavigation
 
-internal class LegAnnotationNavigationDto(
+ class LegAnnotationNavigationDto(
     val distance: List<Double>?,
     val duration: List<Double>?,
     val speed: List<Double>?,
@@ -10,7 +10,7 @@ internal class LegAnnotationNavigationDto(
     val congestion: List<String>?
 )
 
-internal fun LegAnnotationNavigationDto.mapToModel() = LegAnnotationNavigation(
+ fun LegAnnotationNavigationDto.mapToModel() = LegAnnotationNavigation(
     distance = distance,
     duration = duration,
     speed = speed,

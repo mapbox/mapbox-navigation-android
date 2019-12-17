@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 
-internal class LegStepNavigationDto(
+ class LegStepNavigationDto(
     val distance: Double,
     val duration: Double,
     val geometry: String?,
@@ -27,7 +27,7 @@ internal class LegStepNavigationDto(
     val exits: String?
 )
 
-internal fun LegStepNavigationDto.mapToModel() = LegStepNavigation(
+ fun LegStepNavigationDto.mapToModel() = LegStepNavigation(
     distance = distance,
     duration = duration,
     geometry = geometry,

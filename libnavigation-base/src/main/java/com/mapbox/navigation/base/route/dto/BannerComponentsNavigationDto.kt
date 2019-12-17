@@ -16,7 +16,7 @@ class BannerComponentsNavigationDto(
     val active: Boolean?
 )
 
-internal fun BannerComponentsNavigationDto.mapToModel() = BannerComponentsNavigation(
+fun BannerComponentsNavigationDto.mapToModel() = BannerComponentsNavigation(
     text = text,
     type = type,
     abbreviation = abbreviation,

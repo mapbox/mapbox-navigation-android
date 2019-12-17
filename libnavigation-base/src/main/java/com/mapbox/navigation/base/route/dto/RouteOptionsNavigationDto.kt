@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
-internal data class RouteOptionsNavigationDto(
+ data class RouteOptionsNavigationDto(
     val baseUrl: String?,
     val user: String?,
     val profile: String?,
@@ -32,7 +32,7 @@ internal data class RouteOptionsNavigationDto(
     val walkingOptions: WalkingOptionsNavigationDto?
 )
 
-internal fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
+ fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     baseUrl = baseUrl ?: RouteUrl.BASE_URL,
     user = user ?: RouteUrl.PROFILE_DEFAULT_USER,
     profile = profile ?: RouteUrl.PROFILE_DRIVING,

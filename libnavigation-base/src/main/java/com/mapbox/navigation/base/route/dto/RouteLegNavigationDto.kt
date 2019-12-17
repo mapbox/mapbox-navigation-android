@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.route.dto
 
 import com.mapbox.navigation.base.route.model.RouteLegNavigation
 
-internal class RouteLegNavigationDto(
+class RouteLegNavigationDto(
     val distance: Double?,
     val duration: Double?,
     val summary: String?,
@@ -10,7 +10,7 @@ internal class RouteLegNavigationDto(
     val annotation: LegAnnotationNavigationDto?
 )
 
-internal fun RouteLegNavigationDto.mapToModelRouteLeg() = RouteLegNavigation(
+fun RouteLegNavigationDto.mapToRouteLegNavigation(): RouteLegNavigation = RouteLegNavigation(
     distance = distance,
     duration = duration,
     summary = summary,

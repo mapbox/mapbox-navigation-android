@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.StepIntersectionNavigation
 
-internal class StepIntersectionNavigationDto(
+ class StepIntersectionNavigationDto(
     @SerializedName("location")
     val rawLocation: DoubleArray,
     val bearings: List<Int>?,
@@ -15,7 +15,7 @@ internal class StepIntersectionNavigationDto(
     val lanes: List<IntersectionLanesNavigationDto>?
 )
 
-internal fun StepIntersectionNavigationDto.mapToModel() = StepIntersectionNavigation(
+ fun StepIntersectionNavigationDto.mapToModel() = StepIntersectionNavigation(
     location = Point.fromLngLat(rawLocation[0], rawLocation[1]),
     bearings = bearings,
     classes = classes,

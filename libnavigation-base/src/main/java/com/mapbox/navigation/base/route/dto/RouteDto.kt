@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.route.dto
 
 import com.mapbox.navigation.base.route.model.Route
 
-internal class RouteDto(
+class RouteDto(
     val routeIndex: String?,
     val distance: Double,
     val duration: Long,
@@ -14,14 +14,14 @@ internal class RouteDto(
     val voiceLanguage: String?
 )
 
-internal fun RouteDto.mapToModelRoute() = Route(
+fun RouteDto.mapToModelRoute() = Route(
     routeIndex = routeIndex,
     distance = distance,
     duration = duration,
     geometry = geometry,
     weight = weight,
     weightName = weightName,
-    legs = legs?.map { it.mapToModelRouteLeg() },
+    legs = legs?.map { it.mapToRouteLegNavigation() },
     routeOptions = routeOptions?.mapToModel(),
     voiceLanguage = voiceLanguage
 )
