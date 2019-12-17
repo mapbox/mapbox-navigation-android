@@ -27,6 +27,7 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
 
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"
