@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="departLeft"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="50"
+    android:viewportWidth="50">
+    <group
+        android:name="group3"
+        android:translateX="27.05"
+        android:translateY="26.17">
+        <path
+            android:name="bezier2"
+            android:pathData="M 6.91,6.83 L 6.91,-1.2 C 6.91,-1.2 7.86,-8.17 0.95,-8.17 L 0.91,-8.17 "
+            android:strokeColor="#000000"
+            android:strokeWidth="4"/>
+        <path
+            android:name="bezier3"
+            android:fillColor="#000000"
+            android:pathData="M -3.16,-6.17 C -3.16,-6.17 -3.56,-6.17 -3.92,-6.17 C -4.18,-6.17 -4.52,-5.95 -4.52,-5.67 C -4.52,-5.62 -4.58,-5.58 -4.56,-5.53 L -3.63,-0.79 C -3.63,-0.79 -3.63,-0.71 -3.63,-0.67 C -3.63,-0.4 -3.86,-0.17 -4.14,-0.17 C -4.27,-0.17 -4.39,-0.23 -4.48,-0.31 L -14.68,-8.17 L -4.48,-16.04 C -4.39,-16.12 -4.28,-16.17 -4.14,-16.17 C -3.87,-16.17 -3.64,-15.95 -3.64,-15.67 C -3.64,-15.64 -3.66,-15.56 -3.66,-15.56 L -4.62,-10.82 C -4.64,-10.77 -4.64,-10.72 -4.64,-10.67 C -4.64,-10.4 -4.18,-10.17 -3.92,-10.17 C -3.56,-10.17 -3.16,-10.18 -3.16,-10.18 "/>
+        <path
+            android:name="oval"
+            android:fillColor="#000000"
+            android:pathData="M 10,11.68 C 10,13.36 8.64,14.73 6.95,14.73 C 5.27,14.73 3.9,13.36 3.9,11.68 C 3.9,9.99 5.27,8.63 6.95,8.63 C 8.64,8.63 10,9.99 10,11.68 Z"/>
+        <path
+            android:name="rectangle"
+            android:fillColor="#000000"
+            android:pathData="M -2.12,-6.17 L -0.17,-6.17 L -0.17,-10.17 L -2.12,-10.17 L -2.12,-6.17 Z"/>
+    </group>
+</vector>

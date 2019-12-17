@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- arrow-0 -->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="arrow0"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportWidth="50"
+    android:viewportHeight="50">
+    <group
+        android:name="bezier-transform"
+        android:translateX="24.76"
+        android:translateY="40.95">
+        <path
+            android:name="bezier"
+            android:pathData="M 9.11,-18.76 L 0.24,-30.95 L -8.62,-18.76 C -8.7,-18.67 -8.76,-18.55 -8.76,-18.42 C -8.76,-18.15 -8.53,-17.92 -8.26,-17.92 C -8.22,-17.92 -8.14,-17.93 -8.14,-17.93 L -2.4,-19.9 C -2.35,-19.91 -2.31,-19.92 -2.26,-19.92 C -1.98,-19.92 -1.76,-19.7 -1.76,-19.44 L -1.76,-0.92 L 2.24,-0.92 C 2.24,-0.92 2.24,-19.08 2.24,-19.44 C 2.24,-19.7 2.47,-19.92 2.74,-19.92 C 2.79,-19.92 2.84,-19.91 2.89,-19.9 L 8.63,-17.93 C 8.63,-17.93 8.71,-17.92 8.74,-17.92 C 9.02,-17.92 9.24,-18.15 9.24,-18.42 C 9.24,-18.55 9.19,-18.67 9.11,-18.76 Z"
+            android:fillColor="#000000" />
+    </group>
+</vector>

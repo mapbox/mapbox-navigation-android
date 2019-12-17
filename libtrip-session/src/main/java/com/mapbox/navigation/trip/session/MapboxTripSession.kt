@@ -45,11 +45,11 @@ class MapboxTripSession(
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
 
-    private val serviceStateListener = object : TripService.StateListener {
-        override fun onStateChanged(state: Any) {
-            TODO("not implemented")
-        }
-    }
+//    private val serviceStateListener = object : TripService.StateListener {
+//        override fun onStateChanged(state: Any) {
+//            TODO("not implemented")
+//        }
+//    }
 
     private val navigatorPollingRunnable = object : Runnable {
         override fun run() {
@@ -73,7 +73,7 @@ class MapboxTripSession(
     override fun getRouteProgress() = routeProgress
 
     override fun start() {
-        tripService.startService(serviceStateListener)
+        tripService.startService()
         locationEngine.requestLocationUpdates(locationEngineRequest, mainLocationCallback, Looper.getMainLooper())
         workerHandler.postDelayed(navigatorPollingRunnable, STATUS_POLLING_INTERVAL)
     }

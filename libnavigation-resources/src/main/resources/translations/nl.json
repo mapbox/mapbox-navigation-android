@@ -1,0 +1,402 @@
+{
+    "meta": {
+        "capitalizeFirstLetter": true
+    },
+    "v5": {
+        "constants": {
+            "ordinalize": {
+                "1": "eerste",
+                "2": "tweede",
+                "3": "derde",
+                "4": "vierde",
+                "5": "vijfde",
+                "6": "zesde",
+                "7": "zevende",
+                "8": "achtste",
+                "9": "negende",
+                "10": "tiende"
+            },
+            "direction": {
+                "north": "noord",
+                "northeast": "noordoost",
+                "east": "oost",
+                "southeast": "zuidoost",
+                "south": "zuid",
+                "southwest": "zuidwest",
+                "west": "west",
+                "northwest": "noordwest"
+            },
+            "modifier": {
+                "left": "links",
+                "right": "rechts",
+                "sharp left": "linksaf",
+                "sharp right": "rechtsaf",
+                "slight left": "links",
+                "slight right": "rechts",
+                "straight": "rechtdoor",
+                "uturn": "omkeren"
+            },
+            "lanes": {
+                "xo": "Rechts aanhouden",
+                "ox": "Links aanhouden",
+                "xox": "In het midden blijven",
+                "oxo": "Links of rechts blijven"
+            }
+        },
+        "modes": {
+            "ferry": {
+                "default": "Neem het veer",
+                "name": "Neem het veer {way_name}",
+                "destination": "Neem het veer naar {destination}"
+            }
+        },
+        "arrive": {
+            "default": {
+                "default": "Je bent gearriveerd op de {nth} bestemming."
+            },
+            "left": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich links."
+            },
+            "right": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich rechts."
+            },
+            "sharp left": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich links."
+            },
+            "sharp right": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich rechts."
+            },
+            "slight right": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich rechts."
+            },
+            "slight left": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich links."
+            },
+            "straight": {
+                "default": "Je bent gearriveerd. De {nth} bestemming bevindt zich voor je."
+            }
+        },
+        "continue": {
+            "default": {
+                "default": "Ga {modifier}",
+                "name": "Ga {modifier} naar {way_name}",
+                "destination": "Ga {modifier} richting {destination}"
+            },
+            "straight": {
+                "default": "Ga rechtdoor",
+                "name": "Ga rechtdoor naar {way_name}",
+                "destination": "Ga rechtdoor richting {destination}"
+            },
+            "slight left": {
+                "default": "Links aanhouden",
+                "name": "Links aanhouden naar {way_name}",
+                "destination": "Links aanhouden richting {destination}"
+            },
+            "slight right": {
+                "default": "Rechts aanhouden",
+                "name": "Rechts aanhouden naar {way_name}",
+                "destination": "Rechts aanhouden richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "depart": {
+            "default": {
+                "default": "Vertrek in {direction}elijke richting",
+                "name": "Neem {way_name} in {direction}elijke richting"
+            }
+        },
+        "end of road": {
+            "default": {
+                "default": "Ga {modifier}",
+                "name": "Ga {modifier} naar {way_name}",
+                "destination": "Ga {modifier} richting {destination}"
+            },
+            "straight": {
+                "default": "Ga in de aangegeven richting",
+                "name": "Ga naar {way_name}",
+                "destination": "Ga richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "fork": {
+            "default": {
+                "default": "Ga {modifier} op de splitsing",
+                "name": "Ga {modifier} op de splitsing naar {way_name}",
+                "destination": "Ga {modifier} op de splitsing richting {destination}"
+            },
+            "slight left": {
+                "default": "Links aanhouden op de splitsing",
+                "name": "Links aanhouden op de splitsing naar {way_name}",
+                "destination": "Links aanhouden op de splitsing richting {destination}"
+            },
+            "slight right": {
+                "default": "Rechts aanhouden op de splitsing",
+                "name": "Rechts aanhouden op de splitsing naar {way_name}",
+                "destination": "Rechts aanhouden op de splitsing richting {destination}"
+            },
+            "sharp left": {
+                "default": "Linksaf op de splitsing",
+                "name": "Linksaf op de splitsing naar {way_name}",
+                "destination": "Linksaf op de splitsing richting {destination}"
+            },
+            "sharp right": {
+                "default": "Rechtsaf op de splitsing",
+                "name": "Rechtsaf op de splitsing naar {way_name}",
+                "destination": "Rechtsaf op de splitsing richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "merge": {
+            "default": {
+                "default": "Bij de splitsing {modifier}",
+                "name": "Bij de splitsing {modifier} naar {way_name}",
+                "destination": "Bij de splitsing {modifier} richting {destination}"
+            },
+            "slight left": {
+                "default": "Bij de splitsing links aanhouden",
+                "name": "Bij de splitsing links aanhouden naar {way_name}",
+                "destination": "Bij de splitsing links aanhouden richting {destination}"
+            },
+            "slight right": {
+                "default": "Bij de splitsing rechts aanhouden",
+                "name": "Bij de splitsing rechts aanhouden naar {way_name}",
+                "destination": "Bij de splitsing rechts aanhouden richting {destination}"
+            },
+            "sharp left": {
+                "default": "Bij de splitsing linksaf",
+                "name": "Bij de splitsing linksaf naar {way_name}",
+                "destination": "Bij de splitsing linksaf richting {destination}"
+            },
+            "sharp right": {
+                "default": "Bij de splitsing rechtsaf",
+                "name": "Bij de splitsing rechtsaf naar {way_name}",
+                "destination": "Bij de splitsing rechtsaf richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "new name": {
+            "default": {
+                "default": "Ga {modifier}",
+                "name": "Ga {modifier} naar {way_name}",
+                "destination": "Ga {modifier} richting {destination}"
+            },
+            "sharp left": {
+                "default": "Linksaf",
+                "name": "Linksaf naar {way_name}",
+                "destination": "Linksaf richting {destination}"
+            },
+            "sharp right": {
+                "default": "Rechtsaf",
+                "name": "Rechtsaf naar {way_name}",
+                "destination": "Rechtsaf richting {destination}"
+            },
+            "slight left": {
+                "default": "Links aanhouden",
+                "name": "Links aanhouden naar {way_name}",
+                "destination": "Links aanhouden richting {destination}"
+            },
+            "slight right": {
+                "default": "Rechts aanhouden",
+                "name": "Rechts aanhouden naar {way_name}",
+                "destination": "Rechts aanhouden richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "notification": {
+            "default": {
+                "default": "Ga {modifier}",
+                "name": "Ga {modifier} naar {way_name}",
+                "destination": "Ga {modifier} richting {destination}"
+            },
+            "uturn": {
+                "default": "Keer om",
+                "name": "Keer om naar {way_name}",
+                "destination": "Keer om richting {destination}"
+            }
+        },
+        "off ramp": {
+            "default": {
+                "default": "Neem de afrit",
+                "name": "Neem de afrit naar {way_name}",
+                "destination": "Neem de afrit richting {destination}"
+            },
+            "left": {
+                "default": "Neem de afrit links",
+                "name": "Neem de afrit links naar {way_name}",
+                "destination": "Neem de afrit links richting {destination}"
+            },
+            "right": {
+                "default": "Neem de afrit rechts",
+                "name": "Neem de afrit rechts naar {way_name}",
+                "destination": "Neem de afrit rechts richting {destination}"
+            },
+            "sharp left": {
+                "default": "Neem de afrit links",
+                "name": "Neem de afrit links naar {way_name}",
+                "destination": "Neem de afrit links richting {destination}"
+            },
+            "sharp right": {
+                "default": "Neem de afrit rechts",
+                "name": "Neem de afrit rechts naar {way_name}",
+                "destination": "Neem de afrit rechts richting {destination}"
+            },
+            "slight left": {
+                "default": "Neem de afrit links",
+                "name": "Neem de afrit links naar {way_name}",
+                "destination": "Neem de afrit links richting {destination}"
+            },
+            "slight right": {
+                "default": "Neem de afrit rechts",
+                "name": "Neem de afrit rechts naar {way_name}",
+                "destination": "Neem de afrit rechts richting {destination}"
+            }
+        },
+        "on ramp": {
+            "default": {
+                "default": "Neem de oprit",
+                "name": "Neem de oprit naar {way_name}",
+                "destination": "Neem de oprit richting {destination}"
+            },
+            "left": {
+                "default": "Neem de oprit links",
+                "name": "Neem de oprit links naar {way_name}",
+                "destination": "Neem de oprit links richting {destination}"
+            },
+            "right": {
+                "default": "Neem de oprit rechts",
+                "name": "Neem de oprit rechts naar {way_name}",
+                "destination": "Neem de oprit rechts richting {destination}"
+            },
+            "sharp left": {
+                "default": "Neem de oprit links",
+                "name": "Neem de oprit links naar {way_name}",
+                "destination": "Neem de oprit links richting {destination}"
+            },
+            "sharp right": {
+                "default": "Neem de oprit rechts",
+                "name": "Neem de oprit rechts naar {way_name}",
+                "destination": "Neem de oprit rechts richting {destination}"
+            },
+            "slight left": {
+                "default": "Neem de oprit links",
+                "name": "Neem de oprit links naar {way_name}",
+                "destination": "Neem de oprit links richting {destination}"
+            },
+            "slight right": {
+                "default": "Neem de oprit rechts",
+                "name": "Neem de oprit rechts naar {way_name}",
+                "destination": "Neem de oprit rechts richting {destination}"
+            }
+        },
+        "rotary": {
+            "default": {
+                "default": {
+                    "default": "Ga het knooppunt op",
+                    "name": "Verlaat het knooppunt naar {way_name}",
+                    "destination": "Verlaat het knooppunt richting {destination}"
+                },
+                "name": {
+                    "default": "Ga het knooppunt {rotary_name} op",
+                    "name": "Verlaat het knooppunt {rotary_name} naar {way_name}",
+                    "destination": "Verlaat het knooppunt {rotary_name} richting {destination}"
+                },
+                "exit": {
+                    "default": "Ga het knooppunt op en neem afslag {exit_number}",
+                    "name": "Ga het knooppunt op en neem afslag {exit_number} naar {way_name}",
+                    "destination": "Ga het knooppunt op en neem afslag {exit_number} richting {destination}"
+                },
+                "name_exit": {
+                    "default": "Ga het knooppunt {rotary_name} op en neem afslag {exit_number}",
+                    "name": "Ga het knooppunt {rotary_name} op en neem afslag {exit_number} naar {way_name}",
+                    "destination": "Ga het knooppunt {rotary_name} op en neem afslag {exit_number} richting {destination}"
+                }
+            }
+        },
+        "roundabout": {
+            "default": {
+                "exit": {
+                    "default": "Ga de rotonde op en neem afslag {exit_number}",
+                    "name": "Ga de rotonde op en neem afslag {exit_number} naar {way_name}",
+                    "destination": "Ga de rotonde op en neem afslag {exit_number} richting {destination}"
+                },
+                "default": {
+                    "default": "Ga de rotonde op",
+                    "name": "Verlaat de rotonde naar {way_name}",
+                    "destination": "Verlaat de rotonde richting {destination}"
+                }
+            }
+        },
+        "roundabout turn": {
+            "default": {
+                "default": "Ga {modifier} op de rotonde",
+                "name": "Ga {modifier} op de rotonde naar {way_name}",
+                "destination": "Ga {modifier} op de rotonde richting {destination}"
+            },
+            "left": {
+                "default": "Ga links op de rotonde",
+                "name": "Ga links op de rotonde naar {way_name}",
+                "destination": "Ga links op de rotonde richting {destination}"
+            },
+            "right": {
+                "default": "Ga rechts op de rotonde",
+                "name": "Ga rechts op de rotonde naar {way_name}",
+                "destination": "Ga rechts op de rotonde richting {destination}"
+            },
+            "straight": {
+                "default": "Rechtdoor op de rotonde",
+                "name": "Rechtdoor op de rotonde naar {way_name}",
+                "destination": "Rechtdoor op de rotonde richting {destination}"
+            }
+        },
+        "turn": {
+            "default": {
+                "default": "Ga {modifier}",
+                "name": "Ga {modifier} naar {way_name}",
+                "destination": "Ga {modifier} richting {destination}"
+            },
+            "left": {
+                "default": "Ga linksaf",
+                "name": "Ga linksaf naar {way_name}",
+                "destination": "Ga linksaf richting {destination}"
+            },
+            "right": {
+                "default": "Ga rechtsaf",
+                "name": "Ga rechtsaf naar {way_name}",
+                "destination": "Ga rechtsaf richting {destination}"
+            },
+            "straight": {
+                "default": "Ga rechtdoor",
+                "name": "Ga rechtdoor naar {way_name}",
+                "destination": "Ga rechtdoor richting {destination}"
+            }
+        },
+        "use lane": {
+            "no_lanes": {
+                "default": "Rechtdoor"
+            },
+            "default": {
+                "default": "{lane_instruction}"
+            }
+        }
+    }
+}

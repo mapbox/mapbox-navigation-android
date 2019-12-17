@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="merge"
+    android:width="50dp"
+    android:height="50dp"
+    android:viewportHeight="50"
+    android:viewportWidth="50">
+    <group
+        android:name="group3"
+        android:translateX="25.07"
+        android:translateY="24.48">
+        <!--<path-->
+        <!--android:name="bezier"-->
+        <!--android:pathData="M -8.07,16.48 L -8.07,12.47 C -8.07,10.53 -7.44,8.64 -6.28,7.09 L -1.86,1.19 C -0.69,-0.37 -0.07,-2.25 -0.07,-4.19 L -0.07,-10.52 "-->
+        <!--android:strokeColor="#C3C3C3"-->
+        <!--android:strokeLineJoin="round"-->
+        <!--android:strokeWidth="4"/>-->
+        <path
+            android:name="bezier2"
+            android:fillColor="#000000"
+            android:pathData="M 8.06,16.4 L 8.06,12.39 C 8.06,10.45 7.43,8.56 6.27,7.01 L 1.85,1.1 C 0.69,-0.45 0.06,-2.34 0.06,-4.27 L 0.06,-10.6 "
+            android:strokeColor="#000000"
+            android:strokeLineJoin="round"
+            android:strokeWidth="4"/>
+        <path
+            android:name="bezier3"
+            android:fillColor="#000000"
+            android:pathData="M -7.8,-6.29 L 0.07,-16.48 L 7.93,-6.29 C 8.01,-6.2 8.07,-6.08 8.07,-5.95 C 8.07,-5.68 7.84,-5.45 7.57,-5.45 C 7.53,-5.45 7.45,-5.47 7.45,-5.47 L 2.71,-6.43 C 2.66,-6.45 2.62,-6.45 2.57,-6.45 C 2.3,-6.45 2.07,-5.99 2.07,-5.72 C 2.07,-5.36 2.07,-2.97 2.07,-2.97 L 0.07,-2.97 L -1.94,-2.97 C -1.94,-2.97 -1.93,-5.36 -1.93,-5.72 C -1.93,-5.99 -2.16,-6.33 -2.43,-6.33 C -2.48,-6.33 -2.53,-6.38 -2.58,-6.37 L -7.32,-5.43 C -7.32,-5.43 -7.4,-5.44 -7.43,-5.44 C -7.71,-5.44 -7.93,-5.67 -7.93,-5.94 C -7.93,-6.08 -7.88,-6.2 -7.8,-6.29 Z"
+            android:strokeColor="#000000"
+            android:strokeLineJoin="round"
+            android:strokeWidth="0"/>
+    </group>
+</vector>
