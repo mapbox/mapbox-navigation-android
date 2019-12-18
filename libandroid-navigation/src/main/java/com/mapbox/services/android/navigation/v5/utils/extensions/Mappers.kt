@@ -52,7 +52,7 @@ fun Route.mapToDirectionsRoute(): DirectionsRoute {
         .build()
 }
 
-fun RouteOptionsNavigation.mapToRouteOptions() =
+fun RouteOptionsNavigation.mapToRouteOptions(): RouteOptions =
     RouteOptions.builder()
         .apply {
             walkingOptions?.let { walkingOptions(it.mapToWalkingOptions()) }
@@ -85,7 +85,7 @@ fun RouteOptionsNavigation.mapToRouteOptions() =
         .waypointTargets(waypointTargets)!!
         .build()
 
-fun RouteLegNavigation.mapToRouteLeg() =
+fun RouteLegNavigation.mapToRouteLeg(): RouteLeg =
     RouteLeg.builder()
         .annotation(annotation?.mapToLegAnnotation())
         .distance(distance)
@@ -94,7 +94,7 @@ fun RouteLegNavigation.mapToRouteLeg() =
         .summary(summary)
         .build()
 
-fun LegAnnotationNavigation.mapToLegAnnotation() =
+fun LegAnnotationNavigation.mapToLegAnnotation(): LegAnnotation =
     LegAnnotation.builder()
         .congestion(congestion)
         .distance(distance)
@@ -103,7 +103,7 @@ fun LegAnnotationNavigation.mapToLegAnnotation() =
         .speed(speed)
         .build()
 
-fun LegStepNavigation.mapToLegStep() =
+fun LegStepNavigation.mapToLegStep(): LegStep =
     LegStep.builder()
         .bannerInstructions(bannerInstructions?.map(BannerInstructionsNavigation::mapToBannerInstruction) ?: emptyList())
         .destinations(destinations)
@@ -124,7 +124,7 @@ fun LegStepNavigation.mapToLegStep() =
         .weight(weight)
         .build()
 
-fun MaxSpeedNavigation.mapToMaxSpeed() =
+fun MaxSpeedNavigation.mapToMaxSpeed(): MaxSpeed =
     MaxSpeed.builder()
         .speed(speed)
         .none(none)
@@ -132,7 +132,7 @@ fun MaxSpeedNavigation.mapToMaxSpeed() =
         .unknown(unknown)
         .build()
 
-fun BannerInstructionsNavigation.mapToBannerInstruction() =
+fun BannerInstructionsNavigation.mapToBannerInstruction(): BannerInstructions =
     BannerInstructions.builder()
         .distanceAlongGeometry(distanceAlongGeometry)
         .primary(primary?.mapToBannerText() ?: BannerText.builder().build())
@@ -140,7 +140,7 @@ fun BannerInstructionsNavigation.mapToBannerInstruction() =
         .sub(sub?.mapToBannerText())
         .build()
 
-fun StepIntersectionNavigation.mapToStepIntersection() =
+fun StepIntersectionNavigation.mapToStepIntersection(): StepIntersection =
     StepIntersection.builder()
         .bearings(bearings)
         .classes(classes)
@@ -151,7 +151,7 @@ fun StepIntersectionNavigation.mapToStepIntersection() =
         .rawLocation(rawLocation)
         .build()
 
-fun StepManeuverNavigation.mapToStepManeuver() =
+fun StepManeuverNavigation.mapToStepManeuver(): StepManeuver =
     StepManeuver.builder()
         .bearingAfter(bearingAfter)
         .bearingBefore(bearingBefore)
