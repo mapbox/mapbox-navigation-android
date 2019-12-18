@@ -75,7 +75,9 @@ public class OnboardRouterActivityJava
   }
 
   private void setupRouter() {
-    File file = new File(Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath(), "2019_04_13-00_00_11");
+    File file = new File(
+            Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath(),
+            "2019_04_13-00_00_11");
     File fileTiles = new File(file, "tiles");
     Config config = new Config(
             fileTiles.getAbsolutePath(),
