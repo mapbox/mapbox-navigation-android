@@ -1,0 +1,287 @@
+{
+    "meta": {
+        "capitalizeFirstLetter": false
+    },
+    "v5": {
+        "constants": {
+            "ordinalize": {
+                "1": "第一",
+                "2": "第二",
+                "3": "第三",
+                "4": "第四",
+                "5": "第五",
+                "6": "第六",
+                "7": "第七",
+                "8": "第八",
+                "9": "第九",
+                "10": "第十"
+            },
+            "direction": {
+                "north": "北",
+                "northeast": "东北",
+                "east": "东",
+                "southeast": "东南",
+                "south": "南",
+                "southwest": "西南",
+                "west": "西",
+                "northwest": "西北"
+            },
+            "modifier": {
+                "left": "向左",
+                "right": "向右",
+                "sharp left": "向左",
+                "sharp right": "向右",
+                "slight left": "向左",
+                "slight right": "向右",
+                "straight": "直行",
+                "uturn": "调头"
+            },
+            "lanes": {
+                "xo": "靠右直行",
+                "ox": "靠左直行",
+                "xox": "保持在道路中间直行",
+                "oxo": "保持在道路两侧直行"
+            }
+        },
+        "modes": {
+            "ferry": {
+                "default": "乘坐轮渡",
+                "name": "乘坐{way_name}轮渡",
+                "destination": "乘坐开往{destination}的轮渡"
+            }
+        },
+        "arrive": {
+            "default": {
+                "default": "您已经到达您的{nth}个目的地"
+            },
+            "left": {
+                "default": "您已经到达您的{nth}个目的地，在道路左侧"
+            },
+            "right": {
+                "default": "您已经到达您的{nth}个目的地，在道路右侧"
+            },
+            "sharp left": {
+                "default": "您已经到达您的{nth}个目的地，在道路左侧"
+            },
+            "sharp right": {
+                "default": "您已经到达您的{nth}个目的地，在道路右侧"
+            },
+            "slight right": {
+                "default": "您已经到达您的{nth}个目的地，在道路右侧"
+            },
+            "slight left": {
+                "default": "您已经到达您的{nth}个目的地，在道路左侧"
+            },
+            "straight": {
+                "default": "您已经到达您的{nth}个目的地，在您正前方"
+            }
+        },
+        "continue": {
+            "default": {
+                "default": "继续{modifier}",
+                "name": "继续{modifier}，上{way_name}",
+                "destination": "继续{modifier}行驶，前往{destination}"
+            },
+            "uturn": {
+                "default": "调头",
+                "name": "调头上{way_name}",
+                "destination": "调头后前往{destination}"
+            }
+        },
+        "depart": {
+            "default": {
+                "default": "出发向{direction}",
+                "name": "出发向{direction}，上{way_name}"
+            }
+        },
+        "end of road": {
+            "default": {
+                "default": "{modifier}行驶",
+                "name": "{modifier}行驶，上{way_name}",
+                "destination": "{modifier}行驶，前往{destination}"
+            },
+            "straight": {
+                "default": "继续直行",
+                "name": "继续直行，上{way_name}",
+                "destination": "继续直行，前往{destination}"
+            },
+            "uturn": {
+                "default": "在道路尽头调头",
+                "name": "在道路尽头调头上{way_name}",
+                "destination": "在道路尽头调头，前往{destination}"
+            }
+        },
+        "fork": {
+            "default": {
+                "default": "在岔道保持{modifier}",
+                "name": "在岔道保持{modifier}，上{way_name}",
+                "destination": "在岔道保持{modifier}，前往{destination}"
+            },
+            "uturn": {
+                "default": "调头",
+                "name": "调头，上{way_name}",
+                "destination": "调头，前往{destination}"
+            }
+        },
+        "merge": {
+            "default": {
+                "default": "{modifier}并道",
+                "name": "{modifier}并道，上{way_name}",
+                "destination": "{modifier}并道，前往{destination}"
+            },
+            "uturn": {
+                "default": "调头",
+                "name": "调头，上{way_name}",
+                "destination": "调头，前往{destination}"
+            }
+        },
+        "new name": {
+            "default": {
+                "default": "继续{modifier}",
+                "name": "继续{modifier}，上{way_name}",
+                "destination": "继续{modifier}，前往{destination}"
+            },
+            "uturn": {
+                "default": "调头",
+                "name": "调头，上{way_name}",
+                "destination": "调头，前往{destination}"
+            }
+        },
+        "notification": {
+            "default": {
+                "default": "继续{modifier}",
+                "name": "继续{modifier}，上{way_name}",
+                "destination": "继续{modifier}，前往{destination}"
+            },
+            "uturn": {
+                "default": "调头",
+                "name": "调头，上{way_name}",
+                "destination": "调头，前往{destination}"
+            }
+        },
+        "off ramp": {
+            "default": {
+                "default": "上匝道",
+                "name": "通过匝道驶入{way_name}",
+                "destination": "通过匝道前往{destination}"
+            },
+            "left": {
+                "default": "通过左边的匝道",
+                "name": "通过左边的匝道驶入{way_name}",
+                "destination": "通过左边的匝道前往{destination}"
+            },
+            "right": {
+                "default": "通过右边的匝道",
+                "name": "通过右边的匝道驶入{way_name}",
+                "destination": "通过右边的匝道前往{destination}"
+            }
+        },
+        "on ramp": {
+            "default": {
+                "default": "通过匝道",
+                "name": "通过匝道驶入{way_name}",
+                "destination": "通过匝道前往{destination}"
+            },
+            "left": {
+                "default": "通过左边的匝道",
+                "name": "通过左边的匝道驶入{way_name}",
+                "destination": "通过左边的匝道前往{destination}"
+            },
+            "right": {
+                "default": "通过右边的匝道",
+                "name": "通过右边的匝道驶入{way_name}",
+                "destination": "通过右边的匝道前往{destination}"
+            }
+        },
+        "rotary": {
+            "default": {
+                "default": {
+                    "default": "进入环岛",
+                    "name": "通过环岛后驶入{way_name}",
+                    "destination": "通过环岛前往{destination}"
+                },
+                "name": {
+                    "default": "进入{rotary_name}环岛",
+                    "name": "通过{rotary_name}环岛后驶入{way_name}",
+                    "destination": "通过{rotary_name}环岛后前往{destination}"
+                },
+                "exit": {
+                    "default": "进入环岛并从{exit_number}出口驶出",
+                    "name": "进入环岛后从{exit_number}出口驶出进入{way_name}",
+                    "destination": "进入环岛后从{exit_number}出口驶出前往{destination}"
+                },
+                "name_exit": {
+                    "default": "进入{rotary_name}环岛后从{exit_number}出口驶出",
+                    "name": "进入{rotary_name}环岛后从{exit_number}出口驶出进入{way_name}",
+                    "destination": "进入{rotary_name}环岛后从{exit_number}出口驶出前往{destination}"
+                }
+            }
+        },
+        "roundabout": {
+            "default": {
+                "exit": {
+                    "default": "进入环岛后从{exit_number}出口驶出",
+                    "name": "进入环岛后从{exit_number}出口驶出前往{way_name}",
+                    "destination": "进入环岛后从{exit_number}出口驶出前往{destination}"
+                },
+                "default": {
+                    "default": "进入环岛",
+                    "name": "通过环岛后驶入{way_name}",
+                    "destination": "通过环岛后前往{destination}"
+                }
+            }
+        },
+        "roundabout turn": {
+            "default": {
+                "default": "在环岛{modifier}行驶",
+                "name": "在环岛{modifier}行驶，上{way_name}",
+                "destination": "在环岛{modifier}行驶，前往{destination}"
+            },
+            "left": {
+                "default": "在环岛左转",
+                "name": "在环岛左转，上{way_name}",
+                "destination": "在环岛左转，前往{destination}"
+            },
+            "right": {
+                "default": "在环岛右转",
+                "name": "在环岛右转，上{way_name}",
+                "destination": "在环岛右转，前往{destination}"
+            },
+            "straight": {
+                "default": "在环岛继续直行",
+                "name": "在环岛继续直行，上{way_name}",
+                "destination": "在环岛继续直行，前往{destination}"
+            }
+        },
+        "turn": {
+            "default": {
+                "default": "{modifier}转弯",
+                "name": "{modifier}转弯，上{way_name}",
+                "destination": "{modifier}转弯，前往{destination}"
+            },
+            "left": {
+                "default": "左转",
+                "name": "左转，上{way_name}",
+                "destination": "左转，前往{destination}"
+            },
+            "right": {
+                "default": "右转",
+                "name": "右转，上{way_name}",
+                "destination": "右转，前往{destination}"
+            },
+            "straight": {
+                "default": "直行",
+                "name": "直行，上{way_name}",
+                "destination": "直行，前往{destination}"
+            }
+        },
+        "use lane": {
+            "no_lanes": {
+                "default": "继续直行"
+            },
+            "default": {
+                "default": "{lane_instruction}"
+            }
+        }
+    }
+}
