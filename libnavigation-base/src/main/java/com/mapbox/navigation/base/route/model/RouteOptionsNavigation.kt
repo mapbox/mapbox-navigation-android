@@ -15,13 +15,13 @@ class RouteOptionsNavigation(
     val radiuses: String?,
     val bearings: String?,
     val continueStraight: Boolean,
-    val roundaboutExits: Boolean?,
+    val roundaboutExits: Boolean,
     val geometries: String?,
     val overview: String?,
     val steps: Boolean,
     val annotations: String?,
-    val voiceInstructions: Boolean?,
-    val bannerInstructions: Boolean?,
+    val voiceInstructions: Boolean,
+    val bannerInstructions: Boolean,
     val voiceUnits: String?,
     val accessToken: String?,
     val requestUuid: String?,
@@ -35,15 +35,20 @@ class RouteOptionsNavigation(
 
     companion object {
         @JvmStatic
-        fun builder(): Builder {
-            return Builder()
-        }
+        fun builder(): Builder = Builder()
+
+        const val ALTERNATIVES_DEFAULT_VALUE = false
+        const val STEPS_DEFAULT_VALUE = false
+        const val CONTINUE_STRAIGHT_DEFAULT_VALUE = false
+        const val ROUNDABOUT_EXITS_DEFAULT_VALUE = false
+        const val VOICE_INSTRUCTIONS_DEFAULT_VALUE = false
+        const val BANNER_INSTRUCTIONS_DEFAULT_VALUE = false
     }
 
     val coordinates: List<Point>
         get() = listOf(origin.point) + waypoints.map { it.point } + destination.point
 
-    class Builder internal constructor() {
+    class Builder {
         private lateinit var _origin: RoutePointNavigation
         private lateinit var _destination: RoutePointNavigation
         private val _waypoints = mutableListOf<RoutePointNavigation>()
@@ -51,18 +56,18 @@ class RouteOptionsNavigation(
         private var baseUrl: String? = null
         private var user: String? = null
         private var profile: String? = null
-        private var alternatives: Boolean = true
+        private var alternatives: Boolean = ALTERNATIVES_DEFAULT_VALUE
         private var language: String? = null
         private var radiuses: String? = null
         private var bearings: String? = null
-        private var continueStraight: Boolean = false
-        private var roundaboutExits: Boolean? = null
+        private var continueStraight: Boolean = CONTINUE_STRAIGHT_DEFAULT_VALUE
+        private var roundaboutExits: Boolean = ROUNDABOUT_EXITS_DEFAULT_VALUE
         private var geometries: String? = null
         private var overview: String? = null
-        private var steps: Boolean = true
+        private var steps: Boolean = STEPS_DEFAULT_VALUE
         private var annotations: String? = null
-        private var voiceInstructions: Boolean? = null
-        private var bannerInstructions: Boolean? = null
+        private var voiceInstructions: Boolean = VOICE_INSTRUCTIONS_DEFAULT_VALUE
+        private var bannerInstructions: Boolean = BANNER_INSTRUCTIONS_DEFAULT_VALUE
         private var voiceUnits: String? = null
         private var accessToken: String? = null
         private var requestUuid: String? = null

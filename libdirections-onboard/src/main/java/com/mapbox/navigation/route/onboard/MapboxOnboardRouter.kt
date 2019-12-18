@@ -23,24 +23,21 @@ class MapboxOnboardRouter : Router {
     }
 
     private val navigatorNative: MapboxNativeNavigator
-    private val accessToken: String
     private val config: Config
 
     /**
      * Creates an offline router which uses the specified offline path for storing and retrieving
      * data.
      *
-     * @param accessToken mapbox access token
      * @param config offline config
      */
-    constructor(accessToken: String, config: Config) {
+    constructor(config: Config) {
         val tileDir = File(config.tilePath, TILE_PATH_NAME)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
         }
 
         this.navigatorNative = MapboxNativeNavigatorImpl
-        this.accessToken = accessToken
         this.config = config
         MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig())
     }
@@ -48,11 +45,9 @@ class MapboxOnboardRouter : Router {
     // Package private for testing purposes
     internal constructor(
         navigator: MapboxNativeNavigator,
-        accessToken: String,
         config: Config
     ) {
         this.navigatorNative = navigator
-        this.accessToken = accessToken
         this.config = config
     }
 
@@ -68,7 +63,10 @@ class MapboxOnboardRouter : Router {
                 orgin = routeOptions.origin.point,
                 waypoints = routeOptions.waypoints.map { it.point },
                 destination = routeOptions.destination.point,
-                steps = routeOptions.steps
+                steps = routeOptions.steps,
+                voiceIntruction = routeOptions.voiceInstructions,
+                bannerIntruction = routeOptions.bannerInstructions,
+                roundaboutExits = routeOptions.roundaboutExits
             )
         ).build()
 

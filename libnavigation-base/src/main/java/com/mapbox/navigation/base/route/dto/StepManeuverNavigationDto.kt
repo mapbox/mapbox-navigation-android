@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 
- class StepManeuverNavigationDto(
+class StepManeuverNavigationDto(
     @SerializedName("location")
     val rawLocation: DoubleArray,
     @SerializedName("bearing_before")
@@ -18,7 +18,7 @@ import com.mapbox.navigation.base.route.model.StepManeuverNavigation
     val exit: Int?
 )
 
- fun StepManeuverNavigationDto.mapToModel() = StepManeuverNavigation(
+fun StepManeuverNavigationDto.mapToModel() = StepManeuverNavigation(
     location = Point.fromLngLat(rawLocation[0], rawLocation[1]),
     bearingBefore = bearingBefore,
     bearingAfter = bearingAfter,

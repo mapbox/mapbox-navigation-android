@@ -11,12 +11,11 @@ class MapboxOnboardRouterGenerationTest {
 
     private lateinit var onboardRouter: MapboxOnboardRouter
     private val navigator: MapboxNativeNavigator = mockk()
-    private val token = "pk.XXX"
     private val tilePath = "tiles"
 
     @Before
     fun setUp() {
-        onboardRouter = MapboxOnboardRouter(navigator, token, Config(tilePath))
+        onboardRouter = MapboxOnboardRouter(navigator, Config(tilePath))
     }
 
     @Test
