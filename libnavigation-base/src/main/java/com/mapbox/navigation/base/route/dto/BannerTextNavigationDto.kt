@@ -13,7 +13,7 @@ class BannerTextNavigationDto(
     val drivingSide: String?
 )
 
- fun BannerTextNavigationDto.mapToModel() = BannerTextNavigation(
+fun BannerTextNavigationDto.mapToModel() = BannerTextNavigation(
     text = text,
     components = components?.map { it.mapToModel() },
     type = type,
