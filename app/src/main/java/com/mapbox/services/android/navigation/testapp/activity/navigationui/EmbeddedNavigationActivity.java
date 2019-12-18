@@ -29,6 +29,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -46,7 +48,6 @@ import java.io.File;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, ProgressChangeListener, InstructionListListener, SpeechAnnouncementListener,
@@ -217,7 +218,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   private String obtainOfflineDirectory() {
     File offline = Environment.getExternalStoragePublicDirectory("Offline");
     if (!offline.exists()) {
-      Timber.d("Offline directory does not exist");
+      MapboxLogger.INSTANCE.d(new Message("Offline directory does not exist"));
       offline.mkdirs();
     }
     return offline.getAbsolutePath();

@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 
 import java.io.File;
@@ -19,7 +21,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 /**
  * <p>
@@ -29,7 +30,6 @@ import timber.log.Timber;
 class MapboxSpeechPlayer implements SpeechPlayer {
 
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
-  private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
   private static final SpeechAnnouncementMap SPEECH_ANNOUNCEMENT_MAP = new SpeechAnnouncementMap();
   private static final String MP3_POSTFIX = "mp3";
 
@@ -182,7 +182,9 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     try {
       mediaPlayer.setDataSource(instruction);
     } catch (IOException ioException) {
-      Timber.e(ERROR_TEXT, ioException.getMessage());
+      MapboxLogger.INSTANCE.e(
+              new Message("Unable to set data source for the media mediaPlayer! " + ioException.getMessage())
+      );
     }
   }
 

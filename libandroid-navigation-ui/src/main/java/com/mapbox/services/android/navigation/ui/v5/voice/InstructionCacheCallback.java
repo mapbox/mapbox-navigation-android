@@ -3,11 +3,13 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 
 import androidx.annotation.NonNull;
 
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 class InstructionCacheCallback implements Callback<ResponseBody> {
 
@@ -27,7 +29,7 @@ class InstructionCacheCallback implements Callback<ResponseBody> {
 
   @Override
   public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable throwable) {
-    Timber.e(throwable, "onFailure cache instruction");
+    MapboxLogger.INSTANCE.e(new Message("onFailure cache instruction"), throwable);
   }
 
   private boolean closeResponseBody(@NonNull Response<ResponseBody> response) {

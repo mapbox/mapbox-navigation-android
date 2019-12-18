@@ -17,11 +17,13 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.base.route.DirectionsSession;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.route.model.Route;
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
 import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
+import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
 import com.mapbox.navigation.route.offboard.router.NavigationRoute;
 import com.mapbox.services.android.navigation.testapp.R;
@@ -39,7 +41,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import timber.log.Timber;
 
 public class OffboardRouterActivityJava extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -163,12 +164,12 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
 
   @Override
   public void onRoutesRequested() {
-    Timber.d("onRoutesRequested: navigation.getRoute()");
+    MapboxLogger.INSTANCE.d(new Message("onRoutesRequested: navigation.getRoute()"));
   }
 
   @Override
   public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
+    MapboxLogger.INSTANCE.e(new Message("onRoutesRequestFailure: navigation.getRoute()"), throwable);
   }
 
   /*

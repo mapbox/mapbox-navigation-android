@@ -37,6 +37,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
 import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
@@ -72,7 +74,6 @@ import okhttp3.Cache;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
   MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener,
@@ -218,7 +219,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   public void onProgressChange(Location location, RouteProgress routeProgress) {
     // Cache "snapped" Locations for re-route Directions API requests
     // TODO This is for testing / debugging purposes
-    Timber.d("DEBUG snapped %s", location.toString());
+    MapboxLogger.INSTANCE.d(new Message("DEBUG snapped " + location.toString()));
     updateLocation(location);
 
     // Update InstructionView data from RouteProgress
@@ -228,7 +229,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @Override
   public void onEnhancedLocationUpdate(Location location) {
     // TODO This is for testing / debugging purposes
-    Timber.d("DEBUG enhanced %s", location.toString());
+    MapboxLogger.INSTANCE.d(new Message("DEBUG enhanced " + location.toString()));
     checkFirstUpdate(location);
     updateLocation(location);
   }
@@ -466,7 +467,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
         @Override
         public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-          Timber.e(throwable);
+          MapboxLogger.INSTANCE.e(new Message(throwable.getLocalizedMessage()), throwable);
         }
       });
   }
@@ -566,7 +567,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      Timber.e(exception);
+      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
     }
   }
 }

@@ -7,6 +7,8 @@ import com.mapbox.android.search.MapboxSearch
 import com.mapbox.android.search.MapboxSearchOptions
 import com.mapbox.crashmonitor.CrashMonitor
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.testapp.example.utils.DelegatesExt
 import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.squareup.leakcanary.LeakCanary
@@ -65,7 +67,7 @@ class NavigationApplication : MultiDexApplication() {
     private fun setupMapbox() {
         val mapboxAccessToken = Utils.getMapboxAccessToken(applicationContext)
         if (TextUtils.isEmpty(mapboxAccessToken) || mapboxAccessToken == DEFAULT_MAPBOX_ACCESS_TOKEN) {
-            Timber.w("Mapbox access token isn't set!")
+            MapboxLogger.w(Message("Mapbox access token isn't set!"))
         }
 
         val cachingMode = MapboxSearchOptions().setCachingEnabled(true)
@@ -80,7 +82,7 @@ class NavigationApplication : MultiDexApplication() {
         try {
             crashMonitor.monitor(applicationInfo.dataDir)
         } catch (e: Exception) {
-            Timber.e("Couldn't monitor for crashes: ${e.message}")
+            MapboxLogger.e(Message("Couldn't monitor for crashes: ${e.message}"))
         }
     }
 }

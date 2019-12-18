@@ -59,6 +59,7 @@ dependencies {
   // Navigation SDK
   api project(':libandroid-navigation')
   implementation project(':libnavigation-util')
+  implementation project(':liblogger')
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk
@@ -80,9 +81,6 @@ dependencies {
 
   // Picasso
   implementation dependenciesList.picasso
-
-  // Timber
-  implementation dependenciesList.timber
 
   // Mapbox Map SDK Javadoc
   javadocDeps dependenciesList.mapboxMapSdk

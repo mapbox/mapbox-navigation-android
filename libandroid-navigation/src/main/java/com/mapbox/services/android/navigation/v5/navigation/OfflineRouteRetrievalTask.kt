@@ -3,9 +3,10 @@ package com.mapbox.services.android.navigation.v5.navigation
 import android.os.AsyncTask
 import com.google.gson.Gson
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouterResult
-import timber.log.Timber
 
 internal class OfflineRouteRetrievalTask(
     private val navigator: Navigator,
@@ -50,7 +51,7 @@ internal class OfflineRouteRetrievalTask(
 
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
 
-        Timber.e(errorMessage)
+        MapboxLogger.e(Message(errorMessage))
         return errorMessage
     }
 }

@@ -46,8 +46,6 @@ import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
-import org.jetbrains.annotations.TestOnly;
-
 import java.io.File;
 import java.util.List;
 
@@ -99,7 +97,6 @@ public class NavigationViewModel extends AndroidViewModel {
     this.connectivityController = new MapConnectivityController();
   }
 
-  @TestOnly
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
@@ -111,7 +108,6 @@ public class NavigationViewModel extends AndroidViewModel {
     this.mapOfflineManager = mapOfflineManager;
   }
 
-  @TestOnly
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,

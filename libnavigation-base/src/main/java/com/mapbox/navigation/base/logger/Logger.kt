@@ -7,7 +7,7 @@ interface Logger {
     /**
      * Send a verbose log message and log the exception.
      *
-     * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
+     * @param tag is [Tag] used to identify the source of a log message. It usually identifies
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
@@ -17,7 +17,7 @@ interface Logger {
     /**
      * Send a debug log message and log the exception.
      *
-     * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
+     * @param tag is [Tag] used to identify the source of a log message. It usually identifies
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
@@ -27,7 +27,7 @@ interface Logger {
     /**
      * Send an info log message and log the exception.
      *
-     * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
+     * @param tag is [Tag] used to identify the source of a log message. It usually identifies
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
@@ -37,7 +37,7 @@ interface Logger {
     /**
      * Send a warning log message and log the exception.
      *
-     * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
+     * @param tag is [Tag] used to identify the source of a log message. It usually identifies
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
@@ -47,7 +47,7 @@ interface Logger {
     /**
      * Send an error log message and log the exception.
      *
-     * @param tag is [Tag] used to identify the source of a log message.  It usually identifies
+     * @param tag is [Tag] used to identify the source of a log message. It usually identifies
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log

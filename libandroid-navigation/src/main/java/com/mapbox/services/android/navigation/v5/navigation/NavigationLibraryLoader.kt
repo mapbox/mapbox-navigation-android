@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
-import timber.log.Timber
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 
 abstract class NavigationLibraryLoader {
 
@@ -29,7 +30,7 @@ abstract class NavigationLibraryLoader {
             try {
                 loader.load(NAVIGATION_NATIVE)
             } catch (error: UnsatisfiedLinkError) {
-                Timber.e(error, "Failed to load native shared library.")
+                MapboxLogger.e(Message("Failed to load native shared library."), error)
             }
         }
     }
