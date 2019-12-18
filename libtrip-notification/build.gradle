@@ -26,6 +26,7 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
     implementation project(':libnavigation-util')
+    implementation project(':libnavigation-resource')
 
     implementation dependenciesList.supportV4
     testImplementation dependenciesList.junit
