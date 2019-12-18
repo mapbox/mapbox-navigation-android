@@ -1,0 +1,21 @@
+<resources>
+    <!-- Notification Strings -->
+    <string name="end_navigation">End Navigation</string>
+    <string name="channel_name">Navigation Notifications</string>
+    <string name="notification_arrival_time_format">Arrive at %s</string>
+    <string name="kilometers">km</string>
+    <string name="meters">m</string>
+    <string name="miles">mi</string>
+    <string name="feet">ft</string>
+    <string name="eta_format">%s ETA</string>
+
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="hr">hr</string>
+    <!-- Minute -->
+    <string name="min">min</string>
+</resources>
