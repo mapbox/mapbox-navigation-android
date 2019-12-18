@@ -162,14 +162,14 @@ fun StepManeuverNavigation.mapToStepManeuver(): StepManeuver =
         .type(type)
         .build()
 
-fun VoiceInstructionsNavigation.mapToVoiceInstructions() =
+fun VoiceInstructionsNavigation.mapToVoiceInstructions(): VoiceInstructions =
     VoiceInstructions.builder()
         .announcement(announcement)
         .distanceAlongGeometry(distanceAlongGeometry)
         .ssmlAnnouncement(ssmlAnnouncement)
         .build()
 
-fun BannerTextNavigation.mapToBannerText() =
+fun BannerTextNavigation.mapToBannerText(): BannerText =
     BannerText.builder()
         .text(text ?: "")!!
         .components(components?.map(BannerComponentsNavigation::mapToBannerComponents))!!
@@ -179,13 +179,13 @@ fun BannerTextNavigation.mapToBannerText() =
         .type(type)
         .build()
 
-fun IntersectionLanesNavigation.mapToIntersectionLanes() =
+fun IntersectionLanesNavigation.mapToIntersectionLanes(): IntersectionLanes =
     IntersectionLanes.builder()
         .indications(indications)
         .valid(valid)
         .build()
 
-fun BannerComponentsNavigation.mapToBannerComponents() =
+fun BannerComponentsNavigation.mapToBannerComponents(): BannerComponents =
     BannerComponents.builder()
         .abbreviation(abbreviation)
         .abbreviationPriority(abbreviationPriority)
