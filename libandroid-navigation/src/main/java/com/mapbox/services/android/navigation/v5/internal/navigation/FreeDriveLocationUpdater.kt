@@ -12,6 +12,7 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigator
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
 import java.lang.ref.WeakReference
 import java.util.Date
+import java.util.LinkedList
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -32,7 +33,7 @@ internal class FreeDriveLocationUpdater(
     private var electronicHorizonFuture: ScheduledFuture<*>? = null
     private var rawLocation: Location? = null
     private val handler = Handler(Looper.getMainLooper())
-    private val cachedLocations = mutableListOf<Location>()
+    private val cachedLocations = LinkedList<Location>()
 
     fun configure(
         tilePath: String,
@@ -148,7 +149,7 @@ internal class FreeDriveLocationUpdater(
     private fun cacheLocation(location: Location) {
         // remove the oldest location to fit the max cache size
         if (cachedLocations.size == electronicHorizonParams.locationsCacheSize) {
-            cachedLocations.removeAt(0)
+            cachedLocations.removeFirst()
         }
 
         cachedLocations.add(location)

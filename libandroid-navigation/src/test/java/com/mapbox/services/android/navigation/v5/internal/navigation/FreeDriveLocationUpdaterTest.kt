@@ -62,7 +62,7 @@ class FreeDriveLocationUpdaterTest {
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
                 executorService = mockedScheduledExecutorService,
-                electronicHorizonParams = ElectronicHorizonParams()
+                electronicHorizonParams = ElectronicHorizonParams.Builder().build()
             )
 
         theFreeDriveLocationUpdater.start()
@@ -115,7 +115,7 @@ class FreeDriveLocationUpdaterTest {
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
                 executorService = mockedScheduledExecutorService,
-                electronicHorizonParams = ElectronicHorizonParams()
+                electronicHorizonParams = ElectronicHorizonParams.Builder().build()
             )
 
         theFreeDriveLocationUpdater.start()

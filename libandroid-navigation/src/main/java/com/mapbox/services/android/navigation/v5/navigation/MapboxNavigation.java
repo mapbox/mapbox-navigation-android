@@ -1015,7 +1015,7 @@ public class MapboxNavigation implements ServiceConnection {
         offlineNavigator,
         Executors.newScheduledThreadPool(2),
         ElectronicHorizonRequestBuilder.INSTANCE,
-        new ElectronicHorizonParams());
+        new ElectronicHorizonParams.Builder().build());
 
     initializeTelemetry(context);
 
@@ -1057,7 +1057,7 @@ public class MapboxNavigation implements ServiceConnection {
         offlineNavigator,
         Executors.newScheduledThreadPool(2),
         ElectronicHorizonRequestBuilder.INSTANCE,
-        new ElectronicHorizonParams());
+        new ElectronicHorizonParams.Builder().build());
     initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.
