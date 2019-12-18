@@ -2,6 +2,8 @@ package com.mapbox.navigation.route.onboard.task
 
 import android.os.AsyncTask
 import com.google.gson.Gson
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.dto.RouteResponseDto
 import com.mapbox.navigation.base.route.dto.mapToModel
 import com.mapbox.navigation.base.route.model.Route
@@ -20,7 +22,7 @@ internal class OfflineRouteRetrievalTask(
     @Volatile
     private lateinit var routerResult: RouterResult
 
-    private val logger by lazy { MapboxLogger() }
+    private val logger = MapboxLogger
     private val gson = Gson()
 
     // For testing only
@@ -58,7 +60,7 @@ internal class OfflineRouteRetrievalTask(
 
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
 
-        logger.e("OfflineRouteRetrievalTask", errorMessage)
+        logger.e(Tag("OfflineRouteRetrievalTask"), Message(errorMessage))
         return errorMessage
     }
 }

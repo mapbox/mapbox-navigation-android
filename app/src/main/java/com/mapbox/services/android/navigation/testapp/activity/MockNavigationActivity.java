@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.utils.Utils;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver;
