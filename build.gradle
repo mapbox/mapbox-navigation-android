@@ -23,6 +23,9 @@ buildscript {
     classpath pluginDependencies.crashlytics
     classpath pluginDependencies.license
     classpath pluginDependencies.mapboxSdkVersions
+    classpath pluginDependencies.mavenPublish
+    classpath pluginDependencies.bintray
+    classpath pluginDependencies.artifactory
   }
 }
 

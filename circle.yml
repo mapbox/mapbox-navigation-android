@@ -5,6 +5,7 @@ workflows:
   default:
     jobs:
       - build
+      - build-1.0
       - release
       - publish:
           filters:
@@ -110,6 +111,33 @@ jobs:
       - store_test_results:
           path: app/build/test-results
 
+  build-1.0:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtrip-service/build.gradle" }}-{{ checksum  "libtrip-session/build.gradle" }}
+            - deps-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtrip-service/build.gradle" }}-{{ checksum  "libtrip-session/build.gradle" }}
+      - run:
+          name: Check Kotlin code style
+          command: ./gradlew ktlint
+      - run:
+          name: Build Navigation SDK 1.0 (debug)
+          command: make 1.0-build-debug
+      - run:
+          name: Run unit-test
+          command: make 1.0-unit-tests
+
 # ------------------------------------------------------------------------------
   release:
     branch:
@@ -164,6 +192,35 @@ jobs:
           name: Check & Publish Binary Size
           command: |
             ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt "${CIRCLE_SHA1}"
+
+  release-1.0:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    steps:
+      - checkout
+      - run:
+          name: Build Navigation SDK 1.0 (release)
+          command: make 1.0-build-release
+      - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - deploy:
+          name: Publish Navigation SDK 1.0 to Bintray
+          command: |
+            if [[ $CIRCLE_BRANCH == master ]]; then
+              version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+              if [[ $version != *"SNAPSHOT"* ]]; then
+                make 1.0-publish-to-bintray
+              else
+                make 1.0-publish-to-artifactory
+              fi
+            fi
 # ------------------------------------------------------------------------------
   publish:
     docker:
