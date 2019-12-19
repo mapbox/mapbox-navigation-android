@@ -28,3 +28,5 @@ dependencies {
     testImplementation dependenciesList.mockito // deprecated
     testImplementation dependenciesList.mockk
 }
+
+apply from: "${rootDir}/gradle/bintray-publish.gradle"
