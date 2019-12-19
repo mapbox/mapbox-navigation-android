@@ -71,10 +71,12 @@ navigation-fixtures:
 .PHONY: 1.0-build-debug
 1.0-build-debug:
 	./gradlew :libdirections-offboard:assembleDebug
+	./gradlew :libdirections-hybrid:assembleDebug
 
 .PHONY: 1.0-build-release
 1.0-build-release:
 	./gradlew :libdirections-offboard:assembleRelease
+	./gradlew :libdirections-hybrid:assembleRelease
 
 .PHONY: 1.0-unit-tests
 1.0-unit-tests:
@@ -95,7 +97,9 @@ navigation-fixtures:
 .PHONY: 1.0-publish-to-bintray
 1.0-publish-to-bintray:
 	./gradlew :libdirections-offboard:bintrayUpload
+	./gradlew :libdirections-hybrid:bintrayUpload
 
 .PHONY: 1.0-publish-to-artifactory
 1.0-publish-to-artifactory:
 	./gradlew :libdirections-offboard:artifactoryPublish
+	./gradlew :libdirections-hybrid:artifactoryPublish
