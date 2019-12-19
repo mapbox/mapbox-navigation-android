@@ -2,6 +2,8 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationMetricListener
 import com.mapbox.services.android.navigation.v5.location.RawLocationListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -14,7 +16,6 @@ import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeLis
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
 import java.util.concurrent.CopyOnWriteArrayList
-import timber.log.Timber
 
 internal class NavigationEventDispatcher {
 
@@ -43,7 +44,7 @@ internal class NavigationEventDispatcher {
 
     fun addMilestoneEventListener(milestoneEventListener: MilestoneEventListener) {
         if (milestoneEventListeners.contains(milestoneEventListener)) {
-            Timber.w("The specified MilestoneEventListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified MilestoneEventListener has already been added to the stack."))
             return
         }
         milestoneEventListeners.add(milestoneEventListener)
@@ -53,7 +54,7 @@ internal class NavigationEventDispatcher {
         if (milestoneEventListener == null) {
             milestoneEventListeners.clear()
         } else if (!milestoneEventListeners.contains(milestoneEventListener)) {
-            Timber.w("The specified MilestoneEventListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified MilestoneEventListener isn't found in stack, therefore, cannot be removed."))
         } else {
             milestoneEventListeners.remove(milestoneEventListener)
         }
@@ -61,7 +62,7 @@ internal class NavigationEventDispatcher {
 
     fun addProgressChangeListener(progressChangeListener: ProgressChangeListener) {
         if (progressChangeListeners.contains(progressChangeListener)) {
-            Timber.w("The specified ProgressChangeListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified ProgressChangeListener has already been added to the stack."))
             return
         }
         progressChangeListeners.add(progressChangeListener)
@@ -71,7 +72,7 @@ internal class NavigationEventDispatcher {
         if (progressChangeListener == null) {
             progressChangeListeners.clear()
         } else if (!progressChangeListeners.contains(progressChangeListener)) {
-            Timber.w("The specified ProgressChangeListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified ProgressChangeListener isn't found in stack, therefore, cannot be removed."))
         } else {
             progressChangeListeners.remove(progressChangeListener)
         }
@@ -79,7 +80,7 @@ internal class NavigationEventDispatcher {
 
     fun addOffRouteListener(offRouteListener: OffRouteListener) {
         if (offRouteListeners.contains(offRouteListener)) {
-            Timber.w("The specified OffRouteListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified OffRouteListener has already been added to the stack."))
             return
         }
         offRouteListeners.add(offRouteListener)
@@ -89,7 +90,7 @@ internal class NavigationEventDispatcher {
         if (offRouteListener == null) {
             offRouteListeners.clear()
         } else if (!offRouteListeners.contains(offRouteListener)) {
-            Timber.w("The specified OffRouteListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified OffRouteListener isn't found in stack, therefore, cannot be removed."))
         } else {
             offRouteListeners.remove(offRouteListener)
         }
@@ -97,7 +98,7 @@ internal class NavigationEventDispatcher {
 
     fun addNavigationEventListener(navigationEventListener: NavigationEventListener) {
         if (navigationEventListeners.contains(navigationEventListener)) {
-            Timber.w("The specified NavigationEventListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified NavigationEventListener has already been added to the stack."))
             return
         }
         this.navigationEventListeners.add(navigationEventListener)
@@ -107,7 +108,7 @@ internal class NavigationEventDispatcher {
         if (navigationEventListener == null) {
             navigationEventListeners.clear()
         } else if (!navigationEventListeners.contains(navigationEventListener)) {
-            Timber.w("The specified NavigationEventListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified NavigationEventListener isn't found in stack, therefore, cannot be removed."))
         } else {
             navigationEventListeners.remove(navigationEventListener)
         }
@@ -115,7 +116,7 @@ internal class NavigationEventDispatcher {
 
     fun addFasterRouteListener(fasterRouteListener: FasterRouteListener) {
         if (fasterRouteListeners.contains(fasterRouteListener)) {
-            Timber.w("The specified FasterRouteListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified FasterRouteListener has already been added to the stack."))
             return
         }
         fasterRouteListeners.add(fasterRouteListener)
@@ -125,7 +126,7 @@ internal class NavigationEventDispatcher {
         if (fasterRouteListener == null) {
             fasterRouteListeners.clear()
         } else if (!fasterRouteListeners.contains(fasterRouteListener)) {
-            Timber.w("The specified FasterRouteListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified FasterRouteListener isn't found in stack, therefore, cannot be removed."))
         } else {
             fasterRouteListeners.remove(fasterRouteListener)
         }
@@ -133,7 +134,7 @@ internal class NavigationEventDispatcher {
 
     fun addRawLocationListener(rawLocationListener: RawLocationListener) {
         if (rawLocationListeners.contains(rawLocationListener)) {
-            Timber.w("The specified RawLocationListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified RawLocationListener has already been added to the stack."))
             return
         }
         rawLocationListeners.add(rawLocationListener)
@@ -143,7 +144,7 @@ internal class NavigationEventDispatcher {
         if (rawLocationListener == null) {
             rawLocationListeners.clear()
         } else if (!rawLocationListeners.contains(rawLocationListener)) {
-            Timber.w("The specified RawLocationListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified RawLocationListener isn't found in stack, therefore, cannot be removed."))
         } else {
             rawLocationListeners.remove(rawLocationListener)
         }
@@ -151,7 +152,7 @@ internal class NavigationEventDispatcher {
 
     fun addEnhancedLocationListener(enhancedLocationListener: EnhancedLocationListener) {
         if (enhancedLocationListeners.contains(enhancedLocationListener)) {
-            Timber.w("The specified EnhancedLocationListener has already been added to the stack.")
+            MapboxLogger.w(Message("The specified EnhancedLocationListener has already been added to the stack."))
             return
         }
         enhancedLocationListeners.add(enhancedLocationListener)
@@ -161,7 +162,7 @@ internal class NavigationEventDispatcher {
         if (enhancedLocationListener == null) {
             enhancedLocationListeners.clear()
         } else if (!enhancedLocationListeners.contains(enhancedLocationListener)) {
-            Timber.w("The specified EnhancedLocationListener isn't found in stack, therefore, cannot be removed.")
+            MapboxLogger.w(Message("The specified EnhancedLocationListener isn't found in stack, therefore, cannot be removed."))
         } else {
             enhancedLocationListeners.remove(enhancedLocationListener)
         }

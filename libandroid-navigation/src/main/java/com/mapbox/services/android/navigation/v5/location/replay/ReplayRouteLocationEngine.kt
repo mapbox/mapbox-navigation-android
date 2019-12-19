@@ -11,11 +11,12 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayLocationDispatcher
 import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayRouteLocationConverter
 import com.mapbox.services.android.navigation.v5.internal.location.replay.ReplayRouteLocationListener
 import java.util.ArrayList
-import timber.log.Timber
 
 class ReplayRouteLocationEngine : LocationEngine, Runnable {
     private lateinit var converter: ReplayRouteLocationConverter
@@ -107,7 +108,7 @@ class ReplayRouteLocationEngine : LocationEngine, Runnable {
         request: LocationEngineRequest,
         pendingIntent: PendingIntent
     ) {
-        Timber.e("ReplayEngine does not support PendingIntent.")
+        MapboxLogger.e(Message("ReplayEngine does not support PendingIntent."))
     }
 
     override fun removeLocationUpdates(callback: LocationEngineCallback<LocationEngineResult>) {
@@ -115,7 +116,7 @@ class ReplayRouteLocationEngine : LocationEngine, Runnable {
     }
 
     override fun removeLocationUpdates(pendingIntent: PendingIntent) {
-        Timber.e("ReplayEngine does not support PendingIntent.")
+        MapboxLogger.e(Message("ReplayEngine does not support PendingIntent."))
     }
 
     internal fun updateLastLocation(lastLocation: Location) {

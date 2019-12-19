@@ -6,6 +6,8 @@ import android.widget.Toast
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
@@ -14,7 +16,6 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
-import timber.log.Timber
 
 private const val BEARING_TOLERANCE = 90.0
 
@@ -40,12 +41,12 @@ class OfflineRouteFinder(
 
         offlineRouter.configure(version, object : OnOfflineTilesConfiguredCallback {
             override fun onConfigured(numberOfTiles: Int) {
-                Timber.d("Offline tiles configured: $numberOfTiles")
+                MapboxLogger.d(Message("Offline tiles configured: $numberOfTiles"))
                 isConfigured = true
             }
 
             override fun onConfigurationError(error: OfflineError) {
-                Timber.d("Offline tiles configuration error: {${error.message}}")
+                MapboxLogger.d(Message("Offline tiles configuration error: {${error.message}}"))
                 isConfigured = false
             }
         })

@@ -13,10 +13,12 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.directions.session.MapboxDirectionsSession
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
@@ -27,7 +29,6 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.mapToDirection
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
-import timber.log.Timber
 
 class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
@@ -144,11 +145,11 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     }
 
     override fun onRoutesRequested() {
-        Timber.d("onRoutesRequested: navigation.getRoute()")
+        MapboxLogger.d(Message("onRoutesRequested: navigation.getRoute()"))
     }
 
     override fun onRoutesRequestFailure(throwable: Throwable) {
-        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
+        MapboxLogger.e(Message("onRoutesRequestFailure: navigation.getRoute()"), throwable)
     }
 
     /*

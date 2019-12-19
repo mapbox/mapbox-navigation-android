@@ -30,6 +30,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
@@ -53,7 +55,6 @@ import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
 public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback,
   Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener,
@@ -224,12 +225,12 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
       Snackbar.make(contentLayout, instruction, Snackbar.LENGTH_SHORT).show();
     }
     instructionView.updateBannerInstructionsWith(milestone);
-    Timber.d("onMilestoneEvent - Current Instruction: %s", instruction);
+    MapboxLogger.INSTANCE.d(new Message("onMilestoneEvent - Current Instruction: " + instruction));
   }
 
   @Override
   public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-    Timber.d(call.request().url().toString());
+    MapboxLogger.INSTANCE.d(new Message(call.request().url().toString()));
     if (response.body() != null) {
       if (!response.body().routes().isEmpty()) {
         DirectionsRoute route = response.body().routes().get(0);
@@ -244,7 +245,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @Override
   public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    Timber.e(throwable);
+    MapboxLogger.INSTANCE.e(new Message(throwable.getLocalizedMessage()), throwable);
   }
 
   void updateLocation(Location location) {
@@ -324,7 +325,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      Timber.e(exception);
+      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
     }
   }
 }

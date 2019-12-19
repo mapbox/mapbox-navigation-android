@@ -7,6 +7,8 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigator
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
@@ -16,7 +18,6 @@ import java.util.LinkedList
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import timber.log.Timber
 
 internal class FreeDriveLocationUpdater(
     private var locationEngine: LocationEngine,
@@ -167,7 +168,7 @@ internal class FreeDriveLocationUpdater(
         }
 
         override fun onFailure(exception: Exception) {
-            Timber.e(exception)
+            MapboxLogger.e(Message(exception.localizedMessage), exception)
         }
     }
 }
