@@ -28,3 +28,5 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
 }
+
+apply from: "${rootDir}/gradle/bintray-publish.gradle"
