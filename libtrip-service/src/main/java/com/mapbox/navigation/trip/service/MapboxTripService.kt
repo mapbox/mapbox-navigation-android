@@ -76,9 +76,7 @@ class MapboxTripService(
         while (when (!channel.isClosedForReceive) {
                     true -> {
                         val data = channel.receive()
-                        withContext(Dispatchers.Main) {
-                            tripNotification.updateNotification(data)
-                        }
+                        tripNotification.updateNotification(data)
                         true
                     }
                     false -> {
