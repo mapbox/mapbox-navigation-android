@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.navigation.base.trip.MapboxNotificationData
 import com.mapbox.navigation.base.trip.NAVIGATION_NOTIFICATION_ID
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripNotification
@@ -59,11 +60,8 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         updateNotificationViews(routeProgress)
     }
 
-    override fun updateNotification(testData: String) {
-        notification = buildNotification(testData, applicationContext)
-        notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification)
-        buildRemoteViews()
-    }
+    override fun updateNotification(testData: String)  = MapboxNotificationData (NOTIFICATION_ID, buildNotification(testData, applicationContext))
+
 
     override fun onTripSessionStopped(context: Context) {
         unregisterReceiver()

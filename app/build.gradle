@@ -140,8 +140,13 @@ dependencies {
     exclude group: 'com.android.support', module: 'support-annotations'
   })
   androidTestImplementation dependenciesList.testEspressoContrib
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"
 apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/dependency-updates.gradle"
+repositories {
+    mavenCentral()
+}

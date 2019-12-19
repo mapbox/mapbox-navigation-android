@@ -5,9 +5,12 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.trip.MapboxNotificationData
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
+import com.mapbox.navigation.utils.NOTIFICATION_ID
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 import timber.log.Timber
 
 /**
@@ -43,7 +46,7 @@ class MapboxTripService(
         if (!notificationDataChannel.isClosedForSend) {
             notificationDataChannel.close()
         }
-        notificationDataChannel = ConflatedBroadcastChannel<MapboxNotificationData>()
+        notificationDataChannel = ConflatedBroadcastChannel()
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
                 NavigationNotificationService.serviceScope.launch {
@@ -76,7 +79,7 @@ class MapboxTripService(
         while (when (!channel.isClosedForReceive) {
                     true -> {
                         val data = channel.receive()
-                        tripNotification.updateNotification(data)
+                        notificationDataChannel.offer(tripNotification.updateNotification(data))
                         true
                     }
                     false -> {
@@ -92,6 +95,6 @@ class MapboxTripService(
     }
     companion object {
         private var notificationDataChannel = ConflatedBroadcastChannel<MapboxNotificationData>()
-        fun getNotificationDataChannel() = notificationDataChannel.openSubscription()
+        fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> = notificationDataChannel.openSubscription()
     }
 }

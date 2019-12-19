@@ -32,7 +32,7 @@ class TripServiceActivityKt: AppCompatActivity(),
     private lateinit var mapboxTripNotification: MapboxTripNotification
     private lateinit var navigationMapRoute: NavigationMapRoute
     private lateinit var mapboxTripService: MapboxTripService
-
+    private var toggle = false
     @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
@@ -40,7 +40,7 @@ class TripServiceActivityKt: AppCompatActivity(),
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             newOrigin()
             toggleNotification.setOnClickListener {
-                changeText()
+                changeText(!toggle)
             }
         }
     }
@@ -115,7 +115,16 @@ class TripServiceActivityKt: AppCompatActivity(),
         }
     }
 
-    private fun changeText() {
+    private fun changeText(toggle:Boolean) {
+        when (toggle){
+            true ->{
+                job.cancel()
+            }
+            false -> {
+                job.cancel()
+            }
+        }
+
         scope.launch {
             while (isActive) {
                 val text = "Time elapsed: + ${SystemClock.elapsedRealtime()}"

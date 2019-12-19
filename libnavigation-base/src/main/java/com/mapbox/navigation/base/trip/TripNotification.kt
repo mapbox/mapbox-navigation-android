@@ -45,7 +45,7 @@ interface TripNotification {
      *
      * @param routeProgress with the latest progress data
      */
-    fun updateNotification(testData: String)
+    fun updateNotification(testData: String) : MapboxNotificationData
 
     /**
      * Callback for when trip session is stopped via [TripSession.stop].
