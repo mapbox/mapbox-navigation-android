@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
-class ElectronicHorizonParams {
+public class ElectronicHorizonParams {
 
   private long delay;
   private long interval;
@@ -24,7 +24,7 @@ class ElectronicHorizonParams {
     return locationsCacheSize;
   }
 
-  static class Builder {
+  public static class Builder {
     private static final long ELECTRONIC_HORIZON_DELAY_DEFAULT = 20_000;
     private static final long ELECTRONIC_HORIZON_INTERVAL_DEFAULT = 20_000;
     private static final int LOCATIONS_CACHE_SIZE_DEFAULT = 5;

@@ -37,7 +37,7 @@ public class ElectronicHorizonRequestBuilder {
     }
   }
 
-  static class Position {
+  private class Position {
     private double lat;
     private double lon;
 
@@ -47,7 +47,7 @@ public class ElectronicHorizonRequestBuilder {
     }
   }
 
-  static class ElectronicHorizonRequest {
+  private class ElectronicHorizonRequest {
     private List<Position> shape;
     @SerializedName("eh_options")
     private Map<String, Object> options;
