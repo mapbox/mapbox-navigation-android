@@ -45,7 +45,7 @@ internal class MapboxTripService(
         if (!notificationDataChannel.isClosedForSend) {
             notificationDataChannel.close()
         }
-        notificationDataChannel = ConflatedBroadcastChannel<MapboxNotificationData>()
+        notificationDataChannel = ConflatedBroadcastChannel()
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
                 NavigationNotificationService.serviceScope.launch {
@@ -61,11 +61,11 @@ internal class MapboxTripService(
     }
 
     private suspend fun monitorRouteProgress() {
-        val channel = NavigationNotificationService.getNotificationChannel()
+        val channel = NavigationNotificationService.getUpdateNotificationChannel()
         while (when (!channel.isClosedForReceive) {
                     true -> {
                         val routeData = channel.receive()
-                        tripNotification.updateNotification(routeData.routeProgress)
+                        tripNotification.updateNotification(routeData)
                         true
                     }
                     false -> {
@@ -79,6 +79,7 @@ internal class MapboxTripService(
     override fun stopService() {
         notificationDataChannel.close()
     }
+
     companion object {
         private var notificationDataChannel = ConflatedBroadcastChannel<MapboxNotificationData>()
         fun getNotificationDataChannel() = notificationDataChannel.openSubscription()

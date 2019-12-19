@@ -1,3 +1,3 @@
 package com.mapbox.navigation.base.trip
 
-class RouteProgress
+data class RouteProgress(val progress: String)
