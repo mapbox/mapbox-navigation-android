@@ -46,7 +46,7 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
-        notification = buildNotification(applicationContext)
+        notification = buildNotification("", applicationContext)
     }
 
     override fun getNotification() = notification
@@ -54,9 +54,15 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
     override fun getNotificationId() = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
-        notification = buildNotification(applicationContext)
+        notification = buildNotification("", applicationContext)
         notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification)
         updateNotificationViews(routeProgress)
+    }
+
+    override fun updateNotification(testData: String) {
+        notification = buildNotification(testData, applicationContext)
+        notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification)
+        buildRemoteViews()
     }
 
     override fun onTripSessionStopped(context: Context) {
@@ -75,14 +81,15 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         notificationManager.cancel(NAVIGATION_NOTIFICATION_ID)
     }
 
-    private fun buildNotification(applicationContext: Context): Notification {
+    private fun buildNotification(data: String, applicationContext: Context): Notification {
         val channelId =
                 NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
-                .setContentTitle("")
+                .setContentTitle("Testing Notification")
+                .setContentText(data)
                 .setCustomBigContentView(expandedNotificationRemoteViews)
                 .setOngoing(true)
 

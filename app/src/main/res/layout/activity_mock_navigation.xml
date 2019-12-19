@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".activity.MockNavigationActivity">
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/container"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fitsSystemWindows="true"
+tools:context=".activity.MockNavigationActivity">
 
-    <com.mapbox.mapboxsdk.maps.MapView
+<com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mapbox_cameraZoom="14"
         app:mapbox_uiAttribution="false"/>
 
-    <Button
+<Button
         android:id="@+id/startRouteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
         android:text="Start route"
         android:visibility="invisible"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+<com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/newLocationFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

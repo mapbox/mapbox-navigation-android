@@ -33,7 +33,7 @@ private val navigator: MapboxNativeNavigator,
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
-internal class MapboxTripService(
+class MapboxTripService(
     private val tripNotification: TripNotification,
     private val callback: () -> Unit
 ) : TripService {
@@ -61,11 +61,25 @@ internal class MapboxTripService(
     }
 
     private suspend fun monitorRouteProgress() {
-        val channel = NavigationNotificationService.getNotificationChannel()
+        /*val channel = NavigationNotificationService.getNotificationChannel()
         while (when (!channel.isClosedForReceive) {
                     true -> {
                         val routeData = channel.receive()
                         tripNotification.updateNotification(routeData.routeProgress)
+                        true
+                    }
+                    false -> {
+                        false
+                    }
+                }
+        ) {
+        }*/
+
+        val channel = NavigationNotificationService.getTestNotificationChannel()
+        while (when (!channel.isClosedForReceive) {
+                    true -> {
+                        val data = channel.receive()
+                        tripNotification.updateNotification(data)
                         true
                     }
                     false -> {

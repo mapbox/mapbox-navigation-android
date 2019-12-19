@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -22,12 +23,14 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.whileSelect
+import timber.log.Timber
+
 const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
 const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-internal class NavigationNotificationService : Service() {
+class NavigationNotificationService : Service() {
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
@@ -48,7 +51,15 @@ internal class NavigationNotificationService : Service() {
 
     override fun onCreate() {
         startForegroundNotification()
-        notificationChannel.close()
+        serviceScope.launch {
+            while (isActive) {
+                val text = "Time elapsed: + ${SystemClock.elapsedRealtime()}"
+                Timber.i(text)
+                testNotificationChannel.offer(text)
+                delay(1000L)
+            }
+        }
+        /*notificationChannel.close()
         notificationChannel = ConflatedBroadcastChannel()
         serviceScope.launch {
             while (isActive) {
@@ -67,14 +78,15 @@ internal class NavigationNotificationService : Service() {
                 })
                 delay(UPDATE_INTERVAL_IN_MILLISECONDS) // Poll every second
             }
-        }
+        }*/
         locationEngine?.requestLocationUpdates(locationEngineRequest, locationEngineCallback, null)
         super.onCreate()
     }
 
     override fun onDestroy() {
         stopForeground(true)
-        notificationChannel.close()
+        //notificationChannel.close()
+        testNotificationChannel.close()
         super.onDestroy()
     }
 
@@ -103,5 +115,9 @@ internal class NavigationNotificationService : Service() {
         val serviceScope = CoroutineScope(job + Dispatchers.IO)
         private var notificationChannel = ConflatedBroadcastChannel<NavigationTripDescriptor>()
         fun getNotificationChannel() = notificationChannel.openSubscription()
+
+
+        private var testNotificationChannel = ConflatedBroadcastChannel<String>()
+        fun getTestNotificationChannel() = testNotificationChannel.openSubscription()
     }
 }

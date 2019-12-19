@@ -22,6 +22,7 @@ import com.mapbox.services.android.navigation.testapp.activity.MockNavigationAct
 import com.mapbox.services.android.navigation.testapp.activity.OffboardRouterActivityJava;
 import com.mapbox.services.android.navigation.testapp.activity.OffboardRouterActivityKt;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.TripServiceActivityKt;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
@@ -76,6 +77,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_offboard_router_java),
         getString(R.string.description_offboard_router_java),
         OffboardRouterActivityJava.class
+      ),
+      new SampleItem(
+        getString(R.string.title_trip_service_kotlin),
+        getString(R.string.description_trip_service_kotlin),
+        TripServiceActivityKt.class
       ),
       new SampleItem(
         getString(R.string.title_reroute),

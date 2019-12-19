@@ -16,6 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <service android:name="com.mapbox.navigation.trip.service.NavigationNotificationService"/>
+
         <activity
             android:name=".example.ui.ExampleActivity"
             android:screenOrientation="portrait"
@@ -151,6 +153,7 @@
 
         <!-- Testing -->
         <activity android:name=".test.TestNavigationActivity"/>
+        <activity android:name=".activity.TripServiceActivityKt" />
 
         <meta-data
             android:name="com.mapbox.TestEventsServer"
