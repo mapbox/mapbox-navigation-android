@@ -142,7 +142,10 @@ ext {
       playPublisher    : '2.3.0',
       googleServices   : '4.2.0',
       crashlytics      : '1.26.1',
-      mapboxSdkVersions: '1.0.0'
+      mapboxSdkVersions: '1.0.0',
+      mavenPublish     : '3.6.2',
+      bintray          : '1.8.4',
+      artifactory      : '4.9.3'
   ]
 
   pluginDependencies = [
@@ -159,6 +162,9 @@ ext {
       playPublisher    : "com.github.triplet.gradle:play-publisher:${pluginVersion.playPublisher}",
       googleServices   : "com.google.gms:google-services:${pluginVersion.googleServices}",
       crashlytics      : "io.fabric.tools:gradle:${pluginVersion.crashlytics}",
-      mapboxSdkVersions: "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}"
+      mapboxSdkVersions: "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
+      mavenPublish     : "digital.wup:android-maven-publish:${pluginVersion.mavenPublish}",
+      bintray          : "com.jfrog.bintray.gradle:gradle-bintray-plugin:${pluginVersion.bintray}",
+      artifactory      : "org.jfrog.buildinfo:build-info-extractor-gradle:${pluginVersion.artifactory}"
   ]
 }

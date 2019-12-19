@@ -12,20 +12,6 @@ test:
 	# See libandroid-navigation/build.gradle for details
 	./gradlew :libandroid-navigation:test
 	./gradlew :libandroid-navigation-ui:test
-	./gradlew :libdirections-hybrid:test
-	./gradlew :libdirections-offboard:test
-	./gradlew :libdirections-onboard:test
-	./gradlew :libdirections-session:test
-	./gradlew :liblogger:test
-	./gradlew :libnavigation-base:test
-	./gradlew :libnavigation-core:test
-	./gradlew :libnavigation-metrics:test
-	./gradlew :libnavigation-util:test
-	./gradlew :libnavigator:test
-	./gradlew :libtrip-notification:test
-	./gradlew :libtrip-service:test
-	./gradlew :libtrip-session:test
-	./gradlew :libnavigation-core:test
 
 build-release:
 	./gradlew :libandroid-navigation:assembleRelease
@@ -81,3 +67,35 @@ navigation-fixtures:
     # No VoiceInstructions
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-77.034013,38.899994;-77.033757,38.903311?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
 		-o libandroid-navigation/src/test/resources/directions_v5_no_voice.json
+
+.PHONY: 1.0-build-debug
+1.0-build-debug:
+	./gradlew :libdirections-offboard:assembleDebug
+
+.PHONY: 1.0-build-release
+1.0-build-release:
+	./gradlew :libdirections-offboard:assembleRelease
+
+.PHONY: 1.0-unit-tests
+1.0-unit-tests:
+	./gradlew :libdirections-hybrid:test
+	./gradlew :libdirections-offboard:test
+	./gradlew :libdirections-onboard:test
+	./gradlew :liblogger:test
+	./gradlew :libnavigation-base:test
+	./gradlew :libnavigation-core:test
+	./gradlew :libnavigation-metrics:test
+	./gradlew :libnavigation-util:test
+	./gradlew :libnavigator:test
+	./gradlew :libtrip-notification:test
+	./gradlew :libtrip-service:test
+	./gradlew :libtrip-session:test
+	./gradlew :libnavigation-core:test
+
+.PHONY: 1.0-publish-to-bintray
+1.0-publish-to-bintray:
+	./gradlew :libdirections-offboard:bintrayUpload
+
+.PHONY: 1.0-publish-to-artifactory
+1.0-publish-to-artifactory:
+	./gradlew :libdirections-offboard:artifactoryPublish
