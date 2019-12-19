@@ -5,11 +5,9 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.trip.MapboxNotificationData
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
+import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -52,7 +50,6 @@ class MapboxTripService(
                     monitorRouteProgress()
                 }
                 callback()
-                notificationDataChannel.offer(MapboxNotificationData(tripNotification.getNotificationId(), tripNotification.getNotification()))
             }
             false -> {
                 Timber.i("service already started")
@@ -79,7 +76,9 @@ class MapboxTripService(
         while (when (!channel.isClosedForReceive) {
                     true -> {
                         val data = channel.receive()
-                        tripNotification.updateNotification(data)
+                        withContext(Dispatchers.Main) {
+                            tripNotification.updateNotification(data)
+                        }
                         true
                     }
                     false -> {
