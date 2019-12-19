@@ -45,7 +45,7 @@ internal class OfflineRouteRetrievalTask(
     }
 
     public override fun onPostExecute(offlineRoute: List<Route>?) {
-        if (offlineRoute != null) {
+        if (!offlineRoute.isNullOrEmpty()) {
             callback.onRouteFound(offlineRoute)
         } else {
             callback.onError(OfflineError(generateErrorMessage()))
