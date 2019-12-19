@@ -9,6 +9,7 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType
 import java.util.Date
@@ -102,6 +103,11 @@ internal class MapboxNavigator(val navigator: Navigator) {
     fun retrieveRouteGeometryWithBuffer(): Geometry? {
         val routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) ?: return null
         return GeometryGeoJson.fromJson(routeGeometryWithBuffer)
+    }
+
+    @Synchronized
+    fun retrieveElectronicHorizon(request: String): RouterResult {
+        return navigator.getElectronicHorizon(request)
     }
 
     private fun buildFixLocationFromLocation(location: Location): FixLocation {

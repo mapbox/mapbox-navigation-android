@@ -18,6 +18,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
+import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonParams;
+import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonRequestBuilder;
 import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater;
 import com.mapbox.services.android.navigation.v5.internal.navigation.MapboxNavigator;
 import com.mapbox.services.android.navigation.v5.internal.navigation.NavigationEngineFactory;
@@ -1004,9 +1006,17 @@ public class MapboxNavigation implements ServiceConnection {
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
             "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
             accessToken);
-    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
-        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(
+        locationEngine,
+        locationEngineRequest,
+        navigationEventDispatcher,
+        mapboxNavigator,
+        offlineNavigator,
+        Executors.newScheduledThreadPool(2),
+        ElectronicHorizonRequestBuilder.INSTANCE,
+        new ElectronicHorizonParams.Builder().build());
+
     initializeTelemetry(context);
 
     // Create and add default milestones if enabled.
@@ -1038,9 +1048,16 @@ public class MapboxNavigation implements ServiceConnection {
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
             "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
             accessToken); // TODO Replace with an api-routing-tiles-staging valid one
-    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
-        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(
+        locationEngine,
+        locationEngineRequest,
+        navigationEventDispatcher,
+        mapboxNavigator,
+        offlineNavigator,
+        Executors.newScheduledThreadPool(2),
+        ElectronicHorizonRequestBuilder.INSTANCE,
+        new ElectronicHorizonParams.Builder().build());
     initializeTelemetry(applicationContext);
 
     // Create and add default milestones if enabled.

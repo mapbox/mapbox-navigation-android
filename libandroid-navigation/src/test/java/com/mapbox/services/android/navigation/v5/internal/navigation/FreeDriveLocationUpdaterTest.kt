@@ -57,11 +57,12 @@ class FreeDriveLocationUpdaterTest {
     }
 
     @Test
-    fun `checks scheduleAtFixedRate is called when start`() {
+    fun `checks scheduleAtFixedRate is called twice when start`() {
         val mockedScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true)
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
-                executorService = mockedScheduledExecutorService
+                executorService = mockedScheduledExecutorService,
+                electronicHorizonParams = ElectronicHorizonParams.Builder().build()
             )
 
         theFreeDriveLocationUpdater.start()
@@ -71,6 +72,15 @@ class FreeDriveLocationUpdaterTest {
                 any(),
                 eq(1500),
                 eq(1000),
+                eq(TimeUnit.MILLISECONDS)
+            )
+        }
+
+        verify {
+            mockedScheduledExecutorService.scheduleAtFixedRate(
+                any(),
+                eq(20_000),
+                eq(20_000),
                 eq(TimeUnit.MILLISECONDS)
             )
         }
@@ -100,11 +110,12 @@ class FreeDriveLocationUpdaterTest {
     }
 
     @Test
-    fun `checks scheduleAtFixedRate is called only once if start is called multiple times`() {
+    fun `checks scheduleAtFixedRate is called only twice if start is called multiple times`() {
         val mockedScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true)
         val theFreeDriveLocationUpdater =
             buildFreeDriveLocationUpdater(
-                executorService = mockedScheduledExecutorService
+                executorService = mockedScheduledExecutorService,
+                electronicHorizonParams = ElectronicHorizonParams.Builder().build()
             )
 
         theFreeDriveLocationUpdater.start()
@@ -116,6 +127,15 @@ class FreeDriveLocationUpdaterTest {
                 any(),
                 eq(1500),
                 eq(1000),
+                eq(TimeUnit.MILLISECONDS)
+            )
+        }
+
+        verify(exactly = 1) {
+            mockedScheduledExecutorService.scheduleAtFixedRate(
+                any(),
+                eq(20_000),
+                eq(20_000),
                 eq(TimeUnit.MILLISECONDS)
             )
         }
@@ -352,7 +372,9 @@ class FreeDriveLocationUpdaterTest {
         ),
         mapboxNavigator: MapboxNavigator = mockk<MapboxNavigator>(relaxed = true),
         offlineNavigator: OfflineNavigator = mockk<OfflineNavigator>(relaxed = true),
-        executorService: ScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true)
+        executorService: ScheduledExecutorService = mockk<ScheduledExecutorService>(relaxed = true),
+        electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder = mockk(relaxed = true),
+        electronicHorizonParams: ElectronicHorizonParams = mockk(relaxed = true)
     ): FreeDriveLocationUpdater {
         return FreeDriveLocationUpdater(
             locationEngine,
@@ -360,7 +382,9 @@ class FreeDriveLocationUpdaterTest {
             navigationEventDispatcher,
             mapboxNavigator,
             offlineNavigator,
-            executorService
+            executorService,
+            electronicHorizonRequestBuilder,
+            electronicHorizonParams
         )
     }
 }

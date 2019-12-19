@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -88,7 +90,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private static final String COMPONENT_NAVIGATION_INSTRUCTION_CACHE = "component-navigation-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
   private static final int ZERO_PADDING = 0;
-  private static final double DEFAULT_ZOOM = 12.0;
+  private static final double DEFAULT_ZOOM = 18.0;
   private static final double DEFAULT_TILT = 0d;
   private static final double DEFAULT_BEARING = 0d;
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
@@ -121,6 +123,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private DirectionsRoute route;
   private Point destination;
   private MapState mapState;
+  private boolean isFreeDriveEnabled = false;
+  private boolean isFreeDriveCameraConfigured = false;
+  private Handler handler = new Handler();
+  private Runnable updateTracking =
+    () -> navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
 
   private enum MapState {
     INFO,
@@ -156,6 +163,25 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
       // For voice instructions
       initializeSpeechPlayer();
+
+      navigationMap.retrieveMap().addOnMoveListener(new MapboxMap.OnMoveListener() {
+        @Override
+        public void onMoveBegin(@NonNull MoveGestureDetector detector) {
+          handler.removeCallbacks(updateTracking);
+        }
+
+        @Override
+        public void onMove(@NonNull MoveGestureDetector detector) {
+
+        }
+
+        @Override
+        public void onMoveEnd(@NonNull MoveGestureDetector detector) {
+          if (isFreeDriveEnabled) {
+            trackCameraDelayed();
+          }
+        }
+      });
     });
   }
 
@@ -322,6 +348,12 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   void updateLocation(Location location) {
     lastLocation = location;
     navigationMap.updateLocation(location);
+
+    if (isFreeDriveEnabled && !isFreeDriveCameraConfigured) {
+      navigationMap.retrieveMap().getLocationComponent().zoomWhileTracking(DEFAULT_ZOOM);
+      trackCameraDelayed();
+      isFreeDriveCameraConfigured = true;
+    }
   }
 
   private void initializeSpeechPlayer() {
@@ -410,8 +442,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @NonNull
   private CameraPosition buildCameraPositionFrom(Location location, double bearing) {
+    return buildCameraPositionFrom(location, bearing, DEFAULT_ZOOM);
+  }
+
+  @NonNull
+  private CameraPosition buildCameraPositionFrom(Location location, double bearing, double zoom) {
     return new CameraPosition.Builder()
-      .zoom(DEFAULT_ZOOM)
+      .zoom(zoom)
       .target(new LatLng(location.getLatitude(), location.getLongitude()))
       .bearing(bearing)
       .tilt(DEFAULT_TILT)
@@ -438,6 +475,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
       navigation.disableFreeDrive();
+      isFreeDriveEnabled = false;
       navigation.removeEnhancedLocationListener(this);
     }
   }
@@ -447,6 +485,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     if (locationEngine != null) {
       navigation.addEnhancedLocationListener(this);
       navigation.enableFreeDrive();
+      isFreeDriveEnabled = true;
     }
   }
 
@@ -537,6 +576,10 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
       .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
       .build();
+  }
+
+  private void trackCameraDelayed() {
+    handler.postDelayed(updateTracking, TWO_SECONDS_IN_MILLISECONDS);
   }
 
   /*

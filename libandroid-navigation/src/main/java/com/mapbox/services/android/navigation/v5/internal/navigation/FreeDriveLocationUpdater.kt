@@ -12,6 +12,7 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineNavigator
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
 import java.lang.ref.WeakReference
 import java.util.Date
+import java.util.LinkedList
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -23,12 +24,16 @@ internal class FreeDriveLocationUpdater(
     private val navigationEventDispatcher: NavigationEventDispatcher,
     private val mapboxNavigator: MapboxNavigator,
     private val offlineNavigator: OfflineNavigator,
-    private val executorService: ScheduledExecutorService
+    private val executorService: ScheduledExecutorService,
+    private val electronicHorizonRequestBuilder: ElectronicHorizonRequestBuilder,
+    private val electronicHorizonParams: ElectronicHorizonParams
 ) {
     private val callback = CurrentLocationEngineCallback(this)
     private var future: ScheduledFuture<*>? = null
+    private var electronicHorizonFuture: ScheduledFuture<*>? = null
     private var rawLocation: Location? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val cachedLocations = LinkedList<Location>()
 
     fun configure(
         tilePath: String,
@@ -52,17 +57,31 @@ internal class FreeDriveLocationUpdater(
                 }
             }, 1500, 1000, TimeUnit.MILLISECONDS)
         }
+
+        if (electronicHorizonFuture == null) {
+            electronicHorizonFuture = executorService.scheduleAtFixedRate({
+                val request = electronicHorizonRequestBuilder.build(ElectronicHorizonRequestBuilder.Expansion._1D, cachedLocations)
+                mapboxNavigator.retrieveElectronicHorizon(request)
+            }, electronicHorizonParams.delay, electronicHorizonParams.interval, TimeUnit.MILLISECONDS)
+        }
     }
 
     fun stop() {
         future?.let {
             stopLocationUpdates()
         }
+
+        electronicHorizonFuture?.let {
+            stopRetrieveElectronicHorizon()
+        }
     }
 
     fun kill() {
         future?.let {
             stopLocationUpdates()
+        }
+        electronicHorizonFuture?.let {
+            stopRetrieveElectronicHorizon()
         }
         executorService.shutdown()
     }
@@ -111,13 +130,29 @@ internal class FreeDriveLocationUpdater(
         future = null
     }
 
+    private fun stopRetrieveElectronicHorizon() {
+        electronicHorizonFuture?.cancel(false)
+        electronicHorizonFuture = null
+        cachedLocations.clear()
+    }
+
     private fun onLocationChanged(location: Location?) {
         location?.let { currentLocation ->
             rawLocation = currentLocation
+            cacheLocation(currentLocation)
             executorService.execute {
                 mapboxNavigator.updateLocation(currentLocation)
             }
         }
+    }
+
+    private fun cacheLocation(location: Location) {
+        // remove the oldest location to fit the max cache size
+        if (cachedLocations.size == electronicHorizonParams.locationsCacheSize) {
+            cachedLocations.removeFirst()
+        }
+
+        cachedLocations.add(location)
     }
 
     private class CurrentLocationEngineCallback(locationUpdater: FreeDriveLocationUpdater) :
