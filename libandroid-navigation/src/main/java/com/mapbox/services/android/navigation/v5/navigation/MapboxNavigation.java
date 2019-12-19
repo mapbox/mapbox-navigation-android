@@ -978,9 +978,17 @@ public class MapboxNavigation implements ServiceConnection {
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
         "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
         accessToken);
-    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
-        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(
+      locationEngine,
+      locationEngineRequest,
+      navigationEventDispatcher,
+      mapboxNavigator,
+      offlineNavigator,
+      Executors.newScheduledThreadPool(2),
+      new ElectronicHorizonRequestBuilder(),
+      new ElectronicHorizonParams.Builder().build());
+
     initializeTelemetry();
 
     // Create and add default milestones if enabled.
@@ -1012,9 +1020,17 @@ public class MapboxNavigation implements ServiceConnection {
     OfflineNavigator offlineNavigator = new OfflineNavigator(mapboxNavigator.getNavigator(),
         "2019_04_13-00_00_11", "https://api-routing-tiles-staging.tilestream.net",
         accessToken); // TODO Replace with an api-routing-tiles-staging valid one
-    freeDriveLocationUpdater = new FreeDriveLocationUpdater(locationEngine, locationEngineRequest,
-        navigationEventDispatcher, mapboxNavigator, offlineNavigator,
-        Executors.newSingleThreadScheduledExecutor());
+
+    freeDriveLocationUpdater = new FreeDriveLocationUpdater(
+      locationEngine,
+      locationEngineRequest,
+      navigationEventDispatcher,
+      mapboxNavigator,
+      offlineNavigator,
+      Executors.newScheduledThreadPool(2),
+      new ElectronicHorizonRequestBuilder(),
+      new ElectronicHorizonParams.Builder().build());
+
     initializeTelemetry();
 
     // Create and add default milestones if enabled.

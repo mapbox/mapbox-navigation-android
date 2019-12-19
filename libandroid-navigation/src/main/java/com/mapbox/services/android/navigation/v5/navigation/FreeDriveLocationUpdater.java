@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -33,18 +35,26 @@ class FreeDriveLocationUpdater {
   private final ScheduledExecutorService executorService;
   private final CurrentLocationEngineCallback callback = new CurrentLocationEngineCallback(this);
   private ScheduledFuture future;
+  private ScheduledFuture electronicHorizonFuture;
   private Location rawLocation;
   private Handler handler = new Handler(Looper.getMainLooper());
+  private List<Location> cachedLocations = new LinkedList<Location>();
+  private ElectronicHorizonRequestBuilder electronicHorizonRequestBuilder;
+  private ElectronicHorizonParams electronicHorizonParams;
 
   FreeDriveLocationUpdater(LocationEngine locationEngine, LocationEngineRequest locationEngineRequest,
                            NavigationEventDispatcher navigationEventDispatcher, MapboxNavigator mapboxNavigator,
-                           OfflineNavigator offlineNavigator, ScheduledExecutorService executorService) {
+                           OfflineNavigator offlineNavigator, ScheduledExecutorService executorService,
+                           ElectronicHorizonRequestBuilder electronicHorizonRequestBuilder,
+                           ElectronicHorizonParams electronicHorizonParams) {
     this.locationEngine = locationEngine;
     this.locationEngineRequest = locationEngineRequest;
     this.navigationEventDispatcher = navigationEventDispatcher;
     this.mapboxNavigator = mapboxNavigator;
     this.offlineNavigator = offlineNavigator;
     this.executorService = executorService;
+    this.electronicHorizonRequestBuilder = electronicHorizonRequestBuilder;
+    this.electronicHorizonParams = electronicHorizonParams;
   }
 
   void configure(@NonNull String tilePath, @NonNull OnOfflineTilesConfiguredCallback onOfflineTilesConfiguredCallback) {
@@ -69,17 +79,34 @@ class FreeDriveLocationUpdater {
         }
       }, 1500, 1000, TimeUnit.MILLISECONDS);
     }
+
+    if (electronicHorizonFuture == null) {
+      electronicHorizonFuture = executorService.scheduleAtFixedRate(new Runnable() {
+        @Override
+        public void run() {
+          String request = electronicHorizonRequestBuilder.build(
+                  ElectronicHorizonRequestBuilder.Expansion._1D, cachedLocations);
+          mapboxNavigator.retrieveElectronicHorizon(request);
+        }
+      }, electronicHorizonParams.getDelay(), electronicHorizonParams.getInterval(), TimeUnit.MILLISECONDS);
+    }
   }
 
   void stop() {
     if (future != null) {
       stopLocationUpdates();
     }
+    if (electronicHorizonFuture != null) {
+      stopRetrieveElectronicHorizon();
+    }
   }
 
   void kill() {
     if (future != null) {
       stopLocationUpdates();
+    }
+    if (electronicHorizonFuture != null) {
+      stopRetrieveElectronicHorizon();
     }
     executorService.shutdown();
   }
@@ -130,9 +157,16 @@ class FreeDriveLocationUpdater {
     future = null;
   }
 
+  private void stopRetrieveElectronicHorizon() {
+    electronicHorizonFuture.cancel(false);
+    electronicHorizonFuture = null;
+    cachedLocations.clear();
+  }
+
   private void onLocationChanged(@Nullable final Location location) {
     if (location != null) {
       rawLocation = location;
+      cacheLocation(location);
       executorService.execute(new Runnable() {
         @Override
         public void run() {
@@ -140,6 +174,15 @@ class FreeDriveLocationUpdater {
         }
       });
     }
+  }
+
+  private void cacheLocation(Location location) {
+    // remove the oldest location to fit the max cache size
+    if (cachedLocations.size() == electronicHorizonParams.getLocationsCacheSize()) {
+      cachedLocations.remove(0);
+    }
+
+    cachedLocations.add(location);
   }
 
   private static class CurrentLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
