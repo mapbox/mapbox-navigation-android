@@ -9,7 +9,9 @@ import com.mapbox.navigation.base.trip.TripService
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
 import timber.log.Timber
 
 @InternalCoroutinesApi
@@ -26,8 +28,8 @@ internal class MapboxTripService(
     override fun startService() {
         if (!notificationDataChannel.isClosedForSend) {
             notificationDataChannel.close()
+            notificationDataChannel = Channel(1)
         }
-        notificationDataChannel = ConflatedBroadcastChannel()
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
                 callback()
@@ -51,7 +53,7 @@ internal class MapboxTripService(
     }
 
     companion object {
-        private var notificationDataChannel = ConflatedBroadcastChannel<MapboxNotificationData>()
-        fun getNotificationDataChannel() = notificationDataChannel.openSubscription()
+        private var notificationDataChannel = Channel<MapboxNotificationData>(1)
+        fun getNotificationDataChannel() : ReceiveChannel<MapboxNotificationData> = notificationDataChannel
     }
 }

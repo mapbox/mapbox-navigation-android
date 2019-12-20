@@ -10,13 +10,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.whileSelect
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 internal class NavigationNotificationService : Service() {
-
-    private var isFirst = true
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -34,27 +31,10 @@ internal class NavigationNotificationService : Service() {
 
     private fun startForegroundNotification() {
         serviceScope.launch {
-            whileSelect {
-                MapboxTripService.getNotificationDataChannel().onReceiveOrClosed { notificationResponse ->
-                    when (notificationResponse.isClosed) {
-                        true -> {
-                            false
-                        }
-                        false -> {
-                            when (isFirst) {
-                                true -> {
-                                    isFirst = false
-                                    val notification = notificationResponse.value.notification
-                                    notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                                    startForeground(notificationResponse.value.notificationID, notification)
-                                }
-                                false -> {
-                                }
-                            }
-                            true
-                        }
-                    }
-                }
+            while(!MapboxTripService.getNotificationDataChannel().isClosedForReceive){
+                val notificationResponse = MapboxTripService.getNotificationDataChannel().receive()
+                notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
+                startForeground(notificationResponse.notificationID, notificationResponse.notification)
             }
         }
     }
