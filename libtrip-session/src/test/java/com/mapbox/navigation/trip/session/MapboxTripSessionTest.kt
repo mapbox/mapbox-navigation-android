@@ -68,7 +68,7 @@ class MapboxTripSessionTest {
     @Test
     fun startSession() {
         tripSession.start()
-        verify { tripService.startService(any()) }
+        verify { tripService.startService() }
         verify { locationEngine.requestLocationUpdates(locationEngineRequest, any(), Looper.getMainLooper()) }
 
         verify { workerHandler.postDelayed(handlerDelayedRunnableSlot.captured, 1000) }
