@@ -9,5 +9,8 @@ data class MapboxNotificationData(val notificationID: Int, val notification: Not
 interface TripService {
 
     fun startService()
+
     fun stopService()
+
+    fun updateNotification(routeProgress: RouteProgress)
 }

@@ -4,13 +4,11 @@ import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.mapbox.navigation.base.trip.RouteProgress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.whileSelect
 
@@ -18,13 +16,15 @@ import kotlinx.coroutines.selects.whileSelect
 @ExperimentalCoroutinesApi
 internal class NavigationNotificationService : Service() {
 
+    private var isFirst = true
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
-    override fun onCreate() {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundNotification()
-        super.onCreate()
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -41,9 +41,15 @@ internal class NavigationNotificationService : Service() {
                             false
                         }
                         false -> {
-                            val notification = notificationResponse.value.notification
-                            notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                            startForeground(notificationResponse.value.notificationID, notification)
+                            when (isFirst) {
+                                true -> {
+                                    val notification = notificationResponse.value.notification
+                                    notification.flags = Notification.FLAG_FOREGROUND_SERVICE
+                                    startForeground(notificationResponse.value.notificationID, notification)
+                                }
+                                false -> {
+                                }
+                            }
                             true
                         }
                     }
@@ -55,8 +61,5 @@ internal class NavigationNotificationService : Service() {
     companion object {
         private val job = SupervisorJob()
         val serviceScope = CoroutineScope(job + Dispatchers.IO)
-
-        private val updateNotificationChannel = ConflatedBroadcastChannel<RouteProgress>()
-        fun getUpdateNotificationChannel() = updateNotificationChannel.openSubscription()
     }
 }
