@@ -20,9 +20,9 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     api(project(':libnavigation-base'))
+    api project(':libtrip-notification')
     implementation project(':libnavigator')
     implementation project(':libnavigation-util')
-    implementation project(':libtrip-notification')
 
     //ktlint
     ktlint dependenciesList.ktlint
