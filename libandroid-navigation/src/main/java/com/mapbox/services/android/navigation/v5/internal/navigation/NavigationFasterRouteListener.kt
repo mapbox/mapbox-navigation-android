@@ -1,12 +1,11 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.route.FasterRoute
 import com.mapbox.services.android.navigation.v5.route.RouteListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import timber.log.Timber
 
 internal class NavigationFasterRouteListener(
     private val navigationEventDispatcher: NavigationEventDispatcher,
@@ -26,6 +25,6 @@ internal class NavigationFasterRouteListener(
     }
 
     override fun onErrorReceived(throwable: Throwable) {
-        MapboxLogger.e(Message(throwable.localizedMessage), throwable)
+        Timber.e(throwable)
     }
 }

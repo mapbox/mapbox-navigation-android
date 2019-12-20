@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
+import timber.log.Timber;
 
 class NavigationSpeechListener implements SpeechListener {
 
@@ -26,7 +25,7 @@ class NavigationSpeechListener implements SpeechListener {
 
   @Override
   public void onError(String errorText, SpeechAnnouncement speechAnnouncement) {
-    MapboxLogger.INSTANCE.e(new Message(errorText));
+    Timber.e(errorText);
     speechPlayerProvider.retrieveAndroidSpeechPlayer().play(speechAnnouncement);
   }
 }

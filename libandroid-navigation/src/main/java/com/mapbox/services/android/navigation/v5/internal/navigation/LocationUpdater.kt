@@ -7,9 +7,8 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import java.lang.ref.WeakReference
+import timber.log.Timber
 
 @SuppressLint("MissingPermission")
 internal class LocationUpdater(
@@ -82,7 +81,7 @@ internal class LocationUpdater(
         }
 
         override fun onFailure(exception: Exception) {
-            MapboxLogger.e(Message(exception.localizedMessage), exception)
+            Timber.e(exception)
         }
     }
 }

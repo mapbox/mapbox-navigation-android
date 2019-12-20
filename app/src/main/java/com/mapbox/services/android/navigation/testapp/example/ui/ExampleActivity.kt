@@ -66,7 +66,7 @@ class ExampleActivity : HistoryActivity(), ExampleView, LoggerObserver, MetricsO
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_example)
-        MapboxLogger.logLevel = VERBOSE
+        MapboxLogger.logLevel = DEBUG
         MapboxLogger.setObserver(this)
         setupWith(savedInstanceState)
         addNavigationForHistory(viewModel.retrieveNavigation())

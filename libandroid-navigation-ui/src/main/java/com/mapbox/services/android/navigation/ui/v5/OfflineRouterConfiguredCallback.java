@@ -3,10 +3,10 @@ package com.mapbox.services.android.navigation.ui.v5;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
+
+import timber.log.Timber;
 
 class OfflineRouterConfiguredCallback implements OnOfflineTilesConfiguredCallback {
 
@@ -23,6 +23,6 @@ class OfflineRouterConfiguredCallback implements OnOfflineTilesConfiguredCallbac
 
   @Override
   public void onConfigurationError(@NonNull OfflineError error) {
-    MapboxLogger.INSTANCE.e(new Message(error.getMessage()));
+    Timber.e(error.getMessage());
   }
 }

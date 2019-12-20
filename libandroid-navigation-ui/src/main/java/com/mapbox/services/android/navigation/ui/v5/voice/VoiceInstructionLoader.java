@@ -3,8 +3,6 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.ui.v5.ConnectivityStatusProvider;
 
 import java.io.IOException;
@@ -20,6 +18,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
+import timber.log.Timber;
 
 public class VoiceInstructionLoader {
   private static final int VOICE_INSTRUCTIONS_TO_EVICT_THRESHOLD = 4;
@@ -108,7 +107,7 @@ public class VoiceInstructionLoader {
     try {
       cache.evictAll();
     } catch (IOException exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
     }
   }
 

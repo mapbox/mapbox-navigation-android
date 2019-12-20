@@ -3,13 +3,13 @@ package com.mapbox.services.android.navigation.testapp.activity;
 import android.os.AsyncTask;
 import android.os.Environment;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+
+import timber.log.Timber;
 
 class StoreHistoryTask extends AsyncTask<Void, Void, Void> {
   private static final String EMPTY_HISTORY = "{}";
@@ -54,7 +54,7 @@ class StoreHistoryTask extends AsyncTask<Void, Void, Void> {
       fos.flush();
       fos.close();
     } catch (Exception exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
     }
   }
 }

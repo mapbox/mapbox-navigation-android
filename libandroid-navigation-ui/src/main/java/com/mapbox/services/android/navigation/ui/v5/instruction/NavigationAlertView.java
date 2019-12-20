@@ -9,8 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
@@ -19,6 +17,8 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+
+import timber.log.Timber;
 
 public class NavigationAlertView extends AlertView implements FeedbackBottomSheetListener {
 
@@ -140,7 +140,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     try {
       return ((FragmentActivity) getContext()).getSupportFragmentManager();
     } catch (ClassCastException exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
       return null;
     }
   }

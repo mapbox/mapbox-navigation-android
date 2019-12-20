@@ -7,12 +7,11 @@ import android.os.Binder
 import android.os.Handler
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.NavigationNotificationProvider
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.route.RouteFetcher
+import timber.log.Timber
 
 /**
  * Internal usage only, use navigation by initializing a new instance of {@link MapboxNavigation}
@@ -145,7 +144,7 @@ internal class NavigationService : Service() {
 
     inner class LocalBinder : Binder() {
         fun getService(): NavigationService {
-            MapboxLogger.d(Message("Local binder called."))
+            Timber.d("Local binder called.")
             return this@NavigationService
         }
     }

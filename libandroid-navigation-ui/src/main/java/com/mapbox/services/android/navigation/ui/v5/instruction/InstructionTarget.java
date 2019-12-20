@@ -8,12 +8,12 @@ import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.util.List;
+
+import timber.log.Timber;
 
 public class InstructionTarget implements Target {
 
@@ -55,7 +55,7 @@ public class InstructionTarget implements Target {
   public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
     setBackupText();
     sendInstructionLoadedCallback();
-    MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+    Timber.e(exception);
   }
 
   @Override

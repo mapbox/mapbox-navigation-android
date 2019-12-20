@@ -6,8 +6,6 @@ import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.utils.extensions.combineSpan
 import com.mapbox.navigation.utils.span.SpanItem
 import com.mapbox.navigation.utils.span.TextSpanItem
@@ -16,6 +14,7 @@ import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType
 import java.util.ArrayList
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
+import timber.log.Timber
 
 object TimeFormatter {
 
@@ -38,7 +37,7 @@ object TimeFormatter {
         var seconds = routeDuration.toLong()
 
         if (seconds < 0) {
-            MapboxLogger.e(Message("Duration must be greater than zero. Invalid duration $seconds"))
+            Timber.e("Duration must be greater than zero. Invalid duration %s", seconds)
             seconds = 0L
         }
 

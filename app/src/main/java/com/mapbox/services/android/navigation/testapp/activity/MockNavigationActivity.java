@@ -122,7 +122,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
-    MapboxLogger.INSTANCE.setLogLevel(LogPriority.VERBOSE);
+    MapboxLogger.INSTANCE.setLogLevel(LogPriority.DEBUG);
     MapboxLogger.INSTANCE.setObserver(this);
     routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
 

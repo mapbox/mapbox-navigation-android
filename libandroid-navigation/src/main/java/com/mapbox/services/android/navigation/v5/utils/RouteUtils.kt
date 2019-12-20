@@ -3,11 +3,10 @@ package com.mapbox.services.android.navigation.v5.utils
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressState
 import kotlin.collections.ArrayList
+import timber.log.Timber
 
 class RouteUtils {
 
@@ -85,7 +84,7 @@ class RouteUtils {
             val firstRemainingWaypointIndex = remainingWaypointIndices[FIRST_POSITION].toInt()
             coordinates.subList(firstRemainingWaypointIndex, coordinatesSize)
         } catch (ex: NumberFormatException) {
-            MapboxLogger.e(Message("Fail to convert waypoint index to integer"))
+            Timber.e("Fail to convert waypoint index to integer")
             null
         }
     }
@@ -127,7 +126,7 @@ class RouteUtils {
             }
             resultWaypointIndices
         } catch (ex: NumberFormatException) {
-            MapboxLogger.e(Message("Fail to convert waypoint index to integer"))
+            Timber.e("Fail to convert waypoint index to integer")
             null
         }
     }
