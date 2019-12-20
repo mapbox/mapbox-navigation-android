@@ -96,6 +96,9 @@ dependencies {
   implementation dependenciesList.kotlinStdLib
   implementation dependenciesList.ankoCommon
 
+  //Coroutines
+  implementation dependenciesList.coroutinesAndroid
+
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')
   implementation dependenciesList.mapboxMapSdk
