@@ -151,6 +151,7 @@
 
         <!-- Testing -->
         <activity android:name=".test.TestNavigationActivity"/>
+        <activity android:name=".activity.TripServiceActivityKt" />
 
         <meta-data
             android:name="com.mapbox.TestEventsServer"
