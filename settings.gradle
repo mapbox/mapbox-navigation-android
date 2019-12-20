@@ -11,7 +11,6 @@ include ':app',
         ':libtrip-notification',
         ':liblogger',
         ':libnavigation-util',
-        ':libdirections-session',
         ':libtrip-session',
         ':libnavigation-core',
         ':libnavigation-resource'
