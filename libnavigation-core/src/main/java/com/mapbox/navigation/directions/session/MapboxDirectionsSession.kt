@@ -1,14 +1,10 @@
 package com.mapbox.navigation.directions.session
 
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.route.DirectionsSession
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
-@MapboxNavigationModule(MapboxNavigationModuleType.DirectionsSession, skipConfiguration = true)
-class MapboxDirectionsSession(
+internal class MapboxDirectionsSession(
     private val router: Router,
     private val routeObserver: DirectionsSession.RouteObserver // TODO investigate inject routeObserver through setter
 ) : DirectionsSession {

@@ -1,9 +1,9 @@
-package com.mapbox.navigation.base.route
+package com.mapbox.navigation.directions.session
 
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 
-interface DirectionsSession {
+internal interface DirectionsSession {
     fun getRoutes(): List<Route>
     fun getRouteOptions(): RouteOptionsNavigation?
     fun requestRoutes(routeOptions: RouteOptionsNavigation)

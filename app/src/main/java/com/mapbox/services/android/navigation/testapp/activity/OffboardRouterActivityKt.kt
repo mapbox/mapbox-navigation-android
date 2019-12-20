@@ -14,13 +14,11 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.route.DirectionsSession
+import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.offboard.router.NavigationRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.utils.Utils
@@ -33,16 +31,17 @@ import kotlinx.android.synthetic.main.activity_mock_navigation.*
 class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
-    DirectionsSession.RouteObserver {
+    Router.Callback {
 
     private var mapboxMap: MapboxMap? = null
 
     private lateinit var navigationMapRoute: NavigationMapRoute
-    private var directionsSession: DirectionsSession? = null
     private var route: DirectionsRoute? = null
     private var origin: Point? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
+
+    private var offboardRouter: MapboxOffboardRouter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,14 +109,13 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     }
 
     private fun findRoute() {
-        val offboardRouter = MapboxOffboardRouter(
-            NavigationRoute.builder(this)
-        )
-        directionsSession = MapboxDirectionsSession(
-            offboardRouter,
-            this
-        )
-        ifNonNull(directionsSession, origin, destination) { session, originPoint, destinationPoint ->
+        ifNonNull(origin, destination) { originPoint, destinationPoint ->
+            if (offboardRouter == null) {
+                offboardRouter = MapboxOffboardRouter(this)
+            } else {
+                offboardRouter?.cancel()
+            }
+
             if (TurfMeasurement.distance(originPoint, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
                 return
             }
@@ -129,27 +127,24 @@ class OffboardRouterActivityKt : AppCompatActivity(),
                 waypoints.forEach { addWaypoint(it) }
             }.build()
 
-            session.requestRoutes(options)
+            offboardRouter?.getRoute(options, this@OffboardRouterActivityKt)
         }
     }
 
     /*
-     * DirectionSessions.RouteObserver
+     * Router.Callback
      */
 
-    override fun onRoutesChanged(routes: List<Route>) {
+    override fun onResponse(routes: List<Route>) {
         routes.firstOrNull()?.let {
             route = it.mapToDirectionsRoute()
             navigationMapRoute.addRoute(route)
         }
     }
 
-    override fun onRoutesRequested() {
-        MapboxLogger.d(Message("onRoutesRequested: navigation.getRoute()"))
-    }
-
-    override fun onRoutesRequestFailure(throwable: Throwable) {
-        MapboxLogger.e(Message("onRoutesRequestFailure: navigation.getRoute()"), throwable)
+    override fun onFailure(throwable: Throwable) {
+        Toast.makeText(this, "Error: " + throwable.message, Toast.LENGTH_LONG).show()
+        MapboxLogger.e(Message("Router.Callback#onFailure"), throwable)
     }
 
     /*
@@ -183,7 +178,7 @@ class OffboardRouterActivityKt : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        directionsSession?.cancel()
+        offboardRouter?.cancel()
         mapboxMap?.removeOnMapClickListener(this)
         mapView.onDestroy()
     }

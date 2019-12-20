@@ -18,14 +18,11 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.base.route.DirectionsSession;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.route.model.Route;
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
-import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
 import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
-import com.mapbox.navigation.route.offboard.router.NavigationRoute;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.utils.Utils;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -43,9 +40,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class OffboardRouterActivityJava extends AppCompatActivity implements
-        OnMapReadyCallback,
-        MapboxMap.OnMapClickListener,
-        DirectionsSession.RouteObserver {
+  OnMapReadyCallback, MapboxMap.OnMapClickListener, Router.Callback {
 
   // Map variables
   @BindView(R.id.mapView)
@@ -53,12 +48,13 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
 
   private MapboxMap mapboxMap;
 
+  private Router offboardRouter;
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
-  private DirectionsSession directionsSession;
   private Point origin;
   private Point destination;
   private Point waypoint;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -125,14 +121,13 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
   }
 
   private void findRoute() {
-    Router offboardRouter = new MapboxOffboardRouter(
-      NavigationRoute.builder(this)
-    );
-    directionsSession = new MapboxDirectionsSession(
-      offboardRouter,
-      this
-    );
     if (origin != null && destination != null) {
+      if (offboardRouter == null) {
+        offboardRouter = new MapboxOffboardRouter(this);
+      } else {
+        offboardRouter.cancel();
+      }
+
       if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
         List<Point> waypoints = new ArrayList<>();
         if (waypoint != null) {
@@ -145,17 +140,17 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
         for (Point waypointPoint : waypoints) {
           optionsBuilder.addWaypoint(waypointPoint);
         }
-        directionsSession.requestRoutes(optionsBuilder.build());
+        offboardRouter.getRoute(optionsBuilder.build(), this);
       }
     }
   }
 
   /*
-   * DirectionSessions.RouteObserver
+   * Router.Callback
    */
 
   @Override
-  public void onRoutesChanged(@NotNull List<Route> routes) {
+  public void onResponse(@NotNull List<Route> routes) {
     if (!routes.isEmpty()) {
       route = Mappers.mapToDirectionsRoute(routes.get(0));
       navigationMapRoute.addRoute(route);
@@ -163,13 +158,9 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
   }
 
   @Override
-  public void onRoutesRequested() {
-    MapboxLogger.INSTANCE.d(new Message("onRoutesRequested: navigation.getRoute()"));
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    MapboxLogger.INSTANCE.e(new Message("onRoutesRequestFailure: navigation.getRoute()"), throwable);
+  public void onFailure(@NotNull Throwable throwable) {
+    Toast.makeText(this, "Error: " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+    MapboxLogger.INSTANCE.e(new Message("Router.Callback#onFailure"), throwable);
   }
 
   /*
@@ -209,8 +200,8 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    if (directionsSession != null) {
-      directionsSession.cancel();
+    if (offboardRouter != null) {
+      offboardRouter.cancel();
     }
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
