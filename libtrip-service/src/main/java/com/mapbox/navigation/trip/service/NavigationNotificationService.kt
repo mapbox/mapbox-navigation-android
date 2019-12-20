@@ -43,6 +43,7 @@ internal class NavigationNotificationService : Service() {
                         false -> {
                             when (isFirst) {
                                 true -> {
+                                    isFirst = false
                                     val notification = notificationResponse.value.notification
                                     notification.flags = Notification.FLAG_FOREGROUND_SERVICE
                                     startForeground(notificationResponse.value.notificationID, notification)
