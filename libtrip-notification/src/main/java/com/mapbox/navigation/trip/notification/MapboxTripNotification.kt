@@ -45,7 +45,7 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
-        notification = buildNotification(RouteProgress("Test"), applicationContext)
+        notification = buildNotification(applicationContext)
     }
 
     override fun getNotification() = notification
@@ -53,9 +53,9 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
     override fun getNotificationId() = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
-        notification = buildNotification(routeProgress, applicationContext)
-        notificationManager.notify(NOTIFICATION_ID, notification)
         updateNotificationViews(routeProgress)
+        notification = buildNotification(applicationContext)
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     override fun onTripSessionStopped(context: Context) {
@@ -74,18 +74,14 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun buildNotification(
-        routeProgress: RouteProgress,
-        applicationContext: Context
-    ): Notification {
+    private fun buildNotification(applicationContext: Context): Notification {
         val channelId =
                 NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
-                .setContentTitle("")
-                .setContentText(routeProgress.progress)
+                .setCustomContentView(collapsedNotificationRemoteViews)
                 .setCustomBigContentView(expandedNotificationRemoteViews)
                 .setOngoing(true)
 
@@ -131,8 +127,9 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         }
     }
 
-    fun updateNotificationViews(routeProgress: RouteProgress) {
+    private fun updateNotificationViews(routeProgress: RouteProgress) {
         buildRemoteViews()
+        updateData(routeProgress)
         // TODO:OZ,AK uncomment for full functionality of the NotificationService
 //        updateInstructionText(routeProgress.bannerInstruction())
 //        updateDistanceText(routeProgress)
@@ -145,5 +142,16 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
 //                updateManeuverImage(step)
 //            } ?: routeProgress.currentLegProgress()?.currentStep()
 //        }
+    }
+
+    private fun updateData(routeProgress: RouteProgress) {
+        collapsedNotificationRemoteViews?.setTextViewText(
+                R.id.notificationDistanceText,
+                routeProgress.progress
+        )
+        expandedNotificationRemoteViews?.setTextViewText(
+                R.id.notificationDistanceText,
+                routeProgress.progress
+        )
     }
 }
