@@ -19,7 +19,7 @@ import timber.log.Timber
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
-internal class MapboxTripService(
+class MapboxTripService(
     private val tripNotification: TripNotification,
     private val applicationContext: Context
 ) : TripService {

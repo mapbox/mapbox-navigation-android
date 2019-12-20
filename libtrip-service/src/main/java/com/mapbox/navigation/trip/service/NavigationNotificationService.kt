@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-internal class NavigationNotificationService : Service() {
+class NavigationNotificationService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
