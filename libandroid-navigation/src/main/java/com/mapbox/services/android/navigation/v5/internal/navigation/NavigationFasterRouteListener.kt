@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.route.FasterRoute
 import com.mapbox.services.android.navigation.v5.route.RouteListener
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import timber.log.Timber
 
 internal class NavigationFasterRouteListener(

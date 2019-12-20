@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation
 
-import com.mapbox.navigation.utils.time.ElapsedTime
+import com.mapbox.services.android.navigation.v5.utils.time.ElapsedTime
 import okhttp3.Call
 import okhttp3.EventListener
 

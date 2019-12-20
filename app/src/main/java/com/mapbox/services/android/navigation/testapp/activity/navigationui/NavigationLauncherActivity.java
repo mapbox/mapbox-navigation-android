@@ -44,13 +44,13 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.example.utils.ContextEx;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdate;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
-import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 

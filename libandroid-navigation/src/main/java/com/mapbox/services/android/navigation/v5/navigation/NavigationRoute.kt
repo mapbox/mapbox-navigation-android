@@ -10,9 +10,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
+import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.mapToWalkingOptions
 import java.util.Locale
 import okhttp3.EventListener

@@ -5,9 +5,9 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.VoiceInstruction
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
  * This class contains all progress information at any given time during a navigation session. This

@@ -6,11 +6,11 @@ import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import com.mapbox.navigation.utils.extensions.combineSpan
-import com.mapbox.navigation.utils.span.SpanItem
-import com.mapbox.navigation.utils.span.TextSpanItem
 import com.mapbox.services.android.navigation.R
 import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType
+import com.mapbox.services.android.navigation.v5.utils.extensions.combineSpan
+import com.mapbox.services.android.navigation.v5.utils.span.SpanItem
+import com.mapbox.services.android.navigation.v5.utils.span.TextSpanItem
 import java.util.ArrayList
 import java.util.Calendar
 import java.util.concurrent.TimeUnit

@@ -5,10 +5,10 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArrayList
 import retrofit2.Call

@@ -48,6 +48,7 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.maneuver.Maneuve
 import com.mapbox.services.android.navigation.ui.v5.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.summary.list.InstructionListAdapter;
+import com.mapbox.services.android.navigation.ui.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -56,7 +57,6 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import timber.log.Timber;
@@ -417,8 +417,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
-    String language = ContextEx.inferDeviceLanguage(getContext());
-    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
+    String language = ContextUtils.inferDeviceLanguage(getContext());
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextUtils.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
     distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
     inflate(getContext(), R.layout.instruction_view_layout, this);

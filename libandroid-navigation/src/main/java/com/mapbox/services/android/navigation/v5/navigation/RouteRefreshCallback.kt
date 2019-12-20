@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directionsrefresh.v1.models.DirectionsRefreshResponse
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

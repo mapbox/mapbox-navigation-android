@@ -1,7 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone
 
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
  * Using a Route Milestone will result in

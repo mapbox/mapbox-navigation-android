@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.v5.routeprogress
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
  * This is a progress object specific to the current leg the user is on. If there is only one leg
