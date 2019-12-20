@@ -29,6 +29,9 @@ dependencies {
     implementation project(':libnavigation-resource')
 
     implementation dependenciesList.supportV4
+
+    implementation dependenciesList.coroutinesAndroid
+
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
 

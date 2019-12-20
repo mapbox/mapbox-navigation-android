@@ -21,13 +21,13 @@ dependencies {
 
     api(project(':libnavigation-base'))
     api project(':libtrip-notification')
-    implementation project(':libnavigator')
-    implementation project(':libnavigation-util')
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+
+    implementation dependenciesList.coroutinesAndroid
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
