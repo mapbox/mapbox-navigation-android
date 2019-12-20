@@ -54,6 +54,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
-        return RouteProgress()
+        return RouteProgress("")
     }
 }
