@@ -74,8 +74,10 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun buildNotification(routeProgress: RouteProgress,
-                                  applicationContext: Context): Notification {
+    private fun buildNotification(
+        routeProgress: RouteProgress,
+        applicationContext: Context
+    ): Notification {
         val channelId =
                 NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
