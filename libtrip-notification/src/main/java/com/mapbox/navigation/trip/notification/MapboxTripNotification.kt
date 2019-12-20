@@ -14,7 +14,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.trip.NAVIGATION_NOTIFICATION_ID
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.utils.END_NAVIGATION_ACTION
@@ -46,7 +45,7 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
-        notification = buildNotification(applicationContext)
+        notification = buildNotification(RouteProgress("Test"), applicationContext)
     }
 
     override fun getNotification() = notification
@@ -54,8 +53,8 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
     override fun getNotificationId() = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
-        notification = buildNotification(applicationContext)
-        notificationManager.notify(NAVIGATION_NOTIFICATION_ID, notification)
+        notification = buildNotification(routeProgress, applicationContext)
+        notificationManager.notify(NOTIFICATION_ID, notification)
         updateNotificationViews(routeProgress)
     }
 
@@ -72,10 +71,11 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
 
     private fun unregisterReceiver() {
         applicationContext.unregisterReceiver(notificationReceiver)
-        notificationManager.cancel(NAVIGATION_NOTIFICATION_ID)
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun buildNotification(applicationContext: Context): Notification {
+    private fun buildNotification(routeProgress: RouteProgress,
+                                  applicationContext: Context): Notification {
         val channelId =
                 NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
@@ -83,6 +83,7 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
                 .setContentTitle("")
+                .setContentText(routeProgress.progress)
                 .setCustomBigContentView(expandedNotificationRemoteViews)
                 .setOngoing(true)
 
