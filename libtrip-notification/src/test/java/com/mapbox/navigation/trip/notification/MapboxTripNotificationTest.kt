@@ -1,7 +1,6 @@
 package com.mapbox.navigation.trip.notification
 
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -9,12 +8,8 @@ import android.content.res.Resources
 import android.text.format.DateFormat
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import org.junit.Assert
 import java.util.Locale
 import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
 
 class MapboxTripNotificationTest {
 
