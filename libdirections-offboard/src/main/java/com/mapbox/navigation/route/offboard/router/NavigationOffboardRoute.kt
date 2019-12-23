@@ -40,11 +40,14 @@ constructor(
         /**
          * Build a new [NavigationOffboardRoute] object with the proper navigation parameters already setup.
          *
+         * `Origin` and `Destination` are filled default Point(lng = 0.0, lat = 0.0) because Direction API doesn't apply nullable ones.
+         * See [MapboxDirections.Builder.build]
+         *
          * @return a [Builder] object for creating this object
          * @since 0.5.0
          */
         @JvmStatic
-        fun builder(context: Context): Builder =
+        fun builder(accessToken: String, context: Context): Builder =
             Builder()
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .language(context)
@@ -57,9 +60,15 @@ constructor(
                     DirectionsCriteria.ANNOTATION_CONGESTION,
                     DirectionsCriteria.ANNOTATION_DISTANCE
                 )
+                .routeOptions(RouteOptionsNavigation.builder()
+                    .origin(Point.fromLngLat(.0, .0))
+                    .destination(Point.fromLngLat(.0, .0))
+                    .accessToken(accessToken)
+                    .build()
+                )
                 .voiceInstructions(true)
                 .bannerInstructions(true)
-                .enableRefresh(true)
+                .enableRefresh(false)
                 .voiceUnits(context)
     }
 
@@ -93,6 +102,8 @@ constructor(
             call.cancel()
         }
     }
+
+    fun toBuilder(): Builder = Builder(mapboxDirections.toBuilder())
 
     /**
      * This builder is used to create a new request to the Mapbox Directions API and removes options

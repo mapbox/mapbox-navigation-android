@@ -130,7 +130,7 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     private fun findRoute() {
         ifNonNull(origin, destination) { originPoint, destinationPoint ->
             if (offboardRouter == null) {
-                offboardRouter = MapboxOffboardRouter(this)
+                offboardRouter = MapboxOffboardRouter(Utils.getMapboxAccessToken(this), this)
             } else {
                 offboardRouter?.cancel()
             }

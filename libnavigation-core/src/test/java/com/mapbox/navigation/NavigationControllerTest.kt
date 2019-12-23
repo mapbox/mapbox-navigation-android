@@ -27,6 +27,7 @@ class NavigationControllerTest {
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
+    private val navigationOffboardRoute: NavigationOffboardRoute = mockk()
     private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
     private val tripServiceLambda: () -> Unit = mockk()
 
@@ -46,9 +47,10 @@ class NavigationControllerTest {
 
         navigationController =
             NavigationController(
-                context,
                 navigator,
                 locationEngine,
+                locationEngineRequest,
+                navigationOffboardRoute
                 locationEngineRequest,
                 tripServiceLambda,
                 navigationNotificationProvider

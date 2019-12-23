@@ -31,6 +31,7 @@ public class Utils {
    * @param context The {@link Context} of the {@link android.app.Activity} or {@link android.app.Fragment}.
    * @return The Mapbox access token or null if not found.
    */
+  @NonNull
   public static String getMapboxAccessToken(@NonNull Context context) {
     try {
       // Read out AndroidManifest

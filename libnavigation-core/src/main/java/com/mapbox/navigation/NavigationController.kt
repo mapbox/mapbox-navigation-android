@@ -1,6 +1,5 @@
 package com.mapbox.navigation
 
-import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -31,10 +30,10 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class NavigationController {
 
-    private val context: Context
     private val navigator: MapboxNativeNavigator
     private val locationEngine: LocationEngine
     private val locationEngineRequest: LocationEngineRequest
+    private val navigationOffboardRoute: NavigationOffboardRoute
     private val navigationNotificationProvider: NavigationNotificationProvider
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
@@ -61,6 +60,7 @@ class NavigationController {
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
         this.navigationNotificationProvider = navigationNotificationProvider
+        this.navigationOffboardRoute = navigationOffboardRoute
 
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
         directionsSession = NavigationComponentProvider.createDirectionsSession(
@@ -113,7 +113,7 @@ class NavigationController {
                 )
             )
             OffboardRouter -> arrayOf(
-                Context::class.java to context
+                NavigationOffboardRoute::class.java to navigationOffboardRoute
             )
             OnboardRouter -> arrayOf(
                 MapboxNativeNavigator::class.java to navigator
