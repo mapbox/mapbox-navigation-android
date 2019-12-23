@@ -10,18 +10,23 @@ import android.text.format.DateFormat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import org.junit.Assert
 import java.util.Locale
 import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
 
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
+    private val context: Context = mockk(relaxed = true)
+    private val navigationNotificationProvider: NavigationNotificationProvider = mockk(relaxed = true)
+
     @Before
     fun setUp() {
-        mockkStatic(DateFormat::class)
-        mockkStatic(PendingIntent::class)
-        val context = createContext()
-        notification = MapboxTripNotification(context)
+        val notificationManager = mockk<NotificationManager>()
+        every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+        notification = MapboxTripNotification(context, navigationNotificationProvider)
     }
 
     private fun createContext(): Context {
