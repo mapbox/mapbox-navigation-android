@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SDK Điều hướng của Mapbox</string>
+    <string name="app_name">SDK 1.0 Điều hướng của Mapbox</string>
 
     <string name="title_mock_navigation">Giả bộ Điều hướng</string>
     <string name="description_mock_navigation">Giả bộ phiên điều hướng dùng máy định vị giả.</string>

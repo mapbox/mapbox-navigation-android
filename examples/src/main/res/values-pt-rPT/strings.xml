@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Navegação Mapbox SDK para Android</string>
+    <string name="app_name">Navegação 1.0 Mapbox SDK para Android</string>
 
     <string name="title_mock_navigation">Navegação Simulada</string>
     <string name="description_mock_navigation">Simule uma sessão de navegação usando um serviço de localizações simuladas.</string>

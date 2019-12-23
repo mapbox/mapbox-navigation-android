@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Навигация Mapbox для Android</string>
+    <string name="app_name">Навигация 1.0 Mapbox для Android</string>
 
     <string name="title_mock_navigation">Моделирование маршрута</string>
     <string name="description_mock_navigation">Начать моделирование маршрута c помощью эмулятора местоположения.</string>

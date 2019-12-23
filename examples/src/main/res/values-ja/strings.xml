@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android向け Mapbox ナビゲーション SDK</string>
+    <string name="app_name">Android向け 1.0 Mapbox ナビゲーション SDK</string>
 
     <string name="title_mock_navigation">モック ナビゲーション</string>
     <string name="description_mock_navigation">モック ロケーション エンジンを使用してナビゲーション セッションをモックします。</string>

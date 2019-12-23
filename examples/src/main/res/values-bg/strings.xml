@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MapBox Пакет за разработка на навигация</string>
+    <string name="app_name">MapBox 1.0 Пакет за разработка на навигация</string>
 
     <string name="title_mock_navigation">Тестова навигация</string>
     <string name="description_mock_navigation">Имитирай навигационна сесия с тестовия локализатор.</string>
