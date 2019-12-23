@@ -69,6 +69,6 @@ internal class MapboxTripService(
 
     companion object {
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)
-        fun getNotificationDataChannel() : ReceiveChannel<MapboxNotificationData> = notificationDataChannel
+        fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> = notificationDataChannel
     }
 }

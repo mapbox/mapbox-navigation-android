@@ -31,7 +31,7 @@ internal class NavigationNotificationService : Service() {
 
     private fun startForegroundNotification() {
         serviceScope.launch {
-            while(!MapboxTripService.getNotificationDataChannel().isClosedForReceive){
+            while (!MapboxTripService.getNotificationDataChannel().isClosedForReceive) {
                 val notificationResponse = MapboxTripService.getNotificationDataChannel().receive()
                 notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
                 startForeground(notificationResponse.notificationId, notificationResponse.notification)
