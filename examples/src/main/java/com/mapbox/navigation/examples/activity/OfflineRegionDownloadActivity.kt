@@ -1,17 +1,14 @@
-package com.mapbox.services.android.navigation.testapp.activity
+package com.mapbox.navigation.examples.activity
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Bundle
 import android.os.Environment
 import android.preference.PreferenceManager
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.AdapterView
-import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,9 +27,9 @@ import com.mapbox.mapboxsdk.offline.OfflineRegionError
 import com.mapbox.mapboxsdk.offline.OfflineRegionStatus
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.style.layers.FillLayer
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
-import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.navigation.examples.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
@@ -77,6 +74,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         get() {
             return MapboxOfflineRouter(obtainOfflineDirectory())
         }
+
     private lateinit var offlineManager: OfflineManager
     private var offlineRegion: OfflineRegion? = null
     private val offlineRegionCallback = object : OfflineManager.CreateOfflineRegionCallback {
@@ -100,10 +98,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
             offlineRegionStatus?.let { status ->
                 Timber.d(
-                        "%s/%s resources; %s bytes downloaded.",
-                        status.completedResourceCount,
-                        status.requiredResourceCount,
-                        status.completedResourceSize
+                    "%s/%s resources; %s bytes downloaded.",
+                    status.completedResourceCount,
+                    status.requiredResourceCount,
+                    status.completedResourceSize
                 )
                 if (status.isComplete && !isDownloadCompleted) {
                     isDownloadCompleted = true
@@ -147,8 +145,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     fun onVersionFetchFailed() {
         showToast("Unable to fetch versions")
         setDownloadButtonEnabled(false)
-        versionSpinnerContainer.visibility = GONE
-        restartVersionFetchButton.visibility = VISIBLE
+        versionSpinnerContainer.visibility = View.GONE
+        restartVersionFetchButton.visibility = View.VISIBLE
         restartVersionFetchButton.setOnClickListener {
             setupSpinner()
             restartVersionFetchButton.setOnClickListener(null)
@@ -156,8 +154,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     fun setupSpinner(versions: List<String>) {
-        restartVersionFetchButton.visibility = GONE
-        versionSpinnerContainer.visibility = VISIBLE
+        restartVersionFetchButton.visibility = View.GONE
+        versionSpinnerContainer.visibility = View.VISIBLE
 
         ArrayAdapter(this, android.R.layout.simple_spinner_item, versions)
             .also { arrayAdapter ->
@@ -165,7 +163,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 versionSpinner.adapter = arrayAdapter
             }
 
-        versionSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+        versionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 setDownloadButtonEnabled(false)
             }
@@ -192,7 +190,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
                 it.addSource(GeoJsonSource("bounding-box-source"))
                 it.addLayer(
                     FillLayer("bounding-box-layer", "bounding-box-source")
-                        .withProperties(fillColor(Color.parseColor("#50667F")))
+                        .withProperties(PropertyFactory.fillColor(Color.parseColor("#50667F")))
                 )
                 offlineManager = OfflineManager.getInstance(this)
             }
@@ -208,17 +206,20 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
 
         if (ContextCompat.checkSelfPermission(
-                this, WRITE_EXTERNAL_STORAGE
-            ) != PERMISSION_GRANTED
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(this, arrayOf(WRITE_EXTERNAL_STORAGE), 1)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
         } else {
             downloadMapsRegion()
         }
     }
 
     private fun onRemoveClick() {
-        if (ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             showToast("Storage permissions should be granted. Please try again.")
         } else {
             removeSelectedRegion()
@@ -232,7 +233,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     ) {
         when (requestCode) {
             EXTERNAL_STORAGE_PERMISSION -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PERMISSION_GRANTED)) {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     downloadMapsRegion()
                 } else {
                     setDownloadButtonEnabled(false)
@@ -317,13 +318,13 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun showDownloading(downloading: Boolean, message: String) {
         versionSpinner.isEnabled = !downloading
-        loading.visibility = if (downloading) VISIBLE else GONE
+        loading.visibility = if (downloading) View.VISIBLE else View.GONE
         setDownloadButtonEnabled(!downloading, message)
     }
 
     private fun showRemoving(removing: Boolean, message: String) {
         versionSpinner.isEnabled = !removing
-        loading.visibility = if (removing) VISIBLE else GONE
+        loading.visibility = if (removing) View.VISIBLE else View.GONE
         updateRemoveButton(!removing, message)
     }
 

@@ -5,15 +5,6 @@
     android:layout_height="match_parent">
 
     <Preference
-        android:key="@string/view_examples_key"
-        android:title="View List of Navigation Examples">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetClass="com.mapbox.services.android.navigation.testapp.MainActivity"
-            android:targetPackage="com.mapbox.services.android.navigation.app"/>
-    </Preference>
-
-    <Preference
         android:key="@string/git_hash_key"
         android:title="Latest git Hash"/>
 
@@ -61,8 +52,8 @@
             android:title="@string/offline_region_download_title">
             <intent
                 android:action="android.intent.action.VIEW"
-                android:targetClass="com.mapbox.services.android.navigation.testapp.activity.OfflineRegionDownloadActivity"
-                android:targetPackage="com.mapbox.services.android.navigation.app"/>
+                android:targetClass="com.mapbox.navigation.examples.activity.OfflineRegionDownloadActivity"
+                android:targetPackage="com.mapbox.navigation.examples"/>
         </Preference>
 
         <ListPreference

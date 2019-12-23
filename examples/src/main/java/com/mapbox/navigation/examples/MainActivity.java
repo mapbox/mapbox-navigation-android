@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.navigation.examples.activity.MockNavigationActivity;
@@ -26,9 +27,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
+
+  @BindView(R.id.settingsFab)
+  FloatingActionButton settingsFab;
+
+  private static final int CHANGE_SETTING_REQUEST_CODE = 1;
   private RecyclerView recyclerView;
   private PermissionsManager permissionsManager;
 
@@ -36,6 +45,12 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    ButterKnife.bind(this);
+
+    settingsFab.setOnClickListener(v -> startActivityForResult(
+            new Intent(MainActivity.this, NavigationSettingsActivity.class),
+            CHANGE_SETTING_REQUEST_CODE
+    ));
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
       new SampleItem(
