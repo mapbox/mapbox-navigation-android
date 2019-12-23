@@ -83,10 +83,10 @@ android {
 }
 
 dependencies {
-  implementation project(':libdirections-session')
-  implementation project(':libdirections-offboard')
-  implementation project(':libnavigation-util')
-  implementation project(':liblogger')
+    implementation project(':libdirections-session')
+    implementation project(':libdirections-offboard')
+    implementation project(':libnavigation-util')
+    implementation project(':liblogger')
 
     //ktlint
     ktlint dependenciesList.ktlint

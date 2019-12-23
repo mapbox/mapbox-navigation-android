@@ -29,7 +29,9 @@ import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
 import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
@@ -38,7 +40,6 @@ import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundC
 import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import org.json.JSONObject
-import timber.log.Timber
 
 class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener,
     OnOfflineTilesRemovedCallback {
@@ -79,30 +80,26 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     private var offlineRegion: OfflineRegion? = null
     private val offlineRegionCallback = object : OfflineManager.CreateOfflineRegionCallback {
         override fun onCreate(offlineRegion: OfflineRegion?) {
-            Timber.d("Offline region created: NavigationOfflineMapsRegion")
+            MapboxLogger.d(Message("Offline region created: NavigationOfflineMapsRegion"))
             this@OfflineRegionDownloadActivity.offlineRegion = offlineRegion
             launchMapsDownload()
         }
 
         override fun onError(error: String?) {
-            Timber.e("Error: $error")
+            MapboxLogger.e(Message("Error: $error"))
         }
     }
 
     private var isDownloadCompleted: Boolean = false
     private val offlineRegionObserver = object : OfflineRegion.OfflineRegionObserver {
         override fun mapboxTileCountLimitExceeded(limit: Long) {
-            Timber.e("Mapbox tile count limit exceeded: $limit")
+            MapboxLogger.e(Message("Mapbox tile count limit exceeded: $limit"))
         }
 
         override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
             offlineRegionStatus?.let { status ->
-                Timber.d(
-                    "%s/%s resources; %s bytes downloaded.",
-                    status.completedResourceCount,
-                    status.requiredResourceCount,
-                    status.completedResourceSize
-                )
+                MapboxLogger.d(Message("${status.completedResourceCount}/${status.requiredResourceCount} resources; " +
+                    "${status.completedResourceSize} bytes downloaded."))
                 if (status.isComplete && !isDownloadCompleted) {
                     isDownloadCompleted = true
                     downloadSelectedRegion()
@@ -111,8 +108,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
 
         override fun onError(error: OfflineRegionError?) {
-            Timber.e("onError reason: ${error?.reason}")
-            Timber.e("onError message: ${error?.message}")
+            MapboxLogger.e(Message("onError reason: ${error?.reason}"))
+            MapboxLogger.e(Message("onError reason: ${error?.message}"))
         }
     }
 
@@ -310,7 +307,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     private fun obtainOfflineDirectory(): String {
         val offline = Environment.getExternalStoragePublicDirectory("Offline")
         if (!offline.exists()) {
-            Timber.d("Offline directory does not exist")
+            MapboxLogger.d(Message("Offline directory does not exist"))
             offline.mkdirs()
         }
         return offline.absolutePath

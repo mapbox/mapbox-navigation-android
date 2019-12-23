@@ -13,6 +13,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.navigation.base.logger.model.Message;
+import com.mapbox.navigation.logger.MapboxLogger;
 
 import java.util.Random;
 
@@ -67,7 +69,7 @@ public class Utils {
     double randomLon = bbox[0] + (bbox[2] - bbox[0]) * random.nextDouble();
 
     LatLng latLng = new LatLng(randomLat, randomLon);
-    Timber.d("getRandomLatLng: %s", latLng.toString());
+    MapboxLogger.INSTANCE.d(new Message("getRandomLatLng: " + latLng.toString()));
     return latLng;
   }
 }
