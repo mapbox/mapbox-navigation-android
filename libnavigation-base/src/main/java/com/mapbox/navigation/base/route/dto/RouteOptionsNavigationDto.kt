@@ -9,27 +9,37 @@ data class RouteOptionsNavigationDto(
     val baseUrl: String?,
     val user: String?,
     val profile: String?,
-    val coordinates: List<DoubleArray>, // List<RoutePointNavigationDto>,
+    val coordinates: List<DoubleArray>,
     val alternatives: Boolean?,
     val language: String?,
     val radiuses: String?,
     val bearings: String?,
-    @SerializedName("continue_straight") val continueStraight: Boolean?,
-    @SerializedName("roundabout_exits") val roundaboutExits: Boolean?,
+    @SerializedName("continue_straight")
+    val continueStraight: Boolean?,
+    @SerializedName("roundabout_exits")
+    val roundaboutExits: Boolean?,
     val geometries: String?,
     val overview: String?,
     val steps: Boolean?,
     val annotations: String?,
-    @SerializedName("voice_instructions") val voiceInstructions: Boolean?,
-    @SerializedName("banner_instructions") val bannerInstructions: Boolean?,
-    @SerializedName("voice_units") val voiceUnits: String?,
-    @SerializedName("access_token") val accessToken: String?,
-    @SerializedName("uuid") val requestUuid: String?,
+    @SerializedName("voice_instructions")
+    val voiceInstructions: Boolean?,
+    @SerializedName("banner_instructions")
+    val bannerInstructions: Boolean?,
+    @SerializedName("voice_units")
+    val voiceUnits: String?,
+    @SerializedName("access_token")
+    val accessToken: String?,
+    @SerializedName("uuid")
+    val requestUuid: String?,
     val exclude: String?,
     val approaches: String?,
-    @SerializedName("waypoints") val waypointIndices: String?,
-    @SerializedName("waypoint_names") val waypointNames: String?,
-    @SerializedName("waypoint_targets") val waypointTargets: String?,
+    @SerializedName("waypoints")
+    val waypointIndices: String?,
+    @SerializedName("waypoint_names")
+    val waypointNames: String?,
+    @SerializedName("waypoint_targets")
+    val waypointTargets: String?,
     val walkingOptions: WalkingOptionsNavigationDto?
 )
 

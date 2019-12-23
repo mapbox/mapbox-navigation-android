@@ -28,7 +28,6 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.mapToDirection
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.io.File
-import java.util.ArrayList
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
 
@@ -37,7 +36,7 @@ class OnboardRouterActivityKt : AppCompatActivity(),
     MapboxMap.OnMapClickListener,
     DirectionsSession.RouteObserver {
 
-    private lateinit var offboardRouter: Router
+    private lateinit var onboardRouter: Router
     private lateinit var mapboxMap: MapboxMap
 
     private var route: DirectionsRoute? = null
@@ -62,22 +61,20 @@ class OnboardRouterActivityKt : AppCompatActivity(),
             "2019_04_13-00_00_11"
         )
         val fileTiles = File(file, "tiles")
-        val config =
-            Config(
+        val config = Config(
                 fileTiles.absolutePath,
                 null,
                 null,
                 null,
                 null // working with pre-fetched tiles only
             )
-        offboardRouter = MapboxOnboardRouter(config)
+        onboardRouter = MapboxOnboardRouter(config)
     }
 
     private fun newOrigin() {
         clearMap()
         val latLng = LatLng(47.05991, 9.49183)
-        origin =
-            Point.fromLngLat(latLng.longitude, latLng.latitude)
+        origin = Point.fromLngLat(latLng.longitude, latLng.latitude)
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
     }
 
@@ -86,7 +83,7 @@ class OnboardRouterActivityKt : AppCompatActivity(),
         this.mapboxMap.addOnMapClickListener(this)
         mapboxMap.setStyle(
             Style.MAPBOX_STREETS
-        ) { style: Style? ->
+        ) {
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             Snackbar.make(
                 findViewById(R.id.container),
@@ -108,23 +105,19 @@ class OnboardRouterActivityKt : AppCompatActivity(),
 
     private fun findRoute() {
         directionsSession = MapboxDirectionsSession(
-            offboardRouter,
+            onboardRouter,
             this
         )
         ifNonNull(origin, destination) { origin, destination ->
             if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
-                val waypoints = ArrayList<Point>()
-
-                waypoint?.let { waypoints.add(it) }
 
                 val optionsBuilder =
                     RouteOptionsNavigation.Builder()
                         .accessToken(Utils.getMapboxAccessToken(this))
                         .origin(origin)
                         .destination(destination)
-                for (waypointPoint in waypoints) {
-                    optionsBuilder.addWaypoint(waypointPoint)
-                }
+                waypoint?.let { optionsBuilder.addWaypoint(it) }
+
                 directionsSession.requestRoutes(optionsBuilder.build())
             }
         }
@@ -138,8 +131,7 @@ class OnboardRouterActivityKt : AppCompatActivity(),
                 findRoute()
             }
             waypoint == null -> {
-                waypoint =
-                    Point.fromLngLat(point.longitude, point.latitude)
+                waypoint = Point.fromLngLat(point.longitude, point.latitude)
                 mapboxMap.addMarker(MarkerOptions().position(point))
                 findRoute()
             }
@@ -158,7 +150,7 @@ class OnboardRouterActivityKt : AppCompatActivity(),
     override fun onRoutesChanged(routes: List<Route>) {
         if (routes.isNotEmpty()) {
             route = routes[0].mapToDirectionsRoute()
-            navigationMapRoute?.addRoute(route)
+            navigationMapRoute.addRoute(route)
         }
     }
 

@@ -35,7 +35,6 @@ import com.mapbox.turf.TurfMeasurement;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -49,7 +48,7 @@ public class OnboardRouterActivityJava
         MapboxMap.OnMapClickListener,
         DirectionsSession.RouteObserver {
 
-  private Router offboardRouter;
+  private Router onboardRouter;
   private MapboxMap mapboxMap;
 
   private DirectionsRoute route;
@@ -87,7 +86,7 @@ public class OnboardRouterActivityJava
             null // working with pre-fetched tiles only
     );
 
-    offboardRouter = new MapboxOnboardRouter(config);
+    onboardRouter = new MapboxOnboardRouter(config);
   }
 
 
@@ -129,22 +128,17 @@ public class OnboardRouterActivityJava
 
   private void findRoute() {
     directionsSession = new MapboxDirectionsSession(
-            offboardRouter,
+            onboardRouter,
             this
     );
     if (origin != null && destination != null) {
       if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
-        List<Point> waypoints = new ArrayList<>();
-        if (waypoint != null) {
-          waypoints.add(waypoint);
-        }
         RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
                 .accessToken(Utils.getMapboxAccessToken(this))
                 .origin(origin)
                 .destination(destination);
-
-        for (Point waypointPoint : waypoints) {
-          optionsBuilder.addWaypoint(waypointPoint);
+        if (waypoint != null) {
+          optionsBuilder.addWaypoint(waypoint);
         }
         directionsSession.requestRoutes(optionsBuilder.build());
       }

@@ -64,7 +64,7 @@ class OfflineRouteRetrievalTaskTest {
             mockedNavigator,
             mockedCallback
         )
-        val routes = mockk<List<Route>>()
+        val routes = listOf<Route>(mockk())
 
         theOfflineRouteRetrievalTask.onPostExecute(routes)
 

@@ -63,7 +63,6 @@ fun RouteOptionsNavigation.mapToRouteOptions(): RouteOptions =
         .profile(profile)
         .user(user)
         .baseUrl(baseUrl)
-        .alternatives(alternatives)
         .annotations(annotations)
         .approaches(approaches)!!
         .bannerInstructions(bannerInstructions)
@@ -71,7 +70,6 @@ fun RouteOptionsNavigation.mapToRouteOptions(): RouteOptions =
         .continueStraight(continueStraight)
         .coordinates(coordinates)
         .geometries(geometries)
-        .approaches(approaches)!!
         .language(language)
         .overview(overview)
         .radiuses(radiuses)

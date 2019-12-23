@@ -74,38 +74,24 @@ private constructor(
 
     private fun buildOfflineUrl(url: Uri): String {
         val offlineUrlBuilder = url.buildUpon()
-        ifNonNull(bicycleType) {
-            offlineUrlBuilder.appendQueryParameter(BICYCLE_TYPE_QUERY_PARAMETER, it)
-        }
 
-        ifNonNull(cyclingSpeed) {
-            offlineUrlBuilder.appendQueryParameter(CYCLING_SPEED_QUERY_PARAMETER, it.toString())
-        }
+        offlineUrlBuilder.appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType)
+        offlineUrlBuilder.appendQueryParamIfNonNull(CYCLING_SPEED_QUERY_PARAMETER, cyclingSpeed)
+        offlineUrlBuilder.appendQueryParamIfNonNull(CYCLEWAY_BIAS_QUERY_PARAMETER, cyclewayBias)
+        offlineUrlBuilder.appendQueryParamIfNonNull(HILL_BIAS_QUERY_PARAMETER, hillBias)
+        offlineUrlBuilder.appendQueryParamIfNonNull(FERRY_BIAS_QUERY_PARAMETER, ferryBias)
+        offlineUrlBuilder.appendQueryParamIfNonNull(ROUGH_SURFACE_BIAS_QUERY_PARAMETER, roughSurfaceBias)
+        offlineUrlBuilder.appendQueryParamIfNonNull(WAYPOINT_TYPES_QUERY_PARAMETER, waypointTypes)
 
-        ifNonNull(cyclewayBias) {
-            offlineUrlBuilder.appendQueryParameter(CYCLEWAY_BIAS_QUERY_PARAMETER, it.toString())
-        }
-
-        ifNonNull(hillBias) {
-            offlineUrlBuilder.appendQueryParameter(HILL_BIAS_QUERY_PARAMETER, it.toString())
-        }
-
-        ifNonNull(ferryBias) {
-            offlineUrlBuilder.appendQueryParameter(FERRY_BIAS_QUERY_PARAMETER, it.toString())
-        }
-
-        ifNonNull(roughSurfaceBias) {
-            offlineUrlBuilder.appendQueryParameter(
-                ROUGH_SURFACE_BIAS_QUERY_PARAMETER,
-                it.toString()
-            )
-        }
-
-        ifNonNull(waypointTypes) {
-            offlineUrlBuilder.appendQueryParameter(WAYPOINT_TYPES_QUERY_PARAMETER, it)
-        }
         return offlineUrlBuilder.build().toString()
     }
+
+    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: Float?): Uri.Builder = appendQueryParamIfNonNull(key, value?.toString())
+
+    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: String?): Uri.Builder =
+        ifNonNull(value) {
+            appendQueryParameter(key, it)
+        } ?: this
 
     class Builder internal constructor(private val routeUrl: RouteUrl) {
         private var bicycleType: OfflineCriteria.BicycleType? = null

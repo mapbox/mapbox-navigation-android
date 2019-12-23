@@ -19,9 +19,12 @@ import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
  * alleys, 1 indicates preference to favor alleys, and 0 indicates no preference (the default).
  */
 class WalkingOptionsNavigationDto(
-    @SerializedName("walking_speed") val walkingSpeed: Double?,
-    @SerializedName("walkway_bias") val walkwayBias: Double?,
-    @SerializedName("alley_bias") val alleyBias: Double?
+    @SerializedName("walking_speed")
+    val walkingSpeed: Double?,
+    @SerializedName("walkway_bias")
+    val walkwayBias: Double?,
+    @SerializedName("alley_bias")
+    val alleyBias: Double?
 )
 
 fun WalkingOptionsNavigationDto.mapToModel() = WalkingOptionsNavigation(
