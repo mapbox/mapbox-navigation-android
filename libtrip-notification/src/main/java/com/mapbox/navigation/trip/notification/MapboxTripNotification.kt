@@ -24,13 +24,13 @@ import com.mapbox.navigation.utils.SET_BACKGROUND_COLOR
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
 class MapboxTripNotification(
-    private val applicationContext: Context,
-    private val navigationNotificationProvider: NavigationNotificationProvider
+    private val applicationContext: Context
 ) : TripNotification {
     private var collapsedNotificationRemoteViews: RemoteViews? = null
     private var expandedNotificationRemoteViews: RemoteViews? = null
     private var pendingOpenIntent: PendingIntent? = null
-    private var notification: Notification
+    private lateinit var navigationNotificationProvider: NavigationNotificationProvider
+    private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
     private val notificationReceiver = object : BroadcastReceiver() {
@@ -41,14 +41,22 @@ class MapboxTripNotification(
 
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
-                ?.let { notificationService ->
-                    notificationManager = notificationService as NotificationManager
-                } ?: throw (IllegalStateException("unable to create a NotificationManager"))
+            ?.let { notificationService ->
+                notificationManager = notificationService as NotificationManager
+            } ?: throw (IllegalStateException("unable to create a NotificationManager"))
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
-        notification = navigationNotificationProvider.buildNotification(getNotificationBuilder())
+    }
+
+    constructor(
+        context: Context,
+        navigationNotificationProvider: NavigationNotificationProvider
+    ) : this(context) {
+        this.navigationNotificationProvider = navigationNotificationProvider
+        this.notification =
+            navigationNotificationProvider.buildNotification(getNotificationBuilder())
     }
 
     override fun getNotification() = notification
@@ -67,8 +75,8 @@ class MapboxTripNotification(
 
     private fun registerReceiver() {
         applicationContext.registerReceiver(
-                notificationReceiver,
-                IntentFilter(END_NAVIGATION_ACTION)
+            notificationReceiver,
+            IntentFilter(END_NAVIGATION_ACTION)
         )
     }
 
@@ -78,7 +86,8 @@ class MapboxTripNotification(
     }
 
     private fun getNotificationBuilder(): NotificationCompat.Builder {
-        val builder = NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
+        val builder =
+            NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
@@ -93,7 +102,8 @@ class MapboxTripNotification(
     }
 
     private fun buildRemoteViews() {
-        val backgroundColor = ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
+        val backgroundColor =
+            ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
 
         val collapsedLayout = R.layout.collapsed_navigation_notification_layout
         val collapsedLayoutId = R.id.navigationCollapsedNotificationLayout
@@ -120,9 +130,9 @@ class MapboxTripNotification(
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                    NAVIGATION_NOTIFICATION_CHANNEL,
-                    NOTIFICATION_CHANNEL,
-                    NotificationManager.IMPORTANCE_LOW
+                NAVIGATION_NOTIFICATION_CHANNEL,
+                NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -147,12 +157,12 @@ class MapboxTripNotification(
 
     private fun updateData(routeProgress: RouteProgress) {
         collapsedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                routeProgress.progress
+            R.id.notificationDistanceText,
+            routeProgress.progress
         )
         expandedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                routeProgress.progress
+            R.id.notificationDistanceText,
+            routeProgress.progress
         )
     }
 }

@@ -18,7 +18,7 @@ import timber.log.Timber
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
 class MapboxTripService(
     private val tripNotification: TripNotification,
-    private val callback: () -> Unit
+    private val initializeLambda: () -> Unit
 ) : TripService {
 
     private val serviceStarted = AtomicBoolean(false)
@@ -31,10 +31,12 @@ class MapboxTripService(
         }
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
-                callback()
+                initializeLambda()
                 notificationDataChannel.offer(
-                        MapboxNotificationData(tripNotification.getNotificationId(),
-                                tripNotification.getNotification())
+                    MapboxNotificationData(
+                        tripNotification.getNotificationId(),
+                        tripNotification.getNotification()
+                    )
                 )
             }
             false -> {
@@ -53,6 +55,7 @@ class MapboxTripService(
 
     companion object {
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)
-        fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> = notificationDataChannel
+        fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
+            notificationDataChannel
     }
 }

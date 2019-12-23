@@ -34,7 +34,10 @@ class NavigationNotificationService : Service() {
             while (!MapboxTripService.getNotificationDataChannel().isClosedForReceive) {
                 val notificationResponse = MapboxTripService.getNotificationDataChannel().receive()
                 notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                startForeground(notificationResponse.notificationId, notificationResponse.notification)
+                startForeground(
+                    notificationResponse.notificationId,
+                    notificationResponse.notification
+                )
             }
         }
     }

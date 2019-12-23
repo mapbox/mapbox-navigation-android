@@ -63,7 +63,8 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        mapboxTripNotification = MapboxTripNotification(applicationContext, NavigationNotificationProvider())
+        mapboxTripNotification =
+            MapboxTripNotification(applicationContext, NavigationNotificationProvider())
         mapboxTripService = MapboxTripService(mapboxTripNotification) {
             val intent = Intent(applicationContext, NavigationNotificationService::class.java)
             try {

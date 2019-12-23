@@ -43,20 +43,28 @@ class NavigationController {
     private val logger: Logger
     private val directionsSession: DirectionsSession
     private val tripSession: TripSession
-    private val callback: () -> Unit
+    private val tripServiceLambda: () -> Unit
 
-    constructor(context: Context, navigator: MapboxNativeNavigator, locationEngine: LocationEngine, locationEngineRequest: LocationEngineRequest, callback: () -> Unit, navigationNotificationProvider: NavigationNotificationProvider) {
+    constructor(
+        context: Context,
+        navigator: MapboxNativeNavigator,
+        locationEngine: LocationEngine,
+        locationEngineRequest: LocationEngineRequest,
+        tripServiceLambda: () -> Unit,
+        navigationNotificationProvider: NavigationNotificationProvider
+    ) {
         this.context = context
         this.navigator = navigator
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
-        this.callback = callback
+        this.tripServiceLambda = tripServiceLambda
         this.navigationNotificationProvider = navigationNotificationProvider
 
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             NavigationModuleProvider.createModule(HybridRouter, ::paramsProvider),
-            routeObserver)
+            routeObserver
+        )
         tripSession = NavigationModuleProvider.createModule(TripSessionModule, ::paramsProvider)
     }
 
@@ -105,7 +113,7 @@ class NavigationController {
                     TripNotificationModule,
                     ::paramsProvider
                 ),
-                Function0::class.java to callback
+                Function0::class.java to tripServiceLambda
             )
             TripSessionModule -> arrayOf(
                 TripService::class.java to NavigationModuleProvider.createModule(

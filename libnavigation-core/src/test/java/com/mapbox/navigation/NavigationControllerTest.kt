@@ -23,8 +23,9 @@ class NavigationControllerTest {
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
-    private val navigationNotificationProvider: NavigationNotificationProvider = mockk(relaxed = true)
-    private val callback: () -> Unit = { println("TEST") }
+    private val navigationNotificationProvider: NavigationNotificationProvider =
+        mockk(relaxed = true)
+    private val tripServiceLambda: () -> Unit = mockk()
 
     companion object {
         @BeforeClass
@@ -46,7 +47,7 @@ class NavigationControllerTest {
                 navigator,
                 locationEngine,
                 locationEngineRequest,
-                callback,
+                tripServiceLambda,
                 navigationNotificationProvider
             )
     }

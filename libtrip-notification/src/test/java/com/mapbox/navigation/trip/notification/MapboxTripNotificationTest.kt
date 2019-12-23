@@ -15,7 +15,8 @@ class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
     private val context: Context = mockk(relaxed = true)
-    private val navigationNotificationProvider: NavigationNotificationProvider = mockk(relaxed = true)
+    private val navigationNotificationProvider: NavigationNotificationProvider =
+        mockk(relaxed = true)
 
     @Before
     fun setUp() {
