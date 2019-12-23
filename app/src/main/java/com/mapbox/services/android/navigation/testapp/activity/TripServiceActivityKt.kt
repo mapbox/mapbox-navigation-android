@@ -1,6 +1,8 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +14,7 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.trip.service.MapboxTripService
+import com.mapbox.navigation.trip.service.NavigationNotificationService
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import kotlinx.android.synthetic.main.activity_trip_service.*
@@ -60,7 +63,18 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
 
         mapboxTripNotification = MapboxTripNotification(applicationContext)
-        mapboxTripService = MapboxTripService(mapboxTripNotification, applicationContext)
+        mapboxTripService = MapboxTripService(mapboxTripNotification) {
+            val intent = Intent(applicationContext, NavigationNotificationService::class.java)
+            try {
+                applicationContext.startService(intent)
+            } catch (e: IllegalStateException) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    applicationContext.startForegroundService(intent)
+                } else {
+                    throw e
+                }
+            }
+        }
 
         mapboxTripService.startService()
     }

@@ -1,8 +1,5 @@
 package com.mapbox.navigation.trip.service
 
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.trip.MapboxNotificationData
@@ -21,7 +18,7 @@ import timber.log.Timber
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
 class MapboxTripService(
     private val tripNotification: TripNotification,
-    private val applicationContext: Context
+    private val callback: () -> Unit
 ) : TripService {
 
     private val serviceStarted = AtomicBoolean(false)
@@ -34,7 +31,7 @@ class MapboxTripService(
         }
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
-                createService()
+                callback()
                 notificationDataChannel.offer(
                         MapboxNotificationData(tripNotification.getNotificationId(),
                                 tripNotification.getNotification())
@@ -52,19 +49,6 @@ class MapboxTripService(
 
     override fun stopService() {
         notificationDataChannel.close()
-    }
-
-    private fun createService() {
-        val intent = Intent(applicationContext, NavigationNotificationService::class.java)
-        try {
-            applicationContext.startService(intent)
-        } catch (e: IllegalStateException) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(intent)
-            } else {
-                throw e
-            }
-        }
     }
 
     companion object {
