@@ -8,6 +8,7 @@ import com.mapbox.navigation.navigator.model.RouterConfig
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.util.Date
@@ -22,18 +23,21 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun configureRouter(routerConfig: RouterConfig) {
         navigator.configureRouter(
-            routerConfig.tilePath,
-            routerConfig.inMemoryTileCache,
-            routerConfig.mapMatchingSpatialCache,
-            routerConfig.threadsCount,
-            routerConfig.endpointConfig?.let {
-                TileEndpointConfiguration(
-                    it.host,
-                    it.version,
-                    it.token,
-                    it.userAgent
-                )
-            }
+            RouterParams(
+                routerConfig.tilePath,
+                routerConfig.inMemoryTileCache,
+                routerConfig.mapMatchingSpatialCache,
+                routerConfig.threadsCount,
+                routerConfig.endpointConfig?.let {
+                    TileEndpointConfiguration(
+                        it.host,
+                        it.version,
+                        it.token,
+                        it.userAgent
+                    )
+                }),
+
+            )
         )
     }
 
