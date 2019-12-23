@@ -18,8 +18,6 @@ import com.mapbox.navigation.logger.MapboxLogger;
 
 import java.util.Random;
 
-import timber.log.Timber;
-
 public class Utils {
 
   /**
