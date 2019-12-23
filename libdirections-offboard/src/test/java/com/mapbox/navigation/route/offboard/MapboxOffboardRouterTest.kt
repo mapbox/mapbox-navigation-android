@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
-import com.mapbox.navigation.route.offboard.router.NavigationRoute
+import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -19,8 +19,8 @@ import retrofit2.Response
 
 class MapboxOffboardRouterTest : BaseTest() {
 
-    private val navigationRoute = mockk<NavigationRoute>(relaxed = true)
-    private val navigationRouteBuilder = mockk<NavigationRoute.Builder>(relaxed = true)
+    private val navigationRoute = mockk<NavigationOffboardRoute>(relaxed = true)
+    private val navigationRouteBuilder = mockk<NavigationOffboardRoute.Builder>(relaxed = true)
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptionsNavigation = mockk(relaxed = true)

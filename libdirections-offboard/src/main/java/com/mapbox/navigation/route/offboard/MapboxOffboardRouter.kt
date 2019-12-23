@@ -7,22 +7,22 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
-import com.mapbox.navigation.route.offboard.router.NavigationRoute
+import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter(private val routeBuilder: NavigationRoute.Builder) : Router {
+class MapboxOffboardRouter(private val routeBuilder: NavigationOffboardRoute.Builder) : Router {
 
-    constructor(context: Context) : this(NavigationRoute.builder(context))
+    constructor(context: Context) : this(NavigationOffboardRoute.builder(context))
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"
     }
 
-    private var navigationRoute: NavigationRoute? = null
+    private var navigationRoute: NavigationOffboardRoute? = null
 
     override fun getRoute(
         routeOptions: RouteOptionsNavigation,

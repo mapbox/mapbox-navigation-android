@@ -29,7 +29,7 @@ import retrofit2.Callback
  * 1.0
  */
 
-class NavigationRoute
+class NavigationOffboardRoute
 constructor(
     private val mapboxDirections: MapboxDirections
 ) {
@@ -38,7 +38,7 @@ constructor(
         private val EVENT_LISTENER = NavigationRouteEventListener()
 
         /**
-         * Build a new [NavigationRoute] object with the proper navigation parameters already setup.
+         * Build a new [NavigationOffboardRoute] object with the proper navigation parameters already setup.
          *
          * @return a [Builder] object for creating this object
          * @since 0.5.0
@@ -65,7 +65,7 @@ constructor(
 
     /**
      * Wrapper method for Retrofit's [Call.clone] call, useful for getting call information
-     * and allowing you to perform additional functions on this [NavigationRoute] class.
+     * and allowing you to perform additional functions on this [NavigationOffboardRoute] class.
      *
      * @return cloned call
      * @since 1.0.0
@@ -271,10 +271,8 @@ constructor(
 
             origin = options.coordinates.first()
 
-            waypoints.addAll(options.coordinates.toMutableList().also {
-                it.remove(options.coordinates.first())
-                it.remove(options.coordinates.last())
-            })
+            waypoints.clear()
+            waypoints.addAll(options.coordinates.drop(1).dropLast(1))
 
             destination = options.coordinates.last()
 
@@ -397,12 +395,12 @@ constructor(
          * @return a new instance of Navigation Route
          * @since 0.5.0
          */
-        fun build(): NavigationRoute {
+        fun build(): NavigationOffboardRoute {
             // Set the default values which the user cannot alter.
             assembleWaypoints()
             directionsBuilder
                 .eventListener(eventListener)
-            return NavigationRoute(directionsBuilder.build())
+            return NavigationOffboardRoute(directionsBuilder.build())
         }
 
         private fun parseWaypointIndices(waypointIndices: String): Array<Int> {
