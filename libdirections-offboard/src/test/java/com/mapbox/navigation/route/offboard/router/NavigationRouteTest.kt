@@ -52,7 +52,7 @@ class NavigationRouteTest {
     @Test
     @Throws(Exception::class)
     fun sanityTest() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -65,7 +65,7 @@ class NavigationRouteTest {
     @Test
     @Throws(Exception::class)
     fun changingDefaultValueToCustomWorksProperly() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -83,7 +83,7 @@ class NavigationRouteTest {
 
     @Test
     fun addApproachesIncludedInRequest() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .accessToken(ACESS_TOKEN)
@@ -106,7 +106,7 @@ class NavigationRouteTest {
 
     @Test
     fun checksWaypointIndicesIncludedInRequest() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .origin(origin)
@@ -127,7 +127,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointNamesIncludedInRequest() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -144,7 +144,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointTargetsIncludedInRequest() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -166,7 +166,7 @@ class NavigationRouteTest {
 
     @Test
     fun reverseOriginDestination_bearingsAreFormattedCorrectly() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .destination(Point.fromLngLat(1.0, 5.0), 1.0, 5.0)
@@ -182,7 +182,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointsThenOriginDestination_bearingsAreFormattedCorrectly() {
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .accessToken(ACESS_TOKEN)
@@ -225,7 +225,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val navigationRoute = NavigationRoute.builder(context)
+        val navigationRoute = NavigationOffboardRoute.builder(context)
             .routeOptions(routeOptions)
             .build()
 
@@ -251,7 +251,7 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>(relaxed = true)
         every { routeCall.isExecuted } returns false
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute = NavigationOffboardRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 
@@ -264,7 +264,7 @@ class NavigationRouteTest {
         val routeCall = mockk<Call<DirectionsResponse>>()
         every { routeCall.isExecuted } returns true
         every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationRoute(mapboxDirections)
+        val navigationRoute = NavigationOffboardRoute(mapboxDirections)
 
         navigationRoute.cancelCall()
 
@@ -274,7 +274,7 @@ class NavigationRouteTest {
     @Test
     fun builderInterceptor_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = NavigationOffboardRoute.Builder(mapboxDirectionsBuilder)
         val eventListener = mockk<EventListener>(relaxed = true)
 
         builder.eventListener(eventListener)
@@ -285,7 +285,7 @@ class NavigationRouteTest {
     @Test
     fun builderEventListener_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = NavigationOffboardRoute.Builder(mapboxDirectionsBuilder)
         val interceptor = mockk<Interceptor>(relaxed = true)
 
         builder.interceptor(interceptor)
@@ -296,7 +296,7 @@ class NavigationRouteTest {
     @Test
     fun builderContinueStraight_setsMapboxDirections() {
         val mapboxDirectionsBuilder = mockk<MapboxDirections.Builder>(relaxed = true)
-        val builder = NavigationRoute.Builder(mapboxDirectionsBuilder)
+        val builder = NavigationOffboardRoute.Builder(mapboxDirectionsBuilder)
         val continueStraight = false
         val routeOptions =
             RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
