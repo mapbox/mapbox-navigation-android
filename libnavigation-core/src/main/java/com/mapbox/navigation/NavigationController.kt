@@ -91,12 +91,15 @@ class NavigationController {
                 MapboxNativeNavigator::class.java to navigator
             )
             DirectionsSessionModule -> throw NotImplementedError() // going to be removed when next base version
-            TripNotificationModule -> arrayOf()
+            TripNotificationModule -> arrayOf(
+                Context::class.java to context
+            )
             TripServiceModule -> arrayOf(
                 TripNotification::class.java to NavigationModuleProvider.createModule(
                     TripNotificationModule,
                     ::paramsProvider
-                )
+                ),
+                Context::class.java to context
             )
             TripSessionModule -> arrayOf(
                 TripService::class.java to NavigationModuleProvider.createModule(
