@@ -2,23 +2,20 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import android.os.AsyncTask
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.TileEndpointConfiguration
+import com.mapbox.navigator.RouterParams
+import com.mapbox.services.android.navigation.v5.internal.navigation.HttpClient
 
 internal class ConfigureRouterTask(
     private val navigator: Navigator,
-    private val tilePath: String,
-    private val tileEndpointConfiguration: TileEndpointConfiguration,
+    private val routerParams: RouterParams,
     private val callback: OnOfflineTilesConfiguredCallback
 ) : AsyncTask<Void, Void, Long>() {
 
     @Synchronized
     override fun doInBackground(vararg paramsUnused: Void): Long =
         navigator.configureRouter(
-            tilePath,
-            null,
-            null,
-            2, // Two threads for downloading tiles simultaneously
-            tileEndpointConfiguration
+            routerParams,
+            HttpClient(routerParams.endpointConfig?.userAgent ?: "", true)
         )
 
     override fun onPostExecute(numberOfTiles: Long) {

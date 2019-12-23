@@ -2,13 +2,18 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 
 internal class OfflineNavigator @JvmOverloads constructor(
     private val navigator: Navigator,
     private val version: String = "",
     private val host: String = "",
-    private val accessToken: String = ""
+    private val accessToken: String = "",
+    private val userAgent: String = "MapboxNavigationNative",
+    private val inMemoryTileCache: Int? = null,
+    private val mapMatchingSpatialCache: Int? = null,
+    private val threadsCount: Int = 2
 ) {
 
     /**
@@ -20,12 +25,23 @@ internal class OfflineNavigator @JvmOverloads constructor(
      * can be called safely
      */
     fun configure(tilePath: String, callback: OnOfflineTilesConfiguredCallback) {
-        ConfigureRouterTask(
-            navigator,
+        val endPointConfig = TileEndpointConfiguration(
+            host,
+            version,
+            accessToken,
+            userAgent,
+            "" // will be removed in the next nav-native release
+        )
+
+        val routerParams = RouterParams(
             tilePath,
-            TileEndpointConfiguration(host, version, accessToken, ""),
-            callback
-        ).execute()
+            inMemoryTileCache,
+            mapMatchingSpatialCache,
+            threadsCount,
+            endPointConfig
+        )
+
+        ConfigureRouterTask(navigator, routerParams, callback).execute()
     }
 
     /**
