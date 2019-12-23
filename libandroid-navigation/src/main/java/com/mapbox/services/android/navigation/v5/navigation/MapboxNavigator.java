@@ -12,6 +12,7 @@ import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.FixLocation;
 import com.mapbox.navigator.NavigationStatus;
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterResult;
 import com.mapbox.navigator.VoiceInstruction;
 
 import java.util.Date;
@@ -105,6 +106,10 @@ class MapboxNavigator {
 
   Navigator getNavigator() {
     return navigator;
+  }
+
+  synchronized RouterResult retrieveElectronicHorizon(String request) {
+    return navigator.getElectronicHorizon(request);
   }
 
   private FixLocation buildFixLocationFromLocation(Location location) {
