@@ -44,6 +44,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 /**
@@ -674,13 +675,13 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private String establishLanguage(NavigationViewOptions options) {
     String voiceLanguage = options.directionsRoute().voiceLanguage();
-    return voiceLanguage != null ? voiceLanguage : ContextUtils.inferDeviceLanguage(getContext());
+    return voiceLanguage != null ? voiceLanguage : ContextEx.inferDeviceLanguage(getContext());
   }
 
   private String establishUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    return voiceUnits != null ? voiceUnits : LocaleEx.getUnitTypeForLocale(ContextUtils.inferDeviceLocale(getContext()));
+    return voiceUnits != null ? voiceUnits : LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {

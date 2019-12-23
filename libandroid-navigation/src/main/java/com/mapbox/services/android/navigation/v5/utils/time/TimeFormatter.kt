@@ -37,7 +37,7 @@ object TimeFormatter {
         var seconds = routeDuration.toLong()
 
         if (seconds < 0) {
-            Timber.e("Duration must be greater than zero. Invalid duration %s", seconds)
+            Timber.e("Duration must be greater than zero. Invalid duration $seconds")
             seconds = 0L
         }
 

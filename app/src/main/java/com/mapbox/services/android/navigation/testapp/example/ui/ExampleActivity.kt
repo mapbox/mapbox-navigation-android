@@ -293,8 +293,8 @@ class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
     }
 
     override fun onMetricUpdated(metricName: String, jsonStringData: String) {
-        Timber.d("METRICS_LOG: %s", metricName)
-        Timber.d("METRICS_LOG: %s", jsonStringData)
+        Timber.d("METRICS_LOG: $metricName")
+        Timber.d("METRICS_LOG: $jsonStringData")
     }
 
     private fun setupWith(savedInstanceState: Bundle?) {

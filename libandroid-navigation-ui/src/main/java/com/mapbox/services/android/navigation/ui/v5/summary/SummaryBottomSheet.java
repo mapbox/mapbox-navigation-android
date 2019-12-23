@@ -18,12 +18,12 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
-import com.mapbox.services.android.navigation.ui.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import java.text.DecimalFormat;
@@ -195,8 +195,8 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   private void initializeDistanceFormatter() {
-    String language = ContextUtils.inferDeviceLanguage(getContext());
-    String unitType = LocaleEx.getUnitTypeForLocale(ContextUtils.inferDeviceLocale(getContext()));
+    String language = ContextEx.inferDeviceLanguage(getContext());
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
     distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
   }

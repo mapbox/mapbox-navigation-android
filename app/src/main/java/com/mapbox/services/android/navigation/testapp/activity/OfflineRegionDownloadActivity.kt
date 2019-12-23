@@ -77,20 +77,20 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     private var offlineRegion: OfflineRegion? = null
     private val offlineRegionCallback = object : OfflineManager.CreateOfflineRegionCallback {
         override fun onCreate(offlineRegion: OfflineRegion?) {
-            Timber.d("Offline region created: %s", "NavigationOfflineMapsRegion")
+            Timber.d("Offline region created: NavigationOfflineMapsRegion")
             this@OfflineRegionDownloadActivity.offlineRegion = offlineRegion
             launchMapsDownload()
         }
 
         override fun onError(error: String?) {
-            Timber.e("Error: %s", error)
+            Timber.e("Error: $error")
         }
     }
 
     private var isDownloadCompleted: Boolean = false
     private val offlineRegionObserver = object : OfflineRegion.OfflineRegionObserver {
         override fun mapboxTileCountLimitExceeded(limit: Long) {
-            Timber.e("Mapbox tile count limit exceeded: %s", limit)
+            Timber.e("Mapbox tile count limit exceeded: $limit")
         }
 
         override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
@@ -109,8 +109,8 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
         }
 
         override fun onError(error: OfflineRegionError?) {
-            Timber.e("onError reason: %s", error?.reason)
-            Timber.e("onError message: %s", error?.message)
+            Timber.e("onError reason: ${error?.reason}")
+            Timber.e("onError message: ${error?.message}")
         }
     }
 
@@ -253,20 +253,18 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
             "{\"type\":\"Polygon\",\"coordinates\":[[[-77.152533,39.085537],[-77.152533,39.083038],[-77.150031,39.083038],[-77.150031,39.085537],[-77.147529,39.085537],[-77.147529,39.088039],[-77.147529,39.090538],[-77.150031,39.090538],[-77.150031,39.093037],[-77.150031,39.095539],[-77.150031,39.098038],[-77.150031,39.100540],[-77.150031,39.103039],[-77.152533,39.103039],[-77.152533,39.105537],[-77.155028,39.105537],[-77.155028,39.108040],[-77.155028,39.110538],[-77.157531,39.110538],[-77.157531,39.113037],[-77.160033,39.113037],[-77.160033,39.115536],[-77.162528,39.115540],[-77.162528,39.118038],[-77.165030,39.118038],[-77.165030,39.115536],[-77.167533,39.115536],[-77.167533,39.113037],[-77.167533,39.110538],[-77.165030,39.110538],[-77.165030,39.108040],[-77.162536,39.108036],[-77.162536,39.105537],[-77.162536,39.103039],[-77.160033,39.103039],[-77.160033,39.100540],[-77.157531,39.100536],[-77.157531,39.098038],[-77.157531,39.095535],[-77.157531,39.093037],[-77.157531,39.090538],[-77.157531,39.088039],[-77.155036,39.088036],[-77.155036,39.085537],[-77.152533,39.085537]]]}"
         )
         // TODO Hardcoding OfflineRegionDefinitionProvider values for testing / debugging purposes
-        val minZoom: Double = 11.0
-        val maxZoom: Double = 17.0
+        val minZoom = 11.0
+        val maxZoom = 17.0
         // val minZoom: Double = mapboxMap.cameraPosition.zoom
         // val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
-        val definition: OfflineTilePyramidRegionDefinition = OfflineTilePyramidRegionDefinition(
-            styleUrl, bounds, minZoom, maxZoom, pixelRatio
-        )
+        val definition = OfflineTilePyramidRegionDefinition(styleUrl, bounds, minZoom, maxZoom, pixelRatio)
         // TODO Testing downloading a Geometry using OfflineGeometryRegionDefinition as definition
         // val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
         //        styleUrl, geometry, minZoom, maxZoom, pixelRatio)
 
         val metadata: ByteArray
-        val jsonObject: JSONObject = JSONObject()
+        val jsonObject = JSONObject()
         jsonObject.put("FIELD_REGION_NAME", "NavigationOfflineMapsRegion")
         val json: String = jsonObject.toString()
         metadata = json.toByteArray()
@@ -315,13 +313,13 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
 
     private fun showDownloading(downloading: Boolean, message: String) {
         versionSpinner.isEnabled = !downloading
-        loading.visibility = if (downloading) View.VISIBLE else View.GONE
+        loading.visibility = if (downloading) VISIBLE else GONE
         setDownloadButtonEnabled(!downloading, message)
     }
 
     private fun showRemoving(removing: Boolean, message: String) {
         versionSpinner.isEnabled = !removing
-        loading.visibility = if (removing) View.VISIBLE else View.GONE
+        loading.visibility = if (removing) VISIBLE else GONE
         updateRemoveButton(!removing, message)
     }
 
@@ -352,7 +350,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadList
     }
 
     override fun onProgressUpdate(percent: Int) {
-        showDownloading(false, percent.toString() + "%...")
+        showDownloading(false, "$percent%...")
     }
 
     override fun onCompletion() {

@@ -1,3 +1,5 @@
+@file:JvmName("ContextEx")
+
 package com.mapbox.services.android.navigation.v5.utils.extensions
 
 import android.content.Context

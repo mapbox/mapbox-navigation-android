@@ -20,7 +20,9 @@ internal class RouteRefresherCallback(
     }
 
     override fun onError(error: RefreshError) {
-        Timber.w(error.message)
+        error.message?.let {
+            Timber.w(it)
+        }
         routeRefresher.updateIsChecking(false)
     }
 }

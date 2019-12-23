@@ -22,7 +22,6 @@ import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
-import com.mapbox.services.android.navigation.ui.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
@@ -44,6 +43,7 @@ import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import org.jetbrains.annotations.TestOnly;
@@ -314,7 +314,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    language = ContextUtils.inferDeviceLanguage(getApplication());
+    language = ContextEx.inferDeviceLanguage(getApplication());
     if (routeOptions != null) {
       language = routeOptions.language();
     }
@@ -322,7 +322,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private String initializeUnitType(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    String unitType = LocaleEx.getUnitTypeForLocale(ContextUtils.inferDeviceLocale(getApplication()));
+    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
     if (routeOptions != null) {
       unitType = routeOptions.voiceUnits();
     }
