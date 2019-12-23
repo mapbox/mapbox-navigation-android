@@ -7,6 +7,7 @@ workflows:
       - build
       - build-1.0
       - release
+      - release-1.0
       - publish:
           filters:
             tags:
