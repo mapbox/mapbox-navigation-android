@@ -21,7 +21,7 @@ class OfflineRouteTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
+            mockkStatic("com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx")
         }
     }
 
