@@ -6,9 +6,17 @@ import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.logger.annotations.LogLevel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
+import kotlinx.coroutines.selects.whileSelect
 import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
+import java.lang.Exception
+import kotlin.coroutines.CoroutineContext
 
+@ObsoleteCoroutinesApi
+@InternalCoroutinesApi
+@ExperimentalCoroutinesApi
 @MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
 object MapboxLogger : Logger {
 
@@ -16,8 +24,38 @@ object MapboxLogger : Logger {
     @Volatile
     var logLevel: Int = VERBOSE
 
+    data class MessageData(val message: String, val tag: String?)
+
+    private val job = Job()
+    private val scope = CoroutineScope(job + Dispatchers.IO)
+    private val channel = BroadcastChannel<Message>(Channel.UNLIMITED)
     private val observer: AtomicReference<LoggerObserver> = AtomicReference()
 
+    /**
+     * Sample code
+     * During initialization, create a BroadcastChannel with an unlimited buffer. This channel has several properties
+     * 1. It is lock-free
+     * 2. Thread safe
+     * 3. Each openSubscription() call guarantees that you well receive the entire buffer of data
+     * This implies that if multiple clients call offer() on this channel from different threads, this
+     * coroutine (the one we launched from init{}) will receive each message.
+     */
+    init {
+        val subscription = channel.openSubscription()
+        scope.launch {
+            val channelData = subscription.receiveOrClosed()
+            when (channelData.isClosed) {
+                true -> return@launch
+                false -> {
+                    channel.consumeEach { messageData ->
+                        d(Message(messageData.message))
+                    }
+                }
+            }
+        }
+    }
+
+    fun getLoggChannel() = channel
     fun setObserver(observer: LoggerObserver) {
         this.observer.set(observer)
     }
@@ -103,11 +141,11 @@ object MapboxLogger : Logger {
     }
 
     private fun log(
-        @LogLevel requiredLogLevel: Int,
-        tag: String?,
-        msg: String,
-        tr: Throwable?,
-        logBlock: () -> Unit
+            @LogLevel requiredLogLevel: Int,
+            tag: String?,
+            msg: String,
+            tr: Throwable?,
+            logBlock: () -> Unit
     ) {
         if (logLevel <= requiredLogLevel) {
             tag?.let { Timber.tag(it) }

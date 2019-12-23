@@ -16,9 +16,13 @@ import com.mapbox.services.android.navigation.v5.navigation.OfflineError
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 private const val BEARING_TOLERANCE = 90.0
 
+@InternalCoroutinesApi
 class OfflineRouteFinder(
     offlinePath: String,
     version: String,
@@ -32,6 +36,8 @@ class OfflineRouteFinder(
         configureWith(version)
     }
 
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
     fun configureWith(version: String) {
         if (isOfflineEnabled() && version.isEmpty()) {
             val errorMessage = "Offline version not set, please do so in settings"
@@ -41,7 +47,8 @@ class OfflineRouteFinder(
 
         offlineRouter.configure(version, object : OnOfflineTilesConfiguredCallback {
             override fun onConfigured(numberOfTiles: Int) {
-                MapboxLogger.d(Message("Offline tiles configured: $numberOfTiles"))
+                MapboxLogger.getLoggChannel().offer(Message("Offline tiles configured: $numberOfTiles"))
+//                MapboxLogger.d(Message("Offline tiles configured: $numberOfTiles"))
                 isConfigured = true
             }
 
