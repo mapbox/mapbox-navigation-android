@@ -28,12 +28,13 @@ class MapboxOffboardRouterTest : BaseTest() {
     @Before
     fun setUp() {
         val listener = slot<Callback<DirectionsResponse>>()
+        every { navigationRoute.toBuilder() } returns navigationRouteBuilder
         every { navigationRouteBuilder.build() } returns navigationRoute
         every { navigationRouteBuilder.routeOptions(any()) } returns navigationRouteBuilder
         every { navigationRoute.getRoute(capture(listener)) } answers {
             callback = listener.captured
         }
-        offboardRouter = MapboxOffboardRouter(navigationRouteBuilder)
+        offboardRouter = MapboxOffboardRouter(navigationRoute)
     }
 
     @Test
