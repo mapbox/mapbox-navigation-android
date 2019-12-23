@@ -37,7 +37,6 @@ import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMapInstanceState;
 import com.mapbox.services.android.navigation.ui.v5.map.WayNameView;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
-import com.mapbox.services.android.navigation.ui.v5.utils.ContextUtils;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
