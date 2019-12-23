@@ -13,6 +13,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
+import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.MapboxTripService
 import com.mapbox.navigation.trip.service.NavigationNotificationService
 import com.mapbox.services.android.navigation.testapp.R
@@ -62,7 +63,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        mapboxTripNotification = MapboxTripNotification(applicationContext)
+        mapboxTripNotification = MapboxTripNotification(applicationContext, NavigationNotificationProvider())
         mapboxTripService = MapboxTripService(mapboxTripNotification) {
             val intent = Intent(applicationContext, NavigationNotificationService::class.java)
             try {

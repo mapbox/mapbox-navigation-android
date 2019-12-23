@@ -24,6 +24,7 @@ import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.directions.session.DirectionsSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 
 class NavigationController {
 
@@ -31,6 +32,7 @@ class NavigationController {
     private val navigator: MapboxNativeNavigator
     private val locationEngine: LocationEngine
     private val locationEngineRequest: LocationEngineRequest
+    private val navigationNotificationProvider: NavigationNotificationProvider
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
     private val workerHandler: Handler by lazy { Handler(workerThread.looper) }
@@ -41,12 +43,15 @@ class NavigationController {
     private val logger: Logger
     private val directionsSession: DirectionsSession
     private val tripSession: TripSession
+    private val callback: () -> Unit
 
-    constructor(context: Context, navigator: MapboxNativeNavigator, locationEngine: LocationEngine, locationEngineRequest: LocationEngineRequest) {
+    constructor(context: Context, navigator: MapboxNativeNavigator, locationEngine: LocationEngine, locationEngineRequest: LocationEngineRequest, callback: () -> Unit, navigationNotificationProvider: NavigationNotificationProvider) {
         this.context = context
         this.navigator = navigator
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
+        this.callback = callback
+        this.navigationNotificationProvider = navigationNotificationProvider
 
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
         directionsSession = NavigationComponentProvider.createDirectionsSession(
@@ -92,14 +97,15 @@ class NavigationController {
             )
             DirectionsSessionModule -> throw NotImplementedError() // going to be removed when next base version
             TripNotificationModule -> arrayOf(
-                Context::class.java to context
+                Context::class.java to context,
+                NavigationNotificationProvider::class.java to navigationNotificationProvider
             )
             TripServiceModule -> arrayOf(
                 TripNotification::class.java to NavigationModuleProvider.createModule(
                     TripNotificationModule,
                     ::paramsProvider
                 ),
-                Context::class.java to context
+                Function0::class.java to callback
             )
             TripSessionModule -> arrayOf(
                 TripService::class.java to NavigationModuleProvider.createModule(
