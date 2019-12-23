@@ -1,8 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
@@ -14,17 +12,22 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.trip.service.MapboxTripService
-import com.mapbox.navigation.trip.service.NavigationNotificationService
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import kotlinx.android.synthetic.main.activity_trip_service.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-class TripServiceActivityKt: AppCompatActivity(),
-        OnMapReadyCallback{
+class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
