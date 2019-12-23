@@ -34,13 +34,13 @@ internal class NavigationNotificationService : Service() {
             while(!MapboxTripService.getNotificationDataChannel().isClosedForReceive){
                 val notificationResponse = MapboxTripService.getNotificationDataChannel().receive()
                 notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                startForeground(notificationResponse.notificationID, notificationResponse.notification)
+                startForeground(notificationResponse.notificationId, notificationResponse.notification)
             }
         }
     }
 
     companion object {
         private val job = SupervisorJob()
-        val serviceScope = CoroutineScope(job + Dispatchers.IO)
+        private val serviceScope = CoroutineScope(job + Dispatchers.IO)
     }
 }
