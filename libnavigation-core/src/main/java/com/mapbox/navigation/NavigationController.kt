@@ -18,14 +18,17 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType.TripSe
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.trip.TripNotification
-import com.mapbox.navigation.base.trip.TripService
-import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.directions.session.DirectionsSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
+import com.mapbox.navigation.trip.service.TripService
+import com.mapbox.navigation.trip.session.TripSession
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 
+@InternalCoroutinesApi
+@ExperimentalCoroutinesApi
 class NavigationController {
 
     private val context: Context
@@ -42,8 +45,8 @@ class NavigationController {
 
     private val logger: Logger
     private val directionsSession: DirectionsSession
+    private val tripService: TripService
     private val tripSession: TripSession
-    private val tripServiceLambda: () -> Unit
 
     constructor(
         context: Context,
@@ -57,7 +60,6 @@ class NavigationController {
         this.navigator = navigator
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
-        this.tripServiceLambda = tripServiceLambda
         this.navigationNotificationProvider = navigationNotificationProvider
 
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
@@ -65,7 +67,20 @@ class NavigationController {
             NavigationModuleProvider.createModule(HybridRouter, ::paramsProvider),
             routeObserver
         )
-        tripSession = NavigationModuleProvider.createModule(TripSessionModule, ::paramsProvider)
+        tripService = NavigationComponentProvider.createTripService(
+            NavigationModuleProvider.createModule(
+                MapboxNavigationModuleType.TripNotification,
+                ::paramsProvider
+            ), tripServiceLambda
+        )
+        tripSession = NavigationComponentProvider.createTripSession(
+            tripService,
+            locationEngine,
+            locationEngineRequest,
+            navigator,
+            mainHandler,
+            workerHandler
+        )
     }
 
     private val routeObserver = object : DirectionsSession.RouteObserver {
@@ -108,24 +123,8 @@ class NavigationController {
                 Context::class.java to context,
                 NavigationNotificationProvider::class.java to navigationNotificationProvider
             )
-            TripServiceModule -> arrayOf(
-                TripNotification::class.java to NavigationModuleProvider.createModule(
-                    TripNotificationModule,
-                    ::paramsProvider
-                ),
-                Function0::class.java to tripServiceLambda
-            )
-            TripSessionModule -> arrayOf(
-                TripService::class.java to NavigationModuleProvider.createModule(
-                    TripServiceModule,
-                    ::paramsProvider
-                ),
-                LocationEngine::class.java to locationEngine,
-                LocationEngineRequest::class.java to locationEngineRequest,
-                MapboxNativeNavigator::class.java to navigator,
-                Handler::class.java to mainHandler,
-                Handler::class.java to workerHandler
-            )
+            TripServiceModule -> throw NotImplementedError() // going to be removed when next base version
+            TripSessionModule -> throw NotImplementedError() // going to be removed when next base version
             LoggerModule -> arrayOf()
         }
     }

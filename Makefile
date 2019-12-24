@@ -102,9 +102,6 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:test
 	./gradlew :libnavigator:test
 	./gradlew :libtrip-notification:test
-	./gradlew :libtrip-service:test
-	./gradlew :libtrip-session:test
-	./gradlew :libnavigation-core:test
 
 .PHONY: 1.0-publish-to-bintray
 1.0-publish-to-bintray:

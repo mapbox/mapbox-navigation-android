@@ -26,7 +26,6 @@ dependencies {
     api project(':libnavigation-base')
     implementation project(':libnavigation-util')
     implementation project(':liblogger')
-    implementation project(':libtrip-session')
     implementation project(':libnavigator')
     implementation project(':libdirections-hybrid')
     implementation project(':libtrip-notification')
@@ -35,6 +34,7 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk

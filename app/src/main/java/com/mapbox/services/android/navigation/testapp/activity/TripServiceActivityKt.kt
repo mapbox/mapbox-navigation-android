@@ -65,19 +65,22 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
 
         if (!isServiceRunning(NavigationNotificationService::class.java)) {
-            mapboxTripNotification = MapboxTripNotification(applicationContext, NavigationNotificationProvider())
-            mapboxTripService = MapboxTripService(mapboxTripNotification) {
-                val intent = Intent(applicationContext, NavigationNotificationService::class.java)
-                try {
-                    applicationContext.startService(intent)
-                } catch (e: IllegalStateException) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        applicationContext.startForegroundService(intent)
-                    } else {
-                        throw e
+            mapboxTripNotification =
+                MapboxTripNotification(applicationContext, NavigationNotificationProvider())
+            mapboxTripService =
+                MapboxTripService(mapboxTripNotification) {
+                    val intent =
+                        Intent(applicationContext, NavigationNotificationService::class.java)
+                    try {
+                        applicationContext.startService(intent)
+                    } catch (e: IllegalStateException) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            applicationContext.startForegroundService(intent)
+                        } else {
+                            throw e
+                        }
                     }
                 }
-            }
 
             mapboxTripService.startService()
         }

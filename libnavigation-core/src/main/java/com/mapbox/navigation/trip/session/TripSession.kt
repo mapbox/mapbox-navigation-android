@@ -1,12 +1,13 @@
-package com.mapbox.navigation.base.trip
+package com.mapbox.navigation.trip.session
 
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.trip.service.TripService
 
-interface TripSession {
+internal interface TripSession {
 
     val tripService: TripService
     val locationEngine: LocationEngine

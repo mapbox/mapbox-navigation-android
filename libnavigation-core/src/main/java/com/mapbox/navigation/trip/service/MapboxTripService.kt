@@ -1,10 +1,7 @@
 package com.mapbox.navigation.trip.service
 
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.trip.TripNotification
-import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.logger.MapboxLogger
@@ -16,7 +13,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
 class MapboxTripService(
     private val tripNotification: TripNotification,
     private val initializeLambda: () -> Unit

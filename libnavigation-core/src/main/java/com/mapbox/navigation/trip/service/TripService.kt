@@ -1,8 +1,8 @@
-package com.mapbox.navigation.base.trip
+package com.mapbox.navigation.trip.service
 
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
-interface TripService {
+internal interface TripService {
 
     fun startService()
 

@@ -11,11 +11,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
+@InternalCoroutinesApi
+@ExperimentalCoroutinesApi
 class NavigationControllerTest {
 
     private lateinit var navigationController: NavigationController
