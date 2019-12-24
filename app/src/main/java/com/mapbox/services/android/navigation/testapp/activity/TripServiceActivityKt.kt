@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -63,22 +64,23 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        mapboxTripNotification =
-            MapboxTripNotification(applicationContext, NavigationNotificationProvider())
-        mapboxTripService = MapboxTripService(mapboxTripNotification) {
-            val intent = Intent(applicationContext, NavigationNotificationService::class.java)
-            try {
-                applicationContext.startService(intent)
-            } catch (e: IllegalStateException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    applicationContext.startForegroundService(intent)
-                } else {
-                    throw e
+        if (!isServiceRunning(NavigationNotificationService::class.java)) {
+            mapboxTripNotification = MapboxTripNotification(applicationContext, NavigationNotificationProvider())
+            mapboxTripService = MapboxTripService(mapboxTripNotification) {
+                val intent = Intent(applicationContext, NavigationNotificationService::class.java)
+                try {
+                    applicationContext.startService(intent)
+                } catch (e: IllegalStateException) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        applicationContext.startForegroundService(intent)
+                    } else {
+                        throw e
+                    }
                 }
             }
-        }
 
-        mapboxTripService.startService()
+            mapboxTripService.startService()
+        }
     }
 
     public override fun onResume() {
@@ -133,5 +135,15 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 delay(1000L)
             }
         }
+    }
+
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 }

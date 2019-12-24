@@ -12,5 +12,4 @@ include ':app',
         ':liblogger',
         ':libnavigation-util',
         ':libtrip-session',
-        ':libnavigation-core',
-        ':libnavigation-resource'
+        ':libnavigation-core'

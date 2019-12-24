@@ -43,5 +43,5 @@ interface TripNotification {
      *
      * @param context to be used if needed for Android-related work
      */
-    fun onTripSessionStopped(context: Context)
+    fun onTripSessionStopped()
 }

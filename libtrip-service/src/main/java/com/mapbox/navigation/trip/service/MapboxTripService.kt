@@ -51,6 +51,7 @@ class MapboxTripService(
 
     override fun stopService() {
         notificationDataChannel.close()
+        tripNotification.onTripSessionStopped()
     }
 
     companion object {
