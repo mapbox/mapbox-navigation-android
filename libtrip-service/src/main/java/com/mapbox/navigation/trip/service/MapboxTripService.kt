@@ -2,16 +2,17 @@ package com.mapbox.navigation.trip.service
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.logger.MapboxLogger
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import timber.log.Timber
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -33,14 +34,14 @@ class MapboxTripService(
             true -> {
                 initializeLambda()
                 notificationDataChannel.offer(
-                        MapboxNotificationData(
-                                tripNotification.getNotificationId(),
-                                tripNotification.getNotification()
-                        )
+                    MapboxNotificationData(
+                        tripNotification.getNotificationId(),
+                        tripNotification.getNotification()
+                    )
                 )
             }
             false -> {
-                Timber.i("service already started")
+                MapboxLogger.i(Message("service already started"))
             }
         }
     }

@@ -20,7 +20,7 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     implementation project(':libnavigation-util')
-    api(project(':libnavigation-base'))
+    api project(':libnavigation-base')
 
     // Support
     implementation dependenciesList.supportAnnotation

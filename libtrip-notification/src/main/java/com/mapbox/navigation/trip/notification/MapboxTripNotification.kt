@@ -29,7 +29,7 @@ class MapboxTripNotification(
     private var collapsedNotificationRemoteViews: RemoteViews? = null
     private var expandedNotificationRemoteViews: RemoteViews? = null
     private var pendingOpenIntent: PendingIntent? = null
-    private lateinit var navigationNotificationProvider: NavigationNotificationProvider
+    private var navigationNotificationProvider: NavigationNotificationProvider
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
@@ -48,6 +48,7 @@ class MapboxTripNotification(
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
+        this.navigationNotificationProvider = NavigationNotificationProvider()
     }
 
     constructor(
@@ -55,13 +56,17 @@ class MapboxTripNotification(
         navigationNotificationProvider: NavigationNotificationProvider
     ) : this(context) {
         this.navigationNotificationProvider = navigationNotificationProvider
-        this.notification =
-            navigationNotificationProvider.buildNotification(getNotificationBuilder())
     }
 
-    override fun getNotification() = notification
+    override fun getNotification(): Notification {
+        if (!::notification.isInitialized) {
+            this.notification =
+                navigationNotificationProvider.buildNotification(getNotificationBuilder())
+        }
+        return this.notification
+    }
 
-    override fun getNotificationId() = NOTIFICATION_ID
+    override fun getNotificationId(): Int = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
         updateNotificationViews(routeProgress)
