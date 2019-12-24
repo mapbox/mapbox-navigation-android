@@ -48,6 +48,14 @@
                 android:value=".MainActivity"/>
         </activity>
 
+        <activity android:name=".activity.TripServiceActivityKt"
+            android:label="@string/title_trip_service_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
         <activity
             android:name=".NavigationSettingsActivity"
             android:label="@string/settings">

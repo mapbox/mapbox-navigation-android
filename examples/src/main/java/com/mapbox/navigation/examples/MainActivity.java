@@ -22,6 +22,7 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.navigation.examples.activity.MockNavigationActivity;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityJava;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityKt;
+import com.mapbox.navigation.examples.activity.TripServiceActivityKt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +68,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_offboard_router_java),
         getString(R.string.description_offboard_router_java),
         OffboardRouterActivityJava.class
+      ),
+      new SampleItem(
+        getString(R.string.title_trip_service_kotlin),
+        getString(R.string.description_trip_service_kotlin),
+        TripServiceActivityKt.class
       )
     ));
 

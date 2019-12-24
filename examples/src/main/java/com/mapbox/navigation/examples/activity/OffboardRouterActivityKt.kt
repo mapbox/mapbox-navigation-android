@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity
+package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -14,24 +14,37 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
+import com.mapbox.navigation.logger.DEBUG
+import com.mapbox.navigation.logger.ERROR
+import com.mapbox.navigation.logger.INFO
+import com.mapbox.navigation.logger.LogEntry
+import com.mapbox.navigation.logger.LoggerObserver
 import com.mapbox.navigation.logger.MapboxLogger
+import com.mapbox.navigation.logger.VERBOSE
+import com.mapbox.navigation.logger.WARN
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.testapp.utils.Utils
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
-import com.mapbox.services.android.navigation.v5.utils.extensions.mapToDirectionsRoute
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
+import timber.log.Timber
 
 class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
-    Router.Callback {
+    Router.Callback,
+    MetricsObserver,
+    LoggerObserver {
 
     private var mapboxMap: MapboxMap? = null
 
@@ -46,6 +59,10 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mock_navigation)
+
+        MapboxLogger.logLevel = VERBOSE
+        MapboxLogger.setObserver(this)
+        MapboxMetricsReporter.setMetricsObserver(this)
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
@@ -66,7 +83,9 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         this.mapboxMap?.addOnMapClickListener(this)
+        MapboxLogger.d(Message("Map is ready"))
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
+            MapboxLogger.d(Message("Style setting finished"))
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", Snackbar.LENGTH_LONG).show()
             newOrigin()
@@ -186,5 +205,25 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onMetricUpdated(metricName: String, jsonStringData: String) {
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(metricName))
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(jsonStringData))
+    }
+
+    override fun log(level: Int, entry: LogEntry) {
+        if (entry.tag != null) {
+            Timber.tag(entry.tag)
+        }
+        when (level) {
+            VERBOSE -> Timber.v(entry.throwable, entry.message)
+            DEBUG -> Timber.d(entry.throwable, entry.message)
+            INFO -> Timber.i(entry.throwable, entry.message)
+            WARN -> Timber.w(entry.throwable, entry.message)
+            ERROR -> Timber.e(entry.throwable, entry.message)
+            else -> {
+            }
+        }
     }
 }

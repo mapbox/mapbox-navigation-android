@@ -10,6 +10,12 @@
     <string name="title_offboard_router_java">Offboard Router Java</string>
     <string name="description_offboard_router_java">Shows routes using offboard routing api in Java code.</string>
 
+    <string name="title_trip_service_kotlin">Trip Service Kotlin</string>
+    <string name="description_trip_service_kotlin">Shows how to use the Service to push notifications in Kotlin code.</string>
+
+    <string name="title_trip_service_java">Trip Service Java</string>
+    <string name="description_trip_service_java">Shows how to use the Service to push notifications in Java code.</string>
+
     <string name="title_component_navigation">MapboxNavigation with UI components</string>
     <string name="description_component_navigation">MapboxNavigation with UI components</string>
 

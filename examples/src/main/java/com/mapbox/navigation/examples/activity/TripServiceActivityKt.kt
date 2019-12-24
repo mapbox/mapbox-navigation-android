@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity
+package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
@@ -12,12 +12,14 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.MapboxTripService
 import com.mapbox.navigation.trip.service.NavigationNotificationService
-import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import kotlinx.android.synthetic.main.activity_trip_service.*
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +30,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
@@ -134,7 +135,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 val text = "Time elapsed: + ${SystemClock.elapsedRealtime()}"
                 notifyTextView.text = text
                 mapboxTripService.updateNotification(RouteProgress(text))
-                Timber.i(text)
+                MapboxLogger.i(Message(text))
                 delay(1000L)
             }
         }
