@@ -14,6 +14,7 @@ task checkstyle(type: Checkstyle) {
     exclude '**/*FeatureOverviewActivity.java'
     exclude '**/*ManeuversStyleKit.java'
     exclude '**/*LanesStyleKit.java'
+    exclude '**/*OnboardRouterActivityJava.java'
 
     classpath = files()
     ignoreFailures = false
