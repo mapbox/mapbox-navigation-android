@@ -14,8 +14,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripNotification
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.NOTIFICATION_CHANNEL

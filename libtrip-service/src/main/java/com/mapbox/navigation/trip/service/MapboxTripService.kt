@@ -2,10 +2,10 @@ package com.mapbox.navigation.trip.service
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.trip.MapboxNotificationData
-import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
+import com.mapbox.navigation.base.trip.model.MapboxNotificationData
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -33,10 +33,10 @@ class MapboxTripService(
             true -> {
                 initializeLambda()
                 notificationDataChannel.offer(
-                    MapboxNotificationData(
-                        tripNotification.getNotificationId(),
-                        tripNotification.getNotification()
-                    )
+                        MapboxNotificationData(
+                                tripNotification.getNotificationId(),
+                                tripNotification.getNotification()
+                        )
                 )
             }
             false -> {

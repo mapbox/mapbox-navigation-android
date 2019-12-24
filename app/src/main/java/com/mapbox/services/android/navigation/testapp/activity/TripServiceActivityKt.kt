@@ -12,7 +12,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.MapboxTripService
