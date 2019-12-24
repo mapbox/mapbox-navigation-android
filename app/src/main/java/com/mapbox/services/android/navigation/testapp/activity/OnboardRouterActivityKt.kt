@@ -196,8 +196,8 @@ class OnboardRouterActivityKt : AppCompatActivity(),
         mapView.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState?.let { mapView.onSaveInstanceState(it) }
+        mapView.onSaveInstanceState(outState)
     }
 }
