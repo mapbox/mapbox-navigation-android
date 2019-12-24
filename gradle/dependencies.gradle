@@ -49,7 +49,9 @@ ext {
       crashlytics               : '2.9.9',
       multidex                  : '2.0.0',
       json                      : '20180813',
-      coroutinesAndroid         : '1.3.3'
+      coroutinesAndroid         : '1.3.3',
+      okhttp                    : '3.12.0',
+      okio                      : '2.4.3'
   ]
   dependenciesList = [
       // mapbox
@@ -76,6 +78,13 @@ ext {
 
       // code style
       ktlint                    : "com.pinterest:ktlint:${version.ktlint}",
+
+      // network
+      okhttp : "com.squareup.okhttp3:okhttp:${version.okhttp}",
+      okhttpInterceptor : "com.squareup.okhttp3:logging-interceptor:${version.okhttp}",
+
+      // I/O
+      okio : "com.squareup.okio:okio:${version.okio}",
 
       // AutoValue
       autoValue                 : "com.google.auto.value:auto-value:${version.autoValue}",
@@ -141,7 +150,7 @@ ext {
       errorprone       : '0.0.13',
       coveralls        : '2.8.1',
       spotbugs         : '1.3',
-      gradle           : '3.5.1',
+      gradle           : '3.5.3',
       dependencyGraph  : '0.3.0',
       dependencyUpdates: '0.20.0',
       kotlin           : '1.3.61',

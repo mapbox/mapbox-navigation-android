@@ -1,17 +1,18 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation
+package com.mapbox.navigation.navigator.network
 
 import androidx.annotation.Keep
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.logger.MapboxLogger
+import com.mapbox.navigator.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
-import com.mapbox.services.android.navigation.BuildConfig
 import java.io.ByteArrayOutputStream
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
-import timber.log.Timber
 
 @Keep
 internal class HttpClient(
@@ -31,7 +32,7 @@ internal class HttpClient(
         if (BuildConfig.DEBUG) {
             val interceptor = HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
-                    Timber.d(message)
+                    MapboxLogger.d(Message(message))
                 }
             }).setLevel(HttpLoggingInterceptor.Level.BASIC)
 

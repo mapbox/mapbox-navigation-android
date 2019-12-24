@@ -16,6 +16,7 @@ android {
 
 dependencies {
     api(project(':libnavigation-base'))
+    api(project(':liblogger'))
     implementation project(':libnavigation-util')
 
     // Navigator
@@ -26,6 +27,13 @@ dependencies {
 
     //ktlint
     ktlint dependenciesList.ktlint
+
+    //networks
+    implementation dependenciesList.okhttp
+    implementation dependenciesList.okhttpInterceptor
+
+    // I/O
+    implementation dependenciesList.okio
 
     implementation dependenciesList.kotlinStdLib
 

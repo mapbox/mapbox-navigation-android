@@ -18,11 +18,11 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.route.DirectionsSession;
+//import com.mapbox.navigation.base.route.DirectionsSession;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.route.model.Route;
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
-import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
+//import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.route.onboard.model.Config;
 import com.mapbox.services.android.navigation.testapp.R;
@@ -45,15 +45,16 @@ import timber.log.Timber;
 public class OnboardRouterActivityJava
         extends AppCompatActivity
         implements OnMapReadyCallback,
-        MapboxMap.OnMapClickListener,
-        DirectionsSession.RouteObserver {
+        MapboxMap.OnMapClickListener
+//        DirectionsSession.RouteObserver
+{
 
   private Router onboardRouter;
   private MapboxMap mapboxMap;
 
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
-  private DirectionsSession directionsSession;
+//  private DirectionsSession directionsSession;
   private Point origin;
   private Point destination;
   private Point waypoint;
@@ -127,22 +128,22 @@ public class OnboardRouterActivityJava
   }
 
   private void findRoute() {
-    directionsSession = new MapboxDirectionsSession(
-            onboardRouter,
-            this
-    );
-    if (origin != null && destination != null) {
-      if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
-        RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
-                .accessToken(Utils.getMapboxAccessToken(this))
-                .origin(origin)
-                .destination(destination);
-        if (waypoint != null) {
-          optionsBuilder.addWaypoint(waypoint);
-        }
-        directionsSession.requestRoutes(optionsBuilder.build());
-      }
-    }
+//    directionsSession = new MapboxDirectionsSession(
+//            onboardRouter,
+//            this
+//    );
+//    if (origin != null && destination != null) {
+//      if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
+//        RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
+//                .accessToken(Utils.getMapboxAccessToken(this))
+//                .origin(origin)
+//                .destination(destination);
+//        if (waypoint != null) {
+//          optionsBuilder.addWaypoint(waypoint);
+//        }
+//        directionsSession.requestRoutes(optionsBuilder.build());
+//      }
+//    }
   }
 
   @Override
@@ -165,23 +166,23 @@ public class OnboardRouterActivityJava
   /*
    * DirectionSessions.RouteObserver
    */
-  @Override
-  public void onRoutesChanged(@NotNull List<Route> routes) {
-    if (!routes.isEmpty()) {
-      route = Mappers.mapToDirectionsRoute(routes.get(0));
-      navigationMapRoute.addRoute(route);
-    }
-  }
+//  @Override
+//  public void onRoutesChanged(@NotNull List<Route> routes) {
+//    if (!routes.isEmpty()) {
+//      route = Mappers.mapToDirectionsRoute(routes.get(0));
+//      navigationMapRoute.addRoute(route);
+//    }
+//  }
 
-  @Override
-  public void onRoutesRequested() {
-    Timber.d("onRoutesRequested: navigation.getRoute()");
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
-  }
+//  @Override
+//  public void onRoutesRequested() {
+//    Timber.d("onRoutesRequested: navigation.getRoute()");
+//  }
+//
+//  @Override
+//  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
+//    Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
+//  }
 
   /*
    * Activity lifecycle methods
@@ -220,9 +221,9 @@ public class OnboardRouterActivityJava
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    if (directionsSession != null) {
-      directionsSession.cancel();
-    }
+//    if (directionsSession != null) {
+//      directionsSession.cancel();
+//    }
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
       mapView.onDestroy();
