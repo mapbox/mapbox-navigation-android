@@ -124,20 +124,20 @@ data class MapboxNavigationOptions(
             apply { this.isFromNavigationUi = isFromNavigationUi }
 
         fun isDebugLoggingEnabled(debugLoggingEnabled: Boolean) =
-            apply { this.isDebugLoggingEnabled = isDebugLoggingEnabled }
+            apply { this.isDebugLoggingEnabled = debugLoggingEnabled }
 
         fun navigationNotification(notification: NavigationNotification) =
-            apply { this.navigationNotification = navigationNotification }
+            apply { this.navigationNotification = notification }
 
         fun roundingIncrement(@NavigationConstants.RoundingIncrement roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
 
         fun timeFormatType(@TimeFormatType type: Int) =
-            apply { this.timeFormatType = timeFormatType }
+            apply { this.timeFormatType = type }
 
         fun navigationLocationEngineIntervalLagInMilliseconds(lagInMilliseconds: Int) = apply {
             this.navigationLocationEngineIntervalLagInMilliseconds =
-                navigationLocationEngineIntervalLagInMilliseconds
+                    lagInMilliseconds
         }
 
         /**

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.navigator
 
 import android.location.Location
-import com.mapbox.navigation.base.trip.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 
 data class TripStatus(
     val enhancedLocation: Location,

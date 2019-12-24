@@ -10,9 +10,9 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripService
 import com.mapbox.navigation.base.trip.TripSession
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import java.lang.ref.WeakReference
 import java.util.Date
@@ -45,11 +45,11 @@ class MapboxTripSession(
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
 
-    private val serviceStateListener = object : TripService.StateListener {
-        override fun onStateChanged(state: Any) {
-            TODO("not implemented")
-        }
-    }
+//    private val serviceStateListener = object : TripService.StateListener {
+//        override fun onStateChanged(state: Any) {
+//            TODO("not implemented")
+//        }
+//    }
 
     private val navigatorPollingRunnable = object : Runnable {
         override fun run() {
@@ -73,7 +73,7 @@ class MapboxTripSession(
     override fun getRouteProgress() = routeProgress
 
     override fun start() {
-        tripService.startService(serviceStateListener)
+        tripService.startService()
         locationEngine.requestLocationUpdates(locationEngineRequest, mainLocationCallback, Looper.getMainLooper())
         workerHandler.postDelayed(navigatorPollingRunnable, STATUS_POLLING_INTERVAL)
     }

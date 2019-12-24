@@ -19,9 +19,9 @@ dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
 
-    api(project(':libnavigation-base'))
-    implementation(project(':libnavigator'))
-    implementation(project(":libnavigation-util"))
+    api project(':libnavigation-base')
+    implementation project(':libnavigator')
+    implementation project(":libnavigation-util")
 
     //ktlint
     ktlint dependenciesList.ktlint

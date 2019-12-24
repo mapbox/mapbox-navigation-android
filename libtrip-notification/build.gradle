@@ -19,14 +19,20 @@ dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
 
-    api(project(':libnavigation-base'))
+    api project(':libnavigation-base')
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation project(':libnavigation-util')
+
+    implementation dependenciesList.androidXCore
+
+    implementation dependenciesList.coroutinesAndroid
 
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockk
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

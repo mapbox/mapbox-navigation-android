@@ -2,17 +2,62 @@ package com.mapbox.navigation.trip.service
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.TripService
+import com.mapbox.navigation.base.trip.model.MapboxNotificationData
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.logger.MapboxLogger
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 
+@InternalCoroutinesApi
+@ExperimentalCoroutinesApi
 @MapboxNavigationModule(MapboxNavigationModuleType.TripService, skipConfiguration = true)
-class MapboxTripService(override val tripNotification: TripNotification) : TripService {
+class MapboxTripService(
+    private val tripNotification: TripNotification,
+    private val initializeLambda: () -> Unit
+) : TripService {
 
-    override fun startService(stateListener: TripService.StateListener) {
-        TODO("not implemented")
+    private val serviceStarted = AtomicBoolean(false)
+
+    @InternalCoroutinesApi
+    override fun startService() {
+        if (!notificationDataChannel.isClosedForSend) {
+            notificationDataChannel.close()
+            notificationDataChannel = Channel(1)
+        }
+        when (serviceStarted.compareAndSet(false, true)) {
+            true -> {
+                initializeLambda()
+                notificationDataChannel.offer(
+                    MapboxNotificationData(
+                        tripNotification.getNotificationId(),
+                        tripNotification.getNotification()
+                    )
+                )
+            }
+            false -> {
+                MapboxLogger.i(Message("service already started"))
+            }
+        }
+    }
+
+    override fun updateNotification(routeProgress: RouteProgress) {
+        tripNotification.updateNotification(routeProgress)
     }
 
     override fun stopService() {
-        TODO("not implemented")
+        notificationDataChannel.close()
+        tripNotification.onTripSessionStopped()
+    }
+
+    companion object {
+        private var notificationDataChannel = Channel<MapboxNotificationData>(1)
+        fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
+            notificationDataChannel
     }
 }

@@ -86,6 +86,7 @@ dependencies {
   implementation project(':libnavigation-core')
   implementation project(':libdirections-offboard')
   implementation project(':libnavigation-util')
+  implementation project(':libtrip-service')
   implementation project(':liblogger')
 
   //ktlint
@@ -94,6 +95,9 @@ dependencies {
   // Kotlin support
   implementation dependenciesList.kotlinStdLib
   implementation dependenciesList.ankoCommon
+
+  //Coroutines
+  implementation dependenciesList.coroutinesAndroid
 
   // Mapbox Navigation SDK
   implementation project(':libandroid-navigation-ui')

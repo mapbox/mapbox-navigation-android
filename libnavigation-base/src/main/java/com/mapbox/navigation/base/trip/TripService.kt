@@ -1,14 +1,12 @@
 package com.mapbox.navigation.base.trip
 
-interface TripService {
-    val tripNotification: TripNotification
+import com.mapbox.navigation.base.trip.model.RouteProgress
 
-    fun startService(stateListener: StateListener)
+interface TripService {
+
+    fun startService()
+
     fun stopService()
 
-    interface StateListener {
-        fun onStateChanged(state: Any)
-
-        // TODO state enum or separate lifecycle methods?
-    }
+    fun updateNotification(routeProgress: RouteProgress)
 }
