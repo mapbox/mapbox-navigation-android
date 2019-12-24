@@ -86,8 +86,8 @@ dependencies {
   implementation project(':libnavigation-core')
   implementation project(':libdirections-offboard')
   implementation project(':libnavigation-util')
-  implementation project(':libtrip-service')
   implementation project(':liblogger')
+  implementation project(':libtrip-notification')
 
   //ktlint
   ktlint dependenciesList.ktlint

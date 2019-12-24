@@ -8,11 +8,10 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.trip.TripService
-import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.TripStatus
+import com.mapbox.navigation.trip.service.TripService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -50,12 +49,25 @@ class MapboxTripSessionTest {
 
     @Before
     fun setUp() {
-        tripSession = MapboxTripSession(tripService, locationEngine, locationEngineRequest, navigator, mainHandler, workerHandler)
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            locationEngineRequest,
+            navigator,
+            mainHandler,
+            workerHandler
+        )
 
         every { navigator.getStatus(any()) } returns tripStatus
         every { tripStatus.enhancedLocation } returns enhancedLocation
 
-        every { locationEngine.requestLocationUpdates(any(), capture(locationCallbackSlot), any()) } answers {}
+        every {
+            locationEngine.requestLocationUpdates(
+                any(),
+                capture(locationCallbackSlot),
+                any()
+            )
+        } answers {}
         every { locationEngineResult.locations } returns listOf(location)
 
         every { mainHandler.post(capture(mainHandlerRunnableSlot)) } returns true
@@ -69,7 +81,13 @@ class MapboxTripSessionTest {
     fun startSession() {
         tripSession.start()
         verify { tripService.startService() }
-        verify { locationEngine.requestLocationUpdates(locationEngineRequest, any(), Looper.getMainLooper()) }
+        verify {
+            locationEngine.requestLocationUpdates(
+                locationEngineRequest,
+                any(),
+                Looper.getMainLooper()
+            )
+        }
 
         verify { workerHandler.postDelayed(handlerDelayedRunnableSlot.captured, 1000) }
     }

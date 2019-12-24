@@ -7,19 +7,15 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.trip.TripService
-import com.mapbox.navigation.base.trip.TripSession
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.trip.service.TripService
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
 
-@MapboxNavigationModule(MapboxNavigationModuleType.TripSession, skipConfiguration = true)
-class MapboxTripSession(
+internal class MapboxTripSession(
     override val tripService: TripService,
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
@@ -36,7 +32,8 @@ class MapboxTripSession(
             }
         }
 
-    private val mainLocationCallback = MainLocationCallback(this)
+    private val mainLocationCallback =
+        MainLocationCallback(this)
 
     private val locationObservers = CopyOnWriteArrayList<TripSession.LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArrayList<TripSession.RouteProgressObserver>()
@@ -58,7 +55,10 @@ class MapboxTripSession(
                 updateEnhancedLocation(status.enhancedLocation)
                 updateRouteProgress(status.routeProgress)
             }
-            workerHandler.postDelayed(this, STATUS_POLLING_INTERVAL)
+            workerHandler.postDelayed(
+                this,
+                STATUS_POLLING_INTERVAL
+            )
         }
     }
 
@@ -74,8 +74,15 @@ class MapboxTripSession(
 
     override fun start() {
         tripService.startService()
-        locationEngine.requestLocationUpdates(locationEngineRequest, mainLocationCallback, Looper.getMainLooper())
-        workerHandler.postDelayed(navigatorPollingRunnable, STATUS_POLLING_INTERVAL)
+        locationEngine.requestLocationUpdates(
+            locationEngineRequest,
+            mainLocationCallback,
+            Looper.getMainLooper()
+        )
+        workerHandler.postDelayed(
+            navigatorPollingRunnable,
+            STATUS_POLLING_INTERVAL
+        )
     }
 
     override fun stop() {
@@ -104,12 +111,14 @@ class MapboxTripSession(
         routeProgressObservers.remove(routeProgressObserver)
     }
 
-    private class MainLocationCallback(tripSession: MapboxTripSession) : LocationEngineCallback<LocationEngineResult> {
+    private class MainLocationCallback(tripSession: MapboxTripSession) :
+        LocationEngineCallback<LocationEngineResult> {
 
         private val tripSessionReference = WeakReference(tripSession)
 
         override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.firstOrNull()?.let { tripSessionReference.get()?.updateRawLocation(it) }
+            result?.locations?.firstOrNull()
+                ?.let { tripSessionReference.get()?.updateRawLocation(it) }
         }
 
         override fun onFailure(exception: Exception) {
