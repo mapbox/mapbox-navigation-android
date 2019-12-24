@@ -1,7 +1,5 @@
 package com.mapbox.services.android.navigation.testapp.activity
 
-// import com.mapbox.navigation.base.route.DirectionsSession
-// import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
@@ -30,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_mock_navigation.*
 
 class OnboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
-    MapboxMap.OnMapClickListener
+    MapboxMap.OnMapClickListener {
 // DirectionsSession.RouteObserver {
 
     private lateinit var onboardRouter: Router
