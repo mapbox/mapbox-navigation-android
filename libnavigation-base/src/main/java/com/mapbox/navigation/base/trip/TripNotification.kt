@@ -1,7 +1,6 @@
 package com.mapbox.navigation.base.trip
 
 import android.app.Notification
-import android.content.Context
 
 interface TripNotification {
 
