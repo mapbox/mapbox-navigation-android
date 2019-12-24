@@ -52,7 +52,7 @@ class NavigationRouteTest {
     @Test
     @Throws(Exception::class)
     fun sanityTest() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -65,7 +65,7 @@ class NavigationRouteTest {
     @Test
     @Throws(Exception::class)
     fun changingDefaultValueToCustomWorksProperly() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -83,7 +83,7 @@ class NavigationRouteTest {
 
     @Test
     fun addApproachesIncludedInRequest() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .accessToken(ACESS_TOKEN)
@@ -106,7 +106,7 @@ class NavigationRouteTest {
 
     @Test
     fun checksWaypointIndicesIncludedInRequest() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .origin(origin)
@@ -127,7 +127,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointNamesIncludedInRequest() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -144,7 +144,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointTargetsIncludedInRequest() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder().accessToken(ACESS_TOKEN)
                     .origin(origin)
@@ -166,7 +166,7 @@ class NavigationRouteTest {
 
     @Test
     fun reverseOriginDestination_bearingsAreFormattedCorrectly() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .destination(Point.fromLngLat(1.0, 5.0), 1.0, 5.0)
@@ -182,7 +182,7 @@ class NavigationRouteTest {
 
     @Test
     fun addWaypointsThenOriginDestination_bearingsAreFormattedCorrectly() {
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 RouteOptionsNavigation.builder()
                     .accessToken(ACESS_TOKEN)
@@ -225,7 +225,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val navigationRoute = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+        val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(routeOptions)
             .build()
 
@@ -244,6 +244,8 @@ class NavigationRouteTest {
         assertThat(request, containsString("walkway_bias"))
         assertThat(request, containsString("walking_speed"))
     }
+
+    private fun provideNavigationOffboardRouteBuilder() = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
 
     @Test
     fun cancelCall_cancelsCallNotExecuted() {
