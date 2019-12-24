@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.trip
 
 import android.app.Notification
-import android.content.Context
+import com.mapbox.navigation.base.trip.model.RouteProgress
 
 interface TripNotification {
 
@@ -43,5 +43,5 @@ interface TripNotification {
      *
      * @param context to be used if needed for Android-related work
      */
-    fun onTripSessionStopped(context: Context)
+    fun onTripSessionStopped()
 }

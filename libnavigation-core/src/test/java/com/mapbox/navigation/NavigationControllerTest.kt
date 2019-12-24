@@ -1,9 +1,11 @@
 package com.mapbox.navigation
 
+import android.app.NotificationManager
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.every
 import io.mockk.mockk
@@ -17,10 +19,12 @@ import org.junit.Test
 class NavigationControllerTest {
 
     private lateinit var navigationController: NavigationController
-    private val context: Context = mockk()
+    private val context: Context = mockk(relaxed = true)
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
+    private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
+    private val tripServiceLambda: () -> Unit = mockk()
 
     companion object {
         @BeforeClass
@@ -33,12 +37,17 @@ class NavigationControllerTest {
     @Before
     fun setUp() {
         every { context.inferDeviceLocale() } returns Locale.US
+        val notificationManager = mockk<NotificationManager>()
+        every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+
         navigationController =
             NavigationController(
                 context,
                 navigator,
                 locationEngine,
-                locationEngineRequest
+                locationEngineRequest,
+                tripServiceLambda,
+                navigationNotificationProvider
             )
     }
 

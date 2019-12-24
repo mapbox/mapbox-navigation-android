@@ -19,16 +19,15 @@ dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
 
-    api(project(':libnavigation-base'))
+    api project(':libnavigation-base')
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
     implementation project(':libnavigation-util')
-    implementation project(':libnavigation-resource')
 
-    implementation dependenciesList.supportV4
+    implementation dependenciesList.androidXCore
 
     implementation dependenciesList.coroutinesAndroid
 

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.trip.notification
 
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -9,19 +8,20 @@ import android.content.res.Resources
 import android.text.format.DateFormat
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import java.util.Locale
 import org.junit.Before
 
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
+    private val context: Context = mockk(relaxed = true)
+    private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
+
     @Before
     fun setUp() {
-        mockkStatic(DateFormat::class)
-        mockkStatic(PendingIntent::class)
-        val context = createContext()
-        notification = MapboxTripNotification(context)
+        val notificationManager = mockk<NotificationManager>()
+        every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+        notification = MapboxTripNotification(context, navigationNotificationProvider)
     }
 
     private fun createContext(): Context {

@@ -18,7 +18,6 @@ dependencies {
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkGeoJSON
 
-    api dependenciesList.timber
     implementation dependenciesList.supportAnnotation
 
     //ktlint

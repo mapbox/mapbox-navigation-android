@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.trip.model.RouteProgress
 
 interface TripSession {
 

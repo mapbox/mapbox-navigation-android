@@ -14,8 +14,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
-import com.mapbox.navigation.base.trip.RouteProgress
 import com.mapbox.navigation.base.trip.TripNotification
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.NOTIFICATION_CHANNEL
@@ -23,11 +23,14 @@ import com.mapbox.navigation.utils.NOTIFICATION_ID
 import com.mapbox.navigation.utils.SET_BACKGROUND_COLOR
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
-class MapboxTripNotification(private val applicationContext: Context) : TripNotification {
+class MapboxTripNotification(
+    private val applicationContext: Context
+) : TripNotification {
     private var collapsedNotificationRemoteViews: RemoteViews? = null
     private var expandedNotificationRemoteViews: RemoteViews? = null
     private var pendingOpenIntent: PendingIntent? = null
-    private var notification: Notification
+    private var navigationNotificationProvider: NavigationNotificationProvider
+    private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
     private val notificationReceiver = object : BroadcastReceiver() {
@@ -38,34 +41,47 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
 
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
-                ?.let { notificationService ->
-                    notificationManager = notificationService as NotificationManager
-                } ?: throw (IllegalStateException("unable to create a NotificationManager"))
+            ?.let { notificationService ->
+                notificationManager = notificationService as NotificationManager
+            } ?: throw (IllegalStateException("unable to create a NotificationManager"))
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
-        notification = buildNotification(applicationContext)
+        this.navigationNotificationProvider = NavigationNotificationProvider()
     }
 
-    override fun getNotification() = notification
+    constructor(
+        context: Context,
+        navigationNotificationProvider: NavigationNotificationProvider
+    ) : this(context) {
+        this.navigationNotificationProvider = navigationNotificationProvider
+    }
 
-    override fun getNotificationId() = NOTIFICATION_ID
+    override fun getNotification(): Notification {
+        if (!::notification.isInitialized) {
+            this.notification =
+                navigationNotificationProvider.buildNotification(getNotificationBuilder())
+        }
+        return this.notification
+    }
+
+    override fun getNotificationId(): Int = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
         updateNotificationViews(routeProgress)
-        notification = buildNotification(applicationContext)
+        notification = navigationNotificationProvider.buildNotification(getNotificationBuilder())
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    override fun onTripSessionStopped(context: Context) {
+    override fun onTripSessionStopped() {
         unregisterReceiver()
     }
 
     private fun registerReceiver() {
         applicationContext.registerReceiver(
-                notificationReceiver,
-                IntentFilter(END_NAVIGATION_ACTION)
+            notificationReceiver,
+            IntentFilter(END_NAVIGATION_ACTION)
         )
     }
 
@@ -74,10 +90,9 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    private fun buildNotification(applicationContext: Context): Notification {
-        val channelId =
-                NAVIGATION_NOTIFICATION_CHANNEL
-        val builder = NotificationCompat.Builder(applicationContext, channelId)
+    private fun getNotificationBuilder(): NotificationCompat.Builder {
+        val builder =
+            NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
@@ -88,11 +103,12 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
         pendingOpenIntent?.let { pendingOpenIntent ->
             builder.setContentIntent(pendingOpenIntent)
         }
-        return builder.build()
+        return builder
     }
 
     private fun buildRemoteViews() {
-        val backgroundColor = ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
+        val backgroundColor =
+            ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
 
         val collapsedLayout = R.layout.collapsed_navigation_notification_layout
         val collapsedLayoutId = R.id.navigationCollapsedNotificationLayout
@@ -119,9 +135,9 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                    NAVIGATION_NOTIFICATION_CHANNEL,
-                    NOTIFICATION_CHANNEL,
-                    NotificationManager.IMPORTANCE_LOW
+                NAVIGATION_NOTIFICATION_CHANNEL,
+                NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_LOW
             )
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -146,12 +162,12 @@ class MapboxTripNotification(private val applicationContext: Context) : TripNoti
 
     private fun updateData(routeProgress: RouteProgress) {
         collapsedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                routeProgress.progress
+            R.id.notificationDistanceText,
+            routeProgress.progress
         )
         expandedNotificationRemoteViews?.setTextViewText(
-                R.id.notificationDistanceText,
-                routeProgress.progress
+            R.id.notificationDistanceText,
+            routeProgress.progress
         )
     }
 }

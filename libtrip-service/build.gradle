@@ -19,8 +19,9 @@ dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
 
-    api(project(':libnavigation-base'))
+    api project(':libnavigation-base')
     api project(':libtrip-notification')
+    api project(':liblogger')
 
     //ktlint
     ktlint dependenciesList.ktlint
