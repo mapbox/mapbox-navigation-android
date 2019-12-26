@@ -11,4 +11,5 @@ include ':app',
         ':libtrip-notification',
         ':liblogger',
         ':libnavigation-util',
-        ':libnavigation-core'
+        ':libnavigation-core',
+        ':libtesting-ui'

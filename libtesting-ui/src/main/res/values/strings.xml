@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Libtesting UI</string>
+    <string name="btn_set_message">Set message</string>
+    <string name="new_message">New message</string>
+    <string name="default_message">Hello world</string>
+    <string name="show_notification">Show notification</string>
+</resources>
