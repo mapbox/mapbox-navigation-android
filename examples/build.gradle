@@ -83,8 +83,9 @@ android {
 }
 
 dependencies {
-    implementation project(':libtrip-service')
     implementation project(':libdirections-offboard')
+    implementation project(':libtrip-notification')
+    implementation project(':libnavigation-core')
     implementation project(':libnavigation-util')
     implementation project(':liblogger')
 
