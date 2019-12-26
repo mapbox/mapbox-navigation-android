@@ -3,13 +3,12 @@ package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 private const val BEARING_TOLERANCE = 90.0
 
@@ -31,7 +30,7 @@ class ExampleRouteFinder(
     }
 
     override fun onFailure(call: Call<DirectionsResponse>, throwable: Throwable) {
-        MapboxLogger.e(Message(throwable.localizedMessage), throwable)
+        Timber.e(throwable)
     }
 
     private fun find(location: Location, destination: Point) {

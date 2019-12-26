@@ -4,11 +4,10 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import androidx.core.os.ConfigurationCompat
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.util.regex.Pattern
+import timber.log.Timber
 
 internal object MetadataBuilder {
 
@@ -81,7 +80,7 @@ internal object MetadataBuilder {
             reader.close()
             (value.toLong() / 1024).toString()
         } catch (ex: IOException) {
-            MapboxLogger.e(Message("Failing to access RandomAccessFile $RANDOM_ACCESS_FILE_NAME"))
+            Timber.e("Failing to access RandomAccessFile $RANDOM_ACCESS_FILE_NAME")
             ""
         }
     }

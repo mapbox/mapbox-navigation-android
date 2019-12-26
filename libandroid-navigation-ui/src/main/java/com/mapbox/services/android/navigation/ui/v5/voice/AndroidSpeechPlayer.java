@@ -5,11 +5,10 @@ import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
-
 import java.util.HashMap;
 import java.util.Locale;
+
+import timber.log.Timber;
 
 /**
  * Default player used to play voice instructions when a connection to Polly is unable to be established.
@@ -41,7 +40,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
       public void onInit(int status) {
         boolean ableToInitialize = status == TextToSpeech.SUCCESS && language != null;
         if (!ableToInitialize) {
-          MapboxLogger.INSTANCE.e(new Message("There was an error initializing native TTS"));
+          Timber.e("There was an error initializing native TTS");
           return;
         }
         setSpeechListener(speechListener);
@@ -123,7 +122,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   private void initializeWithLanguage(Locale language) {
     boolean isLanguageAvailable = textToSpeech.isLanguageAvailable(language) == TextToSpeech.LANG_AVAILABLE;
     if (!isLanguageAvailable) {
-      MapboxLogger.INSTANCE.w(new Message("The specified language is not supported by TTS"));
+      Timber.w("The specified language is not supported by TTS");
       return;
     }
     languageSupported = true;

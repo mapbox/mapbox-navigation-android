@@ -28,8 +28,6 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -42,6 +40,7 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse> {
@@ -116,7 +115,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
   @Override
   public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
-    MapboxLogger.INSTANCE.e(new Message(throwable.getLocalizedMessage()), throwable);
+    Timber.e(throwable);
   }
 
   @Override

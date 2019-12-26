@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Navigációs SDK Androidhoz</string>
+
+    <string name="title_mock_navigation">Navigáció emuláció</string>
+    <string name="description_mock_navigation">Navigáció emulációja lokáció emulátorral.</string>
+
+    <string name="settings">Beállítások</string>
+    <string name="simulate_route">Útvonal szimulációja</string>
+    <string name="language">Nyelv</string>
+    <string name="unit_type">Mértékegység</string>
+</resources>

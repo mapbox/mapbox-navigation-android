@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Lilọ kiri SDK fun Android</string>
+
+    <string name="title_mock_navigation">Ibẹrin Lilọ kiri</string>
+    <string name="description_mock_navigation">Sọrin iṣoro lilọ kiri nipa lilo lilo ipo iṣiro.</string>
+
+    <string name="title_component_navigation">MapboxNavigation pẹlu awọn ipele UI</string>
+    <string name="description_component_navigation">MapboxNavigation pẹlu awọn ipele UI</string>
+
+    <string name="settings">Ètò</string>
+    <string name="simulate_route">Itọsọna Simulate</string>
+    <string name="language">Ede</string>
+    <string name="unit_type">Iru Iwọn</string>
+    <string name="route_profile">Profaili Itọsọna</string>
+</resources>

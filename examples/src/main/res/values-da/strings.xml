@@ -1,0 +1,5 @@
+<resources>
+    <string name="title_mock_navigation">Mock navigation </string>
+    <string name="description_mock_navigation">Kør en navigationsession ved hjælp af en lokations simulering </string>
+
+</resources>

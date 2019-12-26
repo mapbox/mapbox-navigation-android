@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">SDK 1.0 de mapas y navegación para Android</string>
+
+    <string name="title_mock_navigation">Ejemplo de navegación</string>
+    <string name="description_mock_navigation">Simula una sesión de navegación usando un ejemplo del motor de localización</string>
+
+    <string name="settings">Ajustes</string>
+    <string name="simulate_route">Simular Ruta</string>
+    <string name="language">Idioma</string>
+    <string name="unit_type">Sistema de medida</string>
+    <string name="route_profile">Perfil de ruta</string>
+ </resources>

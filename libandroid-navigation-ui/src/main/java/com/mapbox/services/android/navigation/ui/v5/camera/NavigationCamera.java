@@ -23,8 +23,6 @@ import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.utils.MathUtils;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
@@ -36,6 +34,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION;
@@ -486,7 +486,7 @@ public class NavigationCamera implements LifecycleObserver {
         locationComponent.setCameraMode(cameraMode, cameraTransitionListener);
       }
     } else {
-      MapboxLogger.INSTANCE.e(new Message("Using unsupported camera tracking mode - " + trackingCameraMode + "."));
+      Timber.e("Using unsupported camera tracking mode - %d.", trackingCameraMode);
     }
   }
 

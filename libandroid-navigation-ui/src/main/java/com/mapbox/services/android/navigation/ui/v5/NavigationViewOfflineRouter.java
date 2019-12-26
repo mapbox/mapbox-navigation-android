@@ -1,10 +1,10 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+
+import timber.log.Timber;
 
 class NavigationViewOfflineRouter {
 
@@ -35,7 +35,7 @@ class NavigationViewOfflineRouter {
 
   void findRouteWith(NavigationRoute.Builder builder) {
     if (!isConfigured) {
-      MapboxLogger.INSTANCE.e(new Message("Cannot find route - offline router is not configured"));
+      Timber.e("Cannot find route - offline router is not configured");
       return;
     }
 

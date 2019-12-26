@@ -15,8 +15,6 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
@@ -58,6 +56,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import retrofit2.Callback;
+import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
@@ -233,7 +232,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void addMilestone(@NonNull Milestone milestone) {
     boolean milestoneAdded = milestones.add(milestone);
     if (!milestoneAdded) {
-      MapboxLogger.INSTANCE.w(new Message("Milestone has already been added to the stack."));
+      Timber.w("Milestone has already been added to the stack.");
     }
   }
 
@@ -250,7 +249,7 @@ public class MapboxNavigation implements ServiceConnection {
   public void addMilestones(@NonNull List<Milestone> milestones) {
     boolean milestonesAdded = this.milestones.addAll(milestones);
     if (!milestonesAdded) {
-      MapboxLogger.INSTANCE.w(new Message("These milestones have already been added to the stack."));
+      Timber.w("These milestones have already been added to the stack.");
     }
   }
 
@@ -268,7 +267,7 @@ public class MapboxNavigation implements ServiceConnection {
       milestones.clear();
       return;
     } else if (!milestones.contains(milestone)) {
-      MapboxLogger.INSTANCE.w(new Message("Milestone attempting to remove does not exist in stack."));
+      Timber.w("Milestone attempting to remove does not exist in stack.");
       return;
     }
     milestones.remove(milestone);
@@ -290,7 +289,7 @@ public class MapboxNavigation implements ServiceConnection {
         return;
       }
     }
-    MapboxLogger.INSTANCE.w(new Message("No milestone found with the specified identifier."));
+    Timber.w("No milestone found with the specified identifier.");
   }
 
   /**
@@ -426,7 +425,7 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void stopNavigationService() {
-    MapboxLogger.INSTANCE.d(new Message("MapboxNavigation stopped"));
+    Timber.d("MapboxNavigation stopped");
     if (isServiceAvailable()) {
       navigationTelemetry.stopSession();
       applicationContext.unbindService(this);
@@ -700,7 +699,7 @@ public class MapboxNavigation implements ServiceConnection {
       freeDriveLocationUpdater.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
         @Override
         public void onConfigured(int numberOfTiles) {
-          MapboxLogger.INSTANCE.d(new Message("DEBUG: onConfigured " + numberOfTiles));
+          Timber.d("DEBUG: onConfigured %d", numberOfTiles);
           isFreeDriveConfigured.set(true);
           if (!isActiveGuidanceOnGoing.get() && isFreeDriveEnabled.get()) {
             freeDriveLocationUpdater.start();
@@ -709,7 +708,7 @@ public class MapboxNavigation implements ServiceConnection {
 
         @Override
         public void onConfigurationError(@NotNull OfflineError error) {
-          MapboxLogger.INSTANCE.e(new Message("Free drive: onConfigurationError " + error.getMessage()));
+          Timber.e("Free drive: onConfigurationError %s", error.getMessage());
           isFreeDriveConfigured.set(false);
         }
       });
@@ -935,7 +934,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
-    MapboxLogger.INSTANCE.d(new Message("Connected to service."));
+    Timber.d("Connected to service.");
     NavigationService.LocalBinder binder = (NavigationService.LocalBinder) service;
     if (binder != null) {
       navigationService = binder.getService();
@@ -946,7 +945,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   @Override
   public void onServiceDisconnected(ComponentName name) {
-    MapboxLogger.INSTANCE.d(new Message("Disconnected from service."));
+    Timber.d("Disconnected from service.");
     navigationService = null;
     isBound = false;
   }
@@ -1168,9 +1167,7 @@ public class MapboxNavigation implements ServiceConnection {
   private boolean checkInvalidLegIndex(int legIndex) {
     int legSize = directionsRoute.legs().size();
     if (legIndex < 0 || legIndex > legSize - 1) {
-      MapboxLogger.INSTANCE.e(
-              new Message("Invalid leg index update: " + legIndex + " Current leg index size: " + legSize)
-      );
+      Timber.e("Invalid leg index update: %s Current leg index size: %s", legIndex, legSize);
       return true;
     }
     return false;

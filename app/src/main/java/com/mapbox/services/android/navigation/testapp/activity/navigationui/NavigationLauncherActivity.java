@@ -42,8 +42,6 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
@@ -52,8 +50,8 @@ import com.mapbox.services.android.navigation.ui.v5.camera.CameraUpdateMode;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdate;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
-import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import org.jetbrains.annotations.NotNull;
@@ -69,6 +67,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
+import timber.log.Timber;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
@@ -449,7 +448,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
     }
   }
 }

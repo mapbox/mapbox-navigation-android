@@ -35,8 +35,6 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
@@ -58,8 +56,10 @@ import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.navigation.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+
+import timber.log.Timber;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -721,7 +721,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     try {
       return ((FragmentActivity) getContext()).getSupportFragmentManager();
     } catch (ClassCastException exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
       return null;
     }
   }

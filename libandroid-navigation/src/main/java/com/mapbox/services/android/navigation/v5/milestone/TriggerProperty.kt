@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.v5.milestone
 
 import android.util.SparseArray
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
  * The currently support properties used for triggering a milestone.

@@ -23,7 +23,7 @@ import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.navigation.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 import java.text.DecimalFormat;

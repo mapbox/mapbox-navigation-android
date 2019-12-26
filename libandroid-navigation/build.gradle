@@ -56,10 +56,6 @@ android {
 }
 
 dependencies {
-  api project(':libnavigation-base')
-  implementation project(':libnavigator')
-  implementation project(':libnavigation-util')
-  implementation project(':liblogger')
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
@@ -77,6 +73,9 @@ dependencies {
 
   // Support
   implementation dependenciesList.supportAppcompatV7
+
+  // Logging
+  implementation dependenciesList.timber
 
   // AutoValues
   annotationProcessor dependenciesList.autoValue

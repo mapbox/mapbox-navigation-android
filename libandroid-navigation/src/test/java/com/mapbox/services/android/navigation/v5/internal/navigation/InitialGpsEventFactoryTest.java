@@ -1,8 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation;
 
-import com.mapbox.navigation.utils.time.ElapsedTime;
-
 import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.MetricsReporter;
+import com.mapbox.services.android.navigation.v5.utils.time.ElapsedTime;
 
 import org.junit.Test;
 

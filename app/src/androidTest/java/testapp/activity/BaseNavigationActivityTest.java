@@ -10,8 +10,6 @@ import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.IdlingResourceTimeoutException;
 import androidx.test.rule.ActivityTestRule;
 
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 
@@ -25,11 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import testapp.utils.OnNavigationReadyIdlingResource;
+import timber.log.Timber;
 
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.Espresso.onView;
+
 
 public abstract class BaseNavigationActivityTest {
 
@@ -50,7 +50,7 @@ public abstract class BaseNavigationActivityTest {
       navigationView = idlingResource.getNavigationView();
       assetManager = activity.getAssets();
     } catch (IdlingResourceTimeoutException idlingResourceTimeoutException) {
-      MapboxLogger.INSTANCE.e(new Message("Idling resource timed out. Could not validate if navigation is ready."));
+      Timber.e("Idling resource timed out. Could not validate if navigation is ready.");
       throw new RuntimeException("Could not start test for " + getActivityClass().getSimpleName() + ".\n"
         + "The ViewHierarchy doesn't contain a view with resource id = R.id.navigationView");
     }

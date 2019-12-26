@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
 
 import android.location.Location
 import com.mapbox.android.telemetry.TelemetryUtils
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Date
 
 internal object NavigationEventFactory {

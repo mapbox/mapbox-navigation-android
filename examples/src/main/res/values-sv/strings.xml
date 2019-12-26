@@ -1,0 +1,4 @@
+<resources>
+    <string name="title_mock_navigation">Simulera Navigering</string>
+    <string name="description_mock_navigation">Simulera navigering med en platsmotor</string>
+</resources>

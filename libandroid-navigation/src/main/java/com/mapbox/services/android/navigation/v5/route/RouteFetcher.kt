@@ -5,17 +5,16 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.lang.ref.WeakReference
 import java.util.concurrent.CopyOnWriteArrayList
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import timber.log.Timber
 
 /**
  * This class can be used to fetch new routes given a [Location] origin and
@@ -115,7 +114,7 @@ class RouteFetcher
         }
         val remainingWaypoints = routeUtils.calculateRemainingWaypoints(routeProgress)?.toMutableList()
         if (remainingWaypoints == null) {
-            MapboxLogger.e(Message("An error occurred fetching a new route"))
+            Timber.e("An error occurred fetching a new route")
             return null
         }
         addDestination(remainingWaypoints, navigationRouteBuilder)

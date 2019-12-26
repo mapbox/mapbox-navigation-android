@@ -4,8 +4,8 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.navigation.utils.thread.WorkThreadHandler
 import com.mapbox.services.android.navigation.v5.internal.utils.extensions.toTelemetryEvent
+import com.mapbox.services.android.navigation.v5.utils.thread.WorkThreadHandler
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test

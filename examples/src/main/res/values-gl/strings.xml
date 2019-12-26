@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">SDK 1.0 de mapas e navegación para o Android</string>
+
+    <string name="title_mock_navigation">Exemplo de navegación</string>
+    <string name="description_mock_navigation">Simula unha sesión de navegación empregando un exemplo do motor de localización.</string>
+
+    <string name="title_component_navigation">MapboxNavigation con compoñentes UI</string>
+    <string name="description_component_navigation">MapboxNavigation con compoñentes UI</string>
+
+    <string name="settings">Axustes</string>
+    <string name="simulate_route">Simular rota</string>
+    <string name="language">Lingua</string>
+    <string name="unit_type">Unidade de medida</string>
+    <string name="route_profile">Perfil de rota</string>
+</resources>

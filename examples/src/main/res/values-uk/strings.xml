@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Navigation SDK для Android</string>
+
+    <string name="title_mock_navigation">Симуляція навігації</string>
+    <string name="description_mock_navigation">Симуляція навігації за маршрутом з використанням рушія підстановки даних про місцеположення.</string>
+
+    <string name="title_component_navigation">MapboxNavigation з компонентами інтерфейсу користувача</string>
+    <string name="description_component_navigation">MapboxNavigation з компонентами інтерфейсу користувача</string>
+
+    <string name="settings">Налаштування</string>
+    <string name="simulate_route">Імітация маршрута</string>
+    <string name="language">Мова</string>
+    <string name="unit_type">Одиниці виміру</string>
+    <string name="route_profile">Тип маршрута</string>
+</resources>

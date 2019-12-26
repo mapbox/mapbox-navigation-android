@@ -3,9 +3,9 @@ package com.mapbox.services.android.navigation.v5.milestone
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigator.BannerSection
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 
 /**

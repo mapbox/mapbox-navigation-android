@@ -42,22 +42,6 @@
         </activity>
 
         <activity
-            android:name=".activity.OffboardRouterActivityKt"
-            android:label="@string/title_offboard_router_kotlin">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.OffboardRouterActivityJava"
-            android:label="@string/title_offboard_router_java">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.RerouteActivity"
             android:label="@string/title_reroute">
             <meta-data
@@ -151,13 +135,6 @@
 
         <!-- Testing -->
         <activity android:name=".test.TestNavigationActivity"/>
-
-        <activity android:name=".activity.TripServiceActivityKt"
-                android:screenOrientation="portrait">
-            <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MainActivity"/>
-        </activity>
 
         <meta-data
             android:name="com.mapbox.TestEventsServer"

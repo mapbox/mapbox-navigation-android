@@ -2,9 +2,9 @@ package com.mapbox.services.android.navigation.v5.internal.navigation.routeprogr
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 class MetricsRouteProgress(routeProgress: RouteProgress?) {
 

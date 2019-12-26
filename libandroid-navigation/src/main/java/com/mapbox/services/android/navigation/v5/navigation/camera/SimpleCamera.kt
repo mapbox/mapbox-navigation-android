@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 
 /**

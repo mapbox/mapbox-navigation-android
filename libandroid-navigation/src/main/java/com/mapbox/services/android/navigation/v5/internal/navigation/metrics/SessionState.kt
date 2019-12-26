@@ -5,9 +5,9 @@ import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.internal.location.MetricsLocation
 import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.Date
 
 data class SessionState(

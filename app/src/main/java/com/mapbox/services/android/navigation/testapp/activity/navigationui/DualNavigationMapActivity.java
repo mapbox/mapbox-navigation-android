@@ -32,8 +32,6 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
@@ -48,6 +46,7 @@ import java.lang.ref.WeakReference;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class DualNavigationMapActivity extends AppCompatActivity implements OnNavigationReadyCallback,
   NavigationListener, Callback<DirectionsResponse>, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
@@ -357,7 +356,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
 
     @Override
     public void onFailure(@NonNull Exception exception) {
-      MapboxLogger.INSTANCE.e(new Message(exception.getLocalizedMessage()), exception);
+      Timber.e(exception);
     }
   }
 }

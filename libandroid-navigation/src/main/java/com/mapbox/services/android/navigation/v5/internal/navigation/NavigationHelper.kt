@@ -6,10 +6,10 @@ import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants.PRECISION_6
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 import java.util.ArrayList
 
 /**

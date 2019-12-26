@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Navigation SDK for Android</string>
+
+    <string name="title_mock_navigation">محاكاة الرحلة</string>
+
+    <string name="settings">الإعدادات</string>
+    <string name="simulate_route">محاكاة المسار</string>
+    <string name="language">اللغة</string>
+    <string name="unit_type">نوع الوحدة</string>
+    <string name="route_profile">تعريف المسار</string>
+</resources>

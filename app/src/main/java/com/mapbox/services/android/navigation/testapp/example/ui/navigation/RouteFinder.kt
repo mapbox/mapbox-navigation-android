@@ -6,11 +6,10 @@ import android.preference.PreferenceManager
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
+import timber.log.Timber
 
 class RouteFinder(
     private val viewModel: ExampleViewModel,
@@ -47,13 +46,13 @@ class RouteFinder(
     }
 
     override fun onError(error: String) {
-        MapboxLogger.d(Message(error))
+        Timber.d(error)
     }
 
     private fun obtainOfflineDirectory(): String {
         val offline = Environment.getExternalStoragePublicDirectory("Offline")
         if (!offline.exists()) {
-            MapboxLogger.d(Message("Offline directory does not exist"))
+            Timber.d("Offline directory does not exist")
             offline.mkdirs()
         }
         return offline.absolutePath

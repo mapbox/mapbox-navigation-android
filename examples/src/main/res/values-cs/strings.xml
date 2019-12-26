@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Navigation SDK pro Android</string>
+
+    <string name="title_mock_navigation">Simulované navigování</string>
+    <string name="description_mock_navigation">Simulované navigování využívá simulované určování polohy.</string>
+
+    <string name="title_component_navigation">Navigace MapBox s prvky uživatelského rozhraní</string>
+    <string name="description_component_navigation">Navigace MapBox s prvky uživatelského rozhraní</string>
+
+    <string name="settings">Nastavení</string>
+    <string name="simulate_route">Simulovat trasu</string>
+    <string name="language">Jazyk</string>
+    <string name="unit_type">Jednotka</string>
+    <string name="route_profile">Profil trasy</string>
+</resources>

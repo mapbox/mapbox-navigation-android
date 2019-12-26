@@ -1,0 +1,5 @@
+<resources>
+    <string name="title_mock_navigation">Simular navegació</string>
+    <string name="description_mock_navigation">Simular una sessió de navegació amb un motor simulat d\'ubicació.</string>
+
+</resources>

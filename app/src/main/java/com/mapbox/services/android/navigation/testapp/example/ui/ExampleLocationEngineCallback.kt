@@ -4,8 +4,7 @@ import android.location.Location
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
+import timber.log.Timber
 
 class ExampleLocationEngineCallback(private val location: MutableLiveData<Location>) :
     LocationEngineCallback<LocationEngineResult> {
@@ -15,6 +14,6 @@ class ExampleLocationEngineCallback(private val location: MutableLiveData<Locati
     }
 
     override fun onFailure(exception: Exception) {
-        MapboxLogger.e(Message(exception.localizedMessage), exception)
+        Timber.e(exception)
     }
 }

@@ -43,7 +43,7 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.navigation.utils.extensions.ContextEx;
+import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
 import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
 
 /**
