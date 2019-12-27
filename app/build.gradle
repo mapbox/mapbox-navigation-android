@@ -88,7 +88,6 @@ dependencies {
   implementation project(':libdirections-onboard')
   implementation project(':libnavigation-util')
   implementation project(':liblogger')
-  implementation project(':examples')
 
   //ktlint
   ktlint dependenciesList.ktlint
