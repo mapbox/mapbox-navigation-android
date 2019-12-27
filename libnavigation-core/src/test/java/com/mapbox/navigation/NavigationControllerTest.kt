@@ -5,6 +5,7 @@ import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.every
@@ -47,12 +48,12 @@ class NavigationControllerTest {
 
         navigationController =
             NavigationController(
+                context,
                 navigator,
                 locationEngine,
                 locationEngineRequest,
-                navigationOffboardRoute
-                locationEngineRequest,
                 tripServiceLambda,
+                navigationOffboardRoute,
                 navigationNotificationProvider
             )
     }

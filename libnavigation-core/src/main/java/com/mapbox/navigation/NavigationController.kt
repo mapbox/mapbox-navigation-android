@@ -1,5 +1,6 @@
 package com.mapbox.navigation
 
+import android.content.Context
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -20,6 +21,7 @@ import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.directions.session.DirectionsSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.TripService
 import com.mapbox.navigation.trip.session.TripSession
@@ -35,6 +37,7 @@ class NavigationController {
     private val locationEngineRequest: LocationEngineRequest
     private val navigationOffboardRoute: NavigationOffboardRoute
     private val navigationNotificationProvider: NavigationNotificationProvider
+    private val context: Context
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
     private val workerHandler: Handler by lazy { Handler(workerThread.looper) }
@@ -53,6 +56,7 @@ class NavigationController {
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
         tripServiceLambda: () -> Unit,
+        navigationOffboardRoute: NavigationOffboardRoute,
         navigationNotificationProvider: NavigationNotificationProvider
     ) {
         this.context = context
