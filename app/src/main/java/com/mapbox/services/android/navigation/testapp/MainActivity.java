@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.OnboardRouterActivityJava;
+import com.mapbox.services.android.navigation.testapp.activity.OnboardRouterActivityKt;
 import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;

@@ -30,7 +30,6 @@ import com.mapbox.navigation.base.route.model.StepIntersectionNavigation
 import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 import com.mapbox.navigation.base.route.model.VoiceInstructionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
-import com.mapbox.services.android.navigation.v5.navigation.WalkingOptionsNavigation
 
 fun WalkingOptionsNavigation.mapToWalkingOptions(): WalkingOptions = WalkingOptions
     .builder()
