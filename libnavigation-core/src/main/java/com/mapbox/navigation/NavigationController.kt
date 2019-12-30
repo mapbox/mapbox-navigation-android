@@ -120,7 +120,7 @@ class NavigationController {
                 )
             )
             OffboardRouter -> arrayOf(
-                String::class.java to mapboxToken,
+                String::class.java to accessToken,
                 Context::class.java to context
             )
             OnboardRouter -> arrayOf(
