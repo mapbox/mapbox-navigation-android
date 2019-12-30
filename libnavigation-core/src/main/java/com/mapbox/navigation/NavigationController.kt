@@ -38,6 +38,7 @@ class NavigationController {
     private val navigationOffboardRoute: NavigationOffboardRoute
     private val navigationNotificationProvider: NavigationNotificationProvider
     private val context: Context
+    private val accessToken: String
 
     private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
     private val workerHandler: Handler by lazy { Handler(workerThread.looper) }
@@ -52,6 +53,7 @@ class NavigationController {
 
     constructor(
         context: Context,
+        accessToken: String,
         navigator: MapboxNativeNavigator,
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
@@ -60,6 +62,7 @@ class NavigationController {
         navigationNotificationProvider: NavigationNotificationProvider
     ) {
         this.context = context
+        this.accessToken = accessToken
         this.navigator = navigator
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
@@ -117,7 +120,8 @@ class NavigationController {
                 )
             )
             OffboardRouter -> arrayOf(
-                NavigationOffboardRoute::class.java to navigationOffboardRoute
+                String::class.java to mapboxToken,
+                Context::class.java to context
             )
             OnboardRouter -> arrayOf(
                 MapboxNativeNavigator::class.java to navigator

@@ -25,6 +25,7 @@ class NavigationControllerTest {
 
     private lateinit var navigationController: NavigationController
     private val context: Context = mockk(relaxed = true)
+    private val accessToken = "pk.XXX"
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
@@ -49,6 +50,7 @@ class NavigationControllerTest {
         navigationController =
             NavigationController(
                 context,
+                accessToken,
                 navigator,
                 locationEngine,
                 locationEngineRequest,
