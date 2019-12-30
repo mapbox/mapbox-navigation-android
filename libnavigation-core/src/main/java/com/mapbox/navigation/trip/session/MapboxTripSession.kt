@@ -7,13 +7,21 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.navigation.base.route.util.redesignRouteOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.directions.session.DirectionsSession
+import com.mapbox.navigation.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.trip.service.TripService
+import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.thread.WorkThreadHandler
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.TimeUnit
 
 internal class MapboxTripSession(
     override val tripService: TripService,
@@ -37,10 +45,15 @@ internal class MapboxTripSession(
 
     private val locationObservers = CopyOnWriteArrayList<TripSession.LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArrayList<TripSession.RouteProgressObserver>()
+    private val fasterRouteListeners = CopyOnWriteArraySet<TripSession.FasterRouteListener>()
 
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
+
+    private var fasterRouteExamine: FasterRouteExamine = FasterRouteExamine.Impl()
+    private var fasterRouteFetcher: DirectionsSession? = null
+    private val fasterRouteThreadHandler = WorkThreadHandler()
 
 //    private val serviceStateListener = object : TripService.StateListener {
 //        override fun onStateChanged(state: Any) {
@@ -111,6 +124,39 @@ internal class MapboxTripSession(
         routeProgressObservers.remove(routeProgressObserver)
     }
 
+    override fun enableFasterRouteListener(router: Router) {
+        fasterRouteFetcher = MapboxDirectionsSession(router, FasterRouteObserver())
+        fasterRouteThreadHandler.post { fetchFasterRoute() }
+    }
+
+    override fun disableFasterRouteListener() {
+        fasterRouteFetcher = null
+        fasterRouteThreadHandler.removeAllTasks()
+    }
+
+    override fun registerFasterRouteListener(fasterRouteListener: TripSession.FasterRouteListener) {
+        fasterRouteListeners.add(fasterRouteListener)
+    }
+
+    override fun unregisterFasterRouteListener(fasterRouteListener: TripSession.FasterRouteListener) {
+        fasterRouteListeners.remove(fasterRouteListener)
+    }
+
+    override fun unregisterAllFasterRouteListeners() {
+        fasterRouteListeners.clear()
+    }
+
+    private fun fetchFasterRoute() {
+        val routeOption = routeProgress?.let { route?.redesignRouteOptions(it) }
+        ifNonNull(fasterRouteFetcher, routeOption) { routeFetcher, routeOptions ->
+            routeFetcher.requestRoutes(routeOptions)
+        }
+        fasterRouteThreadHandler.postDelayed(
+            { fetchFasterRoute() },
+            FASTER_ROUTE_FETCH_PERIOD_MILLS
+        )
+    }
+
     private class MainLocationCallback(tripSession: MapboxTripSession) :
         LocationEngineCallback<LocationEngineResult> {
 
@@ -144,5 +190,20 @@ internal class MapboxTripSession(
 
     companion object {
         private const val STATUS_POLLING_INTERVAL = 1000L
+        private val FASTER_ROUTE_FETCH_PERIOD_MILLS = TimeUnit.MINUTES.toMillis(10)
+    }
+
+    internal inner class FasterRouteObserver : DirectionsSession.RouteObserver {
+        override fun onRoutesChanged(routes: List<Route>) {
+            ifNonNull(route, routeProgress, routes.firstOrNull()) { oldRoute, routeProgress, newRoute ->
+                if (fasterRouteExamine.isRouteFaster(oldRoute, routeProgress, newRoute)) {
+                    fasterRouteListeners.forEach { it.onFasterRouteFound(newRoute) }
+                }
+            }
+        }
+
+        override fun onRoutesRequested() = Unit
+
+        override fun onRoutesRequestFailure(throwable: Throwable) = Unit
     }
 }

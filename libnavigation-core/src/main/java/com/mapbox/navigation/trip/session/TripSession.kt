@@ -3,6 +3,7 @@ package com.mapbox.navigation.trip.session
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.trip.service.TripService
@@ -24,6 +25,12 @@ internal interface TripSession {
     fun registerLocationObserver(locationObserver: LocationObserver)
     fun unregisterLocationObserver(locationObserver: LocationObserver)
 
+    fun enableFasterRouteListener(router: Router)
+    fun disableFasterRouteListener()
+    fun registerFasterRouteListener(fasterRouteListener: FasterRouteListener)
+    fun unregisterFasterRouteListener(fasterRouteListener: FasterRouteListener)
+    fun unregisterAllFasterRouteListeners()
+
     fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver)
     fun unregisterRouteProgressObserver(routeProgressObserver: RouteProgressObserver)
 
@@ -34,5 +41,9 @@ internal interface TripSession {
 
     interface RouteProgressObserver {
         fun onRouteProgressChanged(routeProgress: RouteProgress)
+    }
+
+    interface FasterRouteListener {
+        fun onFasterRouteFound(route: Route)
     }
 }
