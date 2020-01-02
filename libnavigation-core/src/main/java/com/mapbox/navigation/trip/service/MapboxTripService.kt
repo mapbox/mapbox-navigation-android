@@ -22,7 +22,7 @@ class MapboxTripService(
     @InternalCoroutinesApi
     override fun startService() {
         if (!notificationDataChannel.isClosedForSend) {
-            notificationDataChannel.close()
+            notificationDataChannel.cancel()
             notificationDataChannel = Channel(1)
         }
         when (serviceStarted.compareAndSet(false, true)) {
@@ -46,7 +46,7 @@ class MapboxTripService(
     }
 
     override fun stopService() {
-        notificationDataChannel.close()
+        notificationDataChannel.cancel()
         tripNotification.onTripSessionStopped()
     }
 
