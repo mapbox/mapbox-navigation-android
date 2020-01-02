@@ -23,6 +23,7 @@ import com.mapbox.navigation.examples.activity.MockNavigationActivity;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityJava;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityKt;
 import com.mapbox.navigation.examples.activity.TripServiceActivityKt;
+import com.mapbox.navigation.examples.activity.TripSessionActivityKt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,31 +50,36 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     ButterKnife.bind(this);
 
     settingsFab.setOnClickListener(v -> startActivityForResult(
-            new Intent(MainActivity.this, NavigationSettingsActivity.class),
-            CHANGE_SETTING_REQUEST_CODE
+        new Intent(MainActivity.this, NavigationSettingsActivity.class),
+        CHANGE_SETTING_REQUEST_CODE
     ));
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
-      new SampleItem(
-        getString(R.string.title_mock_navigation),
-        getString(R.string.description_mock_navigation),
-        MockNavigationActivity.class
-      ),
-      new SampleItem(
-        getString(R.string.title_offboard_router_kotlin),
-        getString(R.string.description_offboard_router_kotlin),
-        OffboardRouterActivityKt.class
-      ),
-      new SampleItem(
-        getString(R.string.title_offboard_router_java),
-        getString(R.string.description_offboard_router_java),
-        OffboardRouterActivityJava.class
-      ),
-      new SampleItem(
-        getString(R.string.title_trip_service_kotlin),
-        getString(R.string.description_trip_service_kotlin),
-        TripServiceActivityKt.class
-      )
+        new SampleItem(
+            getString(R.string.title_mock_navigation),
+            getString(R.string.description_mock_navigation),
+            MockNavigationActivity.class
+        ),
+        new SampleItem(
+            getString(R.string.title_offboard_router_kotlin),
+            getString(R.string.description_offboard_router_kotlin),
+            OffboardRouterActivityKt.class
+        ),
+        new SampleItem(
+            getString(R.string.title_offboard_router_java),
+            getString(R.string.description_offboard_router_java),
+            OffboardRouterActivityJava.class
+        ),
+        new SampleItem(
+            getString(R.string.title_trip_service_kotlin),
+            getString(R.string.description_trip_service_kotlin),
+            TripServiceActivityKt.class
+        ),
+        new SampleItem(
+            getString(R.string.title_trip_session_kotlin),
+            getString(R.string.description_trip_session_kotlin),
+            TripSessionActivityKt.class
+        )
     ));
 
     // RecyclerView
@@ -117,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
     Toast.makeText(this, "This app needs location and storage permissions"
-      + "in order to show its functionality.", Toast.LENGTH_LONG).show();
+        + "in order to show its functionality.", Toast.LENGTH_LONG).show();
   }
 
   @Override
@@ -165,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     @Override
     public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       View view = LayoutInflater
-        .from(parent.getContext())
-        .inflate(R.layout.item_main_feature, parent, false);
+          .from(parent.getContext())
+          .inflate(R.layout.item_main_feature, parent, false);
 
       view.setOnClickListener(clickedView -> {
         int position = recyclerView.getChildLayoutPosition(clickedView);

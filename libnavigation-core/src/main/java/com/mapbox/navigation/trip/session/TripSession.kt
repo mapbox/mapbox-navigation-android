@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.trip.service.TripService
 
-internal interface TripSession {
+interface TripSession {
 
     val tripService: TripService
     val locationEngine: LocationEngine
