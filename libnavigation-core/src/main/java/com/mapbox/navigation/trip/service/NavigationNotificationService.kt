@@ -25,8 +25,9 @@ class NavigationNotificationService : Service() {
     }
 
     override fun onDestroy() {
-        stopForeground(true)
         super.onDestroy()
+        stopForeground(true)
+        job.cancel()
     }
 
     private fun startForegroundNotification() {

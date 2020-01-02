@@ -65,13 +65,12 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        if (!isServiceRunning(NavigationNotificationService::class.java)) {
-            mapboxTripNotification =
+        mapboxTripNotification =
                 MapboxTripNotification(applicationContext, NavigationNotificationProvider())
-            mapboxTripService =
+        mapboxTripService =
                 MapboxTripService(mapboxTripNotification) {
                     val intent =
-                        Intent(applicationContext, NavigationNotificationService::class.java)
+                            Intent(applicationContext, NavigationNotificationService::class.java)
                     try {
                         applicationContext.startService(intent)
                     } catch (e: IllegalStateException) {
@@ -83,8 +82,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
 
-            mapboxTripService.startService()
-        }
+        mapboxTripService.startService()
     }
 
     public override fun onResume() {
