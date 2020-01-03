@@ -25,11 +25,10 @@ class MapboxTripServiceTest {
         every { tripNotification.getNotificationId() } answers { 1234 }
         every { tripNotification.getNotification() } answers { notification }
         every { tripNotification.onTripSessionStopped() } answers { Unit }
-
     }
 
     @Test
-    fun testServiceStartStop() {
+    fun serviceStartStopShouldNotCrash() {
         service.startService()
         service.stopService()
         service.startService()
