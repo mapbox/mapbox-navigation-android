@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.offboard
 
+import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.route.Router
@@ -9,6 +10,7 @@ import com.mapbox.navigation.route.offboard.extension.mapToRoute
 import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertNotNull
@@ -21,6 +23,8 @@ class MapboxOffboardRouterTest : BaseTest() {
 
     private val navigationRoute = mockk<NavigationOffboardRoute>(relaxed = true)
     private val navigationRouteBuilder = mockk<NavigationOffboardRoute.Builder>(relaxed = true)
+    private val context = mockk<Context>()
+    private val accessToken = "pk.1234"
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptionsNavigation = mockk(relaxed = true)
@@ -28,13 +32,15 @@ class MapboxOffboardRouterTest : BaseTest() {
     @Before
     fun setUp() {
         val listener = slot<Callback<DirectionsResponse>>()
-        every { navigationRoute.toBuilder() } returns navigationRouteBuilder
-        every { navigationRouteBuilder.build() } returns navigationRoute
+
+        mockkObject(RouteBuilderProvider)
+        every { RouteBuilderProvider.getBuilder(accessToken, context) } returns navigationRouteBuilder
         every { navigationRouteBuilder.routeOptions(any()) } returns navigationRouteBuilder
+        every { navigationRouteBuilder.build() } returns navigationRoute
         every { navigationRoute.getRoute(capture(listener)) } answers {
             callback = listener.captured
         }
-        offboardRouter = MapboxOffboardRouter(navigationRoute)
+        offboardRouter = MapboxOffboardRouter(accessToken, context)
     }
 
     @Test

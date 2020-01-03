@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
+import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -245,7 +246,7 @@ class NavigationRouteTest {
         assertThat(request, containsString("walking_speed"))
     }
 
-    private fun provideNavigationOffboardRouteBuilder() = NavigationOffboardRoute.builder(ACESS_TOKEN, context)
+    private fun provideNavigationOffboardRouteBuilder() = RouteBuilderProvider.getBuilder(ACESS_TOKEN, context)
 
     @Test
     fun cancelCall_cancelsCallNotExecuted() {
