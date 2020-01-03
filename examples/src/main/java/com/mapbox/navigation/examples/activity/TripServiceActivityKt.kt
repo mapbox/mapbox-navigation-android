@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -113,6 +112,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
+        mapboxTripService.stopService()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -137,15 +137,5 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 delay(1000L)
             }
         }
-    }
-
-    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
     }
 }
