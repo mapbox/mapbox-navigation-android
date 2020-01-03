@@ -25,7 +25,6 @@ dependencies {
 
     api project(':libnavigation-base')
     implementation project(':libnavigation-util')
-    implementation project(':liblogger')
     implementation project(':libnavigator')
     implementation project(':libdirections-hybrid')
     implementation project(':libtrip-notification')
