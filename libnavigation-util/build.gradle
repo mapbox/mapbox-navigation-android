@@ -17,7 +17,6 @@ android {
 }
 
 dependencies {
-    implementation project(':liblogger')
     implementation dependenciesList.kotlinStdLib
 
     //ktlint
