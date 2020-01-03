@@ -1,10 +1,9 @@
 package com.mapbox.navigation.trip.service
 
-import com.mapbox.navigation.base.logger.model.Message
+import android.util.Log
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.logger.MapboxLogger
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -37,7 +36,7 @@ class MapboxTripService(
                 )
             }
             false -> {
-                MapboxLogger.i(Message("service already started"))
+                Log.i("MapboxTripService", "service already started")
             }
         }
     }
