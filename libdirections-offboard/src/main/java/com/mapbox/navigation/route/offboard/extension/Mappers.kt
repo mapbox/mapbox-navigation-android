@@ -5,12 +5,31 @@ package com.mapbox.navigation.route.offboard.extension
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
+
+fun LegStep.mapToLegStep() = LegStepNavigation(
+    distance = distance(),
+    duration = duration()
+)
+
+fun RouteLeg.mapToRouteLeg() = RouteLegsNavigation(
+    distance = distance(),
+    duration = duration(),
+    summary = summary(),
+    steps = steps()?.let { stepList ->
+        stepList.map {
+            it.mapToLegStep()
+        }
+    }
+)
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
@@ -19,7 +38,11 @@ fun DirectionsRoute.mapToRoute() = Route(
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
-    legs = legs()?.let { RouteLegsNavigation(it) },
+    legs = legs()?.let { routeLegs ->
+        routeLegs.map {
+            it.mapToRouteLeg()
+        }
+    },
     routeOptions = routeOptions()?.mapToRouteOptionsNavigation(),
     voiceLanguage = voiceLanguage()
 )
