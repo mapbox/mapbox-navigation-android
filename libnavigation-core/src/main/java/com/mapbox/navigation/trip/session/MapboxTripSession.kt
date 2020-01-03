@@ -3,30 +3,29 @@ package com.mapbox.navigation.trip.session
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.trip.service.TripService
+import com.mapbox.navigation.utils.ThreadController
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -35,6 +34,7 @@ class MapboxTripSession(
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
     private val navigator: MapboxNativeNavigator,
+    // TODO Remove and fix usages as property "mainHandler" is never used
     private val mainHandler: Handler,
     private val workerHandler: Handler
 ) : TripSession {
@@ -63,25 +63,13 @@ class MapboxTripSession(
 //        }
 //    }
 
-    private val navigatorPollingRunnable = object : Runnable {
-        override fun run() {
-            val status = navigator.getStatus(Date())
-            mainHandler.post {
-                updateEnhancedLocation(status.enhancedLocation)
-                updateRouteProgress(status.routeProgress)
-            }
-            workerHandler.postDelayed(
-                this,
-                STATUS_POLLING_INTERVAL
-            )
-        }
-    }
-
     private val navigatorLocationUpdateRunnable = Runnable {
         rawLocation?.let { navigator.updateLocation(it) }
     }
 
     private var listenLocationUpdatesJob: Job = Job()
+
+    private var navigatorPollingJob: Job = Job()
 
     override fun getRawLocation() = rawLocation
 
@@ -111,25 +99,33 @@ class MapboxTripSession(
             mainLocationCallback,
             Looper.getMainLooper()
         )
-        workerHandler.postDelayed(
-            navigatorPollingRunnable,
-            STATUS_POLLING_INTERVAL
-        )
+        navigatorPollingJob = ThreadController.scope.launch {
+            navigatorPolling()
+            delay(STATUS_POLLING_INTERVAL)
+        }
+    }
+
+    private suspend fun navigatorPolling() {
+        val status = navigator.getStatus(Date())
+        withContext(Dispatchers.Main) {
+            updateEnhancedLocation(status.enhancedLocation)
+            updateRouteProgress(status.routeProgress)
+        }
     }
 
     private fun listenLocationUpdates() {
-        listenLocationUpdatesJob = locationScope.launch {
+        listenLocationUpdatesJob = ThreadController.scope.launch {
             while (isActive) {
                 when (!locationChannel.isClosedForReceive) {
                     true -> {
                         val location = locationChannel.receive()
-                        MapboxLogger.d(Tag("DEBUG"), Message("$location"))
+                        Log.d("DEBUG", "$location")
                         updateLocation(location)
                     }
                     false -> {
-                        MapboxLogger.d(
-                            Tag("DEBUG"),
-                            Message("location channel is closed for receive")
+                        Log.d(
+                            "DEBUG",
+                            "location channel is closed for receive"
                         )
                     }
                 }
@@ -140,7 +136,7 @@ class MapboxTripSession(
     override fun stop() {
         tripService.stopService()
         locationEngine.removeLocationUpdates(mainLocationCallback)
-        workerHandler.removeCallbacks(navigatorPollingRunnable)
+        navigatorPollingJob.cancel()
         workerHandler.removeCallbacks(navigatorLocationUpdateRunnable)
     }
 
@@ -178,16 +174,16 @@ class MapboxTripSession(
             result?.locations?.firstOrNull()?.let {
                 when (!locationChannel.isClosedForSend) {
                     true -> locationChannel.offer(it)
-                    false -> MapboxLogger.d(
-                        Tag("DEBUG"),
-                        Message("location channel is closed for send")
+                    false -> Log.d(
+                        "DEBUG",
+                        "location channel is closed for send"
                     )
                 }
             }
         }
 
         override fun onFailure(exception: Exception) {
-            MapboxLogger.d(Tag("DEBUG"), Message("location on failure"), exception)
+            Log.d("DEBUG", "location on failure", exception)
             stopLocationUpdates()
         }
     }
@@ -235,7 +231,5 @@ class MapboxTripSession(
     companion object {
         private const val STATUS_POLLING_INTERVAL = 1000L
         private var locationChannel = Channel<Location>(CONFLATED)
-        private val job = SupervisorJob()
-        private val locationScope = CoroutineScope(job + Dispatchers.Main)
     }
 }
