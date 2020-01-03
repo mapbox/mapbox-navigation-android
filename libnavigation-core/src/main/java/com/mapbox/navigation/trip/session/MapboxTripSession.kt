@@ -93,7 +93,7 @@ class MapboxTripSession(
     //  Currently temporal for testing purposes
     fun startLocationUpdates() {
         if (!locationChannel.isClosedForSend) {
-            locationChannel.close()
+            locationChannel.cancel()
         }
         locationChannel = Channel(CONFLATED)
         locationEngine.requestLocationUpdates(
@@ -150,7 +150,7 @@ class MapboxTripSession(
         locationEngine.removeLocationUpdates(locationEngineCallback)
         listenLocationUpdatesJob.cancel()
         if (!locationChannel.isClosedForSend) {
-            locationChannel.close()
+            locationChannel.cancel()
         }
     }
 
