@@ -14,9 +14,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter(private val offboardRoute: NavigationOffboardRoute) : Router {
-
-    constructor(accessToken: String, context: Context) : this(NavigationOffboardRoute.builder(accessToken, context).build())
+class MapboxOffboardRouter(private val accessToken: String, private val context: Context) : Router {
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"
@@ -28,7 +26,7 @@ class MapboxOffboardRouter(private val offboardRoute: NavigationOffboardRoute) :
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
-        navigationRoute = offboardRoute.toBuilder().routeOptions(routeOptions).build()
+        navigationRoute = RouteBuilderProvider.getBuilder(accessToken, context).routeOptions(routeOptions).build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
 
             override fun onResponse(
