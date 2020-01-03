@@ -5,18 +5,13 @@ import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.Assert
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
 
 @InternalCoroutinesApi
@@ -29,21 +24,11 @@ class NavigationControllerTest {
     private val navigator: MapboxNativeNavigator = mockk()
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk()
-    private val navigationOffboardRoute: NavigationOffboardRoute = mockk()
     private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
     private val tripServiceLambda: () -> Unit = mockk()
 
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun initialize() {
-            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
-        }
-    }
-
     @Before
     fun setUp() {
-        every { context.inferDeviceLocale() } returns Locale.US
         val notificationManager = mockk<NotificationManager>()
         every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
 
@@ -55,7 +40,6 @@ class NavigationControllerTest {
                 locationEngine,
                 locationEngineRequest,
                 tripServiceLambda,
-                navigationOffboardRoute,
                 navigationNotificationProvider
             )
     }

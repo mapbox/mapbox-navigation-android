@@ -21,7 +21,6 @@ import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.directions.session.DirectionsSession
 import com.mapbox.navigation.module.NavigationModuleProvider
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.TripService
 import com.mapbox.navigation.trip.session.TripSession
@@ -35,7 +34,6 @@ class NavigationController {
     private val navigator: MapboxNativeNavigator
     private val locationEngine: LocationEngine
     private val locationEngineRequest: LocationEngineRequest
-    private val navigationOffboardRoute: NavigationOffboardRoute
     private val navigationNotificationProvider: NavigationNotificationProvider
     private val context: Context
     private val accessToken: String
@@ -58,7 +56,6 @@ class NavigationController {
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
         tripServiceLambda: () -> Unit,
-        navigationOffboardRoute: NavigationOffboardRoute,
         navigationNotificationProvider: NavigationNotificationProvider
     ) {
         this.context = context
@@ -67,7 +64,6 @@ class NavigationController {
         this.locationEngine = locationEngine
         this.locationEngineRequest = locationEngineRequest
         this.navigationNotificationProvider = navigationNotificationProvider
-        this.navigationOffboardRoute = navigationOffboardRoute
 
         logger = NavigationModuleProvider.createModule(LoggerModule, ::paramsProvider)
         directionsSession = NavigationComponentProvider.createDirectionsSession(
