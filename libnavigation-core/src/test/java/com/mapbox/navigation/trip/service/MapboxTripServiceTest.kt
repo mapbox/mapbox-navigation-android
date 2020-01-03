@@ -23,8 +23,8 @@ class MapboxTripServiceTest {
     fun setUp() {
         service = MapboxTripService(tripNotification, callback)
         every { tripNotification.getNotificationId() } answers { 1234 }
-        every { tripNotification.getNotification() } answers {notification}
-        every { tripNotification.onTripSessionStopped() } answers { Unit}
+        every { tripNotification.getNotification() } answers { notification }
+        every { tripNotification.onTripSessionStopped() } answers { Unit }
 
     }
 
