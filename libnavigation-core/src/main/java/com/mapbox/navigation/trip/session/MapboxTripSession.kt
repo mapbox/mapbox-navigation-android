@@ -1,7 +1,6 @@
 package com.mapbox.navigation.trip.session
 
 import android.location.Location
-import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
@@ -12,6 +11,7 @@ import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.trip.service.TripService
+import com.mapbox.navigation.utils.JobControl
 import com.mapbox.navigation.utils.ThreadController
 import java.lang.ref.WeakReference
 import java.util.Date
@@ -33,22 +33,20 @@ class MapboxTripSession(
     override val tripService: TripService,
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
-    private val navigator: MapboxNativeNavigator,
-    // TODO Remove and fix usages as property "mainHandler" is never used
-    private val mainHandler: Handler,
-    private val workerHandler: Handler
+    private val navigator: MapboxNativeNavigator
 ) : TripSession {
 
     override var route: Route? = null
         set(value) {
             field = value
             if (value != null) {
-                workerHandler.post { navigator.setRoute(value) }
+                notificationJobController.scope.launch { navigator.setRoute(value) }
             }
         }
-
+    private val notificationJobController: JobControl = ThreadController.getScopeAndRootJob()
+    private val mainThreadNotifiationController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val mainLocationCallback =
-        MainLocationCallback(this)
+            MainLocationCallback(this)
 
     private val locationObservers = CopyOnWriteArrayList<TripSession.LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArrayList<TripSession.RouteProgressObserver>()
@@ -63,13 +61,7 @@ class MapboxTripSession(
 //        }
 //    }
 
-    private val navigatorLocationUpdateRunnable = Runnable {
-        rawLocation?.let { navigator.updateLocation(it) }
-    }
-
     private var listenLocationUpdatesJob: Job = Job()
-
-    private var navigatorPollingJob: Job = Job()
 
     override fun getRawLocation() = rawLocation
 
@@ -85,9 +77,9 @@ class MapboxTripSession(
         }
         locationChannel = Channel(CONFLATED)
         locationEngine.requestLocationUpdates(
-            locationEngineRequest,
-            locationEngineCallback,
-            Looper.getMainLooper()
+                locationEngineRequest,
+                locationEngineCallback,
+                Looper.getMainLooper()
         )
         listenLocationUpdates()
     }
@@ -95,11 +87,11 @@ class MapboxTripSession(
     override fun start() {
         tripService.startService()
         locationEngine.requestLocationUpdates(
-            locationEngineRequest,
-            mainLocationCallback,
-            Looper.getMainLooper()
+                locationEngineRequest,
+                mainLocationCallback,
+                Looper.getMainLooper()
         )
-        navigatorPollingJob = ThreadController.scope.launch {
+        notificationJobController.scope.launch {
             navigatorPolling()
             delay(STATUS_POLLING_INTERVAL)
         }
@@ -114,7 +106,8 @@ class MapboxTripSession(
     }
 
     private fun listenLocationUpdates() {
-        listenLocationUpdatesJob = ThreadController.scope.launch {
+
+        listenLocationUpdatesJob = mainThreadNotifiationController.scope.launch {
             while (isActive) {
                 when (!locationChannel.isClosedForReceive) {
                     true -> {
@@ -124,8 +117,8 @@ class MapboxTripSession(
                     }
                     false -> {
                         Log.d(
-                            "DEBUG",
-                            "location channel is closed for receive"
+                                "DEBUG",
+                                "location channel is closed for receive"
                         )
                     }
                 }
@@ -136,8 +129,8 @@ class MapboxTripSession(
     override fun stop() {
         tripService.stopService()
         locationEngine.removeLocationUpdates(mainLocationCallback)
-        navigatorPollingJob.cancel()
-        workerHandler.removeCallbacks(navigatorLocationUpdateRunnable)
+        notificationJobController.job.cancel()
+        mainThreadNotifiationController.job.cancel()
     }
 
     // TODO Remove / integrate as part of stop()
@@ -175,8 +168,8 @@ class MapboxTripSession(
                 when (!locationChannel.isClosedForSend) {
                     true -> locationChannel.offer(it)
                     false -> Log.d(
-                        "DEBUG",
-                        "location channel is closed for send"
+                            "DEBUG",
+                            "location channel is closed for send"
                     )
                 }
             }
@@ -191,7 +184,7 @@ class MapboxTripSession(
     // TODO Remove, will be replaced by locationEngineCallback
     //  Currently duplicated / not used for testing purposes
     private class MainLocationCallback(tripSession: MapboxTripSession) :
-        LocationEngineCallback<LocationEngineResult> {
+            LocationEngineCallback<LocationEngineResult> {
 
         private val tripSessionReference = WeakReference(tripSession)
 
@@ -214,7 +207,7 @@ class MapboxTripSession(
 
     private fun updateRawLocation(rawLocation: Location) {
         this.rawLocation = rawLocation
-        workerHandler.post(navigatorLocationUpdateRunnable)
+        notificationJobController.scope.launch { rawLocation.let { navigator.updateLocation(it) } }
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
     }
 

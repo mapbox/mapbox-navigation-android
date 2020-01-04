@@ -3,7 +3,6 @@ package com.mapbox.navigation.examples.activity
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -97,9 +96,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .build(),
-            MapboxNativeNavigatorImpl,
-            Handler(),
-            Handler()
+            MapboxNativeNavigatorImpl
         )
     }
 

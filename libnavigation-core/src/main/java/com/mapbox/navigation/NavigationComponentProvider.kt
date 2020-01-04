@@ -34,8 +34,6 @@ internal object NavigationComponentProvider {
         tripService,
         locationEngine,
         locationEngineRequest,
-        navigator,
-        mainHandler,
-        workerHandler
+        navigator
     )
 }
