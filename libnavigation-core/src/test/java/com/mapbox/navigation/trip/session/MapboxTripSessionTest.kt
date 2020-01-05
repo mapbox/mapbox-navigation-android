@@ -1,7 +1,6 @@
 package com.mapbox.navigation.trip.session
 
 import android.location.Location
-import android.os.Handler
 import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -18,6 +17,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -43,11 +43,6 @@ class MapboxTripSessionTest {
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
-    private val mainHandler: Handler = mockk(relaxUnitFun = true)
-    private val workerHandler: Handler = mockk(relaxUnitFun = true)
-    private val mainHandlerRunnableSlot = slot<Runnable>()
-    private val handlerRunnableSlot = slot<Runnable>()
-    private val handlerDelayedRunnableSlot = slot<Runnable>()
 
     private val routeProgress: RouteProgress = mockk()
 
@@ -57,9 +52,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigator,
-            mainHandler,
-            workerHandler
+            navigator
         )
 
         every { navigator.getStatus(any()) } returns tripStatus
@@ -74,16 +67,13 @@ class MapboxTripSessionTest {
         } answers {}
         every { locationEngineResult.locations } returns listOf(location)
 
-        every { mainHandler.post(capture(mainHandlerRunnableSlot)) } returns true
-        every { workerHandler.post(capture(handlerRunnableSlot)) } returns true
-        every { workerHandler.postDelayed(capture(handlerDelayedRunnableSlot), any()) } returns true
-
         every { tripStatus.routeProgress } returns routeProgress
     }
 
     @Test
     fun startSession() {
         tripSession.start()
+
         verify { tripService.startService() }
         verify {
             locationEngine.requestLocationUpdates(
@@ -92,29 +82,27 @@ class MapboxTripSessionTest {
                 Looper.getMainLooper()
             )
         }
-
-        verify { workerHandler.postDelayed(handlerDelayedRunnableSlot.captured, 1000) }
     }
 
     @Test
     fun stopSession() {
         tripSession.start()
+
         tripSession.stop()
+
         verify { tripService.stopService() }
         verify { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        verify { workerHandler.removeCallbacks(handlerRunnableSlot.captured) }
-        verify { workerHandler.removeCallbacks(handlerDelayedRunnableSlot.captured) }
     }
 
     @Test
-    fun locationObserverSuccess() {
+    fun locationObserverSuccess() = runBlocking {
         tripSession.start()
         val observer: TripSession.LocationObserver = mockk(relaxUnitFun = true)
         tripSession.registerLocationObserver(observer)
+
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+
+        tripSession.navigatorPolling()
         verify { observer.onRawLocationChanged(location) }
         verify { observer.onEnhancedLocationChanged(enhancedLocation) }
         assertEquals(location, tripSession.getRawLocation())
@@ -122,70 +110,75 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun locationObserverImmediate() {
+    fun locationObserverImmediate() = runBlocking {
         tripSession.start()
         val observer: TripSession.LocationObserver = mockk(relaxUnitFun = true)
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+        tripSession.navigatorPolling()
+
         tripSession.registerLocationObserver(observer)
+
         verify { observer.onRawLocationChanged(location) }
         verify { observer.onEnhancedLocationChanged(enhancedLocation) }
     }
 
     @Test
-    fun unregisterLocationObserver() {
+    fun unregisterLocationObserver() = runBlocking {
         tripSession.start()
         val observer: TripSession.LocationObserver = mockk(relaxUnitFun = true)
         tripSession.registerLocationObserver(observer)
+
         tripSession.unregisterLocationObserver(observer)
+
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+        tripSession.navigatorPolling()
         verify(exactly = 0) { observer.onRawLocationChanged(any()) }
         verify(exactly = 0) { observer.onEnhancedLocationChanged(any()) }
     }
 
     @Test
-    fun enhancedLocationPush() {
+    fun enhancedLocationPush() = runBlocking {
         tripSession.start()
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        val runnable = handlerRunnableSlot.captured
-        verify { workerHandler.post(runnable) }
-        runnable.run()
+
+        tripSession.navigatorPolling()
+
         verify { navigator.updateLocation(location) }
     }
 
     @Test
-    fun routeProgressObserverSuccess() {
+    fun routeProgressObserverSuccess() = runBlocking {
         tripSession.start()
         val observer: TripSession.RouteProgressObserver = mockk(relaxUnitFun = true)
         tripSession.registerRouteProgressObserver(observer)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+
+        tripSession.navigatorPolling()
+
         verify { observer.onRouteProgressChanged(routeProgress) }
         assertEquals(routeProgress, tripSession.getRouteProgress())
     }
 
     @Test
-    fun routeProgressObserverImmediate() {
+    fun routeProgressObserverImmediate() = runBlocking {
         tripSession.start()
         val observer: TripSession.RouteProgressObserver = mockk(relaxUnitFun = true)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+        tripSession.navigatorPolling()
+
         tripSession.registerRouteProgressObserver(observer)
+
         verify { observer.onRouteProgressChanged(routeProgress) }
         assertEquals(routeProgress, tripSession.getRouteProgress())
     }
 
     @Test
-    fun routeProgressObserverUnregister() {
+    fun routeProgressObserverUnregister() = runBlocking {
         tripSession.start()
         val observer: TripSession.RouteProgressObserver = mockk(relaxUnitFun = true)
         tripSession.registerRouteProgressObserver(observer)
+
         tripSession.unregisterRouteProgressObserver(observer)
-        handlerDelayedRunnableSlot.captured.run()
-        mainHandlerRunnableSlot.captured.run()
+
+        tripSession.navigatorPolling()
         verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
     }
 
@@ -206,9 +199,9 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun setRoute() {
+    fun setRoute() = runBlocking {
         tripSession.route = route
-        handlerRunnableSlot.captured.run()
+
         verify { navigator.setRoute(route) }
     }
 }

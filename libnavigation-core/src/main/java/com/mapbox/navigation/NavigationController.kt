@@ -1,9 +1,6 @@
 package com.mapbox.navigation
 
 import android.content.Context
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
@@ -23,6 +20,7 @@ import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.service.TripService
 import com.mapbox.navigation.trip.session.TripSession
+import com.mapbox.navigation.utils.ThreadController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -35,13 +33,6 @@ class NavigationController {
     private val locationEngine: LocationEngine
     private val locationEngineRequest: LocationEngineRequest
     private val navigationNotificationProvider: NavigationNotificationProvider
-
-    private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
-    private val workerHandler: Handler by lazy { Handler(workerThread.looper) }
-    private val workerThread: HandlerThread by lazy {
-        HandlerThread("NavigationController").apply { start() }
-    }
-
     private val directionsSession: DirectionsSession
     private val tripService: TripService
     private val tripSession: TripSession
@@ -74,9 +65,7 @@ class NavigationController {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigator,
-            mainHandler,
-            workerHandler
+            navigator
         )
     }
 
@@ -127,6 +116,6 @@ class NavigationController {
     }
 
     internal fun onDestroy() {
-        workerThread.quit()
+        ThreadController.cancelAllNonUICoroutines()
     }
 }

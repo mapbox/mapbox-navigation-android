@@ -1,6 +1,5 @@
 package com.mapbox.navigation
 
-import android.os.Handler
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.Router
@@ -27,9 +26,7 @@ internal object NavigationComponentProvider {
         tripService: TripService,
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
-        navigator: MapboxNativeNavigator,
-        mainHandler: Handler,
-        workerHandler: Handler
+        navigator: MapboxNativeNavigator
     ) = MapboxTripSession(
         tripService,
         locationEngine,
