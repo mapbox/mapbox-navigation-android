@@ -29,10 +29,10 @@ class MapboxTripService(
                 tripNotification.onTripSessionStarted()
                 initializeLambda()
                 notificationDataChannel.offer(
-                    MapboxNotificationData(
-                        tripNotification.getNotificationId(),
-                        tripNotification.getNotification()
-                    )
+                        MapboxNotificationData(
+                                tripNotification.getNotificationId(),
+                                tripNotification.getNotification()
+                        )
                 )
             }
             false -> {
@@ -46,9 +46,15 @@ class MapboxTripService(
     }
 
     override fun stopService() {
-        notificationDataChannel.cancel()
-        serviceStarted.set(false)
-        tripNotification.onTripSessionStopped()
+        when (serviceStarted.compareAndSet(true, false)) {
+            true -> {
+                notificationDataChannel.cancel()
+                serviceStarted.set(false)
+                tripNotification.onTripSessionStopped()
+            }
+            false -> {
+            }
+        }
     }
 
     override fun hasServiceStarted() = serviceStarted.get()
@@ -56,6 +62,6 @@ class MapboxTripService(
     companion object {
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)
         fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
-            notificationDataChannel
+                notificationDataChannel
     }
 }
