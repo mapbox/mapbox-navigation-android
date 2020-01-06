@@ -124,7 +124,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     MapboxLogger.INSTANCE.setLogLevel(LogPriority.VERBOSE);
     MapboxLogger.INSTANCE.setObserver(this);
     MapboxMetricsReporter.INSTANCE.setMetricsObserver(this);
-    routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
+    routeRefresh = new RouteRefresh(Mapbox.getAccessToken(), getApplicationContext());
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);

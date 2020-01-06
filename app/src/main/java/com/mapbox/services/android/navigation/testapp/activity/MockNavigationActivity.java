@@ -115,7 +115,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
-    routeRefresh = new RouteRefresh(Mapbox.getAccessToken());
+    routeRefresh = new RouteRefresh(Mapbox.getAccessToken(), getApplicationContext());
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
