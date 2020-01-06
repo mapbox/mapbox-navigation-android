@@ -46,7 +46,6 @@ class MapboxTripNotification(
             } ?: throw (IllegalStateException("unable to create a NotificationManager"))
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
-        registerReceiver()
         createNotificationChannel()
         this.navigationNotificationProvider = NavigationNotificationProvider()
     }
@@ -74,6 +73,9 @@ class MapboxTripNotification(
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
+    override fun onTripSessionStarted() {
+        registerReceiver()
+    }
     override fun onTripSessionStopped() {
         unregisterReceiver()
     }

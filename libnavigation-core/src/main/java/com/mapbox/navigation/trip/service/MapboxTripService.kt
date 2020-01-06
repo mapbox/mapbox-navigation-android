@@ -21,12 +21,12 @@ class MapboxTripService(
 
     @InternalCoroutinesApi
     override fun startService() {
-        if (!notificationDataChannel.isClosedForSend) {
-            notificationDataChannel.cancel()
+        if (notificationDataChannel.isClosedForSend) {
             notificationDataChannel = Channel(1)
         }
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
+                tripNotification.onTripSessionStarted()
                 initializeLambda()
                 notificationDataChannel.offer(
                     MapboxNotificationData(
@@ -47,8 +47,11 @@ class MapboxTripService(
 
     override fun stopService() {
         notificationDataChannel.cancel()
+        serviceStarted.set(false)
         tripNotification.onTripSessionStopped()
     }
+
+    override fun hasServiceStarted() = serviceStarted.get()
 
     companion object {
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)

@@ -9,4 +9,6 @@ interface TripService {
     fun stopService()
 
     fun updateNotification(routeProgress: RouteProgress)
+
+    fun hasServiceStarted(): Boolean
 }

@@ -25,9 +25,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable.isActive
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
@@ -40,7 +41,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapboxTripNotification: MapboxTripNotification
     private lateinit var navigationMapRoute: NavigationMapRoute
     private lateinit var mapboxTripService: MapboxTripService
-
+    private var textUpdateJob: Job = Job()
     @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
@@ -48,7 +49,18 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             newOrigin()
             toggleNotification.setOnClickListener {
-                changeText()
+                when (mapboxTripService.hasServiceStarted()) {
+                    true -> {
+                        textUpdateJob.cancel()
+                        mapboxTripService.stopService()
+                        toggleNotification.text = "Start"
+                    }
+                    false -> {
+                        mapboxTripService.startService()
+                        changeText()
+                        toggleNotification.text = "Stop"
+                    }
+                }
             }
         }
     }
@@ -80,8 +92,6 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
-
-        mapboxTripService.startService()
     }
 
     public override fun onResume() {
@@ -128,7 +138,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun changeText() {
-        scope.launch {
+        textUpdateJob = scope.launch {
             while (isActive) {
                 val text = "Time elapsed: + ${SystemClock.elapsedRealtime()}"
                 notifyTextView.text = text
