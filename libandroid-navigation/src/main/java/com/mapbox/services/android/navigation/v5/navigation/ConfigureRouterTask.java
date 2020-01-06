@@ -3,6 +3,7 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.os.AsyncTask;
 
 import com.mapbox.navigator.Navigator;
+import com.mapbox.navigator.RouterParams;
 
 class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   private final Navigator navigator;
@@ -18,7 +19,8 @@ class ConfigureRouterTask extends AsyncTask<Void, Void, Long> {
   @Override
   protected Long doInBackground(Void... paramsUnused) {
     synchronized (this) {
-      return navigator.configureRouter(tilePath, null, null, null, null);
+      RouterParams routerParams = new RouterParams(tilePath, null, null, null, null);
+      return navigator.configureRouter(routerParams, null);
     }
   }
 
