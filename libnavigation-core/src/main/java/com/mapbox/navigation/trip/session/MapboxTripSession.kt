@@ -16,7 +16,6 @@ import com.mapbox.navigation.utils.ThreadController
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -25,7 +24,6 @@ import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -93,17 +91,17 @@ class MapboxTripSession(
             Looper.getMainLooper()
         )
         ioJobController.scope.launch {
-            navigatorPolling()
-            delay(STATUS_POLLING_INTERVAL)
+            while (isActive) {
+                navigatorPolling()
+                delay(STATUS_POLLING_INTERVAL)
+            }
         }
     }
 
-    suspend fun navigatorPolling() {
+    fun navigatorPolling() {
         val status = navigator.getStatus(Date())
-        withContext(Dispatchers.Main) {
-            updateEnhancedLocation(status.enhancedLocation)
-            updateRouteProgress(status.routeProgress)
-        }
+        updateEnhancedLocation(status.enhancedLocation)
+        updateRouteProgress(status.routeProgress)
     }
 
     private fun listenLocationUpdates() {
@@ -211,14 +209,18 @@ class MapboxTripSession(
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
     }
 
-    private fun updateEnhancedLocation(enhancedLocation: Location) {
-        this.enhancedLocation = enhancedLocation
-        locationObservers.forEach { it.onEnhancedLocationChanged(enhancedLocation) }
+    private fun updateEnhancedLocation(location: Location) {
+        ThreadController.getMainScopeAndRootJob().scope.launch {
+            enhancedLocation = location
+            locationObservers.forEach { it.onEnhancedLocationChanged(location) }
+        }
     }
 
-    private fun updateRouteProgress(routeProgress: RouteProgress) {
-        this.routeProgress = routeProgress
-        routeProgressObservers.forEach { it.onRouteProgressChanged(routeProgress) }
+    private fun updateRouteProgress(progress: RouteProgress) {
+        ThreadController.getMainScopeAndRootJob().scope.launch {
+            routeProgress = progress
+            routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+        }
     }
 
     companion object {

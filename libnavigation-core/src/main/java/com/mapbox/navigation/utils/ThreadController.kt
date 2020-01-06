@@ -37,7 +37,6 @@ object ThreadController {
      * this job a [CoroutineScope] is created. The return object is the [JobControl] data class. This
      * data class contains both the new [Job] object and the [CoroutineScope] that uses the [Job] object.
      * This construct allows the caller to cancel all coroutines created from the returned [CoroutineScope].
-     * Additionally,
      * Example:
      * val jobController:JobController = ThreadController.getScopeAndRootJob()
      * val job_1 = jobController.scope.launch{ doSomethingUsefull_1()}
