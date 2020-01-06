@@ -97,7 +97,6 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:test
 	./gradlew :liblogger:test
 	./gradlew :libnavigation-base:test
-	./gradlew :libnavigation-core:test
 	./gradlew :libnavigation-metrics:test
 	./gradlew :libnavigation-util:test
 	./gradlew :libnavigator:test
