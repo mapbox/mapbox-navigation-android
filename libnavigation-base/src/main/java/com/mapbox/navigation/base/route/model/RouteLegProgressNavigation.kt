@@ -3,22 +3,22 @@ package com.mapbox.navigation.base.route.model
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.ifNonNull
 
-data class RouteLegProgressNavigation internal constructor(
-    var stepIndex: Int? = null,
-    var distanceTraveled: Double? = null,
-    var distanceRemaining: Double? = null,
-    var durationRemaining: Double? = null,
-    var fractionTraveled: Float = 0f,
-    var previousStep: LegStepNavigation? = null,
-    var currentStep: LegStepNavigation? = null,
-    var upComingStep: LegStepNavigation? = null,
-    var followOnStep: LegStepNavigation? = null,
-    var currentStepProgress: RouteStepProgressNavigation? = null,
-    var currentStepPoints: List<Point>? = null,
-    var upcomingStepPoints: List<Point>? = null,
-    var routeLeg: RouteLegsNavigation? = null,
-    var stepDistanceRemaining: Double? = null,
-    var builder: Builder
+class RouteLegProgressNavigation private constructor(
+    private val stepIndex: Int = 0,
+    private val distanceTraveled: Double = 0.0,
+    private val distanceRemaining: Double = 0.0,
+    private val durationRemaining: Double = 0.0,
+    private val fractionTraveled: Float = 0f,
+    private val currentStep: LegStepNavigation? = null,
+    private val previousStep: LegStepNavigation? = null,
+    private val upComingStep: LegStepNavigation? = null,
+    private val followOnStep: LegStepNavigation? = null,
+    private val currentStepProgress: RouteStepProgressNavigation? = null,
+    private val currentStepPoints: List<Point>? = null,
+    private val upcomingStepPoints: List<Point>? = null,
+    private val routeLeg: RouteLegsNavigation? = null,
+    private val stepDistanceRemaining: Double = 0.0,
+    private val builder: Builder
 ) {
 
     /**
@@ -26,7 +26,7 @@ data class RouteLegProgressNavigation internal constructor(
      *
      * @return an integer representing the current step the user is on
      */
-    fun stepIndex(): Int? = stepIndex
+    fun stepIndex(): Int = stepIndex
 
     /**
      * Total distance traveled in meters along current leg.
@@ -34,21 +34,21 @@ data class RouteLegProgressNavigation internal constructor(
      * @return a double value representing the total distance the user has traveled along the current
      * leg, using unit meters.
      */
-    fun distanceTraveled(): Double? = distanceTraveled
+    fun distanceTraveled(): Double = distanceTraveled
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the route.
      *
      * @return long value representing the duration remaining till end of route, in unit seconds
      */
-    fun distanceRemaining(): Double? = distanceRemaining
+    fun distanceRemaining(): Double = distanceRemaining
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
      *
      * @return long value representing the duration remaining till end of step, in unit seconds.
      */
-    fun durationRemaining(): Double? = durationRemaining
+    fun durationRemaining(): Double = durationRemaining
 
     /**
      * Get the fraction traveled along the current leg, this is a float value between 0 and 1 and
@@ -120,30 +120,27 @@ data class RouteLegProgressNavigation internal constructor(
      */
     internal fun routeLeg(): RouteLegsNavigation? = routeLeg
 
-    internal fun stepDistanceRemaining(): Double? = stepDistanceRemaining
+    internal fun stepDistanceRemaining(): Double = stepDistanceRemaining
 
     fun toBuilder() = builder
 
     class Builder {
-        private var stepIndex: Int? = null
-        private var distanceTraveled: Double? = null
-        private var distanceRemaining: Double? = null
-        private var durationRemaining: Double? = null
+        private var stepIndex: Int = 0
         private var fractionTraveled: Float = 0f
-        private var previousStep: LegStepNavigation? = null
-        private var currentStep: LegStepNavigation? = null
-        private var upComingStep: LegStepNavigation? = null
-        private var followOnStep: LegStepNavigation? = null
-        private var currentStepProgress: RouteStepProgressNavigation? = null
+        private var distanceTraveled: Double = 0.0
+        private var distanceRemaining: Double = 0.0
+        private var durationRemaining: Double = 0.0
+        private var stepDistanceRemaining: Double = 0.0
         private var currentStepPoints: List<Point>? = null
         private var upcomingStepPoints: List<Point>? = null
-        private var routeLeg: RouteLegsNavigation? = null
-        private var stepDistanceRemaining: Double? = null
+        private var previousStep: LegStepNavigation? = null
+        private var upComingStep: LegStepNavigation? = null
+        private var followOnStep: LegStepNavigation? = null
+        private lateinit var routeLegBuilder: RouteLegsNavigation
+        private lateinit var currentStepBuilder: LegStepNavigation
+        private lateinit var currentStepProgress: RouteStepProgressNavigation
 
         fun stepIndex(stepIndex: Int) = apply { this.stepIndex = stepIndex }
-
-        fun distanceTraveled(distanceTraveled: Double) =
-                apply { this.distanceTraveled = distanceTraveled }
 
         fun distanceRemaining(distanceRemaining: Double) =
                 apply { this.distanceRemaining = distanceRemaining }
@@ -151,19 +148,7 @@ data class RouteLegProgressNavigation internal constructor(
         fun durationRemaining(durationRemaining: Double) =
                 apply { this.durationRemaining = durationRemaining }
 
-        fun fractionTraveled(fractionTraveled: Float) =
-                apply { this.fractionTraveled = fractionTraveled }
-
-        fun previousStep(previousStep: LegStepNavigation) = apply { this.previousStep = previousStep }
-
-        fun currentStep(currentStep: LegStepNavigation) = apply { this.currentStep = currentStep }
-
-        fun upComingStep(upComingStep: LegStepNavigation) = apply { this.upComingStep = upComingStep }
-
-        fun followOnStep(followOnStep: LegStepNavigation) = apply { this.followOnStep = followOnStep }
-
-        fun currentStepProgress(currentStepProgress: RouteStepProgressNavigation) =
-                apply { this.currentStepProgress = currentStepProgress }
+        fun currentStep(currentStep: LegStepNavigation) = apply { this.currentStepBuilder = currentStep }
 
         fun currentStepPoints(currentStepPoints: List<Point>?) =
                 apply { this.currentStepPoints = currentStepPoints }
@@ -171,49 +156,34 @@ data class RouteLegProgressNavigation internal constructor(
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
                 apply { this.upcomingStepPoints = upcomingStepPoints }
 
-        fun routeLeg(routeLeg: RouteLegsNavigation) = apply { this.routeLeg = routeLeg }
+        fun routeLeg(routeLeg: RouteLegsNavigation) = apply { this.routeLegBuilder = routeLeg }
 
         fun stepDistanceRemaining(stepDistanceRemaining: Double) =
                 apply { this.stepDistanceRemaining = stepDistanceRemaining }
 
         private fun validate() {
             var missing = ""
-            if (this.stepIndex == null) {
-                missing += " stepIndex"
+            if (!this::routeLegBuilder.isInitialized) {
+                missing += " routeLegBuilder"
             }
-            if (this.distanceTraveled == null) {
-                missing += " distanceTraveled"
-            }
-            if (this.distanceRemaining == null) {
-                missing += " distanceRemaining"
-            }
-            if (this.durationRemaining == null) {
-                missing += " durationRemaining"
-            }
-            if (this.fractionTraveled == 0f) {
-                missing += " fractionTraveled"
-            }
-            if (this.currentStep == null) {
+            if (!this::currentStepBuilder.isInitialized) {
                 missing += " currentStep"
             }
-            if (this.currentStepProgress == null) {
+            if (!this::currentStepProgress.isInitialized) {
                 missing += " currentStepProgress"
             }
-            if (this.stepDistanceRemaining == null) {
-                missing += " stepDistanceRemaining"
-            }
-            check(missing.isEmpty()) { "Missing required properties: $missing" }
+            check(missing.isEmpty()) { "RouteLegProgressNavigation.Builder missing required properties: $missing" }
         }
 
         fun build(): RouteLegProgressNavigation {
             distanceTraveled = distanceTraveled()
-            fractionTraveled = fractionTraveled()
+            fractionTraveled = fractionTraveled(distanceTraveled)
             previousStep = previousStep()
             upComingStep = upComingStep()
             followOnStep = followOnStep()
             currentStepProgress = RouteStepProgressNavigation.Builder()
-                    .step(currentStep!!)
-                    .distanceRemaining(stepDistanceRemaining!!)
+                    .step(currentStepBuilder)
+                    .distanceRemaining(stepDistanceRemaining)
                     .build()
 
             validate()
@@ -224,22 +194,22 @@ data class RouteLegProgressNavigation internal constructor(
                     distanceRemaining,
                     durationRemaining,
                     fractionTraveled,
+                    currentStepBuilder,
                     previousStep,
-                    currentStep,
                     upComingStep,
                     followOnStep,
                     currentStepProgress,
                     currentStepPoints,
                     upcomingStepPoints,
-                    routeLeg,
+                    routeLegBuilder,
                     stepDistanceRemaining,
                     this
             )
         }
 
-        private fun distanceTraveled(): Double? =
-                ifNonNull(routeLeg?.distance, distanceRemaining) { distance, distanceRemaining ->
-                    when (distance - distanceRemaining < 0) {
+        private fun distanceTraveled(): Double =
+                routeLegBuilder.distance()?.let { distance ->
+                    return when (distance - distanceRemaining < 0) {
                         true -> {
                             0.0
                         }
@@ -247,22 +217,26 @@ data class RouteLegProgressNavigation internal constructor(
                             distance - distanceRemaining
                         }
                     }
-                }
+                } ?: distanceRemaining
 
-        private fun fractionTraveled(): Float =
-                ifNonNull(distanceTraveled(), routeLeg?.distance) { distanceTraveled, distance ->
-                    when (distance > 0) {
-                        true -> {
-                            (distanceTraveled / distance).toFloat()
-                        }
-                        else -> {
-                            1.0f
-                        }
+        private fun fractionTraveled(distanceTraveled: Double): Float {
+            if (distanceTraveled == 0.0) {
+                return 1.0f
+            }
+            return routeLegBuilder.distance()?.let { distance ->
+                when (distance > 0) {
+                    true -> {
+                        (distanceTraveled / distance).toFloat()
                     }
-                } ?: 1.0f
+                    else -> {
+                        1.0f
+                    }
+                }
+            } ?: 1.0f
+        }
 
         private fun previousStep(): LegStepNavigation? =
-                ifNonNull(routeLeg?.steps, stepIndex) { routeLegSteps, stepIndex ->
+                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
                     return when {
                         stepIndex != 0 -> routeLegSteps[stepIndex - 1]
                         else -> null
@@ -270,7 +244,7 @@ data class RouteLegProgressNavigation internal constructor(
                 }
 
         private fun upComingStep(): LegStepNavigation? =
-                ifNonNull(routeLeg?.steps, stepIndex) { routeLegSteps, stepIndex ->
+                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
                     return when {
                         routeLegSteps.size - 1 > stepIndex -> routeLegSteps[stepIndex + 1]
                         else -> null
@@ -278,7 +252,7 @@ data class RouteLegProgressNavigation internal constructor(
                 }
 
         private fun followOnStep(): LegStepNavigation? =
-                ifNonNull(routeLeg?.steps, stepIndex) { routeLegSteps, stepIndex ->
+                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
                     return when {
                         routeLegSteps.size - 2 > stepIndex -> routeLegSteps[stepIndex + 2]
                         else -> null

@@ -11,21 +11,21 @@ import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 
 fun LegStepNavigation.mapToLegStep(): LegStep {
     return LegStep.builder()
-        .distance(distance)
-        .duration(duration)
+        .distance(distance())
+        .duration(duration())
         .build()
 }
 
 fun RouteLegsNavigation.mapToRouteLeg(): RouteLeg {
-    val steps = steps?.let { stepLegList ->
+    val steps = steps()?.let { stepLegList ->
         stepLegList.map {
             it.mapToLegStep()
         }
     }
     return RouteLeg.builder()
-        .distance(distance)
-        .duration(duration)
-        .summary(summary)
+        .distance(distance())
+        .duration(duration())
+        .summary(summary())
         .steps(steps)
         .build()
 }

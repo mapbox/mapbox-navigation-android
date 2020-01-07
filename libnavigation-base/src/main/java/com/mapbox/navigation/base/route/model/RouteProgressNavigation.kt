@@ -4,22 +4,22 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.ifNonNull
 
-data class RouteProgressNavigation constructor(
-    var directionsRoute: Route? = null,
-    var legIndex: Int? = null,
-    var distanceRemaining: Double? = null,
-    var currentLegProgress: RouteLegProgressNavigation? = null,
-    var currentStepPoints: List<Point>? = null,
-    var upcomingStepPoints: List<Point>? = null,
-    var inTunnel: Boolean? = null,
-    var currentState: RouteProgressStateNavigation? = null,
-    var routeGeometryWithBuffer: Geometry? = null,
-    var currentStep: LegStepNavigation? = null,
-    var stepIndex: Int? = null,
-    var legDistanceRemaining: Double? = null,
-    var stepDistanceRemaining: Double? = null,
-    var legDurationRemaining: Double? = null,
-    var builder: Builder
+class RouteProgressNavigation private constructor(
+    private val route: Route? = null,
+    private val currentStep: LegStepNavigation? = null,
+    private val currentStepPoints: List<Point>? = null,
+    private val upcomingStepPoints: List<Point>? = null,
+    private val routeGeometryWithBuffer: Geometry? = null,
+    private val currentState: RouteProgressStateNavigation? = null,
+    private val currentLegProgress: RouteLegProgressNavigation? = null,
+    private val legIndex: Int = 0,
+    private val stepIndex: Int = 0,
+    private val inTunnel: Boolean = false,
+    private val distanceRemaining: Double = 0.0,
+    private val legDistanceRemaining: Double = 0.0,
+    private val legDurationRemaining: Double = 0.0,
+    private val stepDistanceRemaining: Double = 0.0,
+    private val builder: Builder
 ) {
 
     /**
@@ -27,9 +27,9 @@ data class RouteProgressNavigation constructor(
      * directions route gets obtained, with the next location update this directions route should
      * reflect the new route.
      *
-     * @return a [DirectionsRoute] currently being used for the navigation session
+     * @return a [Route] currently being used for the navigation session
      */
-    fun directionsRoute() = directionsRoute
+    fun route() = route
 
     /**
      * Index representing the current leg the user is on. If the directions route currently in use
@@ -37,9 +37,8 @@ data class RouteProgressNavigation constructor(
      * distance between the two points.
      *
      * @return an integer representing the current leg the user is on
-     * @since 0.1.0
      */
-    fun legIndex(): Int? = legIndex
+    fun legIndex(): Int = legIndex
 
     /**
      * Provides the current [RouteLegNavigation] the user is on.
@@ -47,7 +46,7 @@ data class RouteProgressNavigation constructor(
      * @return a [RouteLegNavigation] the user is currently on
      */
     fun currentLeg(): RouteLegsNavigation? =
-            ifNonNull(directionsRoute()?.legs, legIndex) { routeLegs, legIndex ->
+            ifNonNull(route()?.legs, legIndex) { routeLegs, legIndex ->
                 routeLegs[legIndex]
             }
 
@@ -57,8 +56,8 @@ data class RouteProgressNavigation constructor(
      * @return a double value representing the total distance the user has traveled along the route,
      * using unit meters
      */
-    fun distanceTraveled(): Double? =
-            ifNonNull(directionsRoute?.distance, distanceRemaining) { distance, distanceRemaining ->
+    fun distanceTraveled(): Double =
+            ifNonNull(route?.distance) { distance ->
                 when (distance - distanceRemaining < 0) {
                     true -> {
                         0.0
@@ -67,7 +66,7 @@ data class RouteProgressNavigation constructor(
                         distance - distanceRemaining
                     }
                 }
-            }
+            } ?: 0.0
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the route.
@@ -76,7 +75,7 @@ data class RouteProgressNavigation constructor(
      * seconds
      */
     fun durationRemaining(): Long =
-            ifNonNull(fractionTraveled(), directionsRoute()?.duration) { fractionTraveled, duration ->
+            ifNonNull(fractionTraveled(), route()?.duration) { fractionTraveled, duration ->
                 ((1 - fractionTraveled) * duration).toLong()
             } ?: 0L
 
@@ -87,38 +86,42 @@ data class RouteProgressNavigation constructor(
      * @return a double value between 0 and 1 representing the fraction the user has traveled along the
      * route
      */
-    fun fractionTraveled(): Double? =
-            ifNonNull(distanceTraveled(), directionsRoute()?.distance) { distanceTraveled, distance ->
-                when (distance > 0) {
-                    true -> {
-                        (distanceTraveled / distance)
-                    }
-                    false -> {
-                        1.0
-                    }
+    private fun fractionTraveled(): Double? {
+        if (distanceTraveled() == 0.0) {
+            return 1.0
+        }
+        return route()?.distance?.let { distance ->
+            when (distance > 0) {
+                true -> {
+                    (distanceTraveled() / distance)
                 }
-            } ?: 1.0
+                false -> {
+                    1.0
+                }
+            }
+        } ?: 1.0
+    }
 
     /**
      * Provides the distance remaining in meters till the user reaches the end of the route.
      *
      * @return `long` value representing the distance remaining till end of route, in unit meters
      */
-    fun distanceRemaining(): Double? = distanceRemaining
+    fun distanceRemaining(): Double = distanceRemaining
 
     /**
      * Number of waypoints remaining on the current route.
      *
      * @return integer value representing the number of way points remaining along the route
      */
-    fun remainingWaypoints(): Int? =
-            ifNonNull(directionsRoute?.legs, legIndex) { legs, legIndex -> legs.size - legIndex }
+    fun remainingWaypoints(): Int =
+            ifNonNull(route?.legs, legIndex) { legs, legIndex -> legs.size - legIndex } ?: 0
 
     /**
-     * Gives a [RouteLegProgress] object with information about the particular leg the user is
+     * Gives a [RouteLegProgressNavigation] object with information about the particular leg the user is
      * currently on.
      *
-     * @return a [RouteLegProgress] object
+     * @return a [RouteLegProgressNavigation] object
      */
     fun currentLegProgress() = currentLegProgress
 
@@ -155,7 +158,7 @@ data class RouteProgressNavigation constructor(
     fun currentState() = currentState
 
     /**
-     * Returns the current [DirectionsRoute] geometry with a buffer
+     * Returns the current [Route] geometry with a buffer
      * that encompasses visible tile surface are while navigating.
      *
      *
@@ -180,30 +183,27 @@ data class RouteProgressNavigation constructor(
 
     class Builder {
         private var directionsRoute: Route? = null
-        private var legIndex: Int? = null
-        private var distanceRemaining: Double? = null
-        private var currentLegProgress: RouteLegProgressNavigation? = null
+        private var currentStep: LegStepNavigation? = null
         private var currentStepPoints: List<Point>? = null
         private var upcomingStepPoints: List<Point>? = null
-        private var inTunnel: Boolean? = null
-        private var currentState: RouteProgressStateNavigation? = null
         private var routeGeometryWithBuffer: Geometry? = null
-        private var currentStep: LegStepNavigation? = null
-        private var stepIndex: Int? = null
-        private var legDistanceRemaining: Double? = null
-        private var stepDistanceRemaining: Double? = null
-        private var legDurationRemaining: Double? = null
+        private lateinit var currentStateBuilder: RouteProgressStateNavigation
+        private lateinit var currentLegProgressBuilder: RouteLegProgressNavigation
+        private var legIndex: Int = 0
+        private var stepIndex: Int = 0
+        private var inTunnel: Boolean = false
+        private var distanceRemaining: Double = 0.0
+        private var legDistanceRemaining: Double = 0.0
+        private var legDurationRemaining: Double = 0.0
+        private var stepDistanceRemaining: Double = 0.0
 
-        fun directionsRoute(directionsRoute: Route) =
-                apply { this.directionsRoute = directionsRoute }
+        fun route(route: Route) =
+                apply { this.directionsRoute = route }
 
         fun legIndex(legIndex: Int) = apply { this.legIndex = legIndex }
 
         fun distanceRemaining(distanceRemaining: Double) =
                 apply { this.distanceRemaining = distanceRemaining }
-
-        fun currentLegProgress(currentLegProgress: RouteLegProgressNavigation) =
-                apply { this.currentLegProgress = currentLegProgress }
 
         fun currentStepPoints(currentStepPoints: List<Point>?) =
                 apply { this.currentStepPoints = currentStepPoints }
@@ -213,8 +213,8 @@ data class RouteProgressNavigation constructor(
 
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
 
-        fun currentState(currentState: RouteProgressStateNavigation?) =
-                apply { this.currentState = currentState }
+        fun currentState(currentState: RouteProgressStateNavigation) =
+                apply { this.currentStateBuilder = currentState }
 
         fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) =
                 apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
@@ -234,53 +234,19 @@ data class RouteProgressNavigation constructor(
 
         private fun validate() {
             var missing = ""
-            if (this.directionsRoute == null) {
-                missing += " directionsRoute"
+            if (!this::currentStateBuilder.isInitialized) {
+                missing += " currentStateBuilder"
             }
-            if (this.legIndex == null) {
-                missing += " legIndex"
+            if (!this::currentLegProgressBuilder.isInitialized) {
+                missing += " currentLegProgressBuilder"
             }
-            if (this.distanceRemaining == null) {
-                missing += " distanceRemaining"
-            }
-            if (this.currentLegProgress == null) {
-                missing += " currentLegProgress"
-            }
-            if (this.currentStepPoints == null) {
-                missing += " currentStepPoints"
-            }
-            if (this.inTunnel == null) {
-                missing += " inTunnel"
-            }
-            if (this.currentStep == null) {
-                missing += " currentStep"
-            }
-            if (this.stepIndex == null) {
-                missing += " stepIndex"
-            }
-            if (this.legDistanceRemaining == null) {
-                missing += " legDistanceRemaining"
-            }
-            if (this.stepDistanceRemaining == null) {
-                missing += " stepDistanceRemaining"
-            }
-            if (this.legDurationRemaining == null) {
-                missing += " legDurationRemaining"
-            }
-            check(missing.isEmpty()) { "Missing required properties: $missing" }
+            check(missing.isEmpty()) { "RouteProgressNavigation.Builder missing required properties: $missing" }
         }
 
         fun build(): RouteProgressNavigation {
-            // Default values for variables that are null if not initialized
-            val _legDistanceRemaining = legDistanceRemaining ?: 0.0
-            val _stepIndex = stepIndex ?: 0
-            val _legDurationRemaining = legDurationRemaining ?: 0.0
-            val _stepDistanceRemaining = stepDistanceRemaining ?: 0.0
-            val _legIndex = legIndex ?: 0
-
             val leg: RouteLegsNavigation? = directionsRoute?.let { directionRoute ->
                 directionRoute.legs?.let { legs ->
-                    legs[_legIndex]
+                    legs[legIndex]
                 }
             }
             val routeLegProgressBuilder = RouteLegProgressNavigation.Builder()
@@ -291,31 +257,31 @@ data class RouteProgressNavigation constructor(
                 routeLegProgressBuilder.currentStep(it)
             }
             val legProgress = routeLegProgressBuilder
-                    .stepIndex(_stepIndex)
-                    .distanceRemaining(_legDistanceRemaining)
-                    .durationRemaining(_legDurationRemaining)
-                    .stepDistanceRemaining(_stepDistanceRemaining)
+                    .stepIndex(stepIndex)
+                    .distanceRemaining(legDistanceRemaining)
+                    .durationRemaining(legDurationRemaining)
+                    .stepDistanceRemaining(stepDistanceRemaining)
                     .currentStepPoints(currentStepPoints)
                     .upcomingStepPoints(upcomingStepPoints)
                     .build()
-            currentLegProgress(legProgress)
+            this.currentLegProgressBuilder = legProgress
             validate()
 
             return RouteProgressNavigation(
                     directionsRoute,
-                    legIndex,
-                    distanceRemaining,
-                    currentLegProgress,
+                    currentStep,
                     currentStepPoints,
                     upcomingStepPoints,
-                    inTunnel,
-                    currentState,
                     routeGeometryWithBuffer,
-                    currentStep,
+                    currentStateBuilder,
+                    currentLegProgressBuilder,
+                    legIndex,
                     stepIndex,
+                    inTunnel,
+                    distanceRemaining,
                     legDistanceRemaining,
-                    stepDistanceRemaining,
                     legDurationRemaining,
+                    stepDistanceRemaining,
                     this
             )
         }

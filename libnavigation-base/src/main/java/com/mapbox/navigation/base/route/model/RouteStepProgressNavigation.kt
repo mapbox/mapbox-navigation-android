@@ -1,12 +1,12 @@
 package com.mapbox.navigation.base.route.model
 
-data class RouteStepProgressNavigation internal constructor(
-    var step: LegStepNavigation? = null,
-    var distanceRemaining: Double? = null,
-    var distanceTraveled: Double? = null,
-    var fractionTraveled: Float = 0f,
-    var durationRemaining: Double? = null,
-    var builder: Builder
+class RouteStepProgressNavigation private constructor(
+    private val step: LegStepNavigation? = null,
+    private val distanceRemaining: Double = 0.0,
+    private val distanceTraveled: Double = 0.0,
+    private val fractionTraveled: Float = 0f,
+    private val durationRemaining: Double = 0.0,
+    private val builder: Builder
 ) {
 
     /**
@@ -15,7 +15,7 @@ data class RouteStepProgressNavigation internal constructor(
      * @return double value representing the distance the user has remaining till they reach the end
      * of the current step. Uses unit meters.
      */
-    fun distanceRemaining(): Double? = distanceRemaining
+    fun distanceRemaining(): Double = distanceRemaining
 
     /**
      * Returns distance user has traveled along current step in unit meters.
@@ -23,7 +23,7 @@ data class RouteStepProgressNavigation internal constructor(
      * @return double value representing the distance the user has traveled so far along the current
      * step. Uses unit meters.
      */
-    fun distanceTraveled(): Double? = distanceTraveled
+    fun distanceTraveled(): Double = distanceTraveled
 
     /**
      * Get the fraction traveled along the current step, this is a float value between 0 and 1 and
@@ -39,61 +39,41 @@ data class RouteStepProgressNavigation internal constructor(
      *
      * @return `long` value representing the duration remaining till end of step, in unit seconds.
      */
-    fun durationRemaining(): Double? = durationRemaining
+    fun durationRemaining(): Double = durationRemaining
 
     internal fun step(): LegStepNavigation? = step
 
     fun toBuilder() = builder
 
     class Builder {
-        private var step: LegStepNavigation? = null
-        private var distanceRemaining: Double? = null
-        private var distanceTraveled: Double? = null
+        private lateinit var legStep: LegStepNavigation
+        private var distanceRemaining: Double = 0.0
+        private var distanceTraveled: Double = 0.0
         private var fractionTraveled: Float = 0f
-        private var durationRemaining: Double? = null
+        private var durationRemaining: Double = 0.0
 
-        fun step(step: LegStepNavigation) = apply { this.step = step }
+        fun step(step: LegStepNavigation) = apply { this.legStep = step }
+
         fun distanceRemaining(distanceRemaining: Double) =
                 apply { this.distanceRemaining = distanceRemaining }
 
-        fun distanceTraveled(distanceTraveled: Double) =
-                apply { this.distanceTraveled = distanceTraveled }
-
-        fun fractionTraveled(fractionTraveled: Float) =
-                apply { this.fractionTraveled = fractionTraveled }
-
-        fun durationRemaining(durationRemaining: Double) =
-                apply { this.durationRemaining = durationRemaining }
-
         private fun validate() {
             var missing = ""
-            if (this.step == null) {
-                missing += " step"
+            if (!this::legStep.isInitialized) {
+                missing += " legStep"
             }
-            if (this.distanceRemaining == null) {
-                missing += " distanceRemaining"
-            }
-            if (this.distanceTraveled == null) {
-                missing += " distanceTraveled"
-            }
-            if (this.fractionTraveled == 0f) {
-                missing += " fractionTraveled"
-            }
-            if (this.durationRemaining == null) {
-                missing += " durationRemaining"
-            }
-            check(missing.isEmpty()) { "Missing required properties: $missing" }
+            check(missing.isEmpty()) { "RouteStepProgressNavigation.Builder missing required properties: $missing" }
         }
 
         fun build(): RouteStepProgressNavigation {
-            distanceTraveled = calculateDistanceTraveled(step, distanceRemaining)
-            fractionTraveled = calculateFractionTraveled(step, distanceTraveled)
-            durationRemaining = calculateDurationRemaining(step, fractionTraveled)
+            distanceTraveled = calculateDistanceTraveled(legStep, distanceRemaining)
+            fractionTraveled = calculateFractionTraveled(legStep, distanceTraveled)
+            durationRemaining = calculateDurationRemaining(legStep, fractionTraveled)
 
             validate()
 
             return RouteStepProgressNavigation(
-                    step,
+                    legStep,
                     distanceRemaining,
                     distanceTraveled,
                     fractionTraveled,
@@ -102,24 +82,20 @@ data class RouteStepProgressNavigation internal constructor(
             )
         }
 
-        private fun calculateDistanceTraveled(step: LegStepNavigation?, distanceRemaining: Double?): Double {
-            val currentDistance = step?.distance ?: 0.0
-            val _distanceRemaining = distanceRemaining ?: 0.0
-
-            val distanceTraveled = currentDistance - _distanceRemaining
+        private fun calculateDistanceTraveled(step: LegStepNavigation, distanceRemaining: Double): Double {
+            val distanceTraveled = step.distance() - distanceRemaining
             return when {
                 distanceTraveled < 0 -> 0.0
                 else -> distanceTraveled
             }
         }
 
-        private fun calculateFractionTraveled(step: LegStepNavigation?, distanceTraveled: Double?): Float {
-            val currentDistance = step?.distance ?: 0.0
+        private fun calculateFractionTraveled(step: LegStepNavigation, distanceTraveled: Double): Float {
+            val currentDistance = step.distance()
             when {
                 currentDistance <= 0 -> return 1f
                 else -> {
-                    val _distanceTraveled = distanceTraveled ?: 0.0
-                    val fractionTraveled = (_distanceTraveled / currentDistance).toFloat()
+                    val fractionTraveled = (distanceTraveled / currentDistance).toFloat()
                     return when {
                         fractionTraveled < 0 -> return 0f
                         else -> fractionTraveled
@@ -128,10 +104,9 @@ data class RouteStepProgressNavigation internal constructor(
             }
         }
 
-        private fun calculateDurationRemaining(step: LegStepNavigation?, fractionTraveled: Float?): Double {
-            val currentDuration = step?.duration ?: 0.0
-            val _fractionTraveled = fractionTraveled ?: 0f
-            return (1 - _fractionTraveled) * currentDuration
-        }
+        private fun calculateDurationRemaining(
+            step: LegStepNavigation,
+            fractionTraveled: Float
+        ): Double = (1 - fractionTraveled) * step.duration()
     }
 }

@@ -8,28 +8,42 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegsNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
 
-fun LegStep.mapToLegStep() = LegStepNavigation(
-    distance = distance(),
-    duration = duration()
-)
+fun StepManeuver.mapToStepManeuver() = StepManeuverNavigation.Builder()
+        .type(type())
+        .modifier(modifier())
+        .instruction(instruction())
+        .location(doubleArrayOf(location().longitude(), location().latitude()))
+        .bearingAfter(bearingAfter())
+        .bearingBefore(bearingBefore())
+        .build()
 
-fun RouteLeg.mapToRouteLeg() = RouteLegsNavigation(
-    distance = distance(),
-    duration = duration(),
-    summary = summary(),
-    steps = steps()?.let { stepList ->
-        stepList.map {
-            it.mapToLegStep()
-        }
-    }
-)
+fun LegStep.mapToLegStep() = LegStepNavigation.Builder()
+        .distance(distance())
+        .duration(duration())
+        .stepManeuver(maneuver().mapToStepManeuver())
+        .build()
+
+fun RouteLeg.mapToRouteLeg() = RouteLegsNavigation.Builder()
+        .distance(distance())
+        .duration(duration())
+        .summary(summary())
+        .steps(
+                steps()?.let { stepList ->
+                    stepList.map {
+                        it.mapToLegStep()
+                    }
+                }
+        )
+        .build()
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
