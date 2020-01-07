@@ -36,12 +36,20 @@ interface TripNotification {
     fun updateNotification(routeProgress: RouteProgress)
 
     /**
+     * Callback for when trip session is started via [TripSession.start].
+     *
+     *
+     * This callback may be used to perform post start initialization
+     *
+     */
+    fun onTripSessionStarted()
+
+    /**
      * Callback for when trip session is stopped via [TripSession.stop].
      *
      *
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
      *
-     * @param context to be used if needed for Android-related work
      */
     fun onTripSessionStopped()
 }

@@ -74,6 +74,10 @@ class MapboxTripNotification(
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
+    override fun onTripSessionStarted() {
+        registerReceiver()
+    }
+
     override fun onTripSessionStopped() {
         unregisterReceiver()
     }
