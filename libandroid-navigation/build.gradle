@@ -59,6 +59,7 @@ dependencies {
   api dependenciesList.mapboxSdkServices
   api dependenciesList.mapboxSdkTurf
   api dependenciesList.mapboxCore
+  api dependenciesList.mapboxAndroidAccounts
   api (dependenciesList.mapboxEvents) {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }

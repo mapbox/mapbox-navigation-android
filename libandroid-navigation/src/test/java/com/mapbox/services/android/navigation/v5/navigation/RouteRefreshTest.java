@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.content.Context;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -23,7 +24,8 @@ public class RouteRefreshTest {
     when(routeProgress.directionsRoute()).thenReturn(route);
     RefreshCallback refreshCallback = mock(RefreshCallback.class);
     String accessToken = "some_access_token";
-    RouteRefresh refresh = new RouteRefresh(accessToken);
+    Context context = mock(Context.class);
+    RouteRefresh refresh = new RouteRefresh(accessToken, context);
 
     refresh.refresh(routeProgress, refreshCallback);
 
@@ -41,7 +43,8 @@ public class RouteRefreshTest {
     when(routeProgress.directionsRoute()).thenReturn(route);
     RefreshCallback refreshCallback = mock(RefreshCallback.class);
     String accessToken = "some_access_token";
-    RouteRefresh refresh = new RouteRefresh(accessToken);
+    Context context = mock(Context.class);
+    RouteRefresh refresh = new RouteRefresh(accessToken, context);
 
     refresh.refresh(routeProgress, refreshCallback);
 

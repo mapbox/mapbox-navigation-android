@@ -3,8 +3,8 @@ package com.mapbox.services.android.navigation.v5.navigation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.location.Location;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
 
@@ -18,6 +18,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
+import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigationAccounts;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonParams;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonRequestBuilder;
 import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater;
@@ -44,6 +45,7 @@ import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.snap.Snap;
+import timber.log.Timber;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,9 +56,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import retrofit2.Callback;
-import timber.log.Timber;
 
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.BANNER_INSTRUCTION_MILESTONE_ID;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NON_NULL_APPLICATION_CONTEXT_REQUIRED;
@@ -434,6 +433,7 @@ public class MapboxNavigation implements ServiceConnection {
       MapboxMetricsReporter.disable();
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
+      MapboxNavigationAccounts.getInstance(applicationContext).navigationStopped();
     }
   }
 
@@ -1131,9 +1131,10 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
+    MapboxNavigationAccounts.getInstance(applicationContext).navigationStarted();
     ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
-    routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken));
+    routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken, applicationContext));
     mapboxNavigator.updateRoute(directionsRoute, routeType);
     isActiveGuidanceOnGoing.set(true);
     if (!isBound) {

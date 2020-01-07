@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.services.android.navigation.ui.v5.ConnectivityStatusProvider;
+import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,19 +28,22 @@ public class VoiceInstructionLoader {
   private final String accessToken;
   private List<String> urlsCached;
   private final Cache cache;
+  private final Context context;
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
 
   public VoiceInstructionLoader(Context context, String accessToken, Cache cache) {
     this.connectivityStatus = new ConnectivityStatusProvider(context);
     this.accessToken = accessToken;
+    this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
   }
 
   // Package private (no modifier) for testing purposes
-  VoiceInstructionLoader(String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
+  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
                          ConnectivityStatusProvider connectivityStatus) {
     this.accessToken = accessToken;
+    this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
     this.mapboxSpeechBuilder = mapboxSpeechBuilder;
@@ -90,9 +94,11 @@ public class VoiceInstructionLoader {
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
-    if (!cache.isClosed() && mapboxSpeechBuilder != null) {
-      MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
+    if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
+      mapboxSpeechBuilder
         .instruction(instruction)
+        .interceptor(new SkuInterceptor(context));
+      MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .textType(textType)
         .build();
       mapboxSpeech.enqueueCall(callback);
