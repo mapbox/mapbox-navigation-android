@@ -29,10 +29,10 @@ class MapboxTripService(
                 tripNotification.onTripSessionStarted()
                 initializeLambda()
                 notificationDataChannel.offer(
-                        MapboxNotificationData(
-                                tripNotification.getNotificationId(),
-                                tripNotification.getNotification()
-                        )
+                    MapboxNotificationData(
+                        tripNotification.getNotificationId(),
+                        tripNotification.getNotification()
+                    )
                 )
             }
             false -> {
@@ -62,6 +62,6 @@ class MapboxTripService(
     companion object {
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)
         fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
-                notificationDataChannel
+            notificationDataChannel
     }
 }

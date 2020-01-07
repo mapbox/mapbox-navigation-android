@@ -42,6 +42,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var navigationMapRoute: NavigationMapRoute
     private lateinit var mapboxTripService: MapboxTripService
     private var textUpdateJob: Job = Job()
+
     @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap

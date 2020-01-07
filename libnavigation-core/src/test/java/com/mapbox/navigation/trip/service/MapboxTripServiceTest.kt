@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import org.junit.Assert
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 
@@ -38,6 +38,6 @@ class MapboxTripServiceTest {
 
     @Test
     fun generationSanityTest() {
-        Assert.assertNotNull(service)
+        assertNotNull(service)
     }
 }
