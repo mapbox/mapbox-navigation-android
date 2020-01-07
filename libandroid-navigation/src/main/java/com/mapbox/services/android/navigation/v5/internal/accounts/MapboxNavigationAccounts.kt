@@ -14,7 +14,7 @@ internal class MapboxNavigationAccounts private constructor() {
         private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
         private const val TRIPS_REQUEST_COUNT_THRESHOLD = 5
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
-        private var skuGenerator: SkuGenerator = DisabledSku()
+        private var skuGenerator: SkuGenerator? = null
         private var INSTANCE: MapboxNavigationAccounts? = null
 
         @JvmStatic
@@ -22,8 +22,7 @@ internal class MapboxNavigationAccounts private constructor() {
                 INSTANCE ?: synchronized(this) {
                     MapboxNavigationAccounts().also { mapboxNavigationAccount ->
                         INSTANCE = mapboxNavigationAccount
-                        // TODO uncomment when ready to release as a part of 1.0
-                        // init(context)
+                        init(context)
                     }
                 }
 
@@ -37,14 +36,16 @@ internal class MapboxNavigationAccounts private constructor() {
     }
 
     fun obtainSkuToken(): String {
-        return skuGenerator.generateToken()
+        return skuGenerator?.generateToken()?.let { token ->
+            token
+        } ?: throw IllegalStateException("MapboxNavigationAccounts: skuGenerator cannot be null")
     }
 
     fun navigationStopped() {
-        skuGenerator.onNavigationEnd()
+        skuGenerator?.onNavigationEnd()
     }
 
     fun navigationStarted() {
-        skuGenerator.onNavigationStart()
+        skuGenerator?.onNavigationStart()
     }
 }

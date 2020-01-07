@@ -26,7 +26,7 @@ internal class MapboxNavigationProvider : ContentProvider() {
                 }
             }
         } catch (throwable: Throwable) {
-            Timber.e("$TAG + $throwable")
+            Timber.e(throwable)
         }
         return false
     }
