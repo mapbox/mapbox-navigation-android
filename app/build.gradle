@@ -83,7 +83,6 @@ android {
 }
 
 dependencies {
-  implementation project(':libnavigation-core')
   implementation project(':libdirections-offboard')
   implementation project(':libdirections-onboard')
   implementation project(':libnavigation-util')
