@@ -19,7 +19,7 @@ import java.io.File
 class MapboxOnboardRouter : Router {
 
     companion object {
-        private const val TILE_PATH_NAME = "tiles"
+        private const val TILES_DIR_NAME = "tiles"
     }
 
     private val navigatorNative: MapboxNativeNavigator
@@ -32,7 +32,7 @@ class MapboxOnboardRouter : Router {
      * @param config offline config
      */
     constructor(config: Config) {
-        val tileDir = File(config.tilePath, TILE_PATH_NAME)
+        val tileDir = File(config.tilePath, TILES_DIR_NAME)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
         }

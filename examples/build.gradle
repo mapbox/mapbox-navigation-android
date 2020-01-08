@@ -84,6 +84,7 @@ android {
 
 dependencies {
     implementation project(':libdirections-offboard')
+    implementation project(':libdirections-onboard')
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
     implementation project(':liblogger')

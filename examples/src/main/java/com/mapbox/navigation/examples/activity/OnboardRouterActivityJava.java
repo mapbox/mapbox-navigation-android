@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.testapp.activity;
+package com.mapbox.navigation.examples.activity;
 
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,29 +18,20 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-//import com.mapbox.navigation.base.route.DirectionsSession;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.route.model.Route;
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
-//import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
+import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.route.onboard.model.Config;
-import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.testapp.utils.Utils;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.v5.utils.extensions.Mappers;
-import com.mapbox.turf.TurfConstants;
-import com.mapbox.turf.TurfMeasurement;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import timber.log.Timber;
+
+//import com.mapbox.navigation.base.route.DirectionsSession;
+//import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
 
 public class OnboardRouterActivityJava
         extends AppCompatActivity
@@ -54,7 +45,7 @@ public class OnboardRouterActivityJava
 
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
-//  private DirectionsSession directionsSession;
+  //  private DirectionsSession directionsSession;
   private Point origin;
   private Point destination;
   private Point waypoint;

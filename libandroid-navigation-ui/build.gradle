@@ -58,9 +58,8 @@ dependencies {
 
   // Navigation SDK
   api project(':libandroid-navigation')
-  implementation project(':libnavigation-util')
-    implementation project(':liblogger')
-    implementation project(':libnavigation-base')
+  implementation project(':liblogger')
+  implementation project(':libnavigation-base')
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk
