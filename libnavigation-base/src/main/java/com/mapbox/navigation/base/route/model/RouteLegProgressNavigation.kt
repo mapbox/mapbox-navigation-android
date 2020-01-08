@@ -16,7 +16,7 @@ class RouteLegProgressNavigation private constructor(
     private val currentStepProgress: RouteStepProgressNavigation? = null,
     private val currentStepPoints: List<Point>? = null,
     private val upcomingStepPoints: List<Point>? = null,
-    private val routeLeg: RouteLegsNavigation? = null,
+    private val routeLeg: RouteLegNavigation? = null,
     private val stepDistanceRemaining: Double = 0.0,
     private val builder: Builder
 ) {
@@ -118,7 +118,7 @@ class RouteLegProgressNavigation private constructor(
     /**
      * Not public since developer can access same information from [RouteProgressNavigation].
      */
-    internal fun routeLeg(): RouteLegsNavigation? = routeLeg
+    internal fun routeLeg(): RouteLegNavigation? = routeLeg
 
     internal fun stepDistanceRemaining(): Double = stepDistanceRemaining
 
@@ -136,8 +136,8 @@ class RouteLegProgressNavigation private constructor(
         private var previousStep: LegStepNavigation? = null
         private var upComingStep: LegStepNavigation? = null
         private var followOnStep: LegStepNavigation? = null
-        private lateinit var routeLegBuilder: RouteLegsNavigation
-        private lateinit var currentStepBuilder: LegStepNavigation
+        private lateinit var _routeLeg: RouteLegNavigation
+        private lateinit var _currentStep: LegStepNavigation
         private lateinit var currentStepProgress: RouteStepProgressNavigation
 
         fun stepIndex(stepIndex: Int) = apply { this.stepIndex = stepIndex }
@@ -148,7 +148,7 @@ class RouteLegProgressNavigation private constructor(
         fun durationRemaining(durationRemaining: Double) =
                 apply { this.durationRemaining = durationRemaining }
 
-        fun currentStep(currentStep: LegStepNavigation) = apply { this.currentStepBuilder = currentStep }
+        fun currentStep(currentStep: LegStepNavigation) = apply { this._currentStep = currentStep }
 
         fun currentStepPoints(currentStepPoints: List<Point>?) =
                 apply { this.currentStepPoints = currentStepPoints }
@@ -156,18 +156,18 @@ class RouteLegProgressNavigation private constructor(
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
                 apply { this.upcomingStepPoints = upcomingStepPoints }
 
-        fun routeLeg(routeLeg: RouteLegsNavigation) = apply { this.routeLegBuilder = routeLeg }
+        fun routeLeg(routeLeg: RouteLegNavigation) = apply { this._routeLeg = routeLeg }
 
         fun stepDistanceRemaining(stepDistanceRemaining: Double) =
                 apply { this.stepDistanceRemaining = stepDistanceRemaining }
 
         private fun validate() {
             var missing = ""
-            if (!this::routeLegBuilder.isInitialized) {
-                missing += " routeLegBuilder"
+            if (!this::_routeLeg.isInitialized) {
+                missing += " _routeLeg"
             }
-            if (!this::currentStepBuilder.isInitialized) {
-                missing += " currentStep"
+            if (!this::_currentStep.isInitialized) {
+                missing += " _currentStep"
             }
             if (!this::currentStepProgress.isInitialized) {
                 missing += " currentStepProgress"
@@ -182,7 +182,7 @@ class RouteLegProgressNavigation private constructor(
             upComingStep = upComingStep()
             followOnStep = followOnStep()
             currentStepProgress = RouteStepProgressNavigation.Builder()
-                    .step(currentStepBuilder)
+                    .step(_currentStep)
                     .distanceRemaining(stepDistanceRemaining)
                     .build()
 
@@ -194,21 +194,21 @@ class RouteLegProgressNavigation private constructor(
                     distanceRemaining,
                     durationRemaining,
                     fractionTraveled,
-                    currentStepBuilder,
+                    _currentStep,
                     previousStep,
                     upComingStep,
                     followOnStep,
                     currentStepProgress,
                     currentStepPoints,
                     upcomingStepPoints,
-                    routeLegBuilder,
+                    _routeLeg,
                     stepDistanceRemaining,
                     this
             )
         }
 
         private fun distanceTraveled(): Double =
-                routeLegBuilder.distance()?.let { distance ->
+                _routeLeg.distance()?.let { distance ->
                     return when (distance - distanceRemaining < 0) {
                         true -> {
                             0.0
@@ -223,7 +223,7 @@ class RouteLegProgressNavigation private constructor(
             if (distanceTraveled == 0.0) {
                 return 1.0f
             }
-            return routeLegBuilder.distance()?.let { distance ->
+            return _routeLeg.distance()?.let { distance ->
                 when (distance > 0) {
                     true -> {
                         (distanceTraveled / distance).toFloat()
@@ -236,7 +236,7 @@ class RouteLegProgressNavigation private constructor(
         }
 
         private fun previousStep(): LegStepNavigation? =
-                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
+                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
                     return when {
                         stepIndex != 0 -> routeLegSteps[stepIndex - 1]
                         else -> null
@@ -244,7 +244,7 @@ class RouteLegProgressNavigation private constructor(
                 }
 
         private fun upComingStep(): LegStepNavigation? =
-                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
+                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
                     return when {
                         routeLegSteps.size - 1 > stepIndex -> routeLegSteps[stepIndex + 1]
                         else -> null
@@ -252,7 +252,7 @@ class RouteLegProgressNavigation private constructor(
                 }
 
         private fun followOnStep(): LegStepNavigation? =
-                ifNonNull(routeLegBuilder.steps()) { routeLegSteps ->
+                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
                     return when {
                         routeLegSteps.size - 2 > stepIndex -> routeLegSteps[stepIndex + 2]
                         else -> null

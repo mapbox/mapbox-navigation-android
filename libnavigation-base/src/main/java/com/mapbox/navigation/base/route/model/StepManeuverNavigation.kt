@@ -78,7 +78,7 @@ class StepManeuverNavigation private constructor(
         private var instruction: String? = null
         private var bearingAfter: Double? = null
         private var bearingBefore: Double? = null
-        private lateinit var locationBuilder: DoubleArray
+        private lateinit var _location: DoubleArray
 
         fun type(type: String?) =
                 apply { this.type = type }
@@ -96,12 +96,12 @@ class StepManeuverNavigation private constructor(
                 apply { this.bearingBefore = bearingBefore }
 
         fun location(location: DoubleArray) =
-                apply { this.locationBuilder = location }
+                apply { this._location = location }
 
         private fun validate() {
             var missing = ""
-            if (!this::locationBuilder.isInitialized) {
-                missing += " locationBuilder"
+            if (!this::_location.isInitialized) {
+                missing += " _location"
             }
             check(missing.isEmpty()) { "StepManeuverNavigation.Builder missing required properties: $missing" }
         }
@@ -112,7 +112,7 @@ class StepManeuverNavigation private constructor(
             return StepManeuverNavigation(
                 type,
                 modifier,
-                locationBuilder,
+                _location,
                 bearingAfter,
                 bearingBefore,
                 instruction,

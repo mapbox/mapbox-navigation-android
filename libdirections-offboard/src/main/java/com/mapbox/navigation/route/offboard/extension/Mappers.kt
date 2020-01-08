@@ -11,7 +11,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteLegsNavigation
+import com.mapbox.navigation.base.route.model.RouteLegNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
@@ -32,7 +32,7 @@ fun LegStep.mapToLegStep() = LegStepNavigation.Builder()
         .stepManeuver(maneuver().mapToStepManeuver())
         .build()
 
-fun RouteLeg.mapToRouteLeg() = RouteLegsNavigation.Builder()
+fun RouteLeg.mapToRouteLeg() = RouteLegNavigation.Builder()
         .distance(distance())
         .duration(duration())
         .summary(summary())

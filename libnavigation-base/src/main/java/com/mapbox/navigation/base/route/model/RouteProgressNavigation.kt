@@ -47,7 +47,7 @@ class RouteProgressNavigation private constructor(
      *
      * @return a [RouteLegNavigation] the user is currently on
      */
-    fun currentLeg(): RouteLegsNavigation? =
+    fun currentLeg(): RouteLegNavigation? =
             ifNonNull(route()?.legs, legIndex) { routeLegs, legIndex ->
                 routeLegs[legIndex]
             }
@@ -197,8 +197,8 @@ class RouteProgressNavigation private constructor(
         private var upcomingStepPoints: List<Point>? = null
         private var routeGeometryWithBuffer: Geometry? = null
         private var bannerInstruction: BannerInstruction? = null
-        private lateinit var currentStateBuilder: RouteProgressStateNavigation
-        private lateinit var currentLegProgressBuilder: RouteLegProgressNavigation
+        private lateinit var _currentState: RouteProgressStateNavigation
+        private lateinit var _currentLegProgress: RouteLegProgressNavigation
         private var legIndex: Int = 0
         private var stepIndex: Int = 0
         private var inTunnel: Boolean = false
@@ -227,7 +227,7 @@ class RouteProgressNavigation private constructor(
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
 
         fun currentState(currentState: RouteProgressStateNavigation) =
-                apply { this.currentStateBuilder = currentState }
+                apply { this._currentState = currentState }
 
         fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) =
                 apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
@@ -247,17 +247,17 @@ class RouteProgressNavigation private constructor(
 
         private fun validate() {
             var missing = ""
-            if (!this::currentStateBuilder.isInitialized) {
-                missing += " currentStateBuilder"
+            if (!this::_currentState.isInitialized) {
+                missing += " _currentState"
             }
-            if (!this::currentLegProgressBuilder.isInitialized) {
-                missing += " currentLegProgressBuilder"
+            if (!this::_currentLegProgress.isInitialized) {
+                missing += " _currentLegProgress"
             }
             check(missing.isEmpty()) { "RouteProgressNavigation.Builder missing required properties: $missing" }
         }
 
         fun build(): RouteProgressNavigation {
-            val leg: RouteLegsNavigation? = directionsRoute?.let { directionRoute ->
+            val leg: RouteLegNavigation? = directionsRoute?.let { directionRoute ->
                 directionRoute.legs?.let { legs ->
                     legs[legIndex]
                 }
@@ -277,7 +277,7 @@ class RouteProgressNavigation private constructor(
                     .currentStepPoints(currentStepPoints)
                     .upcomingStepPoints(upcomingStepPoints)
                     .build()
-            this.currentLegProgressBuilder = legProgress
+            this._currentLegProgress = legProgress
             validate()
 
             return RouteProgressNavigation(
@@ -287,8 +287,8 @@ class RouteProgressNavigation private constructor(
                     upcomingStepPoints,
                     routeGeometryWithBuffer,
                     bannerInstruction,
-                    currentStateBuilder,
-                    currentLegProgressBuilder,
+                    _currentState,
+                    _currentLegProgress,
                     legIndex,
                     stepIndex,
                     inTunnel,

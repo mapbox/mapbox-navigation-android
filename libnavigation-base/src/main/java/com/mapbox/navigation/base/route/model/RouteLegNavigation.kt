@@ -1,6 +1,6 @@
 package com.mapbox.navigation.base.route.model
 
-class RouteLegsNavigation private constructor(
+class RouteLegNavigation private constructor(
     private val distance: Double? = null,
     private val duration: Double? = null,
     private val summary: String? = null,
@@ -55,8 +55,8 @@ class RouteLegsNavigation private constructor(
         fun steps(steps: List<LegStepNavigation>?) =
                 apply { this.steps = steps }
 
-        fun build(): RouteLegsNavigation {
-            return RouteLegsNavigation(
+        fun build(): RouteLegNavigation {
+            return RouteLegNavigation(
                     distance,
                     duration,
                     summary,

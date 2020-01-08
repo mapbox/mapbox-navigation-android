@@ -7,7 +7,7 @@ import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteLegsNavigation
+import com.mapbox.navigation.base.route.model.RouteLegNavigation
 
 fun LegStepNavigation.mapToLegStep(): LegStep {
     return LegStep.builder()
@@ -16,7 +16,7 @@ fun LegStepNavigation.mapToLegStep(): LegStep {
         .build()
 }
 
-fun RouteLegsNavigation.mapToRouteLeg(): RouteLeg {
+fun RouteLegNavigation.mapToRouteLeg(): RouteLeg {
     val steps = steps()?.let { stepLegList ->
         stepLegList.map {
             it.mapToLegStep()
