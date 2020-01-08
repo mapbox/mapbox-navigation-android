@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.route.model
 
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.banner.BannerInstruction
 import com.mapbox.navigation.base.extensions.ifNonNull
 
 class RouteProgressNavigation private constructor(
@@ -10,6 +11,7 @@ class RouteProgressNavigation private constructor(
     private val currentStepPoints: List<Point>? = null,
     private val upcomingStepPoints: List<Point>? = null,
     private val routeGeometryWithBuffer: Geometry? = null,
+    private val bannerInstruction: BannerInstruction? = null,
     private val currentState: RouteProgressStateNavigation? = null,
     private val currentLegProgress: RouteLegProgressNavigation? = null,
     private val legIndex: Int = 0,
@@ -150,6 +152,13 @@ class RouteProgressNavigation private constructor(
     fun inTunnel() = inTunnel
 
     /**
+     * Current banner instruction.
+     *
+     * @return current banner instruction
+     */
+    fun bannerInstruction() = bannerInstruction
+
+    /**
      * Returns the current state of progress along the route.  Provides route and location tracking
      * information.
      *
@@ -187,6 +196,7 @@ class RouteProgressNavigation private constructor(
         private var currentStepPoints: List<Point>? = null
         private var upcomingStepPoints: List<Point>? = null
         private var routeGeometryWithBuffer: Geometry? = null
+        private var bannerInstruction: BannerInstruction? = null
         private lateinit var currentStateBuilder: RouteProgressStateNavigation
         private lateinit var currentLegProgressBuilder: RouteLegProgressNavigation
         private var legIndex: Int = 0
@@ -207,6 +217,9 @@ class RouteProgressNavigation private constructor(
 
         fun currentStepPoints(currentStepPoints: List<Point>?) =
                 apply { this.currentStepPoints = currentStepPoints }
+
+        fun bannerInstruction(bannerInstruction: BannerInstruction?) =
+                apply { this.bannerInstruction = bannerInstruction }
 
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
                 apply { this.upcomingStepPoints = upcomingStepPoints }
@@ -273,6 +286,7 @@ class RouteProgressNavigation private constructor(
                     currentStepPoints,
                     upcomingStepPoints,
                     routeGeometryWithBuffer,
+                    bannerInstruction,
                     currentStateBuilder,
                     currentLegProgressBuilder,
                     legIndex,
