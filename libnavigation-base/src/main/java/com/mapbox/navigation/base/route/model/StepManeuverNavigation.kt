@@ -33,10 +33,10 @@ class StepManeuverNavigation private constructor(
         private var modifier: String? = null
 
         fun type(type: String?) =
-                apply { this.type = type }
+            apply { this.type = type }
 
         fun modifier(modifier: String?) =
-                apply { this.modifier = modifier }
+            apply { this.modifier = modifier }
 
         fun build(): StepManeuverNavigation {
 

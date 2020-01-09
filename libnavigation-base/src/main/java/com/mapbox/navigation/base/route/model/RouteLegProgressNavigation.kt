@@ -140,26 +140,29 @@ class RouteLegProgressNavigation private constructor(
         private lateinit var _currentStep: LegStepNavigation
         private lateinit var currentStepProgress: RouteStepProgressNavigation
 
-        fun stepIndex(stepIndex: Int) = apply { this.stepIndex = stepIndex }
+        fun stepIndex(stepIndex: Int) =
+            apply { this.stepIndex = stepIndex }
 
         fun distanceRemaining(distanceRemaining: Double) =
-                apply { this.distanceRemaining = distanceRemaining }
+            apply { this.distanceRemaining = distanceRemaining }
 
         fun durationRemaining(durationRemaining: Double) =
-                apply { this.durationRemaining = durationRemaining }
+            apply { this.durationRemaining = durationRemaining }
 
-        fun currentStep(currentStep: LegStepNavigation) = apply { this._currentStep = currentStep }
+        fun currentStep(currentStep: LegStepNavigation) =
+            apply { this._currentStep = currentStep }
 
         fun currentStepPoints(currentStepPoints: List<Point>?) =
-                apply { this.currentStepPoints = currentStepPoints }
+            apply { this.currentStepPoints = currentStepPoints }
 
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
-                apply { this.upcomingStepPoints = upcomingStepPoints }
+            apply { this.upcomingStepPoints = upcomingStepPoints }
 
-        fun routeLeg(routeLeg: RouteLegNavigation) = apply { this._routeLeg = routeLeg }
+        fun routeLeg(routeLeg: RouteLegNavigation) =
+            apply { this._routeLeg = routeLeg }
 
         fun stepDistanceRemaining(stepDistanceRemaining: Double) =
-                apply { this.stepDistanceRemaining = stepDistanceRemaining }
+            apply { this.stepDistanceRemaining = stepDistanceRemaining }
 
         private fun validate() {
             var missing = ""
@@ -182,42 +185,42 @@ class RouteLegProgressNavigation private constructor(
             upComingStep = upComingStep()
             followOnStep = followOnStep()
             currentStepProgress = RouteStepProgressNavigation.Builder()
-                    .step(_currentStep)
-                    .distanceRemaining(stepDistanceRemaining)
-                    .build()
+                .step(_currentStep)
+                .distanceRemaining(stepDistanceRemaining)
+                .build()
 
             validate()
 
             return RouteLegProgressNavigation(
-                    stepIndex,
-                    distanceTraveled,
-                    distanceRemaining,
-                    durationRemaining,
-                    fractionTraveled,
-                    _currentStep,
-                    previousStep,
-                    upComingStep,
-                    followOnStep,
-                    currentStepProgress,
-                    currentStepPoints,
-                    upcomingStepPoints,
-                    _routeLeg,
-                    stepDistanceRemaining,
-                    this
+                stepIndex,
+                distanceTraveled,
+                distanceRemaining,
+                durationRemaining,
+                fractionTraveled,
+                _currentStep,
+                previousStep,
+                upComingStep,
+                followOnStep,
+                currentStepProgress,
+                currentStepPoints,
+                upcomingStepPoints,
+                _routeLeg,
+                stepDistanceRemaining,
+                this
             )
         }
 
         private fun distanceTraveled(): Double =
-                _routeLeg.distance()?.let { distance ->
-                    return when (distance - distanceRemaining < 0) {
-                        true -> {
-                            0.0
-                        }
-                        else -> {
-                            distance - distanceRemaining
-                        }
+            _routeLeg.distance()?.let { distance ->
+                return when (distance - distanceRemaining < 0) {
+                    true -> {
+                        0.0
                     }
-                } ?: distanceRemaining
+                    else -> {
+                        distance - distanceRemaining
+                    }
+                }
+            } ?: distanceRemaining
 
         private fun fractionTraveled(distanceTraveled: Double): Float {
             if (distanceTraveled == 0.0) {
@@ -236,44 +239,44 @@ class RouteLegProgressNavigation private constructor(
         }
 
         private fun previousStep(): LegStepNavigation? =
-                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
-                    return when {
-                        stepIndex != 0 -> routeLegSteps[stepIndex - 1]
-                        else -> null
-                    }
+            ifNonNull(_routeLeg.steps()) { routeLegSteps ->
+                return when {
+                    stepIndex != 0 -> routeLegSteps[stepIndex - 1]
+                    else -> null
                 }
+            }
 
         private fun upComingStep(): LegStepNavigation? =
-                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
-                    return when {
-                        routeLegSteps.size - 1 > stepIndex -> routeLegSteps[stepIndex + 1]
-                        else -> null
-                    }
+            ifNonNull(_routeLeg.steps()) { routeLegSteps ->
+                return when {
+                    routeLegSteps.size - 1 > stepIndex -> routeLegSteps[stepIndex + 1]
+                    else -> null
                 }
+            }
 
         private fun followOnStep(): LegStepNavigation? =
-                ifNonNull(_routeLeg.steps()) { routeLegSteps ->
-                    return when {
-                        routeLegSteps.size - 2 > stepIndex -> routeLegSteps[stepIndex + 2]
-                        else -> null
-                    }
+            ifNonNull(_routeLeg.steps()) { routeLegSteps ->
+                return when {
+                    routeLegSteps.size - 2 > stepIndex -> routeLegSteps[stepIndex + 2]
+                    else -> null
                 }
+            }
     }
 
     override fun toString(): String {
         return stepIndex.toString() +
-                distanceTraveled.toString() +
-                distanceRemaining.toString() +
-                fractionTraveled.toString() +
-                currentStep.toString() +
-                previousStep.toString() +
-                upComingStep.toString() +
-                followOnStep.toString() +
-                currentStepProgress.toString() +
-                currentStepPoints.toString() +
-                upcomingStepPoints.toString() +
-                routeLeg.toString() +
-                stepDistanceRemaining.toString()
+            distanceTraveled.toString() +
+            distanceRemaining.toString() +
+            fractionTraveled.toString() +
+            currentStep.toString() +
+            previousStep.toString() +
+            upComingStep.toString() +
+            followOnStep.toString() +
+            currentStepProgress.toString() +
+            currentStepPoints.toString() +
+            upcomingStepPoints.toString() +
+            routeLeg.toString() +
+            stepDistanceRemaining.toString()
     }
 
     override fun equals(other: Any?): Boolean {

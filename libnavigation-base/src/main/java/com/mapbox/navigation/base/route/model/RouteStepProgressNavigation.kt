@@ -41,7 +41,12 @@ class RouteStepProgressNavigation private constructor(
      */
     fun durationRemaining(): Double = durationRemaining
 
-    internal fun step(): LegStepNavigation? = step
+    /**
+     * Provides data about one [LegStepNavigation] representing the step the user is on
+     *
+     * @return a [LegStepNavigation]
+     */
+    fun step(): LegStepNavigation? = step
 
     fun toBuilder() = builder
 

@@ -48,19 +48,19 @@ class LegStepNavigation private constructor(
         private lateinit var stepManeuverBuilder: StepManeuverNavigation
 
         fun distance(distance: Double) =
-                apply { this.distance = distance }
+            apply { this.distance = distance }
 
         fun duration(duration: Double) =
-                apply { this.duration = duration }
+            apply { this.duration = duration }
 
         fun geometry(geometry: String?) =
-                apply { this.geometry = geometry }
+            apply { this.geometry = geometry }
 
         fun drivingSide(drivingSide: String?) =
-                apply { this.drivingSide = drivingSide }
+            apply { this.drivingSide = drivingSide }
 
         fun stepManeuver(stepManeuver: StepManeuverNavigation) =
-                apply { this.stepManeuverBuilder = stepManeuver }
+            apply { this.stepManeuverBuilder = stepManeuver }
 
         private fun validate() {
             var missing = ""
@@ -74,22 +74,22 @@ class LegStepNavigation private constructor(
             validate()
 
             return LegStepNavigation(
-                    distance,
-                    duration,
-                    geometry,
-                    drivingSide,
-                    stepManeuverBuilder,
-                    this
+                distance,
+                duration,
+                geometry,
+                drivingSide,
+                stepManeuverBuilder,
+                this
             )
         }
     }
 
     override fun toString(): String {
         return this.distance.toString() +
-                this.duration.toString() +
-                this.drivingSide +
-                this.geometry +
-                this.maneuver.toString()
+            this.duration.toString() +
+            this.drivingSide +
+            this.geometry +
+            this.maneuver.toString()
     }
 
     override fun equals(other: Any?): Boolean {

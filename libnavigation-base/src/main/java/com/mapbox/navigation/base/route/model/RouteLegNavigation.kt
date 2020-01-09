@@ -44,33 +44,33 @@ class RouteLegNavigation private constructor(
         private var steps: List<LegStepNavigation>? = null
 
         fun distance(distance: Double?) =
-                apply { this.distance = distance }
+            apply { this.distance = distance }
 
         fun duration(duration: Double?) =
-                apply { this.duration = duration }
+            apply { this.duration = duration }
 
         fun summary(summary: String?) =
-                apply { this.summary = summary }
+            apply { this.summary = summary }
 
         fun steps(steps: List<LegStepNavigation>?) =
-                apply { this.steps = steps }
+            apply { this.steps = steps }
 
         fun build(): RouteLegNavigation {
             return RouteLegNavigation(
-                    distance,
-                    duration,
-                    summary,
-                    steps,
-                    this
+                distance,
+                duration,
+                summary,
+                steps,
+                this
             )
         }
     }
 
     override fun toString(): String {
         return this.distance.toString() +
-                this.duration.toString() +
-                this.summary +
-                this.steps.toString()
+            this.duration.toString() +
+            this.summary +
+            this.steps.toString()
     }
 
     override fun equals(other: Any?): Boolean {

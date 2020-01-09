@@ -18,28 +18,28 @@ import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
 
 fun StepManeuver.mapToStepManeuver() = StepManeuverNavigation.Builder()
-        .type(type())
-        .modifier(modifier())
-        .build()
+    .type(type())
+    .modifier(modifier())
+    .build()
 
 fun LegStep.mapToLegStep() = LegStepNavigation.Builder()
-        .distance(distance())
-        .duration(duration())
-        .stepManeuver(maneuver().mapToStepManeuver())
-        .build()
+    .distance(distance())
+    .duration(duration())
+    .stepManeuver(maneuver().mapToStepManeuver())
+    .build()
 
 fun RouteLeg.mapToRouteLeg() = RouteLegNavigation.Builder()
-        .distance(distance())
-        .duration(duration())
-        .summary(summary())
-        .steps(
-                steps()?.let { stepList ->
-                    stepList.map {
-                        it.mapToLegStep()
-                    }
-                }
-        )
-        .build()
+    .distance(distance())
+    .duration(duration())
+    .summary(summary())
+    .steps(
+        steps()?.let { stepList ->
+            stepList.map {
+                it.mapToLegStep()
+            }
+        }
+    )
+    .build()
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
@@ -93,7 +93,9 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .waypointIndices(waypointIndices() ?: "")
         .waypointNames(waypointNames() ?: "")
         .waypointTargets(waypointTargets() ?: "")
-        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation())
+        .walkingOptions(
+            walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation()
+        )
         .build()
 }
 
