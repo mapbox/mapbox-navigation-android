@@ -164,10 +164,10 @@ class RouteLegProgressNavigation private constructor(
         private fun validate() {
             var missing = ""
             if (!this::_routeLeg.isInitialized) {
-                missing += " _routeLeg"
+                missing += " routeLeg"
             }
             if (!this::_currentStep.isInitialized) {
-                missing += " _currentStep"
+                missing += " currentStep"
             }
             if (!this::currentStepProgress.isInitialized) {
                 missing += " currentStepProgress"

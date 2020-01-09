@@ -248,10 +248,10 @@ class RouteProgressNavigation private constructor(
         private fun validate() {
             var missing = ""
             if (!this::_currentState.isInitialized) {
-                missing += " _currentState"
+                missing += " currentState"
             }
             if (!this::_currentLegProgress.isInitialized) {
-                missing += " _currentLegProgress"
+                missing += " currentLegProgress"
             }
             check(missing.isEmpty()) { "RouteProgressNavigation.Builder missing required properties: $missing" }
         }
