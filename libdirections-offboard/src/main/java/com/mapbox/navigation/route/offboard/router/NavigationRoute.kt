@@ -16,6 +16,7 @@ import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
 import retrofit2.Callback
+import kotlin.collections.ArrayList
 
 /**
  * The NavigationRoute class wraps the [MapboxDirections] class with parameters which
@@ -218,6 +219,17 @@ constructor(
          */
         fun interceptor(interceptor: Interceptor): Builder {
             directionsBuilder.interceptor(interceptor)
+            return this
+        }
+
+        /**
+         * Adds an optional network interceptor to set in the OkHttp client.
+         *
+         * @param interceptor to set for OkHttp
+         * @return this builder for chaining options together
+         */
+        fun networkInterceptor(interceptor: Interceptor): Builder {
+            directionsBuilder.networkInterceptor(interceptor)
             return this
         }
 

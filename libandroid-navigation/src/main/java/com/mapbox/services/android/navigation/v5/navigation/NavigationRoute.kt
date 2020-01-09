@@ -14,11 +14,11 @@ import com.mapbox.services.android.navigation.v5.internal.accounts.SkuIntercepto
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.mapToWalkingOptions
+import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
 import retrofit2.Callback
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
