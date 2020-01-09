@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsAdapterFactory
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import java.io.IOException
-import java.util.*
+import java.util.Scanner
 
 open class BaseTest {
 
