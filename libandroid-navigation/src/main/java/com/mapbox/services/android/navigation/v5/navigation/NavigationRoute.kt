@@ -572,6 +572,17 @@ internal constructor(
         }
 
         /**
+         * Adds an optional network interceptor to set in the OkHttp client.
+         *
+         * @param interceptor to set for OkHttp
+         * @return this builder for chaining options together
+         */
+        fun networkInterceptor(interceptor: Interceptor): Builder {
+            directionsBuilder.networkInterceptor(interceptor)
+            return this
+        }
+
+        /**
          * Adds an optional event listener to set in the OkHttp client.
          *
          * @param eventListener to set for OkHttp
