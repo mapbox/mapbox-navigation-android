@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import java.io.IOException
 import java.util.Scanner
-import okhttp3.internal.Util.UTF_8
 
 open class BaseTest {
 
@@ -18,7 +17,7 @@ open class BaseTest {
     protected fun loadJsonFixture(filename: String): String {
         val inputStream = javaClass.classLoader?.getResourceAsStream(filename)
         return inputStream?.let {
-            val scanner = Scanner(it, UTF_8.name()).useDelimiter("\\A")
+            val scanner = Scanner(it, "UTF-8").useDelimiter("\\A")
             if (scanner.hasNext()) scanner.next() else ""
         } ?: ""
     }

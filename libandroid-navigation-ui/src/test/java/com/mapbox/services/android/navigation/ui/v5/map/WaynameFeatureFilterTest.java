@@ -17,7 +17,6 @@ import java.util.Scanner;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
-import static okhttp3.internal.Util.UTF_8;
 import static org.mockito.Mockito.mock;
 
 public class WaynameFeatureFilterTest {
@@ -43,7 +42,7 @@ public class WaynameFeatureFilterTest {
   private String loadJsonFixture(String filename) {
     ClassLoader classLoader = getClass().getClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(filename);
-    Scanner scanner = new Scanner(inputStream, UTF_8.name()).useDelimiter("\\A");
+    Scanner scanner = new Scanner(inputStream, "UTF-8").useDelimiter("\\A");
     return scanner.hasNext() ? scanner.next() : "";
   }
 
