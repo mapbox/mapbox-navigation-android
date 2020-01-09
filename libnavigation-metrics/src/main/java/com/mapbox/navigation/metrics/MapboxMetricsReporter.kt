@@ -70,6 +70,7 @@ object MapboxMetricsReporter : MetricsReporter {
      */
     @JvmStatic
     fun disable() {
+        removeObserver()
         mapboxTelemetry.disable()
         threadWorker.stop()
     }
@@ -86,5 +87,9 @@ object MapboxMetricsReporter : MetricsReporter {
 
     override fun setMetricsObserver(metricsObserver: MetricsObserver) {
         this.metricsObserver = metricsObserver
+    }
+
+    fun removeObserver() {
+        this.metricsObserver = null
     }
 }

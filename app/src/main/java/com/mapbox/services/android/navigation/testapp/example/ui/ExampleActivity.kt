@@ -97,6 +97,7 @@ class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
+        MapboxMetricsReporter.removeObserver()
     }
 
     override fun onBackPressed() {
