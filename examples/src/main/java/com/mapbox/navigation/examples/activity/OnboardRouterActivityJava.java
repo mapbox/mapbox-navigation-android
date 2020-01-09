@@ -19,26 +19,27 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.route.model.Route;
+import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
 import com.mapbox.navigation.examples.R;
+import com.mapbox.navigation.examples.utils.Utils;
+import com.mapbox.navigation.examples.utils.extensions.Mappers;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.route.onboard.model.Config;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
-//import com.mapbox.navigation.base.route.DirectionsSession;
-//import com.mapbox.navigation.directions.session.MapboxDirectionsSession;
-
-public class OnboardRouterActivityJava
-        extends AppCompatActivity
-        implements OnMapReadyCallback,
-        MapboxMap.OnMapClickListener
-//        DirectionsSession.RouteObserver
-{
+public class OnboardRouterActivityJava extends AppCompatActivity implements OnMapReadyCallback,
+        MapboxMap.OnMapClickListener {
 
   private Router onboardRouter;
   private MapboxMap mapboxMap;
@@ -119,22 +120,27 @@ public class OnboardRouterActivityJava
   }
 
   private void findRoute() {
-//    directionsSession = new MapboxDirectionsSession(
-//            onboardRouter,
-//            this
-//    );
-//    if (origin != null && destination != null) {
-//      if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
-//        RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
-//                .accessToken(Utils.getMapboxAccessToken(this))
-//                .origin(origin)
-//                .destination(destination);
-//        if (waypoint != null) {
-//          optionsBuilder.addWaypoint(waypoint);
-//        }
-//        directionsSession.requestRoutes(optionsBuilder.build());
-//      }
-//    }
+    RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
+            .accessToken(Utils.getMapboxAccessToken(this))
+            .origin(origin)
+            .destination(destination);
+    if (waypoint != null) {
+      optionsBuilder.addWaypoint(waypoint);
+    }
+    onboardRouter.getRoute(optionsBuilder.build(), new Router.Callback() {
+      @Override
+      public void onResponse(@NotNull List<Route> routes) {
+        if (!routes.isEmpty()) {
+          route = Mappers.mapToDirectionsRoute(routes.get(0));
+          navigationMapRoute.addRoute(route);
+        }
+      }
+
+      @Override
+      public void onFailure(@NotNull Throwable throwable) {
+        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
+      }
+    });
   }
 
   @Override
@@ -153,27 +159,6 @@ public class OnboardRouterActivityJava
     }
     return false;
   }
-
-  /*
-   * DirectionSessions.RouteObserver
-   */
-//  @Override
-//  public void onRoutesChanged(@NotNull List<Route> routes) {
-//    if (!routes.isEmpty()) {
-//      route = Mappers.mapToDirectionsRoute(routes.get(0));
-//      navigationMapRoute.addRoute(route);
-//    }
-//  }
-
-//  @Override
-//  public void onRoutesRequested() {
-//    Timber.d("onRoutesRequested: navigation.getRoute()");
-//  }
-//
-//  @Override
-//  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-//    Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
-//  }
 
   /*
    * Activity lifecycle methods
@@ -212,9 +197,10 @@ public class OnboardRouterActivityJava
   @Override
   protected void onDestroy() {
     super.onDestroy();
-//    if (directionsSession != null) {
-//      directionsSession.cancel();
-//    }
+    if (onboardRouter != null) {
+      onboardRouter.cancel();
+      onboardRouter = null;
+    }
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);
       mapView.onDestroy();

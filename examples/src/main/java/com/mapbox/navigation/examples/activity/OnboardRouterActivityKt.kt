@@ -14,9 +14,11 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.utils.extensions.ifNonNull
@@ -25,18 +27,16 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.io.File
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
+import timber.log.Timber
 
-class OnboardRouterActivityKt : AppCompatActivity(),
-    OnMapReadyCallback,
+class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     MapboxMap.OnMapClickListener {
-// DirectionsSession.RouteObserver {
 
     private lateinit var onboardRouter: Router
     private lateinit var mapboxMap: MapboxMap
 
     private var route: DirectionsRoute? = null
     private lateinit var navigationMapRoute: NavigationMapRoute
-    // private lateinit var directionsSession: DirectionsSession
     private var origin: Point? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
@@ -99,10 +99,6 @@ class OnboardRouterActivityKt : AppCompatActivity(),
     }
 
     private fun findRoute() {
-        // directionsSession = MapboxDirectionsSession(
-        //     onboardRouter,
-        //     this
-        // )
         ifNonNull(origin, destination) { origin, destination ->
             if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
 
@@ -113,7 +109,18 @@ class OnboardRouterActivityKt : AppCompatActivity(),
                         .destination(destination)
                 waypoint?.let { optionsBuilder.addWaypoint(it) }
 
-                // directionsSession.requestRoutes(optionsBuilder.build())
+                onboardRouter.getRoute(optionsBuilder.build(), object : Router.Callback {
+                    override fun onResponse(routes: List<Route>) {
+                        if (routes.isNotEmpty()) {
+                            route = routes[0].mapToDirectionsRoute()
+                            navigationMapRoute.addRoute(route)
+                        }
+                    }
+
+                    override fun onFailure(throwable: Throwable) {
+                        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
+                    }
+                })
             }
         }
     }
@@ -142,24 +149,6 @@ class OnboardRouterActivityKt : AppCompatActivity(),
         }
         return false
     }
-
-    /*
-     * DirectionSessions.RouteObserver
-     */
-    // override fun onRoutesChanged(routes: List<Route>) {
-    //     if (routes.isNotEmpty()) {
-    //         route = routes[0].mapToDirectionsRoute()
-    //         navigationMapRoute.addRoute(route)
-    //     }
-    // }
-
-    // override fun onRoutesRequested() {
-    //     Timber.d("onRoutesRequested: navigation.getRoute()")
-    // }
-    //
-    // override fun onRoutesRequestFailure(throwable: Throwable) {
-    //     Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
-    // }
 
     /*
      * Activity lifecycle methods
@@ -191,7 +180,7 @@ class OnboardRouterActivityKt : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        // directionsSession.cancel()
+        onboardRouter.cancel()
         mapboxMap.removeOnMapClickListener(this)
         mapView.onDestroy()
     }
