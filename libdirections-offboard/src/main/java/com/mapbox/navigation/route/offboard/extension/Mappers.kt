@@ -5,12 +5,41 @@ package com.mapbox.navigation.route.offboard.extension
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteLegsNavigation
+import com.mapbox.navigation.base.route.model.RouteLegNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.route.model.StepManeuverNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
+
+fun StepManeuver.mapToStepManeuver() = StepManeuverNavigation.Builder()
+    .type(type())
+    .modifier(modifier())
+    .build()
+
+fun LegStep.mapToLegStep() = LegStepNavigation.Builder()
+    .distance(distance())
+    .duration(duration())
+    .stepManeuver(maneuver().mapToStepManeuver())
+    .build()
+
+fun RouteLeg.mapToRouteLeg() = RouteLegNavigation.Builder()
+    .distance(distance())
+    .duration(duration())
+    .summary(summary())
+    .steps(
+        steps()?.let { stepList ->
+            stepList.map {
+                it.mapToLegStep()
+            }
+        }
+    )
+    .build()
 
 fun DirectionsRoute.mapToRoute() = Route(
     routeIndex = routeIndex(),
@@ -19,7 +48,11 @@ fun DirectionsRoute.mapToRoute() = Route(
     geometry = geometry(),
     weight = weight(),
     weightName = weightName(),
-    legs = legs()?.let { RouteLegsNavigation(it) },
+    legs = legs()?.let { routeLegs ->
+        routeLegs.map {
+            it.mapToRouteLeg()
+        }
+    },
     routeOptions = routeOptions()?.mapToRouteOptionsNavigation(),
     voiceLanguage = voiceLanguage()
 )
@@ -60,7 +93,9 @@ fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
         .waypointIndices(waypointIndices() ?: "")
         .waypointNames(waypointNames() ?: "")
         .waypointTargets(waypointTargets() ?: "")
-        .walkingOptions(walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation())
+        .walkingOptions(
+            walkingOptions()?.mapToWalkingOptionsNavigation() ?: WalkingOptionsNavigation()
+        )
         .build()
 }
 
