@@ -19,7 +19,6 @@ import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
 import retrofit2.Callback
-import kotlin.collections.ArrayList
 
 /**
  * The NavigationRoute class wraps the [MapboxDirections] class with parameters which
