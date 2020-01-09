@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static okhttp3.internal.Util.UTF_8;
-
 class TestRouteBuilder {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
@@ -28,7 +26,7 @@ class TestRouteBuilder {
   String loadJsonFixture(String filename) throws IOException {
     ClassLoader classLoader = getClass().getClassLoader();
     InputStream inputStream = classLoader.getResourceAsStream(filename);
-    Scanner scanner = new Scanner(inputStream, UTF_8.name()).useDelimiter("\\A");
+    Scanner scanner = new Scanner(inputStream, "UTF-8").useDelimiter("\\A");
     return scanner.hasNext() ? scanner.next() : "";
   }
 
