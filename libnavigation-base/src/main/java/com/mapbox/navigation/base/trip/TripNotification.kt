@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.trip
 
 import android.app.Notification
+import com.mapbox.navigation.base.route.model.RouteProgressNavigation
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
 interface TripNotification {
@@ -25,7 +26,7 @@ interface TripNotification {
 
     /**
      * If enabled, this method will be called every time a
-     * new [RouteProgress] is generated.
+     * new [RouteProgressNavigation] is generated.
      *
      *
      * This method can serve as a cue to update a [Notification]
@@ -33,7 +34,7 @@ interface TripNotification {
      *
      * @param routeProgress with the latest progress data
      */
-    fun updateNotification(routeProgress: RouteProgress)
+    fun updateNotification(routeProgress: RouteProgressNavigation)
 
     /**
      * Callback for when trip session is started via [TripSession.start].
