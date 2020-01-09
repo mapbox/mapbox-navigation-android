@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.text.format.DateFormat
+import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.trip.notification.utils.distance.DistanceFormatter
 import io.mockk.every
 import io.mockk.mockk
 import java.util.Locale
@@ -15,13 +17,20 @@ class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
     private val context: Context = mockk(relaxed = true)
+    private val navigationOptionBuilder: NavigationOptions.Builder = mockk(relaxed = true)
+    private val distanceFormatter: DistanceFormatter = mockk()
     private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
 
     @Before
     fun setUp() {
         val notificationManager = mockk<NotificationManager>()
         every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
-        notification = MapboxTripNotification(context, navigationNotificationProvider)
+        notification = MapboxTripNotification(
+            context,
+            distanceFormatter,
+            navigationOptionBuilder,
+            navigationNotificationProvider
+        )
     }
 
     private fun createContext(): Context {
