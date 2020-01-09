@@ -83,4 +83,19 @@ class LegStepNavigation private constructor(
             )
         }
     }
+
+    override fun toString(): String {
+        return this.distance.toString() +
+                this.duration.toString() +
+                this.drivingSide +
+                this.geometry +
+                this.maneuver.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other is LegStepNavigation) {
+            true -> this.toString() == other.toString()
+            false -> false
+        }
+    }
 }

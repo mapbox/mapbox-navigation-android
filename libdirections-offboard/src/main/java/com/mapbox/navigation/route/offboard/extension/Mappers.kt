@@ -20,10 +20,6 @@ import java.util.Locale
 fun StepManeuver.mapToStepManeuver() = StepManeuverNavigation.Builder()
         .type(type())
         .modifier(modifier())
-        .instruction(instruction())
-        .location(doubleArrayOf(location().longitude(), location().latitude()))
-        .bearingAfter(bearingAfter())
-        .bearingBefore(bearingBefore())
         .build()
 
 fun LegStep.mapToLegStep() = LegStepNavigation.Builder()

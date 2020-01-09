@@ -65,4 +65,18 @@ class RouteLegNavigation private constructor(
             )
         }
     }
+
+    override fun toString(): String {
+        return this.distance.toString() +
+                this.duration.toString() +
+                this.summary +
+                this.steps.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other is RouteLegNavigation) {
+            true -> this.toString() == other.toString()
+            false -> false
+        }
+    }
 }

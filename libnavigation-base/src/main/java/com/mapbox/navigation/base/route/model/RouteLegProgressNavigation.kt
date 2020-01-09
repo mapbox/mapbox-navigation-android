@@ -259,4 +259,27 @@ class RouteLegProgressNavigation private constructor(
                     }
                 }
     }
+
+    override fun toString(): String {
+        return stepIndex.toString() +
+                distanceTraveled.toString() +
+                distanceRemaining.toString() +
+                fractionTraveled.toString() +
+                currentStep.toString() +
+                previousStep.toString() +
+                upComingStep.toString() +
+                followOnStep.toString() +
+                currentStepProgress.toString() +
+                currentStepPoints.toString() +
+                upcomingStepPoints.toString() +
+                routeLeg.toString() +
+                stepDistanceRemaining.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other is RouteLegProgressNavigation) {
+            true -> this.toString() == other.toString()
+            false -> false
+        }
+    }
 }

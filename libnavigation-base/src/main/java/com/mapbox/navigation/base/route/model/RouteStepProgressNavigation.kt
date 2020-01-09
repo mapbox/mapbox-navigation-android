@@ -109,4 +109,19 @@ class RouteStepProgressNavigation private constructor(
             fractionTraveled: Float
         ): Double = (1 - fractionTraveled) * step.duration()
     }
+
+    override fun toString(): String {
+        return this.step.toString() +
+                this.distanceRemaining.toString() +
+                this.distanceTraveled.toString() +
+                this.fractionTraveled.toString() +
+                this.durationRemaining.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other is RouteStepProgressNavigation) {
+            true -> this.toString() == other.toString()
+            false -> false
+        }
+    }
 }

@@ -300,4 +300,29 @@ class RouteProgressNavigation private constructor(
             )
         }
     }
+
+    override fun toString(): String {
+        return route.toString() +
+                currentStep.toString() +
+                currentStepPoints.toString() +
+                upcomingStepPoints.toString() +
+                routeGeometryWithBuffer.toString() +
+                bannerInstruction.toString() +
+                currentState.toString() +
+                currentLegProgress.toString() +
+                legIndex.toString() +
+                stepIndex.toString() +
+                inTunnel.toString() +
+                distanceRemaining.toString() +
+                legDistanceRemaining.toString() +
+                legDurationRemaining.toString() +
+                stepDistanceRemaining.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other is RouteProgressNavigation) {
+            true -> this.toString() == other.toString()
+            false -> false
+        }
+    }
 }
