@@ -197,6 +197,8 @@ class OffboardRouterActivityKt : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
+        MapboxMetricsReporter.removeObserver()
+        MapboxLogger.removeObserver()
         offboardRouter?.cancel()
         mapboxMap?.removeOnMapClickListener(this)
         mapView.onDestroy()

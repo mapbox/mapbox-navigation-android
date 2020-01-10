@@ -351,6 +351,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    MapboxMetricsReporter.INSTANCE.removeObserver();
+    MapboxLogger.INSTANCE.removeObserver();
     navigation.onDestroy();
     if (mapboxMap != null) {
       mapboxMap.removeOnMapClickListener(this);

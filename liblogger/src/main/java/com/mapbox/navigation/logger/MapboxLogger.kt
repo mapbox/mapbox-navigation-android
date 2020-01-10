@@ -22,6 +22,10 @@ object MapboxLogger : Logger {
         this.observer.set(observer)
     }
 
+    fun removeObserver() {
+        observer.set(null)
+    }
+
     fun v(msg: Message) {
         v(null, msg, null)
     }
