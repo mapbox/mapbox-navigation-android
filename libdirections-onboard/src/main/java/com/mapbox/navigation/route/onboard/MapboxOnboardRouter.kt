@@ -2,6 +2,7 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
@@ -24,6 +25,7 @@ class MapboxOnboardRouter : Router {
 
     private val navigatorNative: MapboxNativeNavigator
     private val config: Config
+    private val logger: Logger?
 
     /**
      * Creates an offline router which uses the specified offline path for storing and retrieving
@@ -31,7 +33,7 @@ class MapboxOnboardRouter : Router {
      *
      * @param config offline config
      */
-    constructor(config: Config) {
+    constructor(config: Config, logger: Logger?) {
         val tileDir = File(config.tilePath, TILES_DIR_NAME)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
@@ -39,6 +41,7 @@ class MapboxOnboardRouter : Router {
 
         this.navigatorNative = MapboxNativeNavigatorImpl
         this.config = config
+        this.logger = logger
         MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig())
     }
 
@@ -49,6 +52,7 @@ class MapboxOnboardRouter : Router {
     ) {
         this.navigatorNative = navigator
         this.config = config
+        this.logger = null
     }
 
     override fun getRoute(
@@ -70,7 +74,7 @@ class MapboxOnboardRouter : Router {
             )
         ).build()
 
-        OfflineRouteRetrievalTask(navigatorNative, object : OnOfflineRouteFoundCallback {
+        OfflineRouteRetrievalTask(navigatorNative, logger, object : OnOfflineRouteFoundCallback {
             override fun onRouteFound(routes: List<Route>) {
                 callback.onResponse(routes)
             }

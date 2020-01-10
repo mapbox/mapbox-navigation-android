@@ -80,11 +80,11 @@ ext {
       ktlint                    : "com.pinterest:ktlint:${version.ktlint}",
 
       // network
-      okhttp : "com.squareup.okhttp3:okhttp:${version.okhttp}",
-      okhttpInterceptor : "com.squareup.okhttp3:logging-interceptor:${version.okhttp}",
+      okhttp                    : "com.squareup.okhttp3:okhttp:${version.okhttp}",
+      okhttpInterceptor         : "com.squareup.okhttp3:logging-interceptor:${version.okhttp}",
 
       // I/O
-      okio : "com.squareup.okio:okio:${version.okio}",
+      okio                      : "com.squareup.okio:okio:${version.okio}",
 
       // AutoValue
       autoValue                 : "com.google.auto.value:auto-value:${version.autoValue}",

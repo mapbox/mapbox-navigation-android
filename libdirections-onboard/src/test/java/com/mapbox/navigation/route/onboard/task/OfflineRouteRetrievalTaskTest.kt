@@ -62,6 +62,7 @@ class OfflineRouteRetrievalTaskTest {
         val mockedCallback = mockk<OnOfflineRouteFoundCallback>(relaxed = true)
         val theOfflineRouteRetrievalTask = OfflineRouteRetrievalTask(
             mockedNavigator,
+            null,
             mockedCallback
         )
         val routes = listOf<Route>(mockk())

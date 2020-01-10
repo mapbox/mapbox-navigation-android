@@ -23,7 +23,7 @@ class RouteOptionsNavigation(
     val voiceInstructions: Boolean,
     val bannerInstructions: Boolean,
     val voiceUnits: String?,
-    val accessToken: String?,
+    val accessToken: String,
     val requestUuid: String?,
     val exclude: String?,
     val approaches: String?,
@@ -52,6 +52,7 @@ class RouteOptionsNavigation(
         private lateinit var _origin: RoutePointNavigation
         private lateinit var _destination: RoutePointNavigation
         private val _waypoints = mutableListOf<RoutePointNavigation>()
+        private lateinit var _accessToken: String
 
         private var baseUrl: String? = null
         private var user: String? = null
@@ -69,7 +70,6 @@ class RouteOptionsNavigation(
         private var voiceInstructions: Boolean = VOICE_INSTRUCTIONS_DEFAULT_VALUE
         private var bannerInstructions: Boolean = BANNER_INSTRUCTIONS_DEFAULT_VALUE
         private var voiceUnits: String? = null
-        private var accessToken: String? = null
         private var requestUuid: String? = null
         private var exclude: String? = null
         private var approaches: String? = null
@@ -142,7 +142,7 @@ class RouteOptionsNavigation(
 
         fun voiceUnits(voiceUnits: String): Builder = also { this.voiceUnits = voiceUnits }
 
-        fun accessToken(accessToken: String): Builder = also { this.accessToken = accessToken }
+        fun accessToken(accessToken: String): Builder = also { this._accessToken = accessToken }
 
         fun requestUuid(requestUuid: String): Builder = also { this.requestUuid = requestUuid }
 
@@ -184,7 +184,7 @@ class RouteOptionsNavigation(
                 voiceInstructions,
                 bannerInstructions,
                 voiceUnits,
-                accessToken,
+                _accessToken,
                 requestUuid,
                 exclude,
                 approaches,
@@ -199,6 +199,8 @@ class RouteOptionsNavigation(
             check(::_origin.isInitialized) { "Property origin hasn't been initialized" }
 
             check(::_destination.isInitialized) { "Property destination hasn't been initialized" }
+
+            check(::_accessToken.isInitialized) { "Property accessToken hasn't been initialized" }
         }
     }
 }

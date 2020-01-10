@@ -15,8 +15,8 @@ android {
 }
 
 dependencies {
-    api(project(':libnavigation-base'))
-    api(project(':liblogger'))
+    implementation(project(':libnavigation-base'))
+    implementation(project(':liblogger'))
     implementation project(':libnavigation-util')
 
     // Navigator

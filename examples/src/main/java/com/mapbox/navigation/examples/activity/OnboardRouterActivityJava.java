@@ -46,7 +46,6 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
 
   private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
-  //  private DirectionsSession directionsSession;
   private Point origin;
   private Point destination;
   private Point waypoint;
@@ -79,7 +78,7 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
             null // working with pre-fetched tiles only
     );
 
-    onboardRouter = new MapboxOnboardRouter(config);
+    onboardRouter = new MapboxOnboardRouter(config, null);
   }
 
 

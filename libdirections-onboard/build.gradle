@@ -21,7 +21,6 @@ dependencies {
 
     api project(':libnavigation-base')
     implementation project(':libnavigator')
-    implementation project(':liblogger')
     implementation project(":libnavigation-util")
 
     //ktlint
@@ -32,6 +31,7 @@ dependencies {
 
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.robolectric
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

@@ -9,7 +9,7 @@ import com.mapbox.navigation.utils.extensions.ifNonNull
  * The [OfflineRoute] class wraps the [NavigationRoute] class with parameters which
  * could be set in order for an offline navigation session to successfully begin.
  */
-class OfflineRoute
+internal class OfflineRoute
 private constructor(
     private val routeUrl: RouteUrl,
     bicycleType: OfflineCriteria.BicycleType?,
@@ -80,13 +80,17 @@ private constructor(
         offlineUrlBuilder.appendQueryParamIfNonNull(CYCLEWAY_BIAS_QUERY_PARAMETER, cyclewayBias)
         offlineUrlBuilder.appendQueryParamIfNonNull(HILL_BIAS_QUERY_PARAMETER, hillBias)
         offlineUrlBuilder.appendQueryParamIfNonNull(FERRY_BIAS_QUERY_PARAMETER, ferryBias)
-        offlineUrlBuilder.appendQueryParamIfNonNull(ROUGH_SURFACE_BIAS_QUERY_PARAMETER, roughSurfaceBias)
+        offlineUrlBuilder.appendQueryParamIfNonNull(
+            ROUGH_SURFACE_BIAS_QUERY_PARAMETER,
+            roughSurfaceBias
+        )
         offlineUrlBuilder.appendQueryParamIfNonNull(WAYPOINT_TYPES_QUERY_PARAMETER, waypointTypes)
 
         return offlineUrlBuilder.build().toString()
     }
 
-    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: Float?): Uri.Builder = appendQueryParamIfNonNull(key, value?.toString())
+    private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: Float?): Uri.Builder =
+        appendQueryParamIfNonNull(key, value?.toString())
 
     private fun Uri.Builder.appendQueryParamIfNonNull(key: String, value: String?): Uri.Builder =
         ifNonNull(value) {

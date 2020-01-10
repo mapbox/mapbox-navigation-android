@@ -65,7 +65,7 @@ fun RouteOptionsNavigationDto.mapToModel() = RouteOptionsNavigation(
     bannerInstructions = bannerInstructions
         ?: RouteOptionsNavigation.BANNER_INSTRUCTIONS_DEFAULT_VALUE,
     voiceUnits = voiceUnits,
-    accessToken = accessToken,
+    accessToken = accessToken ?: "",
     requestUuid = requestUuid,
     exclude = exclude,
     approaches = approaches,

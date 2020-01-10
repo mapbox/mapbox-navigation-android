@@ -63,7 +63,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             null,
             null // working with pre-fetched tiles only
         )
-        onboardRouter = MapboxOnboardRouter(config)
+        onboardRouter = MapboxOnboardRouter(config, null)
     }
 
     private fun newOrigin() {
