@@ -22,4 +22,11 @@ interface MetricsReporter {
      * @since 1.0.0
      */
     fun setMetricsObserver(metricsObserver: MetricsObserver)
+
+    /**
+     * Remove metrics observer
+     *
+     * @since 1.0.0
+     */
+    fun removeObserver()
 }

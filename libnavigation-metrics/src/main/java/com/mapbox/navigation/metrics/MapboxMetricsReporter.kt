@@ -89,7 +89,7 @@ object MapboxMetricsReporter : MetricsReporter {
         this.metricsObserver = metricsObserver
     }
 
-    fun removeObserver() {
+    override fun removeObserver() {
         this.metricsObserver = null
     }
 }
