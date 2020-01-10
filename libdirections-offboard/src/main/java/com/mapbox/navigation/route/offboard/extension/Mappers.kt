@@ -8,16 +8,28 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.IntersectionLanes
+import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.MaxSpeed
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.StepIntersection
 import com.mapbox.api.directions.v5.models.StepManeuver
+import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.route.model.BannerComponentsNavigation
+import com.mapbox.navigation.base.route.model.BannerInstructionsNavigation
+import com.mapbox.navigation.base.route.model.BannerTextNavigation
+import com.mapbox.navigation.base.route.model.IntersectionLanesNavigation
+import com.mapbox.navigation.base.route.model.LegAnnotationNavigation
 import com.mapbox.navigation.base.route.model.LegStepNavigation
-import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.route.model.MaxSpeedNavigation
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteLegNavigation
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.route.model.StepIntersectionNavigation
 import com.mapbox.navigation.base.route.model.StepManeuverNavigation
+import com.mapbox.navigation.base.route.model.VoiceInstructionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
 import java.util.Locale
 
@@ -61,33 +73,20 @@ fun DirectionsRoute.mapToRoute() = Route(
     voiceLanguage = voiceLanguage()
 )
 
-fun RouteLeg.mapToRouteLegNavigation() = RouteLegNavigation(
-    distance = distance(),
-    duration = duration(),
-    summary = summary(),
-    steps = steps()?.map(LegStep::mapToLegStepNavigation),
-    annotation = annotation()?.mapToLegAnnotationNavigation()
-)
+fun RouteLeg.mapToRouteLegNavigation() = RouteLegNavigation.Builder()
+    .distance(distance())
+    .duration(duration())
+    .steps(steps()?.map { it.mapToLegStep() })
+    .summary(summary())
+    .build()
 
-fun LegStep.mapToLegStepNavigation() = LegStepNavigation(
-    distance = distance(),
-    duration = duration(),
-    geometry = geometry(),
-    name = name(),
-    ref = ref(),
-    destinations = destinations(),
-    mode = mode(),
-    pronunciation = pronunciation(),
-    rotaryName = rotaryName(),
-    rotaryPronunciation = rotaryPronunciation(),
-    maneuver = maneuver().mapToStepManeuverNavigation(),
-    voiceInstructions = voiceInstructions()?.map { it.mapToVoiceInstructionsNavigation() },
-    bannerInstructions = bannerInstructions()?.map { it.mapToBannerInstructionsNavigation() },
-    drivingSide = drivingSide(),
-    weight = weight(),
-    intersections = intersections()?.map { it.mapToStepIntersectionNavigation() },
-    exits = exits()
-)
+fun LegStep.mapToLegStepNavigation() = LegStepNavigation.Builder()
+    .stepManeuver(maneuver().mapToStepManeuverNavigation())
+    .distance(distance())
+    .drivingSide(drivingSide())
+    .duration(duration())
+    .geometry(geometry())
+    .build()
 
 fun RouteOptions.mapToRouteOptionsNavigation(): RouteOptionsNavigation {
     val routeOptionsNavigationBuilder = RouteOptionsNavigation
@@ -138,7 +137,7 @@ fun VoiceInstructions.mapToVoiceInstructionsNavigation() = VoiceInstructionsNavi
 )
 
 fun BannerInstructions.mapToBannerInstructionsNavigation() = BannerInstructionsNavigation(
-distanceAlongGeometry = distanceAlongGeometry(),
+    distanceAlongGeometry = distanceAlongGeometry(),
     primary = primary().mapToBannerTextNavigation(),
     secondary = secondary()?.mapToBannerTextNavigation(),
     sub = sub()?.mapToBannerTextNavigation()
@@ -163,15 +162,10 @@ fun BannerComponents.mapToBannerComponentsNavigation() = BannerComponentsNavigat
     active = active()
 )
 
-fun StepManeuver.mapToStepManeuverNavigation() = StepManeuverNavigation(
-    location = location(),
-    bearingBefore = bearingBefore(),
-    bearingAfter = bearingAfter(),
-    instruction = instruction(),
-    type = type(),
-    modifier = modifier(),
-    exit = exit()
-)
+fun StepManeuver.mapToStepManeuverNavigation() = StepManeuverNavigation.Builder()
+    .modifier(modifier())
+    .type(type())
+    .build()
 
 fun StepIntersection.mapToStepIntersectionNavigation() = StepIntersectionNavigation(
     location = location(),

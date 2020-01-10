@@ -7,12 +7,12 @@ import com.mapbox.navigator.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
+import java.io.ByteArrayOutputStream
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
-import java.io.ByteArrayOutputStream
 
 @Keep
 internal class HttpClient(
@@ -21,8 +21,6 @@ internal class HttpClient(
     private val logger: Logger? = null,
     private val clientBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
 ) : HttpInterface() {
-
-
 
     companion object {
         private const val USER_AGENT = "MapboxNavigationNative"

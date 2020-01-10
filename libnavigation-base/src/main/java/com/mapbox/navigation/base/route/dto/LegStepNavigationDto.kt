@@ -26,22 +26,10 @@ class LegStepNavigationDto(
     val exits: String?
 )
 
-fun LegStepNavigationDto.mapToModel() = LegStepNavigation(
-    distance = distance,
-    duration = duration,
-    geometry = geometry,
-    name = name,
-    ref = ref,
-    destinations = destinations,
-    mode = mode,
-    pronunciation = pronunciation,
-    rotaryName = rotaryName,
-    rotaryPronunciation = rotaryPronunciation,
-    maneuver = maneuver.mapToModel(),
-    voiceInstructions = voiceInstructions?.map(VoiceInstructionsNavigationDto::mapToModel),
-    bannerInstructions = bannerInstructions?.map(BannerInstructionsNavigationDto::mapToModel),
-    drivingSide = drivingSide,
-    weight = weight,
-    intersections = intersections?.map(StepIntersectionNavigationDto::mapToModel),
-    exits = exits
-)
+fun LegStepNavigationDto.mapToModel() = LegStepNavigation.Builder()
+    .distance(distance)
+    .drivingSide(drivingSide)
+    .duration(duration)
+    .geometry(geometry)
+    .stepManeuver(maneuver.mapToModel())
+    .build()

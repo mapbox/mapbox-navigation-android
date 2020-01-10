@@ -10,10 +10,10 @@ class RouteLegNavigationDto(
     val annotation: LegAnnotationNavigationDto?
 )
 
-fun RouteLegNavigationDto.mapToRouteLegNavigation(): RouteLegNavigation = RouteLegNavigation(
-    distance = distance,
-    duration = duration,
-    summary = summary,
-    steps = steps?.map { it.mapToModel() },
-    annotation = annotation?.mapToModel()
-)
+fun RouteLegNavigationDto.mapToRouteLegNavigation(): RouteLegNavigation =
+    RouteLegNavigation.Builder()
+        .distance(distance)
+        .duration(duration)
+        .summary(summary)
+        .steps(steps?.map { it.mapToModel() })
+        .build()

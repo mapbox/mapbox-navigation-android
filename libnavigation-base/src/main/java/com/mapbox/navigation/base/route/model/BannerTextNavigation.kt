@@ -33,7 +33,7 @@ package com.mapbox.navigation.base.route.model
 class BannerTextNavigation(
     val text: String?,
     val components: List<BannerComponentsNavigation>?,
-    @StepManeuverNavigation.StepManeuverTypeNavigation
+    @StepManeuverType
     val type: String?,
     val modifier: String?,
     val degrees: Double?,
