@@ -9,8 +9,7 @@ import java.io.ByteArrayOutputStream
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
-import okio.buffer
-import okio.sink
+import okio.Okio
 import timber.log.Timber
 
 @Keep
@@ -65,7 +64,7 @@ internal class HttpClient(
             val result = if (response.isSuccessful) HttpCode.SUCCESS else HttpCode.FAILURE
 
             response.body()?.let { body ->
-                val sink = outputStream.sink().buffer()
+                val sink = Okio.buffer(Okio.sink(outputStream))
                 sink.writeAll(body.source())
                 sink.close()
             }

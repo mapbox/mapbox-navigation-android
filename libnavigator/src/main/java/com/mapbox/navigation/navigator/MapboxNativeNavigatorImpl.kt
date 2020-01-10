@@ -5,8 +5,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.navigator.model.RouterConfig
-import com.mapbox.navigation.navigator.network.HttpClient
 import com.mapbox.navigator.FixLocation
+import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.RouterParams
@@ -21,9 +21,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     private val navigator: Navigator = Navigator()
-    private const val userAgent = "MapboxNavigationNative"
 
-    override fun configureRouter(routerConfig: RouterConfig) {
+    override fun configureRouter(routerConfig: RouterConfig, httpClient: HttpInterface, userAgent: String) {
         navigator.configureRouter(
             RouterParams(
                 routerConfig.tilePath,
@@ -39,7 +38,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                         ""
                     )
                 }),
-            HttpClient(userAgent)
+            httpClient
         )
     }
 

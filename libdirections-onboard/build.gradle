@@ -29,6 +29,13 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.supportAnnotation
 
+    //networks
+    implementation dependenciesList.okhttp
+    implementation dependenciesList.okhttpInterceptor
+
+    // I/O
+    implementation dependenciesList.okio
+
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.robolectric

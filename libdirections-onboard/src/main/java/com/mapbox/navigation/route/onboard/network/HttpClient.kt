@@ -1,27 +1,32 @@
-package com.mapbox.navigation.navigator.network
+package com.mapbox.navigation.route.onboard.network
 
 import androidx.annotation.Keep
+import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigator.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
-import java.io.ByteArrayOutputStream
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
+import java.io.ByteArrayOutputStream
 
 @Keep
 internal class HttpClient(
-    private val userAgent: String,
+    internal val userAgent: String = USER_AGENT,
     private val acceptGzipEncoding: Boolean = false,
+    private val logger: Logger? = null,
     private val clientBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
 ) : HttpInterface() {
 
+
+
     companion object {
+        private const val USER_AGENT = "MapboxNavigationNative"
+
         private const val ERROR_EMPTY_USER_AGENT = "Empty UserAgent is not allowed"
         private const val HEADER_USER_AGENT = "User-Agent"
         private const val HEADER_ENCODING = "Accept-Encoding"
@@ -32,7 +37,7 @@ internal class HttpClient(
         if (BuildConfig.DEBUG) {
             val interceptor = HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
-                    MapboxLogger.d(Message(message))
+                    logger?.d(msg = Message(message))
                 }
             }).setLevel(HttpLoggingInterceptor.Level.BASIC)
 

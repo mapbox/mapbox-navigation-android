@@ -88,6 +88,7 @@ dependencies {
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
     implementation project(':liblogger')
+    implementation project(':libnavigator')
 
     //ktlint
     ktlint dependenciesList.ktlint

@@ -12,6 +12,7 @@ import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.model.mapToRouteConfig
+import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import java.io.File
@@ -42,7 +43,8 @@ class MapboxOnboardRouter : Router {
         this.navigatorNative = MapboxNativeNavigatorImpl
         this.config = config
         this.logger = logger
-        MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig())
+        val httpClient = HttpClient()
+        MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig(), httpClient, httpClient.userAgent)
     }
 
     // Package private for testing purposes
@@ -61,7 +63,7 @@ class MapboxOnboardRouter : Router {
     ) {
         val offlineRouter = OfflineRoute.builder(
             RouteUrl(
-                accessToken = routeOptions.accessToken ?: "",
+                accessToken = routeOptions.accessToken,
                 user = routeOptions.user,
                 profile = routeOptions.profile,
                 orgin = routeOptions.origin.point,
