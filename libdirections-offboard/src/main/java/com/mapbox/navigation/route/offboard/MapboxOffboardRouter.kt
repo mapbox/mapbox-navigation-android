@@ -26,7 +26,9 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
-        navigationRoute = RouteBuilderProvider.getBuilder(accessToken, context).routeOptions(routeOptions).build()
+        navigationRoute = RouteBuilderProvider.getBuilder(accessToken, context)
+            .routeOptions(routeOptions)
+            .build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
 
             override fun onResponse(

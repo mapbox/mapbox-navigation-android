@@ -38,11 +38,11 @@ class RouteOptionsNavigation(
         fun builder(): Builder = Builder()
 
         const val ALTERNATIVES_DEFAULT_VALUE = false
-        const val STEPS_DEFAULT_VALUE = false
+        const val STEPS_DEFAULT_VALUE = true
         const val CONTINUE_STRAIGHT_DEFAULT_VALUE = false
         const val ROUNDABOUT_EXITS_DEFAULT_VALUE = false
-        const val VOICE_INSTRUCTIONS_DEFAULT_VALUE = false
-        const val BANNER_INSTRUCTIONS_DEFAULT_VALUE = false
+        const val VOICE_INSTRUCTIONS_DEFAULT_VALUE = true
+        const val BANNER_INSTRUCTIONS_DEFAULT_VALUE = true
     }
 
     val coordinates: List<Point>
