@@ -45,7 +45,7 @@ constructor(
      * @return cloned call
      * @since 1.0.0
      */
-    val call: Call<DirectionsResponse>
+    val cloneCall: Call<DirectionsResponse>
         get() = mapboxDirections.cloneCall()
 
     /**
@@ -64,9 +64,7 @@ constructor(
      * the user dismisses the calling activity or no longer needs the returned results.
      */
     fun cancelCall() {
-        if (!call.isExecuted) {
-            call.cancel()
-        }
+        mapboxDirections.cancelCall()
     }
 
     fun toBuilder(): Builder = Builder(mapboxDirections.toBuilder())
