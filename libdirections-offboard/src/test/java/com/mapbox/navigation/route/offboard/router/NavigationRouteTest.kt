@@ -77,7 +77,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.call.request().url().toString(),
+            navigationRoute.cloneCall.request().url().toString(),
             containsString("/cycling/")
         )
     }
@@ -100,7 +100,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.call.request().url().toString(),
+            navigationRoute.cloneCall.request().url().toString(),
             containsString("curb")
         )
     }
@@ -121,7 +121,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.call.request().url().toString(),
+            navigationRoute.cloneCall.request().url().toString(),
             containsString("waypoints")
         )
     }
@@ -138,7 +138,7 @@ class NavigationRouteTest {
             )
             .build()
         assertThat(
-            navigationRoute.call.request().url().toString(),
+            navigationRoute.cloneCall.request().url().toString(),
             containsString("Destination")
         )
     }
@@ -160,7 +160,7 @@ class NavigationRouteTest {
             .build()
 
         assertThat(
-            navigationRoute.call.request().url().toString(),
+            navigationRoute.cloneCall.request().url().toString(),
             containsString("waypoint_targets")
         )
     }
@@ -176,7 +176,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.call.request().url().toString()
+        val requestUrl = navigationRoute.cloneCall.request().url().toString()
 
         assertThat(requestUrl, containsString("bearings=90%2C90%3B1%2C5"))
     }
@@ -195,7 +195,7 @@ class NavigationRouteTest {
             )
             .build()
 
-        val requestUrl = navigationRoute.call.request().url().toString()
+        val requestUrl = navigationRoute.cloneCall.request().url().toString()
 
         assertThat(requestUrl, containsString("bearings=10%2C10%3B20%2C20%3B30%2C30%3B40%2C40"))
     }
@@ -230,7 +230,7 @@ class NavigationRouteTest {
             .routeOptions(routeOptions)
             .build()
 
-        val request = navigationRoute.call.request().url().toString()
+        val request = navigationRoute.cloneCall.request().url().toString()
         assertThat(request, containsString("https://api-directions-traf.com"))
         assertThat(request, containsString("alternatives=true"))
         assertThat(request, containsString(ACESS_TOKEN))
@@ -249,7 +249,7 @@ class NavigationRouteTest {
     private fun provideNavigationOffboardRouteBuilder() = RouteBuilderProvider.getBuilder(ACESS_TOKEN, context)
 
     @Test
-    fun cancelCall_cancelsCallNotExecuted() {
+    fun cancelCall_cancelsCall() {
         val mapboxDirections = mockk<MapboxDirections>(relaxed = true)
         val routeCall = mockk<Call<DirectionsResponse>>(relaxed = true)
         every { routeCall.isExecuted } returns false
@@ -258,20 +258,7 @@ class NavigationRouteTest {
 
         navigationRoute.cancelCall()
 
-        verify { routeCall.cancel() }
-    }
-
-    @Test
-    fun cancelCall_doesNotCancelExecutedCall() {
-        val mapboxDirections = mockk<MapboxDirections>()
-        val routeCall = mockk<Call<DirectionsResponse>>()
-        every { routeCall.isExecuted } returns true
-        every { mapboxDirections.cloneCall() } returns routeCall
-        val navigationRoute = NavigationOffboardRoute(mapboxDirections)
-
-        navigationRoute.cancelCall()
-
-        verify(exactly = 0) { routeCall.cancel() }
+        verify { mapboxDirections.cancelCall() }
     }
 
     @Test
