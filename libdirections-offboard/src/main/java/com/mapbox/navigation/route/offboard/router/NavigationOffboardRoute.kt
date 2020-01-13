@@ -18,7 +18,7 @@ import retrofit2.Call
 import retrofit2.Callback
 
 /**
- * The NavigationRoute class wraps the [MapboxDirections] class with parameters which
+ * The NavigationOffboardRoute class wraps the [MapboxDirections] class with parameters which
  * <u>must</u> be set in order for a navigation session to successfully begin. While it is possible
  * to pass in any [com.mapbox.api.directions.v5.models.DirectionsRoute] into
  * [MapboxNavigation.startNavigation], using this class will ensure your
@@ -26,9 +26,8 @@ import retrofit2.Callback
  *
  * Developer Note: MapboxDirections cannot be directly extended since it is an AutoValue class.
  *
- * 1.0
+ * 1.0.0
  */
-
 internal class NavigationOffboardRoute
 constructor(
     private val mapboxDirections: MapboxDirections
@@ -53,7 +52,7 @@ constructor(
      * [Callback] must be passed into the method to handle both the response and failure.
      *
      * @param callback a RetroFit callback which contains an onResponse and onFailure
-     * @since 0.5.0
+     * @since 1.0.0
      */
     fun getRoute(callback: Callback<DirectionsResponse>) {
         mapboxDirections.enqueueCall(callback)
@@ -80,33 +79,33 @@ constructor(
      * reflect your users use-case.
      *
      *
-     * @since 0.5.0
+     * @since 1.0.0
      */
     class Builder internal constructor(private val directionsBuilder: MapboxDirections.Builder) {
-        private val eventListener: NavigationRouteEventListener
+
+        companion object {
+            private const val SEMICOLON = ";"
+            private const val COMMA = ","
+        }
+
+        private val eventListener: NavigationRouteEventListener = EVENT_LISTENER
         private var origin: RoutePointNavigation? = null
         private var destination: RoutePointNavigation? = null
         private val waypoints = ArrayList<RoutePointNavigation>()
-        private val SEMICOLON = ";"
-        private val COMMA = ","
 
         /**
          * Private constructor for initializing the raw MapboxDirections.Builder
          */
-        constructor() : this(MapboxDirections.builder()) {}
-
-        init {
-            this.eventListener = EVENT_LISTENER
-        }
+        constructor() : this(MapboxDirections.builder())
 
         /**
          * This selects which mode of transportation the user will be using while navigating from the
          * origin to the final destination. The options include driving, driving considering traffic,
          * walking, and cycling. Using each of these profiles will result in different routing biases.
          *
-         * @param profile required to be one of the String values found in the [ProfileCriteria]
+         * @param profile required to be one of the String values found in the [DirectionsCriteria.ProfileCriteria]
          * @return this builder for chaining options together
-         * @since 0.5.0
+         * @since 1.0.0
          */
         internal fun profile(@DirectionsCriteria.ProfileCriteria profile: String): Builder {
             directionsBuilder.profile(profile)
@@ -178,7 +177,7 @@ constructor(
          *
          * @param clientAppName base package name or other simple string identifier
          * @return this builder for chaining options together
-         * @since 0.5.0
+         * @since 1.0.0
          */
         fun clientAppName(clientAppName: String): Builder {
             directionsBuilder.clientAppName(clientAppName)
@@ -240,31 +239,23 @@ constructor(
          *
          * @param options containing all variables for request
          * @return this builder for chaining options together
-         * @since 0.9.0
+         * @since 1.0.0
          */
-        internal fun routeOptions(options: RouteOptionsNavigation): Builder {
-            options.baseUrl?.let {
-                directionsBuilder.baseUrl(it)
-            }
+        fun routeOptions(options: RouteOptionsNavigation): Builder {
+            directionsBuilder.baseUrl(options.baseUrl)
 
-            options.user?.let {
-                directionsBuilder.user(it)
-            }
+            directionsBuilder.user(options.user)
 
-            options.profile?.let {
-                directionsBuilder.profile(it)
-            }
+            directionsBuilder.profile(options.profile)
 
-            origin = options.coordinates.first()
+            origin = options.origin
 
             waypoints.clear()
-            waypoints.addAll(options.coordinates.drop(1).dropLast(1))
+            waypoints.addAll(options.waypoints)
 
-            destination = options.coordinates.last()
+            destination = options.destination
 
-            options.alternatives?.let {
-                directionsBuilder.alternatives(it)
-            }
+            directionsBuilder.alternatives(options.alternatives)
 
             options.language?.let {
                 directionsBuilder.language(Locale(it))
@@ -287,45 +278,33 @@ constructor(
                 }
             }
 
-            options.continueStraight?.let {
-                directionsBuilder.continueStraight(it)
-            }
+            directionsBuilder.continueStraight(options.continueStraight)
 
-            options.roundaboutExits?.let {
-                directionsBuilder.roundaboutExits(it)
-            }
+            directionsBuilder.roundaboutExits(options.roundaboutExits)
 
             options.geometries?.let {
-                directionsBuilder.geometries(it)
+                directionsBuilder.geometries(options.geometries)
             }
 
             options.overview?.let {
                 directionsBuilder.overview(it)
             }
 
-            options.steps?.let {
-                directionsBuilder.steps(it)
-            }
+            directionsBuilder.steps(options.steps)
 
             options.annotations?.let {
                 directionsBuilder.annotations(it)
             }
 
-            options.voiceInstructions?.let {
-                directionsBuilder.voiceInstructions(it)
-            }
+            directionsBuilder.voiceInstructions(options.voiceInstructions)
 
-            options.bannerInstructions?.let {
-                directionsBuilder.bannerInstructions(it)
-            }
+            directionsBuilder.bannerInstructions(options.bannerInstructions)
 
             options.voiceUnits?.let {
                 directionsBuilder.voiceUnits(it)
             }
 
-            options.accessToken?.let {
-                directionsBuilder.accessToken(it)
-            }
+            directionsBuilder.accessToken(options.accessToken)
 
             options.requestUuid?.let {
                 // TODO Check if needed as it is only set at response time
@@ -379,7 +358,7 @@ constructor(
          * settings for navigation to work correctly.
          *
          * @return a new instance of Navigation Route
-         * @since 0.5.0
+         * @since 1.0.0
          */
         fun build(): NavigationOffboardRoute {
             // Set the default values which the user cannot alter.
@@ -393,11 +372,10 @@ constructor(
             val splitWaypointIndices =
                 waypointIndices.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
                     .toTypedArray()
-            val indices = Array(splitWaypointIndices.size, { 0 })
-            var index = 0
-            for (waypointIndex in splitWaypointIndices) {
+            val indices = Array(splitWaypointIndices.size) { 0 }
+            for ((index, waypointIndex) in splitWaypointIndices.withIndex()) {
                 val parsedIndex = Integer.valueOf(waypointIndex)
-                indices[index++] = parsedIndex
+                indices[index] = parsedIndex
             }
             return indices
         }

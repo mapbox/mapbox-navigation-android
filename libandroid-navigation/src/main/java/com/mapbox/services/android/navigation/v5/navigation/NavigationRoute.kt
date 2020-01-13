@@ -13,7 +13,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
-import com.mapbox.services.android.navigation.v5.utils.extensions.mapToWalkingOptions
 import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor
@@ -626,8 +625,8 @@ internal constructor(
          * @param navigationWalkingOptions object holding walking options
          * @return this builder for chaining options together
          */
-        fun walkingOptions(navigationWalkingOptions: WalkingOptionsNavigation): Builder {
-            directionsBuilder.walkingOptions(navigationWalkingOptions.mapToWalkingOptions())
+        fun walkingOptions(navigationWalkingOptions: NavigationWalkingOptions): Builder {
+            directionsBuilder.walkingOptions(navigationWalkingOptions.walkingOptions)
             return this
         }
 

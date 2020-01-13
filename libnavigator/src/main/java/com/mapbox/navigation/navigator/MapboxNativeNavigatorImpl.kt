@@ -4,9 +4,14 @@ import android.location.Location
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.navigator.model.RouterConfig
 import com.mapbox.navigator.FixLocation
+import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.RouterParams
+import com.mapbox.navigator.RouterResult
+import com.mapbox.navigator.TileEndpointConfiguration
 import java.util.Date
 
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
@@ -17,9 +22,31 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     private val navigator: Navigator = Navigator()
 
+    override fun configureRouter(routerConfig: RouterConfig, httpClient: HttpInterface, userAgent: String) {
+        navigator.configureRouter(
+            RouterParams(
+                routerConfig.tilePath,
+                routerConfig.inMemoryTileCache,
+                routerConfig.mapMatchingSpatialCache,
+                routerConfig.threadsCount,
+                routerConfig.endpointConfig?.let {
+                    TileEndpointConfiguration(
+                        it.host,
+                        it.version,
+                        it.token,
+                        userAgent,
+                        ""
+                    )
+                }),
+            httpClient
+        )
+    }
+
     override fun updateLocation(rawLocation: Location) {
         navigator.updateLocation(rawLocation.toFixLocation())
     }
+
+    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
 
     override fun setRoute(route: Route) {
         TODO("not implemented")

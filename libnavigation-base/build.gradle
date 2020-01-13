@@ -28,6 +28,6 @@ dependencies {
     // Unit testing
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk
+    testImplementation dependenciesList.robolectric
 }
-
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
