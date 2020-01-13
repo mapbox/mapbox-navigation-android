@@ -10,6 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.core.utils.TextUtils
 import com.mapbox.geojson.Point
+import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import java.util.Locale
@@ -53,6 +54,7 @@ internal constructor(
                 )
                 .language(context)
                 .voiceUnits(context)
+                .interceptor(SkuInterceptor(context))
                 .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                 .continueStraight(true)
     }
@@ -565,6 +567,17 @@ internal constructor(
          */
         fun interceptor(interceptor: Interceptor): Builder {
             directionsBuilder.interceptor(interceptor)
+            return this
+        }
+
+        /**
+         * Adds an optional network interceptor to set in the OkHttp client.
+         *
+         * @param interceptor to set for OkHttp
+         * @return this builder for chaining options together
+         */
+        fun networkInterceptor(interceptor: Interceptor): Builder {
+            directionsBuilder.networkInterceptor(interceptor)
             return this
         }
 

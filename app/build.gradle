@@ -83,11 +83,6 @@ android {
 }
 
 dependencies {
-  implementation project(':libdirections-offboard')
-  implementation project(':libdirections-onboard')
-  implementation project(':libnavigation-util')
-  implementation project(':liblogger')
-
   //ktlint
   ktlint dependenciesList.ktlint
 

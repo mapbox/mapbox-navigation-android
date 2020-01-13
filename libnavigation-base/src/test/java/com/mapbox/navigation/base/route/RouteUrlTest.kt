@@ -18,7 +18,7 @@ class RouteUrlTest {
     @Test
     fun checkBaseUrl() {
         setupRouteUrl()
-            .checkContain("${RouteUrl.BASE_URL}/${RouteUrl.BASE_URL_P0}/${RouteUrl.BASE_URL_P1}/")
+            .checkContain("${RouteUrl.BASE_URL}/${RouteUrl.BASE_URL_API_NAME}/${RouteUrl.BASE_URL_API_VERSION}/")
     }
 
     @Test
@@ -30,8 +30,8 @@ class RouteUrlTest {
         )
 
         assertNotNull(routeUrl.path)
-        routeUrl.path!!.contains(
-            "/12.2,43.4;54.0,90.01;32.9,81.23;42.00210201,13.123121"
+        assertTrue(
+            routeUrl.path?.contains("/12.2,43.4;54.0,90.01;32.9,81.23;42.00210201,13.123121") ?: false
         )
     }
 

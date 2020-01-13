@@ -22,8 +22,8 @@ class RouteUrl(
     companion object {
         const val BASE_URL = "https://api.mapbox.com"
 
-        const val BASE_URL_P0 = "directions"
-        const val BASE_URL_P1 = "v5"
+        const val BASE_URL_API_NAME = "directions"
+        const val BASE_URL_API_VERSION = "v5"
 
         private const val QUERY_PARAM_ACCESS_TOKEN = "access_token"
         private const val QUERY_PARAM_STEPS = "steps"
@@ -112,8 +112,8 @@ class RouteUrl(
     fun getRequest(): Uri =
         Uri.parse(BASE_URL)
             .buildUpon()
-            .appendPath(BASE_URL_P0)
-            .appendPath(BASE_URL_P1)
+            .appendPath(BASE_URL_API_NAME)
+            .appendPath(BASE_URL_API_VERSION)
             .appendPath(user)
             .appendPath(profile)
             .appendPath(retrieveCoordinates())
