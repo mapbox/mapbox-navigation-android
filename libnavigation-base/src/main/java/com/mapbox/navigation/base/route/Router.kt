@@ -16,5 +16,7 @@ interface Router {
         fun onResponse(routes: List<Route>)
 
         fun onFailure(throwable: Throwable)
+
+        fun onCanceled()
     }
 }

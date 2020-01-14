@@ -21,11 +21,14 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
     }
 
     private var navigationRoute: NavigationOffboardRoute? = null
+    private var callback: Router.Callback? = null
 
     override fun getRoute(
         routeOptions: RouteOptionsNavigation,
         callback: Router.Callback
     ) {
+        cancel()
+        this.callback = callback
         navigationRoute = RouteBuilderProvider.getBuilder(accessToken, context).routeOptions(routeOptions).build()
         navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
 
@@ -35,20 +38,28 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
             ) {
                 val routes = response.body()?.routes()
                 if (response.isSuccessful && !routes.isNullOrEmpty()) {
-                    callback.onResponse(routes.map { it.mapToRoute() })
+                    notifyCallback { routes.map { it.mapToRoute() } }
                 } else {
-                    callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
+                    notifyCallback { it.onFailure(NavigationException(ERROR_FETCHING_ROUTE)) }
                 }
             }
 
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                callback.onFailure(t)
+                notifyCallback { it.onFailure(t) }
             }
         })
     }
 
     override fun cancel() {
         navigationRoute?.cancelCall()
+        notifyCallback { it.onCanceled() }
+    }
+
+    private fun notifyCallback(func: (Router.Callback) -> Unit) {
         navigationRoute = null
+        callback?.let {
+            func(it)
+            callback = null
+        }
     }
 }

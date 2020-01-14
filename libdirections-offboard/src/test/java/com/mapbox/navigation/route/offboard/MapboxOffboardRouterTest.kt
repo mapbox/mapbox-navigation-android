@@ -57,7 +57,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
     @Test
     fun cancel_NavigationRouteCancelCallCalled() {
-        getRoute(mockk())
+        getRoute(mockk(relaxUnitFun = true))
 
         offboardRouter.cancel()
 
@@ -126,6 +126,23 @@ class MapboxOffboardRouterTest : BaseTest() {
         callback.onFailure(mockk(), throwable)
 
         verify { routerCallback.onFailure(throwable) }
+    }
+
+    @Test
+    fun onCanceled() {
+        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        getRoute(routerCallback)
+        offboardRouter.cancel()
+
+        // make sure failure is not deliver after canceling
+        callback.onFailure(mockk(), mockk())
+        val route = buildMultipleLegRoute()
+        val response = buildResponse(listOf(route), true)
+        callback.onResponse(mockk(), response)
+
+        verify { routerCallback.onCanceled() }
+        verify(exactly = 0) { routerCallback.onFailure(any()) }
+        verify(exactly = 0) { routerCallback.onResponse(any()) }
     }
 
     private fun getRoute(routerCallback: Router.Callback) {
