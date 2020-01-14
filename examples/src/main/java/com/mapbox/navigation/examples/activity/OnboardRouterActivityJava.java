@@ -37,6 +37,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.coordinates;
+
 public class OnboardRouterActivityJava extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapClickListener {
 
@@ -118,18 +121,14 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
   }
 
   private void findRoute() {
-    RouteOptions.Builder optionsBuilder = RouteOptions.builder()
+    RouteOptions.Builder optionsBuilder =
+      applyDefaultParams(RouteOptions.builder())
             .accessToken(Utils.getMapboxAccessToken(this));
 
-    List<Point> coordinates = new ArrayList<Point>();
-    coordinates.add(origin);
+    List<Point> waypoints = new ArrayList<>();
+    waypoints.add(waypoint);
 
-    if (waypoint != null) {
-      coordinates.add(waypoint);
-    }
-
-    coordinates.add(destination);
-    optionsBuilder.coordinates(coordinates);
+    coordinates(optionsBuilder, origin, waypoints, destination);
 
     onboardRouter.getRoute(optionsBuilder.build(), new Router.Callback() {
       @Override

@@ -14,14 +14,22 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.logger.*
+import com.mapbox.navigation.logger.DEBUG
+import com.mapbox.navigation.logger.ERROR
+import com.mapbox.navigation.logger.INFO
+import com.mapbox.navigation.logger.LogEntry
+import com.mapbox.navigation.logger.LoggerObserver
+import com.mapbox.navigation.logger.MapboxLogger
+import com.mapbox.navigation.logger.VERBOSE
+import com.mapbox.navigation.logger.WARN
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.offboard.router.applyDefaultParams
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
@@ -132,18 +140,8 @@ class OffboardRouterActivityKt : AppCompatActivity(),
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()
             val options = RouteOptions.builder().applyDefaultParams().apply {
-                
                 accessToken(Utils.getMapboxAccessToken(this@OffboardRouterActivityKt))
-
-                val points: MutableList<Point?> = mutableListOf()
-                points.add(originPoint)
-                waypoints.forEach {
-                    points.add(it)
-                }
-                points.add(destination)
-
-                coordinates(points)
-
+                coordinates(originPoint, waypoints, destinationPoint)
             }.build()
 
             offboardRouter?.getRoute(options, this@OffboardRouterActivityKt)

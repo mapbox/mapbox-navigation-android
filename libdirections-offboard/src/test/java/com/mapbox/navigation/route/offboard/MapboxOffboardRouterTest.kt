@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.base.BaseTest
-import com.mapbox.navigation.route.offboard.router.routeOptions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -39,6 +38,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         every { mapboxDirections.enqueueCall(capture(listener)) } answers {
             callback = listener.captured
         }
+        every { routeOptions.coordinates().size } returns 2
         offboardRouter = MapboxOffboardRouter(accessToken, context)
     }
 

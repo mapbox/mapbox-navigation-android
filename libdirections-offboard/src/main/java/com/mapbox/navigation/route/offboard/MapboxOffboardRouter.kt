@@ -37,7 +37,7 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
             ) {
                 val routes = response.body()?.routes()
                 if (response.isSuccessful && !routes.isNullOrEmpty()) {
-                    callback.onResponse(routes.map { it })
+                    callback.onResponse(routes)
                 } else {
                     callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
                 }

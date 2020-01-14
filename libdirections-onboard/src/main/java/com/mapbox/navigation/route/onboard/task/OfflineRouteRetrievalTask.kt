@@ -12,6 +12,7 @@ import com.mapbox.navigation.route.onboard.OnOfflineRouteFoundCallback
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigator.RouterResult
+import java.lang.RuntimeException
 
 internal class OfflineRouteRetrievalTask(
     private val navigator: MapboxNativeNavigator,
@@ -40,7 +41,11 @@ internal class OfflineRouteRetrievalTask(
             routerResult = navigator.getRoute(url)
         }
 
-        return DirectionsResponse.fromJson(routerResult.json).routes()
+        return try {
+            DirectionsResponse.fromJson(routerResult.json).routes()
+        } catch (e: RuntimeException) {
+            emptyList()
+        }
     }
 
     public override fun onPostExecute(offlineRoute: List<DirectionsRoute>?) {

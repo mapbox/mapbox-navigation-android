@@ -14,19 +14,20 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.route.offboard.router.applyDefaultParams
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import java.io.File
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
-import java.io.File
 
 class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     MapboxMap.OnMapClickListener {
@@ -104,13 +105,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
                 val optionsBuilder =
                     RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(this))
-
-                val coordinates = mutableListOf<Point>()
-                coordinates.add(origin)
-                waypoint?.let { coordinates.add(it) }
-                coordinates.add(destination)
-
-                optionsBuilder.coordinates(coordinates)
+                        .coordinates(origin, listOf(waypoint), destination)
 
                 onboardRouter.getRoute(optionsBuilder.build(), object : Router.Callback {
                     override fun onResponse(routes: List<DirectionsRoute>) {

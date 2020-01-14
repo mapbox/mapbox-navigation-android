@@ -1,17 +1,22 @@
+@file:JvmName("MapboxDirectionsUtils")
+
 package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.RouteUrl
-import java.util.*
-
+import com.mapbox.navigation.base.extensions.SEMICOLON
+import com.mapbox.navigation.base.extensions.checkFields
+import com.mapbox.navigation.base.extensions.convertToListOfDoubles
+import com.mapbox.navigation.base.extensions.convertToListOfPairsOfDoubles
+import com.mapbox.navigation.base.extensions.parseWaypointIndices
+import com.mapbox.navigation.base.extensions.parseWaypointTargets
+import java.util.Locale
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
-private const val SEMICOLON = ";"
-private const val COMMA = ","
 
 fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirections.Builder {
+    options.checkFields()
+
     baseUrl(options.baseUrl())
     user(options.user())
     profile(options.profile())
@@ -39,7 +44,7 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
 
     options.bearings()?.let { bearings ->
         if (bearings.isNotEmpty()) {
-            bearings.convertToListOfPairsOfDoubles(SEMICOLON[0], COMMA[0])
+            bearings.convertToListOfPairsOfDoubles()
                 ?.forEach { pair ->
                     addBearing(pair.first, pair.second)
                 }
@@ -119,70 +124,4 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
     eventListener(EVENT_LISTENER)
 
     return this
-}
-
-private fun String.convertToListOfDoubles(separator: Char = ';'): List<Double>? =
-    try {
-        this.split(separator).map { token ->
-            token.toDouble()
-        }
-    } catch (e: Exception) {
-        null
-    }
-
-private fun String.convertToListOfPairsOfDoubles(
-    firstSeparator: Char = ';',
-    secondSeparator: Char = ','
-): List<Pair<Double, Double>>? =
-    try {
-        val pairs = split(firstSeparator)
-        val result = mutableListOf<Pair<Double, Double>>()
-        pairs.forEach { pair ->
-            val parts = pair.split(secondSeparator)
-            result.add(Pair(parts[0].toDouble(), parts[1].toDouble()))
-        }
-        result.toList()
-    } catch (e: Exception) {
-        null
-    }
-
-
-private fun parseWaypointIndices(waypointIndices: String): Array<Int> {
-    val splitWaypointIndices =
-        waypointIndices.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-    val indices = Array(splitWaypointIndices.size) { 0 }
-    for ((index, waypointIndex) in splitWaypointIndices.withIndex()) {
-        val parsedIndex = Integer.valueOf(waypointIndex)
-        indices[index] = parsedIndex
-    }
-    return indices
-}
-
-private fun parseWaypointTargets(waypointTargets: String): Array<Point?> {
-    val splitWaypointTargets =
-        waypointTargets.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-    val waypoints = arrayOfNulls<Point>(splitWaypointTargets.size)
-    var index = 0
-    for (waypointTarget in splitWaypointTargets) {
-        val point = waypointTarget.split(COMMA.toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-        if (waypointTarget.isEmpty()) {
-            waypoints[index++] = null
-        } else {
-            val longitude = java.lang.Double.valueOf(point[0])
-            val latitude = java.lang.Double.valueOf(point[0])
-            waypoints[index++] = Point.fromLngLat(longitude, latitude)
-        }
-    }
-    return waypoints
-}
-
-fun RouteOptions.Builder.applyDefaultParams() : RouteOptions.Builder = also {
-    baseUrl(RouteUrl.BASE_URL)
-    user(RouteUrl.PROFILE_DEFAULT_USER)
-    profile(RouteUrl.PROFILE_DRIVING)
-    geometries(RouteUrl.GEOMETRY_POLYLINE6)
-    requestUuid("")
 }

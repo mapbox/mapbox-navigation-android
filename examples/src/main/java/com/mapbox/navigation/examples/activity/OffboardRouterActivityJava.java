@@ -37,6 +37,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.coordinates;
+
 public class OffboardRouterActivityJava extends AppCompatActivity implements
   OnMapReadyCallback, MapboxMap.OnMapClickListener, Router.Callback {
 
@@ -130,12 +133,12 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
         if (waypoint != null) {
           waypoints.add(waypoint);
         }
-        RouteOptions.Builder optionsBuilder = RouteOptions.builder();
-        optionsBuilder.accessToken(Utils.getMapboxAccessToken(this));
-        List<Point> coordinates = new ArrayList<>();
-        coordinates.add(origin);
-        coordinates.addAll(waypoints);
-        coordinates.add(destination);
+        RouteOptions.Builder optionsBuilder =
+                applyDefaultParams(RouteOptions.builder())
+                .accessToken(Utils.getMapboxAccessToken(this));
+
+        coordinates(optionsBuilder, origin, waypoints, destination);
+
         offboardRouter.getRoute(optionsBuilder.build(), this);
       }
     }

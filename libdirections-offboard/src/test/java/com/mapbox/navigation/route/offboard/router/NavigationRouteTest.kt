@@ -5,6 +5,8 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.bearings
+import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
@@ -12,13 +14,13 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockkStatic
+import java.util.Locale
 import junit.framework.Assert.assertNotNull
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import java.util.*
 
 class NavigationRouteTest {
 
@@ -102,17 +104,15 @@ class NavigationRouteTest {
             .routeOptions(
                 provideDefaultRouteOptionsBuilder()
                     .coordinates(
-                        listOf(
-                            origin,
-                            Point.fromLngLat(1.0, 3.0),
-                            Point.fromLngLat(1.0, 3.0),
-                            destination
-                        )
+                        origin,
+                        listOf(Point.fromLngLat(1.0, 3.0), Point.fromLngLat(1.0, 3.0)),
+                        destination
                     )
                     .accessToken(ACESS_TOKEN)
                     .waypointIndices(arrayOf(0, 2, 3).joinToString(separator = ";"))
                     .build()
             )
+
             .build()
 
         assertThat(
@@ -165,12 +165,14 @@ class NavigationRouteTest {
         val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 provideDefaultRouteOptionsBuilder()
-                    .accessToken(ACESS_TOKEN).build()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(
+                        origin = Point.fromLngLat(1.0, 2.0),
+                        destination = Point.fromLngLat(1.0, 5.0)
+                    )
+                    .bearings(90.0, 90.0, 1.0, 5.0)
+                    .build()
             )
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .addBearing(90.0, 90.0)
-            .destination(Point.fromLngLat(1.0, 5.0))
-            .addBearing(1.0, 5.0)
             .build()
 
         val requestUrl = navigationRoute.cloneCall().request().url().toString()
@@ -183,16 +185,15 @@ class NavigationRouteTest {
         val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(
                 provideDefaultRouteOptionsBuilder()
-                    .accessToken(ACESS_TOKEN).build()
+                    .accessToken(ACESS_TOKEN)
+                    .coordinates(
+                        Point.fromLngLat(1.0, 2.0),
+                        listOf(Point.fromLngLat(3.0, 4.0), Point.fromLngLat(5.0, 6.0)),
+                        Point.fromLngLat(7.0, 8.0)
+                    )
+                    .bearings(10.0, 10.0, 20.0, 20.0, 30.0, 30.0, 40.0, 40.0)
+                    .build()
             )
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .addBearing(10.0, 10.0)
-            .addWaypoint(Point.fromLngLat(3.0, 4.0))
-            .addBearing(20.0, 20.0)
-            .addWaypoint(Point.fromLngLat(5.0, 6.0))
-            .addBearing(30.0, 30.0)
-            .destination(Point.fromLngLat(7.0, 8.0))
-            .addBearing(40.0, 40.0)
             .build()
 
         val requestUrl = navigationRoute.cloneCall().request().url().toString()
@@ -221,13 +222,15 @@ class NavigationRouteTest {
                     1.0
                 ).build()
             )
+            .coordinates(
+                Point.fromLngLat(1.0, 2.0),
+                listOf(Point.fromLngLat(1.0, 3.0)),
+                Point.fromLngLat(1.0, 5.0)
+            )
             .build()
 
         val navigationRoute = provideNavigationOffboardRouteBuilder()
             .routeOptions(routeOptions)
-            .origin(Point.fromLngLat(1.0, 2.0))
-            .addWaypoint(Point.fromLngLat(1.0, 3.0))
-            .destination(Point.fromLngLat(1.0, 5.0))
             .build()
 
         val request = navigationRoute.cloneCall().request().url().toString()
