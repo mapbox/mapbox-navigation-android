@@ -49,6 +49,7 @@ class MapboxTripNotification(
     private var collapsedNotificationRemoteViews: RemoteViews? = null
     private var expandedNotificationRemoteViews: RemoteViews? = null
     private var pendingOpenIntent: PendingIntent? = null
+    private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.eta_format)
     private val navigationOptions: NavigationOptions = navigationOptionsBuilder.build()
     private lateinit var notification: Notification
@@ -67,6 +68,7 @@ class MapboxTripNotification(
             } ?: throw (IllegalStateException("unable to create a NotificationManager"))
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
+        pendingCloseIntent = createPendingCloseIntent(applicationContext)
         registerReceiver()
         createNotificationChannel()
     }
@@ -151,6 +153,7 @@ class MapboxTripNotification(
         val expandedLayoutId = R.id.navigationExpandedNotificationLayout
         RemoteViews(applicationContext.packageName, expandedLayout).also { remoteViews ->
             expandedNotificationRemoteViews = remoteViews
+            remoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent)
             remoteViews.setInt(expandedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
         }
     }
@@ -160,6 +163,11 @@ class MapboxTripNotification(
         val intent = pm.getLaunchIntentForPackage(applicationContext.packageName) ?: return null
         intent.setPackage(null)
         return PendingIntent.getActivity(applicationContext, 0, intent, 0)
+    }
+
+    private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
+        val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
+        return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, 0)
     }
 
     private fun createNotificationChannel() {
