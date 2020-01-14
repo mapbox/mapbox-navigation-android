@@ -6,8 +6,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.text.format.DateFormat
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.trip.notification.utils.distance.DistanceFormatter
 import io.mockk.every
 import io.mockk.mockk
 import java.util.Locale

@@ -15,9 +15,10 @@ class NavigationOptions private constructor(
 
     fun timeFormatType() = timeFormatType
 
-    class Builder {
-        var timeFormatType: Int = NONE_SPECIFIED
-        var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY
+    data class Builder(
+        private var timeFormatType: Int = NONE_SPECIFIED,
+        private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY
+    ) {
 
         fun roundingIncrement(roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }

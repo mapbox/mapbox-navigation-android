@@ -6,6 +6,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.RoundingIncrement
@@ -33,12 +34,12 @@ import java.util.Locale
  * @param context from which to get localized strings from
  * @param roundingIncrement increment by which to round small distances
  */
-class DistanceFormatter(
+class MapboxDistanceFormatter(
     language: String?,
     @VoiceUnit unitType: String,
     private val context: Context,
     @RoundingIncrement private val roundingIncrement: Int
-) {
+) : DistanceFormatter {
 
     private val unitStrings = hashMapOf<String, String>(
         UNIT_KILOMETERS to context.getString(R.string.kilometers),
@@ -77,21 +78,25 @@ class DistanceFormatter(
      * @return SpannableString representation which has a bolded number and units which have a
      * relative size of .65 times the size of the number
      */
-    fun formatDistance(distance: Double): SpannableString {
+    override fun formatDistance(distance: Double): SpannableString {
         val distanceSmallUnit =
             TurfConversion.convertLength(distance, UNIT_METERS, smallUnit)
         val distanceLargeUnit =
             TurfConversion.convertLength(distance, UNIT_METERS, largeUnit)
 
-        // If the distance is greater than 10 miles/kilometers, then round to nearest mile/kilometer
-        return if (distanceLargeUnit > LARGE_UNIT_THRESHOLD) {
-            getDistanceString(roundToDecimalPlace(distanceLargeUnit, 0), largeUnit)
+        return when {
+            // If the distance is greater than 10 miles/kilometers, then round to nearest mile/kilometer
+            distanceLargeUnit > LARGE_UNIT_THRESHOLD -> {
+                getDistanceString(roundToDecimalPlace(distanceLargeUnit, 0), largeUnit)
+            }
             // If the distance is less than 401 feet/meters, round by fifty feet/meters
-        } else if (distanceSmallUnit < SMALL_UNIT_THRESHOLD) {
-            getDistanceString(roundToClosestIncrement(distanceSmallUnit), smallUnit)
+            distanceSmallUnit < SMALL_UNIT_THRESHOLD -> {
+                getDistanceString(roundToClosestIncrement(distanceSmallUnit), smallUnit)
+            }
             // If the distance is between 401 feet/meters and 10 miles/kilometers, then round to one decimal place
-        } else {
-            getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit)
+            else -> {
+                getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit)
+            }
         }
     }
 
