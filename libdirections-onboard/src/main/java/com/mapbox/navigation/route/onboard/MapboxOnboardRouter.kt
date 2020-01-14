@@ -11,10 +11,11 @@ import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.route.onboard.model.OfflineError
-import com.mapbox.navigation.route.onboard.model.mapToRouteConfig
 import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import com.mapbox.navigation.utils.exceptions.NavigationException
+import com.mapbox.navigator.RouterParams
+import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
@@ -44,7 +45,21 @@ class MapboxOnboardRouter : Router {
         this.config = config
         this.logger = logger
         val httpClient = HttpClient()
-        MapboxNativeNavigatorImpl.configureRouter(config.mapToRouteConfig(), httpClient, httpClient.userAgent)
+        val routerParams = RouterParams(
+            config.tilePath,
+            config.inMemoryTileCache,
+            config.mapMatchingSpatialCache,
+            config.threadsCount,
+            config.endpoint?.let {
+                TileEndpointConfiguration(
+                    it.host,
+                    it.version,
+                    it.token,
+                    httpClient.userAgent,
+                    ""
+                )
+            })
+        MapboxNativeNavigatorImpl.configureRouter(routerParams, httpClient)
     }
 
     // Package private for testing purposes
