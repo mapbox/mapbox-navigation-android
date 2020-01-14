@@ -22,6 +22,8 @@ class LegStepNavigation private constructor(
      */
     fun duration(): Double = duration
 
+    fun geometry(): String? = geometry
+
     /**
      * The legal driving side at the location for this step. Result will either be {@code left} or
      * {@code right}.
