@@ -51,15 +51,10 @@ class MapboxTripNotification internal constructor(
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.eta_format)
+    private val notificationReceiver = NotificationActionReceiver()
     private val navigationOptions: NavigationOptions = navigationOptionsBuilder.build()
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
-
-    private val notificationReceiver = object : BroadcastReceiver() {
-        override fun onReceive(applicationContext: Context, intent: Intent) {
-            this@MapboxTripNotification.onEndNavigationBtnClick()
-        }
-    }
 
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
@@ -343,5 +338,11 @@ class MapboxTripNotification internal constructor(
     companion object {
         private var notificationActionButtonChannel = Channel<NotificationAction>(1)
         fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> = notificationActionButtonChannel
+    }
+
+    inner class NotificationActionReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            onEndNavigationBtnClick()
+        }
     }
 }
