@@ -12,8 +12,8 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import org.junit.Before
 import java.util.Locale
+import org.junit.Before
 
 class MapboxTripNotificationTest {
 
