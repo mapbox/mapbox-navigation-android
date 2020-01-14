@@ -30,6 +30,10 @@ import com.mapbox.navigation.utils.NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.NOTIFICATION_ID
 import com.mapbox.navigation.utils.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.extensions.ifNonNull
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.channels.ReceiveChannel
 import java.util.Calendar
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
@@ -89,6 +93,19 @@ class MapboxTripNotification(
 
     override fun onTripSessionStopped() {
         unregisterReceiver()
+        try {
+            notificationActionButtonChannel.cancel()
+        } catch (e: Exception) {
+            when (e) {
+                is ClosedReceiveChannelException,
+                is ClosedSendChannelException -> {
+
+                }
+                else -> {
+                    throw e
+                }
+            }
+        }
     }
 
     private fun registerReceiver() {
@@ -300,6 +317,24 @@ class MapboxTripNotification(
     }
 
     private fun onEndNavigationBtnClick() {
-        // TODO: communicate back to MapboxTripSession to stop navigation.
+        try {
+            notificationActionButtonChannel.offer(NotificationAction.END_NAVIGATION)
+        } catch (e: Exception) {
+            when (e) {
+                is ClosedReceiveChannelException,
+                is ClosedSendChannelException -> {
+                    notificationActionButtonChannel = Channel(1)
+                    notificationActionButtonChannel.offer(NotificationAction.END_NAVIGATION)
+                }
+                else -> {
+                    throw e
+                }
+            }
+        }
+    }
+
+    companion object {
+        private var notificationActionButtonChannel = Channel<NotificationAction>(1)
+        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> = notificationActionButtonChannel
     }
 }
