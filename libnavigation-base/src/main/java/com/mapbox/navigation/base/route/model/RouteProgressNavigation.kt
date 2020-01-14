@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.route.model
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.banner.BannerInstruction
-import com.mapbox.navigation.base.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 
 class RouteProgressNavigation private constructor(
     private val route: Route? = null,
@@ -77,7 +77,10 @@ class RouteProgressNavigation private constructor(
      * seconds
      */
     fun durationRemaining(): Long =
-        ifNonNull(fractionTraveled(), route()?.duration) { fractionTraveled, duration ->
+        ifNonNull(
+            fractionTraveled(),
+            route()?.duration
+        ) { fractionTraveled, duration ->
             ((1 - fractionTraveled) * duration).toLong()
         } ?: 0L
 
@@ -117,7 +120,10 @@ class RouteProgressNavigation private constructor(
      * @return integer value representing the number of way points remaining along the route
      */
     fun remainingWaypoints(): Int =
-        ifNonNull(route?.legs, legIndex) { legs, legIndex -> legs.size - legIndex } ?: 0
+        ifNonNull(
+            route?.legs,
+            legIndex
+        ) { legs, legIndex -> legs.size - legIndex } ?: 0
 
     /**
      * Gives a [RouteLegProgressNavigation] object with information about the particular leg the user is

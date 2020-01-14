@@ -18,7 +18,7 @@ import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.base.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
@@ -128,14 +128,22 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     }
 
     private fun findRoute() {
-        ifNonNull(origin, destination) { originPoint, destinationPoint ->
+        ifNonNull(
+            origin,
+            destination
+        ) { originPoint, destinationPoint ->
             if (offboardRouter == null) {
                 offboardRouter = MapboxOffboardRouter(Utils.getMapboxAccessToken(this), this)
             } else {
                 offboardRouter?.cancel()
             }
 
-            if (TurfMeasurement.distance(originPoint, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
+            if (TurfMeasurement.distance(
+                    originPoint,
+                    destinationPoint,
+                    TurfConstants.UNIT_METERS
+                ) < 50
+            ) {
                 return
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()

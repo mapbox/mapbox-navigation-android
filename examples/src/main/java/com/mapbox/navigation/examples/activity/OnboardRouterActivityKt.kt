@@ -16,7 +16,7 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.base.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute

@@ -28,7 +28,7 @@ import com.mapbox.navigation.base.utils.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.base.utils.NOTIFICATION_CHANNEL
 import com.mapbox.navigation.base.utils.NOTIFICATION_ID
 import com.mapbox.navigation.base.utils.SET_BACKGROUND_COLOR
-import com.mapbox.navigation.base.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 import com.mapbox.navigation.trip.notification.utils.time.TimeFormatter.formatTime
 import java.util.Calendar
 import kotlinx.coroutines.channels.Channel
@@ -118,9 +118,7 @@ class MapboxTripNotification internal constructor(
 
     private fun getNotificationBuilder(): NotificationCompat.Builder {
         val builder =
-            NotificationCompat.Builder(applicationContext,
-                NAVIGATION_NOTIFICATION_CHANNEL
-            )
+            NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setSmallIcon(R.drawable.ic_navigation)
@@ -142,8 +140,7 @@ class MapboxTripNotification internal constructor(
         val collapsedLayoutId = R.id.navigationCollapsedNotificationLayout
         RemoteViews(applicationContext.packageName, collapsedLayout).also { remoteViews ->
             collapsedNotificationRemoteViews = remoteViews
-            remoteViews.setInt(collapsedLayoutId,
-                SET_BACKGROUND_COLOR, backgroundColor)
+            remoteViews.setInt(collapsedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
         }
 
         val expandedLayout = R.layout.expanded_navigation_notification_layout
@@ -151,8 +148,7 @@ class MapboxTripNotification internal constructor(
         RemoteViews(applicationContext.packageName, expandedLayout).also { remoteViews ->
             expandedNotificationRemoteViews = remoteViews
             remoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent)
-            remoteViews.setInt(expandedLayoutId,
-                SET_BACKGROUND_COLOR, backgroundColor)
+            remoteViews.setInt(expandedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
         }
     }
 
@@ -341,7 +337,8 @@ class MapboxTripNotification internal constructor(
 
     companion object {
         private var notificationActionButtonChannel = Channel<NotificationAction>(1)
-        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> = notificationActionButtonChannel
+        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> =
+            notificationActionButtonChannel
     }
 
     inner class NotificationActionReceiver : BroadcastReceiver() {
