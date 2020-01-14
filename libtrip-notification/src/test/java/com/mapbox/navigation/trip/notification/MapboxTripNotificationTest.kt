@@ -1,6 +1,7 @@
 package com.mapbox.navigation.trip.notification
 
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -10,23 +11,24 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import io.mockk.every
 import io.mockk.mockk
-import java.util.Locale
+import io.mockk.mockkStatic
 import org.junit.Before
+import java.util.Locale
 
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
-    private val context: Context = mockk(relaxed = true)
     private val navigationOptionBuilder: NavigationOptions.Builder = mockk(relaxed = true)
     private val distanceFormatter: DistanceFormatter = mockk()
     private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
 
     @Before
     fun setUp() {
-        val notificationManager = mockk<NotificationManager>()
-        every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+        mockkStatic(DateFormat::class)
+        mockkStatic(PendingIntent::class)
+        val mockedContext = createContext()
         notification = MapboxTripNotification(
-            context,
+            mockedContext,
             distanceFormatter,
             navigationOptionBuilder,
             navigationNotificationProvider
@@ -35,6 +37,8 @@ class MapboxTripNotificationTest {
 
     private fun createContext(): Context {
         val mockedContext = mockk<Context>()
+        val mockPendingIntentForActivity = mockk<PendingIntent>(relaxed = true)
+        val mockPendingIntentForBroadcast = mockk<PendingIntent>(relaxed = true)
         val mockedConfiguration = Configuration()
         mockedConfiguration.locale = Locale("en")
         val mockedResources = mockk<Resources>(relaxed = true)
@@ -47,6 +51,8 @@ class MapboxTripNotificationTest {
         val notificationManager = mockk<NotificationManager>(relaxed = true)
         every { mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns (notificationManager)
         every { DateFormat.is24HourFormat(mockedContext) } returns (false)
+        every { PendingIntent.getActivity(mockedContext, any(), any(), any()) } returns (mockPendingIntentForActivity)
+        every { PendingIntent.getBroadcast(mockedContext, any(), any(), any()) } returns (mockPendingIntentForBroadcast)
         return mockedContext
     }
 }
