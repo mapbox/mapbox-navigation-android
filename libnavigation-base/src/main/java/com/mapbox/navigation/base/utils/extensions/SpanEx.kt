@@ -1,12 +1,12 @@
 @file:JvmName("SpanEx")
 
-package com.mapbox.navigation.utils.extensions
+package com.mapbox.navigation.base.utils.extensions
 
 import android.os.Build
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import com.mapbox.navigation.utils.span.SpanItem
-import com.mapbox.navigation.utils.span.TextSpanItem
+import com.mapbox.navigation.base.utils.span.SpanItem
+import com.mapbox.navigation.base.utils.span.TextSpanItem
 
 fun List<SpanItem>.combineSpan(): SpannableStringBuilder {
     val builder = SpannableStringBuilder()

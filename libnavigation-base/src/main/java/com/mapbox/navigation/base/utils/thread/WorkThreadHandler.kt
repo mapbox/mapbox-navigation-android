@@ -1,8 +1,8 @@
-package com.mapbox.navigation.utils.thread
+package com.mapbox.navigation.base.utils.thread
 
 import android.os.Handler
 import android.os.HandlerThread
-import com.mapbox.navigation.utils.extensions.quitSafelySupport
+import com.mapbox.navigation.base.utils.extensions.quitSafelySupport
 
 class WorkThreadHandler(
     private val handleThreadName: String = HANDLE_THREAD_NAME

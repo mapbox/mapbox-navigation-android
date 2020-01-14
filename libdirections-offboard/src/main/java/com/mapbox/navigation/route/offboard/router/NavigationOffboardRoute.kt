@@ -8,9 +8,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.RoutePointNavigation
-import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
+import com.mapbox.navigation.base.utils.extensions.getUnitTypeForLocale
+import com.mapbox.navigation.base.utils.extensions.inferDeviceLocale
 import com.mapbox.navigation.route.offboard.extension.mapToWalkingOptions
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import java.util.Locale
 import okhttp3.EventListener
 import okhttp3.Interceptor

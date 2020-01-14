@@ -26,7 +26,6 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
-    implementation project(':libnavigation-util')
 
     implementation dependenciesList.androidXCore
 

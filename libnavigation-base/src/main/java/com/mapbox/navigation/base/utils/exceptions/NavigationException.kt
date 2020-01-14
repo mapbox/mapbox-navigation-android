@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.exceptions
+package com.mapbox.navigation.base.utils.exceptions
 
 /**
  * Generic Exception for all things Mapbox Navigation.

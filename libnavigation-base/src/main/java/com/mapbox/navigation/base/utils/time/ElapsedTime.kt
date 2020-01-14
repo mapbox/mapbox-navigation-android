@@ -1,7 +1,7 @@
-package com.mapbox.navigation.utils.time
+package com.mapbox.navigation.base.utils.time
 
-import com.mapbox.navigation.utils.exceptions.NavigationException
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.exceptions.NavigationException
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 import kotlin.math.roundToLong
 
 class ElapsedTime(

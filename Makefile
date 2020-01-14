@@ -75,7 +75,6 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:assembleDebug
 	./gradlew :libnavigation-base:assembleDebug
 	./gradlew :libnavigation-metrics:assembleDebug
-	./gradlew :libnavigation-util:assembleDebug
 	./gradlew :libnavigator:assembleDebug
 	./gradlew :libtrip-notification:assembleDebug
 
@@ -86,7 +85,6 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:assembleRelease
 	./gradlew :libnavigation-base:assembleRelease
 	./gradlew :libnavigation-metrics:assembleRelease
-	./gradlew :libnavigation-util:assembleRelease
 	./gradlew :libnavigator:assembleRelease
 	./gradlew :libtrip-notification:assembleRelease
 
@@ -98,7 +96,6 @@ navigation-fixtures:
 	./gradlew :liblogger:test
 	./gradlew :libnavigation-base:test
 	./gradlew :libnavigation-metrics:test
-	./gradlew :libnavigation-util:test
 	./gradlew :libnavigator:test
 	./gradlew :libtrip-notification:test
 
@@ -109,7 +106,6 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:bintrayUpload
 	./gradlew :libnavigation-base:bintrayUpload
 	./gradlew :libnavigation-metrics:bintrayUpload
-	./gradlew :libnavigation-util:bintrayUpload
 	./gradlew :libnavigator:bintrayUpload
 	./gradlew :libtrip-notification:bintrayUpload
 
@@ -120,6 +116,5 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:artifactoryPublish
 	./gradlew :libnavigation-base:artifactoryPublish
 	./gradlew :libnavigation-metrics:artifactoryPublish
-	./gradlew :libnavigation-util:artifactoryPublish
 	./gradlew :libnavigator:artifactoryPublish
 	./gradlew :libtrip-notification:artifactoryPublish

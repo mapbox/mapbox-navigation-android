@@ -6,8 +6,8 @@ import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
+import com.mapbox.navigation.base.utils.thread.WorkThreadHandler
 import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
-import com.mapbox.navigation.utils.thread.WorkThreadHandler
 
 /**
  * Default implementation of [MetricsReporter] interface.

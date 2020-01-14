@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
@@ -30,7 +31,6 @@ import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.logger.VERBOSE
 import com.mapbox.navigation.logger.WARN
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver

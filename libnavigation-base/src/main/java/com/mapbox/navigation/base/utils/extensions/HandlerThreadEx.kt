@@ -1,6 +1,6 @@
 @file:JvmName("HandlerThreadEx")
 
-package com.mapbox.navigation.utils.extensions
+package com.mapbox.navigation.base.utils.extensions
 
 import android.os.Build
 import android.os.HandlerThread

@@ -3,7 +3,7 @@ package com.mapbox.navigation.route.onboard
 import android.net.Uri
 import androidx.annotation.FloatRange
 import com.mapbox.navigation.base.route.RouteUrl
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 
 /**
  * The [OfflineRoute] class wraps the [NavigationRoute] class with parameters which

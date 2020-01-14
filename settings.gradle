@@ -9,5 +9,4 @@ include ':app',
         ':libdirections-hybrid',
         ':libnavigation-metrics',
         ':libtrip-notification',
-        ':liblogger',
-        ':libnavigation-util'
+        ':liblogger'

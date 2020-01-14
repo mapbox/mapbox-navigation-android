@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils
+package com.mapbox.navigation.base.utils
 
 const val NOTIFICATION_CHANNEL = "Navigation Notifications"
 const val NAVIGATION_NOTIFICATION_CHANNEL = "NAVIGATION_NOTIFICATION_CHANNEL"

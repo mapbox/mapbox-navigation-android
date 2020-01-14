@@ -7,8 +7,8 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.base.route.model.WalkingOptionsNavigation
+import com.mapbox.navigation.base.utils.extensions.inferDeviceLocale
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -32,7 +32,7 @@ class NavigationRouteTest {
         @BeforeClass
         @JvmStatic
         fun init() {
-            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
+            mockkStatic("com.mapbox.navigation.base.utils.extensions.ContextEx")
         }
 
         const val ACESS_TOKEN = "pk.XXX"

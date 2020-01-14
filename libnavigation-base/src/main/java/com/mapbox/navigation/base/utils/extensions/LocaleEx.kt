@@ -1,6 +1,6 @@
 @file:JvmName("LocaleEx")
 
-package com.mapbox.navigation.trip.notification.utils.extension
+package com.mapbox.navigation.base.utils.extensions
 
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.METRIC

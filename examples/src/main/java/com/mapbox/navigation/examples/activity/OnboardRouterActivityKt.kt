@@ -16,12 +16,12 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.route.onboard.model.Config
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement

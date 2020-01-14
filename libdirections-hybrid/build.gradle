@@ -22,7 +22,6 @@ dependencies {
     api project(':libnavigation-base')
     implementation project(":libdirections-onboard")
     implementation project(":libdirections-offboard")
-    implementation project(":libnavigation-util")
 
     //ktlint
     ktlint dependenciesList.ktlint

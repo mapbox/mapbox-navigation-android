@@ -7,13 +7,13 @@ import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.utils.exceptions.NavigationException
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
-import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File

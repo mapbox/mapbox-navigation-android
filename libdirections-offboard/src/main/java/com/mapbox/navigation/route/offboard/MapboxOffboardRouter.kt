@@ -6,9 +6,9 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.navigation.base.utils.exceptions.NavigationException
 import com.mapbox.navigation.route.offboard.extension.mapToRoute
 import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
-import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

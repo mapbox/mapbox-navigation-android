@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.thread
+package com.mapbox.navigation.base.utils.thread
 
 interface ThreadHandler {
 

@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.route.model
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 
 class RouteLegProgressNavigation private constructor(
     private val stepIndex: Int = 0,

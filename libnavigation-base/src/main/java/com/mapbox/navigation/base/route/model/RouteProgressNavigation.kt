@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.route.model
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.banner.BannerInstruction
-import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.extensions.ifNonNull
 
 class RouteProgressNavigation private constructor(
     private val route: Route? = null,

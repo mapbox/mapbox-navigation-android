@@ -1,6 +1,6 @@
 package com.mapbox.navigation.route.offboard.router
 
-import com.mapbox.navigation.utils.time.ElapsedTime
+import com.mapbox.navigation.base.utils.time.ElapsedTime
 import okhttp3.Call
 import okhttp3.EventListener
 
