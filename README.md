@@ -28,19 +28,19 @@ If you are looking to include this inside your project, please take a look at [t
 
 Add this snippet to your `build.gradle` file to use this SDK (`libandroid-navigation`):
 
-```
+```gradle
 implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.4'
 ```
 
 And for `libandroid-navigation-ui`:
 
-```
+```gradle
 implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.4'
 ```
 **Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.
 
 **Important Note**: You _must_ include the following snippet in your top project-level `build.gradle` file:
-```
+```gradle
 repositories {
     maven { url 'https://mapbox.bintray.com/mapbox' }
 }
