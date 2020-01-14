@@ -18,11 +18,11 @@ import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.navigation.base.banner.BannerInstruction
+import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.model.LegStepNavigation
 import com.mapbox.navigation.base.route.model.RouteProgressNavigation
 import com.mapbox.navigation.base.trip.TripNotification
-import com.mapbox.navigation.trip.notification.utils.distance.DistanceFormatter
 import com.mapbox.navigation.trip.notification.utils.time.TimeFormatter.formatTime
 import com.mapbox.navigation.utils.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.NAVIGATION_NOTIFICATION_CHANNEL
@@ -37,7 +37,7 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
-class MapboxTripNotification(
+class MapboxTripNotification internal constructor(
     private val applicationContext: Context,
     private val distanceFormatter: DistanceFormatter,
     navigationOptionsBuilder: NavigationOptions.Builder,
