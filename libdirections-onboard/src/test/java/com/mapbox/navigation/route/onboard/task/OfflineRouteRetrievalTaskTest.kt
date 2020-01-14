@@ -1,6 +1,6 @@
 package com.mapbox.navigation.route.onboard.task
 
-import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineRouteFoundCallback
 import com.mapbox.navigation.route.onboard.model.OfflineError
@@ -65,7 +65,7 @@ class OfflineRouteRetrievalTaskTest {
             null,
             mockedCallback
         )
-        val routes = listOf<Route>(mockk())
+        val routes = listOf<DirectionsRoute>(mockk())
 
         theOfflineRouteRetrievalTask.onPostExecute(routes)
 

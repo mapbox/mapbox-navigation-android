@@ -62,8 +62,8 @@ fun parseWaypointTargets(waypointTargets: String): Array<Point?> {
         if (waypointTarget.isEmpty()) {
             waypoints[index++] = null
         } else {
-            val longitude = java.lang.Double.valueOf(point[0])
-            val latitude = java.lang.Double.valueOf(point[0])
+            val longitude = point[0].toDouble()
+            val latitude = point[0].toDouble()
             waypoints[index++] = Point.fromLngLat(longitude, latitude)
         }
     }
