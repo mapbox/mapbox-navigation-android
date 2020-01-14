@@ -16,11 +16,12 @@ import java.util.Date
 
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
-    private val navigator: Navigator = Navigator()
-
+    // Order matters! https://kotlinlang.org/docs/reference/classes.html#constructors
     init {
         System.loadLibrary("navigator-android")
     }
+
+    private val navigator: Navigator = Navigator()
 
     // Route following
 
