@@ -151,7 +151,7 @@ class MapboxTripNotification(
         buildRemoteViews()
         updateData(routeProgress)
         // TODO:OZ,AK uncomment for full functionality of the NotificationService
-//        updateInstructionText(routeProgress.bannerInstruction())
+//        updateInstructionText(routeProgress.bannerInstructions())
 //        updateDistanceText(routeProgress)
 //        val time = Calendar.getInstance()
 //
@@ -167,11 +167,11 @@ class MapboxTripNotification(
     private fun updateData(routeProgress: RouteProgress) {
         collapsedNotificationRemoteViews?.setTextViewText(
             R.id.notificationDistanceText,
-            routeProgress.progress
+            "" // todo
         )
         expandedNotificationRemoteViews?.setTextViewText(
             R.id.notificationDistanceText,
-            routeProgress.progress
+            "" // todo
         )
     }
 }
