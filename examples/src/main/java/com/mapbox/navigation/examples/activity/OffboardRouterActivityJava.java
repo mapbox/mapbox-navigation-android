@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -19,11 +20,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.route.model.Route;
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
-import com.mapbox.navigation.examples.utils.extensions.Mappers;
 import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -132,13 +130,12 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
         if (waypoint != null) {
           waypoints.add(waypoint);
         }
-        RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder();
+        RouteOptions.Builder optionsBuilder = RouteOptions.builder();
         optionsBuilder.accessToken(Utils.getMapboxAccessToken(this));
-        optionsBuilder.origin(origin);
-        optionsBuilder.destination(destination);
-        for (Point waypointPoint : waypoints) {
-          optionsBuilder.addWaypoint(waypointPoint);
-        }
+        List<Point> coordinates = new ArrayList<>();
+        coordinates.add(origin);
+        coordinates.addAll(waypoints);
+        coordinates.add(destination);
         offboardRouter.getRoute(optionsBuilder.build(), this);
       }
     }
@@ -149,10 +146,9 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
    */
 
   @Override
-  public void onResponse(@NotNull List<Route> routes) {
+  public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
     if (!routes.isEmpty()) {
-      route = Mappers.mapToDirectionsRoute(routes.get(0));
-      navigationMapRoute.addRoute(route);
+      navigationMapRoute.addRoute(routes.get(0));
     }
   }
 

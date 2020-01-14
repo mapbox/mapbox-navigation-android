@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -16,20 +17,11 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
-import com.mapbox.navigation.logger.DEBUG
-import com.mapbox.navigation.logger.ERROR
-import com.mapbox.navigation.logger.INFO
-import com.mapbox.navigation.logger.LogEntry
-import com.mapbox.navigation.logger.LoggerObserver
-import com.mapbox.navigation.logger.MapboxLogger
-import com.mapbox.navigation.logger.VERBOSE
-import com.mapbox.navigation.logger.WARN
+import com.mapbox.navigation.logger.*
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
+import com.mapbox.navigation.route.offboard.router.applyDefaultParams
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
@@ -139,11 +131,19 @@ class OffboardRouterActivityKt : AppCompatActivity(),
                 return
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()
-            val options = RouteOptionsNavigation.builder().apply {
+            val options = RouteOptions.builder().applyDefaultParams().apply {
+                
                 accessToken(Utils.getMapboxAccessToken(this@OffboardRouterActivityKt))
-                origin(originPoint)
-                destination(destinationPoint)
-                waypoints.forEach { addWaypoint(it) }
+
+                val points: MutableList<Point?> = mutableListOf()
+                points.add(originPoint)
+                waypoints.forEach {
+                    points.add(it)
+                }
+                points.add(destination)
+
+                coordinates(points)
+
             }.build()
 
             offboardRouter?.getRoute(options, this@OffboardRouterActivityKt)
@@ -154,9 +154,9 @@ class OffboardRouterActivityKt : AppCompatActivity(),
      * Router.Callback
      */
 
-    override fun onResponse(routes: List<Route>) {
+    override fun onResponse(routes: List<DirectionsRoute>) {
         routes.firstOrNull()?.let {
-            route = it.mapToDirectionsRoute()
+            route = it
             navigationMapRoute.addRoute(route)
         }
     }

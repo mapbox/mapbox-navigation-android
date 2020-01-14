@@ -2,15 +2,16 @@ package com.mapbox.navigation.route.offboard
 
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
+import com.mapbox.api.directions.v5.MapboxDirections
+import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
+import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 
 internal object RouteBuilderProvider {
-    fun getBuilder(accessToken: String, context: Context): NavigationOffboardRoute.Builder =
-        NavigationOffboardRoute.Builder()
+
+    fun getBuilder(accessToken: String, context: Context): MapboxDirections.Builder =
+        MapboxDirections.builder()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .language(context)
+            .language(context.inferDeviceLocale())
             .continueStraight(true)
             .roundaboutExits(true)
             .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
@@ -20,14 +21,9 @@ internal object RouteBuilderProvider {
                 DirectionsCriteria.ANNOTATION_CONGESTION,
                 DirectionsCriteria.ANNOTATION_DISTANCE
             )
-            .routeOptions(RouteOptionsNavigation.builder()
-                .origin(Point.fromLngLat(.0, .0))
-                .destination(Point.fromLngLat(.0, .0))
-                .accessToken(accessToken)
-                .build()
-            )
+            .accessToken(accessToken)
             .voiceInstructions(true)
             .bannerInstructions(true)
             .enableRefresh(false)
-            .voiceUnits(context)
+            .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
 }

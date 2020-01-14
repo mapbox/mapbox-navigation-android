@@ -2,12 +2,11 @@ package com.mapbox.navigation.route.onboard.task
 
 import android.os.AsyncTask
 import com.google.gson.Gson
+import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
-import com.mapbox.navigation.base.route.dto.RouteResponseDto
-import com.mapbox.navigation.base.route.dto.mapToModel
-import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineRouteFoundCallback
 import com.mapbox.navigation.route.onboard.model.OfflineError
@@ -18,7 +17,7 @@ internal class OfflineRouteRetrievalTask(
     private val navigator: MapboxNativeNavigator,
     private val logger: Logger?,
     private val callback: OnOfflineRouteFoundCallback
-) : AsyncTask<String, Void, List<Route>>() {
+) : AsyncTask<String, Void, List<DirectionsRoute>>() {
 
     @Volatile
     private lateinit var routerResult: RouterResult
@@ -34,17 +33,17 @@ internal class OfflineRouteRetrievalTask(
         this.routerResult = routerResult
     }
 
-    override fun doInBackground(vararg params: String): List<Route>? {
+    override fun doInBackground(vararg params: String): List<DirectionsRoute>? {
         val url = params.first()
 
         synchronized(navigator) {
             routerResult = navigator.getRoute(url)
         }
 
-        return gson.fromJson(routerResult.json, RouteResponseDto::class.java)?.mapToModel()?.routes
+        return DirectionsResponse.fromJson(routerResult.json).routes()
     }
 
-    public override fun onPostExecute(offlineRoute: List<Route>?) {
+    public override fun onPostExecute(offlineRoute: List<DirectionsRoute>?) {
         if (!offlineRoute.isNullOrEmpty()) {
             callback.onRouteFound(offlineRoute)
         } else {

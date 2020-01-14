@@ -3,11 +3,11 @@ package com.mapbox.navigation.route.offboard
 import android.content.Context
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
-import com.mapbox.navigation.route.offboard.extension.mapToRoute
-import com.mapbox.navigation.route.offboard.router.NavigationOffboardRoute
+import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,16 +20,16 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
         const val ERROR_FETCHING_ROUTE = "Error fetching route"
     }
 
-    private var navigationRoute: NavigationOffboardRoute? = null
+    private var mapboxDirections: MapboxDirections? = null
 
     override fun getRoute(
-        routeOptions: RouteOptionsNavigation,
+        routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        navigationRoute = RouteBuilderProvider.getBuilder(accessToken, context)
+        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context)
             .routeOptions(routeOptions)
             .build()
-        navigationRoute?.getRoute(object : Callback<DirectionsResponse> {
+        mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
 
             override fun onResponse(
                 call: Call<DirectionsResponse>,
@@ -37,7 +37,7 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
             ) {
                 val routes = response.body()?.routes()
                 if (response.isSuccessful && !routes.isNullOrEmpty()) {
-                    callback.onResponse(routes.map { it.mapToRoute() })
+                    callback.onResponse(routes.map { it })
                 } else {
                     callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
                 }
@@ -50,7 +50,7 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
     }
 
     override fun cancel() {
-        navigationRoute?.cancelCall()
-        navigationRoute = null
+        mapboxDirections?.cancelCall()
+        mapboxDirections = null
     }
 }

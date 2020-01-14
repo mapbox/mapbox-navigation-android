@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -14,20 +15,18 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.examples.utils.extensions.mapToDirectionsRoute
+import com.mapbox.navigation.route.offboard.router.applyDefaultParams
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import java.io.File
 import kotlinx.android.synthetic.main.activity_mock_navigation.*
 import timber.log.Timber
+import java.io.File
 
 class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     MapboxMap.OnMapClickListener {
@@ -103,17 +102,20 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
 
                 val optionsBuilder =
-                    RouteOptionsNavigation.Builder()
+                    RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(this))
-                        .origin(origin)
-                        .destination(destination)
-                waypoint?.let { optionsBuilder.addWaypoint(it) }
+
+                val coordinates = mutableListOf<Point>()
+                coordinates.add(origin)
+                waypoint?.let { coordinates.add(it) }
+                coordinates.add(destination)
+
+                optionsBuilder.coordinates(coordinates)
 
                 onboardRouter.getRoute(optionsBuilder.build(), object : Router.Callback {
-                    override fun onResponse(routes: List<Route>) {
+                    override fun onResponse(routes: List<DirectionsRoute>) {
                         if (routes.isNotEmpty()) {
-                            route = routes[0].mapToDirectionsRoute()
-                            navigationMapRoute.addRoute(route)
+                            navigationMapRoute.addRoute(routes[0])
                         }
                     }
 
