@@ -33,10 +33,10 @@ internal class HttpClient(
 
     private val client: OkHttpClient by lazy {
         if (BuildConfig.DEBUG) {
-            val interceptor = HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
-                override fun log(message: String) {
-                    logger?.d(msg = Message(message))
-                }
+            val interceptor = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger { message ->
+                logger?.d(
+                    msg = Message(message)
+                )
             }).setLevel(HttpLoggingInterceptor.Level.BASIC)
 
             clientBuilder.addInterceptor(interceptor)

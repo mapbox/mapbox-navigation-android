@@ -2,55 +2,30 @@ package com.mapbox.navigation.navigator
 
 import android.location.Location
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.model.Route
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.navigator.model.RouterConfig
+import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
-import com.mapbox.navigator.TileEndpointConfiguration
+import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
+
+    private val navigator: Navigator = Navigator()
 
     init {
         System.loadLibrary("navigator-android")
     }
 
-    private val navigator: Navigator = Navigator()
+    // Route following
 
-    override fun configureRouter(routerConfig: RouterConfig, httpClient: HttpInterface, userAgent: String) {
-        navigator.configureRouter(
-            RouterParams(
-                routerConfig.tilePath,
-                routerConfig.inMemoryTileCache,
-                routerConfig.mapMatchingSpatialCache,
-                routerConfig.threadsCount,
-                routerConfig.endpointConfig?.let {
-                    TileEndpointConfiguration(
-                        it.host,
-                        it.version,
-                        it.token,
-                        userAgent,
-                        ""
-                    )
-                }),
-            httpClient
-        )
-    }
-
-    override fun updateLocation(rawLocation: Location) {
+    override fun updateLocation(rawLocation: Location): Boolean =
         navigator.updateLocation(rawLocation.toFixLocation())
-    }
-
-    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
-
-    override fun setRoute(route: Route) {
-        TODO("not implemented")
-    }
 
     override fun getStatus(date: Date): TripStatus {
         val status = navigator.getStatus(date)
@@ -59,6 +34,69 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             status.getRouteProgress()
         )
     }
+
+    // Routing
+
+    override fun setRoute(routeJson: String, routeIndex: Int, legIndex: Int): NavigationStatus =
+        navigator.setRoute(routeJson, routeIndex, legIndex)
+
+    override fun updateAnnotations(
+        legAnnotationJson: String,
+        routeIndex: Int,
+        legIndex: Int
+    ): Boolean = navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
+
+    override fun getBannerInstruction(index: Int): BannerInstruction? =
+        navigator.getBannerInstruction(index)
+
+    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? =
+        navigator.getRouteBufferGeoJson(gridSize, bufferDilation)
+
+    override fun updateLegIndex(routeIndex: Int, legIndex: Int): NavigationStatus =
+        navigator.changeRouteLeg(routeIndex, legIndex)
+
+    // Free Drive
+
+    override fun getElectronicHorizon(request: String): RouterResult =
+        navigator.getElectronicHorizon(request)
+
+    // Offline
+
+    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
+        navigator.configureRouter(routerParams, httpClient)
+
+    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
+
+    override fun unpackTiles(tarPath: String, destinationPath: String): Long =
+        navigator.unpackTiles(tarPath, destinationPath)
+
+    override fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long =
+        navigator.removeTiles(tilePath, southwest, northeast)
+
+    // History traces
+
+    override fun getHistory(): String = navigator.history
+
+    override fun toggleHistory(isEnabled: Boolean) {
+        navigator.toggleHistory(isEnabled)
+    }
+
+    override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
+        navigator.pushHistory(eventType, eventJsonProperties)
+    }
+
+    // Configuration
+
+    override fun getConfig(): NavigatorConfig = navigator.config
+
+    override fun setConfig(config: NavigatorConfig?) {
+        navigator.setConfig(config)
+    }
+
+    // Other
+
+    override fun getVoiceInstruction(index: Int): VoiceInstruction? =
+        navigator.getVoiceInstruction(index)
 
     private fun Location.toFixLocation() = FixLocation(
         Point.fromLngLat(this.longitude, this.latitude),
