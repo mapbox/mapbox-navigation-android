@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.HttpInterface
@@ -28,7 +29,7 @@ interface MapboxNativeNavigator {
     // Routing
 
     fun setRoute(
-        routeJson: String,
+        route: DirectionsRoute,
         routeIndex: Int = INDEX_FIRST_ROUTE,
         legIndex: Int = INDEX_FIRST_LEG
     ): NavigationStatus
