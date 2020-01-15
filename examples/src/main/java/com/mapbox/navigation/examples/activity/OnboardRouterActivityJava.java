@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -19,11 +20,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.route.model.Route;
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
-import com.mapbox.navigation.examples.utils.extensions.Mappers;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.route.onboard.model.Config;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -31,12 +29,16 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
+
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
+import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.coordinates;
 
 public class OnboardRouterActivityJava extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapClickListener {
@@ -119,19 +121,20 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
   }
 
   private void findRoute() {
-    RouteOptionsNavigation.Builder optionsBuilder = new RouteOptionsNavigation.Builder()
-            .accessToken(Utils.getMapboxAccessToken(this))
-            .origin(origin)
-            .destination(destination);
-    if (waypoint != null) {
-      optionsBuilder.addWaypoint(waypoint);
-    }
+    RouteOptions.Builder optionsBuilder =
+      applyDefaultParams(RouteOptions.builder())
+            .accessToken(Utils.getMapboxAccessToken(this));
+
+    List<Point> waypoints = new ArrayList<>();
+    waypoints.add(waypoint);
+
+    coordinates(optionsBuilder, origin, waypoints, destination);
+
     onboardRouter.getRoute(optionsBuilder.build(), new Router.Callback() {
       @Override
-      public void onResponse(@NotNull List<Route> routes) {
+      public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
         if (!routes.isEmpty()) {
-          route = Mappers.mapToDirectionsRoute(routes.get(0));
-          navigationMapRoute.addRoute(route);
+          navigationMapRoute.addRoute(routes.get(0));
         }
       }
 

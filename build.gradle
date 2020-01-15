@@ -41,7 +41,7 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven { url 'https://mapbox.bintray.com/mapbox' }
-//    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
 
   group = GROUP

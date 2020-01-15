@@ -1,6 +1,6 @@
 package com.mapbox.navigation.route.onboard
 
-import com.mapbox.navigation.base.route.model.Route
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.route.onboard.model.OfflineError
 
 /**
@@ -13,7 +13,7 @@ internal interface OnOfflineRouteFoundCallback {
      *
      * @param routes offline routes
      */
-    fun onRouteFound(routes: List<Route>)
+    fun onRouteFound(routes: List<DirectionsRoute>)
 
     /**
      * Called when there was an error fetching the offline route.

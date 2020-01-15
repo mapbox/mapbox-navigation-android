@@ -1,19 +1,19 @@
 package com.mapbox.navigation.base.route
 
-import com.mapbox.navigation.base.route.model.Route
-import com.mapbox.navigation.base.route.model.RouteOptionsNavigation
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 
 interface Router {
 
     fun getRoute(
-        routeOptions: RouteOptionsNavigation,
+        routeOptions: RouteOptions,
         callback: Callback
     )
 
     fun cancel()
 
     interface Callback {
-        fun onResponse(routes: List<Route>)
+        fun onResponse(routes: List<DirectionsRoute>)
 
         fun onFailure(throwable: Throwable)
     }
