@@ -37,11 +37,9 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
-class MapboxTripNotification internal constructor(
+class MapboxTripNotification constructor(
     private val applicationContext: Context,
-    private val distanceFormatter: DistanceFormatter,
-    navigationOptionsBuilder: NavigationOptions.Builder,
-    private val navigationNotificationProvider: NavigationNotificationProvider
+    private val navigationOptions: NavigationOptions
 ) : TripNotification {
     private var currentManeuverId = 0
     private var instructionText: String? = null
@@ -51,21 +49,11 @@ class MapboxTripNotification internal constructor(
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.eta_format)
+    private val navigationNotificationProvider = NavigationNotificationProvider
     private val notificationReceiver = NotificationActionReceiver()
-    private val navigationOptions: NavigationOptions = navigationOptionsBuilder.build()
+    private val distanceFormatter: DistanceFormatter = navigationOptions.distanceFormatter()
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
-
-    constructor(
-        applicationContext: Context,
-        distanceFormatter: DistanceFormatter
-    ) : this(applicationContext, distanceFormatter, NavigationOptions.Builder())
-
-    constructor(
-        applicationContext: Context,
-        distanceFormatter: DistanceFormatter,
-        navigationOptionsBuilder: NavigationOptions.Builder
-    ) : this(applicationContext, distanceFormatter, navigationOptionsBuilder, NavigationNotificationProvider)
 
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
@@ -325,8 +313,7 @@ class MapboxTripNotification internal constructor(
         return STEP_MANEUVER_MODIFIER_LEFT == drivingSide &&
             (STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
                 STEP_MANEUVER_TYPE_ROTARY == maneuverType ||
-                STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
-                )
+                STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier)
     }
 
     private fun onEndNavigationBtnClick() {
@@ -348,7 +335,8 @@ class MapboxTripNotification internal constructor(
 
     companion object {
         private var notificationActionButtonChannel = Channel<NotificationAction>(1)
-        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> = notificationActionButtonChannel
+        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> =
+            notificationActionButtonChannel
     }
 
     inner class NotificationActionReceiver : BroadcastReceiver() {

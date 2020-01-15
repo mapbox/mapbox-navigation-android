@@ -14,6 +14,7 @@ const val STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout"
 const val STEP_MANEUVER_TYPE_ROTARY = "rotary"
 const val STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn"
 const val STEP_MANEUVER_TYPE_NOTIFICATION = "notification"
+// TODO Why are these never used?
 const val STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT = "exit roundabout"
 const val STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary"
 

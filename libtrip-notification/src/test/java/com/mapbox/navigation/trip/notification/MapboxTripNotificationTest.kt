@@ -9,7 +9,6 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.text.format.DateFormat
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.trip.notification.utils.distance.MapboxDistanceFormatter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -21,9 +20,7 @@ import org.junit.Test
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
-    private val navigationOptionBuilder: NavigationOptions.Builder = mockk(relaxed = true)
-    private val distanceFormatter: MapboxDistanceFormatter = mockk()
-    private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
+    private val navigationOptions: NavigationOptions = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -32,9 +29,7 @@ class MapboxTripNotificationTest {
         val mockedContext = createContext()
         notification = MapboxTripNotification(
             mockedContext,
-            distanceFormatter,
-            navigationOptionBuilder,
-            navigationNotificationProvider
+            navigationOptions
         )
     }
 
