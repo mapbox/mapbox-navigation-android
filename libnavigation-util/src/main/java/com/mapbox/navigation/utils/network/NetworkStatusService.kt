@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.service
+package com.mapbox.navigation.utils.network
 
 import android.annotation.TargetApi
 import android.content.BroadcastReceiver
@@ -15,7 +15,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 
 data class NetworkStatus(val isNetworkAvailable: Boolean)
 
-class NetworkStatusService(private val applicationContext: Context) {
+class NetworkStatusService(applicationContext: Context) {
 
     private val connectivityManager: ConnectivityManager = applicationContext
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
