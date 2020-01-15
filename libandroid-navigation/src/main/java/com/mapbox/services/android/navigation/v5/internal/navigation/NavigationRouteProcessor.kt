@@ -1,12 +1,20 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
+import com.mapbox.api.directions.v5.models.BannerComponents
+import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
+import com.mapbox.navigator.BannerComponent
+import com.mapbox.navigator.BannerInstruction
+import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.services.android.navigation.v5.routeprogress.CurrentLegAnnotation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgressStateMap
@@ -153,7 +161,7 @@ internal class NavigationRouteProcessor {
         progressBuilder: RouteProgress.Builder
     ) {
         val voiceInstruction = status.voiceInstruction
-        progressBuilder.voiceInstruction(voiceInstruction)
+        progressBuilder.voiceInstruction(voiceInstruction?.mapToDirectionsApi())
     }
 
     private fun addBannerInstructions(
@@ -165,6 +173,55 @@ internal class NavigationRouteProcessor {
         if (status.routeState == RouteState.INITIALIZED) {
             bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION)
         }
-        progressBuilder.bannerInstruction(bannerInstruction)
+        currentStep?.let {
+            progressBuilder.bannerInstruction(bannerInstruction?.mapToDirectionsApi(it))
+        }
+    }
+
+    private fun BannerInstruction.mapToDirectionsApi(currentStep: LegStep): BannerInstructions {
+        return BannerInstructions.builder()
+            .distanceAlongGeometry(this.remainingStepDistance.toDouble())
+            .primary(this.primary.mapToDirectionsApi())
+            .secondary(this.secondary?.mapToDirectionsApi())
+            .sub(this.sub?.mapToDirectionsApi())
+            .view(currentStep.bannerInstructions()?.get(this.index)?.view())
+            .build()
+    }
+
+    private fun BannerSection.mapToDirectionsApi(): BannerText {
+        return BannerText.builder()
+            .components(this.components?.mapToDirectionsApi())
+            .degrees(this.degrees?.toDouble())
+            .drivingSide(this.drivingSide)
+            .modifier(this.modifier)
+            .text(this.text)
+            .type(this.type)
+            .build()
+    }
+
+    private fun MutableList<BannerComponent>.mapToDirectionsApi(): MutableList<BannerComponents>? {
+        val components = mutableListOf<BannerComponents>()
+        this.forEach {
+            components.add(
+                BannerComponents.builder()
+                    .abbreviation(it.abbr)
+                    .abbreviationPriority(it.abbrPriority)
+                    .active(it.active)
+                    .directions(it.directions)
+                    .imageBaseUrl(it.imageBaseurl)
+                    .text(it.text)
+                    .type(it.type)
+                    .build()
+            )
+        }
+        return components
+    }
+
+    private fun VoiceInstruction.mapToDirectionsApi(): VoiceInstructions? {
+        return VoiceInstructions.builder()
+            .announcement(this.announcement)
+            .distanceAlongGeometry(this.remainingStepDistance.toDouble())
+            .ssmlAnnouncement(this.ssmlAnnouncement)
+            .build()
     }
 }

@@ -1,12 +1,8 @@
 package com.mapbox.services.android.navigation.v5.milestone
 
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.BannerText
-import com.mapbox.navigator.BannerSection
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
-import java.util.ArrayList
 
 /**
  * A default milestone that is added to [com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation]
@@ -36,45 +32,11 @@ private constructor(
 
     private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean =
         ifNonNull(
-            routeProgress.bannerInstruction(),
-            retrieveBannerFrom(routeProgress.bannerInstruction()?.primary)
-        ) { currentBannerInstruction, primaryBannerText ->
-            val secondaryBannerText: BannerText? = retrieveBannerFrom(currentBannerInstruction.secondary)
-            val subBannerText: BannerText? = retrieveBannerFrom(currentBannerInstruction.sub)
-            this.bannerInstructions = BannerInstructions.builder()
-                .primary(primaryBannerText)
-                .secondary(secondaryBannerText)
-                .sub(subBannerText)
-                .distanceAlongGeometry(currentBannerInstruction.remainingStepDistance.toDouble())
-                .build()
+            routeProgress.bannerInstruction()
+        ) {
+            this.bannerInstructions = routeProgress.bannerInstruction()
             true
         } ?: false
-
-    private fun retrieveBannerFrom(bannerSection: BannerSection?): BannerText? =
-        bannerSection?.components?.let { currentComponents ->
-            val primaryComponents = ArrayList<BannerComponents>()
-            currentComponents.forEach {
-                primaryComponents.add(
-                    BannerComponents.builder()
-                        .text(it.text)
-                        .type(it.type)
-                        .abbreviation(it.abbr)
-                        .abbreviationPriority(it.abbrPriority)
-                        .imageBaseUrl(it.imageBaseurl)
-                        .directions(it.directions)
-                        .active(it.active)
-                        .build()
-                )
-            }
-            BannerText.builder()
-                .type(bannerSection.type)
-                .modifier(bannerSection.modifier)
-                .degrees(bannerSection.degrees?.toDouble())
-                .drivingSide(bannerSection.drivingSide)
-                .text(bannerSection.text)
-                ?.components(primaryComponents)
-                ?.build()
-        }
 
     class Builder : Milestone.Builder() {
 
