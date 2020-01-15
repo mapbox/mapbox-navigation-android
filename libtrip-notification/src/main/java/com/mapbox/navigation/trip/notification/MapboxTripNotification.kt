@@ -56,6 +56,17 @@ class MapboxTripNotification internal constructor(
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
+    constructor(
+        applicationContext: Context,
+        distanceFormatter: DistanceFormatter
+    ) : this(applicationContext, distanceFormatter, NavigationOptions.Builder())
+
+    constructor(
+        applicationContext: Context,
+        distanceFormatter: DistanceFormatter,
+        navigationOptionsBuilder: NavigationOptions.Builder
+    ) : this(applicationContext, distanceFormatter, navigationOptionsBuilder, NavigationNotificationProvider)
+
     init {
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
             ?.let { notificationService ->

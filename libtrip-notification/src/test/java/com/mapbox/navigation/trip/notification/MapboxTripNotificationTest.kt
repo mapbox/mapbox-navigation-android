@@ -8,8 +8,8 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.text.format.DateFormat
-import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.trip.notification.utils.distance.MapboxDistanceFormatter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -22,7 +22,7 @@ class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
     private val navigationOptionBuilder: NavigationOptions.Builder = mockk(relaxed = true)
-    private val distanceFormatter: DistanceFormatter = mockk()
+    private val distanceFormatter: MapboxDistanceFormatter = mockk()
     private val navigationNotificationProvider: NavigationNotificationProvider = mockk()
 
     @Before
@@ -60,9 +60,28 @@ class MapboxTripNotificationTest {
         val notificationManager = mockk<NotificationManager>(relaxed = true)
         every { mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns (notificationManager)
         every { DateFormat.is24HourFormat(mockedContext) } returns (false)
-        every { PendingIntent.getActivity(mockedContext, any(), any(), any()) } returns (mockPendingIntentForActivity)
-        every { PendingIntent.getBroadcast(mockedContext, any(), any(), any()) } returns (mockPendingIntentForBroadcast)
-        every { mockedContext.registerReceiver(any(), any()) } returns (mockedBroadcastReceiverIntent)
+        every {
+            PendingIntent.getActivity(
+                mockedContext,
+                any(),
+                any(),
+                any()
+            )
+        } returns (mockPendingIntentForActivity)
+        every {
+            PendingIntent.getBroadcast(
+                mockedContext,
+                any(),
+                any(),
+                any()
+            )
+        } returns (mockPendingIntentForBroadcast)
+        every {
+            mockedContext.registerReceiver(
+                any(),
+                any()
+            )
+        } returns (mockedBroadcastReceiverIntent)
         return mockedContext
     }
 }
