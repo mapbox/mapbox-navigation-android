@@ -219,6 +219,19 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                         currentStep.distance().toFloat() - remainingStepDistance
                     stepProgressBuilder.distanceTraveled(distanceTraveled)
                     stepProgressBuilder.fractionTraveled(distanceTraveled / currentStep.distance().toFloat())
+
+                    routeState.convertState()?.also {
+                        routeProgressBuilder.currentState(it)
+
+                        var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
+                        if (it == RouteProgressState.ROUTE_INITIALIZED) {
+                            bannerInstructions =
+                                getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi(
+                                    currentStep
+                                )
+                        }
+                        routeProgressBuilder.bannerInstructions(bannerInstructions)
+                    }
                 }
 
                 if (upcomingStepIndex < steps.size) {
@@ -247,17 +260,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
         routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
 
-        routeState.convertState()?.also {
-            routeProgressBuilder.currentState(it)
-
-            var bannerInstructions = bannerInstruction?.mapToDirectionsApi()
-            if (it == RouteProgressState.ROUTE_INITIALIZED) {
-                bannerInstructions =
-                    getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi()
-            }
-            routeProgressBuilder.bannerInstructions(bannerInstructions)
-        }
-
         routeProgressBuilder.inTunnel(inTunnel)
         routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
 
@@ -266,13 +268,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         return routeProgressBuilder.build()
     }
 
-    private fun BannerInstruction.mapToDirectionsApi(): BannerInstructions {
+    private fun BannerInstruction.mapToDirectionsApi(currentStep: LegStep): BannerInstructions {
         return BannerInstructions.builder()
             .distanceAlongGeometry(this.remainingStepDistance.toDouble())
             .primary(this.primary.mapToDirectionsApi())
             .secondary(this.secondary?.mapToDirectionsApi())
             .sub(this.sub?.mapToDirectionsApi())
-            .view(null)
+            .view(currentStep.bannerInstructions()?.get(this.index)?.view())
             .build()
     }
 
