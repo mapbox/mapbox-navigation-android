@@ -331,6 +331,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   @Override
   public void updateWayNameVisibility(boolean isVisible) {
+    if (wayNameView.retrieveWayNameText().isEmpty()) {
+      isVisible = false;
+    }
     wayNameView.updateVisibility(isVisible);
     if (navigationMap != null) {
       navigationMap.updateWaynameQueryMap(isVisible);
