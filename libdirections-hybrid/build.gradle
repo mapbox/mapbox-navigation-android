@@ -28,6 +28,7 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.junit
