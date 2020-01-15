@@ -24,9 +24,10 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     // Unit testing
-    testImplementation dependenciesList.junit
+    implementation dependenciesList.junit
     testImplementation dependenciesList.mockito // deprecated
     testImplementation dependenciesList.mockk
+    api dependenciesList.coroutinesTestAndroid
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

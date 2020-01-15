@@ -29,6 +29,8 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.supportAnnotation
 
+    implementation dependenciesList.coroutinesAndroid
+
     //networks
     implementation dependenciesList.okhttp
     implementation dependenciesList.okhttpInterceptor
