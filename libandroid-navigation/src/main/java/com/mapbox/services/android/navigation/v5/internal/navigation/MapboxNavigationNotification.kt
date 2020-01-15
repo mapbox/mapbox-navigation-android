@@ -16,8 +16,8 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.navigator.BannerInstruction
 import com.mapbox.services.android.navigation.R
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
@@ -247,13 +247,13 @@ internal class MapboxNavigationNotification : NavigationNotification {
         notificationManager?.cancel(NavigationConstants.NAVIGATION_NOTIFICATION_ID)
     }
 
-    private fun updateInstructionText(bannerInstruction: BannerInstruction?) {
+    private fun updateInstructionText(bannerInstruction: BannerInstructions?) {
         if (bannerInstruction != null && (instructionText == null || newInstructionText(
                 bannerInstruction
             ))
         ) {
-            updateViewsWithInstruction(bannerInstruction.primary.text)
-            instructionText = bannerInstruction.primary.text
+            updateViewsWithInstruction(bannerInstruction.primary().text())
+            instructionText = bannerInstruction.primary().text()
         }
     }
 
@@ -262,8 +262,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationInstructionText, text)
     }
 
-    private fun newInstructionText(bannerInstruction: BannerInstruction): Boolean {
-        return instructionText != bannerInstruction.primary.text
+    private fun newInstructionText(bannerInstruction: BannerInstructions): Boolean {
+        return instructionText != bannerInstruction.primary().text()
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {

@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.v5.routeprogress
 
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.navigator.BannerInstruction
-import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
 
 /**
@@ -31,8 +31,8 @@ data class RouteProgress internal constructor(
     var currentStepPoints: List<Point>? = null,
     var upcomingStepPoints: List<Point>? = null,
     var inTunnel: Boolean? = null,
-    var voiceInstruction: VoiceInstruction? = null,
-    var bannerInstruction: BannerInstruction? = null,
+    var voiceInstruction: VoiceInstructions? = null,
+    var bannerInstruction: BannerInstructions? = null,
     var currentState: RouteProgressState? = null,
     var routeGeometryWithBuffer: Geometry? = null,
     var currentStep: LegStep? = null,
@@ -233,8 +233,8 @@ data class RouteProgress internal constructor(
         private var currentStepPoints: List<Point>? = null
         private var upcomingStepPoints: List<Point>? = null
         private var inTunnel: Boolean? = null
-        private var voiceInstruction: VoiceInstruction? = null
-        private var bannerInstruction: BannerInstruction? = null
+        private var voiceInstruction: VoiceInstructions? = null
+        private var bannerInstruction: BannerInstructions? = null
         private var currentState: RouteProgressState? = null
         private var routeGeometryWithBuffer: Geometry? = null
         private var currentStep: LegStep? = null
@@ -260,10 +260,10 @@ data class RouteProgress internal constructor(
             apply { this.upcomingStepPoints = upcomingStepPoints }
 
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
-        fun voiceInstruction(voiceInstruction: VoiceInstruction?) =
+        fun voiceInstruction(voiceInstruction: VoiceInstructions?) =
             apply { this.voiceInstruction = voiceInstruction }
 
-        fun bannerInstruction(bannerInstruction: BannerInstruction?) =
+        fun bannerInstruction(bannerInstruction: BannerInstructions?) =
             apply { this.bannerInstruction = bannerInstruction }
 
         fun currentState(currentState: RouteProgressState?) =
