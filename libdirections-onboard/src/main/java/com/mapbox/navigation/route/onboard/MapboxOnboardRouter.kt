@@ -5,11 +5,11 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.logger.Logger
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.route.onboard.model.OfflineError
 import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
@@ -26,7 +26,7 @@ class MapboxOnboardRouter : Router {
     }
 
     private val navigatorNative: MapboxNativeNavigator
-    private val config: Config
+    private val config: MapboxOnboardRouterConfig
     private val logger: Logger?
 
     /**
@@ -35,7 +35,7 @@ class MapboxOnboardRouter : Router {
      *
      * @param config offline config
      */
-    constructor(config: Config, logger: Logger?) {
+    constructor(config: MapboxOnboardRouterConfig, logger: Logger?) {
         val tileDir = File(config.tilePath, TILES_DIR_NAME)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
@@ -65,7 +65,7 @@ class MapboxOnboardRouter : Router {
     // Package private for testing purposes
     internal constructor(
         navigator: MapboxNativeNavigator,
-        config: Config
+        config: MapboxOnboardRouterConfig
     ) {
         this.navigatorNative = navigator
         this.config = config

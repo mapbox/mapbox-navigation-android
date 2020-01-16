@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard.model
+package com.mapbox.navigation.base.options
 
 data class Endpoint(
     val host: String,
