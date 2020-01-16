@@ -25,13 +25,17 @@ fun String.convertToListOfDoubles(separator: Char = ';'): List<Double>? =
 fun String.convertToListOfPairsOfDoubles(
     firstSeparator: Char = ';',
     secondSeparator: Char = ','
-): List<Pair<Double, Double>>? =
+): List<Pair<Double, Double>?>? =
     try {
         val pairs = split(firstSeparator)
-        val result = mutableListOf<Pair<Double, Double>>()
+        val result = mutableListOf<Pair<Double, Double>?>()
         pairs.forEach { pair ->
             val parts = pair.split(secondSeparator)
-            result.add(Pair(parts[0].toDouble(), parts[1].toDouble()))
+            if (parts.size == 1) {
+                result.add(null)
+            } else {
+                result.add(Pair(parts[0].toDouble(), parts[1].toDouble()))
+            }
         }
         result.toList()
     } catch (e: Exception) {
@@ -63,7 +67,7 @@ fun parseWaypointTargets(waypointTargets: String): Array<Point?> {
             waypoints[index++] = null
         } else {
             val longitude = point[0].toDouble()
-            val latitude = point[0].toDouble()
+            val latitude = point[1].toDouble()
             waypoints[index++] = Point.fromLngLat(longitude, latitude)
         }
     }
@@ -95,19 +99,15 @@ fun RouteOptions.Builder.coordinates(
     return this
 }
 
-fun RouteOptions.Builder.bearings(vararg doubles: Double): RouteOptions.Builder {
+fun RouteOptions.Builder.bearings(vararg pairs: Pair<Double, Double>?): RouteOptions.Builder {
     val builder = StringBuilder()
-    doubles.forEachIndexed { index, d ->
-        when {
-            index % 2 == 0 -> {
-                builder.append("$d,")
-            }
-            index == doubles.size - 1 -> {
-                builder.append("$d")
-            }
-            else -> {
-                builder.append("$d;")
-            }
+    pairs.forEachIndexed { index, pair ->
+        if (pair != null) {
+            builder.append("${pair.first},${pair.second}")
+        }
+
+        if (index != pairs.size - 1) {
+            builder.append(";")
         }
     }
 

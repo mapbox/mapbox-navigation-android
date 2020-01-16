@@ -170,14 +170,14 @@ class NavigationRouteTest {
                         origin = Point.fromLngLat(1.0, 2.0),
                         destination = Point.fromLngLat(1.0, 5.0)
                     )
-                    .bearings(90.0, 90.0, 1.0, 5.0)
+                    .bearings(Pair(90.0, 90.0), null)
                     .build()
             )
             .build()
 
         val requestUrl = navigationRoute.cloneCall().request().url().toString()
 
-        assertThat(requestUrl, containsString("bearings=90%2C90%3B1%2C5"))
+        assertThat(requestUrl, containsString("bearings=90%2C90"))
     }
 
     @Test
@@ -191,7 +191,7 @@ class NavigationRouteTest {
                         listOf(Point.fromLngLat(3.0, 4.0), Point.fromLngLat(5.0, 6.0)),
                         Point.fromLngLat(7.0, 8.0)
                     )
-                    .bearings(10.0, 10.0, 20.0, 20.0, 30.0, 30.0, 40.0, 40.0)
+                    .bearings(Pair(10.0, 10.0), Pair(20.0, 20.0), Pair(30.0, 30.0), Pair(40.0, 40.0))
                     .build()
             )
             .build()
