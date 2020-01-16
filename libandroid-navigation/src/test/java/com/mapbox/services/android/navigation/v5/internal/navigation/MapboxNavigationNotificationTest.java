@@ -9,10 +9,10 @@ import android.content.res.Resources;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mapbox.api.directions.v5.DirectionsAdapterFactory;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigator.BannerInstruction;
-import com.mapbox.navigator.BannerSection;
 import com.mapbox.services.android.navigation.v5.BaseTest;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
@@ -86,8 +86,13 @@ public class MapboxNavigationNotificationTest extends BaseTest {
     MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
       mockedMapboxNavigation, mockedNotification);
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    BannerSection aBannerSection = new BannerSection("You have arrived", null, null, null, null, null);
-    BannerInstruction aBannerInstruction = new BannerInstruction(aBannerSection, null, null, 0.1f, 3);
+    BannerText aBannerSection = BannerText.builder()
+            .text("You have arrived")
+            .build();
+    BannerInstructions aBannerInstruction = BannerInstructions.builder()
+            .primary(aBannerSection)
+            .distanceAlongGeometry(0.1f)
+            .build();
     routeProgress = routeProgress.toBuilder().bannerInstruction(aBannerInstruction).build();
 
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
@@ -103,13 +108,23 @@ public class MapboxNavigationNotificationTest extends BaseTest {
     MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
       mockedMapboxNavigation, mockedNotification);
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    BannerSection willArriveBannerSection = new BannerSection("You will arrive", null, null, null, null, null);
-    BannerInstruction willArriveBannerInstruction = new BannerInstruction(willArriveBannerSection, null, null, 0.1f, 3);
+    BannerText willArriveBannerSection = BannerText.builder()
+            .text("You will arrive")
+            .build();
+    BannerInstructions willArriveBannerInstruction = BannerInstructions.builder()
+            .primary(willArriveBannerSection)
+            .distanceAlongGeometry(0.1f)
+            .build();
     routeProgress = routeProgress.toBuilder().bannerInstruction(willArriveBannerInstruction).build();
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
     assertEquals("You will arrive", mapboxNavigationNotification.retrieveInstructionText());
-    BannerSection haveArrivedBannerSection = new BannerSection("You have arrived", null, null, null, null, null);
-    BannerInstruction haveArrivedBannerInstruction = new BannerInstruction(haveArrivedBannerSection, null, null, 0.1f, 3);
+    BannerText haveArrivedBannerSection = BannerText.builder()
+            .text("You have arrived")
+            .build();
+    BannerInstructions haveArrivedBannerInstruction = BannerInstructions.builder()
+            .primary(haveArrivedBannerSection)
+            .distanceAlongGeometry(0.1f)
+            .build();
     routeProgress = routeProgress.toBuilder().bannerInstruction(haveArrivedBannerInstruction).build();
 
     mapboxNavigationNotification.updateNotificationViews(routeProgress);

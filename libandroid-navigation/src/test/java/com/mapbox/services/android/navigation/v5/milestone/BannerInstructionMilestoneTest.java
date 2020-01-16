@@ -1,5 +1,8 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
+import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.navigator.BannerComponent;
 import com.mapbox.navigator.BannerInstruction;
 import com.mapbox.navigator.BannerSection;
@@ -21,7 +24,7 @@ public class BannerInstructionMilestoneTest extends BaseTest {
   @Test
   public void checksNotBannerShownIfBannerInstructionIsNull() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    BannerInstruction nullBannerInstruction = null;
+    BannerInstructions nullBannerInstruction = null;
     routeProgress = add(nullBannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
@@ -33,10 +36,10 @@ public class BannerInstructionMilestoneTest extends BaseTest {
   @Test
   public void checksBannerShownIfBannerInstructionIsNotNull() throws Exception {
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
-    BannerSection bannerSection = mock(BannerSection.class);
-    when(bannerSection.getText()).thenReturn("mock text");
-    BannerInstruction bannerInstruction =
-      buildEmptyBannerInstructionWithPrimary(bannerSection);
+    BannerText bannerText = mock(BannerText.class);
+    when(bannerText.text()).thenReturn("mock text");
+    BannerInstructions bannerInstruction =
+      buildEmptyBannerInstructionWithPrimary(bannerText);
     routeProgress = add(bannerInstruction, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
@@ -52,30 +55,46 @@ public class BannerInstructionMilestoneTest extends BaseTest {
     boolean isActive = true;
     ArrayList<String> anyDirections = new ArrayList<>();
     anyDirections.add("a direction");
-    BannerComponent aComponent = new BannerComponent("a type", "a text", "an abbr", anAbbrPriority,
-      "an image base url", isActive, anyDirections);
-    ArrayList<BannerComponent> components = new ArrayList<>();
+    BannerComponents aComponent = BannerComponents.builder()
+            .type("a type")
+            .text("a text")
+            .abbreviation("an abbr")
+            .abbreviationPriority(anAbbrPriority)
+            .imageBaseUrl("an image base url")
+            .active(isActive)
+            .directions(anyDirections)
+            .build();
+    ArrayList<BannerComponents> components = new ArrayList<>();
     components.add(aComponent);
-    BannerSection sectionWithComponents = new BannerSection("a text", "a type", "a modifier", 60, "a driving side",
-      components);
-    BannerInstruction emptyBannerInstruction = buildEmptyBannerInstructionWithPrimary(sectionWithComponents);
-    routeProgress = add(emptyBannerInstruction, routeProgress);
+    BannerText sectionWithComponents = BannerText.builder()
+            .text("a text")
+            .type("a type")
+            .modifier("a modifier")
+            .degrees(60.0)
+            .drivingSide("a driving side")
+            .components(components)
+            .build();
+    BannerInstructions emptyBannerInstructions = buildEmptyBannerInstructionWithPrimary(sectionWithComponents);
+    routeProgress = add(emptyBannerInstructions, routeProgress);
     BannerInstructionMilestone milestone = buildBannerInstructionMilestone();
 
     boolean isOccurring = milestone.isOccurring(routeProgress, routeProgress);
 
     assertTrue(isOccurring);
-    assertEquals(1, routeProgress.bannerInstruction().getPrimary().getComponents().size());
+    assertEquals(1, routeProgress.bannerInstruction().primary().components().size());
   }
 
-  private RouteProgress add(BannerInstruction bannerInstruction, RouteProgress routeProgress) {
+  private RouteProgress add(BannerInstructions bannerInstructions, RouteProgress routeProgress) {
     return routeProgress.toBuilder()
-      .bannerInstruction(bannerInstruction)
+      .bannerInstruction(bannerInstructions)
       .build();
   }
 
-  private BannerInstruction buildEmptyBannerInstructionWithPrimary(BannerSection section) {
-    return new BannerInstruction(section, null, null, -1, -1);
+  private BannerInstructions buildEmptyBannerInstructionWithPrimary(BannerText text) {
+    return BannerInstructions.builder()
+            .primary(text)
+            .distanceAlongGeometry(0.3f)
+            .build();
   }
 
   private BannerInstructionMilestone buildBannerInstructionMilestone() {
