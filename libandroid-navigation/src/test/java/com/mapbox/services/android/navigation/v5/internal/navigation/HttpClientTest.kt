@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -45,7 +46,7 @@ class HttpClientTest {
         val response = httpClient.executeMockRequest()
 
         assertEquals(HttpCode.SUCCESS.name, response.code.name)
-        assertEquals(SUCCESS_BODY.toByteArray().toList(), response.bytes)
+        assertArrayEquals(SUCCESS_BODY.toByteArray(), response.bytes)
     }
 
     @Test
@@ -55,7 +56,7 @@ class HttpClientTest {
         val response = httpClient.executeMockRequest()
 
         assertEquals(HttpCode.FAILURE.name, response.code.name)
-        assertEquals(FAILURE_BODY.toByteArray().toList(), response.bytes)
+        assertArrayEquals(FAILURE_BODY.toByteArray(), response.bytes)
     }
 
     @Test

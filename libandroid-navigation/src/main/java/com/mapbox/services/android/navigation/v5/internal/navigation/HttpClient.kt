@@ -6,6 +6,7 @@ import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
 import com.mapbox.services.android.navigation.BuildConfig
 import java.io.ByteArrayOutputStream
+import java.lang.IllegalArgumentException
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -51,9 +52,13 @@ internal class HttpClient(
     }
 
     override fun get(url: String): HttpResponse {
-        val requestBuilder = Request.Builder()
-            .addHeader(HEADER_USER_AGENT, userAgent)
-            .url(url)
+        val requestBuilder = try {
+            Request.Builder()
+                .addHeader(HEADER_USER_AGENT, userAgent)
+                .url(url)
+        } catch (e: IllegalArgumentException) {
+            return HttpResponse(ByteArray(0), HttpCode.FAILURE)
+        }
 
         if (acceptGzipEncoding) {
             requestBuilder.addHeader(HEADER_ENCODING, GZIP)
@@ -69,8 +74,7 @@ internal class HttpClient(
                 sink.close()
             }
 
-            // FIXME core should receive Array, not List. It is List now because of bindgen
-            val bytes = outputStream.toByteArray().toList()
+            val bytes = outputStream.toByteArray()
             outputStream.close()
 
             return HttpResponse(bytes, result)
