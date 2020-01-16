@@ -34,7 +34,7 @@ private constructor(
         ifNonNull(
             routeProgress.bannerInstruction()
         ) {
-            this.bannerInstructions = routeProgress.bannerInstruction()
+            this.bannerInstructions = it
             true
         } ?: false
 

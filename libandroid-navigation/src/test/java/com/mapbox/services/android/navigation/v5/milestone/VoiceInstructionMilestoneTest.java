@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.milestone;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.navigator.VoiceInstruction;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -25,10 +26,10 @@ public class VoiceInstructionMilestoneTest {
   @Test
   public void onSameInstructionOccurring_milestoneDoesNotTriggerTwice() {
     RouteProgress firstProgress = mock(RouteProgress.class);
-    VoiceInstruction voiceInstruction = mock(VoiceInstruction.class);
-    when(voiceInstruction.getSsmlAnnouncement()).thenReturn("current SSML announcement");
-    when(firstProgress.voiceInstruction()).thenReturn(voiceInstruction, null);
-    when(voiceInstruction.getAnnouncement()).thenReturn("instruction");
+    VoiceInstructions voiceInstructions = mock(VoiceInstructions.class);
+    when(voiceInstructions.ssmlAnnouncement()).thenReturn("current SSML announcement");
+    when(firstProgress.voiceInstruction()).thenReturn(voiceInstructions, null);
+    when(voiceInstructions.announcement()).thenReturn("instruction");
     when(firstProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
@@ -42,9 +43,9 @@ public class VoiceInstructionMilestoneTest {
   public void onOccurringMilestone_voiceSsmlInstructionsAreReturned() {
     RouteProgress routeProgress = mock(RouteProgress.class, RETURNS_DEEP_STUBS);
     when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
-    when(routeProgress.voiceInstruction().getAnnouncement()).thenReturn("current announcement");
+    when(routeProgress.voiceInstruction().announcement()).thenReturn("current announcement");
     String currentSsmlAnnouncement = "current SSML announcement";
-    when(routeProgress.voiceInstruction().getSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
+    when(routeProgress.voiceInstruction().ssmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
@@ -57,9 +58,9 @@ public class VoiceInstructionMilestoneTest {
     RouteProgress routeProgress = mock(RouteProgress.class, RETURNS_DEEP_STUBS);
     when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
     String currentAnnouncement = "current announcement";
-    when(routeProgress.voiceInstruction().getAnnouncement()).thenReturn(currentAnnouncement);
+    when(routeProgress.voiceInstruction().announcement()).thenReturn(currentAnnouncement);
     String currentSsmlAnnouncement = "current SSML announcement";
-    when(routeProgress.voiceInstruction().getSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
+    when(routeProgress.voiceInstruction().ssmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
@@ -72,9 +73,9 @@ public class VoiceInstructionMilestoneTest {
     RouteProgress routeProgress = mock(RouteProgress.class, RETURNS_DEEP_STUBS);
     when(routeProgress.directionsRoute()).thenReturn(mock(DirectionsRoute.class));
     String currentAnnouncement = "current announcement";
-    when(routeProgress.voiceInstruction().getAnnouncement()).thenReturn(currentAnnouncement);
+    when(routeProgress.voiceInstruction().announcement()).thenReturn(currentAnnouncement);
     String currentSsmlAnnouncement = "current SSML announcement";
-    when(routeProgress.voiceInstruction().getSsmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
+    when(routeProgress.voiceInstruction().ssmlAnnouncement()).thenReturn(currentSsmlAnnouncement);
     VoiceInstructionMilestone milestone = buildVoiceInstructionMilestone();
 
     milestone.isOccurring(routeProgress, routeProgress);
