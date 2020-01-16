@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.tests
+package com.mapbox.navigation.route.onboard
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

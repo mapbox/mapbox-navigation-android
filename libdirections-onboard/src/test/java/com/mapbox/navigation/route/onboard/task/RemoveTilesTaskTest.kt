@@ -2,9 +2,9 @@ package com.mapbox.navigation.route.onboard.task
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.route.onboard.MainCoroutineRule
 import com.mapbox.navigation.route.onboard.OnOfflineTilesRemovedCallback
-import com.mapbox.navigation.utils.tests.MainCoroutineRule
-import com.mapbox.navigation.utils.tests.runBlockingTest
+import com.mapbox.navigation.route.onboard.runBlockingTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

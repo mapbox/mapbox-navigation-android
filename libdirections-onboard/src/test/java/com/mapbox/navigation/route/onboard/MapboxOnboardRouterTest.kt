@@ -12,8 +12,6 @@ import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.utils.exceptions.NavigationException
-import com.mapbox.navigation.utils.tests.MainCoroutineRule
-import com.mapbox.navigation.utils.tests.runBlockingTest
 import com.mapbox.navigator.RouterResult
 import io.mockk.every
 import io.mockk.mockk
@@ -39,11 +37,11 @@ class MapboxOnboardRouterTest {
 
     private lateinit var onboardRouter: MapboxOnboardRouter
 
-    private val navigator: MapboxNativeNavigator = mockk(relaxed = true)
-    private val logger: Logger = mockk(relaxed = true)
-    private val routerCallback: Router.Callback = mockk(relaxed = true)
-    private val routerResultSuccess: RouterResult = mockk(relaxed = true)
-    private val routerResultFailure: RouterResult = mockk(relaxed = true)
+    private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
+    private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
+    private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
+    private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
 
     @Before
