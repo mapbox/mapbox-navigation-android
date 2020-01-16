@@ -10,7 +10,7 @@ class NavigationOptions private constructor(
     @RoundingIncrement private val roundingIncrement: Int,
     @TimeFormatType private val timeFormatType: Int,
     private val distanceFormatter: DistanceFormatter?,
-    private val onboardRouterConfig: MapboxOnboardRouterConfig
+    private val onboardRouterConfig: MapboxOnboardRouterConfig?
 ) {
 
     fun roundingIncrement() = roundingIncrement
@@ -24,8 +24,8 @@ class NavigationOptions private constructor(
     data class Builder(
         private var timeFormatType: Int = NONE_SPECIFIED,
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
-        private var distanceFormatter: DistanceFormatter?,
-        private var onboardRouterConfig: MapboxOnboardRouterConfig
+        private var distanceFormatter: DistanceFormatter? = null,
+        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
     ) {
 
         fun roundingIncrement(roundingIncrement: Int) =
