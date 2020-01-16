@@ -3,6 +3,7 @@ package com.mapbox.navigation.utils.timer
 import android.os.CountDownTimer
 import com.mapbox.navigation.utils.thread.ThreadController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
@@ -23,11 +24,20 @@ class MapboxTimer(
     private lateinit var timer: CountDownTimer
     private val mainControllerJobScope = ThreadController.getMainScopeAndRootJob()
 
-    init {
+    fun start() {
         mainControllerJobScope.scope.launch {
-            startCountdownTimer()
-            delay(restartAfter)
+            while(isActive) {
+                startCountdownTimer()
+                delay(restartAfter)
+            }
         }
+    }
+
+    fun stop() {
+        if (::timer.isInitialized) {
+            timer.cancel()
+        }
+        mainControllerJobScope.job.cancel()
     }
 
     private fun startCountdownTimer() {
@@ -42,11 +52,5 @@ class MapboxTimer(
             }
         }
         timer.start()
-    }
-
-    fun stopCountDownTimer() {
-        if (::timer.isInitialized) {
-            timer.cancel()
-        }
     }
 }
