@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.typedef.TimeFormatType
 class NavigationOptions private constructor(
     @RoundingIncrement private val roundingIncrement: Int,
     @TimeFormatType private val timeFormatType: Int,
-    private val distanceFormatter: DistanceFormatter
+    private val distanceFormatter: DistanceFormatter?
 ) {
 
     fun roundingIncrement() = roundingIncrement
@@ -21,7 +21,7 @@ class NavigationOptions private constructor(
     data class Builder(
         private var timeFormatType: Int = NONE_SPECIFIED,
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
-        private var distanceFormatter: DistanceFormatter
+        private var distanceFormatter: DistanceFormatter?
     ) {
 
         fun roundingIncrement(roundingIncrement: Int) =

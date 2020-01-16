@@ -51,7 +51,8 @@ class MapboxTripNotification constructor(
     private val etaFormat: String = applicationContext.getString(R.string.eta_format)
     private val navigationNotificationProvider = NavigationNotificationProvider
     private val notificationReceiver = NotificationActionReceiver()
-    private val distanceFormatter: DistanceFormatter = navigationOptions.distanceFormatter()
+    private val distanceFormatter: DistanceFormatter =
+        navigationOptions.distanceFormatter() ?: throw IllegalArgumentException("Distance formatter is required.")
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
