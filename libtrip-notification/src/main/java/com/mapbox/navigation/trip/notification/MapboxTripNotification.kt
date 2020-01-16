@@ -86,6 +86,7 @@ class MapboxTripNotification constructor(
 
     override fun onTripSessionStarted() {
         registerReceiver()
+        notificationActionButtonChannel = Channel(1)
     }
 
     override fun onTripSessionStopped() {
@@ -323,10 +324,7 @@ class MapboxTripNotification constructor(
         } catch (e: Exception) {
             when (e) {
                 is ClosedReceiveChannelException,
-                is ClosedSendChannelException -> {
-                    notificationActionButtonChannel = Channel(1)
-                    notificationActionButtonChannel.offer(NotificationAction.END_NAVIGATION)
-                }
+                is ClosedSendChannelException -> { }
                 else -> {
                     throw e
                 }
