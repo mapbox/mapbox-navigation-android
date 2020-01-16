@@ -180,12 +180,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 )
 
                 var routeDistanceRemaining = remainingLegDistance
+                var routeDurationRemaining = remainingLegDuration
                 if (legs.size >= TWO_LEGS) {
                     for (i in legIndex + ONE_INDEX until legs.size) {
                         routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
+                        routeDurationRemaining += legs[i].duration()?.toLong() ?: 0L
                     }
                 }
                 routeProgressBuilder.distanceRemaining(routeDistanceRemaining)
+                routeProgressBuilder.durationRemaining(routeDurationRemaining)
 
                 var routeDistance = 0f
                 for (leg in legs) {
@@ -265,6 +268,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
 
         routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
+
+        ifNonNull(route) {
+            routeProgressBuilder.route(it)
+        }
 
         return routeProgressBuilder.build()
     }
