@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.onboard
 
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.route.onboard.model.Config
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
@@ -14,7 +14,7 @@ class MapboxOnboardRouterTest {
 
     @Before
     fun setUp() {
-        onboardRouter = MapboxOnboardRouter(navigator, Config(tilePath))
+        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(tilePath))
     }
 
     @Test

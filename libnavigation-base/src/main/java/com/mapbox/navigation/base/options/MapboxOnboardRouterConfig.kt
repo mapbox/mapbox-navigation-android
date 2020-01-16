@@ -1,6 +1,6 @@
-package com.mapbox.navigation.route.onboard.model
+package com.mapbox.navigation.base.options
 
-data class Config(
+data class MapboxOnboardRouterConfig(
     val tilePath: String,
     val inMemoryTileCache: Int? = null,
     val mapMatchingSpatialCache: Int? = null,

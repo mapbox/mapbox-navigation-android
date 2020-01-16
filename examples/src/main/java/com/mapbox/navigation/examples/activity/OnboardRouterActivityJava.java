@@ -23,7 +23,7 @@ import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
-import com.mapbox.navigation.route.onboard.model.Config;
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +72,7 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
             Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath(),
             "2019_04_13-00_00_11");
     File fileTiles = new File(file, "tiles");
-    Config config = new Config(
+    MapboxOnboardRouterConfig config = new MapboxOnboardRouterConfig(
             fileTiles.getAbsolutePath(),
             null,
             null,

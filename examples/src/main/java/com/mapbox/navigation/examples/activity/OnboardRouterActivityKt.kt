@@ -16,11 +16,11 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
-import com.mapbox.navigation.route.onboard.model.Config
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import com.mapbox.turf.TurfConstants
@@ -56,7 +56,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             "2019_04_13-00_00_11"
         )
         val fileTiles = File(file, "tiles")
-        val config = Config(
+        val config = MapboxOnboardRouterConfig(
             fileTiles.absolutePath,
             null,
             null,
