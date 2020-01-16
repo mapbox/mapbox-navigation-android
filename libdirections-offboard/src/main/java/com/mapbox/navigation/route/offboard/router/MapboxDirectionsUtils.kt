@@ -46,7 +46,11 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
         if (bearings.isNotEmpty()) {
             bearings.convertToListOfPairsOfDoubles()
                 ?.forEach { pair ->
-                    addBearing(pair.first, pair.second)
+                    if (pair != null) {
+                        addBearing(pair.first, pair.second)
+                    } else {
+                        addBearing(null, null)
+                    }
                 }
         }
     }
