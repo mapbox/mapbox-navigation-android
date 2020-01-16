@@ -34,7 +34,6 @@ import java.util.Calendar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.channels.ReceiveChannel
 
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
 class MapboxTripNotification constructor(
@@ -52,7 +51,8 @@ class MapboxTripNotification constructor(
     private val navigationNotificationProvider = NavigationNotificationProvider
     private val notificationReceiver = NotificationActionReceiver()
     private val distanceFormatter: DistanceFormatter =
-        navigationOptions.distanceFormatter() ?: throw IllegalArgumentException("Distance formatter is required.")
+        navigationOptions.distanceFormatter()
+            ?: throw IllegalArgumentException("Distance formatter is required.")
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
@@ -256,7 +256,7 @@ class MapboxTripNotification constructor(
             val str = item?.let {
                 distanceFormatter.formatDistance(it.toDouble())
             }
-            if (str == null) {
+            if (str != null) {
                 val formattedDistance = str.toString()
                 currentDistanceText.toString() != formattedDistance
             } else
@@ -324,7 +324,8 @@ class MapboxTripNotification constructor(
         } catch (e: Exception) {
             when (e) {
                 is ClosedReceiveChannelException,
-                is ClosedSendChannelException -> { }
+                is ClosedSendChannelException -> {
+                }
                 else -> {
                     throw e
                 }
@@ -333,9 +334,7 @@ class MapboxTripNotification constructor(
     }
 
     companion object {
-        private var notificationActionButtonChannel = Channel<NotificationAction>(1)
-        fun getNotificationActionButtonChannel(): ReceiveChannel<NotificationAction> =
-            notificationActionButtonChannel
+        var notificationActionButtonChannel = Channel<NotificationAction>(1)
     }
 
     inner class NotificationActionReceiver : BroadcastReceiver() {

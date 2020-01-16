@@ -298,7 +298,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
             val str = item?.let {
                 distanceFormatter.formatDistance(it)
             }
-            if (str == null) {
+            if (str != null) {
                 val formattedDistance = str.toString()
                 currentDistanceText.toString() != formattedDistance
             } else
