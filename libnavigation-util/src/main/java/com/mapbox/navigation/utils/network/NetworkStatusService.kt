@@ -18,33 +18,34 @@ data class NetworkStatus(val isNetworkAvailable: Boolean)
 class NetworkStatusService(applicationContext: Context) {
 
     private val connectivityManager: ConnectivityManager = applicationContext
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val networkStatusChannel = Channel<NetworkStatus>(Channel.CONFLATED)
 
     fun getNetworkStatusChannel(): ReceiveChannel<NetworkStatus> = networkStatusChannel
 
     init {
-
         @TargetApi(11)
         when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             true -> {
                 val builder = NetworkRequest.Builder()
-                builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                builder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                builder.addTransportType(NetworkCapabilities.TRANSPORT_VPN)
-                val callback: ConnectivityManager.NetworkCallback = object : ConnectivityManager.NetworkCallback() {
-                    override fun onAvailable(network: Network?) {
-                        super.onAvailable(network)
-                        networkStatusChannel.offer(NetworkStatus(true))
-                    }
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_VPN)
 
-                    override fun onLost(network: Network?) {
-                        super.onLost(network)
-                        networkStatusChannel.offer(NetworkStatus(false))
+                val callback: ConnectivityManager.NetworkCallback =
+                    object : ConnectivityManager.NetworkCallback() {
+                        override fun onAvailable(network: Network?) {
+                            super.onAvailable(network)
+                            networkStatusChannel.offer(NetworkStatus(true))
+                        }
+
+                        override fun onLost(network: Network?) {
+                            super.onLost(network)
+                            networkStatusChannel.offer(NetworkStatus(false))
+                        }
                     }
-                }
                 connectivityManager.registerNetworkCallback(builder.build(), callback)
             }
             false -> {
@@ -52,8 +53,7 @@ class NetworkStatusService(applicationContext: Context) {
                 val receiver: BroadcastReceiver = object : BroadcastReceiver() {
                     override fun onReceive(context: Context, intent: Intent) {
                         val activeNetwork = connectivityManager.activeNetworkInfo
-                        val isConnected = (activeNetwork != null &&
-                                activeNetwork.isConnectedOrConnecting)
+                        val isConnected = activeNetwork?.isConnectedOrConnecting ?: false
                         networkStatusChannel.offer(NetworkStatus(isConnected))
                     }
                 }

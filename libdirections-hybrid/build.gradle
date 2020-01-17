@@ -32,6 +32,8 @@ dependencies {
 
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.junit
+    testImplementation dependenciesList.robolectric
+    testImplementation dependenciesList.coroutinesTestAndroid
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

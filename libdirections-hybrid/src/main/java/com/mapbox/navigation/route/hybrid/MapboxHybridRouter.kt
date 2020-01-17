@@ -13,21 +13,26 @@ import java.util.concurrent.atomic.AtomicReference
 
 @MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
 class MapboxHybridRouter(
-    private val onBoardRouter: Router,
-    private val offBoardRouter: Router,
+    private val onboardRouter: Router,
+    private val offboardRouter: Router,
     context: Context
 ) : Router {
 
-    private val navigationMonitorStateException = NetworkStatusService(context)
+    private val networkStatusService = NetworkStatusService(context)
     private val jobControl = ThreadController.getIOScopeAndRootJob()
+    private val offBoardRouterHandler: RouterHandler by lazy {
+        RouterHandler(mainRouter = offboardRouter, reserveRouter = onboardRouter)
+    }
+    private val onBoardRouterHandler: RouterHandler by lazy {
+        RouterHandler(mainRouter = onboardRouter, reserveRouter = offboardRouter)
+    }
 
     /**
      * routeDispatchHandler always references a router, (on-board or off-board).
      * Internet availability determines which one.
      */
-    private val routeDispatchHandler: AtomicReference<RouterDispatchInterface> = AtomicReference(
-        OffBoardRouterHandler(offBoardRouter, onBoardRouter)
-    )
+    private val routeDispatchHandler: AtomicReference<RouterDispatchInterface> =
+        AtomicReference(offBoardRouterHandler)
 
     /**
      * At init time, the network monitor is setup. isNetworkAvailable represents the current network state. Based
@@ -35,14 +40,14 @@ class MapboxHybridRouter(
      */
     init {
         jobControl.scope.monitorChannelWithException(
-            navigationMonitorStateException.getNetworkStatusChannel()
+            networkStatusService.getNetworkStatusChannel()
         ) { networkStatus ->
             when (networkStatus.isNetworkAvailable) {
                 true -> {
-                    routeDispatchHandler.set(OffBoardRouterHandler(offBoardRouter, onBoardRouter))
+                    routeDispatchHandler.set(offBoardRouterHandler)
                 }
                 false -> {
-                    routeDispatchHandler.set(OnBoardRouterHandler(offBoardRouter, onBoardRouter))
+                    routeDispatchHandler.set(onBoardRouterHandler)
                 }
             }
         }
@@ -55,56 +60,16 @@ class MapboxHybridRouter(
         fun execute(routeOptions: RouteOptions, clientCallback: Router.Callback)
     }
 
-    // Off board router is used if an internet connection is available
-    private class OffBoardRouterHandler(
-        private val offBoardRouter: Router,
-        private val onBoardRouter: Router
+    private class RouterHandler(
+        private val mainRouter: Router,
+        private val reserveRouter: Router
     ) : RouterDispatchInterface, Router.Callback {
-        private var isOnBoardRouterCalled = false
-        private var options: RouteOptions? = null
-        private var callback: Router.Callback? = null
+        private var reserveRouterCalled = false
+        private lateinit var options: RouteOptions
+        private lateinit var callback: Router.Callback
 
         override fun onResponse(routes: List<DirectionsRoute>) {
-            callback?.onResponse(routes)
-        }
-
-        override fun onFailure(throwable: Throwable) {
-            when (isOnBoardRouterCalled) {
-                true -> {
-                    isOnBoardRouterCalled = false
-                    callback?.onFailure(throwable)
-                }
-                false -> {
-                    isOnBoardRouterCalled = true
-                    options?.let { options ->
-                        onBoardRouter.getRoute(options, this)
-                    }
-                }
-            }
-        }
-
-        /**
-         * This method is equivalent to calling .getRoute() with the additional parameter capture
-         */
-        override fun execute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
-            isOnBoardRouterCalled = false
-            options = routeOptions
-            callback = clientCallback
-            offBoardRouter.getRoute(routeOptions, this)
-        }
-    }
-
-    // On Board router used if an internet connection is not available.
-    private class OnBoardRouterHandler(
-        private val offBoardRouter: Router,
-        private val onBoardRouter: Router
-    ) : RouterDispatchInterface, Router.Callback {
-        private var isOffBoardRouterCalled = false
-        private var options: RouteOptions? = null
-        private var callback: Router.Callback? = null
-
-        override fun onResponse(routes: List<DirectionsRoute>) {
-            callback?.onResponse(routes)
+            callback.onResponse(routes)
         }
 
         /**
@@ -115,24 +80,26 @@ class MapboxHybridRouter(
          * if that fails propagate the exception
          */
         override fun onFailure(throwable: Throwable) {
-            when (isOffBoardRouterCalled) {
+            when (reserveRouterCalled) {
                 true -> {
-                    isOffBoardRouterCalled = false
-                    callback?.onFailure(throwable)
+                    reserveRouterCalled = false
+                    callback.onFailure(throwable)
                 }
                 false -> {
-                    isOffBoardRouterCalled = true
-                    options?.let { options ->
-                        offBoardRouter.getRoute(options, this)
-                    }
+                    reserveRouterCalled = true
+                    reserveRouter.getRoute(options, this)
                 }
             }
         }
+
+        /**
+         * This method is equivalent to calling .getRoute() with the additional parameter capture
+         */
         override fun execute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
-            isOffBoardRouterCalled = false
+            reserveRouterCalled = false
             options = routeOptions
             callback = clientCallback
-            onBoardRouter.getRoute(routeOptions, this)
+            mainRouter.getRoute(routeOptions, this)
         }
     }
 
@@ -144,7 +111,7 @@ class MapboxHybridRouter(
     }
 
     override fun cancel() {
-        onBoardRouter.cancel()
-        offBoardRouter.cancel()
+        onboardRouter.cancel()
+        offboardRouter.cancel()
     }
 }
