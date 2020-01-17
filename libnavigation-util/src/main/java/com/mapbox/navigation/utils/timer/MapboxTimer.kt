@@ -16,7 +16,7 @@ class MapboxTimer(private val restartAfter: Long, private val listener: MapboxTi
 
     fun start() {
         mainControllerJobScope.scope.launch {
-            while(isActive) {
+            while (isActive) {
                 delay(restartAfter)
                 listener.onTimerExpired()
             }
