@@ -17,11 +17,11 @@ import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.utils.exceptions.NavigationException
+import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +36,7 @@ class MapboxOnboardRouter : Router {
     private val navigatorNative: MapboxNativeNavigator
     private val config: MapboxOnboardRouterConfig
     private val logger: Logger?
-    private val scope = MainScope()
+    private val jobControl = ThreadController.getMainScopeAndRootJob()
     private val gson = Gson()
 
     /**
@@ -112,11 +112,11 @@ class MapboxOnboardRouter : Router {
     }
 
     override fun cancel() {
-        scope.cancel()
+        jobControl.scope.cancel()
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {
-        scope.launch {
+        jobControl.scope.launch {
             val routerResult = withContext(Dispatchers.Default) {
                 synchronized(navigatorNative) {
                     navigatorNative.getRoute(url)
