@@ -118,9 +118,7 @@ class MapboxOnboardRouter : Router {
     private fun retrieveRoute(url: String, callback: Router.Callback) {
         jobControl.scope.launch {
             val routerResult = withContext(Dispatchers.Default) {
-                synchronized(navigatorNative) {
-                    navigatorNative.getRoute(url)
-                }
+                navigatorNative.getRoute(url)
             }
 
             val routes: List<DirectionsRoute> = try {
