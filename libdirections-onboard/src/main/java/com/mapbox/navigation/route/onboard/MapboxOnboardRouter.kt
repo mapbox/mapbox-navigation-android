@@ -21,7 +21,6 @@ import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +35,7 @@ class MapboxOnboardRouter : Router {
     private val navigatorNative: MapboxNativeNavigator
     private val config: MapboxOnboardRouterConfig
     private val logger: Logger?
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val mainJobControl = ThreadController.getMainScopeAndRootJob()
     private val gson = Gson()
 
     /**
@@ -112,12 +111,12 @@ class MapboxOnboardRouter : Router {
     }
 
     override fun cancel() {
-        jobControl.scope.cancel()
+        mainJobControl.scope.cancel()
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {
-        jobControl.scope.launch {
-            val routerResult = withContext(Dispatchers.Default) {
+        mainJobControl.scope.launch {
+            val routerResult = withContext(ThreadController.IODispatcher) {
                 navigatorNative.getRoute(url)
             }
 
@@ -137,7 +136,7 @@ class MapboxOnboardRouter : Router {
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
-        logger?.e(Tag("OfflineRouteRetrievalTask"), Message(errorMessage))
+        logger?.e(Tag("MapboxOnboardRouter"), Message(errorMessage))
         return errorMessage
     }
 }

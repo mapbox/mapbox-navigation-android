@@ -171,7 +171,7 @@ class MapboxOnboardRouterTest {
 
     companion object {
         private const val TILE_PATH = "tiles"
-        private const val TAG = "OfflineRouteRetrievalTask"
+        private const val TAG = "MapboxOnboardRouter"
 
         private const val ROUTE_SIZE = 1
         private const val ROUTE_DISTANCE = 50369.7

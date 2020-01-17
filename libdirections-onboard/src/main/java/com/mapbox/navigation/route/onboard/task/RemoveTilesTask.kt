@@ -4,7 +4,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineTilesRemovedCallback
 import com.mapbox.navigation.utils.thread.ThreadController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,11 +16,11 @@ internal class RemoveTilesTask(
     private val callback: OnOfflineTilesRemovedCallback
 ) {
 
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
+    private val mainJobControl = ThreadController.getMainScopeAndRootJob()
 
     fun launch() {
-        jobControl.scope.launch {
-            val numberOfTiles = withContext(Dispatchers.Default) {
+        mainJobControl.scope.launch {
+            val numberOfTiles = withContext(ThreadController.IODispatcher) {
                 navigator.removeTiles(tilePath, southwest, northeast)
             }
 
@@ -30,6 +29,6 @@ internal class RemoveTilesTask(
     }
 
     fun cancel() {
-        jobControl.scope.cancel()
+        mainJobControl.scope.cancel()
     }
 }
