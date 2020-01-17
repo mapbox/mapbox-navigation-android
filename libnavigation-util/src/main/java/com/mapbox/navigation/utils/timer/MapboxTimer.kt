@@ -24,6 +24,8 @@ class MapboxTimer(private val restartAfter: Long, private val listener: MapboxTi
     }
 
     fun stop() {
-        mainControllerJobScope.job.cancel()
+        mainControllerJobScope.job.children.forEach { job ->
+            job.cancel()
+        }
     }
 }
