@@ -62,6 +62,10 @@ internal class RouteProcessorBackgroundThread(
 
         fun onUserOffRoute(location: Location, userOffRoute: Boolean)
 
-        fun onCheckFasterRoute(location: Location, routeProgress: RouteProgress, checkFasterRoute: Boolean)
+        fun onCheckFasterRoute(
+            location: Location,
+            routeProgress: RouteProgress,
+            checkFasterRoute: Boolean
+        )
     }
 }

@@ -4,6 +4,9 @@
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 
+    <string name="title_component_hybrid_navigation">Hybrid Navigation</string>
+    <string name="description_hybrid_router">Demonstrates Hybrid routing </string>
+
     <string name="title_offboard_router_kotlin">Offboard Router Kotlin</string>
     <string name="description_offboard_router_kotlin">Shows routes using offboard routing api in Kotlin code.</string>
 

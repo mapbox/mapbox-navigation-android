@@ -29,7 +29,10 @@ internal class RouteProcessorThreadListener(
      * navigation engine thread has finished. Depending on whether or not a milestone gets triggered
      * or not, the navigation event dispatcher will be called to notify the developer.
      */
-    override fun onMilestoneTrigger(triggeredMilestones: List<Milestone>, routeProgress: RouteProgress) {
+    override fun onMilestoneTrigger(
+        triggeredMilestones: List<Milestone>,
+        routeProgress: RouteProgress
+    ) {
         for (milestone in triggeredMilestones) {
             val instruction = buildInstructionString(routeProgress, milestone)
             eventDispatcher.onMilestoneEvent(routeProgress, instruction, milestone)
@@ -58,7 +61,11 @@ internal class RouteProcessorThreadListener(
      * @param routeProgress for various [com.mapbox.api.directions.v5.models.LegStep] data
      * @param checkFasterRoute true if should check for faster route, false otherwise
      */
-    override fun onCheckFasterRoute(location: Location, routeProgress: RouteProgress, checkFasterRoute: Boolean) {
+    override fun onCheckFasterRoute(
+        location: Location,
+        routeProgress: RouteProgress,
+        checkFasterRoute: Boolean
+    ) {
         when (checkFasterRoute) {
             true -> {
                 routeFetcher.findRouteFromRouteProgress(location, routeProgress)

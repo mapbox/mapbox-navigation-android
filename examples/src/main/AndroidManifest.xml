@@ -45,6 +45,15 @@
         </activity>
 
         <activity
+            android:name=".activity.HybridNavigationActivity"
+            android:label="@string/description_hybrid_router"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+
+        <activity
             android:name=".activity.OffboardRouterActivityKt"
             android:label="@string/title_offboard_router_kotlin">
             <meta-data

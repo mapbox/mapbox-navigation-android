@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.navigation.examples.activity.HybridNavigationActivity;
 import com.mapbox.navigation.examples.activity.MockNavigationActivity;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityJava;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityKt;
@@ -72,6 +73,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_offboard_router_kotlin),
         getString(R.string.description_offboard_router_kotlin),
         OffboardRouterActivityKt.class
+      ),
+      new SampleItem(
+        getString(R.string.title_component_hybrid_navigation),
+        getString(R.string.description_hybrid_router),
+        HybridNavigationActivity.class
       ),
       new SampleItem(
         getString(R.string.title_offboard_router_java),

@@ -91,6 +91,8 @@ dependencies {
     implementation project(':liblogger')
     implementation project(':libnavigator')
     androidTestImplementation project(':libtesting')
+    androidTestImplementation project(':libtesting-ui')
+    implementation project(':libdirections-hybrid')
 
     //ktlint
     ktlint dependenciesList.ktlint
