@@ -166,7 +166,7 @@ data class RouteLegProgress internal constructor(
 
         fun previousStep(previousStep: LegStep) = apply { this.previousStep = previousStep }
         fun currentStep(currentStep: LegStep) = apply { this.currentStep = currentStep }
-        fun upComingStep(upComingStep: LegStep) = apply { this.upComingStep = upComingStep }
+        fun upComingStep(upComingStep: LegStep?) = apply { this.upComingStep = upComingStep }
         fun followOnStep(followOnStep: LegStep) = apply { this.followOnStep = followOnStep }
         fun currentStepProgress(currentStepProgress: RouteStepProgress) =
             apply { this.currentStepProgress = currentStepProgress }
