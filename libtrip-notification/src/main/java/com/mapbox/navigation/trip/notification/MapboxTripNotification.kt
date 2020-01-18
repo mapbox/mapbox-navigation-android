@@ -41,7 +41,7 @@ class MapboxTripNotification constructor(
     private val navigationOptions: NavigationOptions
 ) : TripNotification {
     private var currentManeuverId = 0
-    private var instructionText: String? = null
+    private var currentInstructionText: String? = null
     private var currentDistanceText: SpannableString? = null
     private var collapsedNotificationRemoteViews: RemoteViews? = null
     private var expandedNotificationRemoteViews: RemoteViews? = null
@@ -90,6 +90,10 @@ class MapboxTripNotification constructor(
     }
 
     override fun onTripSessionStopped() {
+        currentManeuverId = 0
+        currentInstructionText = null
+        currentDistanceText = null
+
         unregisterReceiver()
         try {
             notificationActionButtonChannel.cancel()
@@ -212,14 +216,14 @@ class MapboxTripNotification constructor(
     private fun updateInstructionText(bannerInstruction: BannerInstructions?) {
         bannerInstruction?.let { bannerIns ->
             val primaryText = bannerIns.primary().text()
-            if (instructionText.isNullOrEmpty() || instructionText != primaryText) {
+            if (currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText) {
                 collapsedNotificationRemoteViews?.setTextViewText(
                     R.id.notificationInstructionText, primaryText
                 )
                 expandedNotificationRemoteViews?.setTextViewText(
                     R.id.notificationInstructionText, primaryText
                 )
-                instructionText = primaryText
+                currentInstructionText = primaryText
             }
         }
     }
