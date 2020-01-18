@@ -6,19 +6,19 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * Schedules a delay of [restartAfter] seconds and then restarts.
+ * Schedules a delay of [restartAfter] milliseconds and then restarts.
  *
- * @param restartAfter Time delay until the timer should restart
- * @param listener Hook to receive the events from [MapboxTimerListener]
+ * @param restartAfter Time delay until the timer should restart.
+ * @param delayLambda lambda function that is to be executed after [restartAfter] milliseconds.
  */
-class MapboxTimer(private val restartAfter: Long, private val listener: MapboxTimerListener) {
+class MapboxTimer(private val restartAfter: Long, private val delayLambda: () -> Unit) {
     private val mainControllerJobScope = ThreadController.getMainScopeAndRootJob()
 
     fun start() {
         mainControllerJobScope.scope.launch {
             while (isActive) {
                 delay(restartAfter)
-                listener.onTimerExpired()
+                delayLambda()
             }
         }
     }
