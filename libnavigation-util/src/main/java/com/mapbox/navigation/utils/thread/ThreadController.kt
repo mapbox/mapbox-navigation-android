@@ -29,15 +29,20 @@ fun <T> CoroutineScope.monitorChannelWithException(
                     }
                 }
             } catch (e: Exception) {
-                when (e) {
-                    is ClosedReceiveChannelException,
-                    is ClosedSendChannelException,
-                    is CancellationException -> {
-                        isChannelValid = false
-                    }
+                e.ifChannelException {
+                    isChannelValid = false
                 }
             }
         }
+    }
+}
+
+fun Exception.ifChannelException(action: () -> Unit) {
+    when (this) {
+        is CancellationException,
+        is ClosedSendChannelException,
+        is ClosedReceiveChannelException -> action()
+        else -> throw this
     }
 }
 
