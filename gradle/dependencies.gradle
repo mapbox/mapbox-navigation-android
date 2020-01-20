@@ -77,6 +77,7 @@ ext {
 
       // Coroutines and Channels
       coroutinesAndroid         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${version.coroutinesAndroid}",
+      coroutinesTestAndroid     : "org.jetbrains.kotlinx:kotlinx-coroutines-test:${version.coroutinesAndroid}",
 
       // code style
       ktlint                    : "com.pinterest:ktlint:${version.ktlint}",

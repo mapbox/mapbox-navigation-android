@@ -1,22 +1,29 @@
 package com.mapbox.navigation.route.onboard
 
+import com.google.gson.Gson
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.logger.Logger
+import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.route.onboard.model.OfflineError
+import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.route.onboard.network.HttpClient
-import com.mapbox.navigation.route.onboard.task.OfflineRouteRetrievalTask
 import com.mapbox.navigation.utils.exceptions.NavigationException
+import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
 class MapboxOnboardRouter : Router {
@@ -28,6 +35,8 @@ class MapboxOnboardRouter : Router {
     private val navigatorNative: MapboxNativeNavigator
     private val config: MapboxOnboardRouterConfig
     private val logger: Logger?
+    private val mainJobControl = ThreadController.getMainScopeAndRootJob()
+    private val gson = Gson()
 
     /**
      * Creates an offline router which uses the specified offline path for storing and retrieving
@@ -65,11 +74,12 @@ class MapboxOnboardRouter : Router {
     // Package private for testing purposes
     internal constructor(
         navigator: MapboxNativeNavigator,
-        config: MapboxOnboardRouterConfig
+        config: MapboxOnboardRouterConfig,
+        logger: Logger
     ) {
         this.navigatorNative = navigator
         this.config = config
-        this.logger = null
+        this.logger = logger
     }
 
     override fun getRoute(
@@ -97,16 +107,36 @@ class MapboxOnboardRouter : Router {
             )
         ).build()
 
-        OfflineRouteRetrievalTask(navigatorNative, logger, object : OnOfflineRouteFoundCallback {
-            override fun onRouteFound(routes: List<DirectionsRoute>) {
-                callback.onResponse(routes)
-            }
-
-            override fun onError(error: OfflineError) {
-                callback.onFailure(NavigationException(error.message))
-            }
-        }).execute(offlineRouter.buildUrl())
+        retrieveRoute(offlineRouter.buildUrl(), callback)
     }
 
-    override fun cancel() = Unit
+    override fun cancel() {
+        mainJobControl.scope.cancel()
+    }
+
+    private fun retrieveRoute(url: String, callback: Router.Callback) {
+        mainJobControl.scope.launch {
+            val routerResult = withContext(ThreadController.IODispatcher) {
+                navigatorNative.getRoute(url)
+            }
+
+            val routes: List<DirectionsRoute> = try {
+                DirectionsResponse.fromJson(routerResult.json).routes()
+            } catch (e: RuntimeException) {
+                emptyList()
+            }
+
+            when {
+                !routes.isNullOrEmpty() -> callback.onResponse(routes)
+                else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
+            }
+        }
+    }
+
+    private fun generateErrorMessage(response: String): String {
+        val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
+        val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
+        logger?.e(Tag("MapboxOnboardRouter"), Message(errorMessage))
+        return errorMessage
+    }
 }

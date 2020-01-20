@@ -29,6 +29,8 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.supportAnnotation
 
+    implementation dependenciesList.coroutinesAndroid
+
     //networks
     implementation dependenciesList.okhttp
     implementation dependenciesList.okhttpInterceptor
@@ -39,6 +41,7 @@ dependencies {
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.robolectric
+    testImplementation dependenciesList.coroutinesTestAndroid
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

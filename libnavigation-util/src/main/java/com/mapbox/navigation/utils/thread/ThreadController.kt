@@ -49,7 +49,7 @@ object ThreadController {
     private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
             MAX_THREAD_COUNT
     )
-    private val IODispatchContext =
+    val IODispatcher =
             Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
 
     private val ioRootJob = SupervisorJob()
@@ -91,7 +91,7 @@ object ThreadController {
      */
     fun getIOScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(ioRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + IODispatchContext))
+        return JobControl(parentJob, CoroutineScope(parentJob + IODispatcher))
     }
 
     /**
