@@ -57,8 +57,13 @@ object ThreadController {
     val IODispatcher =
             Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
 
-    private val ioRootJob = SupervisorJob()
-    private val mainRootJob = SupervisorJob()
+    private var ioRootJob = SupervisorJob()
+    private var mainRootJob = SupervisorJob()
+
+    fun init() {
+        ioRootJob = SupervisorJob()
+        mainRootJob = SupervisorJob()
+    }
 
     /**
      * This method cancels all coroutines that are children of this job. The call affects
