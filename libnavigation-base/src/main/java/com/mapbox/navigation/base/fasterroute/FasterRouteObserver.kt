@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 
-interface FasterRouteListener {
+interface FasterRouteObserver {
 
     fun onFasterRouteAvailable(fasterRoute: DirectionsRoute)
 
