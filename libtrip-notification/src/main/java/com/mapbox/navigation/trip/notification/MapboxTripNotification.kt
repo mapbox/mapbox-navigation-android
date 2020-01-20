@@ -64,7 +64,6 @@ class MapboxTripNotification constructor(
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         pendingCloseIntent = createPendingCloseIntent(applicationContext)
-        registerReceiver()
         createNotificationChannel()
     }
 

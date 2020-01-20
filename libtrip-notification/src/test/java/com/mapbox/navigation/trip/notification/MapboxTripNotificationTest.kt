@@ -1,5 +1,6 @@
 package com.mapbox.navigation.trip.notification
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -9,10 +10,15 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.text.format.DateFormat
 import com.mapbox.navigation.base.options.NavigationOptions
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.verify
 import java.util.Locale
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -20,13 +26,14 @@ import org.junit.Test
 class MapboxTripNotificationTest {
 
     private lateinit var notification: MapboxTripNotification
+    private lateinit var mockedContext: Context
     private val navigationOptions: NavigationOptions = mockk(relaxed = true)
 
     @Before
     fun setUp() {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
-        val mockedContext = createContext()
+        mockedContext = createContext()
         notification = MapboxTripNotification(
             mockedContext,
             navigationOptions
@@ -77,6 +84,44 @@ class MapboxTripNotificationTest {
                 any()
             )
         } returns (mockedBroadcastReceiverIntent)
+        every { mockedContext.unregisterReceiver(any()) } just Runs
         return mockedContext
+    }
+
+    @Test
+    fun whenTripStartedThenRegisterReceiverCalledOnce() {
+        notification.onTripSessionStarted()
+        verify(exactly = 1) { mockedContext.registerReceiver(any(), any()) }
+    }
+
+    @Test
+    fun whenTripStoppedThenCleanupIsDone() {
+        val notificationManager =
+            mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notification.onTripSessionStopped()
+
+        verify(exactly = 1) { mockedContext.unregisterReceiver(any()) }
+        verify(exactly = 1) { notificationManager.cancel(any()) }
+        assertEquals(
+            true,
+            MapboxTripNotification.notificationActionButtonChannel.isClosedForReceive
+        )
+        assertEquals(true, MapboxTripNotification.notificationActionButtonChannel.isClosedForSend)
+    }
+
+    @Test
+    fun whenGetNotificationCalledThenNavigationNotificationProviderInteractedOnlyOnce() {
+        mockkObject(NavigationNotificationProvider)
+        val notificationMock = mockk<Notification>()
+        every { NavigationNotificationProvider.buildNotification(any()) } returns notificationMock
+
+        notification.getNotification()
+
+        verify(exactly = 1) { NavigationNotificationProvider.buildNotification(any()) }
+
+        notification.getNotification()
+        notification.getNotification()
+
+        verify(exactly = 1) { NavigationNotificationProvider.buildNotification(any()) }
     }
 }
