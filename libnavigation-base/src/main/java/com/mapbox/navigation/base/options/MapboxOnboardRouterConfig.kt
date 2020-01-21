@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.options
 
 /**
- * @param tilePath Path where tiles will be stored / Path where tiles will be fetched
+ * @param tilePath Path where tiles will be stored to / Path where tiles will be fetched from
  * @param inMemoryTileCache Int?
  * @param mapMatchingSpatialCache Int?
  * @param threadsCount Max count of native threads(optional)

@@ -28,8 +28,8 @@ import kotlinx.coroutines.withContext
 /**
  * MapboxOnboardRouter provides offline route fetching
  *
- * It uses offline storage path for storing and retrieving data, setup endpoint,
- * tiles' version, token. Config provides via [MapboxOnboardRouterConfig].
+ * It uses offline storage path to store and retrieve data, setup endpoint,
+ * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  */
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
 class MapboxOnboardRouter : Router {
@@ -45,7 +45,7 @@ class MapboxOnboardRouter : Router {
     private val gson = Gson()
 
     /**
-     * @param config OnbooardRouter config
+     * @param config [MapboxOnboardRouterConfig]
      * @param logger [Logger]
      */
     constructor(config: MapboxOnboardRouterConfig, logger: Logger?) {
