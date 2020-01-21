@@ -11,6 +11,10 @@ import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * MapboxHybridRouter combines onboard and offboard Routers.
+ * Fetch route based on internet-connection state.
+ */
 @MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
 class MapboxHybridRouter(
     private val onboardRouter: Router,

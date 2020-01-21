@@ -14,6 +14,12 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * MapboxOffboardRouter provides online route-fetching
+ *
+ * @param accessToken mapboxAccessToken token
+ * @param context application Context
+ */
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
 class MapboxOffboardRouter(
     private val accessToken: String,
