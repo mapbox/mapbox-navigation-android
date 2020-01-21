@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.options
 
 /**
- * Defines endpoint's properties for retrieve tiles
+ * Defines endpoint's properties to retrieve tiles
  *
  * @param host Tiles endpoint
  * @param version Version of tiles
