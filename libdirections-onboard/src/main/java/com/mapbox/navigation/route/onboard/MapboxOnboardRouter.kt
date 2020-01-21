@@ -89,16 +89,15 @@ class MapboxOnboardRouter : Router {
 
         val origin = routeOptions.coordinates().first()
         val destination = routeOptions.coordinates().last()
-        routeOptions.coordinates().drop(1).dropLast(1)
+        val waypoints = routeOptions.coordinates().drop(1).dropLast(1)
 
         val offlineRouter = OfflineRoute.builder(
-
             RouteUrl(
                 accessToken = routeOptions.accessToken(),
                 user = routeOptions.user(),
                 profile = routeOptions.profile(),
                 orgin = origin,
-                waypoints = routeOptions.coordinates(),
+                waypoints = waypoints,
                 destination = destination,
                 steps = routeOptions.steps() ?: false,
                 voiceIntruction = routeOptions.voiceInstructions() ?: false,
