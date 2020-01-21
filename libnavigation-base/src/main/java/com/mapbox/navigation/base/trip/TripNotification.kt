@@ -50,7 +50,6 @@ interface TripNotification {
      *
      * This callback may be used to perform post start initialization
      * @since 1.0.0
-     *
      */
     fun onTripSessionStarted()
 
@@ -60,7 +59,6 @@ interface TripNotification {
      *
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
      * @since 1.0.0
-     *
      */
     fun onTripSessionStopped()
 }
