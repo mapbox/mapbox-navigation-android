@@ -35,6 +35,15 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 
+/**
+ * Default implementation of [TripNotification] interface
+ *
+ * @param applicationContext is [Context]
+ * @param navigationOptions is [NavigationOptions] used here to format
+ * distance and time
+ *
+ * @since 1.0.0
+ */
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
 class MapboxTripNotification constructor(
     private val applicationContext: Context,
