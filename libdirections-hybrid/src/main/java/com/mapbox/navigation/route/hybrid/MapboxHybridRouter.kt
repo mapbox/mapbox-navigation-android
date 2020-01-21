@@ -26,10 +26,10 @@ class MapboxHybridRouter(
 ) : Router {
 
     private val jobControl = ThreadController.getIOScopeAndRootJob()
-    private val offBoardRouterHandler: RouterHandler by lazy {
+    private val offboardRouterHandler: RouterHandler by lazy {
         RouterHandler(mainRouter = offboardRouter, reserveRouter = onboardRouter)
     }
-    private val onBoardRouterHandler: RouterHandler by lazy {
+    private val onboardRouterHandler: RouterHandler by lazy {
         RouterHandler(mainRouter = onboardRouter, reserveRouter = offboardRouter)
     }
 
@@ -38,7 +38,7 @@ class MapboxHybridRouter(
      * Internet availability determines which one.
      */
     private val routeDispatchHandler: AtomicReference<RouterDispatchInterface> =
-        AtomicReference(offBoardRouterHandler)
+        AtomicReference(offboardRouterHandler)
 
     /**
      * At init time, the network monitor is setup. isNetworkAvailable represents the current network state. Based
@@ -48,10 +48,10 @@ class MapboxHybridRouter(
         jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
             when (networkStatus.isNetworkAvailable) {
                 true -> {
-                    routeDispatchHandler.set(offBoardRouterHandler)
+                    routeDispatchHandler.set(offboardRouterHandler)
                 }
                 false -> {
-                    routeDispatchHandler.set(onBoardRouterHandler)
+                    routeDispatchHandler.set(onboardRouterHandler)
                 }
             }
         }, networkStatusService::cleanup)
