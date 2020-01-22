@@ -244,7 +244,6 @@ class MapboxOnboardRouterTest {
             destination = destination
         ).getRequest()
 
-        // "https://api.mapbox.com/directions/v5/mapbox/driving/0.0%2C0.0%3B0.0%2C0.0%3B0.0%2C0.0%3B0.0%2C0.0?access_token=&steps=false&geometries=polyline6&overview=full&voice_instructions=false&banner_instructions=false&roundabout_exits=false&enable_refresh=true"
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
         private const val FAILURE_RESPONSE =
