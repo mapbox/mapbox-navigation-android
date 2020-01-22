@@ -18,7 +18,7 @@ interface MetricsReporter {
     /**
      * Add observer that triggered when metric event handled
      *
-     * @param metricsObserver is [MetricsObserver] that triggered when metric event handled
+     * @param metricsObserver the [MetricsObserver] that is called when a new metric event is triggered
      * @since 1.0.0
      */
     fun setMetricsObserver(metricsObserver: MetricsObserver)
