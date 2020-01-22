@@ -4,14 +4,14 @@ import android.app.Notification
 import androidx.core.app.NotificationCompat
 
 /**
- * Provide notification for navigation process launched with a [TripSession]
+ * Provides notification for navigation process launched with a [TripSession]
  *
  * @since 1.0.0
  */
-object NavigationNotificationProvider {
+internal object NavigationNotificationProvider {
 
     /**
-     * Build [Notification] based on [NotificationCompat.Builder] params
+     * Builds [Notification] based on [NotificationCompat.Builder] params
      *
      * @param builder is [NotificationCompat.Builder] used for
      * building notification
