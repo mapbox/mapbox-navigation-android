@@ -10,6 +10,8 @@ import com.mapbox.navigation.logger.WARN
 
 /**
  * Log level indicates which logs are allowed to be emitted by the Mapbox Maps SDK for Android.
+ *
+ * @since 1.0.0
  */
 @IntDef(VERBOSE, DEBUG, INFO, WARN, ERROR, NONE)
 @Retention(AnnotationRetention.SOURCE)
