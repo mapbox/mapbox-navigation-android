@@ -2,6 +2,7 @@ package com.mapbox.navigation.utils.thread
 
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,7 +55,7 @@ object ThreadController {
     private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
             MAX_THREAD_COUNT
     )
-    val IODispatcher =
+    val IODispatcher: CoroutineDispatcher =
             Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
 
     private var ioRootJob = SupervisorJob()
