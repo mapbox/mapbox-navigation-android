@@ -16,11 +16,14 @@
     <string name="title_onboard_router_java" translatable="false">Onboard Router Java</string>
     <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
 
-    <string name="title_trip_service_kotlin">Trip Service Kotlin</string>
-    <string name="description_trip_service_kotlin">Shows how to use the Service to push notifications in Kotlin code.</string>
+    <string name="title_trip_service_kotlin" translatable="false">Trip Service Kotlin</string>
+    <string name="description_trip_service_kotlin" translatable="false">Shows how to use the Service to push notifications in Kotlin code.</string>
 
-    <string name="title_trip_service_java">Trip Service Java</string>
-    <string name="description_trip_service_java">Shows how to use the Service to push notifications in Java code.</string>
+    <string name="title_trip_session_kotlin" translatable="false">Trip Session Kotlin</string>
+    <string name="description_trip_session_kotlin" translatable="false">Shows how to use the Session API in Kotlin code.</string>
+
+    <string name="title_simple_navigation_kotlin" translatable="false">Simple Mapbox Navigation Kotlin</string>
+    <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
 
     <string name="title_component_navigation">MapboxNavigation with UI components</string>
     <string name="description_component_navigation">MapboxNavigation with UI components</string>
