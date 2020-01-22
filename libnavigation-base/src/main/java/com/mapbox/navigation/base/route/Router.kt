@@ -12,7 +12,7 @@ interface Router {
      * Fetch route based on [RouteOptions]
      *
      * @param routeOptions RouteOptions
-     * @param callback Callback that should be handled
+     * @param callback Callback that gets notified with the results of the request
      */
     fun getRoute(
         routeOptions: RouteOptions,
@@ -20,7 +20,7 @@ interface Router {
     )
 
     /**
-     * Interrupt route-fetching request
+     * Interrupt route-fetching request, if any is in progress.
      */
     fun cancel()
 
@@ -30,9 +30,9 @@ interface Router {
     interface Callback {
 
         /**
-         * List of [DirectionsRoute]
+         * Non-empty list of [DirectionsRoute]
          *
-         * @param routes List<DirectionsRoute> the most relevant has index 0, second is 1 and etc.
+         * @param routes List<DirectionsRoute> the most relevant has index 0. If requested, alternative routes are available on higher indices.
          * Has at least one Route
          */
         fun onResponse(routes: List<DirectionsRoute>)
