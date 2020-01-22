@@ -4,7 +4,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineTilesRemovedCallback
 import com.mapbox.navigation.utils.thread.ThreadController
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -29,6 +29,6 @@ internal class RemoveTilesTask(
     }
 
     fun cancel() {
-        mainJobControl.scope.cancel()
+        mainJobControl.job.cancelChildren()
     }
 }
