@@ -19,13 +19,16 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
+import com.mapbox.navigation.trip.notification.NotificationAction
 import com.mapbox.navigation.trip.service.MapboxTripService
 import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.activity_trip_service.notifyTextView
 import kotlinx.android.synthetic.main.activity_trip_service.toggleNotification
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -49,14 +52,13 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
             toggleNotification.setOnClickListener {
                 when (mapboxTripService.hasServiceStarted()) {
                     true -> {
-                        textUpdateJob.cancel()
-                        mapboxTripService.stopService()
-                        toggleNotification.text = "Start"
+                        stopService()
                     }
                     false -> {
                         mapboxTripService.startService()
                         changeText()
                         toggleNotification.text = "Stop"
+                        monitorNotificationActionButton(MapboxTripNotification.notificationActionButtonChannel)
                     }
                 }
             }
@@ -105,6 +107,20 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         }, {
             stopService(intent)
         })*/
+    }
+
+    private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
+        mainJobController.scope.monitorChannelWithException(channel) { notificationAction ->
+            when (notificationAction) {
+                NotificationAction.END_NAVIGATION -> stopService()
+            }
+        }
+    }
+
+    private fun stopService() {
+        textUpdateJob.cancel()
+        mapboxTripService.stopService()
+        toggleNotification.text = "Start"
     }
 
     public override fun onResume() {
