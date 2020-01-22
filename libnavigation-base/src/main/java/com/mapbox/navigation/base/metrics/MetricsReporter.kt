@@ -1,7 +1,7 @@
 package com.mapbox.navigation.base.metrics
 
 /**
- * Interface for handling metric events.
+ * Defines API for handling metric events.
  *
  * @since 1.0.0
  */
@@ -18,7 +18,7 @@ interface MetricsReporter {
     /**
      * Add observer that triggered when metric event handled
      *
-     * @param metricsObserver metric event handle observer
+     * @param metricsObserver is [MetricsObserver] that triggered when metric event handled
      * @since 1.0.0
      */
     fun setMetricsObserver(metricsObserver: MetricsObserver)

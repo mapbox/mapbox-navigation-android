@@ -57,7 +57,7 @@ object MapboxMetricsReporter : MetricsReporter {
      * Set flag to determine is need to log [mapboxTelemetry] events.
      *
      * @param isDebugLoggingEnabled true to enable logging, false to disable logging
-     * @since 0.43.0
+     * @since 1.0.0
      */
     @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
@@ -66,6 +66,8 @@ object MapboxMetricsReporter : MetricsReporter {
 
     /**
      * Disable [mapboxTelemetry] to finish telemetry session when it needed.
+     * This method also removes metrics observer and stops background thread used for
+     * sending events to observer.
      *
      * @since 1.0.0
      */
