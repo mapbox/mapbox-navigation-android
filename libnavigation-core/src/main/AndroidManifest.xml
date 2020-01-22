@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mapbox.navigation">
+    package="com.mapbox.navigation.core">
 
     <application>
-        <service android:name="com.mapbox.navigation.trip.service.NavigationNotificationService" />
+        <service android:name=".trip.service.NavigationNotificationService" />
     </application>
 </manifest>
