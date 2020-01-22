@@ -127,6 +127,7 @@ class MapboxDirectionsSessionTest {
     @Test
     fun fasterRoute_timerStartedOnce() {
         session.requestRoutes(routeOptions)
+        callback.onResponse(routes)
         session.requestRoutes(routeOptions)
         verify(exactly = 1) { mapboxTimer.start() }
     }
@@ -157,7 +158,7 @@ class MapboxDirectionsSessionTest {
         val throwable: Throwable = mockk()
         callback.onFailure(throwable)
         delayLambda()
-        verify(exactly = 1) { router.getRoute(any(), any()) }
+        verify(exactly = 2) { router.getRoute(any(), any()) }
     }
 
     @Test
