@@ -15,7 +15,7 @@ class RouteUrl(
     val overview: String = OVERVIEW_FULL,
     val voiceInstruction: Boolean = VOICE_INSTRUCTION_DEFAULT_VALUE,
     val bannerInstruction: Boolean = BANNER_INSTRUCTION_DEFAULT_VALUE,
-    val roundaboutExits: Boolean = ROUND_ABOUTEXITS_DEFAULT_VALUE,
+    val roundaboutExits: Boolean = ROUNDABOUT_EXITS_DEFAULT_VALUE,
     val enableRefresh: Boolean = ENABLE_REFRESH_DEFAULT_VALUE
 ) {
 
@@ -34,10 +34,10 @@ class RouteUrl(
         private const val QUERY_PARAM_ROUNDABOUT_EXITS = "roundabout_exits"
         private const val QUERY_PARAM_ENABLE_REFRESH = "enable_refresh"
 
-        const val STEPS_DEFAULT_VALUE = true
-        const val VOICE_INSTRUCTION_DEFAULT_VALUE = true
-        const val BANNER_INSTRUCTION_DEFAULT_VALUE = true
-        const val ROUND_ABOUTEXITS_DEFAULT_VALUE = true
+        const val STEPS_DEFAULT_VALUE = false
+        const val VOICE_INSTRUCTION_DEFAULT_VALUE = false
+        const val BANNER_INSTRUCTION_DEFAULT_VALUE = false
+        const val ROUNDABOUT_EXITS_DEFAULT_VALUE = false
         const val ENABLE_REFRESH_DEFAULT_VALUE = true
 
         /**

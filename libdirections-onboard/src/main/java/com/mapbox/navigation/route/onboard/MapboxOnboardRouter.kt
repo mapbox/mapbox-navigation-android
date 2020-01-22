@@ -102,7 +102,7 @@ class MapboxOnboardRouter : Router {
                 steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
                 voiceInstruction = routeOptions.voiceInstructions() ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
                 bannerInstruction = routeOptions.bannerInstructions() ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
-                roundaboutExits = routeOptions.roundaboutExits() ?: RouteUrl.ROUND_ABOUTEXITS_DEFAULT_VALUE
+                roundaboutExits = routeOptions.roundaboutExits() ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE
             )
         ).build()
 
