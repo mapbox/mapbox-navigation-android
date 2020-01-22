@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -72,7 +73,7 @@ object ThreadController {
      * a kill switch for all non-UI scoped coroutines.
      */
     fun cancelAllNonUICoroutines() {
-        ioRootJob.cancel()
+        ioRootJob.cancelChildren()
     }
 
     /**
@@ -81,7 +82,7 @@ object ThreadController {
      * a kill switch for all UI scoped coroutines.
      */
     fun cancelAllUICoroutines() {
-        mainRootJob.cancel()
+        mainRootJob.cancelChildren()
     }
 
     /**

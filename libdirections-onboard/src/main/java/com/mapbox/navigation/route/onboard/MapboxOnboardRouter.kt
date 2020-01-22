@@ -21,7 +21,7 @@ import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -41,7 +41,9 @@ class MapboxOnboardRouter : Router {
     private val navigatorNative: MapboxNativeNavigator
     private val config: MapboxOnboardRouterConfig
     private val logger: Logger?
-    private val mainJobControl = ThreadController.getMainScopeAndRootJob()
+    private val mainJobControl by lazy {
+        ThreadController.getMainScopeAndRootJob()
+    }
     private val gson = Gson()
 
     /**
@@ -114,7 +116,7 @@ class MapboxOnboardRouter : Router {
     }
 
     override fun cancel() {
-        mainJobControl.scope.cancel()
+        mainJobControl.job.cancelChildren()
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {

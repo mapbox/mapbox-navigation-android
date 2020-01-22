@@ -29,6 +29,7 @@ import com.mapbox.navigation.utils.NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.NOTIFICATION_ID
 import com.mapbox.navigation.utils.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.thread.ifChannelException
 import java.util.Calendar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
@@ -109,13 +110,8 @@ class MapboxTripNotification constructor(
         try {
             notificationActionButtonChannel.cancel()
         } catch (e: Exception) {
-            when (e) {
-                is ClosedReceiveChannelException,
-                is ClosedSendChannelException -> {
-                }
-                else -> {
-                    throw e
-                }
+            e.ifChannelException {
+                // Do nothing
             }
         }
     }
