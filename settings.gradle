@@ -10,4 +10,5 @@ include ':app',
         ':libnavigation-metrics',
         ':libtrip-notification',
         ':liblogger',
-        ':libnavigation-util'
+        ':libnavigation-util',
+        ':libnavigation-core'
