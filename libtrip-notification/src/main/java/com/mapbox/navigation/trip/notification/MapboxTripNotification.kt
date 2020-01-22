@@ -151,7 +151,7 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Creates notification view for collapsed and expanded states
+     * Creates live and interactive views displayed in the notification's layout.
      *
      * @since 1.0.0
      */
@@ -176,10 +176,10 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Creates [PendingIntent] for open application when notification view is clicked
+     * Creates [PendingIntent] for opening application when notification view is clicked
      *
      * @param applicationContext is [Context]
-     * @return [PendingIntent] for open application
+     * @return [PendingIntent] to opening application
      * @since 1.0.0
      */
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
@@ -190,11 +190,11 @@ class MapboxTripNotification constructor(
     }
 
     /**
-     * Creates [PendingIntent] for finish navigation process ([TripSession]) when
+     * Creates [PendingIntent] for stopping [TripSession] when
      * proper button is clicked in the navigation view
      *
      * @param applicationContext is [Context]
-     * @return [PendingIntent] for end navigation process
+     * @return [PendingIntent] for stopping [TripSession]
      * @since 1.0.0
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {

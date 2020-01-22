@@ -4,8 +4,8 @@ import android.app.Notification
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
 /**
- * Defines notification showing to user during navigation process
- * launched with a [TripSession].
+ * Defines a contract for [Notification] instance provider and manager.
+ * This notification is going to be used in a foreground service managed by a [TripSession]
  *
  * @since 1.0.0
  */
