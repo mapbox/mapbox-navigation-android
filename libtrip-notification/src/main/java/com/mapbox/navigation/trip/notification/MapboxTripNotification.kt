@@ -64,6 +64,7 @@ class MapboxTripNotification constructor(
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         pendingCloseIntent = createPendingCloseIntent(applicationContext)
+        buildRemoteViews()
         createNotificationChannel()
     }
 
@@ -196,14 +197,13 @@ class MapboxTripNotification constructor(
         }
 
     private fun updateNotificationViews(routeProgress: RouteProgress) {
-        buildRemoteViews()
         updateInstructionText(routeProgress.bannerInstructions())
         updateDistanceText(routeProgress)
         generateArrivalTime(routeProgress, Calendar.getInstance())?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
-            routeProgress.currentLegProgress()?.upcomingStep()?.let { step ->
-                updateManeuverImage(step)
-            } ?: routeProgress.currentLegProgress()?.currentStepProgress()?.step()
+            val step = routeProgress.currentLegProgress()?.upcomingStep()
+                ?: routeProgress.currentLegProgress()?.currentStepProgress()?.step()
+            step?.let { updateManeuverImage(it) }
         }
     }
 
@@ -282,32 +282,26 @@ class MapboxTripNotification constructor(
     }
 
     private fun getManeuverResource(step: LegStep): Int {
-        val maneuver = step.maneuver()
-        val maneuverType = maneuver.type()
-        maneuver.let { stepManeuver ->
-            val maneuverModifier = stepManeuver.modifier()
-            if (!TextUtils.isEmpty(maneuverModifier)) {
-                val drivingSide = step.drivingSide()
-                val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                    maneuverType,
-                    maneuverModifier,
-                    drivingSide
-                )
-                return when (isLeftSideDriving) {
-                    true -> {
-                        ManeuverResource.obtainManeuverResource(
-                            maneuverType + maneuverModifier + drivingSide
-                        )
-                    }
-                    else -> {
-                        ManeuverResource.obtainManeuverResource(
-                            maneuverType + maneuverModifier
-                        )
-                    }
-                }
+        val stepManeuver = step.maneuver()
+        val maneuverType = stepManeuver.type()
+        val maneuverModifier = stepManeuver.modifier()
+        val isModifierNotEmpty = TextUtils.isEmpty(maneuverModifier).not()
+        val maneuverResourceString = if (isModifierNotEmpty) {
+            val drivingSide = step.drivingSide()
+            val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
+                maneuverType,
+                maneuverModifier,
+                drivingSide
+            )
+            if (isLeftSideDriving) {
+                maneuverType + maneuverModifier + drivingSide
+            } else {
+                maneuverType + maneuverModifier
             }
+        } else {
+            maneuverType
         }
-        return ManeuverResource.obtainManeuverResource(maneuverType)
+        return ManeuverResource.obtainManeuverResource(maneuverResourceString)
     }
 
     private fun isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
