@@ -24,6 +24,9 @@ import com.mapbox.navigation.examples.activity.OffboardRouterActivityJava;
 import com.mapbox.navigation.examples.activity.OffboardRouterActivityKt;
 import com.mapbox.navigation.examples.activity.OnboardRouterActivityJava;
 import com.mapbox.navigation.examples.activity.OnboardRouterActivityKt;
+import com.mapbox.navigation.examples.activity.SimpleMapboxNavigationKt;
+import com.mapbox.navigation.examples.activity.TripServiceActivityKt;
+import com.mapbox.navigation.examples.activity.TripSessionActivityKt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +59,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
       new SampleItem(
+        getString(R.string.title_simple_navigation_kotlin),
+        getString(R.string.description_simple_navigation_kotlin),
+        SimpleMapboxNavigationKt.class
+      ),
+      new SampleItem(
         getString(R.string.title_mock_navigation),
         getString(R.string.description_mock_navigation),
         MockNavigationActivity.class
@@ -79,6 +87,16 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         getString(R.string.title_onboard_router_java),
         getString(R.string.description_onboard_router_java),
         OnboardRouterActivityJava.class
+      ),
+      new SampleItem(
+        getString(R.string.title_trip_service_kotlin),
+        getString(R.string.description_trip_service_kotlin),
+        TripServiceActivityKt.class
+      ),
+      new SampleItem(
+        getString(R.string.title_trip_session_kotlin),
+        getString(R.string.description_trip_session_kotlin),
+        TripSessionActivityKt.class
       )
     ));
 

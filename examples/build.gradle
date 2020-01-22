@@ -83,6 +83,7 @@ android {
 }
 
 dependencies {
+    implementation project(':libnavigation-core')
     implementation project(':libdirections-offboard')
     implementation project(':libdirections-onboard')
     implementation project(':libtrip-notification')
@@ -102,6 +103,7 @@ dependencies {
 
     // Mapbox Navigation SDK
     implementation project(':libandroid-navigation-ui')
+    implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxMapSdk
     implementation dependenciesList.mapboxSearchSdk
     implementation dependenciesList.mapboxCrashMonitor
