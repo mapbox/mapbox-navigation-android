@@ -49,6 +49,11 @@ class MapboxTripNotification constructor(
     private val applicationContext: Context,
     private val navigationOptions: NavigationOptions
 ) : TripNotification {
+
+    companion object {
+        var notificationActionButtonChannel = Channel<NotificationAction>(1)
+    }
+
     private var currentManeuverId = 0
     private var currentInstructionText: String? = null
     private var currentDistanceText: SpannableString? = null
@@ -145,6 +150,11 @@ class MapboxTripNotification constructor(
         return builder
     }
 
+    /**
+     * Creates notification view for collapsed and expanded states
+     *
+     * @since 1.0.0
+     */
     private fun buildRemoteViews() {
         val backgroundColor =
             ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
@@ -165,6 +175,13 @@ class MapboxTripNotification constructor(
         }
     }
 
+    /**
+     * Creates [PendingIntent] for open application when notification view is clicked
+     *
+     * @param applicationContext is [Context]
+     * @return [PendingIntent] for open application
+     * @since 1.0.0
+     */
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
         val pm = applicationContext.packageManager
         val intent = pm.getLaunchIntentForPackage(applicationContext.packageName) ?: return null
@@ -172,6 +189,14 @@ class MapboxTripNotification constructor(
         return PendingIntent.getActivity(applicationContext, 0, intent, 0)
     }
 
+    /**
+     * Creates [PendingIntent] for finish navigation process ([TripSession]) when
+     * proper button is clicked in the navigation view
+     *
+     * @param applicationContext is [Context]
+     * @return [PendingIntent] for end navigation process
+     * @since 1.0.0
+     */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
         val endNavigationBtn = Intent(END_NAVIGATION_ACTION)
         return PendingIntent.getBroadcast(applicationContext, 0, endNavigationBtn, 0)
@@ -343,10 +368,6 @@ class MapboxTripNotification constructor(
                 }
             }
         }
-    }
-
-    companion object {
-        var notificationActionButtonChannel = Channel<NotificationAction>(1)
     }
 
     inner class NotificationActionReceiver : BroadcastReceiver() {
