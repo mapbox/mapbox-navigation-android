@@ -9,13 +9,31 @@ import com.mapbox.navigation.logger.annotations.LogLevel
 import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
+/**
+ * Default implementation of [Logger] interface
+ *
+ * @since 1.0.0
+ */
+
 @MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
 object MapboxLogger : Logger {
 
+    /**
+     * Defines level of logs need to be logged.
+     * For example, if current logLevel is INFO:
+     *  - MapboxLogger.d("Message") - will not log anything
+     *  - MapboxLogger.i("Message") - will log "Message"
+     *  - MapboxLogger.w("Message") - will log "Message"
+     *
+     * @since 1.0.0
+     */
     @LogLevel
     @Volatile
     var logLevel: Int = VERBOSE
 
+    /**
+     * Observes logged messages.
+     */
     private val observer: AtomicReference<LoggerObserver> = AtomicReference()
 
     fun setObserver(observer: LoggerObserver) {

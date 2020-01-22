@@ -3,6 +3,12 @@ package com.mapbox.navigation.base.logger
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 
+/**
+ * Defines API for logging events.
+ *
+ * @since 1.0.0
+ */
+
 interface Logger {
     /**
      * Send a verbose log message and log the exception.
