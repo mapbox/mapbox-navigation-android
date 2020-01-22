@@ -99,10 +99,10 @@ class MapboxOnboardRouter : Router {
                 orgin = origin,
                 waypoints = waypoints,
                 destination = destination,
-                steps = routeOptions.steps() ?: false,
-                voiceIntruction = routeOptions.voiceInstructions() ?: false,
-                bannerIntruction = routeOptions.bannerInstructions() ?: false,
-                roundaboutExits = routeOptions.roundaboutExits() ?: false
+                steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
+                voiceInstruction = routeOptions.voiceInstructions() ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
+                bannerInstruction = routeOptions.bannerInstructions() ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
+                roundaboutExits = routeOptions.roundaboutExits() ?: RouteUrl.ROUND_ABOUTEXITS_DEFAULT_VALUE
             )
         ).build()
 

@@ -10,13 +10,13 @@ class RouteUrl(
     val destination: Point,
     val user: String = PROFILE_DEFAULT_USER,
     val profile: String = PROFILE_DRIVING,
-    val steps: Boolean = true,
+    val steps: Boolean = STEPS_DEFAULT_VALUE,
     val geometries: String = GEOMETRY_POLYLINE6,
     val overview: String = OVERVIEW_FULL,
-    val voiceIntruction: Boolean = true,
-    val bannerIntruction: Boolean = true,
-    val roundaboutExits: Boolean = true,
-    val enableRefresh: Boolean = true
+    val voiceInstruction: Boolean = VOICE_INSTRUCTION_DEFAULT_VALUE,
+    val bannerInstruction: Boolean = BANNER_INSTRUCTION_DEFAULT_VALUE,
+    val roundaboutExits: Boolean = ROUND_ABOUTEXITS_DEFAULT_VALUE,
+    val enableRefresh: Boolean = ENABLE_REFRESH_DEFAULT_VALUE
 ) {
 
     companion object {
@@ -33,6 +33,12 @@ class RouteUrl(
         private const val QUERY_PARAM_BANNER_INSTRUCTIONS = "banner_instructions"
         private const val QUERY_PARAM_ROUNDABOUT_EXITS = "roundabout_exits"
         private const val QUERY_PARAM_ENABLE_REFRESH = "enable_refresh"
+
+        const val STEPS_DEFAULT_VALUE = true
+        const val VOICE_INSTRUCTION_DEFAULT_VALUE = true
+        const val BANNER_INSTRUCTION_DEFAULT_VALUE = true
+        const val ROUND_ABOUTEXITS_DEFAULT_VALUE = true
+        const val ENABLE_REFRESH_DEFAULT_VALUE = true
 
         /**
          * Mapbox default username.
@@ -121,8 +127,8 @@ class RouteUrl(
             .appendQueryParameter(QUERY_PARAM_STEPS, steps.toString())
             .appendQueryParameter(QUERY_PARAM_GEOMERTY, geometries)
             .appendQueryParameter(QUERY_PARAM_OVERVIEW, overview)
-            .appendQueryParameter(QUERY_PARAM_VOICE_INSTRUCTIONS, voiceIntruction.toString())
-            .appendQueryParameter(QUERY_PARAM_BANNER_INSTRUCTIONS, bannerIntruction.toString())
+            .appendQueryParameter(QUERY_PARAM_VOICE_INSTRUCTIONS, voiceInstruction.toString())
+            .appendQueryParameter(QUERY_PARAM_BANNER_INSTRUCTIONS, bannerInstruction.toString())
             .appendQueryParameter(QUERY_PARAM_ROUNDABOUT_EXITS, roundaboutExits.toString())
             .appendQueryParameter(QUERY_PARAM_ENABLE_REFRESH, enableRefresh.toString())
             .build()
