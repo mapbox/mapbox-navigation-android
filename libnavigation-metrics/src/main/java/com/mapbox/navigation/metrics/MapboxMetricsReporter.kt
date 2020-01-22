@@ -67,7 +67,7 @@ object MapboxMetricsReporter : MetricsReporter {
     /**
      * Disable [mapboxTelemetry] to finish telemetry session when it needed.
      * This method also removes metrics observer and stops background thread used for
-     * sending events to observer.
+     * events dispatching.
      *
      * @since 1.0.0
      */
