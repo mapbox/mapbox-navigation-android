@@ -78,6 +78,7 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:assembleDebug
 	./gradlew :libnavigator:assembleDebug
 	./gradlew :libtrip-notification:assembleDebug
+	./gradlew :libnavigation-core:assembleDebug
 
 .PHONY: 1.0-build-release
 1.0-build-release:
@@ -89,6 +90,7 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:assembleRelease
 	./gradlew :libnavigator:assembleRelease
 	./gradlew :libtrip-notification:assembleRelease
+	./gradlew :libnavigation-core:assembleRelease
 
 .PHONY: 1.0-unit-tests
 1.0-unit-tests:
@@ -97,11 +99,11 @@ navigation-fixtures:
 	./gradlew :libdirections-onboard:test
 	./gradlew :liblogger:test
 	./gradlew :libnavigation-base:test
-	./gradlew :libnavigation-core:test
 	./gradlew :libnavigation-metrics:test
 	./gradlew :libnavigation-util:test
 	./gradlew :libnavigator:test
 	./gradlew :libtrip-notification:test
+	./gradlew :libnavigation-core:test
 
 .PHONY: 1.0-publish-to-bintray
 1.0-publish-to-bintray:
@@ -113,6 +115,7 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:bintrayUpload
 	./gradlew :libnavigator:bintrayUpload
 	./gradlew :libtrip-notification:bintrayUpload
+	./gradlew :libnavigation-core:bintrayUpload
 
 .PHONY: 1.0-publish-to-artifactory
 1.0-publish-to-artifactory:
@@ -124,3 +127,4 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:artifactoryPublish
 	./gradlew :libnavigator:artifactoryPublish
 	./gradlew :libtrip-notification:artifactoryPublish
+	./gradlew :libnavigation-core:artifactoryPublish
