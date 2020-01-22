@@ -8,6 +8,7 @@ workflows:
       - build-1.0
       - release
       - release-1.0
+      - ui-tests
       - publish:
           filters:
             tags:
@@ -138,6 +139,59 @@ jobs:
       - run:
           name: Run unit-test
           command: make 1.0-unit-tests
+
+  ui-tests:
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}
+            - deps-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}
+      - run:
+          name: Export secrets for developer-config.xml
+          command: |
+            #!/bin/bash
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/app/src/main/res/values/developer-config.xml
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/examples/src/main/res/values/developer-config.xml
+      - run:
+          name: Build Test Application APK
+          command: ./gradlew examples:assembleDebug
+      - run:
+          name: Build Instrumentation Test APK
+          command: ./gradlew examples:assembleAndroidTest
+      - run:
+          name: Log in to Google Cloud Platform
+          shell: /bin/bash -euo pipefail
+          command: |
+            echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
+            gcloud auth activate-service-account --key-file secret.json --project mapbox-navigation-android
+            rm secret.json
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app examples/build/outputs/apk/debug/examples-debug.apk \
+              --test examples/build/outputs/apk/androidTest/debug/examples-debug-androidTest.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --timeout 5m
 
 # ------------------------------------------------------------------------------
   release:

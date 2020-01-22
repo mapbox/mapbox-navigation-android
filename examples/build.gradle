@@ -90,6 +90,7 @@ dependencies {
     implementation project(':libnavigation-util')
     implementation project(':liblogger')
     implementation project(':libnavigator')
+    androidTestImplementation project(':libtesting-ui')
 
     //ktlint
     ktlint dependenciesList.ktlint
@@ -104,22 +105,12 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libandroid-navigation-ui')
     implementation dependenciesList.mapboxAnnotationPlugin
-    implementation dependenciesList.mapboxMapSdk
-    implementation dependenciesList.mapboxSearchSdk
-    implementation dependenciesList.mapboxCrashMonitor
 
     // Support libraries
     implementation dependenciesList.supportAppcompatV7
     implementation dependenciesList.supportDesign
-    implementation dependenciesList.supportRecyclerView
-    implementation dependenciesList.supportConstraintLayout
-    implementation dependenciesList.supportCardView
-    implementation dependenciesList.lifecycleExtensions
 
     implementation dependenciesList.gmsLocation
-
-    implementation dependenciesList.firebaseCore
-    implementation dependenciesList.crashlytics
 
     implementation dependenciesList.multidex
 
@@ -134,18 +125,6 @@ dependencies {
     debugImplementation dependenciesList.leakCanaryDebug
     releaseImplementation dependenciesList.leakCanaryRelease
     androidTestImplementation dependenciesList.leakCanaryTest
-
-    // Unit Testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockito
-    testImplementation dependenciesList.mockk
-
-    // Instrumentation testing
-    androidTestImplementation dependenciesList.testRules
-    androidTestImplementation(dependenciesList.testEspressoCore, {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    androidTestImplementation dependenciesList.testEspressoContrib
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"
