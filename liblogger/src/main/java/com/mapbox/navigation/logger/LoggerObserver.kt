@@ -5,8 +5,6 @@ import com.mapbox.navigation.logger.annotations.LogLevel
 
 /**
  * Defines API observe events logged by [Logger].
- *
- * @since 1.0.0
  */
 interface LoggerObserver {
 
@@ -15,7 +13,6 @@ interface LoggerObserver {
      *
      * @param level [LogLevel] indicates which level has observed [LogEntry].
      * @param entry [LogEntry] sent with observer.
-     * @since 1.0.0
      */
     fun log(@LogLevel level: Int, entry: LogEntry)
 }

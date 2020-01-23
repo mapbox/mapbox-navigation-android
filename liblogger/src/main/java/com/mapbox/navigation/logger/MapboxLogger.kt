@@ -11,8 +11,6 @@ import timber.log.Timber
 
 /**
  * Default implementation of [Logger] interface
- *
- * @since 1.0.0
  */
 
 @MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
@@ -24,8 +22,6 @@ object MapboxLogger : Logger {
      *  - MapboxLogger.d("Message") - will not log anything
      *  - MapboxLogger.i("Message") - will log "Message"
      *  - MapboxLogger.w("Message") - will log "Message"
-     *
-     * @since 1.0.0
      */
     @LogLevel
     @Volatile

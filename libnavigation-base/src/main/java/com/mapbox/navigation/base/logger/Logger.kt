@@ -5,8 +5,6 @@ import com.mapbox.navigation.base.logger.model.Tag
 
 /**
  * Defines API for logging events.
- *
- * @since 1.0.0
  */
 
 interface Logger {
@@ -17,7 +15,6 @@ interface Logger {
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
-     * @since 1.0.0
      */
     fun v(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
@@ -28,7 +25,6 @@ interface Logger {
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
-     * @since 1.0.0
      */
     fun d(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
@@ -39,7 +35,6 @@ interface Logger {
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
-     * @since 1.0.0
      */
     fun i(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
@@ -50,7 +45,6 @@ interface Logger {
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
-     * @since 1.0.0
      */
     fun w(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 
@@ -61,7 +55,6 @@ interface Logger {
      * the class or activity where the log call occurs.
      * @param msg is [Message] you would like logged.
      * @param tr An exception to log
-     * @since 1.0.0
      */
     fun e(tag: Tag? = null, msg: Message, tr: Throwable? = null)
 }
