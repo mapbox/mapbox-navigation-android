@@ -45,9 +45,6 @@ class MapboxNavigation(
         .build()
 ) {
 
-    private val bannerInstructionsObservers = CopyOnWriteArrayList<BannerInstructionsObserver>()
-    private val voiceInstructionsObservers = CopyOnWriteArrayList<VoiceInstructionsObserver>()
-
     private var mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private val tripService: TripService
