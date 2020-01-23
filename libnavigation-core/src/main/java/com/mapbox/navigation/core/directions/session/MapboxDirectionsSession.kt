@@ -32,10 +32,14 @@ class MapboxDirectionsSession(
                         emptyList()
                     )
                 }
-                is State.RoutesAvailable -> routeObservers.forEach {
-                    it.onRoutesChanged(
-                        currentRoutes
-                    )
+                is State.RoutesAvailable -> {
+                    // start the timer only when the route has been requested at least once
+                    fasterRouteTimer.start()
+                    routeObservers.forEach {
+                        it.onRoutesChanged(
+                            currentRoutes
+                        )
+                    }
                 }
                 is State.UserRoutesRequestInProgress -> routeObservers.forEach { it.onRoutesRequested() }
                 is State.UserRoutesRequestFailed -> {
@@ -65,8 +69,6 @@ class MapboxDirectionsSession(
             override fun onResponse(routes: List<DirectionsRoute>) {
                 currentRoutes = routes
                 state = State.RoutesAvailable
-                // start the timer only when the route has been requested at least once
-                fasterRouteTimer.start()
             }
 
             override fun onFailure(throwable: Throwable) {
