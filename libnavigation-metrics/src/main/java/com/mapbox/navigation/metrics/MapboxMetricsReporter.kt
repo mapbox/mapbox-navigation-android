@@ -60,7 +60,7 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * Disable metrics reporting and ends [mapboxTelemetry] session.
+     * Disables metrics reporting and ends [mapboxTelemetry] session.
      * This method also removes metrics observer and stops background thread used for
      * events dispatching.
      */
