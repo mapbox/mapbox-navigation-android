@@ -95,7 +95,7 @@ class MapboxDirectionsSession(
     }
 
     private fun requestFasterRoute(routeOptions: RouteOptions) {
-        if (state == State.UserRoutesRequestInProgress) {
+        if (state != State.RoutesAvailable) {
             return
         }
         router.getRoute(routeOptions, object : Router.Callback {

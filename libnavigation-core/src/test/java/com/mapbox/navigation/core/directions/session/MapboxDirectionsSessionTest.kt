@@ -158,7 +158,7 @@ class MapboxDirectionsSessionTest {
         val throwable: Throwable = mockk()
         callback.onFailure(throwable)
         delayLambda()
-        verify(exactly = 2) { router.getRoute(any(), any()) }
+        verify(exactly = 1) { router.getRoute(any(), any()) }
     }
 
     @Test
