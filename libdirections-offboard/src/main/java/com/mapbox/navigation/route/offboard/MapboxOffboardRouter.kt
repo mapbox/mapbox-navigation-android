@@ -7,7 +7,9 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.route.offboard.router.addInterceptor
 import com.mapbox.navigation.route.offboard.router.routeOptions
+import com.mapbox.navigation.sku.accounts.SkuInterceptor
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,6 +30,7 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
     ) {
         mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context)
             .routeOptions(routeOptions)
+            .addInterceptor(SkuInterceptor(context))
             .build()
         mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
 
