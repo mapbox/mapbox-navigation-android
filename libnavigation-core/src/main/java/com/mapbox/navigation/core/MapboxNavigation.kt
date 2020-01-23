@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.typedef.TWELVE_HOURS
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
+import com.mapbox.navigation.core.sku.NavigationSession
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -34,7 +35,6 @@ import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import java.lang.reflect.Field
-import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
 
 class MapboxNavigation(
@@ -46,10 +46,11 @@ class MapboxNavigation(
         .build()
 ) {
 
-    private var mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
+    private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private val tripService: TripService
     private val tripSession: TripSession
+    private val navigationSession = NavigationSession(context)
 
     private var notificationChannelField: Field? = null
 
@@ -61,6 +62,9 @@ class MapboxNavigation(
                 ::paramsProvider
             )
         )
+        directionsSession.registerRouteObserver(createInternalRouteObserver())
+        directionsSession.registerRouteObserver(navigationSession)
+
         val notification: TripNotification = NavigationModuleProvider.createModule(
             MapboxNavigationModuleType.TripNotification,
             ::paramsProvider
@@ -71,7 +75,6 @@ class MapboxNavigation(
                     isAccessible = true
                 }
         }
-
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
             notification
@@ -81,9 +84,8 @@ class MapboxNavigation(
             locationEngine,
             locationEngineRequest
         )
-
-        directionsSession.registerRouteObserver(createInternalRouteObserver())
         tripSession.registerOffRouteObserver(createInternalOffRouteObserver())
+        tripSession.registerStateObserver(navigationSession)
     }
 
     fun startTripSession() {
