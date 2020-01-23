@@ -15,13 +15,13 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter private constructor(
+class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
-    private val skuTokenProvider: SkuTokenProvider
+    private val skuTokenProvider: SkuTokenProvider?
 ) : Router {
 
-    constructor(accessToken: String, context: Context): this(accessToken, context)
+    constructor(accessToken: String, context: Context) : this(accessToken, context, null)
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"

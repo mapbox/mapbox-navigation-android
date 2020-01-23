@@ -8,9 +8,10 @@ import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 
-internal class MapboxNavigationAccounts private constructor(): SkuTokenProvider {
+internal class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
 
     companion object {
+        private const val SKU_KEY = "sku"
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
         private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
         private const val TRIPS_REQUEST_COUNT_THRESHOLD = 5
@@ -43,7 +44,7 @@ internal class MapboxNavigationAccounts private constructor(): SkuTokenProvider 
         val skuToken = skuGenerator?.generateToken()
         check(!skuToken.isNullOrEmpty()) { "MapboxNavigationAccounts: skuToken cannot be null or empty" }
 
-        return when(resourceUrl.isNullOrEmpty() && querySize < 0) {
+        return when (resourceUrl.isNullOrEmpty() && querySize < 0) {
             true -> { skuToken }
             false -> { buildResourceUrlWithSku(resourceUrl!!, querySize, skuToken) }
         }
@@ -64,7 +65,7 @@ internal class MapboxNavigationAccounts private constructor(): SkuTokenProvider 
         } else {
             urlBuilder.append("&")
         }
-        urlBuilder.append("sku=$skuToken")
+        urlBuilder.append("$SKU_KEY=$skuToken")
         urlBuilder.toString()
         return urlBuilder.toString()
     }

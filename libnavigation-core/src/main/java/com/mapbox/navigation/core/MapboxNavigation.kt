@@ -8,6 +8,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -18,6 +19,7 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.TWELVE_HOURS
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteObserver
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.accounts.NavigationSession
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
@@ -286,7 +288,8 @@ class MapboxNavigation(
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
                     ?: throw RuntimeException("You need to provide an access in order to use the default OffboardRouter.")),
-                Context::class.java to context
+                Context::class.java to context,
+                SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxNavigationModuleType.OnboardRouter -> arrayOf()
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version

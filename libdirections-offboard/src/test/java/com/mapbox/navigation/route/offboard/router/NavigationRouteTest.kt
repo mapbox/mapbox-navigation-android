@@ -250,7 +250,7 @@ class NavigationRouteTest {
     }
 
     private fun provideNavigationOffboardRouteBuilder() =
-        RouteBuilderProvider.getBuilder(ACESS_TOKEN, context)
+        RouteBuilderProvider.getBuilder(ACESS_TOKEN, context, null)
 
     private fun provideDefaultRouteOptionsBuilder() =
         RouteOptions.builder()
