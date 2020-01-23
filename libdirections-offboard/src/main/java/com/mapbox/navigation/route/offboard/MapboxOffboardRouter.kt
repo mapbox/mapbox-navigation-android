@@ -6,6 +6,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.utils.exceptions.NavigationException
@@ -14,7 +15,13 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @MapboxNavigationModule(MapboxNavigationModuleType.OffboardRouter, skipConfiguration = true)
-class MapboxOffboardRouter(private val accessToken: String, private val context: Context) : Router {
+class MapboxOffboardRouter private constructor(
+    private val accessToken: String,
+    private val context: Context,
+    private val skuTokenProvider: SkuTokenProvider
+) : Router {
+
+    constructor(accessToken: String, context: Context): this(accessToken, context)
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"
@@ -26,7 +33,7 @@ class MapboxOffboardRouter(private val accessToken: String, private val context:
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context)
+        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, skuTokenProvider)
             .routeOptions(routeOptions)
             .build()
         mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
