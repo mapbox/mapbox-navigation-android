@@ -8,7 +8,6 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -314,42 +313,4 @@ class MapboxNavigation(
     companion object {
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
     }
-}
-
-private fun RouteOptions.toBuilder(): RouteOptions.Builder {
-    val builder = RouteOptions.builder()
-        .applyDefaultParams()
-        .accessToken(this.accessToken())
-        .alternatives(this.alternatives())
-        .annotations(this.annotations())
-        .approaches(this.approaches())
-        .bannerInstructions(this.bannerInstructions())
-        .baseUrl(this.baseUrl())
-        .bearings(this.bearings())
-        .continueStraight(this.continueStraight())
-        .coordinates(this.coordinates())
-        .geometries(this.geometries())
-        .language(this.language())
-        .overview(this.overview())
-        .profile(this.profile())
-        .radiuses(this.radiuses())
-        .requestUuid(this.requestUuid())
-        .roundaboutExits(this.roundaboutExits())
-        .steps(this.steps())
-        .user(this.user())
-        .voiceInstructions(this.voiceInstructions())
-        .voiceUnits(this.voiceUnits())
-        .waypointIndices(this.waypointIndices())
-        .waypointNames(this.waypointNames())
-        .waypointTargets(this.waypointTargets())
-
-    // todo fix mapbox-java annotation
-    this.exclude()?.let {
-        builder.exclude(it)
-    }
-    this.walkingOptions()?.let {
-        builder.walkingOptions(it)
-    }
-
-    return builder
 }
