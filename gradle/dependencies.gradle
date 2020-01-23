@@ -13,7 +13,7 @@ ext {
       mapboxSdkDirectionsModels : '5.1.0-SNAPSHOT',
       mapboxEvents              : '4.5.1',
       mapboxCore                : '1.3.0',
-      mapboxNavigator           : 'mvr-to-nikita-SNAPSHOT-1',
+      mapboxNavigator           : '9.0.2',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.7.0',
       mapboxAccounts            : '0.2.0',
