@@ -157,6 +157,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         mapView.onDestroy()
         mapboxNavigation.stopTripSession()
+        mapboxNavigation.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

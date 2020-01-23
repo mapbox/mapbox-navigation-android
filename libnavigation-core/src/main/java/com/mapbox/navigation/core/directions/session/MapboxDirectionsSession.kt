@@ -18,7 +18,7 @@ class MapboxDirectionsSession(
     private val fasterRouteTimer =
         NavigationComponentProvider.createMapboxTimer(fasterRouteInterval) {
             _routeOptions?.let { requestFasterRoute(it) }
-        }.apply { start() }
+        }
 
     private var state: State = State.NoRoutesAvailable
         set(value) {
@@ -32,10 +32,14 @@ class MapboxDirectionsSession(
                         emptyList()
                     )
                 }
-                is State.RoutesAvailable -> routeObservers.forEach {
-                    it.onRoutesChanged(
-                        currentRoutes
-                    )
+                is State.RoutesAvailable -> {
+                    // start the timer only when the route has been requested at least once
+                    fasterRouteTimer.start()
+                    routeObservers.forEach {
+                        it.onRoutesChanged(
+                            currentRoutes
+                        )
+                    }
                 }
                 is State.UserRoutesRequestInProgress -> routeObservers.forEach { it.onRoutesRequested() }
                 is State.UserRoutesRequestFailed -> {

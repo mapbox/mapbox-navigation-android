@@ -127,6 +127,7 @@ class MapboxDirectionsSessionTest {
     @Test
     fun fasterRoute_timerStartedOnce() {
         session.requestRoutes(routeOptions)
+        callback.onResponse(routes)
         session.requestRoutes(routeOptions)
         verify(exactly = 1) { mapboxTimer.start() }
     }
