@@ -7,7 +7,7 @@ import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 
-internal class MapboxNavigationAccounts private constructor() {
+class MapboxNavigationAccounts private constructor() {
 
     companion object {
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
@@ -19,12 +19,12 @@ internal class MapboxNavigationAccounts private constructor() {
 
         @JvmStatic
         fun getInstance(context: Context): MapboxNavigationAccounts =
-                INSTANCE ?: synchronized(this) {
-                    MapboxNavigationAccounts().also { mapboxNavigationAccount ->
-                        INSTANCE = mapboxNavigationAccount
-                        init(context)
-                    }
+            INSTANCE ?: synchronized(this) {
+                MapboxNavigationAccounts().also { mapboxNavigationAccount ->
+                    INSTANCE = mapboxNavigationAccount
+                    init(context)
                 }
+            }
 
         private fun init(context: Context) {
             val preferences = context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
@@ -35,7 +35,7 @@ internal class MapboxNavigationAccounts private constructor() {
         }
     }
 
-    fun obtainSkuToken(): String {
+    internal fun obtainSkuToken(): String {
         return skuGenerator?.generateToken()?.let { token ->
             token
         } ?: throw IllegalStateException("MapboxNavigationAccounts: skuGenerator cannot be null")
@@ -47,5 +47,18 @@ internal class MapboxNavigationAccounts private constructor() {
 
     fun navigationStarted() {
         skuGenerator?.onNavigationStart()
+    }
+
+    fun buildResourceUrlWithSku(resourceUrl: String, querySize: Int): String {
+        val urlBuilder = StringBuilder(resourceUrl)
+        if (querySize == 0) {
+            urlBuilder.append("?")
+        } else {
+            urlBuilder.append("&")
+        }
+
+        val skuToken = obtainSkuToken()
+        urlBuilder.append("sku=$skuToken")
+        return urlBuilder.toString()
     }
 }
