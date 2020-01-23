@@ -50,9 +50,6 @@ class MapboxTripNotificationTest {
         val distanceSlot = slot<Double>()
         distanceFormatter = mockk()
         every { distanceFormatter.formatDistance(capture(distanceSlot)) } returns distanceSpannable
-        // every { distanceSpannable.toString() } answers {
-        //     distanceSlot.captured.toString()
-        // }
         every { navigationOptions.distanceFormatter() } returns distanceFormatter
     }
 
@@ -345,8 +342,6 @@ class MapboxTripNotificationTest {
     ): RouteLegProgress {
         val currentLegProgress = mockk<RouteLegProgress>(relaxed = true)
         every { routeProgress.currentLegProgress() } returns currentLegProgress
-        // val currentStepProgress = mockk<RouteStepProgress>()
-        // every { currentLegProgress.currentStepProgress() } returns currentStepProgress
         every { currentLegProgress.currentStepProgress()?.distanceRemaining() } returns distance
         every { currentLegProgress.durationRemaining() } returns duration
         return currentLegProgress

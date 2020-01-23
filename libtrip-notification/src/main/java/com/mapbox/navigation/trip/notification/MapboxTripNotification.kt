@@ -10,7 +10,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.text.SpannableString
-import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -196,7 +195,6 @@ class MapboxTripNotification constructor(
         generateArrivalTime(routeProgress, Calendar.getInstance())?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
             val step = routeProgress.currentLegProgress()?.upcomingStep()
-                ?: routeProgress.currentLegProgress()?.currentStepProgress()?.step()
             step?.let { updateManeuverImage(it) }
         }
     }
@@ -295,18 +293,16 @@ class MapboxTripNotification constructor(
         val stepManeuver = step.maneuver()
         val maneuverType = stepManeuver.type()
         val maneuverModifier = stepManeuver.modifier()
-        val isModifierNotEmpty = TextUtils.isEmpty(maneuverModifier).not()
-        val maneuverResourceString = if (isModifierNotEmpty) {
+        val maneuverResourceString = if (maneuverModifier.isNullOrEmpty().not()) {
             val drivingSide = step.drivingSide()
             val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
                 maneuverType,
                 maneuverModifier,
                 drivingSide
             )
-            if (isLeftSideDriving) {
-                maneuverType + maneuverModifier + drivingSide
-            } else {
-                maneuverType + maneuverModifier
+            when (isLeftSideDriving) {
+                true -> maneuverType + maneuverModifier + drivingSide
+                false -> maneuverType + maneuverModifier
             }
         } else {
             maneuverType
