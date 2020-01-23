@@ -14,8 +14,6 @@ import kotlinx.coroutines.launch
 
 /**
  * Default implementation of [MetricsReporter] interface.
- *
- * @since 1.0.0
  */
 object MapboxMetricsReporter : MetricsReporter {
 
@@ -31,7 +29,6 @@ object MapboxMetricsReporter : MetricsReporter {
      * @param context Android context
      * @param accessToken Mapbox access token
      * @param userAgent Use agent indicate source of metrics
-     * @since 1.0.0
      */
     @JvmStatic
     fun init(
@@ -54,10 +51,9 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * Set flag to determine is need to log [mapboxTelemetry] events.
+     * Toggle whether or not you'd like to log [mapboxTelemetry] events.
      *
      * @param isDebugLoggingEnabled true to enable logging, false to disable logging
-     * @since 1.0.0
      */
     @JvmStatic
     fun toggleLogging(isDebugLoggingEnabled: Boolean) {
@@ -65,11 +61,9 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * Disable [mapboxTelemetry] to finish telemetry session when it needed.
+     * Disable metrics reporting and ends [mapboxTelemetry] session.
      * This method also removes metrics observer and stops background thread used for
      * events dispatching.
-     *
-     * @since 1.0.0
      */
     @JvmStatic
     fun disable() {
