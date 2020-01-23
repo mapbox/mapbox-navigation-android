@@ -88,7 +88,7 @@ class MapboxMetricsReporterTest {
         val parentJob = SupervisorJob()
         val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
         mockkObject(ThreadController)
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
         MapboxMetricsReporter.init(mapboxTelemetry, ThreadController)

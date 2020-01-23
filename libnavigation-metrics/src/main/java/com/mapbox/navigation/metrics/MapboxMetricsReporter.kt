@@ -23,7 +23,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var mapboxTelemetry: MapboxTelemetry
     @Volatile
     private var metricsObserver: MetricsObserver? = null
-    private var mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
+    private var ioJobController: JobControl = ThreadController.getIOScopeAndRootJob()
 
     /**
      * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
@@ -49,7 +49,7 @@ object MapboxMetricsReporter : MetricsReporter {
         threadController: ThreadController
     ) {
         this.mapboxTelemetry = mapboxTelemetry
-        this.mainJobController = threadController.getMainScopeAndRootJob()
+        this.ioJobController = threadController.getMainScopeAndRootJob()
         mapboxTelemetry.enable()
     }
 
@@ -73,7 +73,7 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         removeObserver()
         mapboxTelemetry.disable()
-        mainJobController.job.cancelChildren()
+        ioJobController.job.cancelChildren()
     }
 
     override fun addEvent(metricEvent: MetricEvent) {
@@ -81,7 +81,7 @@ object MapboxMetricsReporter : MetricsReporter {
             mapboxTelemetry.push(it)
         }
 
-        mainJobController.scope.launch {
+        ioJobController.scope.launch {
             metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
         }
     }
