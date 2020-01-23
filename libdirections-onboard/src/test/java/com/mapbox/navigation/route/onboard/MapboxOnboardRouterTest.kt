@@ -32,7 +32,7 @@ import org.robolectric.annotation.Config
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 class MapboxOnboardRouterTest {
 
     @get:Rule
