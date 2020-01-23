@@ -33,7 +33,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val listener = slot<Callback<DirectionsResponse>>()
 
         mockkObject(RouteBuilderProvider)
-        every { RouteBuilderProvider.getBuilder(accessToken, context) } returns mapboxDirectionsBuilder
+        every { RouteBuilderProvider.getBuilder(accessToken, context, null) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         every { mapboxDirections.enqueueCall(capture(listener)) } answers {

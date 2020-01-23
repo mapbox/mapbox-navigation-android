@@ -1,9 +1,7 @@
-package com.mapbox.navigation.core.sku
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.core.internal.accounts.NavigationSession
-import com.mapbox.navigation.sku.accounts.MapboxNavigationAccounts
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
