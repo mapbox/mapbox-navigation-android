@@ -40,8 +40,6 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
  * @param applicationContext is [Context]
  * @param navigationOptions is [NavigationOptions] used here to format
  * distance and time
- *
- * @since 1.0.0
  */
 @MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
 class MapboxTripNotification constructor(
@@ -152,8 +150,6 @@ class MapboxTripNotification constructor(
 
     /**
      * Creates live and interactive views displayed in the notification's layout.
-     *
-     * @since 1.0.0
      */
     private fun buildRemoteViews() {
         val backgroundColor =
@@ -190,7 +186,6 @@ class MapboxTripNotification constructor(
      *
      * @param applicationContext is [Context]
      * @return [PendingIntent] to opening application
-     * @since 1.0.0
      */
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
         val pm = applicationContext.packageManager
@@ -205,7 +200,6 @@ class MapboxTripNotification constructor(
      *
      * @param applicationContext is [Context]
      * @return [PendingIntent] for stopping [TripSession]
-     * @since 1.0.0
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
         val endNavigationBtn = Intent(END_NAVIGATION_ACTION)

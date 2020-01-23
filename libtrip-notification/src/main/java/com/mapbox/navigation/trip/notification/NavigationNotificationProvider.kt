@@ -5,8 +5,6 @@ import androidx.core.app.NotificationCompat
 
 /**
  * Provides notification for navigation process launched with a [TripSession]
- *
- * @since 1.0.0
  */
 internal object NavigationNotificationProvider {
 
@@ -16,7 +14,6 @@ internal object NavigationNotificationProvider {
      * @param builder is [NotificationCompat.Builder] used for
      * building notification
      * @return [Notification] was built based on [Notification.Builder] params
-     * @since 1.0.0
      */
     fun buildNotification(builder: NotificationCompat.Builder): Notification {
         return builder.build()
