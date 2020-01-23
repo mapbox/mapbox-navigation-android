@@ -22,7 +22,6 @@ android {
 dependencies {
 
     implementation project(':libnavigation-util')
-    implementation dependenciesList.okhttp
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.mapboxAndroidAccounts
 
