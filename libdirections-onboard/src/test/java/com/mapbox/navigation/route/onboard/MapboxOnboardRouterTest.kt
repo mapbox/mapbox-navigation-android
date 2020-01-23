@@ -27,10 +27,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@Config(manifest=Config.NONE)
 class MapboxOnboardRouterTest {
 
     @get:Rule
@@ -167,14 +169,14 @@ class MapboxOnboardRouterTest {
             .applyDefaultParams()
             .apply {
                 accessToken(ACCESS_TOKEN)
-                coordinates(orgin, waypoints, destination)
+                coordinates(origin, waypoints, destination)
             }.build()
     }
 
     companion object {
         private const val ACCESS_TOKEN = "pk.1234"
 
-        private val orgin = Point.fromLngLat(.0, .0)
+        private val origin = Point.fromLngLat(.0, .0)
         private val waypoints = listOf(Point.fromLngLat(.42, .11))
         private val destination = Point.fromLngLat(1.83, 1232.01)
 
@@ -239,7 +241,7 @@ class MapboxOnboardRouterTest {
 
         private val URL = RouteUrl(
             accessToken = ACCESS_TOKEN,
-            orgin = orgin,
+            orgin = origin,
             waypoints = waypoints,
             destination = destination
         ).getRequest()
