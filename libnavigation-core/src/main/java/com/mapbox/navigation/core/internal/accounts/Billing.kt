@@ -1,4 +1,4 @@
-package com.mapbox.navigation.sku.accounts
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -15,7 +15,8 @@ internal class Billing private constructor() {
 
     companion object {
         private var INSTANCE: Billing? = null
-        private var billingType = BillingModel.TRIPS
+        private var billingType =
+            BillingModel.TRIPS
 
         fun getInstance(context: Context): Billing =
                 INSTANCE ?: synchronized(this) {
@@ -37,7 +38,10 @@ internal class Billing private constructor() {
         }
 
         private fun setBillingType(context: Context) {
-            val applicationInfo = getApplicationInfo(context)
+            val applicationInfo =
+                getApplicationInfo(
+                    context
+                )
             applicationInfo?.let { appInfo ->
                 appInfo.metaData?.let { metadata ->
                     billingType = when (metadata.getBoolean(KEY_META_DATA_MANAGE_SKU, DEFAULT_TOKEN_MANAGE_SKU)) {

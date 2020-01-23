@@ -1,10 +1,9 @@
-package com.mapbox.navigation.core.sku
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
-import com.mapbox.navigation.sku.accounts.MapboxNavigationAccounts
 
 internal class NavigationSession(private val context: Context) : RouteObserver, TripSessionStateObserver {
 

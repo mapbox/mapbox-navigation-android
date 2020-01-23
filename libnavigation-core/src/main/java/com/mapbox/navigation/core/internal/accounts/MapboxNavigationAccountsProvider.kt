@@ -1,4 +1,4 @@
-package com.mapbox.navigation.sku.accounts
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.ContentProvider
 import android.content.ContentValues

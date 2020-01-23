@@ -2,6 +2,11 @@
     package="com.mapbox.navigation.core">
 
     <application>
+        <provider
+            android:name="com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccountsProvider"
+            android:authorities="${applicationId}.mapboxnavigationinitprovider"
+            android:exported="false"
+            android:initOrder="200"/>
         <service android:name=".trip.service.NavigationNotificationService" />
     </application>
 </manifest>
