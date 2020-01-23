@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
+import com.mapbox.navigation.sku.accounts.SkuInterceptor
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 
 internal object RouteBuilderProvider {
@@ -26,4 +27,5 @@ internal object RouteBuilderProvider {
             .bannerInstructions(true)
             .enableRefresh(false)
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
+            .interceptor(SkuInterceptor(context))
 }

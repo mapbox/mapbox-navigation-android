@@ -34,6 +34,7 @@ class MapboxOffboardRouterTest : BaseTest() {
 
         mockkObject(RouteBuilderProvider)
         every { RouteBuilderProvider.getBuilder(accessToken, context) } returns mapboxDirectionsBuilder
+        every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         every { mapboxDirections.enqueueCall(capture(listener)) } answers {
             callback = listener.captured
