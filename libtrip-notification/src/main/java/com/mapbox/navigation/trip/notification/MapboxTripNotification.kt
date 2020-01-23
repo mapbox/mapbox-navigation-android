@@ -196,7 +196,7 @@ class MapboxTripNotification constructor(
 
     /**
      * Creates [PendingIntent] for stopping [TripSession] when
-     * proper button is clicked in the navigation view
+     * proper button is clicked in the notification view
      *
      * @param applicationContext is [Context]
      * @return [PendingIntent] for stopping [TripSession]
