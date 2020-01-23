@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.extensions.convertToListOfPairsOfDoubles
 import com.mapbox.navigation.base.extensions.parseWaypointIndices
 import com.mapbox.navigation.base.extensions.parseWaypointTargets
 import java.util.Locale
+import okhttp3.Interceptor
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
 
@@ -127,5 +128,10 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
 
     eventListener(EVENT_LISTENER)
 
+    return this
+}
+
+fun MapboxDirections.Builder.addInterceptor(interceptor: Interceptor): MapboxDirections.Builder {
+    addInterceptor(interceptor)
     return this
 }
