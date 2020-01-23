@@ -20,7 +20,6 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
-import com.mapbox.navigator.FixLocation
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
@@ -53,7 +52,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     // Route following
 
     override fun updateLocation(rawLocation: Location): Boolean =
-        navigator.updateLocation(rawLocation.toFixLocation())
+        navigator.updateLocation(rawLocation.toFixLocation(Date()))
 
     override fun getStatus(date: Date): TripStatus {
         val status = navigator.getStatus(date)
@@ -136,26 +135,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
         navigator.getVoiceInstruction(index)
-
-    private fun Location.toFixLocation() = FixLocation(
-        Point.fromLngLat(this.longitude, this.latitude),
-        Date(this.time),
-        this.speed,
-        this.bearing,
-        this.altitude.toFloat(),
-        this.accuracy,
-        this.provider
-    )
-
-    private fun FixLocation.toLocation(): Location = Location(this.provider).also {
-        it.latitude = this.coordinate.latitude()
-        it.longitude = this.coordinate.longitude()
-        it.time = this.time.time
-        it.speed = this.speed ?: 0f
-        it.bearing = this.bearing ?: 0f
-        it.altitude = this.altitude?.toDouble() ?: 0.0
-        it.accuracy = this.accuracyHorizontal ?: 0f
-    }
 
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
         val upcomingStepIndex = stepIndex + ONE_INDEX
