@@ -7,7 +7,10 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
-import com.mapbox.navigation.utils.thread.WorkThreadHandler
+import com.mapbox.navigation.utils.thread.JobControl
+import com.mapbox.navigation.utils.thread.ThreadController
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 
 /**
  * Default implementation of [MetricsReporter] interface.
@@ -20,7 +23,7 @@ object MapboxMetricsReporter : MetricsReporter {
     private lateinit var mapboxTelemetry: MapboxTelemetry
     @Volatile
     private var metricsObserver: MetricsObserver? = null
-    private var threadWorker = WorkThreadHandler("MapboxMetricsReporter")
+    private var mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
 
     /**
      * Initialize [mapboxTelemetry] that need to send event to Mapbox Telemetry server.
@@ -38,17 +41,15 @@ object MapboxMetricsReporter : MetricsReporter {
     ) {
         mapboxTelemetry = MapboxTelemetry(context, accessToken, userAgent)
         mapboxTelemetry.enable()
-        threadWorker.start()
     }
 
     // For test purposes only
     internal fun init(
         mapboxTelemetry: MapboxTelemetry,
-        threadWorker: WorkThreadHandler
+        threadController: ThreadController
     ) {
         this.mapboxTelemetry = mapboxTelemetry
-        this.threadWorker = threadWorker
-        this.threadWorker.start()
+        this.mainJobController = threadController.getMainScopeAndRootJob()
         mapboxTelemetry.enable()
     }
 
@@ -72,7 +73,7 @@ object MapboxMetricsReporter : MetricsReporter {
     fun disable() {
         removeObserver()
         mapboxTelemetry.disable()
-        threadWorker.stop()
+        mainJobController.job.cancelChildren()
     }
 
     override fun addEvent(metricEvent: MetricEvent) {
@@ -80,7 +81,7 @@ object MapboxMetricsReporter : MetricsReporter {
             mapboxTelemetry.push(it)
         }
 
-        threadWorker.post {
+        mainJobController.scope.launch {
             metricsObserver?.onMetricUpdated(metricEvent.metricName, metricEvent.toJson(gson))
         }
     }
