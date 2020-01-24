@@ -38,6 +38,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simple_mapbox_navigation)
@@ -48,7 +49,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.startTripSession()
     }
 
-    @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
