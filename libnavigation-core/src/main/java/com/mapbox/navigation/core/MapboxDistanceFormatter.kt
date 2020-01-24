@@ -30,7 +30,7 @@ import java.util.Locale
  * This constructor will infer device language and unit type using the device locale.
  *
  * @param language for which language
- * @param unitType to use, or NONE_SPECIFIED to use default for locale country
+ * @param unitType to use, or UNDEFINED to use default for locale country
  * @param context from which to get localized strings from
  * @param roundingIncrement increment by which to round small distances
  */

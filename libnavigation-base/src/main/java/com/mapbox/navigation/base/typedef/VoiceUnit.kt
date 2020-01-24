@@ -15,8 +15,13 @@ const val IMPERIAL = "imperial"
 const val METRIC = "metric"
 
 /**
+ * Use to apply default units for a locale.
+ */
+const val UNDEFINED = "undefined"
+
+/**
  * Retention policy for the various units of measurements.
  */
 @Retention(AnnotationRetention.SOURCE)
-@StringDef(IMPERIAL, METRIC)
+@StringDef(IMPERIAL, METRIC, UNDEFINED)
 annotation class VoiceUnit

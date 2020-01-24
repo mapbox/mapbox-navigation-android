@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.TimeFormatType
 
-private const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
+const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
 
 class NavigationOptions private constructor(
     @RoundingIncrement private val roundingIncrement: Int,
@@ -26,6 +26,20 @@ class NavigationOptions private constructor(
 
     fun navigatorPollingDelay() = navigatorPollingDelay
 
+    fun toBuilder(): Builder {
+        val builder = Builder()
+            .roundingIncrement(roundingIncrement)
+            .timeFormatType(timeFormatType)
+            .navigatorPollingDelay(navigatorPollingDelay)
+        distanceFormatter?.let {
+            builder.distanceFormatter(it)
+        }
+        onboardRouterConfig?.let {
+            builder.onboardRouterConfig(it)
+        }
+        return builder
+    }
+
     data class Builder(
         private var timeFormatType: Int = NONE_SPECIFIED,
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
@@ -44,7 +58,7 @@ class NavigationOptions private constructor(
             apply { this.distanceFormatter = distanceFormatter }
 
         fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig) =
-            apply { this.onboardRouterConfig }
+            apply { this.onboardRouterConfig = onboardRouterConfig }
 
         fun navigatorPollingDelay(pollingDelay: Long) =
             apply { navigatorPollingDelay = pollingDelay }
