@@ -107,6 +107,10 @@ jobs:
             else
               echo "Skipping push to Transifex"
             fi
+#      Uncomment when API' docs will be ready
+#      - run:
+#          name: Check public documentation
+#          command: sh scripts/dokka-validate.sh
       - store_artifacts:
           path: app/build/reports
           destination: reports
