@@ -24,17 +24,22 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         fun getInstance(context: Context): MapboxNavigationAccounts =
             INSTANCE
                 ?: synchronized(this) {
-                MapboxNavigationAccounts().also { mapboxNavigationAccount ->
-                    INSTANCE = mapboxNavigationAccount
-                    init(context)
+                    MapboxNavigationAccounts().also { mapboxNavigationAccount ->
+                        INSTANCE = mapboxNavigationAccount
+                        init(context)
+                    }
                 }
-            }
 
         private fun init(context: Context) {
-            val preferences = context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+            val preferences =
+                context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
             skuGenerator = when (Billing.getInstance(context).getBillingType()) {
-                Billing.BillingModel.MAU -> MauSku(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD)
-                Billing.BillingModel.TRIPS -> TripsSku(preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD,
+                Billing.BillingModel.MAU -> MauSku(
+                    preferences,
+                    TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD
+                )
+                Billing.BillingModel.TRIPS -> TripsSku(
+                    preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD,
                     TRIPS_REQUEST_COUNT_THRESHOLD
                 )
             }
@@ -45,9 +50,13 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         val skuToken = skuGenerator?.generateToken()
         check(!skuToken.isNullOrEmpty()) { "MapboxNavigationAccounts: skuToken cannot be null or empty" }
 
-        return when (resourceUrl.isNullOrEmpty() && querySize < 0) {
-            true -> { skuToken }
-            false -> { buildResourceUrlWithSku(resourceUrl!!, querySize, skuToken) }
+        return when (resourceUrl != null && resourceUrl.isNotEmpty() && querySize >= 0) {
+            true -> {
+                buildResourceUrlWithSku(resourceUrl, querySize, skuToken)
+            }
+            false -> {
+                skuToken
+            }
         }
     }
 
@@ -59,15 +68,18 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         skuGenerator?.onNavigationStart()
     }
 
-    private fun buildResourceUrlWithSku(resourceUrl: String, querySize: Int, skuToken: String): String {
+    private fun buildResourceUrlWithSku(
+        resourceUrl: String,
+        querySize: Int,
+        skuToken: String
+    ): String {
         val urlBuilder = StringBuilder(resourceUrl)
-        if (querySize == 0) {
-            urlBuilder.append("?")
-        } else {
-            urlBuilder.append("&")
+        when {
+            querySize < 0 -> throw IllegalArgumentException("query size cannot be negative")
+            querySize == 0 -> urlBuilder.append("?")
+            else -> urlBuilder.append("&")
         }
         urlBuilder.append("$SKU_KEY=$skuToken")
-        urlBuilder.toString()
         return urlBuilder.toString()
     }
 }

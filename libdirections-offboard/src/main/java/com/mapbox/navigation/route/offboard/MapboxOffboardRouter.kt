@@ -10,7 +10,6 @@ import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.utils.exceptions.NavigationException
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,10 +18,8 @@ import retrofit2.Response
 class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
-    private val skuTokenProvider: SkuTokenProvider?
+    private val skuTokenProvider: SkuTokenProvider
 ) : Router {
-
-    constructor(accessToken: String, context: Context) : this(accessToken, context, null)
 
     companion object {
         const val ERROR_FETCHING_ROUTE = "Error fetching route"
@@ -34,29 +31,27 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        ifNonNull(skuTokenProvider) { tokenProvider ->
-            mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, tokenProvider)
-                .routeOptions(routeOptions)
-                .build()
-            mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
+        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, skuTokenProvider)
+            .routeOptions(routeOptions)
+            .build()
+        mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
 
-                override fun onResponse(
-                    call: Call<DirectionsResponse>,
-                    response: Response<DirectionsResponse>
-                ) {
-                    val routes = response.body()?.routes()
-                    if (response.isSuccessful && !routes.isNullOrEmpty()) {
-                        callback.onResponse(routes)
-                    } else {
-                        callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
-                    }
+            override fun onResponse(
+                call: Call<DirectionsResponse>,
+                response: Response<DirectionsResponse>
+            ) {
+                val routes = response.body()?.routes()
+                if (response.isSuccessful && !routes.isNullOrEmpty()) {
+                    callback.onResponse(routes)
+                } else {
+                    callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
                 }
+            }
 
-                override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                    callback.onFailure(t)
-                }
-            })
-        } ?: throw IllegalStateException("skuTokenProvider cannot be null")
+            override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                callback.onFailure(t)
+            }
+        })
     }
 
     override fun cancel() {
