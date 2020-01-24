@@ -10,7 +10,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.text.SpannableString
-import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -64,6 +63,7 @@ class MapboxTripNotification constructor(
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         pendingCloseIntent = createPendingCloseIntent(applicationContext)
+        buildRemoteViews()
         createNotificationChannel()
     }
 
@@ -140,20 +140,30 @@ class MapboxTripNotification constructor(
         val backgroundColor =
             ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
 
+        buildCollapsedViews(backgroundColor)
+        buildExpandedViews(backgroundColor)
+    }
+
+    private fun buildCollapsedViews(backgroundColor: Int) {
         val collapsedLayout = R.layout.collapsed_navigation_notification_layout
         val collapsedLayoutId = R.id.navigationCollapsedNotificationLayout
-        RemoteViews(applicationContext.packageName, collapsedLayout).also { remoteViews ->
-            collapsedNotificationRemoteViews = remoteViews
-            remoteViews.setInt(collapsedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
-        }
 
+        RemoteViewsProvider.createRemoteViews(applicationContext.packageName, collapsedLayout)
+            .also { remoteViews ->
+                collapsedNotificationRemoteViews = remoteViews
+                remoteViews.setInt(collapsedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
+            }
+    }
+
+    private fun buildExpandedViews(backgroundColor: Int) {
         val expandedLayout = R.layout.expanded_navigation_notification_layout
         val expandedLayoutId = R.id.navigationExpandedNotificationLayout
-        RemoteViews(applicationContext.packageName, expandedLayout).also { remoteViews ->
-            expandedNotificationRemoteViews = remoteViews
-            remoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent)
-            remoteViews.setInt(expandedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
-        }
+        RemoteViewsProvider.createRemoteViews(applicationContext.packageName, expandedLayout)
+            .also { remoteViews ->
+                expandedNotificationRemoteViews = remoteViews
+                remoteViews.setOnClickPendingIntent(R.id.endNavigationBtn, pendingCloseIntent)
+                remoteViews.setInt(expandedLayoutId, SET_BACKGROUND_COLOR, backgroundColor)
+            }
     }
 
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
@@ -179,37 +189,14 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun generateArrivalTime(
-        routeProgress: RouteProgress,
-        time: Calendar
-    ): String? =
-        ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
-            val legDurationRemaining = currentLegProgress.durationRemaining()
-            val timeFormatType = navigationOptions.timeFormatType()
-            val arrivalTime = formatTime(
-                time,
-                legDurationRemaining.toDouble(),
-                timeFormatType,
-                DateFormat.is24HourFormat(applicationContext)
-            )
-            String.format(etaFormat, arrivalTime)
-        }
-
     private fun updateNotificationViews(routeProgress: RouteProgress) {
-        buildRemoteViews()
         updateInstructionText(routeProgress.bannerInstructions())
         updateDistanceText(routeProgress)
         generateArrivalTime(routeProgress, Calendar.getInstance())?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
-            routeProgress.currentLegProgress()?.upcomingStep()?.let { step ->
-                updateManeuverImage(step)
-            } ?: routeProgress.currentLegProgress()?.currentStepProgress()?.step()
+            val step = routeProgress.currentLegProgress()?.upcomingStep()
+            step?.let { updateManeuverImage(it) }
         }
-    }
-
-    private fun updateViewsWithArrival(time: String) {
-        collapsedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
-        expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
     }
 
     private fun updateInstructionText(bannerInstruction: BannerInstructions?) {
@@ -248,6 +235,27 @@ class MapboxTripNotification constructor(
         }
     }
 
+    private fun generateArrivalTime(
+        routeProgress: RouteProgress,
+        time: Calendar
+    ): String? =
+        ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
+            val legDurationRemaining = currentLegProgress.durationRemaining()
+            val timeFormatType = navigationOptions.timeFormatType()
+            val arrivalTime = formatTime(
+                time,
+                legDurationRemaining.toDouble(),
+                timeFormatType,
+                DateFormat.is24HourFormat(applicationContext)
+            )
+            String.format(etaFormat, arrivalTime)
+        }
+
+    private fun updateViewsWithArrival(time: String) {
+        collapsedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
+        expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
+    }
+
     private fun newDistanceText(routeProgress: RouteProgress) =
         ifNonNull(
             distanceFormatter,
@@ -255,7 +263,7 @@ class MapboxTripNotification constructor(
             currentDistanceText
         ) { distanceFormatter, currentLegProgress, currentDistanceText ->
             val item = currentLegProgress.currentStepProgress()?.distanceRemaining()
-            // The call below can return an empty spanable string. toString() will cause a NPE and ?. will not catch it.
+            // The call below can return an empty spannable string. toString() will cause a NPE and ?. will not catch it.
             val str = item?.let {
                 distanceFormatter.formatDistance(it.toDouble())
             }
@@ -282,32 +290,24 @@ class MapboxTripNotification constructor(
     }
 
     private fun getManeuverResource(step: LegStep): Int {
-        val maneuver = step.maneuver()
-        val maneuverType = maneuver.type()
-        maneuver.let { stepManeuver ->
-            val maneuverModifier = stepManeuver.modifier()
-            if (!TextUtils.isEmpty(maneuverModifier)) {
-                val drivingSide = step.drivingSide()
-                val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                    maneuverType,
-                    maneuverModifier,
-                    drivingSide
-                )
-                return when (isLeftSideDriving) {
-                    true -> {
-                        ManeuverResource.obtainManeuverResource(
-                            maneuverType + maneuverModifier + drivingSide
-                        )
-                    }
-                    else -> {
-                        ManeuverResource.obtainManeuverResource(
-                            maneuverType + maneuverModifier
-                        )
-                    }
-                }
+        val stepManeuver = step.maneuver()
+        val maneuverType = stepManeuver.type()
+        val maneuverModifier = stepManeuver.modifier()
+        val maneuverResourceString = if (maneuverModifier.isNullOrEmpty().not()) {
+            val drivingSide = step.drivingSide()
+            val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
+                maneuverType,
+                maneuverModifier,
+                drivingSide
+            )
+            when (isLeftSideDriving) {
+                true -> maneuverType + maneuverModifier + drivingSide
+                false -> maneuverType + maneuverModifier
             }
+        } else {
+            maneuverType
         }
-        return ManeuverResource.obtainManeuverResource(maneuverType)
+        return ManeuverResource.obtainManeuverResource(maneuverResourceString)
     }
 
     private fun isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
