@@ -28,11 +28,13 @@ internal object NavigationComponentProvider {
     fun createTripSession(
         tripService: TripService,
         locationEngine: LocationEngine,
-        locationEngineRequest: LocationEngineRequest
+        locationEngineRequest: LocationEngineRequest,
+        navigatorPollingDelay: Long
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
-        locationEngineRequest
+        locationEngineRequest,
+        navigatorPollingDelay
     )
 
     fun createMapboxTimer(

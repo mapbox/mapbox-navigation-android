@@ -40,6 +40,16 @@ import kotlinx.coroutines.channels.ReceiveChannel
 class MapboxNavigation(
     private val context: Context,
     private val accessToken: String?,
+    private val navigationOptions: NavigationOptions = NavigationOptions.Builder(
+        TWELVE_HOURS,
+        ROUNDING_INCREMENT_FIFTY,
+        distanceFormatter = MapboxDistanceFormatter(
+            context.applicationContext,
+            "ja",
+            METRIC,
+            ROUNDING_INCREMENT_FIFTY
+        )
+    ).build(),
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
@@ -82,7 +92,8 @@ class MapboxNavigation(
         tripSession = NavigationComponentProvider.createTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest
+            locationEngineRequest,
+            navigationOptions.navigatorPollingDelay()
         )
         tripSession.registerOffRouteObserver(createInternalOffRouteObserver())
         tripSession.registerStateObserver(navigationSession)
@@ -294,16 +305,7 @@ class MapboxNavigation(
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
-                NavigationOptions::class.java to NavigationOptions.Builder(
-                    TWELVE_HOURS,
-                    ROUNDING_INCREMENT_FIFTY,
-                    MapboxDistanceFormatter(
-                        context.applicationContext,
-                        "ja",
-                        METRIC,
-                        ROUNDING_INCREMENT_FIFTY
-                    )
-                ).build()
+                NavigationOptions::class.java to navigationOptions
             )
             MapboxNavigationModuleType.TripService -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripSession -> throw NotImplementedError() // going to be removed when next base version

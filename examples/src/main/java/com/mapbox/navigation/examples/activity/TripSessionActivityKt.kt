@@ -28,6 +28,7 @@ import timber.log.Timber
 
 const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
 const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500
+private const val NAVIGATOR_POLLING_DELAY = 1500L
 
 class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
@@ -104,6 +105,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .build(),
+            NAVIGATOR_POLLING_DELAY,
             MapboxNativeNavigatorImpl
         )
     }

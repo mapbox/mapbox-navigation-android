@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -57,14 +58,16 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createTripSession(
                 tripService,
                 locationEngine,
-                locationEngineRequest
+                locationEngineRequest,
+                any()
             )
         } returns tripSession
-
+        val navigationOptions = mockk<NavigationOptions>(relaxed = true)
         mapboxNavigation =
             MapboxNavigation(
                 context,
                 accessToken,
+                navigationOptions,
                 locationEngine,
                 locationEngineRequest
             )
