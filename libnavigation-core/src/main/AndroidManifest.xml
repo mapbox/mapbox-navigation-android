@@ -3,8 +3,8 @@
 
     <application>
         <provider
-            android:name=".internal.accounts.MapboxNavigationAccountsProvider"
-            android:authorities="${applicationId}.mapboxnavigationinitprovider"
+            android:name="com.mapbox.navigation.core.accounts.MapboxNavigationAccountsProvider"
+            android:authorities="${applicationId}.MapboxNavigationAccountsProvider"
             android:exported="false"
             android:initOrder="200"/>
         <service android:name=".trip.service.NavigationNotificationService" />
