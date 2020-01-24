@@ -47,15 +47,19 @@ class MapboxOffboardRouter(
                 response: Response<DirectionsResponse>
             ) {
                 val routes = response.body()?.routes()
-                if (response.isSuccessful && !routes.isNullOrEmpty()) {
-                    callback.onResponse(routes)
-                } else {
-                    callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
+                when {
+                    call.isCanceled -> callback.onCanceled()
+                    response.isSuccessful && !routes.isNullOrEmpty() -> callback.onResponse(routes)
+                    else -> callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
                 }
             }
 
             override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                callback.onFailure(t)
+                if (call.isCanceled) {
+                    callback.onCanceled()
+                } else {
+                    callback.onFailure(t)
+                }
             }
         })
     }

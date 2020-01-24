@@ -142,6 +142,11 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
       public void onFailure(@NotNull Throwable throwable) {
         Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
       }
+
+      @Override
+      public void onCanceled() {
+        Timber.e("onRoutesRequestCanceled");
+      }
     });
   }
 

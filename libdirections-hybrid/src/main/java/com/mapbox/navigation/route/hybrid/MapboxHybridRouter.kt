@@ -64,6 +64,7 @@ class MapboxHybridRouter(
         private val mainRouter: Router,
         private val reserveRouter: Router
     ) : RouterDispatchInterface, Router.Callback {
+
         private var reserveRouterCalled = false
         private lateinit var options: RouteOptions
         private lateinit var callback: Router.Callback
@@ -90,6 +91,10 @@ class MapboxHybridRouter(
                     reserveRouter.getRoute(options, this)
                 }
             }
+        }
+
+        override fun onCanceled() {
+            callback.onCanceled()
         }
 
         /**

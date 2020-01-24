@@ -180,6 +180,30 @@ class MapboxNavigation(
     }
 
     /**
+     * Set a list of routes.
+     *
+     * If the list is empty, the SDK will exit the `Active Guidance` state.
+     *
+     * If the list is not empty, the route at index 0 is going to be treated as the primary route
+     * and used for route progress, off route events and map-matching calculations.
+     *
+     * @param routes a list of [DirectionsRoute]s
+     */
+    fun setRoutes(routes: List<DirectionsRoute>) {
+        directionsSession.routes = routes
+    }
+
+    /**
+     * Get a list of routes.
+     *
+     * If the list is not empty, the route at index 0 is the one treated as the primary route
+     * and used for route progress, off route events and map-matching calculations.
+     *
+     * @return a list of [DirectionsRoute]s
+     */
+    fun getRoutes() = directionsSession.routes
+
+    /**
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
@@ -343,6 +367,10 @@ class MapboxNavigation(
                     tripSession.unregisterOffRouteObserver(this)
                 }
             })*/
+        }
+
+        override fun onRoutesRequestCanceled() {
+            // do nothing
         }
     }
 

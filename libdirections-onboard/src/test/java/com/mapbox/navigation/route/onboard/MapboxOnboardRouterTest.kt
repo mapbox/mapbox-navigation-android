@@ -16,15 +16,26 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterResult
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -94,6 +105,81 @@ class MapboxOnboardRouterTest {
 
         verify { navigator.getRoute(URL.toString()) }
         verify { routerCallback.onResponse(any()) }
+    }
+
+    @Test
+    fun checkCallbackCalledOnCancel() {
+        coEvery { navigator.getRoute(any()) } coAnswers {
+            onboardRouter.cancel()
+            routerResultSuccess
+        }
+
+        val latch = CountDownLatch(1)
+        val callback: Router.Callback = object : Router.Callback {
+            override fun onResponse(routes: List<DirectionsRoute>) {
+                Assert.fail()
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                Assert.fail()
+            }
+
+            override fun onCanceled() {
+                latch.countDown()
+            }
+        }
+        onboardRouter.getRoute(routerOptions, callback)
+
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            Assert.fail("onCanceled not called")
+        }
+    }
+
+    @Test
+    fun checkCallbackCalledOnCancel2() = coroutineRule.runBlockingTest {
+        coEvery { navigator.getRoute(any()) } coAnswers { throw CancellationException() }
+
+        onboardRouter.getRoute(routerOptions, routerCallback)
+
+        verify { routerCallback.onCanceled() }
+    }
+
+    @Test
+    fun checkCallbackCalledOnCancel3() = runBlocking {
+        coEvery {
+            navigator.getRoute(any())
+        } coAnswers {
+            onboardRouter.cancel()
+            routerResultFailure
+        }
+
+        onboardRouter.getRoute(routerOptions, routerCallback)
+
+        verify { routerCallback.onCanceled() }
+    }
+
+    @Test
+    fun checkCallbackCalledOnCancel4() = runBlocking {
+        // cancellable code should run on a separate dispatcher to allow call `cancel` after launch.
+        // if we use the same dispatcher, it will be blocked until coroutine finish. `cancel` will have no affect
+        // job's state will be `isActive == false`, `isCancelled == false`.
+        every { ThreadController.IODispatcher } returns Dispatchers.Default
+
+        coEvery { navigator.getRoute(any()) } coAnswers {
+            // delay on a separate dispatcher, it doesn't affect the main thread.
+            // we just suspend the function until it's cancelled from the main thread.
+            // if we don't suspend it, the function will return immediately, before `cancel` is called.
+            // job's state will be `isActive == false`, `isCancelled == false`.
+            delay(1000)
+            routerResultSuccess
+        }
+
+        val scope = coroutineRule.coroutineScope
+        val job = scope.launch { onboardRouter.getRoute("") }
+        scope.cancel()
+
+        assertFalse(job.isActive)
+        assertTrue(job.isCancelled)
     }
 
     @Test

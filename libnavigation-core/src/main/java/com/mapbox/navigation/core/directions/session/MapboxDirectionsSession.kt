@@ -14,7 +14,6 @@ class MapboxDirectionsSession(
     private val fasterRouteInterval = 2 * 60 * 1000L // 2 minutes
     private val routeObservers = CopyOnWriteArrayList<RouteObserver>()
     private var _routeOptions: RouteOptions? = null
-    private var currentRoutes: List<DirectionsRoute> = emptyList()
     private val fasterRouteTimer =
         NavigationComponentProvider.createMapboxTimer(fasterRouteInterval) {
             _routeOptions?.let { requestFasterRoute(it) }
@@ -22,23 +21,16 @@ class MapboxDirectionsSession(
 
     private var state: State = State.NoRoutesAvailable
         set(value) {
-            if (field == value) {
-                return
-            }
             field = value
             when (value) {
                 is State.NoRoutesAvailable -> routeObservers.forEach {
-                    it.onRoutesChanged(
-                        emptyList()
-                    )
+                    it.onRoutesChanged(routes)
                 }
                 is State.RoutesAvailable -> {
                     // start the timer only when the route has been requested at least once
                     fasterRouteTimer.start()
                     routeObservers.forEach {
-                        it.onRoutesChanged(
-                            currentRoutes
-                        )
+                        it.onRoutesChanged(routes)
                     }
                 }
                 is State.UserRoutesRequestInProgress -> routeObservers.forEach { it.onRoutesRequested() }
@@ -50,29 +42,38 @@ class MapboxDirectionsSession(
             }
         }
 
-    // todo thanks to the state machine, we can expose the routes setter as well, we'll need the canceled callback as well though
-    override fun getRoutes() = currentRoutes
+    override var routes: List<DirectionsRoute> = emptyList()
+        set(value) {
+            field = value
+            router.cancel()
+            state = if (value.isEmpty()) {
+                State.NoRoutesAvailable
+            } else {
+                State.RoutesAvailable
+            }
+        }
 
     override fun getRouteOptions(): RouteOptions? = _routeOptions
 
     override fun cancel() {
-        router.cancel() // todo expose onCanceled in Router.Callback
+        router.cancel()
     }
 
     override fun requestRoutes(routeOptions: RouteOptions) {
-        router.cancel()
-
+        routes = emptyList()
         this._routeOptions = routeOptions
-        currentRoutes = emptyList()
         state = State.UserRoutesRequestInProgress
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
-                currentRoutes = routes
-                state = State.RoutesAvailable
+                this@MapboxDirectionsSession.routes = routes
             }
 
             override fun onFailure(throwable: Throwable) {
                 state = State.UserRoutesRequestFailed(throwable)
+            }
+
+            override fun onCanceled() {
+                routeObservers.forEach { it.onRoutesRequestCanceled() }
             }
         })
     }
@@ -81,7 +82,7 @@ class MapboxDirectionsSession(
         routeObservers.add(routeObserver)
         when (val localState = state) {
             is State.NoRoutesAvailable -> Unit
-            is State.RoutesAvailable -> routeObserver.onRoutesChanged(currentRoutes)
+            is State.RoutesAvailable -> routeObserver.onRoutesChanged(routes)
             is State.UserRoutesRequestInProgress -> routeObserver.onRoutesRequested()
             is State.UserRoutesRequestFailed ->
                 routeObserver.onRoutesRequestFailure(localState.throwable)
@@ -107,14 +108,15 @@ class MapboxDirectionsSession(
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 if (isRouteFaster(routes[0])) {
-                    currentRoutes = routes
-                    routeObservers.forEach {
-                        it.onRoutesChanged(currentRoutes)
-                    }
+                    this@MapboxDirectionsSession.routes = routes
                 }
             }
 
             override fun onFailure(throwable: Throwable) {
+                // do nothing
+            }
+
+            override fun onCanceled() {
                 // do nothing
             }
         })

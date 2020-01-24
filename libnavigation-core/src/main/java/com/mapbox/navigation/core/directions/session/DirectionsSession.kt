@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 
 internal interface DirectionsSession {
 
-    fun getRoutes(): List<DirectionsRoute>
+    var routes: List<DirectionsRoute>
 
     fun getRouteOptions(): RouteOptions?
 

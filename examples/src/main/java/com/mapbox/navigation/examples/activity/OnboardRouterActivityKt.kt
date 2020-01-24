@@ -108,6 +108,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
                         .coordinates(origin, listOf(waypoint), destination)
 
                 onboardRouter.getRoute(optionsBuilder.build(), object : Router.Callback {
+
                     override fun onResponse(routes: List<DirectionsRoute>) {
                         if (routes.isNotEmpty()) {
                             navigationMapRoute.addRoute(routes[0])
@@ -116,6 +117,10 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
 
                     override fun onFailure(throwable: Throwable) {
                         Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
+                    }
+
+                    override fun onCanceled() {
+                        Timber.e("onRoutesRequestCanceled")
                     }
                 })
             }

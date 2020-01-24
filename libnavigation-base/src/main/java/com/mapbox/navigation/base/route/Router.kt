@@ -42,5 +42,10 @@ interface Router {
          * Called when I/O, server-side, network error has been occurred or no one Route has been found.
          */
         fun onFailure(throwable: Throwable)
+
+        /**
+         * Called whenever a route request is canceled.
+         */
+        fun onCanceled()
     }
 }

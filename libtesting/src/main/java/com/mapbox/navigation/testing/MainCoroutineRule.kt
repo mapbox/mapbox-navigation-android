@@ -2,6 +2,7 @@ package com.mapbox.navigation.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.resetMain
@@ -14,7 +15,7 @@ import org.junit.runners.model.Statement
 @ExperimentalCoroutinesApi
 class MainCoroutineRule : TestRule {
     val testDispatcher = TestCoroutineDispatcher()
-    val coroutineScope = TestCoroutineScope(testDispatcher)
+    val coroutineScope = TestCoroutineScope(testDispatcher + SupervisorJob())
 
     override fun apply(base: Statement, description: Description?) = object : Statement() {
         @Throws(Throwable::class)
@@ -29,5 +30,5 @@ class MainCoroutineRule : TestRule {
     }
 
     fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
-            coroutineScope.runBlockingTest { block() }
+        coroutineScope.runBlockingTest { block() }
 }

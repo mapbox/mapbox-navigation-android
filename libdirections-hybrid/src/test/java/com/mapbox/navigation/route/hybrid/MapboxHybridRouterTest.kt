@@ -71,12 +71,32 @@ class MapboxHybridRouterTest {
     }
 
     @Test
+    fun offboardRouterCanceled() {
+        enableNetworkConnection()
+
+        hybridRouter.getRoute(routerOptions, routerCallback)
+        internalCallback.captured.onCanceled()
+
+        verify(exactly = 1) { routerCallback.onCanceled() }
+    }
+
+    @Test
     fun whenNoNetworkConnectionOnboardRouterUsed() = rule.runBlockingTest {
         disableNetworkConnection()
 
         hybridRouter.getRoute(routerOptions, routerCallback)
 
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, any()) }
+    }
+
+    @Test
+    fun onboardRouterCanceled() {
+        disableNetworkConnection()
+
+        hybridRouter.getRoute(routerOptions, routerCallback)
+        internalCallback.captured.onCanceled()
+
+        verify(exactly = 1) { routerCallback.onCanceled() }
     }
 
     @Test

@@ -16,6 +16,7 @@ import io.mockk.verify
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
@@ -29,6 +30,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptions = mockk(relaxed = true)
     private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
+    private val call: Call<DirectionsResponse> = mockk()
 
     @Before
     fun setUp() {
@@ -43,6 +45,7 @@ class MapboxOffboardRouterTest : BaseTest() {
             callback = listener.captured
         }
         every { routeOptions.coordinates().size } returns 2
+        every { call.isCanceled } returns false
         offboardRouter = MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider)
     }
 
@@ -81,7 +84,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val response = buildResponse(listOf(route), true)
         getRoute(routerCallback)
 
-        callback.onResponse(mockk(), response)
+        callback.onResponse(call, response)
 
         verify { routerCallback.onResponse(any()) }
     }
@@ -93,7 +96,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val response = buildResponse(listOf(route), false)
         getRoute(routerCallback)
 
-        callback.onResponse(mockk(), response)
+        callback.onResponse(call, response)
 
         verify { routerCallback.onFailure(any()) }
     }
@@ -104,7 +107,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val response = buildResponse(listOf(), true)
         getRoute(routerCallback)
 
-        callback.onResponse(mockk(), response)
+        callback.onResponse(call, response)
 
         verify { routerCallback.onFailure(any()) }
     }
@@ -115,7 +118,7 @@ class MapboxOffboardRouterTest : BaseTest() {
         val response = buildResponse(listOf(), false)
         getRoute(routerCallback)
 
-        callback.onResponse(mockk(), response)
+        callback.onResponse(call, response)
 
         verify { routerCallback.onFailure(any()) }
     }
@@ -126,9 +129,37 @@ class MapboxOffboardRouterTest : BaseTest() {
         val throwable = mockk<Throwable>()
         getRoute(routerCallback)
 
-        callback.onFailure(mockk(), throwable)
+        callback.onFailure(call, throwable)
 
         verify { routerCallback.onFailure(throwable) }
+    }
+
+    @Test
+    fun onFailure_canceled_onCanceledIsCalled() {
+        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val throwable = mockk<Throwable>()
+        getRoute(routerCallback)
+
+        val call: Call<DirectionsResponse> = mockk()
+        every { call.isCanceled } returns true
+
+        callback.onFailure(call, throwable)
+
+        verify { routerCallback.onCanceled() }
+    }
+
+    @Test
+    fun onSuccess_canceled_onCanceledIsCalled() {
+        val routerCallback = mockk<Router.Callback>(relaxed = true)
+        val route = buildMultipleLegRoute()
+        val response = buildResponse(listOf(route), true)
+        getRoute(routerCallback)
+
+        every { call.isCanceled } returns true
+
+        callback.onResponse(call, response)
+
+        verify { routerCallback.onCanceled() }
     }
 
     private fun getRoute(routerCallback: Router.Callback) {
