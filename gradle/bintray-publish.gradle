@@ -10,14 +10,15 @@ group = project.ext.mapboxArtifactGroupId
 publishing {
     publications {
         MapboxNavigationPublication(MavenPublication) {
-            afterEvaluate {
-                from components.android
-                artifact(androidSourcesJar)
-            }
-
+            from components.android
             groupId this.group
             artifactId project.ext.mapboxArtifactId
             version this.version
+
+            afterEvaluate {
+                artifact(androidSourcesJar)
+                artifact(androidJavadocsJar)
+            }
 
             pom.withXml {
                 final mainNode = asNode()
@@ -86,4 +87,9 @@ artifactory {
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.kotlin
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
 }

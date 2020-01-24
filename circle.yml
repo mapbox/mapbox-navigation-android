@@ -107,10 +107,6 @@ jobs:
             else
               echo "Skipping push to Transifex"
             fi
-#      Uncomment when API' docs will be ready
-#      - run:
-#          name: Check public documentation
-#          command: sh scripts/dokka-validate.sh
       - store_artifacts:
           path: app/build/reports
           destination: reports
@@ -261,6 +257,13 @@ jobs:
       - run:
           name: Build Navigation SDK 1.0 (release)
           command: make 1.0-build-release
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+#     Uncomment when API' docs will be ready
+#     - run:
+#         name: Check public documentation
+#         command: sh scripts/dokka-validate.sh
       - run:
           name: Generate Bintray credentials
           command: |
