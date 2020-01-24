@@ -39,7 +39,7 @@ interface Router {
 
         /**
          * @param throwable Throwable safety error.
-         * Called on I/O either when network error occurred or no one Route has been found.
+         * Called when I/O, server-side, network error has been occurred or no one Route has been found.
          */
         fun onFailure(throwable: Throwable)
     }
