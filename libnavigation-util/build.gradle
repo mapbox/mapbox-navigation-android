@@ -1,7 +1,21 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libnavigation-utils'
+
+        perPackageOption {
+            prefix = "utils"
+            suppress = true
+        }
+    }
+}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
