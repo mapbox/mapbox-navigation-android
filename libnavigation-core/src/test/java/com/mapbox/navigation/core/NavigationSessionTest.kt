@@ -1,7 +1,8 @@
-package com.mapbox.navigation.core.internal.accounts
+package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -22,7 +23,11 @@ class NavigationSessionTest {
     fun setUp() {
         every { context.applicationContext } returns appContext
         mockkObject(MapboxNavigationAccounts)
-        every { MapboxNavigationAccounts.getInstance(appContext) } returns accounts
+        every {
+            MapboxNavigationAccounts.getInstance(
+                appContext
+            )
+        } returns accounts
         routes = mutableListOf()
         navigationSession = NavigationSession(context)
     }

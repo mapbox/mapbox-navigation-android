@@ -1,7 +1,8 @@
-package com.mapbox.navigation.core.internal.accounts
+package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 
@@ -18,8 +19,12 @@ internal class NavigationSession(private val context: Context) : RouteObserver, 
             // todo expose state observers for the rest of the lib to hook into?
 
             when {
-                previousValue == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(context.applicationContext).navigationStopped()
-                value == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(context.applicationContext).navigationStarted()
+                previousValue == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
+                    context.applicationContext
+                ).navigationStopped()
+                value == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
+                    context.applicationContext
+                ).navigationStarted()
             }
         }
 

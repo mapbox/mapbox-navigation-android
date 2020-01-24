@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.accounts
+package com.mapbox.navigation.core.accounts
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -12,7 +12,7 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
 
     companion object {
         private const val TAG = "MapboxNavigationAccountsProvider"
-        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccountsProvider"
+        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.navigation.core.accounts.MapboxNavigationAccountsProvider"
     }
 
     override fun onCreate(): Boolean {

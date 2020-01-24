@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.accounts
+package com.mapbox.navigation.core.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
