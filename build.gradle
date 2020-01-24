@@ -26,6 +26,7 @@ buildscript {
     classpath pluginDependencies.mavenPublish
     classpath pluginDependencies.bintray
     classpath pluginDependencies.artifactory
+    classpath pluginDependencies.dokka
   }
 }
 

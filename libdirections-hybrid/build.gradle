@@ -1,7 +1,16 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libdirections-hybrid'
+    }
+}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
