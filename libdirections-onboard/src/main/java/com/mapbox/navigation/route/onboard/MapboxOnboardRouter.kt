@@ -89,21 +89,20 @@ class MapboxOnboardRouter : Router {
 
         val origin = routeOptions.coordinates().first()
         val destination = routeOptions.coordinates().last()
-        routeOptions.coordinates().drop(1).dropLast(1)
+        val waypoints = routeOptions.coordinates().drop(1).dropLast(1)
 
         val offlineRouter = OfflineRoute.builder(
-
             RouteUrl(
                 accessToken = routeOptions.accessToken(),
                 user = routeOptions.user(),
                 profile = routeOptions.profile(),
                 orgin = origin,
-                waypoints = routeOptions.coordinates(),
+                waypoints = waypoints,
                 destination = destination,
-                steps = routeOptions.steps() ?: false,
-                voiceIntruction = routeOptions.voiceInstructions() ?: false,
-                bannerIntruction = routeOptions.bannerInstructions() ?: false,
-                roundaboutExits = routeOptions.roundaboutExits() ?: false
+                steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
+                voiceInstruction = routeOptions.voiceInstructions() ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
+                bannerInstruction = routeOptions.bannerInstructions() ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
+                roundaboutExits = routeOptions.roundaboutExits() ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE
             )
         ).build()
 
