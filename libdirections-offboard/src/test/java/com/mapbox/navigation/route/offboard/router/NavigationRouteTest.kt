@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.RouteUrl
@@ -13,6 +14,7 @@ import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import java.util.Locale
 import junit.framework.Assert.assertNotNull
@@ -36,6 +38,7 @@ class NavigationRouteTest {
 
     val origin: Point = Point.fromLngLat(0.0, 0.0)
     val destination: Point = Point.fromLngLat(1.0, 1.0)
+    private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
 
     @MockK
     private lateinit var context: Context
@@ -44,6 +47,7 @@ class NavigationRouteTest {
     fun setup() {
         MockKAnnotations.init(this)
         every { context.inferDeviceLocale() } returns Locale.US
+        every { mockSkuTokenProvider.obtainSkuToken() } returns ("/mock&sku=102jaksdhfj")
     }
 
     @Test
@@ -250,7 +254,7 @@ class NavigationRouteTest {
     }
 
     private fun provideNavigationOffboardRouteBuilder() =
-        RouteBuilderProvider.getBuilder(ACESS_TOKEN, context, null)
+        RouteBuilderProvider.getBuilder(ACESS_TOKEN, context, mockSkuTokenProvider)
 
     private fun provideDefaultRouteOptionsBuilder() =
         RouteOptions.builder()

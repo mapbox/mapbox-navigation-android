@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Uncomment this line of code if you want to use MAU based billing
+        <meta-data android:name="com.mapbox.ManageSkuToken" android:value="false" />
+        -->
+
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>

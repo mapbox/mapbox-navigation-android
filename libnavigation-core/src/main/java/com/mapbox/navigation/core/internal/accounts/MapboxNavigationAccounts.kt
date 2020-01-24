@@ -8,7 +8,8 @@ import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 
-internal class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
+// TODO: make the class internal
+class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
 
     companion object {
         private const val SKU_KEY = "sku"

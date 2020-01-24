@@ -3,7 +3,7 @@
 
     <application>
         <provider
-            android:name="com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccountsProvider"
+            android:name=".internal.accounts.MapboxNavigationAccountsProvider"
             android:authorities="${applicationId}.mapboxnavigationinitprovider"
             android:exported="false"
             android:initOrder="200"/>

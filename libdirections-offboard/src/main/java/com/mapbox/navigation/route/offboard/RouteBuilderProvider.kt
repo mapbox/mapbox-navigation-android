@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.route.offboard.extension.getUnitTypeForLocale
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 
 internal object RouteBuilderProvider {
@@ -13,9 +12,9 @@ internal object RouteBuilderProvider {
     fun getBuilder(
         accessToken: String,
         context: Context,
-        skuTokenProvider: SkuTokenProvider?
-    ): MapboxDirections.Builder {
-        val directionsBuilder = MapboxDirections.builder()
+        skuTokenProvider: SkuTokenProvider
+    ): MapboxDirections.Builder =
+        MapboxDirections.builder()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .language(context.inferDeviceLocale())
             .continueStraight(true)
@@ -32,14 +31,10 @@ internal object RouteBuilderProvider {
             .bannerInstructions(true)
             .enableRefresh(false)
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
-
-        ifNonNull(skuTokenProvider) { tokenProvider ->
-            directionsBuilder.interceptor {
+            .interceptor {
                 val httpUrl = it.request().url()
-                val skuUrl = tokenProvider.obtainSkuToken(httpUrl.toString(), httpUrl.querySize())
+                val skuUrl =
+                    skuTokenProvider.obtainSkuToken(httpUrl.toString(), httpUrl.querySize())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }
-        }
-        return directionsBuilder
-    }
 }

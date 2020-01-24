@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import io.mockk.every
@@ -27,20 +28,22 @@ class MapboxOffboardRouterTest : BaseTest() {
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptions = mockk(relaxed = true)
+    private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
 
     @Before
     fun setUp() {
         val listener = slot<Callback<DirectionsResponse>>()
 
         mockkObject(RouteBuilderProvider)
-        every { RouteBuilderProvider.getBuilder(accessToken, context, null) } returns mapboxDirectionsBuilder
+        every { mockSkuTokenProvider.obtainSkuToken() } returns ("/mock&sku=102jaksdhfj")
+        every { RouteBuilderProvider.getBuilder(accessToken, context, mockSkuTokenProvider) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections
         every { mapboxDirections.enqueueCall(capture(listener)) } answers {
             callback = listener.captured
         }
         every { routeOptions.coordinates().size } returns 2
-        offboardRouter = MapboxOffboardRouter(accessToken, context)
+        offboardRouter = MapboxOffboardRouter(accessToken, context, mockSkuTokenProvider)
     }
 
     @Test
