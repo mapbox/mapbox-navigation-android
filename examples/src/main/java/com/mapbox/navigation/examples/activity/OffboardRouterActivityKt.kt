@@ -187,6 +187,10 @@ class OffboardRouterActivityKt : AppCompatActivity(),
         MapboxLogger.e(Message("Router.Callback#onFailure"), throwable)
     }
 
+    override fun onCanceled() {
+        Toast.makeText(this, "Canceled", Toast.LENGTH_LONG).show()
+    }
+
     /*
      * Activity lifecycle methods
      */

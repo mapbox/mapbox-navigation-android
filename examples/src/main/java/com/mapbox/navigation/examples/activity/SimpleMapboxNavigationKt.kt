@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.annotations.IconFactory
@@ -59,6 +60,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                     RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(applicationContext))
                         .coordinates(location.toPoint(), null, click.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .build()
                 )
 
@@ -72,10 +75,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             false
         }
 
-        mapboxMap.setStyle(Style.MAPBOX_STREETS) {
+        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@SimpleMapboxNavigationKt, it)
+                    LocationComponentActivationOptions.builder(this@SimpleMapboxNavigationKt, style)
                         .useDefaultLocationEngine(false)
                         .build()
                 )
@@ -84,8 +87,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             }
 
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
-            symbolManager = SymbolManager(mapView, mapboxMap, it)
-            it.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
+            navigationMapRoute?.setOnRouteSelectionChangeListener { route ->
+                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
+                    remove(route)
+                    add(0, route)
+                })
+            }
+
+            symbolManager = SymbolManager(mapView, mapboxMap, style)
+            style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
         }
     }
 
@@ -108,7 +118,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val routeObserver = object : RouteObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapRoute?.addRoute(routes[0])
+            if (routes.isNotEmpty()) {
+                navigationMapRoute?.addRoutes(routes)
+            }
             Timber.e("route changed %s", routes.toString())
         }
 
@@ -119,6 +131,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesRequestFailure(throwable: Throwable) {
             symbolManager?.deleteAll()
             Timber.e("route request failure %s", throwable.toString())
+        }
+
+        override fun onRoutesRequestCanceled() {
+            symbolManager?.deleteAll()
+            Timber.e("route request canceled")
         }
     }
 

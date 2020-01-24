@@ -21,6 +21,7 @@ import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -106,9 +107,12 @@ class MapboxOnboardRouter : Router {
                 waypoints = waypoints,
                 destination = destination,
                 steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
-                voiceInstruction = routeOptions.voiceInstructions() ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
-                bannerInstruction = routeOptions.bannerInstructions() ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
-                roundaboutExits = routeOptions.roundaboutExits() ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE
+                voiceInstruction = routeOptions.voiceInstructions()
+                    ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
+                bannerInstruction = routeOptions.bannerInstructions()
+                    ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
+                roundaboutExits = routeOptions.roundaboutExits()
+                    ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE
             )
         ).build()
 
@@ -121,21 +125,27 @@ class MapboxOnboardRouter : Router {
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {
         mainJobControl.scope.launch {
-            val routerResult = withContext(ThreadController.IODispatcher) {
-                navigatorNative.getRoute(url)
-            }
+            try {
+                val routerResult = getRoute(url)
 
-            val routes: List<DirectionsRoute> = try {
-                DirectionsResponse.fromJson(routerResult.json).routes()
-            } catch (e: RuntimeException) {
-                emptyList()
-            }
+                val routes: List<DirectionsRoute> = try {
+                    DirectionsResponse.fromJson(routerResult.json).routes()
+                } catch (e: RuntimeException) {
+                    emptyList()
+                }
 
-            when {
-                !routes.isNullOrEmpty() -> callback.onResponse(routes)
-                else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
+                when {
+                    !routes.isNullOrEmpty() -> callback.onResponse(routes)
+                    else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
+                }
+            } catch (e: CancellationException) {
+                callback.onCanceled()
             }
         }
+    }
+
+    internal suspend fun getRoute(url: String) = withContext(ThreadController.IODispatcher) {
+        navigatorNative.getRoute(url)
     }
 
     private fun generateErrorMessage(response: String): String {

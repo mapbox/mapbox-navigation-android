@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
 import com.mapbox.navigation.utils.timer.MapboxTimer
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -45,7 +46,7 @@ class MapboxDirectionsSessionTest {
     @Test
     fun initialState() {
         assertNull(session.getRouteOptions())
-        assertEquals(session.getRoutes(), emptyList<DirectionsRoute>())
+        assertEquals(session.routes, emptyList<DirectionsRoute>())
     }
 
     @Test
@@ -54,9 +55,9 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions)
         callback.onResponse(routes)
 
-        assertEquals(routes, session.getRoutes())
-        verify { observer.onRoutesRequested() }
-        verify { observer.onRoutesChanged(routes) }
+        assertEquals(routes, session.routes)
+        verify(exactly = 1) { observer.onRoutesRequested() }
+        verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
@@ -64,11 +65,11 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions)
 
         session.registerRouteObserver(observer)
-        verify { observer.onRoutesRequested() }
+        verify(exactly = 1) { observer.onRoutesRequested() }
         verify(exactly = 0) { observer.onRoutesChanged(routes) }
 
         callback.onResponse(routes)
-        verify { observer.onRoutesChanged(routes) }
+        verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
@@ -77,7 +78,7 @@ class MapboxDirectionsSessionTest {
         callback.onResponse(routes)
         session.registerRouteObserver(observer)
         verify(exactly = 0) { observer.onRoutesRequested() }
-        verify { observer.onRoutesChanged(routes) }
+        verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test
@@ -85,9 +86,9 @@ class MapboxDirectionsSessionTest {
         val throwable: Throwable = mockk()
         session.registerRouteObserver(observer)
         session.requestRoutes(routeOptions)
-        verify { observer.onRoutesRequested() }
+        verify(exactly = 1) { observer.onRoutesRequested() }
         callback.onFailure(throwable)
-        verify { observer.onRoutesRequestFailure(throwable) }
+        verify(exactly = 1) { observer.onRoutesRequestFailure(throwable) }
     }
 
     @Test
@@ -95,9 +96,9 @@ class MapboxDirectionsSessionTest {
         val throwable: Throwable = mockk()
         session.requestRoutes(routeOptions)
         session.registerRouteObserver(observer)
-        verify { observer.onRoutesRequested() }
+        verify(exactly = 1) { observer.onRoutesRequested() }
         callback.onFailure(throwable)
-        verify { observer.onRoutesRequestFailure(throwable) }
+        verify(exactly = 1) { observer.onRoutesRequestFailure(throwable) }
     }
 
     @Test
@@ -107,7 +108,7 @@ class MapboxDirectionsSessionTest {
         callback.onFailure(throwable)
         session.registerRouteObserver(observer)
         verify(exactly = 0) { observer.onRoutesRequested() }
-        verify { observer.onRoutesRequestFailure(throwable) }
+        verify(exactly = 1) { observer.onRoutesRequestFailure(throwable) }
     }
 
     @Test
@@ -143,7 +144,7 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions)
         callback.onResponse(routes)
         delayLambda()
-        verify { router.getRoute(routeOptions, callback) }
+        verify(exactly = 1) { router.getRoute(routeOptions, callback) }
     }
 
     @Test
@@ -174,9 +175,10 @@ class MapboxDirectionsSessionTest {
         verify(exactly = 1) { router.cancel() }
         callback.onResponse(routes)
 
+        clearMocks(router)
         delayLambda()
         session.cancel()
-        verify(exactly = 2) { router.cancel() }
+        verify(exactly = 1) { router.cancel() }
     }
 
     @Test
@@ -184,8 +186,36 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions)
         callback.onResponse(routes)
         delayLambda()
+        clearMocks(router)
         session.requestRoutes(routeOptions)
-        verify(exactly = 2) { router.cancel() }
+        verify(exactly = 1) { router.cancel() }
+    }
+
+    @Test
+    fun routeSetter_set() {
+        session.registerRouteObserver(observer)
+        session.routes = routes
+        verify(exactly = 1) { observer.onRoutesChanged(routes) }
+    }
+
+    @Test
+    fun routeSetter_set_alreadyAvailable() {
+        session.registerRouteObserver(observer)
+        session.requestRoutes(routeOptions)
+        callback.onResponse(routes)
+        val newRoutes: List<DirectionsRoute> = listOf(mockk())
+        session.routes = newRoutes
+        verify(exactly = 1) { observer.onRoutesChanged(newRoutes) }
+    }
+
+    @Test
+    fun routeSetter_cancelRouter() {
+        session.registerRouteObserver(observer)
+        session.requestRoutes(routeOptions)
+        clearMocks(router)
+        session.routes = routes
+        verify(exactly = 1) { router.cancel() }
+        verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }
 
     @Test

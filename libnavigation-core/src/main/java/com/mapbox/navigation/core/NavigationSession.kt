@@ -6,7 +6,8 @@ import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 
-internal class NavigationSession(private val context: Context) : RouteObserver, TripSessionStateObserver {
+internal class NavigationSession(private val context: Context) : RouteObserver,
+    TripSessionStateObserver {
 
     private var state = State.IDLE
         set(value) {
@@ -62,6 +63,10 @@ internal class NavigationSession(private val context: Context) : RouteObserver, 
 
     override fun onRoutesRequestFailure(throwable: Throwable) {
         hasRoutes = false
+    }
+
+    override fun onRoutesRequestCanceled() {
+        // do nothing
     }
 
     override fun onSessionStarted() {
