@@ -7,19 +7,30 @@ import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
-import com.mapbox.navigation.utils.thread.WorkThreadHandler
+import com.mapbox.navigation.utils.thread.JobControl
+import com.mapbox.navigation.utils.thread.ThreadController
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class MapboxMetricsReporterTest {
+
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
 
     @Test
     fun telemetryEnabledWhenReporterInit() {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        val threadWorker = mockk<WorkThreadHandler>(relaxed = true)
 
-        MapboxMetricsReporter.init(mapboxTelemetry, threadWorker)
+        MapboxMetricsReporter.init(mapboxTelemetry, ThreadController)
 
         verify { mapboxTelemetry.enable() }
     }
@@ -34,7 +45,9 @@ class MapboxMetricsReporterTest {
     }
 
     @Test
-    fun telemetryPushCalledWhenAddValidEvent() {
+    fun telemetryPushCalledWhenAddValidEvent() = coroutineRule.runBlockingTest {
+        mockkObject(ThreadController)
+        mockIOScopeAndRootJob()
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
         val metricEvent = StubNavigationEvent(NavigationMetrics.ARRIVE)
         val event = metricEvent.toTelemetryEvent()
@@ -42,10 +55,13 @@ class MapboxMetricsReporterTest {
         MapboxMetricsReporter.addEvent(metricEvent)
 
         verify { mapboxTelemetry.push(event) }
+        unmockkObject(ThreadController)
     }
 
     @Test
-    fun telemetryPushCalledWhenAddInvalidEvent() {
+    fun telemetryPushCalledWhenAddInvalidEvent() = coroutineRule.runBlockingTest {
+        mockkObject(ThreadController)
+        mockIOScopeAndRootJob()
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
         val metricEvent = StubNavigationEvent("some_event")
         val event = metricEvent.toTelemetryEvent()
@@ -53,6 +69,7 @@ class MapboxMetricsReporterTest {
         MapboxMetricsReporter.addEvent(metricEvent)
 
         verify(exactly = 0) { mapboxTelemetry.push(event) }
+        unmockkObject(ThreadController)
     }
 
     @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
@@ -73,10 +90,15 @@ class MapboxMetricsReporterTest {
 
     private fun initMetricsReporterWithTelemetry(): MapboxTelemetry {
         val mapboxTelemetry = mockk<MapboxTelemetry>(relaxed = true)
-        val threadWorker = mockk<WorkThreadHandler>(relaxed = true)
-        MapboxMetricsReporter.init(mapboxTelemetry, threadWorker)
+        MapboxMetricsReporter.init(mapboxTelemetry, ThreadController)
 
         return mapboxTelemetry
+    }
+
+    private fun mockIOScopeAndRootJob() {
+        val parentJob = SupervisorJob()
+        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
     }
 
     private class StubNavigationEvent(
