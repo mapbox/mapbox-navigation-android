@@ -63,6 +63,7 @@ dependencies {
   api (dependenciesList.mapboxEvents) {
     exclude group: "com.mapbox.mapboxsdk", module: "mapbox-android-core"
   }
+  implementation project(":libnavigation-util")
 
   //ktlint
   ktlint dependenciesList.ktlint
@@ -71,6 +72,8 @@ dependencies {
   implementation dependenciesList.mapboxNavigator
 
   implementation dependenciesList.kotlinStdLib
+
+  implementation dependenciesList.coroutinesAndroid
 
   // Support
   implementation dependenciesList.supportAppcompatV7
