@@ -64,7 +64,6 @@ class MapboxOnboardRouterTest {
     fun checkCallbackCalledOnFailure() = coroutineRule.runBlockingTest {
         val exceptionSlot = slot<NavigationException>()
         every { navigator.getRoute(any()) } returns routerResultFailure
-        advanceUntilIdle()
 
         onboardRouter.getRoute(routerOptions, routerCallback)
 
