@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.onboard
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.RouteUrl
+import com.mapbox.navigation.base.route.internal.RouteUrl
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import org.junit.Assert.assertTrue
