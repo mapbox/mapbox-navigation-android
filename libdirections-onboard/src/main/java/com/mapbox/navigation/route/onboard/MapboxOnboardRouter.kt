@@ -10,8 +10,8 @@ import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
-import com.mapbox.navigation.base.route.RouteUrl
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError

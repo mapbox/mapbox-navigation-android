@@ -8,7 +8,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.route.RouteUrl
+import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations

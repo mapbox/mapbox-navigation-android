@@ -4,7 +4,7 @@ package com.mapbox.navigation.base.extensions
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.RouteUrl
+import com.mapbox.navigation.base.route.internal.RouteUrl
 
 const val SEMICOLON = ";"
 const val COMMA = ","
