@@ -8,6 +8,11 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavigation-base'
+
+        perPackageOption {
+            prefix = "route.internal"
+            suppress = true
+        }
     }
 }
 

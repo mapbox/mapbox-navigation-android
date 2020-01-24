@@ -21,6 +21,17 @@ javadoc:
 	./gradlew :libandroid-navigation:javadocrelease
 	./gradlew :libandroid-navigation-ui:javadocrelease
 
+javadoc-dokka:
+    ./gradlew :libnavigation-base:dokka
+    ./gradlew :libnavigator:dokka
+    ./gradlew :libdirections-onboard:dokka
+    ./gradlew :libdirections-offboard:dokka
+    ./gradlew :libdirections-hybrid:dokka
+    ./gradlew :libnavigation-metrics:dokka
+    ./gradlew :libtrip-notification:dokka
+    ./gradlew :liblogger:dokka
+    ./gradlew :libnavigation-core:dokka
+
 publish:
 	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
 	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
