@@ -11,12 +11,13 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.TripNotification
-import com.mapbox.navigation.base.typedef.METRIC
+import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.TWELVE_HOURS
+import com.mapbox.navigation.base.typedef.UNDEFINED
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteObserver
@@ -40,6 +41,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 class MapboxNavigation(
     private val context: Context,
     private val accessToken: String?,
+    private val navigationOptions: NavigationOptions,
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
@@ -82,7 +84,8 @@ class MapboxNavigation(
         tripSession = NavigationComponentProvider.createTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest
+            locationEngineRequest,
+            navigationOptions.navigatorPollingDelay()
         )
         tripSession.registerOffRouteObserver(createInternalOffRouteObserver())
         tripSession.registerStateObserver(navigationSession)
@@ -294,16 +297,7 @@ class MapboxNavigation(
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
-                NavigationOptions::class.java to NavigationOptions.Builder(
-                    TWELVE_HOURS,
-                    ROUNDING_INCREMENT_FIFTY,
-                    MapboxDistanceFormatter(
-                        context.applicationContext,
-                        "ja",
-                        METRIC,
-                        ROUNDING_INCREMENT_FIFTY
-                    )
-                ).build()
+                NavigationOptions::class.java to navigationOptions
             )
             MapboxNavigationModuleType.TripService -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripSession -> throw NotImplementedError() // going to be removed when next base version
@@ -313,5 +307,20 @@ class MapboxNavigation(
 
     companion object {
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
+
+        @JvmStatic
+        fun defaultNavigationOptions(context: Context): NavigationOptions {
+            return NavigationOptions.Builder(
+                NONE_SPECIFIED,
+                ROUNDING_INCREMENT_FIFTY,
+                DEFAULT_NAVIGATOR_POLLING_DELAY,
+                MapboxDistanceFormatter(
+                    context.applicationContext,
+                    null,
+                    UNDEFINED,
+                    ROUNDING_INCREMENT_FIFTY
+                )
+            ).build()
+        }
     }
 }

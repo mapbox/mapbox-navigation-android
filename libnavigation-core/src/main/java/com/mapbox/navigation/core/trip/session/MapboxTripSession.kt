@@ -31,6 +31,7 @@ class MapboxTripSession(
     override val tripService: TripService,
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
+    private val navigatorPollingDelay: Long,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     threadController: ThreadController = ThreadController
 ) : TripSession {
@@ -239,7 +240,7 @@ class MapboxTripSession(
     private suspend fun navigatorPolling(): TripStatus =
         withContext(ioJobController.scope.coroutineContext) {
             val date = Date()
-            date.time = date.time + 1500
+            date.time = date.time + navigatorPollingDelay
             navigator.getStatus(date)
         }
 

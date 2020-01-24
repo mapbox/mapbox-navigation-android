@@ -58,6 +58,7 @@ class MapboxTripSessionTest {
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
 
     private val routeProgress: RouteProgress = mockk()
+    private val navigatorPollingDelay = 1500L
 
     @Before
     fun setUp() {
@@ -65,6 +66,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator
         )
 
@@ -176,6 +178,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )
@@ -202,6 +205,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )
@@ -230,6 +234,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )
@@ -256,6 +261,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )
@@ -282,6 +288,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )
@@ -310,6 +317,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
+            navigatorPollingDelay,
             navigator,
             ThreadController
         )

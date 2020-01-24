@@ -6,9 +6,12 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.TimeFormatType
 
+const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
+
 class NavigationOptions private constructor(
     @RoundingIncrement private val roundingIncrement: Int,
     @TimeFormatType private val timeFormatType: Int,
+    private val navigatorPollingDelay: Long,
     private val distanceFormatter: DistanceFormatter?,
     private val onboardRouterConfig: MapboxOnboardRouterConfig?
 ) {
@@ -21,9 +24,26 @@ class NavigationOptions private constructor(
 
     fun onboardRouterConfig() = onboardRouterConfig
 
+    fun navigatorPollingDelay() = navigatorPollingDelay
+
+    fun toBuilder(): Builder {
+        val builder = Builder()
+            .roundingIncrement(roundingIncrement)
+            .timeFormatType(timeFormatType)
+            .navigatorPollingDelay(navigatorPollingDelay)
+        distanceFormatter?.let {
+            builder.distanceFormatter(it)
+        }
+        onboardRouterConfig?.let {
+            builder.onboardRouterConfig(it)
+        }
+        return builder
+    }
+
     data class Builder(
         private var timeFormatType: Int = NONE_SPECIFIED,
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
+        private var navigatorPollingDelay: Long = DEFAULT_NAVIGATOR_POLLING_DELAY,
         private var distanceFormatter: DistanceFormatter? = null,
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
     ) {
@@ -38,12 +58,16 @@ class NavigationOptions private constructor(
             apply { this.distanceFormatter = distanceFormatter }
 
         fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig) =
-            apply { this.onboardRouterConfig }
+            apply { this.onboardRouterConfig = onboardRouterConfig }
+
+        fun navigatorPollingDelay(pollingDelay: Long) =
+            apply { navigatorPollingDelay = pollingDelay }
 
         fun build(): NavigationOptions {
             return NavigationOptions(
                 roundingIncrement,
                 timeFormatType,
+                navigatorPollingDelay,
                 distanceFormatter,
                 onboardRouterConfig
             )
