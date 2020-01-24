@@ -45,10 +45,7 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.coroutinesTestAndroid
+    testImplementation project(':libtesting')
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"

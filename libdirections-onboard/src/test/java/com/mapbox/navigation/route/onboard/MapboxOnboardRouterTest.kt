@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigator.RouterResult
 import io.mockk.every

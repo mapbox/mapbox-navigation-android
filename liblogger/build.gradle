@@ -26,8 +26,7 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
+    testImplementation project(':libtesting')
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.testing.ui.rules
+package com.mapbox.navigation.testing
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.platform.app.InstrumentationRegistry

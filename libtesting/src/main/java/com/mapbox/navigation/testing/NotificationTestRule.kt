@@ -1,4 +1,4 @@
-package com.mapbox.navigation.testing.ui.rules
+package com.mapbox.navigation.testing
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.test.uiautomator.By
@@ -20,6 +20,8 @@ open class NotificationTestRule<A : AppCompatActivity>(activityClass: Class<A>) 
 
     protected fun UiDevice.waitForNotification() {
         this.openNotification()
-        this.wait(Until.hasObject(By.textStartsWith(appName)), TIMEOUT)
+        this.wait(Until.hasObject(By.textStartsWith(appName)),
+            TIMEOUT
+        )
     }
 }

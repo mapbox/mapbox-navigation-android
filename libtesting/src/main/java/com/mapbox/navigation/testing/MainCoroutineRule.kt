@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard
+package com.mapbox.navigation.testing
 
 import com.mapbox.navigation.utils.thread.ThreadController
 import io.mockk.every
@@ -17,13 +17,13 @@ import org.junit.runners.model.Statement
 
 @ExperimentalCoroutinesApi
 class MainCoroutineRule : TestRule {
-    val coroutineDispatcher = TestCoroutineDispatcher()
-    val coroutineScope = TestCoroutineScope(coroutineDispatcher)
+    val testDispatcher = TestCoroutineDispatcher()
+    val coroutineScope = TestCoroutineScope(testDispatcher)
 
     override fun apply(base: Statement, description: Description?) = object : Statement() {
         @Throws(Throwable::class)
         override fun evaluate() {
-            Dispatchers.setMain(coroutineDispatcher)
+            Dispatchers.setMain(testDispatcher)
 
             mockkObject(ThreadController)
             every { ThreadController.IODispatcher } returns coroutineDispatcher
@@ -40,9 +40,3 @@ class MainCoroutineRule : TestRule {
     fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
             coroutineScope.runBlockingTest { block() }
 }
-
-@ExperimentalCoroutinesApi
-fun MainCoroutineRule.runBlockingTest(block: suspend () -> Unit) =
-        this.coroutineDispatcher.runBlockingTest {
-            block()
-        }

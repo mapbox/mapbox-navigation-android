@@ -28,4 +28,11 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin'
         exclude group: 'androidx.annotation'
     }
+
+    api dependenciesList.mockk
+    api dependenciesList.junit
+    api dependenciesList.robolectric
+    api dependenciesList.coroutinesTestAndroid
+
+    implementation dependenciesList.coroutinesAndroid
 }

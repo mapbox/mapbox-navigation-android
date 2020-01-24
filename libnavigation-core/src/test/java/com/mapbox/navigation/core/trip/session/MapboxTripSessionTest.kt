@@ -8,11 +8,10 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MainCoroutineRule
-import com.mapbox.navigation.core.runBlockingTest
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.TripStatus
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.NavigationStatus

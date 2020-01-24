@@ -40,9 +40,6 @@ dependencies {
 
     implementation dependenciesList.kotlinStdLib
 
-    // Unit testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.robolectric
+    testImplementation project(':libtesting')
 }
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
