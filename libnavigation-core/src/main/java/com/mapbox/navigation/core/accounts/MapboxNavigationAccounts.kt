@@ -46,9 +46,8 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         }
     }
 
-    override fun obtainSkuToken(resourceUrl: String?, querySize: Int): String {
+    override fun obtainSkuToken(resourceUrl: String?, querySize: Int): String? {
         val skuToken = skuGenerator?.generateToken()
-        check(!skuToken.isNullOrEmpty()) { "MapboxNavigationAccounts: skuToken cannot be null or empty" }
 
         return when (!resourceUrl.isNullOrEmpty() && querySize >= 0) {
             true -> {
@@ -71,7 +70,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     private fun buildResourceUrlWithSku(
         resourceUrl: String,
         querySize: Int,
-        skuToken: String
+        skuToken: String?
     ): String {
         val urlBuilder = StringBuilder(resourceUrl)
         when {
