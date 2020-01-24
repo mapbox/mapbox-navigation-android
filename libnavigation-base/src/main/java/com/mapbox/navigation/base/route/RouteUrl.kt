@@ -34,11 +34,11 @@ class RouteUrl(
         private const val QUERY_PARAM_ROUNDABOUT_EXITS = "roundabout_exits"
         private const val QUERY_PARAM_ENABLE_REFRESH = "enable_refresh"
 
-        const val STEPS_DEFAULT_VALUE = false
-        const val VOICE_INSTRUCTION_DEFAULT_VALUE = false
-        const val BANNER_INSTRUCTION_DEFAULT_VALUE = false
-        const val ROUNDABOUT_EXITS_DEFAULT_VALUE = false
-        const val ENABLE_REFRESH_DEFAULT_VALUE = true
+        internal const val STEPS_DEFAULT_VALUE = true
+        internal const val VOICE_INSTRUCTION_DEFAULT_VALUE = true
+        internal const val BANNER_INSTRUCTION_DEFAULT_VALUE = true
+        internal const val ROUNDABOUT_EXITS_DEFAULT_VALUE = true
+        internal const val ENABLE_REFRESH_DEFAULT_VALUE = true
 
         /**
          * Mapbox default username.
