@@ -18,6 +18,7 @@ import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.UNDEFINED
+import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
