@@ -16,7 +16,7 @@ With this SDK you can implement turn by turn navigation in your own Android app 
 # Why have we forked
 
 1. Mapbox decided to put a closed source component to their navigation SDK and introduced a non open source license. Flitsmeister wants a open source solution.
-2. Mapbox decided to put telemetry in their SDK. We couldn't turn this off wihtout adjusting the source.
+2. Mapbox decided to put telemetry in their SDK. We couldn't turn this off without adjusting the source.
 3. We want to use the SDK without paying Mapbox for each MAU and without Mapbox API keys.
 
 All issues are covered with this SDK. 
