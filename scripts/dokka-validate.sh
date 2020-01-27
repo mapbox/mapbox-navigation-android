@@ -7,6 +7,5 @@
 ./gradlew :libdirections-hybrid:dokka -i | grep -i 'No documentation for com' && { echo 'kdoc validation failed'; exit 1; }
 ./gradlew :libnavigation-metrics:dokka -i | grep -i 'No documentation for com' && { echo 'kdoc validation failed'; exit 1; }
 ./gradlew :libtrip-notification:dokka -i | grep -i 'No documentation for com' && { echo 'kdoc validation failed'; exit 1; }
-./gradlew :liblogger:dokka -i | grep -i 'No documentation for com' && { echo 'kdoc validation failed'; exit 1; }
 ./gradlew :libnavigation-core:dokka -i | grep -i 'No documentation for com' && { echo 'kdoc validation failed'; exit 1; }
 exit 0
