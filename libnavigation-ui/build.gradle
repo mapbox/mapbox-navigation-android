@@ -1,0 +1,47 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.dokka'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libnavigation-ui'
+    }
+}
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+    buildToolsVersion androidVersions.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-consumer.pro'
+    }
+
+}
+
+dependencies {
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
+
+    // Support libraries
+    implementation dependenciesList.supportDesign
+    implementation dependenciesList.supportRecyclerView
+    implementation dependenciesList.supportConstraintLayout
+    implementation dependenciesList.supportCardView
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    // Unit testing
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.mockito
+    testImplementation dependenciesList.mockk
+    testImplementation dependenciesList.robolectric
+    testImplementation dependenciesList.json
+}
