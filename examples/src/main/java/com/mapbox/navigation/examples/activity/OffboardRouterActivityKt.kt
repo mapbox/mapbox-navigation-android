@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
@@ -88,7 +89,11 @@ class OffboardRouterActivityKt : AppCompatActivity(),
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             MapboxLogger.d(Message("Style setting finished"))
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
-            Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(
+                findViewById(R.id.container),
+                "Tap map to place waypoint",
+                Snackbar.LENGTH_LONG
+            ).show()
             newOrigin()
         }
     }
@@ -106,7 +111,11 @@ class OffboardRouterActivityKt : AppCompatActivity(),
                 findRoute()
             }
             else -> {
-                Toast.makeText(this, "Only 2 waypoints supported for this example", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "Only 2 waypoints supported for this example",
+                    Toast.LENGTH_LONG
+                ).show()
                 clearMap()
             }
         }
@@ -131,18 +140,31 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     private fun findRoute() {
         ifNonNull(origin, destination) { originPoint, destinationPoint ->
             if (offboardRouter == null) {
-                offboardRouter = MapboxOffboardRouter(Utils.getMapboxAccessToken(this), this, MapboxNavigationAccounts.getInstance(this))
+                offboardRouter = MapboxOffboardRouter(
+                    Utils.getMapboxAccessToken(this),
+                    this,
+                    MapboxNavigationAccounts.getInstance(this)
+                )
             } else {
                 offboardRouter?.cancel()
             }
 
-            if (TurfMeasurement.distance(originPoint, destinationPoint, TurfConstants.UNIT_METERS) < 50) {
+            if (TurfMeasurement.distance(
+                    originPoint,
+                    destinationPoint,
+                    TurfConstants.UNIT_METERS
+                ) < 50
+            ) {
                 return
             }
             val waypoints = mutableListOf(waypoint).filterNotNull()
             val options = RouteOptions.builder().applyDefaultParams().apply {
                 accessToken(Utils.getMapboxAccessToken(this@OffboardRouterActivityKt))
                 coordinates(originPoint, waypoints, destinationPoint)
+                profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                annotations(
+                    "${DirectionsCriteria.ANNOTATION_CONGESTION},${DirectionsCriteria.ANNOTATION_DISTANCE},${DirectionsCriteria.ANNOTATION_DURATION}"
+                )
             }.build()
 
             offboardRouter?.getRoute(options, this@OffboardRouterActivityKt)

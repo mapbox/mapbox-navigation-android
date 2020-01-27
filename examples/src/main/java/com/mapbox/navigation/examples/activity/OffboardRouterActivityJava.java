@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -125,9 +126,9 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
     if (origin != null && destination != null) {
       if (offboardRouter == null) {
         offboardRouter = new MapboxOffboardRouter(
-                Utils.getMapboxAccessToken(this),
-                this,
-                MapboxNavigationAccounts.getInstance(this));
+          Utils.getMapboxAccessToken(this),
+          this,
+          MapboxNavigationAccounts.getInstance(this));
       } else {
         offboardRouter.cancel();
       }
@@ -138,8 +139,14 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
           waypoints.add(waypoint);
         }
         RouteOptions.Builder optionsBuilder =
-                applyDefaultParams(RouteOptions.builder())
-                .accessToken(Utils.getMapboxAccessToken(this));
+          applyDefaultParams(RouteOptions.builder())
+          .accessToken(Utils.getMapboxAccessToken(this))
+          .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+          .annotations(
+            DirectionsCriteria.ANNOTATION_CONGESTION + ","
+            + DirectionsCriteria.ANNOTATION_DISTANCE
+            + "," + DirectionsCriteria.ANNOTATION_DURATION
+          );
 
         coordinates(optionsBuilder, origin, waypoints, destination);
 
