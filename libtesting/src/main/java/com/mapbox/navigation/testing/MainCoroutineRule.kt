@@ -1,9 +1,5 @@
-package com.mapbox.navigation.route.onboard
+package com.mapbox.navigation.testing
 
-import com.mapbox.navigation.utils.thread.ThreadController
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -17,20 +13,15 @@ import org.junit.runners.model.Statement
 
 @ExperimentalCoroutinesApi
 class MainCoroutineRule : TestRule {
-    val coroutineDispatcher = TestCoroutineDispatcher()
-    val coroutineScope = TestCoroutineScope(coroutineDispatcher)
+    val testDispatcher = TestCoroutineDispatcher()
+    val coroutineScope = TestCoroutineScope(testDispatcher)
 
     override fun apply(base: Statement, description: Description?) = object : Statement() {
         @Throws(Throwable::class)
         override fun evaluate() {
-            Dispatchers.setMain(coroutineDispatcher)
-
-            mockkObject(ThreadController)
-            every { ThreadController.IODispatcher } returns coroutineDispatcher
+            Dispatchers.setMain(testDispatcher)
 
             base.evaluate()
-
-            unmockkObject(ThreadController)
 
             Dispatchers.resetMain() // Restore original main dispatcher
             coroutineScope.cleanupTestCoroutines()
@@ -40,9 +31,3 @@ class MainCoroutineRule : TestRule {
     fun runBlockingTest(block: suspend TestCoroutineScope.() -> Unit) =
             coroutineScope.runBlockingTest { block() }
 }
-
-@ExperimentalCoroutinesApi
-fun MainCoroutineRule.runBlockingTest(block: suspend () -> Unit) =
-        this.coroutineDispatcher.runBlockingTest {
-            block()
-        }

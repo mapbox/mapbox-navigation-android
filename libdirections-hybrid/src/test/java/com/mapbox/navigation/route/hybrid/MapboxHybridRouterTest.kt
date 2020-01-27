@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
+import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

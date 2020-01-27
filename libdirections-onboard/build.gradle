@@ -47,10 +47,7 @@ dependencies {
     // I/O
     implementation dependenciesList.okio
 
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.coroutinesTestAndroid
+    testImplementation project(':libtesting')
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

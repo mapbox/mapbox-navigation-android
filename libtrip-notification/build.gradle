@@ -40,8 +40,7 @@ dependencies {
 
     implementation dependenciesList.coroutinesAndroid
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
+    testImplementation project(':libtesting')
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
