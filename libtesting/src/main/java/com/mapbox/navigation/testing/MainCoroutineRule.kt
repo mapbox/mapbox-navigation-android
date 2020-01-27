@@ -1,9 +1,5 @@
 package com.mapbox.navigation.testing
 
-import com.mapbox.navigation.utils.thread.ThreadController
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -25,12 +21,7 @@ class MainCoroutineRule : TestRule {
         override fun evaluate() {
             Dispatchers.setMain(testDispatcher)
 
-            mockkObject(ThreadController)
-            every { ThreadController.IODispatcher } returns coroutineDispatcher
-
             base.evaluate()
-
-            unmockkObject(ThreadController)
 
             Dispatchers.resetMain() // Restore original main dispatcher
             coroutineScope.cleanupTestCoroutines()
