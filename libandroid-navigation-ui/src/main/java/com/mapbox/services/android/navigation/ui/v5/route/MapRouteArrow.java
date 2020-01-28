@@ -15,6 +15,7 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -26,7 +27,6 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.MathUtils;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapImageUtils;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.turf.TurfConstants;
@@ -62,7 +62,6 @@ import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ARROW_SHAFT_LINE_LAYER_ID;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.ARROW_SHAFT_SOURCE_ID;
-import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.MAX_ARROW_ZOOM;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.MAX_DEGREES;
 import static com.mapbox.services.android.navigation.ui.v5.route.RouteConstants.MAX_ZOOM_ARROW_HEAD_CASING_SCALE;
@@ -93,7 +92,7 @@ class MapRouteArrow {
   private final MapView mapView;
   private final MapboxMap mapboxMap;
 
-  MapRouteArrow(MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes) {
+  MapRouteArrow(MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, String aboveLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
 
@@ -105,7 +104,7 @@ class MapRouteArrow {
       ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_border_color));
     typedArray.recycle();
 
-    initialize();
+    initialize(aboveLayer);
   }
 
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
@@ -169,7 +168,7 @@ class MapRouteArrow {
     arrowHeadGeoJsonSource.setGeoJson(arrowHeadGeoJsonFeature);
   }
 
-  private void initialize() {
+  private void initialize(String aboveLayer) {
     initializeArrowShaft();
     initializeArrowHead();
 
@@ -181,7 +180,7 @@ class MapRouteArrow {
     SymbolLayer headLayer = createArrowHeadLayer();
     SymbolLayer headCasingLayer = createArrowHeadCasingLayer();
 
-    mapboxMap.getStyle().addLayerBelow(shaftCasingLayer, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
+    mapboxMap.getStyle().addLayerAbove(shaftCasingLayer, aboveLayer);
     mapboxMap.getStyle().addLayerAbove(headCasingLayer, shaftCasingLayer.getId());
 
     mapboxMap.getStyle().addLayerAbove(shaftLayer, headCasingLayer.getId());

@@ -27,6 +27,7 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -151,7 +152,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
       mapState = MapState.INFO;
-      navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
+      navigationMap = new NavigationMapboxMap(mapView, mapboxMap, null);
 
       // For Location updates
       initializeLocationEngine();
@@ -392,8 +393,9 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void playAnnouncement(Milestone milestone) {
     if (milestone instanceof VoiceInstructionMilestone) {
-      SpeechAnnouncement announcement = SpeechAnnouncement.builder()
-        .voiceInstructionMilestone((VoiceInstructionMilestone) milestone)
+      VoiceInstructions announcement = VoiceInstructions.builder()
+              .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
+              .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
         .build();
       speechPlayer.play(announcement);
     }

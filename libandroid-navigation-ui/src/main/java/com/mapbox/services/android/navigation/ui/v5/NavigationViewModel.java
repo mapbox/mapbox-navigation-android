@@ -14,6 +14,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
@@ -23,7 +24,6 @@ import com.mapbox.services.android.navigation.ui.v5.instruction.BannerInstructio
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionModel;
 import com.mapbox.services.android.navigation.ui.v5.summary.SummaryModel;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayer;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader;
@@ -504,8 +504,10 @@ public class NavigationViewModel extends AndroidViewModel {
     if (milestone instanceof VoiceInstructionMilestone) {
       voiceInstructionsToAnnounce++;
       voiceInstructionCache.update(voiceInstructionsToAnnounce);
-      SpeechAnnouncement announcement = SpeechAnnouncement.builder()
-        .voiceInstructionMilestone((VoiceInstructionMilestone) milestone).build();
+      VoiceInstructions announcement = VoiceInstructions.builder()
+        .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
+        .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
+        .build();
       announcement = retrieveAnnouncementFromSpeechEvent(announcement);
       speechPlayer.play(announcement);
     }
@@ -564,7 +566,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private SpeechAnnouncement retrieveAnnouncementFromSpeechEvent(SpeechAnnouncement announcement) {
+  private VoiceInstructions retrieveAnnouncementFromSpeechEvent(VoiceInstructions announcement) {
     if (navigationViewEventDispatcher != null) {
       announcement = navigationViewEventDispatcher.onAnnouncement(announcement);
     }

@@ -195,7 +195,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   public void onMapReady(@NotNull MapboxMap mapboxMap) {
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       mapboxMap.addOnMapLongClickListener(this);
-      map = new NavigationMapboxMap(mapView, mapboxMap);
+      map = new NavigationMapboxMap(mapView, mapboxMap, null);
       map.setOnRouteSelectionChangeListener(this);
       map.updateLocationLayerRenderMode(RenderMode.COMPASS);
       initializeLocationEngine();

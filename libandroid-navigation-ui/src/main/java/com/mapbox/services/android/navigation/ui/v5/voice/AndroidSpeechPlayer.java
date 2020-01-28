@@ -5,6 +5,8 @@ import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -55,7 +57,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    * @param speechAnnouncement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(SpeechAnnouncement speechAnnouncement) {
+  public void play(VoiceInstructions speechAnnouncement) {
     boolean isValidAnnouncement = speechAnnouncement != null
       && !TextUtils.isEmpty(speechAnnouncement.announcement());
     boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;

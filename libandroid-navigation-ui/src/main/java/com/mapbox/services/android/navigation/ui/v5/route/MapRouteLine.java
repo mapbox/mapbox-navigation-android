@@ -14,6 +14,8 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.mapboxsdk.location.LocationComponentConstants;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
@@ -21,7 +23,6 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.utils.MapUtils;
 
 import java.util.ArrayList;
@@ -177,7 +178,21 @@ class MapRouteLine {
 
     Drawable originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
     Drawable destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
-    belowLayer = findRouteBelowLayerId(belowLayer, style);
+
+    boolean layerBelowExists = false;
+    if (belowLayer != null && !belowLayer.isEmpty()) {
+      for (Layer layer : style.getLayers()) {
+        if (layer.getId().equals(belowLayer)) {
+          layerBelowExists = true;
+          break;
+        }
+      }
+    }
+
+    if (!layerBelowExists) {
+      // Avoid placing the route on top of the user location layer
+      belowLayer = LocationComponentConstants.SHADOW_LAYER;
+    }
 
     initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayer);
 
@@ -188,6 +203,12 @@ class MapRouteLine {
     updateAlternativeVisibilityTo(alternativesVisible);
     updateRoutesFor(primaryRouteIndex);
     updateVisibilityTo(isVisible);
+
+    if (!directionsRoutes.isEmpty() && routeFeatureCollections.isEmpty()) {
+      // if directions routes are populated but the feature collections are not,
+      // it means that we recreated the MapRouteLine while it was converting features
+      generateRouteFeatureCollectionsFrom(directionsRoutes);
+    }
   }
 
   // For testing only
@@ -264,6 +285,13 @@ class MapRouteLine {
 
   int retrievePrimaryRouteIndex() {
     return primaryRouteIndex;
+  }
+
+  String getTopLayerId() {
+    if (routeLayerIds.isEmpty()){
+      return LocationComponentConstants.SHADOW_LAYER;
+    }
+    return routeLayerIds.get(routeLayerIds.size() - 1);
   }
 
   private void drawRoutes(List<FeatureCollection> routeFeatureCollections) {
@@ -406,20 +434,6 @@ class MapRouteLine {
   // Testing only
   OnPrimaryRouteUpdatedCallback retrievePrimaryRouteUpdatedCallback() {
     return primaryRouteUpdatedCallback;
-  }
-
-  private String findRouteBelowLayerId(String belowLayer, Style style) {
-    if (belowLayer == null || belowLayer.isEmpty()) {
-      List<Layer> styleLayers = style.getLayers();
-      for (int i = 0; i < styleLayers.size(); i++) {
-        if (!(styleLayers.get(i) instanceof SymbolLayer)
-          // Avoid placing the route on top of the user location layer
-          && !styleLayers.get(i).getId().contains(RouteConstants.MAPBOX_LOCATION_ID)) {
-          belowLayer = styleLayers.get(i).getId();
-        }
-      }
-    }
-    return belowLayer;
   }
 
   private void initializeLayers(Style style, MapRouteLayerProvider layerProvider,

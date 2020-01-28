@@ -45,7 +45,7 @@ public abstract class SpeechAnnouncement {
    * <p>
    * Please note, the usage of this method creates a new instance of {@link SpeechAnnouncement}.
    *
-   * @return a {@link SpeechAnnouncement.Builder} with the same values set to match the ones defined
+   * @return a {@link Builder} with the same values set to match the ones defined
    * in this {@link SpeechAnnouncement}
    * @since 0.16.0
    */

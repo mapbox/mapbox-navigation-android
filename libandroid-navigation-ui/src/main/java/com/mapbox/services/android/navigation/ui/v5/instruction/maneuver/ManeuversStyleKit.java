@@ -1,12 +1,12 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
 
-import android.graphics.Paint;
+import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.graphics.Canvas;
-import android.graphics.Path;
-import android.graphics.DashPathEffect;
 
 import java.util.Stack;
 

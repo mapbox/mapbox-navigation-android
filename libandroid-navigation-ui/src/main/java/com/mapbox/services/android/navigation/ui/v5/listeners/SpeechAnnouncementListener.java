@@ -1,6 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.listeners;
 
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 /**
  * This listener will be triggered when a voice announcement is about to be voiced.
@@ -25,5 +25,5 @@ public interface SpeechAnnouncementListener {
    * @param announcement about to be announced
    * @return speech announcement to be played; null if should be ignored
    */
-  SpeechAnnouncement willVoice(SpeechAnnouncement announcement);
+  VoiceInstructions willVoice(VoiceInstructions announcement);
 }

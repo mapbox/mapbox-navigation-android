@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.instruction;
 
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -9,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,9 +24,9 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,10 +37,10 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.SoundButton;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
@@ -78,6 +80,8 @@ import timber.log.Timber;
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
   private static final String COMPONENT_TYPE_LANE = "lane";
+  private static final long GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED = 900L;
+  private static final long GUIDANCE_VIEW_HIDE_TRANSITION_SPEED = 900L;
 
   private ManeuverView upcomingManeuverView;
   private TextView upcomingDistanceText;
@@ -89,6 +93,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private View rerouteLayout;
   private View turnLaneLayout;
   private View subStepLayout;
+  private ImageView guidanceViewImage;
   private RecyclerView rvTurnLanes;
   private RecyclerView rvInstructions;
   private TurnLaneAdapter turnLaneAdapter;
@@ -279,6 +284,18 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
+  public void updateBannerInstructionsWith(BannerInstructions instructions) {
+    if (instructions == null || instructions.primary() == null) {
+      return;
+    }
+    BannerText primary = instructions.primary();
+    String primaryManeuverModifier = primary.modifier();
+    String drivingSide = currentStep.drivingSide();
+    updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees(), drivingSide);
+    updateDataFromBannerText(primary, instructions.secondary());
+    updateSubStep(instructions.sub(), primaryManeuverModifier);
+  }
+
   /**
    * Shows {@link FeedbackBottomSheet} and adds a listener so
    * the proper feedback information is collected or the user dismisses the UI.
@@ -438,6 +455,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     subStepLayout = findViewById(R.id.subStepLayout);
+    guidanceViewImage = findViewById(R.id.guidanceImageView);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
     instructionLayout = findViewById(R.id.instructionLayout);
     instructionLayoutText = findViewById(R.id.instructionLayoutText);
@@ -452,7 +470,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * set in the given navigation theme (light or dark).
    */
   private void initializeBackground() {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
@@ -690,6 +708,20 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
+  public void showGuidanceViewImage() {
+    if (guidanceViewImage.getVisibility() == GONE) {
+      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED, new DecelerateInterpolator());
+      guidanceViewImage.setVisibility(VISIBLE);
+    }
+  }
+
+  public void hideGuidanceViewImage() {
+    if (guidanceViewImage.getVisibility() == VISIBLE) {
+      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_HIDE_TRANSITION_SPEED, new DecelerateInterpolator());
+      guidanceViewImage.setVisibility(GONE);
+    }
+  }
+
   private boolean shouldShowTurnLanes(BannerText subText, String maneuverModifier) {
     if (!hasComponents(subText) || TextUtils.isEmpty(maneuverModifier)) {
       return false;
@@ -741,6 +773,13 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private void beginDelayedTransition() {
     TransitionManager.beginDelayedTransition(this);
+  }
+
+  private void beginGuidanceImageDelayedTransition(long duration, TimeInterpolator interpolator) {
+    AutoTransition transition = new AutoTransition();
+    transition.setDuration(duration);
+    transition.setInterpolator(interpolator);
+    TransitionManager.beginDelayedTransition(this, transition);
   }
 
   private void beginDelayedListTransition() {

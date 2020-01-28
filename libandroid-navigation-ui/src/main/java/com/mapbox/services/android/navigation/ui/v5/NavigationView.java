@@ -345,7 +345,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
-   * Used when starting this {@link android.app.Activity}
+   * Used when starting this {@link Activity}
    * for the first time.
    * <p>
    * Zooms to the beginning of the {@link DirectionsRoute}.
@@ -558,7 +558,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (initialMapCameraPosition != null) {
       map.setCameraPosition(initialMapCameraPosition);
     }
-    navigationMap = new NavigationMapboxMap(mapView, map);
+    navigationMap = new NavigationMapboxMap(mapView, map, null);
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
