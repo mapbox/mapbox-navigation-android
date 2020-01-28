@@ -48,7 +48,6 @@ import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdat
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
