@@ -37,6 +37,7 @@ import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.activity.notification.CustomNavigationNotification
 import com.mapbox.navigation.examples.utils.Utils
@@ -191,7 +192,7 @@ class HybridNavigationActivity : AppCompatActivity(), OnMapReadyCallback, OnMapC
                 null // working with pre-fetched tiles only
         )
         val onboardRouter = MapboxOnboardRouter(config, null)
-        val offBoardRouter = MapboxOffboardRouter(token, this)
+        val offBoardRouter = MapboxOffboardRouter(token, this, MapboxNavigationAccounts.getInstance(this))
         return MapboxHybridRouter(onboardRouter, offBoardRouter, applicationContext)
     }
 
