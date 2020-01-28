@@ -31,7 +31,7 @@ dependencies {
 
     api dependenciesList.mockk
     api dependenciesList.junit
-    api dependenciesList.robolectric
+    androidTestImplementation dependenciesList.robolectric
     api dependenciesList.coroutinesTestAndroid
 
     implementation dependenciesList.coroutinesAndroid
