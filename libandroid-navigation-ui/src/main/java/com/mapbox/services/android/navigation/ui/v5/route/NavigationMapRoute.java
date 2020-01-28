@@ -13,10 +13,10 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
@@ -253,7 +253,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @since 0.8.0
    */
   public void setOnRouteSelectionChangeListener(
-    @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener) {
+          @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener) {
     mapRouteClickListener.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
   }
 
@@ -326,7 +326,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
     Handler handler = new Handler(context.getMainLooper());
     return new MapRouteLine(context, mapboxMap.getStyle(), styleRes, belowLayer,
-      drawableProvider, sourceProvider, layerProvider, handler
+            drawableProvider, sourceProvider, layerProvider, handler
     );
   }
 
@@ -409,13 +409,13 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void updateProgressChangeListener() {
-      if (navigation != null) {
-          navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
-      }
-      mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
-      if (navigation != null) {
-          navigation.addProgressChangeListener(mapRouteProgressChangeListener);
-      }
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+    }
+    mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
+    if (navigation != null) {
+      navigation.addProgressChangeListener(mapRouteProgressChangeListener);
+    }
   }
 
   public void onNewRouteProgress(RouteProgress routeProgress) {

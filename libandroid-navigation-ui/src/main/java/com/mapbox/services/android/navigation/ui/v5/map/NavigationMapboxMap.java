@@ -14,10 +14,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.camera.CameraUpdate;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -33,6 +29,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationSnapshotReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -41,9 +38,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-//import kotlin.Unit;
-//import kotlin.jvm.functions.Function0;
 
 import static com.mapbox.services.android.navigation.ui.v5.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
@@ -70,9 +64,9 @@ public class NavigationMapboxMap {
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
   private static final double NAVIGATION_INITIAL_MAP_ZOOM = 17d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
-    = new CopyOnWriteArrayList<>();
+          = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
-    = new MapWayNameChangedListener(onWayNameChangedListeners);
+          = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -92,11 +86,13 @@ public class NavigationMapboxMap {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView   for map size and Context
-   * @param mapboxMap for APIs to interact with the map
+   * @param mapView           for map size and Context
+   * @param mapboxMap         for APIs to interact with the map
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    */
-  public NavigationMapboxMap(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap, @Nullable String routeBelowLayerId) {
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap,
+                             @Nullable String routeBelowLayerId) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     initializeLocationComponent(mapView, mapboxMap);
@@ -631,38 +627,16 @@ public class NavigationMapboxMap {
     int locationLayerStyleRes = findLayerStyleRes(context);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
-      .locationComponentOptions(options)
-      .useDefaultLocationEngine(false)
-      .build();
+            .locationComponentOptions(options)
+            .useDefaultLocationEngine(false)
+            .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
   }
 
-//  public void startNavigationCamera(@Nullable Location location, Function0<Unit> function) {
-//    if (location == null) return;
-//
-//    CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(
-//            new CameraPosition.Builder()
-//                    .zoom(NAVIGATION_INITIAL_MAP_ZOOM)
-//                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
-//                    .build()
-//    );
-//    mapboxMap.easeCamera(cameraUpdate, 2000, new MapboxMap.CancelableCallback() {
-//      @Override
-//      public void onCancel() {
-//
-//      }
-//
-//      @Override
-//      public void onFinish() {
-//        function.invoke();
-//      }
-//    });
-//  }
-
   private int findLayerStyleRes(Context context) {
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
-      R.attr.navigationViewLocationLayerStyle);
+            R.attr.navigationViewLocationLayerStyle);
     if (!isValid(locationLayerStyleRes)) {
       locationLayerStyleRes = R.style.NavigationLocationLayerStyle;
     }
