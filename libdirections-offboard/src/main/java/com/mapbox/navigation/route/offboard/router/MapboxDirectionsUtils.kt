@@ -7,7 +7,10 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.SEMICOLON
 import com.mapbox.navigation.base.extensions.checkFields
 import com.mapbox.navigation.base.extensions.convertToListOfDoubles
+import com.mapbox.navigation.base.extensions.convertToListOfInts
+import com.mapbox.navigation.base.extensions.convertToListOfLongs
 import com.mapbox.navigation.base.extensions.convertToListOfPairsOfDoubles
+import com.mapbox.navigation.base.extensions.parseOriginTraces
 import com.mapbox.navigation.base.extensions.parseWaypointIndices
 import com.mapbox.navigation.base.extensions.parseWaypointTargets
 import java.util.Locale
@@ -123,6 +126,18 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
 
     options.walkingOptions()?.let {
         walkingOptions(it)
+    }
+
+    options.originTrace()?.parseOriginTraces()?.toTypedArray()?.let {
+        addOriginTrace(*it)
+    }
+
+    options.originTraceTimestamps()?.convertToListOfLongs()?.toTypedArray()?.let {
+        addOriginTraceTimestamps(*it)
+    }
+
+    options.originTraceRadiuses()?.convertToListOfInts()?.toTypedArray()?.let {
+        addOriginTraceRadiuses(*it)
     }
 
     eventListener(EVENT_LISTENER)

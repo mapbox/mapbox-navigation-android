@@ -30,7 +30,7 @@ dependencies {
     //ktlint
     ktlint dependenciesList.ktlint
 
-    implementation dependenciesList.mapboxSdkServices
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.1.0-20200128.122639-11'
 
     testImplementation dependenciesList.junit
     testImplementation dependenciesList.mockk

@@ -22,6 +22,35 @@ fun String.convertToListOfDoubles(separator: Char = ';'): List<Double>? =
         null
     }
 
+fun String.convertToListOfLongs(separator: Char = ';'): List<Long>? =
+    try {
+        this.split(separator).map { token ->
+            token.toLong()
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+fun String.convertToListOfInts(separator: Char = ';'): List<Int>? =
+    try {
+        this.split(separator).map { token ->
+            token.toInt()
+        }
+    } catch (e: Exception) {
+        null
+    }
+
+fun String.parseOriginTraces(): List<Point>? =
+    try {
+        this.split(SEMICOLON).map { token ->
+            token.split(COMMA).let {
+                Point.fromLngLat(it[0].toDouble(), it[1].toDouble())
+            }
+        }
+    } catch (e: Exception) {
+        null
+    }
+
 fun String.convertToListOfPairsOfDoubles(
     firstSeparator: Char = ';',
     secondSeparator: Char = ','
