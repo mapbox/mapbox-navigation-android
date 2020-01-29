@@ -101,7 +101,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Offline
 
-    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
+    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
         navigator.configureRouter(routerParams, httpClient)
 
     override fun getRoute(url: String): RouterResult = navigator.getRoute(url)

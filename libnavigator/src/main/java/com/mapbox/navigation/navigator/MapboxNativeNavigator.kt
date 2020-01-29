@@ -49,7 +49,7 @@ interface MapboxNativeNavigator {
 
     // Offline
 
-    fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long
+    fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long
     fun getRoute(url: String): RouterResult
     fun unpackTiles(tarPath: String, destinationPath: String): Long
     fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long
