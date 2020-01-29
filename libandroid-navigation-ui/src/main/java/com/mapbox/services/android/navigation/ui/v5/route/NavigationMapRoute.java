@@ -253,7 +253,8 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @since 0.8.0
    */
   public void setOnRouteSelectionChangeListener(
-          @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener) {
+          @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener
+  ) {
     mapRouteClickListener.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
   }
 

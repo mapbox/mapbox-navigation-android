@@ -554,7 +554,7 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   @Retention(RetentionPolicy.SOURCE)
-  @IntDef( {NAVIGATION_TRACKING_MODE_GPS,
+  @IntDef({NAVIGATION_TRACKING_MODE_GPS,
           NAVIGATION_TRACKING_MODE_NORTH,
           NAVIGATION_TRACKING_MODE_NONE
   })
