@@ -104,6 +104,8 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession = NavigationSession(context)
+    private val internalRouteObserver = createInternalRouteObserver()
+    private val internalOffRouteObserver = createInternalOffRouteObserver()
 
     private var notificationChannelField: Field? = null
 
@@ -115,7 +117,7 @@ class MapboxNavigation(
                 ::paramsProvider
             )
         )
-        directionsSession.registerRouteObserver(createInternalRouteObserver())
+        directionsSession.registerRouteObserver(internalRouteObserver)
         directionsSession.registerRouteObserver(navigationSession)
 
         val notification: TripNotification = NavigationModuleProvider.createModule(
@@ -138,7 +140,7 @@ class MapboxNavigation(
             locationEngineRequest,
             navigationOptions.navigatorPollingDelay()
         )
-        tripSession.registerOffRouteObserver(createInternalOffRouteObserver())
+        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
     }
 
@@ -184,7 +186,17 @@ class MapboxNavigation(
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
         directionsSession.shutDownSession()
-        // todo cleanup listeners?
+
+        directionsSession.unregisterRouteObserver(internalRouteObserver)
+        directionsSession.unregisterRouteObserver(navigationSession)
+
+        tripSession.unregisterOffRouteObserver(internalOffRouteObserver)
+        tripSession.unregisterStateObserver(navigationSession)
+
+        // todo what about observers that are registered via this class's methods?
+        // if onDestroy gets called and there were observers registered from the outside
+        // will that cause resource leaks? Should this class keep track of the observers
+        // registered from the outside and unregister those listeners here?
     }
 
     /**
