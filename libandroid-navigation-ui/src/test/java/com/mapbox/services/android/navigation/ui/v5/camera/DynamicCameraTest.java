@@ -78,7 +78,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(16d, maxCameraZoom);
+    assertEquals(18d, maxCameraZoom);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(12d, maxCameraZoom);
+    assertEquals(18d, maxCameraZoom);
   }
 
   @Test
@@ -110,7 +110,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(14d, maxCameraZoom);
+    assertEquals(18d, maxCameraZoom);
   }
 
   @Test

@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+
 import org.junit.Test;
 
 import static junit.framework.Assert.assertTrue;
@@ -13,7 +15,7 @@ public class NavigationSpeechPlayerTest {
   public void onPlayAnnouncement_mapboxSpeechPlayerIsGivenAnnouncement() {
     MapboxSpeechPlayer speechPlayer = mock(MapboxSpeechPlayer.class);
     NavigationSpeechPlayer navigationSpeechPlayer = buildNavigationSpeechPlayer(speechPlayer);
-    SpeechAnnouncement announcement = mock(SpeechAnnouncement.class);
+    VoiceInstructions announcement = mock(VoiceInstructions.class);
 
     navigationSpeechPlayer.play(announcement);
 
@@ -24,7 +26,7 @@ public class NavigationSpeechPlayerTest {
   public void onPlayAnnouncement_androidSpeechPlayerIsGivenAnnouncement() {
     AndroidSpeechPlayer speechPlayer = mock(AndroidSpeechPlayer.class);
     NavigationSpeechPlayer navigationSpeechPlayer = buildNavigationSpeechPlayer(speechPlayer);
-    SpeechAnnouncement announcement = mock(SpeechAnnouncement.class);
+    VoiceInstructions announcement = mock(VoiceInstructions.class);
 
     navigationSpeechPlayer.play(announcement);
 

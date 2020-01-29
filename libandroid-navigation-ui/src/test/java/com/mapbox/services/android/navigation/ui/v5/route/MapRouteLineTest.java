@@ -176,9 +176,9 @@ public class MapRouteLineTest extends BaseTest {
       mock(Handler.class)
     );
 
-    verify(style).addLayer(routeLayer);
-    verify(style).addLayer(routeShieldLayer);
-    verify(style).addLayer(wayPointLayer);
+    verify(style).addLayerBelow(routeLayer, "mapbox-location-shadow-layer");
+    verify(style).addLayerBelow(routeShieldLayer, "mapbox-location-shadow-layer");
+    verify(style).addLayerBelow(wayPointLayer, "mapbox-location-shadow-layer");
     verify(style).addSource(routeLineSource);
     verify(style).addSource(wayPointSource);
 
