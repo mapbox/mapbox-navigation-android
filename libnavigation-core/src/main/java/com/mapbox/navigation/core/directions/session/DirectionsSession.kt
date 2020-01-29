@@ -9,13 +9,13 @@ internal interface DirectionsSession {
 
     fun getRouteOptions(): RouteOptions?
 
-    fun requestRoutes(routeOptions: RouteOptions)
+    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback)
 
     fun cancel()
 
-    fun registerRouteObserver(routeObserver: RouteObserver)
+    fun registerRoutesObserver(routesObserver: RoutesObserver)
 
-    fun unregisterRouteObserver(routeObserver: RouteObserver)
+    fun unregisterRoutesObserver(routesObserver: RoutesObserver)
 
     fun shutDownSession()
 

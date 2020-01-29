@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.activity
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -21,7 +22,8 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RouteObserver
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
@@ -62,7 +64,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                         .coordinates(location.toPoint(), null, click.toPoint())
                         .alternatives(true)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build()
+                        .build(),
+                    routesReqCallback
                 )
 
                 symbolManager?.deleteAll()
@@ -116,24 +119,29 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val routeObserver = object : RouteObserver {
+    private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            if (routes.isNotEmpty()) {
-                navigationMapRoute?.addRoutes(routes)
+            navigationMapRoute?.addRoutes(routes)
+            if (routes.isEmpty()) {
+                Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
+                    .show()
             }
             Timber.e("route changed %s", routes.toString())
         }
+    }
 
-        override fun onRoutesRequested() {
-            Timber.e("route requested")
+    private val routesReqCallback = object : RoutesRequestCallback {
+        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
+            Timber.e("route request success %s", routes.toString())
+            return routes
         }
 
-        override fun onRoutesRequestFailure(throwable: Throwable) {
+        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request failure %s", throwable.toString())
         }
 
-        override fun onRoutesRequestCanceled() {
+        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request canceled")
         }
@@ -154,7 +162,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onStart()
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.registerRouteObserver(routeObserver)
+        mapboxNavigation.registerRoutesObserver(routesObserver)
     }
 
     override fun onStop() {
@@ -162,7 +170,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onStop()
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRouteObserver(routeObserver)
+        mapboxNavigation.unregisterRoutesObserver(routesObserver)
     }
 
     override fun onLowMemory() {

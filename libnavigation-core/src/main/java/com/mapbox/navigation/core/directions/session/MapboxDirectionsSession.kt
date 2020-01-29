@@ -12,85 +12,64 @@ class MapboxDirectionsSession(
 ) : DirectionsSession {
 
     private val fasterRouteInterval = 2 * 60 * 1000L // 2 minutes
-    private val routeObservers = CopyOnWriteArrayList<RouteObserver>()
-    private var _routeOptions: RouteOptions? = null
+    private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
+    private var routeOptions: RouteOptions? = null
     private val fasterRouteTimer =
         NavigationComponentProvider.createMapboxTimer(fasterRouteInterval) {
-            _routeOptions?.let { requestFasterRoute(it) }
-        }
-
-    private var state: State = State.NoRoutesAvailable
-        set(value) {
-            field = value
-            when (value) {
-                is State.NoRoutesAvailable -> routeObservers.forEach {
-                    it.onRoutesChanged(routes)
-                }
-                is State.RoutesAvailable -> {
-                    // start the timer only when the route has been requested at least once
-                    fasterRouteTimer.start()
-                    routeObservers.forEach {
-                        it.onRoutesChanged(routes)
-                    }
-                }
-                is State.UserRoutesRequestInProgress -> routeObservers.forEach { it.onRoutesRequested() }
-                is State.UserRoutesRequestFailed -> {
-                    routeObservers.forEach {
-                        it.onRoutesRequestFailure(value.throwable)
-                    }
-                }
-            }
+            routeOptions?.let { requestFasterRoute(it) }
         }
 
     override var routes: List<DirectionsRoute> = emptyList()
         set(value) {
-            field = value
             router.cancel()
-            state = if (value.isEmpty()) {
-                State.NoRoutesAvailable
-            } else {
-                State.RoutesAvailable
+            if (routes.isEmpty() && value.isEmpty()) {
+                return
             }
+            field = value
+            if (value.isEmpty()) {
+                fasterRouteTimer.stop()
+            } else {
+                fasterRouteTimer.start()
+            }
+            routesObservers.forEach { it.onRoutesChanged(value) }
         }
 
-    override fun getRouteOptions(): RouteOptions? = _routeOptions
+    override fun getRouteOptions(): RouteOptions? = routeOptions
 
     override fun cancel() {
         router.cancel()
     }
 
-    override fun requestRoutes(routeOptions: RouteOptions) {
+    override fun requestRoutes(
+        routeOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback
+    ) {
         routes = emptyList()
-        this._routeOptions = routeOptions
-        state = State.UserRoutesRequestInProgress
+        this.routeOptions = routeOptions
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
-                this@MapboxDirectionsSession.routes = routes
+                this@MapboxDirectionsSession.routes = routesRequestCallback.onRoutesReady(routes)
             }
 
             override fun onFailure(throwable: Throwable) {
-                state = State.UserRoutesRequestFailed(throwable)
+                routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
             }
 
             override fun onCanceled() {
-                routeObservers.forEach { it.onRoutesRequestCanceled() }
+                routesRequestCallback.onRoutesRequestCanceled(routeOptions)
             }
         })
     }
 
-    override fun registerRouteObserver(routeObserver: RouteObserver) {
-        routeObservers.add(routeObserver)
-        when (val localState = state) {
-            is State.NoRoutesAvailable -> Unit
-            is State.RoutesAvailable -> routeObserver.onRoutesChanged(routes)
-            is State.UserRoutesRequestInProgress -> routeObserver.onRoutesRequested()
-            is State.UserRoutesRequestFailed ->
-                routeObserver.onRoutesRequestFailure(localState.throwable)
+    override fun registerRoutesObserver(routesObserver: RoutesObserver) {
+        routesObservers.add(routesObserver)
+        if (routes.isNotEmpty()) {
+            routesObserver.onRoutesChanged(routes)
         }
     }
 
-    override fun unregisterRouteObserver(routeObserver: RouteObserver) {
-        routeObservers.remove(routeObserver)
+    override fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
+        routesObservers.remove(routesObserver)
     }
 
     override fun unregisterAllRouteObservers() {
@@ -98,11 +77,12 @@ class MapboxDirectionsSession(
     }
 
     override fun shutDownSession() {
+        cancel()
         fasterRouteTimer.stop()
     }
 
     private fun requestFasterRoute(routeOptions: RouteOptions) {
-        if (state != State.RoutesAvailable) {
+        if (routes.isEmpty()) {
             return
         }
         router.getRoute(routeOptions, object : Router.Callback {
@@ -125,12 +105,5 @@ class MapboxDirectionsSession(
     private fun isRouteFaster(newRoute: DirectionsRoute): Boolean {
         // TODO: Implement the logic to check if the route is faster
         return false
-    }
-
-    private sealed class State {
-        object NoRoutesAvailable : State()
-        object RoutesAvailable : State()
-        object UserRoutesRequestInProgress : State()
-        class UserRoutesRequestFailed(val throwable: Throwable) : State()
     }
 }
