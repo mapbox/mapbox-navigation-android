@@ -25,7 +25,8 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.UNDEFINED
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RouteObserver
+import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -71,7 +72,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
  *
  * ### Routing
- * A route can be requested with [requestRoutes]. If the request is successful and returns a non-empty list of routes in the [RouteObserver],
+ * A route can be requested with [requestRoutes]. If the request is successful and returns a non-empty list of routes in the [RoutesObserver],
  * the first route at index 0 is going to be chosen as a primary one.
  *
  * If the SDK is in an `Idle` state, it stays in this same state even when a primary route is available.
@@ -117,8 +118,8 @@ class MapboxNavigation(
                 ::paramsProvider
             )
         )
-        directionsSession.registerRouteObserver(internalRouteObserver)
-        directionsSession.registerRouteObserver(navigationSession)
+        directionsSession.registerRoutesObserver(internalRouteObserver)
+        directionsSession.registerRoutesObserver(navigationSession)
 
         val notification: TripNotification = NavigationModuleProvider.createModule(
             MapboxNavigationModuleType.TripNotification,
@@ -172,11 +173,41 @@ class MapboxNavigation(
      * Requests a route using the provided [Router] implementation.
      * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
      *
-     * @see [registerRouteObserver]
+     * @param routeOptions params for the route request
+     * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
      */
     fun requestRoutes(routeOptions: RouteOptions) {
-        directionsSession.requestRoutes(routeOptions)
+        directionsSession.requestRoutes(routeOptions, defaultRoutesRequestCallback)
+    }
+
+    private val defaultRoutesRequestCallback = object : RoutesRequestCallback {
+        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
+            return routes
+        }
+
+        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+
+        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+    }
+
+    /**
+     * Requests a route using the provided [Router] implementation.
+     * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
+     *
+     * @param routeOptions params for the route request
+     * @param routesRequestCallback listener that gets notified when request state changes
+     * @see [registerRoutesObserver]
+     * @see [registerRouteProgressObserver]
+     */
+    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback) {
+        directionsSession.requestRoutes(routeOptions, routesRequestCallback)
     }
 
     /**
@@ -288,12 +319,19 @@ class MapboxNavigation(
         tripSession.unregisterOffRouteObserver(offRouteObserver)
     }
 
-    fun registerRouteObserver(routeObserver: RouteObserver) {
-        directionsSession.registerRouteObserver(routeObserver)
+    /**
+     * Registers [RoutesObserver]. The updates are available when a new list of routes is set.
+     * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance' and location map-matching.
+     */
+    fun registerRoutesObserver(routesObserver: RoutesObserver) {
+        directionsSession.registerRoutesObserver(routesObserver)
     }
 
-    fun unregisterRouteObserver(routeObserver: RouteObserver) {
-        directionsSession.unregisterRouteObserver(routeObserver)
+    /**
+     * Unregisters [RoutesObserver].
+     */
+    fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
+        directionsSession.unregisterRoutesObserver(routesObserver)
     }
 
     /**
@@ -343,34 +381,13 @@ class MapboxNavigation(
         tripSession.unregisterStateObserver(tripSessionStateObserver)
     }
 
-    private fun createInternalRouteObserver() = object : RouteObserver {
+    private fun createInternalRouteObserver() = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 tripSession.route = routes[0]
             } else {
                 tripSession.route = null
             }
-        }
-
-        override fun onRoutesRequested() {
-            tripSession.route = null
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable) {
-            tripSession.route = null
-            // todo retry logic with delay
-            /*tripSession.registerOffRouteObserver(object : OffRouteObserver {
-                override fun onOffRouteStateChanged(offRoute: Boolean) {
-                    if (offRoute) {
-                        reRoute()
-                    }
-                    tripSession.unregisterOffRouteObserver(this)
-                }
-            })*/
-        }
-
-        override fun onRoutesRequestCanceled() {
-            // do nothing
         }
     }
 
@@ -426,7 +443,10 @@ class MapboxNavigation(
             }
 
             val optionsRebuilt = optionsBuilder.build()
-            directionsSession.requestRoutes(optionsRebuilt)
+            directionsSession.requestRoutes(
+                optionsRebuilt,
+                defaultRoutesRequestCallback // todo cache the original callback and reach out to the user before setting the route
+            )
         }
     }
 
