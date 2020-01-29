@@ -6,13 +6,11 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
+import io.mockk.*
 import java.util.Locale
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -76,5 +74,26 @@ class MapboxNavigationTest {
     @Test
     fun sanity() {
         assertNotNull(mapboxNavigation)
+    }
+
+    @Test
+    fun onDestroy_unregisters_DirectionSession_observers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 2) { directionsSession.unregisterRouteObserver(any()) }
+    }
+
+    @Test
+    fun onDestroy_unregistersOffRouteObservers_from_tripSession() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
+    }
+
+    @Test
+    fun onDestroy_unregistersStateObservers_from_tripSession() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterStateObserver(any()) }
     }
 }
