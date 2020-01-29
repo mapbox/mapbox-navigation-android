@@ -11,17 +11,25 @@ def writeToFile(file, filePath) :
             data = json.load(dataFile)
             licenseName = ""
             licenseUrl = ""
+            uniqueProjects = set()
             for entry in data:
                 projectName = entry["project"]
-                projectUrl = entry["url"]
-                for license in entry["licenses"]:
-                    licenseName = license["license"]
-                    licenseUrl = license["license_url"]
+                if not projectName in uniqueProjects :
+                    uniqueProjects.add(projectName)
+                    projectUrl = entry["url"]
+                    description = entry["description"]
+                    if description is not None and str(description).lower() != str(projectName).lower() :
+                        description = " (%s).  \n" % description
+                    else :
+                        description = ".  \n"
+                    for license in entry["licenses"]:
+                        licenseName = license["license"]
+                        licenseUrl = license["license_url"]
 
-                file.write("Mapbox Navigation uses portions of the %s.  \n" % projectName +
-                                  ("URL: [%s](%s)  \n" % (projectUrl, projectUrl) if projectUrl is not None else "") +
-                                  "License: [%s](%s)" % (licenseName, licenseUrl) +
-                                  "\n\n===========================================================================\n\n")
+                    file.write("Mapbox Navigation uses portions of the %s%s" % (projectName, description) +
+                                      ("URL: [%s](%s)  \n" % (projectUrl, projectUrl) if projectUrl is not None else "") +
+                                      "License: [%s](%s)" % (licenseName, licenseUrl) +
+                                      "\n\n===========================================================================\n\n")
 
 with open(licensePath, 'w') as licenseFile:
     licenseFile.write("The MIT License (MIT)\n\nCopyright (c) 2019 Mapbox\n\n")
@@ -45,3 +53,30 @@ with open(licensePath, 'w') as licenseFile:
     licenseFile.write("\n\n\n### Navigation UI SDK  \n")
     licenseFile.write("---------------------------------------\n")
     writeToFile(licenseFile, "/libandroid-navigation-ui/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Hybrid Router SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libdirections-hybrid/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Offboard Router SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libdirections-offboard/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Onboard Router SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libdirections-onboard/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Logger SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/liblogger/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Navigation Base SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libnavigation-base/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Navigation Core SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libnavigation-core/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Metrics SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libnavigation-metrics/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Navigator SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libnavigator/build/reports/licenses/licenseReleaseReport.json")
+    licenseFile.write("\n\n\n### Trip Notification SDK module  \n")
+    licenseFile.write("---------------------------------------\n")
+    writeToFile(licenseFile, "/libtrip-notification/build/reports/licenses/licenseReleaseReport.json")
