@@ -81,8 +81,10 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * the SDK will enter the `Active Guidance` mode instead and propagate meaningful [RouteProgress].
  * Additionally, the enhanced location's map-matching will be more precise and based on the primary route itself.
  *
- * If the first or any routes request fails, or the route is manually cleared, the SDK will fallback to either `Idle` or `Free Drive` state.
- * TODO docs about MapboxNavigation#setRoutes method when API is available
+ * If a new routes request is made, or the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
+ *
+ * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
+ * todo should we expose a "primaryRouteIndex" field instead of relying on the list's order?
  *
  * @param context activity/fragment's context
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
