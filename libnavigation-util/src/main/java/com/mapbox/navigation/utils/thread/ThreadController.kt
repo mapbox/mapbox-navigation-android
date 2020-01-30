@@ -20,7 +20,7 @@ import kotlinx.coroutines.selects.select
 fun <T> CoroutineScope.monitorChannelWithException(
     channel: ReceiveChannel<T>,
     predicate: suspend (T) -> Unit,
-    onCancellation: () -> Unit
+    onCancellation: (() -> Unit) = {}
 ): Job {
 
     var isChannelValid = true
