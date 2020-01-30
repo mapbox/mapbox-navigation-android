@@ -80,20 +80,48 @@ class MapboxNavigationTest {
     fun onDestroy_unregisters_DirectionSession_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 2) { directionsSession.unregisterRouteObserver(any()) }
+        verify(exactly = 1) { directionsSession.unregisterAllRouteObservers() }
     }
 
     @Test
-    fun onDestroy_unregistersOffRouteObservers_from_tripSession() {
+    fun onDestroy_unregisters_TripSession_location_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.unregisterAllLocationObservers() }
     }
 
     @Test
-    fun onDestroy_unregistersStateObservers_from_tripSession() {
+    fun onDestroy_unregisters_TripSession_routeProgress_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.unregisterStateObserver(any()) }
+        verify(exactly = 1) { tripSession.unregisterAllRouteProgressObservers() }
+    }
+
+    @Test
+    fun onDestroy_unregisters_TripSession_offRoute_observers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllOffRouteObservers() }
+    }
+
+    @Test
+    fun onDestroy_unregisters_TripSession_state_observers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllStateObservers() }
+    }
+
+    @Test
+    fun unregisterAllBannerInstructionsObservers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllBannerInstructionsObservers() }
+    }
+
+    @Test
+    fun unregisterAllVoiceInstructionsObservers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllVoiceInstructionsObservers() }
     }
 }

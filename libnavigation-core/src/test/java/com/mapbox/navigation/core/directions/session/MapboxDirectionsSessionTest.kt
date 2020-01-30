@@ -187,4 +187,18 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions)
         verify(exactly = 2) { router.cancel() }
     }
+
+    @Test
+    fun unregisterAllRouteObservers() {
+        session.registerRouteObserver(observer)
+        session.requestRoutes(routeOptions)
+
+        session.unregisterAllRouteObservers()
+
+        callback.onResponse(routes)
+        delayLambda()
+
+        verify { router.getRoute(routeOptions, callback) }
+        verify(exactly = 0) { observer.onRoutesChanged(any()) }
+    }
 }

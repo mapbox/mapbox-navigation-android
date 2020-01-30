@@ -142,6 +142,10 @@ class MapboxTripSession(
         locationObservers.remove(locationObserver)
     }
 
+    override fun unregisterAllLocationObservers() {
+        locationObservers.clear()
+    }
+
     override fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
         routeProgressObservers.add(routeProgressObserver)
         routeProgress?.let { routeProgressObserver.onRouteProgressChanged(it) }
@@ -151,6 +155,10 @@ class MapboxTripSession(
         routeProgressObservers.remove(routeProgressObserver)
     }
 
+    override fun unregisterAllRouteProgressObservers() {
+        routeProgressObservers.clear()
+    }
+
     override fun registerOffRouteObserver(offRouteObserver: OffRouteObserver) {
         offRouteObservers.add(offRouteObserver)
         offRouteObserver.onOffRouteStateChanged(isOffRoute)
@@ -158,6 +166,10 @@ class MapboxTripSession(
 
     override fun unregisterOffRouteObserver(offRouteObserver: OffRouteObserver) {
         offRouteObservers.add(offRouteObserver)
+    }
+
+    override fun unregisterAllOffRouteObservers() {
+        offRouteObservers.clear()
     }
 
     override fun registerStateObserver(stateObserver: TripSessionStateObserver) {
@@ -173,6 +185,10 @@ class MapboxTripSession(
         stateObservers.remove(stateObserver)
     }
 
+    override fun unregisterAllStateObservers() {
+        stateObservers.clear()
+    }
+
     override fun registerBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
         routeProgress?.let {
@@ -180,6 +196,10 @@ class MapboxTripSession(
                 bannerInstructionsObserver.onNewBannerInstructions(bannerInstruction)
             }
         }
+    }
+
+    override fun unregisterAllBannerInstructionsObservers() {
+        bannerInstructionsObservers.clear()
     }
 
     override fun unregisterBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
@@ -197,6 +217,10 @@ class MapboxTripSession(
 
     override fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
         voiceInstructionsObservers.remove(voiceInstructionsObserver)
+    }
+
+    override fun unregisterAllVoiceInstructionsObservers() {
+        voiceInstructionsObservers.clear()
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
@@ -253,9 +277,7 @@ class MapboxTripSession(
         routeProgress = progress
         tripService.updateNotification(progress)
         routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-        checkBannerInstructionEvent(
-            progress
-        ) { bannerInstruction ->
+        checkBannerInstructionEvent(progress) { bannerInstruction ->
             bannerInstructionsObservers.forEach {
                 it.onNewBannerInstructions(bannerInstruction)
             }

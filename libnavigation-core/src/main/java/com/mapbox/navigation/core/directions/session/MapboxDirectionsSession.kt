@@ -92,6 +92,10 @@ class MapboxDirectionsSession(
         routeObservers.remove(routeObserver)
     }
 
+    override fun unregisterAllRouteObservers() {
+        routeObservers.clear()
+    }
+
     override fun shutDownSession() {
         fasterRouteTimer.stop()
     }
