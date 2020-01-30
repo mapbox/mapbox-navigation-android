@@ -21,6 +21,7 @@ class RouteUrl(
 
     companion object {
         const val BASE_URL = "https://api.mapbox.com"
+        const val BASE_DIRECTIONS_STAGING_URL = "https://cloudfront-staging.tilestream.net"
 
         const val BASE_URL_API_NAME = "directions"
         const val BASE_URL_API_VERSION = "v5"

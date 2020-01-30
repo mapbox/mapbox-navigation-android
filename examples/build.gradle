@@ -107,8 +107,10 @@ dependencies {
     implementation dependenciesList.mapboxAnnotationPlugin
 
     // Support libraries
-    implementation dependenciesList.supportAppcompatV7
+    implementation dependenciesList.androidXCore
     implementation dependenciesList.supportDesign
+    implementation dependenciesList.supportAppcompatV7
+    implementation dependenciesList.supportConstraintLayout
 
     implementation dependenciesList.gmsLocation
 

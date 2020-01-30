@@ -22,7 +22,7 @@ internal class MapboxNavigationProvider : ContentProvider() {
         try {
             ifNonNull(context, context?.applicationContext) { _, applicationContext ->
                 if (Billing.getInstance(applicationContext).getBillingType() == Billing.BillingModel.MAU) {
-                    MapboxNavigationAccounts.getInstance(applicationContext).obtainSkuToken()
+                    MapboxNavigationAccounts.getInstance(applicationContext).initializeSku()
                 }
             }
         } catch (throwable: Throwable) {

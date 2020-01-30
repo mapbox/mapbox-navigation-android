@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.format.DateUtils
 import com.mapbox.android.accounts.navigation.sku.v1.MauSku
 import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
-import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 
 internal class MapboxNavigationAccounts private constructor() {
@@ -29,16 +28,22 @@ internal class MapboxNavigationAccounts private constructor() {
         private fun init(context: Context) {
             val preferences = context.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE)
             skuGenerator = when (Billing.getInstance(context).getBillingType()) {
-                Billing.BillingModel.MAU -> MauSku(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD)
-                Billing.BillingModel.TRIPS -> TripsSku(preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD, TRIPS_REQUEST_COUNT_THRESHOLD)
+                Billing.BillingModel.MAU -> MauSku(preferences, TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD, context.applicationContext.packageName)
+                Billing.BillingModel.TRIPS -> null
             }
         }
     }
 
+    fun initializeSku() {
+        skuGenerator?.initializeSKU()
+    }
+
     fun obtainSkuToken(): String {
-        return skuGenerator?.generateToken()?.let { token ->
-            token
-        } ?: throw IllegalStateException("MapboxNavigationAccounts: skuGenerator cannot be null")
+        return skuGenerator?.let { generator ->
+            val skuToken = generator.generateToken() ?: ""
+            check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty")}
+            skuToken
+        } ?: ""
     }
 
     fun navigationStopped() {

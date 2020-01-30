@@ -34,7 +34,7 @@ internal object RouteBuilderProvider {
             .interceptor {
                 val httpUrl = it.request().url()
                 val skuUrl =
-                    skuTokenProvider.obtainSkuToken(httpUrl.toString(), httpUrl.querySize())
+                    skuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }
 }
