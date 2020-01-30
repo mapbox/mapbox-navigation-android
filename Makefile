@@ -2,7 +2,7 @@ checkstyle:
 	./gradlew checkstyle
 
 license-verification:
-    ./gradlew verify-license
+    ./gradlew verifyLicenseGeneration
 
 license:
 	./gradlew licenseReleaseReport
