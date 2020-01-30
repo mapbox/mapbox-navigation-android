@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -18,7 +19,8 @@ import kotlinx.coroutines.selects.select
 
 fun <T> CoroutineScope.monitorChannelWithException(
     channel: ReceiveChannel<T>,
-    predicate: suspend (T) -> Unit
+    predicate: suspend (T) -> Unit,
+    onCancellation: () -> Unit
 ): Job {
 
     var isChannelValid = true
@@ -33,6 +35,7 @@ fun <T> CoroutineScope.monitorChannelWithException(
             } catch (e: Exception) {
                 e.ifChannelException {
                     isChannelValid = false
+                    onCancellation()
                 }
             }
         }
