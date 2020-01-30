@@ -6,7 +6,9 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -173,6 +175,8 @@ class MapboxTripSessionTest {
         mockkObject(ThreadController)
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -229,6 +233,8 @@ class MapboxTripSessionTest {
         mockkObject(ThreadController)
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -256,6 +262,8 @@ class MapboxTripSessionTest {
         mockkObject(ThreadController)
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -283,6 +291,8 @@ class MapboxTripSessionTest {
         mockkObject(ThreadController)
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -312,6 +322,8 @@ class MapboxTripSessionTest {
         mockkObject(ThreadController)
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -353,5 +365,200 @@ class MapboxTripSessionTest {
         tripSession.route = route
 
         verify { navigator.setRoute(route) }
+    }
+
+    @Test
+    fun unregisterAllLocationObservers() {
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
+
+        tripSession.start()
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
+        tripSession.unregisterAllLocationObservers()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        verify(exactly = 0) { observer.onRawLocationChanged(location) }
+        assertEquals(location, tripSession.getRawLocation())
+
+        tripSession.stop()
+    }
+
+    @Test
+    fun unregisterAllRouteProgressObservers() {
+        val parentJob = SupervisorJob()
+        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+        mockkObject(ThreadController)
+
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
+
+        tripSession = MapboxTripSession(
+                tripService,
+                locationEngine,
+                locationEngineRequest,
+                navigatorPollingDelay,
+                navigator,
+                ThreadController
+        )
+        tripSession.start()
+        val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
+        val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
+
+        tripSession.registerLocationObserver(locationObserver)
+        tripSession.registerRouteProgressObserver(routeProgressObserver)
+
+        tripSession.unregisterAllRouteProgressObservers()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        verify(exactly = 0) { routeProgressObserver.onRouteProgressChanged(any()) }
+
+        tripSession.stop()
+        unmockkObject(ThreadController)
+    }
+
+    @Test
+    fun unregisterAllOffRouteObservers() {
+        val parentJob = SupervisorJob()
+        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+        mockkObject(ThreadController)
+
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns null
+        every { tripStatus.offRoute } returns true
+
+        tripSession = MapboxTripSession(
+                tripService,
+                locationEngine,
+                locationEngineRequest,
+                navigatorPollingDelay,
+                navigator,
+                ThreadController
+        )
+        tripSession.start()
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        val locationObserver: LocationObserver = mockk(relaxUnitFun = true)
+
+        tripSession.registerLocationObserver(locationObserver)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+
+        tripSession.unregisterAllOffRouteObservers()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        //registerOffRouteObserver will call onOffRouteStateChanged() on
+        //the offRouteObserver so that accounts for the verify 1 time
+        //below. However there shouldn't be any additional calls when
+        //the locationCallback.onSuccess() is called because the collection
+        //of offRouteObservers should be empty.
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(any()) }
+
+        tripSession.stop()
+        unmockkObject(ThreadController)
+    }
+
+    @Test
+    fun unregisterAllStateObservers() {
+        val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
+
+        tripSession.registerStateObserver(stateObserver)
+
+        tripSession.start()
+
+        tripSession.unregisterAllStateObservers()
+
+        //stop() would normally trigger a call to stateObserver.onSessionStopped()
+        tripSession.stop()
+
+        verify(exactly = 1) { stateObserver.onSessionStarted() }
+        verify(exactly = 1) { stateObserver.onSessionStopped() }
+    }
+
+    @Test
+    fun unregisterAllBannerInstructionsObservers() {
+        val parentJob = SupervisorJob()
+        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+        val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
+        val bannerInstructions: BannerInstructions = mockk()
+        mockkObject(ThreadController)
+
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns bannerInstructions
+        every { routeProgress.voiceInstructions() } returns null
+        every { tripStatus.offRoute } returns true
+
+        tripSession = MapboxTripSession(
+                tripService,
+                locationEngine,
+                locationEngineRequest,
+                navigatorPollingDelay,
+                navigator,
+                ThreadController
+        )
+        tripSession.start()
+        tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        tripSession.stop()
+
+
+        tripSession.start()
+        tripSession.unregisterAllBannerInstructionsObservers()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        verify(exactly = 1) { bannerInstructionsObserver.onNewBannerInstructions(any()) }
+
+        tripSession.stop()
+        unmockkObject(ThreadController)
+    }
+
+    @Test
+    fun unregisterAllVoiceInstructionsObservers() {
+        val parentJob = SupervisorJob()
+        val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+        val voiceInstructionsObserver: VoiceInstructionsObserver = mockk(relaxUnitFun = true)
+        val voiceInstructions: VoiceInstructions = mockk()
+        mockkObject(ThreadController)
+
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { routeProgress.bannerInstructions() } returns null
+        every { routeProgress.voiceInstructions() } returns voiceInstructions
+        every { tripStatus.offRoute } returns true
+
+        tripSession = MapboxTripSession(
+                tripService,
+                locationEngine,
+                locationEngineRequest,
+                navigatorPollingDelay,
+                navigator,
+                ThreadController
+        )
+        tripSession.start()
+        tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        tripSession.stop()
+
+
+        tripSession.start()
+        tripSession.unregisterAllVoiceInstructionsObservers()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        verify(exactly = 1) { voiceInstructionsObserver.onNewVoiceInstructions(any()) }
+
+        tripSession.stop()
+        unmockkObject(ThreadController)
     }
 }

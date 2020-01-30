@@ -186,17 +186,13 @@ class MapboxNavigation(
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
         directionsSession.shutDownSession()
-
-        directionsSession.unregisterRouteObserver(internalRouteObserver)
-        directionsSession.unregisterRouteObserver(navigationSession)
-
-        tripSession.unregisterOffRouteObserver(internalOffRouteObserver)
-        tripSession.unregisterStateObserver(navigationSession)
-
-        // todo what about observers that are registered via this class's methods?
-        // if onDestroy gets called and there were observers registered from the outside
-        // will that cause resource leaks? Should this class keep track of the observers
-        // registered from the outside and unregister those listeners here?
+        directionsSession.unregisterAllRouteObservers()
+        tripSession.unregisterAllLocationObservers()
+        tripSession.unregisterAllRouteProgressObservers()
+        tripSession.unregisterAllOffRouteObservers()
+        tripSession.unregisterAllStateObservers()
+        tripSession.unregisterAllBannerInstructionsObservers()
+        tripSession.unregisterAllVoiceInstructionsObservers()
     }
 
     /**
