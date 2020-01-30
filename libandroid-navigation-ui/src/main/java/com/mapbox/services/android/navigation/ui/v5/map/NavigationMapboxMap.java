@@ -88,6 +88,18 @@ public class NavigationMapboxMap {
    *
    * @param mapView           for map size and Context
    * @param mapboxMap         for APIs to interact with the map
+   */
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap) {
+    this(mapView, mapboxMap, null);
+  }
+
+  /**
+   * Constructor that can be used once {@link OnMapReadyCallback}
+   * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+   *
+   * @param mapView           for map size and Context
+   * @param mapboxMap         for APIs to interact with the map
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
@@ -103,6 +115,7 @@ public class NavigationMapboxMap {
     initializeCamera(mapboxMap, locationComponent);
     initializeLocationFpsDelegate(mapboxMap, locationComponent);
   }
+
 
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapLayerInteractor layerInteractor) {

@@ -69,7 +69,7 @@ public class DynamicCameraTest extends BaseTest {
   public void onCameraPositionZoomGreaterThanMax_engineReturnsMaxCameraZoom() throws Exception {
     MapboxMap mapboxMap = mock(MapboxMap.class);
     CameraPosition cameraPositionWithZoomGreaterThanMax = new CameraPosition.Builder()
-      .zoom(20d)
+      .zoom(22d)
       .build();
     when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMax);
     DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
@@ -78,7 +78,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(18d, maxCameraZoom);
+    assertEquals(20d, maxCameraZoom);
   }
 
   @Test
@@ -94,14 +94,14 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(18d, maxCameraZoom);
+    assertEquals(16d, maxCameraZoom);
   }
 
   @Test
   public void onCameraPositionZoomGreaterThanMinAndLessThanMax_engineReturnsCameraPositionZoom() throws Exception {
     MapboxMap mapboxMap = mock(MapboxMap.class);
     CameraPosition cameraPositionWithZoomGreaterThanMinAndLessThanMax = new CameraPosition.Builder()
-      .zoom(14d)
+      .zoom(17d)
       .build();
     when(mapboxMap.getCameraForLatLngBounds(any(LatLngBounds.class), any(int[].class))).thenReturn(cameraPositionWithZoomGreaterThanMinAndLessThanMax);
     DynamicCamera theCameraEngine = new DynamicCamera(mapboxMap);
@@ -110,7 +110,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(18d, maxCameraZoom);
+    assertEquals(17d, maxCameraZoom);
   }
 
   @Test

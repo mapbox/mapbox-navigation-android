@@ -29,6 +29,7 @@ public class NavigationSpeechListenerTest {
     verify(audioFocusManager).abandonAudioFocus();
   }
 
+  // FIXME replace SpeechAnnouncement by VoiceInstruction
 //  @Test
 //  public void onError_fallbackGoesToAndroidSpeechPlayer() {
 //    SpeechPlayerProvider provider = mock(SpeechPlayerProvider.class);
@@ -38,7 +39,6 @@ public class NavigationSpeechListenerTest {
 //    SpeechAnnouncement announcement = buildAnnouncement();
 //
 //    navigationSpeechListener.onError("Error text", announcement);
-//    androidSpeechPlayer.play();
 //    verify(androidSpeechPlayer).play(announcement);
 //  }
 
