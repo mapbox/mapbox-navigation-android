@@ -2,7 +2,7 @@ checkstyle:
 	./gradlew checkstyle
 
 license-verification:
-    python ./scripts/validate-license.py
+	python ./scripts/validate-license.py
 
 license:
 	./gradlew licenseReleaseReport
