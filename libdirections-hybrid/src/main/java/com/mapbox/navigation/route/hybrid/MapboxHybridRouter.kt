@@ -43,10 +43,8 @@ class MapboxHybridRouter(
      * on that state we use either the off-board or on-board router.
      */
     init {
-        jobControl.scope.monitorChannelWithException(
-            networkStatusService.getNetworkStatusChannel()
-        ) { networkStatus ->
-            when (networkStatus.isNetworkAvailable) {
+        jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
+            when(networkStatus.isNetworkAvailable) {
                 true -> {
                     routeDispatchHandler.set(offBoardRouterHandler)
                 }
@@ -54,7 +52,7 @@ class MapboxHybridRouter(
                     routeDispatchHandler.set(onBoardRouterHandler)
                 }
             }
-        }
+        }, networkStatusService::cleanup)
     }
 
     /**

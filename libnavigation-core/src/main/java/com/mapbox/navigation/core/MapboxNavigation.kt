@@ -403,11 +403,11 @@ class MapboxNavigation(
     }
 
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
-        mainJobController.scope.monitorChannelWithException(channel) { notificationAction ->
+        mainJobController.scope.monitorChannelWithException(channel, { notificationAction ->
             when (notificationAction) {
                 NotificationAction.END_NAVIGATION -> tripSession.stop()
             }
-        }
+        }, {})
     }
 
     /**

@@ -15,12 +15,13 @@ import kotlinx.coroutines.channels.ReceiveChannel
 
 data class NetworkStatus(val isNetworkAvailable: Boolean)
 
-class NetworkStatusService(applicationContext: Context) {
+class NetworkStatusService(private val applicationContext: Context) {
 
     private val connectivityManager: ConnectivityManager = applicationContext
         .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val networkStatusChannel = Channel<NetworkStatus>(Channel.CONFLATED)
+    private var receiver: BroadcastReceiver? = null
 
     fun getNetworkStatusChannel(): ReceiveChannel<NetworkStatus> = networkStatusChannel
 
@@ -50,7 +51,7 @@ class NetworkStatusService(applicationContext: Context) {
             }
             false -> {
                 val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-                val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+                receiver = object : BroadcastReceiver() {
                     override fun onReceive(context: Context, intent: Intent) {
                         val activeNetwork = connectivityManager.activeNetworkInfo
                         val isConnected = activeNetwork?.isConnectedOrConnecting ?: false
@@ -59,6 +60,12 @@ class NetworkStatusService(applicationContext: Context) {
                 }
                 applicationContext.registerReceiver(receiver, filter)
             }
+        }
+    }
+
+    fun cleanup() {
+        if(receiver != null) {
+            applicationContext.unregisterReceiver(receiver)
         }
     }
 }
