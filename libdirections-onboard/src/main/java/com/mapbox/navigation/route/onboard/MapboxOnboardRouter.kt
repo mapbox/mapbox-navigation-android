@@ -129,7 +129,7 @@ class MapboxOnboardRouter : Router {
                 val routerResult = getRoute(url)
 
                 val routes: List<DirectionsRoute> = try {
-                    DirectionsResponse.fromJson(routerResult.json).routes()
+                    parseDirectionsRoutes(routerResult.json)
                 } catch (e: RuntimeException) {
                     emptyList()
                 }
@@ -147,6 +147,11 @@ class MapboxOnboardRouter : Router {
     internal suspend fun getRoute(url: String) = withContext(ThreadController.IODispatcher) {
         navigatorNative.getRoute(url)
     }
+
+    private suspend fun parseDirectionsRoutes(json: String): List<DirectionsRoute> =
+        withContext(ThreadController.IODispatcher) {
+            DirectionsResponse.fromJson(json).routes()
+        }
 
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
