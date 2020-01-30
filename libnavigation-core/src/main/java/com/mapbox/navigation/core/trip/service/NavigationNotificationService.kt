@@ -32,6 +32,6 @@ class NavigationNotificationService : Service() {
         ioJobController.scope.monitorChannelWithException(MapboxTripService.getNotificationDataChannel(), { notificationResponse ->
             notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
             startForeground(notificationResponse.notificationId, notificationResponse.notification)
-        }, {})
+        })
     }
 }

@@ -407,7 +407,7 @@ class MapboxNavigation(
             when (notificationAction) {
                 NotificationAction.END_NAVIGATION -> tripSession.stop()
             }
-        }, {})
+        })
     }
 
     /**

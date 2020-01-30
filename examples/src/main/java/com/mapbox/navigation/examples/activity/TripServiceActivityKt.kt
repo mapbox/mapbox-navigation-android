@@ -114,7 +114,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
             when (notificationAction) {
                 NotificationAction.END_NAVIGATION -> stopService()
             }
-        }, {})
+        })
     }
 
     private fun stopService() {
