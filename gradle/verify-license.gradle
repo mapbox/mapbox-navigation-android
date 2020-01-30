@@ -1,0 +1,8 @@
+apply from: "${rootDir}/gradle/dependencies.gradle"
+
+task verifyLicenseGeneration {
+    println "Verify license generation with git diff..."
+    exec {
+        commandLine "python", "scripts/validate-license.py"
+    }
+}

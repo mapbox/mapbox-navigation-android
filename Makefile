@@ -1,8 +1,8 @@
 checkstyle:
 	./gradlew checkstyle
 
-nitpick:
-	./gradlew nitpick
+license-verification:
+    ./gradlew verify-license
 
 license:
 	./gradlew licenseReleaseReport

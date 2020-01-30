@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Generate and Validate License
           command: |
-            make nitpick
+            make license-verification
       - run:
           name: Check Java code style
           command: make checkstyle
@@ -209,7 +209,7 @@ jobs:
       - run:
           name: Generate and Validate License
           command: |
-            make nitpick
+            make license-verification
       - run:
           name: Generate Maven credentials
           shell: /bin/bash -euo pipefail
