@@ -312,5 +312,6 @@ private fun RouteState.convertState(): RouteProgressState? {
         RouteState.COMPLETE -> RouteProgressState.ROUTE_ARRIVED
         RouteState.OFFROUTE -> null // send in a callback instead
         RouteState.STALE -> RouteProgressState.LOCATION_STALE
+        RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
 }
