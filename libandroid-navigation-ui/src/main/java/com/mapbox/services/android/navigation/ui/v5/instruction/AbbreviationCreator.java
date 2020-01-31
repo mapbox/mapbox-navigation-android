@@ -143,7 +143,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
   AbbreviationNode setupNode(BannerComponents components, int index, int startIndex, String
     modifier) {
     addPriorityInfo(components, index);
-    return new AbbreviationCreator.AbbreviationNode(components, startIndex);
+    return new AbbreviationNode(components, startIndex);
   }
 
   @Override

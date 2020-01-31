@@ -60,7 +60,7 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
     public abstract NavigationLauncherOptions build();
   }
 
-  public static NavigationLauncherOptions.Builder builder() {
+  public static Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .shouldSimulateRoute(false)
       .waynameChipEnabled(true);

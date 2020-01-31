@@ -4,8 +4,8 @@ import android.text.SpannableString;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-
 import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;

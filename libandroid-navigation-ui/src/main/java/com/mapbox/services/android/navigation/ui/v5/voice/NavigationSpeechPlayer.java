@@ -3,6 +3,8 @@ package com.mapbox.services.android.navigation.ui.v5.voice;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+
 /**
  * Used to play {@link SpeechAnnouncement}s.
  * <p>
@@ -30,7 +32,7 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * @since 0.16.0
    */
   @Override
-  public void play(SpeechAnnouncement speechAnnouncement) {
+  public void play(VoiceInstructions speechAnnouncement) {
     speechPlayerProvider.retrieveSpeechPlayer().play(speechAnnouncement);
   }
 

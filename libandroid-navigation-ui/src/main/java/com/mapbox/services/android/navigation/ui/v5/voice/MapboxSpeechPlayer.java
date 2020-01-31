@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
 
 import java.io.File;
@@ -62,13 +63,16 @@ class MapboxSpeechPlayer implements SpeechPlayer {
    * @param announcement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(SpeechAnnouncement announcement) {
+  public void play(VoiceInstructions announcement) {
     boolean isInvalidAnnouncement = announcement == null;
     if (isInvalidAnnouncement) {
       return;
     }
-    this.announcement = announcement;
-    playAnnouncementTextAndTypeFrom(announcement);
+    this.announcement = SpeechAnnouncement.builder()
+      .announcement(announcement.announcement())
+      .ssmlAnnouncement(announcement.ssmlAnnouncement())
+      .build();
+    playAnnouncementTextAndTypeFrom(this.announcement);
   }
 
   @Override

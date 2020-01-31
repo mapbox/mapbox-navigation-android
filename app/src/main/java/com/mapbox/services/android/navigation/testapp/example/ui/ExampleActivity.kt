@@ -122,7 +122,7 @@ class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
     override fun onMapReady(mapboxMap: MapboxMap) {
         Timber.e("Map is ready")
         mapboxMap.setStyle(Style.Builder().fromUrl(getString(R.string.navigation_guidance_day))) {
-            map = NavigationMapboxMap(mapView, mapboxMap)
+            map = NavigationMapboxMap(mapView, mapboxMap, null)
             map?.setOnRouteSelectionChangeListener(this)
             map?.updateLocationLayerRenderMode(RenderMode.NORMAL)
             mapboxMap.addOnMapLongClickListener { point -> presenter.onMapLongClick(point) }

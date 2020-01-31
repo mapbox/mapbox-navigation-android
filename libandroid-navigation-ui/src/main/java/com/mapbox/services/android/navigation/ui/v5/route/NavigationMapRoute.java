@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
 import android.content.Context;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
-import android.os.Handler;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +141,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
-    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
+    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
     this.mapRouteClickListener = new MapRouteClickListener(routeLine);
     this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     initializeDidFinishLoadingStyleListener();
@@ -252,7 +253,8 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @since 0.8.0
    */
   public void setOnRouteSelectionChangeListener(
-    @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener) {
+          @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener
+  ) {
     mapRouteClickListener.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
   }
 
@@ -325,7 +327,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
     Handler handler = new Handler(context.getMainLooper());
     return new MapRouteLine(context, mapboxMap.getStyle(), styleRes, belowLayer,
-      drawableProvider, sourceProvider, layerProvider, handler
+            drawableProvider, sourceProvider, layerProvider, handler
     );
   }
 
@@ -372,8 +374,9 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void redraw(Style style) {
-    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes);
     recreateRouteLine(style);
+    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
+    updateProgressChangeListener();
   }
 
   private void recreateRouteLine(Style style) {
@@ -404,6 +407,21 @@ public class NavigationMapRoute implements LifecycleObserver {
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
+  }
+
+  private void updateProgressChangeListener() {
+    if (navigation != null) {
+      navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+    }
     mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
+    if (navigation != null) {
+      navigation.addProgressChangeListener(mapRouteProgressChangeListener);
+    }
+  }
+
+  public void onNewRouteProgress(RouteProgress routeProgress) {
+    if (mapRouteProgressChangeListener != null) {
+      mapRouteProgressChangeListener.onProgressChange(routeProgress);
+    }
   }
 }

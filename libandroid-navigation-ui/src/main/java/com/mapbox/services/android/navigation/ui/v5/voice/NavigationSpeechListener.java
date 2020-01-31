@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+
 import timber.log.Timber;
 
 class NavigationSpeechListener implements SpeechListener {
@@ -26,6 +28,10 @@ class NavigationSpeechListener implements SpeechListener {
   @Override
   public void onError(String errorText, SpeechAnnouncement speechAnnouncement) {
     Timber.e(errorText);
-    speechPlayerProvider.retrieveAndroidSpeechPlayer().play(speechAnnouncement);
+    VoiceInstructions announcement = VoiceInstructions.builder()
+      .announcement(speechAnnouncement.announcement())
+      .ssmlAnnouncement(speechAnnouncement.ssmlAnnouncement())
+      .build();
+    speechPlayerProvider.retrieveAndroidSpeechPlayer().play(announcement);
   }
 }
