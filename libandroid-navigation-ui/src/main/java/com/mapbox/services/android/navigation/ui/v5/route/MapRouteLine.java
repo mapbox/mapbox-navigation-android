@@ -182,8 +182,8 @@ class MapRouteLine {
             R.styleable.NavigationMapRoute_destinationWaypointIcon, R.drawable.ic_route_destination);
     typedArray.recycle();
 
-    Drawable originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
-    Drawable destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
+    final Drawable originIcon = drawableProvider.retrieveDrawable(originWaypointIcon);
+    final Drawable destinationIcon = drawableProvider.retrieveDrawable(destinationWaypointIcon);
 
     boolean layerBelowExists = false;
     if (belowLayer != null && !belowLayer.isEmpty()) {
@@ -199,16 +199,16 @@ class MapRouteLine {
     if (!layerBelowExists) {
       for (int i = style.getLayers().size() - 1; i >= 0; i--) {
         Layer layer = style.getLayers().get(i);
-        if (layer.getId().equals(LocationComponentConstants.SHADOW_LAYER) ||
-                layer.getId().equals(RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW)) {
+        if (layer.getId().equals(LocationComponentConstants.SHADOW_LAYER)
+                || layer.getId().equals(RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW)) {
           belowLayerCandidate = layer.getId();
         }
       }
     }
 
-    if (layerBelowExists){
+    if (layerBelowExists) {
       belowLayerCandidate = belowLayer;
-    } else if (belowLayerCandidate == null){
+    } else if (belowLayerCandidate == null) {
       // Try to place route on shadow layer and avoid user's one
       belowLayerCandidate = LocationComponentConstants.SHADOW_LAYER;
     }
