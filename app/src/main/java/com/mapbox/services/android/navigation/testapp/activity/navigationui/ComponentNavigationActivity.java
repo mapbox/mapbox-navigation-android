@@ -151,7 +151,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
       mapState = MapState.INFO;
-      navigationMap = new NavigationMapboxMap(mapView, mapboxMap, null);
+      navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
       // For Location updates
       initializeLocationEngine();

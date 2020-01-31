@@ -116,7 +116,7 @@ class MapRouteLine {
   MapRouteLine(Context context,
                Style style,
                int styleRes,
-               String belowLayer,
+               final String belowLayer,
                MapRouteDrawableProvider drawableProvider,
                MapRouteSourceProvider sourceProvider,
                MapRouteLayerProvider layerProvider,
@@ -195,12 +195,25 @@ class MapRouteLine {
       }
     }
 
+    String belowLayerCandidate = null;
     if (!layerBelowExists) {
-      // Avoid placing the route on top of the user location layer
-      belowLayer = LocationComponentConstants.SHADOW_LAYER;
+      for (int i = style.getLayers().size() - 1; i >= 0; i--) {
+        Layer layer = style.getLayers().get(i);
+        if (layer.getId().equals(LocationComponentConstants.SHADOW_LAYER) ||
+                layer.getId().equals(RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW)) {
+          belowLayerCandidate = layer.getId();
+        }
+      }
     }
 
-    initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayer);
+    if (layerBelowExists){
+      belowLayerCandidate = belowLayer;
+    } else if (belowLayerCandidate == null){
+      // Avoid placing the route on top of the user location layer
+      belowLayerCandidate = LocationComponentConstants.SHADOW_LAYER;
+    }
+
+    initializeLayers(style, layerProvider, originIcon, destinationIcon, belowLayerCandidate);
 
     this.directionsRoutes.addAll(directionsRoutes);
     this.routeFeatureCollections.addAll(routeFeatureCollections);

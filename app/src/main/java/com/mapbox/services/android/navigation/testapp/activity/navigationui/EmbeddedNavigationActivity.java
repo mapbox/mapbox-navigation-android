@@ -298,8 +298,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
   }
 
-
-
   private static class StyleCycle {
     private static final String[] STYLES = new String[]{
       Style.MAPBOX_STREETS,
