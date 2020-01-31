@@ -1,8 +1,8 @@
 checkstyle:
 	./gradlew checkstyle
 
-nitpick:
-	./gradlew nitpick
+license-verification:
+	python ./scripts/validate-license.py
 
 license:
 	./gradlew licenseReleaseReport
