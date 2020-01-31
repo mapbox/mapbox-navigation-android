@@ -13,17 +13,20 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.network.NetworkStatusService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.lang.Exception
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -44,6 +47,7 @@ class MapboxHybridRouterTest {
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val receiver = slot<BroadcastReceiver>()
     private val internalCallback = slot<Router.Callback>()
+    private lateinit var networkStatusService: NetworkStatusService
 
     @Before
     fun setUp() {
@@ -52,7 +56,10 @@ class MapboxHybridRouterTest {
         every { context.registerReceiver(capture(receiver), any()) } returns intent
         every { onboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
         every { offboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
-        hybridRouter = MapboxHybridRouter(onboardRouter, offboardRouter, context)
+        every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
+
+        networkStatusService = NetworkStatusService(context)
+        hybridRouter = MapboxHybridRouter(onboardRouter, offboardRouter, networkStatusService)
     }
 
     @Test
@@ -163,6 +170,19 @@ class MapboxHybridRouterTest {
 
         verify(exactly = 1) { offboardRouter.getRoute(routerOptions, capture(internalCallback)) }
         verify(exactly = 1) { onboardRouter.getRoute(routerOptions, capture(internalCallback)) }
+    }
+
+    @Test
+    fun networkStatusService_cleanup_calledOnChannelClose() = rule.runBlockingTest {
+        (networkStatusService.getNetworkStatusChannel() as Channel).close()
+
+        try {
+            networkStatusService.getNetworkStatusChannel().receive()
+        } catch (ex: Exception) { }
+
+        every { context.unregisterReceiver(any()) } answers {}
+
+        verify { context.unregisterReceiver(any()) }
     }
 
     private fun enableNetworkConnection() = networkConnected(true)

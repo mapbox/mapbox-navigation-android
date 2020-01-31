@@ -1,6 +1,5 @@
 package com.mapbox.navigation.route.hybrid
 
-import android.content.Context
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -19,10 +18,9 @@ import java.util.concurrent.atomic.AtomicReference
 class MapboxHybridRouter(
     private val onboardRouter: Router,
     private val offboardRouter: Router,
-    context: Context
+    networkStatusService: NetworkStatusService
 ) : Router {
 
-    private val networkStatusService = NetworkStatusService(context)
     private val jobControl = ThreadController.getIOScopeAndRootJob()
     private val offBoardRouterHandler: RouterHandler by lazy {
         RouterHandler(mainRouter = offboardRouter, reserveRouter = onboardRouter)
