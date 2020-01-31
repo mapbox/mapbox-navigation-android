@@ -209,7 +209,7 @@ class MapRouteLine {
     if (layerBelowExists){
       belowLayerCandidate = belowLayer;
     } else if (belowLayerCandidate == null){
-      // Avoid placing the route on top of the user location layer
+      // Try to place route on shadow layer and avoid user's one
       belowLayerCandidate = LocationComponentConstants.SHADOW_LAYER;
     }
 
