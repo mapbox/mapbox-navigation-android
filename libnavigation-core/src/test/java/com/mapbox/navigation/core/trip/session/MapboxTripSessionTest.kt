@@ -452,11 +452,11 @@ class MapboxTripSessionTest {
 
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
-        //registerOffRouteObserver will call onOffRouteStateChanged() on
-        //the offRouteObserver so that accounts for the verify 1 time
-        //below. However there shouldn't be any additional calls when
-        //the locationCallback.onSuccess() is called because the collection
-        //of offRouteObservers should be empty.
+        // registerOffRouteObserver will call onOffRouteStateChanged() on
+        // the offRouteObserver so that accounts for the verify 1 time
+        // below. However there shouldn't be any additional calls when
+        // the locationCallback.onSuccess() is called because the collection
+        // of offRouteObservers should be empty.
         verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(any()) }
 
         tripSession.stop()
@@ -473,7 +473,7 @@ class MapboxTripSessionTest {
 
         tripSession.unregisterAllStateObservers()
 
-        //stop() would normally trigger a call to stateObserver.onSessionStopped()
+        // stop() would normally trigger a call to stateObserver.onSessionStopped()
         tripSession.stop()
 
         verify(exactly = 1) { stateObserver.onSessionStarted() }
@@ -508,7 +508,6 @@ class MapboxTripSessionTest {
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
         tripSession.stop()
-
 
         tripSession.start()
         tripSession.unregisterAllBannerInstructionsObservers()
@@ -549,7 +548,6 @@ class MapboxTripSessionTest {
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
         tripSession.stop()
-
 
         tripSession.start()
         tripSession.unregisterAllVoiceInstructionsObservers()

@@ -26,7 +26,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.Exception
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi

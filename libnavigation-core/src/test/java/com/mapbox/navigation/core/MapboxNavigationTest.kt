@@ -6,11 +6,14 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.directions.session.RouteObserver
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.verify
 import java.util.Locale
 import org.junit.Assert.assertNotNull
 import org.junit.Before

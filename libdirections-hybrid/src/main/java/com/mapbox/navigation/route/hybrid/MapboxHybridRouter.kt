@@ -42,7 +42,7 @@ class MapboxHybridRouter(
      */
     init {
         jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
-            when(networkStatus.isNetworkAvailable) {
+            when (networkStatus.isNetworkAvailable) {
                 true -> {
                     routeDispatchHandler.set(offBoardRouterHandler)
                 }
