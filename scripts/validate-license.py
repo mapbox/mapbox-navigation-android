@@ -13,4 +13,4 @@ if b"LICENSE.md" in output:
    raise ValueError("""An error ocurred while validating the license generation.
             Changes were detected to the license generation output
             but weren't commited. Run make license and
-            commit the change set to make this validation pass.""")
+            commit the changeset to make this validation pass.""")
