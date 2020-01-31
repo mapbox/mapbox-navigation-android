@@ -198,10 +198,10 @@ class MapRouteLine {
     String belowLayerCandidate = null;
     if (!layerBelowExists) {
       for (int i = style.getLayers().size() - 1; i >= 0; i--) {
-        Layer layer = style.getLayers().get(i);
-        if (layer.getId().equals(LocationComponentConstants.SHADOW_LAYER)
-                || layer.getId().equals(RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW)) {
-          belowLayerCandidate = layer.getId();
+        String layerId = style.getLayers().get(i).getId();
+        if (layerId.equals(LocationComponentConstants.SHADOW_LAYER)
+                || layerId.equals(RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW)) {
+          belowLayerCandidate = layerId;
         }
       }
     }
