@@ -37,5 +37,7 @@ enum class RouteProgressState {
      * A lack of [android.location.Location] updates from the phone has caused lack of confidence in the
      * progress updates being sent.
      */
-    LOCATION_STALE
+    LOCATION_STALE,
+
+    ROUTE_UNCERTAIN
 }
