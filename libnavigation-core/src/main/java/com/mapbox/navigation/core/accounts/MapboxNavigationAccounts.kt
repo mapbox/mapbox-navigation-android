@@ -56,7 +56,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
                     buildResourceUrlWithSku(resourceUrl, querySize, skuToken)
                 }
             }
-        } ?: ""
+        } ?: resourceUrl
     }
 
     internal fun initializeSku() {
