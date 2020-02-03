@@ -7,8 +7,8 @@ import androidx.test.espresso.ViewAction;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.test.TestNavigationActivity;
-import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
-import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
+import com.mapbox.navigation.ui.NavigationViewOptions;
+import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 
 import org.junit.Test;
 

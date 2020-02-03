@@ -21,8 +21,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.NAVIGATION_PERMISSIONS_REQUEST
-import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
-import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
+import com.mapbox.navigation.ui.camera.DynamicCamera
+import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 

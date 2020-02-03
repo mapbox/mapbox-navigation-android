@@ -104,7 +104,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_settings"/>
 
-        <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
+        <com.mapbox.navigation.ui.instruction.InstructionView
             android:id="@+id/instructionView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

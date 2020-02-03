@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.navigation.ui.NavigationView;
 
 import org.hamcrest.Matcher;
 

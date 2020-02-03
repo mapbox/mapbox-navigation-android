@@ -23,7 +23,7 @@ import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.trip.notification.NotificationAction
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import com.mapbox.navigation.ui.route.NavigationMapRoute
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.activity_trip_service.notifyTextView
 import kotlinx.android.synthetic.main.activity_trip_service.toggleNotification

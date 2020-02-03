@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.ui.v5.NavigationView;
-import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
-import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
-import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.navigation.ui.NavigationView;
+import com.mapbox.navigation.ui.NavigationViewOptions;
+import com.mapbox.navigation.ui.OnNavigationReadyCallback;
+import com.mapbox.navigation.ui.listeners.NavigationListener;
 
 public class TestNavigationActivity extends AppCompatActivity implements NavigationListener,
   OnNavigationReadyCallback {
