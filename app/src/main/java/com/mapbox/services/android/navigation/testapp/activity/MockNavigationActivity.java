@@ -38,7 +38,7 @@ import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricEvent;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.notification.CustomNavigationNotification;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.instruction.Instruction;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;

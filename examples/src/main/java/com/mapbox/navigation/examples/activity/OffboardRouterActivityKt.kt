@@ -33,7 +33,7 @@ import com.mapbox.navigation.logger.VERBOSE
 import com.mapbox.navigation.logger.WARN
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
 import com.mapbox.turf.TurfConstants

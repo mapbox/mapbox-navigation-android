@@ -2,7 +2,7 @@ package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.api.directions.v5.models.VoiceInstructions
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
+import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone

@@ -104,7 +104,7 @@ dependencies {
     implementation dependenciesList.coroutinesAndroid
 
     // Mapbox Navigation SDK
-    implementation project(':libandroid-navigation-ui')
+    implementation project(':libnavigation-ui')
     implementation dependenciesList.mapboxAnnotationPlugin
 
     // Support libraries

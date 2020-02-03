@@ -30,7 +30,7 @@ import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.Ex
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
 import com.mapbox.services.android.navigation.testapp.example.utils.hideKeyboard
 import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
-import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap
+import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter

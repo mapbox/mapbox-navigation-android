@@ -91,7 +91,7 @@ dependencies {
   implementation dependenciesList.ankoCommon
 
   // Mapbox Navigation SDK
-  implementation project(':libandroid-navigation-ui')
+  implementation project(':libnavigation-ui')
   implementation dependenciesList.mapboxMapSdk
   implementation dependenciesList.mapboxSearchSdk
   implementation dependenciesList.mapboxCrashMonitor

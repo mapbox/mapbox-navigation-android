@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.mapbox.services.android.navigation.ui.v5.NavigationView
+    <com.mapbox.navigation.ui.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -17,10 +17,10 @@ import com.mapbox.services.android.navigation.testapp.example.ui.navigation.Exam
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleOffRouteListener
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleProgressChangeListener
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.RouteFinder
-import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
-import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider
-import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader
+import com.mapbox.navigation.ui.camera.DynamicCamera
+import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
+import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
+import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation

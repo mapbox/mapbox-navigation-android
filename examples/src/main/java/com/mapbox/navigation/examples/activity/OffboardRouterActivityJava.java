@@ -26,7 +26,7 @@ import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
 import com.mapbox.navigation.logger.MapboxLogger;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 
