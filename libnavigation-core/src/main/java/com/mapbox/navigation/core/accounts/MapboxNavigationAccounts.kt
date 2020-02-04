@@ -44,6 +44,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         }
     }
 
+    @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->
             val skuToken = generator.generateToken() ?: ""

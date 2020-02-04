@@ -16,7 +16,7 @@ ext {
       mapboxNavigator           : '9.0.4',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.7.0',
-      mapboxAccounts            : '0.2.0',
+      mapboxAccounts            : '0.3.1',
       mapboxSearchSdk           : '0.1.0-SNAPSHOT',
       mapboxAnnotations         : '0.0.1-alpha.2',
       mapboxAnnotationsProcessor: '0.0.1-alpha.2',
