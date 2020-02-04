@@ -598,19 +598,17 @@ constructor(
          */
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
+            val distanceFormatter = MapboxDistanceFormatter.Builder(context.applicationContext)
+                    .withUnitType(UNDEFINED)
+                    .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                    .build()
+
             val builder = NavigationOptions.Builder()
                 .timeFormatType(NONE_SPECIFIED)
                 .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
                 .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
                 .fasterRouteDetectorInterval(DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
-                .distanceFormatter(
-                    MapboxDistanceFormatter(
-                        context.applicationContext,
-                        null,
-                        UNDEFINED,
-                        ROUNDING_INCREMENT_FIFTY
-                    )
-                )
+                .distanceFormatter(distanceFormatter)
 
             // TODO provide a production routing tiles endpoint
             val tilesUri = URI("")

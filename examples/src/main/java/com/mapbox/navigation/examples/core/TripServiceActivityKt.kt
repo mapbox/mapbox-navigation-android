@@ -76,15 +76,15 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
+        val mapboxDistanceFormatter = MapboxDistanceFormatter.Builder(applicationContext)
+                .withUnitType(METRIC)
+                .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .build()
+
         mapboxTripNotification = MapboxTripNotification(
             applicationContext,
             NavigationOptions.Builder(
-                distanceFormatter = MapboxDistanceFormatter(
-                    applicationContext,
-                    "en",
-                    METRIC,
-                    ROUNDING_INCREMENT_FIFTY
-                )
+                distanceFormatter = mapboxDistanceFormatter
             ).timeFormatType(TWENTY_FOUR_HOURS).build()
         )
 

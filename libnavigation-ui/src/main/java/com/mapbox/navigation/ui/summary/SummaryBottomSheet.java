@@ -197,10 +197,11 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   private void initializeDistanceFormatter() {
-    String language = ContextEx.inferDeviceLanguage(getContext());
     String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
-    distanceFormatter =
-      new MapboxDistanceFormatter(getContext(), language, unitType, RoundingIncrementKt.ROUNDING_INCREMENT_FIFTY);
+    distanceFormatter = MapboxDistanceFormatter.builder(getContext())
+      .withUnitType(unitType)
+      .withRoundingIncrement(RoundingIncrementKt.ROUNDING_INCREMENT_FIFTY)
+      .build();
   }
 
   /**

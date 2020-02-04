@@ -31,12 +31,12 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.instruction.ImageCreator;
@@ -668,10 +668,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void establishDistanceFormatter(NavigationViewOptions options) {
     String unitType = establishUnitType(options);
-    String language = establishLanguage(options);
     int roundingIncrement = establishRoundingIncrement(options);
-    DistanceFormatter distanceFormatter =
-      new MapboxDistanceFormatter(getContext(), language, unitType, roundingIncrement);
+    DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder(getContext())
+      .withUnitType(unitType)
+      .withRoundingIncrement(roundingIncrement)
+      .build();
 
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);

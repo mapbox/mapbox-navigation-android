@@ -340,7 +340,10 @@ public class NavigationViewModel extends AndroidViewModel {
   private void initializeDistanceFormatter(NavigationViewOptions options) {
     String unitType = initializeUnitType(options);
     int roundingIncrement = initializeRoundingIncrement(options);
-    distanceFormatter = new MapboxDistanceFormatter(getApplication(), language, unitType, roundingIncrement);
+    distanceFormatter = MapboxDistanceFormatter.builder(getApplication())
+      .withUnitType(unitType)
+      .withRoundingIncrement(roundingIncrement)
+      .build();
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {

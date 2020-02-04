@@ -40,9 +40,10 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.ui.legacy.NavigationConstants;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -485,10 +486,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
-    String language = ContextEx.inferDeviceLanguage(getContext());
     String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
-    distanceFormatter = new MapboxDistanceFormatter(getContext(), language, unitType, roundingIncrement);
+    distanceFormatter = MapboxDistanceFormatter.builder(getContext())
+      .withUnitType(unitType)
+      .withRoundingIncrement(roundingIncrement)
+      .build();
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
