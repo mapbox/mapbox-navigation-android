@@ -83,7 +83,7 @@ class MapboxNavigationTest {
     fun onDestroy_unregisters_DirectionSession_observers() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { directionsSession.unregisterAllRouteObservers() }
+        verify(exactly = 1) { directionsSession.unregisterAllRoutesObservers() }
     }
 
     @Test

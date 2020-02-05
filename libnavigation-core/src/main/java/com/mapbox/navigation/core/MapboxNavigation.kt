@@ -107,7 +107,7 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession = NavigationSession(context)
-    private val internalRouteObserver = createInternalRouteObserver()
+    private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
 
     private var notificationChannelField: Field? = null
@@ -120,7 +120,7 @@ class MapboxNavigation(
                 ::paramsProvider
             )
         )
-        directionsSession.registerRoutesObserver(internalRouteObserver)
+        directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
 
         val notification: TripNotification = NavigationModuleProvider.createModule(
@@ -243,7 +243,7 @@ class MapboxNavigation(
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
         directionsSession.shutDownSession()
-        directionsSession.unregisterAllRouteObservers()
+        directionsSession.unregisterAllRoutesObservers()
         tripSession.unregisterAllLocationObservers()
         tripSession.unregisterAllRouteProgressObservers()
         tripSession.unregisterAllOffRouteObservers()
@@ -383,7 +383,7 @@ class MapboxNavigation(
         tripSession.unregisterStateObserver(tripSessionStateObserver)
     }
 
-    private fun createInternalRouteObserver() = object : RoutesObserver {
+    private fun createInternalRoutesObserver() = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 tripSession.route = routes[0]
