@@ -2,15 +2,17 @@ package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.Toast
 import android.os.Looper
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.annotations.IconFactory
@@ -168,17 +170,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.e("route request success %s", routes.toString())
+            startNavigation.visibility = VISIBLE
             return routes
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request failure %s", throwable.toString())
+            startNavigation.visibility = GONE
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request canceled")
+            startNavigation.visibility = GONE
         }
     }
 
