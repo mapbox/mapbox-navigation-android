@@ -8,6 +8,21 @@ import com.mapbox.navigation.base.typedef.TimeFormatType
 
 const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
 
+/**
+ * Defines navigation options
+ *
+ * @param roundingIncrement defines the increment displayed on the instruction view
+ * @param timeFormatType defines time format for calculation remaining trip time
+ * @param navigatorPollingDelay defines approximate location engine interval lag in milliseconds
+ *
+ * This value will be used to offset the time at which the current location was calculated
+ * in such a way as to project the location forward along the current trajectory so as to
+ * appear more in sync with the users ground-truth location
+ *
+ * @param fasterRouteDetectorInterval defines time interval in milliseconds for detection is faster route available
+ * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
+ * @param onboardRouterConfig [MapboxOnboardRouterConfig] defines configuration for the default on-board router
+ */
 data class NavigationOptions constructor(
     @RoundingIncrement val roundingIncrement: Int,
     @TimeFormatType val timeFormatType: Int,
