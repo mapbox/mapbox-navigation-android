@@ -114,6 +114,7 @@ class MapboxNavigation(
 
     init {
         ThreadController.init()
+
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             NavigationModuleProvider.createModule(
                 MapboxNavigationModuleType.OffboardRouter,
