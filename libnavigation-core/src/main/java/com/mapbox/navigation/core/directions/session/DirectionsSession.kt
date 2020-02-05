@@ -19,5 +19,5 @@ internal interface DirectionsSession {
 
     fun shutDownSession()
 
-    fun unregisterAllRouteObservers()
+    fun unregisterAllRoutesObservers()
 }

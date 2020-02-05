@@ -221,7 +221,7 @@ class MapboxDirectionsSessionTest {
         session.registerRoutesObserver(observer)
         session.requestRoutes(routeOptions, routesRequestCallback)
 
-        session.unregisterAllRouteObservers()
+        session.unregisterAllRoutesObservers()
 
         callback.onResponse(routes)
         delayLambda()

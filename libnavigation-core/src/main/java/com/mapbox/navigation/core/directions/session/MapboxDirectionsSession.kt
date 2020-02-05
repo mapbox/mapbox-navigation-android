@@ -72,8 +72,8 @@ class MapboxDirectionsSession(
         routesObservers.remove(routesObserver)
     }
 
-    override fun unregisterAllRouteObservers() {
-        routeObservers.clear()
+    override fun unregisterAllRoutesObservers() {
+        routesObservers.clear()
     }
 
     override fun shutDownSession() {
