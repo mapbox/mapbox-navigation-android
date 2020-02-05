@@ -145,7 +145,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onFailure(exception: java.lang.Exception) {
-
         }
     }
 
