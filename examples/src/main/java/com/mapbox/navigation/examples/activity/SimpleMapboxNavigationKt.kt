@@ -27,7 +27,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -75,7 +74,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             locationComponent?.lastKnownLocation?.let { location ->
                 mapboxNavigation.requestRoutes(
                     RouteOptions.builder().applyDefaultParams()
-                        .baseUrl(RouteUrl.BASE_DIRECTIONS_STAGING_URL)
                         .accessToken(Utils.getMapboxAccessToken(applicationContext))
                         .coordinates(location.toPoint(), null, click.toPoint())
                         .alternatives(true)
@@ -146,7 +144,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        override fun onFailure(exception: java.lang.Exception) {
+        override fun onFailure(exception: Exception) {
         }
     }
 

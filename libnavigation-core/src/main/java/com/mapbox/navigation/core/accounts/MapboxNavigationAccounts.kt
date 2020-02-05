@@ -47,7 +47,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->
-            val skuToken = generator.generateToken() ?: ""
+            val skuToken = generator.generateToken()
             check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty") }
 
             when {
