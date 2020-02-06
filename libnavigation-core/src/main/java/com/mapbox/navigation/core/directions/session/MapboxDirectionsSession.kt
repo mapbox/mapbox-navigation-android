@@ -98,10 +98,9 @@ class MapboxDirectionsSession(
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 val route = routes[0]
-                fasterRouteObservers.forEach { it.onFasterRouteAvailable(route) }
-                /*if (isRouteFaster(route)) {
+                if (isRouteFaster(route)) {
                     fasterRouteObservers.forEach { it.onFasterRouteAvailable(route) }
-                }*/
+                }
             }
 
             override fun onFailure(throwable: Throwable) {
