@@ -27,6 +27,7 @@ import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -381,6 +382,14 @@ class MapboxNavigation(
      */
     fun unregisterTripSessionStateObserver(tripSessionStateObserver: TripSessionStateObserver) {
         tripSession.unregisterStateObserver(tripSessionStateObserver)
+    }
+
+    fun registerFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
+        directionsSession.registerFasterRouteObserver(fasterRouteObserver)
+    }
+
+    fun unregisterFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
+        directionsSession.unregisterFasterRouteObserver(fasterRouteObserver)
     }
 
     private fun createInternalRoutesObserver() = object : RoutesObserver {

@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.activity
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Looper
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -33,6 +34,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -49,10 +51,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val locationEngineCallback = MyLocationEngineCallback(this)
     private var mapboxMap: MapboxMap? = null
     private var navigationMapRoute: NavigationMapRoute? = null
-    private lateinit var mapboxNavigation: MapboxNavigation
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
+    private var fasterRoute: DirectionsRoute? = null
 
+    private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
 
     @SuppressLint("MissingPermission")
@@ -176,6 +179,24 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private val fasterRouteSelectionTimer: CountDownTimer = object : CountDownTimer(10000L, 1000L) {
+        override fun onTick(millisUntilFinished: Long) {
+            Timber.e("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+        }
+
+        override fun onFinish() {
+            Timber.e("FASTER_ROUTE: finished")
+            this@SimpleMapboxNavigationKt.fasterRoute = null
+        }
+    }
+
+    private val fasterRouteObserver = object : FasterRouteObserver {
+        override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
+            this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
+            fasterRouteSelectionTimer.start()
+        }
+    }
+
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.d("route request success %s", routes.toString())
@@ -222,6 +243,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
     }
 
     override fun onStop() {
@@ -231,6 +253,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
         stopLocationUpdates()
     }
 
