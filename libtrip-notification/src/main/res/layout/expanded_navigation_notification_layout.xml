@@ -30,6 +30,7 @@
             android:tint="@android:color/white" />
 
         <TextView
+            android:id="@+id/endNavigationBtnText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
