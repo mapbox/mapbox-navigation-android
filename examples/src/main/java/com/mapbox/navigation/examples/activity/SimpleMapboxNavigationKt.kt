@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.view.View.GONE
@@ -31,13 +32,13 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
-import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
-import kotlinx.android.synthetic.main.activity_trip_service.mapView
+import kotlinx.android.synthetic.main.activity_trip_service.*
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
@@ -113,6 +114,32 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
+        }
+    }
+
+    private val locationObserver = object : LocationObserver {
+        override fun onRawLocationChanged(rawLocation: Location) {
+            Timber.e("raw location %s", rawLocation.toString())
+        }
+
+        override fun onEnhancedLocationChanged(
+            enhancedLocation: Location,
+            keyPoints: List<Location>
+        ) {
+            if (keyPoints.isNotEmpty()) {
+                locationComponent?.forceLocationUpdate(keyPoints.map {
+                    // workaround for https://github.com/mapbox/mapbox-location-native/pull/65#discussion_r375777857
+                    val lat = it.latitude
+                    val lon = it.longitude
+                    it.latitude = lon
+                    it.longitude = lat
+                    it
+                }, true)
+            } else {
+                locationComponent?.forceLocationUpdate(enhancedLocation)
+            }
+            Timber.e("enhanced location %s", enhancedLocation)
+            Timber.e("enhanced keyPoints %s", keyPoints)
         }
     }
 
@@ -198,6 +225,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
+        mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
     }
@@ -205,6 +233,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         mapView.onStop()
+        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
     }

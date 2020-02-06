@@ -53,6 +53,7 @@ class MapboxTripSessionTest {
     private val locationEngineResult: LocationEngineResult = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
     private val enhancedLocation: Location = mockk(relaxUnitFun = true)
+    private val keyPoints: List<Location> = mockk(relaxUnitFun = true)
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val navigationStatus: NavigationStatus = mockk(relaxUnitFun = true)
@@ -75,6 +76,7 @@ class MapboxTripSessionTest {
         every { navigator.updateLocation(any()) } returns false
         every { navigator.setRoute(any()) } returns navigationStatus
         every { tripStatus.enhancedLocation } returns enhancedLocation
+        every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false
 
         every {
@@ -278,7 +280,7 @@ class MapboxTripSessionTest {
 
         tripSession.registerLocationObserver(observer)
 
-        verify { observer.onEnhancedLocationChanged(enhancedLocation) }
+        verify { observer.onEnhancedLocationChanged(enhancedLocation, keyPoints) }
         assertEquals(enhancedLocation, tripSession.getEnhancedLocation())
         tripSession.stop()
         unmockkObject(ThreadController)
@@ -309,7 +311,7 @@ class MapboxTripSessionTest {
 
         tripSession.registerLocationObserver(observer)
 
-        verify(exactly = 2) { observer.onEnhancedLocationChanged(enhancedLocation) }
+        verify(exactly = 2) { observer.onEnhancedLocationChanged(enhancedLocation, keyPoints) }
         assertEquals(enhancedLocation, tripSession.getEnhancedLocation())
         tripSession.stop()
         unmockkObject(ThreadController)
@@ -340,7 +342,7 @@ class MapboxTripSessionTest {
         tripSession.unregisterLocationObserver(observer)
 
         tripSession.stop()
-        verify(exactly = 1) { observer.onEnhancedLocationChanged(enhancedLocation) }
+        verify(exactly = 1) { observer.onEnhancedLocationChanged(enhancedLocation, keyPoints) }
         unmockkObject(ThreadController)
     }
 

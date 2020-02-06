@@ -8,9 +8,12 @@ import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
 import java.io.ByteArrayOutputStream
-import java.lang.IllegalArgumentException
+import java.io.IOException
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
@@ -56,33 +59,40 @@ internal class HttpClient(
         return acceptGzipEncoding
     }
 
-    override fun get(url: String): HttpResponse {
+    override fun get(url: String, nativeResponse: HttpResponse) {
         val requestBuilder = try {
             Request.Builder()
                 .addHeader(HEADER_USER_AGENT, userAgent)
                 .url(url)
         } catch (e: IllegalArgumentException) {
-            return HttpResponse(ByteArray(0), HttpCode.FAILURE)
+            nativeResponse.run(ByteArray(0), HttpCode.FAILURE)
+            return
         }
 
         if (acceptGzipEncoding) {
             requestBuilder.addHeader(HEADER_ENCODING, GZIP)
         }
 
-        client.newCall(requestBuilder.build()).execute().use { response ->
-            val outputStream = ByteArrayOutputStream()
-            val result = if (response.isSuccessful) HttpCode.SUCCESS else HttpCode.FAILURE
-
-            response.body()?.let { body ->
-                val sink = outputStream.sink().buffer()
-                sink.writeAll(body.source())
-                sink.close()
+        client.newCall(requestBuilder.build()).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                nativeResponse.run(ByteArray(0), HttpCode.FAILURE)
             }
 
-            val bytes = outputStream.toByteArray()
-            outputStream.close()
+            override fun onResponse(call: Call, response: Response) {
+                val outputStream = ByteArrayOutputStream()
+                val result = if (response.isSuccessful) HttpCode.SUCCESS else HttpCode.FAILURE
 
-            return HttpResponse(bytes, result)
-        }
+                response.body()?.let { body ->
+                    val sink = outputStream.sink().buffer()
+                    sink.writeAll(body.source())
+                    sink.close()
+                }
+
+                val bytes = outputStream.toByteArray()
+                outputStream.close()
+
+                nativeResponse.run(bytes, result)
+            }
+        })
     }
 }

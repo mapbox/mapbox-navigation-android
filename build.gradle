@@ -41,6 +41,15 @@ allprojects {
     mavenCentral()
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
+    maven {
+      Properties localProperties = new Properties()
+      localProperties.load(project.rootProject.file("local.properties").newDataInputStream())
+      url 'https://mapbox.bintray.com/mapbox_private'
+      credentials {
+        username = localProperties.getProperty("BINTRAY_USER", "")
+        password = localProperties.getProperty("BINTRAY_API_KEY", "")
+      }
+    }
     maven { url 'https://mapbox.bintray.com/mapbox' }
     maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
