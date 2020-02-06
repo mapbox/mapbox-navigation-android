@@ -32,6 +32,14 @@ jobs:
             - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
             - jars-
       - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
@@ -124,6 +132,14 @@ jobs:
             - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}
             - deps-
       - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
@@ -153,6 +169,14 @@ jobs:
           keys:
             - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}
             - deps-
+      - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
@@ -207,6 +231,14 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - run:
           name: Generate and Validate License
           command: |
             make license-verification
@@ -255,6 +287,14 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
+      - run:
           name: Build Navigation SDK 1.0 (release)
           command: make 1.0-build-release
       - run:
@@ -264,14 +304,6 @@ jobs:
 #     - run:
 #         name: Check public documentation
 #         command: sh scripts/dokka-validate.sh
-      - run:
-          name: Generate Bintray credentials
-          command: |
-            if [ -n "${BINTRAY_USER}" ]; then
-              echo "BINTRAY_USER=$BINTRAY_USER
-              BINTRAY_API_KEY=$BINTRAY_API_KEY
-              GPG_PASSPHRASE=$GPG_PASSPHRASE"
-            fi
       - deploy:
           name: Publish Navigation SDK 1.0 to Bintray
           command: |
@@ -299,6 +331,14 @@ jobs:
           keys:
             - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
             - jars-
+      - run:
+          name: Generate Bintray credentials
+          command: |
+            if [ -n "${BINTRAY_USER}" ]; then
+              echo "BINTRAY_USER=$BINTRAY_USER
+              BINTRAY_API_KEY=$BINTRAY_API_KEY
+              GPG_PASSPHRASE=$GPG_PASSPHRASE"
+            fi
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
