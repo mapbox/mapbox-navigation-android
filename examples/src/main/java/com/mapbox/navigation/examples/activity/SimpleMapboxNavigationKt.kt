@@ -34,11 +34,13 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
-import kotlinx.android.synthetic.main.activity_trip_service.*
+import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
+import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
@@ -60,9 +62,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
         mapboxNavigation = MapboxNavigation(applicationContext, Utils.getMapboxAccessToken(this))
-        startLocationUpdates()
         startNavigation.setOnClickListener {
-            stopLocationUpdates()
             mapboxNavigation.startTripSession()
         }
     }
@@ -195,20 +195,29 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.e("route request success %s", routes.toString())
-            startNavigation.visibility = VISIBLE
             return routes
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request failure %s", throwable.toString())
-            startNavigation.visibility = GONE
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request canceled")
+        }
+    }
+
+    private val tripSessionStateObserver = object : TripSessionStateObserver {
+        override fun onSessionStarted() {
+            stopLocationUpdates()
             startNavigation.visibility = GONE
+        }
+
+        override fun onSessionStopped() {
+            startLocationUpdates()
+            startNavigation.visibility = VISIBLE
         }
     }
 
@@ -228,6 +237,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
+        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     override fun onStop() {
@@ -236,6 +246,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
+        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        stopLocationUpdates()
     }
 
     override fun onLowMemory() {
