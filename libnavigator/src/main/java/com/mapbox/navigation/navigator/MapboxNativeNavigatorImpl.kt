@@ -58,6 +58,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val status = navigator.getStatus(date)
         return TripStatus(
             status.location.toLocation(),
+            status.key_points.map { it.toLocation() },
             status.getRouteProgress(),
             status.routeState == RouteState.OFFROUTE
         )

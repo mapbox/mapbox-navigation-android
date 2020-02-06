@@ -135,7 +135,7 @@ class MapboxTripSession(
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
         rawLocation?.let { locationObserver.onRawLocationChanged(it) }
-        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it) }
+        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it, emptyList()) }
     }
 
     override fun unregisterLocationObserver(locationObserver: LocationObserver) {
@@ -253,7 +253,7 @@ class MapboxTripSession(
         mainJobController.scope.launch {
             while (isActive) {
                 val status = navigatorPolling()
-                updateEnhancedLocation(status.enhancedLocation)
+                updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
                 updateRouteProgress(status.routeProgress)
                 isOffRoute = status.offRoute
                 delay(STATUS_POLLING_INTERVAL)
@@ -268,9 +268,9 @@ class MapboxTripSession(
             navigator.getStatus(date)
         }
 
-    private fun updateEnhancedLocation(location: Location) {
+    private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
         enhancedLocation = location
-        locationObservers.forEach { it.onEnhancedLocationChanged(location) }
+        locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
     }
 
     private fun updateRouteProgress(progress: RouteProgress) {
