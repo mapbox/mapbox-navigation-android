@@ -13,12 +13,12 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.MapboxNavigation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -276,14 +276,14 @@ public class NavigationMapRoute implements LifecycleObserver {
    * This method will allow this class to listen to new routes based on
    * the progress updates from {@link MapboxNavigation}.
    * <p>
-   * If a new route is given to {@link MapboxNavigation#startNavigation(DirectionsRoute)}, this
+   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
    * class will automatically draw the new route.
    *
    * @param navigation to add the progress change listener
    */
   public void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
-    navigation.addProgressChangeListener(mapRouteProgressChangeListener);
+    navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
   }
 
 
@@ -295,7 +295,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void removeProgressChangeListener(MapboxNavigation navigation) {
     if (navigation != null) {
-      navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
   }
 
@@ -351,7 +351,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       isMapClickListenerAdded = true;
     }
     if (navigation != null) {
-      navigation.addProgressChangeListener(mapRouteProgressChangeListener);
+      navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }
     if (!isDidFinishLoadingStyleListenerAdded) {
       mapView.addOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
@@ -365,7 +365,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       isMapClickListenerAdded = false;
     }
     if (navigation != null) {
-      navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
     if (isDidFinishLoadingStyleListenerAdded) {
       mapView.removeOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
@@ -411,11 +411,11 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void updateProgressChangeListener() {
     if (navigation != null) {
-      navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
     mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     if (navigation != null) {
-      navigation.addProgressChangeListener(mapRouteProgressChangeListener);
+      navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }
   }
 

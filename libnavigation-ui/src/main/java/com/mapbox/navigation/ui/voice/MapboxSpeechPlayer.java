@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
-import com.mapbox.services.android.navigation.v5.utils.DownloadTask;
+import com.mapbox.navigation.ui.utils.DownloadTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,11 +31,11 @@ class MapboxSpeechPlayer implements SpeechPlayer {
 
   private static final String MAPBOX_INSTRUCTION_CACHE = "mapbox_instruction_cache";
   private static final String ERROR_TEXT = "Unable to set data source for the media mediaPlayer! %s";
-  private static final SpeechAnnouncementMap SPEECH_ANNOUNCEMENT_MAP = new SpeechAnnouncementMap();
+  private static final VoiceInstructionMap VOICE_INSTRUCTION_MAP = new VoiceInstructionMap();
   private static final String MP3_POSTFIX = "mp3";
 
-  private SpeechAnnouncement announcement;
-  private SpeechListener speechListener;
+  private VoiceInstructions announcement;
+  private VoiceListener voiceListener;
   private MediaPlayer mediaPlayer;
   private Queue<File> instructionQueue;
   private File mapboxCache;
@@ -49,9 +49,9 @@ class MapboxSpeechPlayer implements SpeechPlayer {
    * @param context                to setup the caches
    * @param voiceInstructionLoader voice instruction loader
    */
-  MapboxSpeechPlayer(Context context, @NonNull SpeechListener speechListener,
+  MapboxSpeechPlayer(Context context, @NonNull VoiceListener voiceListener,
                      VoiceInstructionLoader voiceInstructionLoader) {
-    this.speechListener = speechListener;
+    this.voiceListener = voiceListener;
     this.voiceInstructionLoader = voiceInstructionLoader;
     setupCaches(context);
     instructionQueue = new ConcurrentLinkedQueue();
@@ -68,11 +68,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     if (isInvalidAnnouncement) {
       return;
     }
-    this.announcement = SpeechAnnouncement.builder()
-      .announcement(announcement.announcement())
-      .ssmlAnnouncement(announcement.ssmlAnnouncement())
-      .build();
-    playAnnouncementTextAndTypeFrom(this.announcement);
+    playAnnouncementTextAndTypeFrom(announcement);
   }
 
   @Override
@@ -103,10 +99,10 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     mapboxCache.mkdir();
   }
 
-  private void playAnnouncementTextAndTypeFrom(SpeechAnnouncement announcement) {
+  private void playAnnouncementTextAndTypeFrom(VoiceInstructions announcement) {
     boolean hasSsmlAnnouncement = announcement.ssmlAnnouncement() != null;
-    SpeechAnnouncementUpdate speechAnnouncementUpdate = SPEECH_ANNOUNCEMENT_MAP.get(hasSsmlAnnouncement);
-    Pair<String, String> textAndType = speechAnnouncementUpdate.buildTextAndTypeFrom(announcement);
+    VoiceInstructionUpdate voiceInstructionUpdate = VOICE_INSTRUCTION_MAP.get(hasSsmlAnnouncement);
+    Pair<String, String> textAndType = voiceInstructionUpdate.buildTextAndTypeFrom(announcement);
     playAnnouncementText(textAndType.first, textAndType.second);
   }
 
@@ -126,7 +122,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       isPlaying = false;
       mediaPlayer.stop();
       mediaPlayer.release();
-      speechListener.onDone();
+      voiceListener.onDone();
     }
   }
 
@@ -158,7 +154,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   }
 
   private void onError(String errorText) {
-    speechListener.onError(errorText, announcement);
+    voiceListener.onError(errorText, announcement);
   }
 
   private void playInstruction(@NonNull File instruction) {
@@ -194,7 +190,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
-        speechListener.onStart();
+        voiceListener.onStart();
         isPlaying = true;
         mp.start();
       }
@@ -204,7 +200,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       public void onCompletion(MediaPlayer mp) {
         mp.release();
         isPlaying = false;
-        speechListener.onDone();
+        voiceListener.onDone();
         onInstructionFinishedPlaying();
       }
     });

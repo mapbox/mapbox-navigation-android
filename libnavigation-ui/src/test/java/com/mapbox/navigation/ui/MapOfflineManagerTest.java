@@ -16,7 +16,7 @@ import com.mapbox.navigation.ui.OfflineDatabaseLoadedCallback;
 import com.mapbox.navigation.ui.OfflineMetadataProvider;
 import com.mapbox.navigation.ui.OfflineRegionDefinitionProvider;
 import com.mapbox.navigation.ui.RegionDownloadCallback;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
 
 import org.junit.Test;
 import org.mockito.InOrder;

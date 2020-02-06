@@ -1,3 +1,5 @@
+@file:JvmName("RoundingIncrementKt")
+
 package com.mapbox.navigation.base.typedef
 
 import androidx.annotation.IntDef

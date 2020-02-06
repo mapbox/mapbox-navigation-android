@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
 
 import java.io.IOException;
 

@@ -24,7 +24,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   private static final String DEFAULT_UTTERANCE_ID = "default_id";
 
   private TextToSpeech textToSpeech;
-  private SpeechListener speechListener;
+  private VoiceListener voiceListener;
 
   private boolean isMuted;
   private boolean languageSupported = false;
@@ -36,7 +36,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    * @param language to initialize locale to set
    * @since 0.6.0
    */
-  AndroidSpeechPlayer(Context context, final String language, final SpeechListener speechListener) {
+  AndroidSpeechPlayer(Context context, final String language, final VoiceListener voiceListener) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
       @Override
       public void onInit(int status) {
@@ -45,7 +45,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
           Timber.e("There was an error initializing native TTS");
           return;
         }
-        setSpeechListener(speechListener);
+        setVoiceListener(voiceListener);
         initializeWithLanguage(new Locale(language));
       }
     });
@@ -54,12 +54,12 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   /**
    * Plays the given voice instruction using TTS
    *
-   * @param speechAnnouncement with voice instruction to be synthesized and played
+   * @param voiceInstructions with voice instruction to be synthesized and played
    */
   @Override
-  public void play(VoiceInstructions speechAnnouncement) {
-    boolean isValidAnnouncement = speechAnnouncement != null
-      && !TextUtils.isEmpty(speechAnnouncement.announcement());
+  public void play(VoiceInstructions voiceInstructions) {
+    boolean isValidAnnouncement = voiceInstructions != null
+      && !TextUtils.isEmpty(voiceInstructions.announcement());
     boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;
     if (!canPlay) {
       return;
@@ -69,7 +69,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
 
     HashMap<String, String> params = new HashMap<>(1);
     params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
-    textToSpeech.speak(speechAnnouncement.announcement(), TextToSpeech.QUEUE_ADD, params);
+    textToSpeech.speak(voiceInstructions.announcement(), TextToSpeech.QUEUE_ADD, params);
   }
 
   /**
@@ -133,17 +133,17 @@ class AndroidSpeechPlayer implements SpeechPlayer {
 
   private void fireInstructionListenerIfApi14() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      speechListener.onStart();
+      voiceListener.onStart();
     }
   }
 
-  private void setSpeechListener(final SpeechListener speechListener) {
-    this.speechListener = speechListener;
+  private void setVoiceListener(final VoiceListener voiceListener) {
+    this.voiceListener = voiceListener;
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(speechListener));
+      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(voiceListener));
     } else {
-      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(speechListener));
+      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(voiceListener));
     }
   }
 }

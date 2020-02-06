@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui;
 
 import com.mapbox.navigation.ui.MapOfflineManager;
 import com.mapbox.navigation.ui.NavigationOfflineDatabaseCallback;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
 
 import org.junit.Test;
 

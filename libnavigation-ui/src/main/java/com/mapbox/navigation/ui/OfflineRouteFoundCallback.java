@@ -4,8 +4,8 @@ package com.mapbox.navigation.ui;
 import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
-import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.navigation.ui.navigation.OfflineError;
+import com.mapbox.navigation.ui.navigation.OnOfflineRouteFoundCallback;
 
 class OfflineRouteFoundCallback implements OnOfflineRouteFoundCallback {
 

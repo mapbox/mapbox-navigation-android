@@ -19,7 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.ui.ThemeSwitcher;
 
 /**

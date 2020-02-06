@@ -11,7 +11,7 @@ import com.mapbox.navigation.ui.NavigationViewModel;
 import com.mapbox.navigation.ui.NavigationViewRouter;
 import com.mapbox.navigation.ui.VoiceInstructionCache;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

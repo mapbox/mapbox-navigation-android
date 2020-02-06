@@ -89,7 +89,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
-class MapboxNavigation(
+class MapboxNavigation
+@JvmOverloads
+constructor(
     private val context: Context,
     private val accessToken: String?,
     private val navigationOptions: NavigationOptions = defaultNavigationOptions(context),

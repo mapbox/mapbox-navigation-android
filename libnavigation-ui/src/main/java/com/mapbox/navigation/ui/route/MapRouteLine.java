@@ -14,6 +14,7 @@ import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.location.LocationComponentConstants;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
@@ -22,7 +23,6 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.navigation.ui.utils.MapUtils;
 
 import java.util.ArrayList;

@@ -9,7 +9,7 @@ import android.view.animation.TranslateAnimation;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 
 /**
  * Button used to re-activate following user location during navigation.

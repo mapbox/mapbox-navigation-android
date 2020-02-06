@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui;
 
 import android.location.Location;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,21 +9,17 @@ import androidx.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
-import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
-import com.mapbox.services.android.navigation.v5.route.RouteListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.ui.listeners.RouteListener;
 
 import java.util.Date;
 import java.util.List;
 
 class NavigationViewRouter implements RouteListener {
 
-  private final RouteFetcher onlineRouter;
-  private final ConnectivityStatusProvider connectivityStatus;
+  private final Router router;
   private final RouteComparator routeComparator;
   private final ViewRouteListener listener;
   @Nullable
@@ -33,26 +30,19 @@ class NavigationViewRouter implements RouteListener {
   private Location location;
   private RouteCallStatus callStatus;
 
-  NavigationViewRouter(RouteFetcher onlineRouter, ConnectivityStatusProvider connectivityStatus,
-                       ViewRouteListener listener) {
-    this.onlineRouter = onlineRouter;
-    this.connectivityStatus = connectivityStatus;
+  NavigationViewRouter(Router router, ViewRouteListener listener) {
+    this.router = router;
     this.listener = listener;
     this.routeComparator = new RouteComparator(this);
-    onlineRouter.addRouteListener(this);
   }
 
   // Extra fields for testing purposes
-  NavigationViewRouter(RouteFetcher onlineRouter, NavigationViewOfflineRouter offlineRouter,
-                       ConnectivityStatusProvider connectivityStatus, RouteComparator routeComparator,
+  NavigationViewRouter(Router router, RouteComparator routeComparator,
                        ViewRouteListener listener, RouteCallStatus callStatus) {
-    this.onlineRouter = onlineRouter;
-    this.offlineRouter = offlineRouter;
-    this.connectivityStatus = connectivityStatus;
+    this.router = router;
     this.routeComparator = routeComparator;
     this.listener = listener;
     this.callStatus = callStatus;
-    onlineRouter.addRouteListener(this);
   }
 
   @Override

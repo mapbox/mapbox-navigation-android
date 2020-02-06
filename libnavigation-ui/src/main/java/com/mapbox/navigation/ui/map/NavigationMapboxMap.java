@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -28,19 +29,18 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
+import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.navigation.ui.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
+import static com.mapbox.navigation.utils.ConstantsEx.NAVIGATION_MINIMUM_MAP_ZOOM;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -86,8 +86,8 @@ public class NavigationMapboxMap {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView           for map size and Context
-   * @param mapboxMap         for APIs to interact with the map
+   * @param mapView   for map size and Context
+   * @param mapboxMap for APIs to interact with the map
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap) {

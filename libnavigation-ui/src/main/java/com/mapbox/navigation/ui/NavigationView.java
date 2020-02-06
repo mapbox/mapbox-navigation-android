@@ -15,20 +15,29 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.typedef.TimeFormatType;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.instruction.ImageCreator;
 import com.mapbox.navigation.ui.instruction.InstructionView;
@@ -37,15 +46,7 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
-import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
-import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+import com.mapbox.navigation.utils.extensions.ContextEx;
 
 /**
  * View that creates the drop-in UI.
@@ -54,7 +55,7 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
  * it was launched with a {@link DirectionsRoute}.
  * <p>
  * Or, if not found, this view will look for a set of {@link Point} coordinates.
- * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link NavigationRoute}.
+ * In the latter case, a new {@link DirectionsRoute} will be retrieved from {@link Router}.
  * <p>
  * Once valid data is obtained, this activity will immediately begin navigation
  * with {@link MapboxNavigation}.
@@ -70,7 +71,7 @@ import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
  * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
-  NavigationContract.View {
+        NavigationContract.View {
 
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
@@ -150,8 +151,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int bottomSheetBehaviorState = summaryBehavior == null ? INVALID_STATE : summaryBehavior.getState();
     boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
-      bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
-      isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
+            bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
+            isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -542,7 +543,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
     summaryBehavior.setBottomSheetCallback(new SummaryBottomSheetCallback(navigationPresenter,
-      navigationViewEventDispatcher));
+            navigationViewEventDispatcher));
   }
 
   private void initializeNavigationEventDispatcher() {
@@ -552,7 +553,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeInstructionListListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
-      navigationViewEventDispatcher));
+            navigationViewEventDispatcher));
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
@@ -606,7 +607,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
     int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
     int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
-    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
+    return new int[]{leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
   }
 
   private boolean isChangingConfigurations() {
@@ -662,15 +663,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     String unitType = establishUnitType(options);
     String language = establishLanguage(options);
     int roundingIncrement = establishRoundingIncrement(options);
-    DistanceFormatter distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
+    DistanceFormatter distanceFormatter = new MapboxDistanceFormatter(getContext(), language, unitType, roundingIncrement);
 
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }
 
   private int establishRoundingIncrement(NavigationViewOptions navigationViewOptions) {
-    MapboxNavigationOptions mapboxNavigationOptions = navigationViewOptions.navigationOptions();
-    return mapboxNavigationOptions.roundingIncrement();
+    NavigationOptions navigationOptions = navigationViewOptions.navigationOptions();
+    return navigationOptions.roundingIncrement();
   }
 
   private String establishLanguage(NavigationViewOptions options) {

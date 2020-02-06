@@ -16,9 +16,9 @@ import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.navigation.ui.listeners.RouteListener;
 import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.navigation.ui.milestone.MilestoneEventListener;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.routeprogress.ProgressChangeListener;
 
 import org.junit.Test;
 

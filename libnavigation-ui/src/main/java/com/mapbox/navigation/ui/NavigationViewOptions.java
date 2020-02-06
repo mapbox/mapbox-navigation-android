@@ -7,6 +7,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.auto.value.AutoValue;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
@@ -14,17 +17,11 @@ import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.navigation.ui.listeners.RouteListener;
 import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
-import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-
-import java.util.List;
 
 @AutoValue
 public abstract class NavigationViewOptions extends NavigationUiOptions {
 
-  public abstract MapboxNavigationOptions navigationOptions();
+  public abstract NavigationOptions navigationOptions();
 
   @Nullable
   public abstract FeedbackListener feedbackListener();
@@ -36,13 +33,10 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   public abstract NavigationListener navigationListener();
 
   @Nullable
-  public abstract ProgressChangeListener progressChangeListener();
+  public abstract RouteProgressObserver routeProgressObserver();
 
   @Nullable
-  public abstract MilestoneEventListener milestoneEventListener();
-
-  @Nullable
-  public abstract List<Milestone> milestones();
+  public abstract LocationObserver locationObserver();
 
   @Nullable
   public abstract BottomSheetBehavior.BottomSheetCallback bottomSheetCallback();
@@ -75,7 +69,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder waynameChipEnabled(boolean waynameChipEnabled);
 
-    public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
+    public abstract Builder navigationOptions(NavigationOptions navigationOptions);
 
     public abstract Builder feedbackListener(FeedbackListener feedbackListener);
 
@@ -83,11 +77,9 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder navigationListener(NavigationListener navigationListener);
 
-    public abstract Builder progressChangeListener(ProgressChangeListener progressChangeListener);
+    public abstract Builder progressChangeListener(RouteProgressObserver routeProgressObserver);
 
-    public abstract Builder milestoneEventListener(MilestoneEventListener milestoneEventListener);
-
-    public abstract Builder milestones(List<Milestone> milestones);
+    public abstract Builder locationObserver(LocationObserver locationObserver);
 
     public abstract Builder bottomSheetCallback(BottomSheetBehavior.BottomSheetCallback bottomSheetCallback);
 
@@ -136,8 +128,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
-      .navigationOptions(new MapboxNavigationOptions.Builder().build())
-      .shouldSimulateRoute(false)
-      .waynameChipEnabled(true);
+            .navigationOptions(new NavigationOptions.Builder().build())
+            .shouldSimulateRoute(false)
+            .waynameChipEnabled(true);
   }
 }

@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.DrawableCompat;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.ui.ThemeSwitcher;
 
 public class WayNameView extends FrameLayout {

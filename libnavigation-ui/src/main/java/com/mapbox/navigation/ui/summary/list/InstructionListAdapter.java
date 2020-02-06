@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
 
@@ -23,7 +23,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   @Override
   public InstructionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-      .inflate(R.layout.instruction_viewholder_layout, parent, false);
+            .inflate(R.layout.instruction_viewholder_layout, parent, false);
     return new InstructionViewHolder(view);
   }
 

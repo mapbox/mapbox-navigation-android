@@ -6,10 +6,10 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteStepProgress;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.routeprogress.RouteLegProgress;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.routeprogress.RouteStepProgress;
 
 import org.junit.Test;
 

@@ -4,7 +4,7 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 
 class TurnLaneViewHolder extends RecyclerView.ViewHolder {
 

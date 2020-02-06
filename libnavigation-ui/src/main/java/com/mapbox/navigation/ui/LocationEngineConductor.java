@@ -5,7 +5,7 @@ import android.content.Context;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
+import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
 
 class LocationEngineConductor {
 

@@ -10,6 +10,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
@@ -52,10 +53,6 @@ interface ExampleView : PermissionsListener, OnMapReadyCallback,
     fun updateSettingsFabVisibility(visibility: Int)
 
     fun updateInstructionViewVisibility(visibility: Int)
-
-    fun updateInstructionViewWith(progress: RouteProgress)
-
-    fun updateInstructionViewWith(milestone: Milestone)
 
     fun addMapProgressChangeListener(navigation: MapboxNavigation)
 

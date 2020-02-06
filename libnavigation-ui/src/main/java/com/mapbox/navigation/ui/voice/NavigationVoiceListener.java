@@ -4,13 +4,13 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 import timber.log.Timber;
 
-class NavigationSpeechListener implements SpeechListener {
+class NavigationVoiceListener implements VoiceListener {
 
   private SpeechPlayerProvider speechPlayerProvider;
   private SpeechAudioFocusManager audioFocusManager;
 
-  NavigationSpeechListener(SpeechPlayerProvider speechPlayerProvider,
-                           SpeechAudioFocusManager audioFocusManager) {
+  NavigationVoiceListener(SpeechPlayerProvider speechPlayerProvider,
+                          SpeechAudioFocusManager audioFocusManager) {
     this.speechPlayerProvider = speechPlayerProvider;
     this.audioFocusManager = audioFocusManager;
   }
@@ -26,12 +26,8 @@ class NavigationSpeechListener implements SpeechListener {
   }
 
   @Override
-  public void onError(String errorText, SpeechAnnouncement speechAnnouncement) {
+  public void onError(String errorText, VoiceInstructions voiceInstructions) {
     Timber.e(errorText);
-    VoiceInstructions announcement = VoiceInstructions.builder()
-      .announcement(speechAnnouncement.announcement())
-      .ssmlAnnouncement(speechAnnouncement.ssmlAnnouncement())
-      .build();
-    speechPlayerProvider.retrieveAndroidSpeechPlayer().play(announcement);
+    speechPlayerProvider.retrieveAndroidSpeechPlayer().play(voiceInstructions);
   }
 }

@@ -10,7 +10,7 @@ import android.net.wifi.WifiManager;
 import java.util.HashMap;
 
 /**
- * TODO internal package
+ * TODO should be removed, logic moved to HybridRouter
  */
 public class ConnectivityStatusProvider {
 

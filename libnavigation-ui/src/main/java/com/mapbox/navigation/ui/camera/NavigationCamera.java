@@ -23,11 +23,9 @@ import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.utils.MathUtils;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
-import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.ui.routeprogress.ProgressChangeListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -425,7 +423,7 @@ public class NavigationCamera implements LifecycleObserver {
     if (routeProgress == null) {
       return new RouteInformation(null, null, null);
     }
-    return new RouteInformation(routeProgress.directionsRoute(), null, null);
+    return new RouteInformation(routeProgress.route(), null, null);
   }
 
   private void onCameraTransitionFinished() {

@@ -9,8 +9,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.navigation.ui.BaseTest;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.utils.DistanceFormatter;
 
 import org.junit.Test;
 

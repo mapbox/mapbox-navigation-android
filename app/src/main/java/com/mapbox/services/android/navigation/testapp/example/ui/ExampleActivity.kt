@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
@@ -43,7 +44,7 @@ private const val ZERO_PADDING = 0
 private const val BOTTOMSHEET_MULTIPLIER = 4
 private const val CHANGE_SETTING_REQUEST_CODE = 1
 
-class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
+class ExampleActivity : HistoryActivity(), ExampleView {
 
     private var map: NavigationMapboxMap? = null
     private val viewModel by lazy(mode = LazyThreadSafetyMode.NONE) {
@@ -220,14 +221,6 @@ class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
         instructionView.visibility = visibility
     }
 
-    override fun updateInstructionViewWith(progress: RouteProgress) {
-        instructionView.updateDistanceWith(progress)
-    }
-
-    override fun updateInstructionViewWith(milestone: Milestone) {
-        instructionView.updateBannerInstructionsWith(milestone)
-    }
-
     override fun addMapProgressChangeListener(navigation: MapboxNavigation) {
         map?.addProgressChangeListener(navigation)
     }
@@ -291,11 +284,6 @@ class ExampleActivity : HistoryActivity(), ExampleView, MetricsObserver {
 
     override fun updateCameraTrackingMode(trackingMode: Int) {
         map?.updateCameraTrackingMode(trackingMode)
-    }
-
-    override fun onMetricUpdated(metricName: String, jsonStringData: String) {
-        Timber.d("METRICS_LOG: $metricName")
-        Timber.d("METRICS_LOG: $jsonStringData")
     }
 
     private fun setupWith(savedInstanceState: Bundle?) {

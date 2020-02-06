@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

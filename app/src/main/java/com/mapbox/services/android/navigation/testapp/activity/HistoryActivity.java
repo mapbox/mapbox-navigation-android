@@ -1,12 +1,16 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
 
+import android.location.Location;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,16 +22,26 @@ public class HistoryActivity extends AppCompatActivity {
 
   private MapboxNavigation navigation;
   private String filename;
-  private ProgressChangeListener progressHistoryListener = (location, routeProgress) -> executeStoreHistoryTask();
-  private EnhancedLocationListener enhancedLocationListener = (location) -> executeStoreHistoryTask();
+  private RouteProgressObserver progressHistoryListener = (routeProgress) -> executeStoreHistoryTask();
+  private LocationObserver enhancedLocationObserver = new LocationObserver() {
+
+    @Override
+    public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+      executeStoreHistoryTask();
+    }
+
+    @Override
+    public void onRawLocationChanged(@NotNull Location rawLocation) {
+    }
+  };
 
   public void addNavigationForHistory(@NonNull MapboxNavigation navigation) {
     if (navigation == null) {
       throw new IllegalArgumentException("MapboxNavigation cannot be null");
     }
     this.navigation = navigation;
-    navigation.addProgressChangeListener(progressHistoryListener);
-    navigation.addEnhancedLocationListener(enhancedLocationListener);
+    navigation.registerRouteProgressObserver(progressHistoryListener);
+    navigation.registerLocationObserver(enhancedLocationObserver);
     navigation.toggleHistory(true);
     filename = buildFileName();
   }

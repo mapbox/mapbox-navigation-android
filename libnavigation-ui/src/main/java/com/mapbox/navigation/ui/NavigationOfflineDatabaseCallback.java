@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui;
 
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
 
 import timber.log.Timber;
 

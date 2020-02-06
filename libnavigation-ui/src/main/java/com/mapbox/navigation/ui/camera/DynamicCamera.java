@@ -10,10 +10,8 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
-import com.mapbox.services.android.navigation.v5.navigation.camera.SimpleCamera;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.ui.navigation.NavigationConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +128,7 @@ public class DynamicCamera extends SimpleCamera {
    * @return camera position that encompasses both locations
    */
   private CameraPosition createCameraPosition(Location location, RouteProgress routeProgress) {
-    LegStep upComingStep = routeProgress.currentLegProgress().upComingStep();
+    LegStep upComingStep = routeProgress.currentLegProgress().upcomingStep();
     if (upComingStep != null) {
       Point stepManeuverPoint = upComingStep.maneuver().location();
 
@@ -145,8 +143,8 @@ public class DynamicCamera extends SimpleCamera {
       }
 
       LatLngBounds cameraBounds = new LatLngBounds.Builder()
-        .includes(latLngs)
-        .build();
+              .includes(latLngs)
+              .build();
 
       int[] padding = {0, 0, 0, 0};
       return mapboxMap.getCameraForLatLngBounds(cameraBounds, padding);
@@ -169,8 +167,8 @@ public class DynamicCamera extends SimpleCamera {
    * @return true if new step, false if not
    */
   private boolean isNewStep(RouteProgress routeProgress) {
-    boolean isNewStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
-    currentStep = routeProgress.currentLegProgress().currentStep();
+    boolean isNewStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
+    currentStep = routeProgress.currentLegProgress().currentStepProgress().step();
     resetAlertLevels(isNewStep);
     return isNewStep;
   }
@@ -190,16 +188,16 @@ public class DynamicCamera extends SimpleCamera {
   private boolean shouldUpdateZoom(RouteInformation routeInformation) {
     RouteProgress progress = routeInformation.getRouteProgress();
     return isForceUpdate()
-      || isNewStep(progress)
-      || isLowAlert(progress)
-      || isMediumAlert(progress)
-      || isHighAlert(progress);
+            || isNewStep(progress)
+            || isLowAlert(progress)
+            || isMediumAlert(progress)
+            || isHighAlert(progress);
   }
 
   private boolean isLowAlert(RouteProgress progress) {
     if (!hasPassedLowAlertLevel) {
       double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStep().duration();
+      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
       boolean isLowAlert = durationRemaining < NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
       if (hasValidStepDuration && isLowAlert) {
@@ -213,7 +211,7 @@ public class DynamicCamera extends SimpleCamera {
   private boolean isMediumAlert(RouteProgress progress) {
     if (!hasPassedMediumAlertLevel) {
       double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStep().duration();
+      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
       boolean isMediumAlert = durationRemaining < NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
       if (hasValidStepDuration && isMediumAlert) {
@@ -227,7 +225,7 @@ public class DynamicCamera extends SimpleCamera {
   private boolean isHighAlert(RouteProgress progress) {
     if (!hasPassedHighAlertLevel) {
       double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStep().duration();
+      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
       boolean isHighAlert = durationRemaining < NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
       if (hasValidStepDuration && isHighAlert) {

@@ -1,14 +1,14 @@
 package com.mapbox.navigation.ui.route;
 
-import android.location.Location;
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class MapRouteProgressChangeListener implements ProgressChangeListener {
+class MapRouteProgressChangeListener implements RouteProgressObserver {
 
   private final MapRouteLine routeLine;
   private final MapRouteArrow routeArrow;
@@ -20,7 +20,7 @@ class MapRouteProgressChangeListener implements ProgressChangeListener {
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
+  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
     onProgressChange(routeProgress);
   }
 
@@ -28,7 +28,7 @@ class MapRouteProgressChangeListener implements ProgressChangeListener {
     if (!isVisible) {
       return;
     }
-    DirectionsRoute currentRoute = routeProgress.directionsRoute();
+    DirectionsRoute currentRoute = routeProgress.route();
     List<DirectionsRoute> directionsRoutes = routeLine.retrieveDirectionsRoutes();
     int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
     addNewRoute(currentRoute, directionsRoutes, primaryRouteIndex);

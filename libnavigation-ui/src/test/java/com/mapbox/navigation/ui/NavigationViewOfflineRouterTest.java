@@ -4,9 +4,9 @@ import com.mapbox.navigation.ui.NavigationViewOfflineRouter;
 import com.mapbox.navigation.ui.NavigationViewRouter;
 import com.mapbox.navigation.ui.OfflineRouteFoundCallback;
 import com.mapbox.navigation.ui.OfflineRouterConfiguredCallback;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.navigation.ui.navigation.MapboxOfflineRouter;
+import com.mapbox.navigation.ui.navigation.NavigationRoute;
+import com.mapbox.navigation.ui.navigation.OfflineRoute;
 
 import org.junit.Test;
 
