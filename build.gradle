@@ -42,12 +42,10 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven {
-      Properties localProperties = new Properties()
-      localProperties.load(project.rootProject.file("local.properties").newDataInputStream())
       url 'https://mapbox.bintray.com/mapbox_private'
       credentials {
-        username = localProperties.getProperty("BINTRAY_USER", "")
-        password = localProperties.getProperty("BINTRAY_API_KEY", "")
+        username = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
+        password = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
       }
     }
     maven { url 'https://mapbox.bintray.com/mapbox' }
