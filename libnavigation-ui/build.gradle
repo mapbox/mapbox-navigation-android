@@ -58,6 +58,12 @@ dependencies {
 
   // Navigation SDK
   api project(':libnavigation-core')
+  api project(':libnavigation-base')
+  implementation project(':libnavigation-util')
+
+  // Mapbox
+  implementation dependenciesList.mapboxSdkServices
+  implementation dependenciesList.mapboxSdkTurf
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk
@@ -92,6 +98,7 @@ dependencies {
   testImplementation dependenciesList.mockk
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
+  compile project(path: ':libnavigation-core')
 }
 
 apply from: 'javadoc.gradle'

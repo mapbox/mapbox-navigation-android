@@ -6,10 +6,10 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.ui.utils.ViewUtils;
-import com.mapbox.services.android.navigation.ui.v5.R;
 
 public class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
 

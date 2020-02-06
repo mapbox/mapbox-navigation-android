@@ -13,9 +13,9 @@ import com.mapbox.api.directions.v5.models.DirectionsWaypoint;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.navigation.NavigationRoute;
+import com.mapbox.navigation.ui.route.RouteFetcher;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
 
 import org.junit.Test;
 

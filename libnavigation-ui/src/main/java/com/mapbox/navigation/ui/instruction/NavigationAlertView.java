@@ -8,16 +8,17 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LifecycleOwner;
 
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.ui.NavigationView;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.navigation.ui.NavigationViewModel;
 import com.mapbox.navigation.ui.alert.AlertView;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.navigation.ui.internal.navigation.metrics.FeedbackEvent;
+import com.mapbox.navigation.utils.ConstantsEx;
 
 import timber.log.Timber;
 
@@ -70,7 +71,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
       @Override
       public void run() {
         show(getContext().getString(R.string.report_problem),
-          NavigationConstants.ALERT_VIEW_PROBLEM_DURATION, true);
+                ConstantsEx.ALERT_VIEW_PROBLEM_DURATION, true);
       }
     }, THREE_SECOND_DELAY_IN_MILLIS);
   }
@@ -85,8 +86,8 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     }
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
-      long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
-      FeedbackBottomSheet.newInstance(this, duration).show(fragmentManager, FeedbackBottomSheet.TAG);
+      FeedbackBottomSheet.newInstance(this, ConstantsEx.FEEDBACK_BOTTOM_SHEET_DURATION)
+              .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
 
@@ -96,7 +97,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
    * <p>
    * Note this will only happen automatically in the context of
    * the {@link NavigationView} or a {@link NavigationViewModel}
-   * has been added to the instruction view with {@link InstructionView#subscribe(NavigationViewModel)}.
+   * has been added to the instruction view with {@link InstructionView#subscribe(LifecycleOwner, NavigationViewModel)}.
    *
    * @param isEnabled true to show during off-route events, false to hide
    */

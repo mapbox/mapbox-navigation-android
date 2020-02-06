@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 
 public class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;

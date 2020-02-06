@@ -2,9 +2,7 @@ package com.mapbox.navigation.ui;
 
 import android.location.Location;
 
-import com.mapbox.navigation.ui.NavigationViewModel;
-import com.mapbox.navigation.ui.NavigationViewModelProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 import org.junit.Test;
 
@@ -18,11 +16,10 @@ public class NavigationViewModelProgressChangeListenerTest {
   public void checksNavigationViewModelRouteProgressIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     NavigationViewModelProgressChangeListener theNavigationViewModelProgressChangeListener =
-      new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
-    Location anyLocation = mock(Location.class);
+            new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
     RouteProgress theRouteProgress = mock(RouteProgress.class);
 
-    theNavigationViewModelProgressChangeListener.onProgressChange(anyLocation, theRouteProgress);
+    theNavigationViewModelProgressChangeListener.onRouteProgressChanged(theRouteProgress);
 
     verify(mockedNavigationViewModel).updateRouteProgress(eq(theRouteProgress));
   }
@@ -31,11 +28,10 @@ public class NavigationViewModelProgressChangeListenerTest {
   public void checksNavigationViewModelLocationIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     NavigationViewModelProgressChangeListener theNavigationViewModelProgressChangeListener =
-      new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
+            new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
     Location theLocation = mock(Location.class);
-    RouteProgress anyRouteProgress = mock(RouteProgress.class);
 
-    theNavigationViewModelProgressChangeListener.onProgressChange(theLocation, anyRouteProgress);
+    theNavigationViewModelProgressChangeListener.onRawLocationChanged(theLocation);
 
     verify(mockedNavigationViewModel).updateLocation(eq(theLocation));
   }

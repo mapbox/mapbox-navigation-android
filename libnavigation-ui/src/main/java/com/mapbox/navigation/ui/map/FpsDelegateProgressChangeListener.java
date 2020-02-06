@@ -1,11 +1,11 @@
 package com.mapbox.navigation.ui.map;
 
-import android.location.Location;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import org.jetbrains.annotations.NotNull;
 
-class FpsDelegateProgressChangeListener implements ProgressChangeListener {
+class FpsDelegateProgressChangeListener implements RouteProgressObserver {
 
   private final MapFpsDelegate fpsDelegate;
 
@@ -14,7 +14,7 @@ class FpsDelegateProgressChangeListener implements ProgressChangeListener {
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
+  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
     fpsDelegate.adjustFpsFor(routeProgress);
   }
 }

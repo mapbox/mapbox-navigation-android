@@ -30,6 +30,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
@@ -42,6 +44,8 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 
 import retrofit2.Call;
@@ -49,7 +53,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, ProgressChangeListener, InstructionListListener, SpeechAnnouncementListener,
+  NavigationListener, LocationObserver, InstructionListListener, SpeechAnnouncementListener,
   BannerInstructionsListener {
 
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
@@ -170,8 +174,12 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    setSpeed(location);
+  public void onRawLocationChanged(@NotNull Location rawLocation) {
+  }
+
+  @Override
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+    setSpeed(enhancedLocation);
   }
 
   @Override
@@ -201,7 +209,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .navigationListener(this)
         .directionsRoute(directionsRoute)
         .shouldSimulateRoute(true)
-        .progressChangeListener(this)
+        .locationObserver(this)
         .instructionListListener(this)
         .speechAnnouncementListener(this)
         .bannerInstructionsListener(this)

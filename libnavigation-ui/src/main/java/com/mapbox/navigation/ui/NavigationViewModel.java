@@ -18,10 +18,15 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
+import com.mapbox.navigation.base.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.BannerInstructionModel;
@@ -31,29 +36,11 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
-import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
-import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
-import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
-import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.route.FasterRouteListener;
-import com.mapbox.services.android.navigation.v5.route.RouteFetcher;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
-import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
-import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+import com.mapbox.navigation.utils.extensions.ContextEx;
 
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
-import java.util.List;
 
 import okhttp3.Cache;
 
@@ -93,6 +80,8 @@ public class NavigationViewModel extends AndroidViewModel {
   private boolean isChangingConfigurations;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
+  private NavigationViewModelProgressChangeListener navigationViewVm =
+          new NavigationViewModelProgressChangeListener(this);
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -104,7 +93,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @TestOnly
-  // Package private (no modifier) for testing purposes
+    // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
                       NavigationViewRouter router) {
@@ -116,7 +105,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @TestOnly
-  // Package private (no modifier) for testing purposes
+    // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
                       VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
@@ -247,9 +236,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void stopNavigation() {
-    navigation.removeProgressChangeListener(null);
-    navigation.removeMilestoneEventListener(null);
-    navigation.stopNavigation();
+    navigation.unregisterRouteProgressObserver(navigationViewVm);
+    navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.stopTripSession();
   }
 
   boolean isOffRoute() {
@@ -333,19 +322,19 @@ public class NavigationViewModel extends AndroidViewModel {
     return unitType;
   }
 
-  private void initializeTimeFormat(MapboxNavigationOptions options) {
+  private void initializeTimeFormat(NavigationOptions options) {
     timeFormatType = options.timeFormatType();
   }
 
   private int initializeRoundingIncrement(NavigationViewOptions options) {
-    MapboxNavigationOptions navigationOptions = options.navigationOptions();
+    NavigationOptions navigationOptions = options.navigationOptions();
     return navigationOptions.roundingIncrement();
   }
 
   private void initializeDistanceFormatter(NavigationViewOptions options) {
     String unitType = initializeUnitType(options);
     int roundingIncrement = initializeRoundingIncrement(options);
-    distanceFormatter = new DistanceFormatter(getApplication(), language, unitType, roundingIncrement);
+    distanceFormatter = new MapboxDistanceFormatter(getApplication(), language, unitType, roundingIncrement);
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {
@@ -372,13 +361,13 @@ public class NavigationViewModel extends AndroidViewModel {
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
-      connectivityController, regionDownloadCallback);
-    navigation.addProgressChangeListener(mapOfflineManager);
+            connectivityController, regionDownloadCallback);
+    navigation.registerRouteProgressObserver(mapOfflineManager);
   }
 
   private void initializeVoiceInstructionLoader() {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
-      TEN_MEGABYTE_CACHE_SIZE);
+            TEN_MEGABYTE_CACHE_SIZE);
     voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
   }
 
@@ -399,43 +388,35 @@ public class NavigationViewModel extends AndroidViewModel {
     return locationEngineConductor.obtainLocationEngine();
   }
 
-  private void initializeNavigation(Context context, MapboxNavigationOptions options, LocationEngine locationEngine) {
+  private void initializeNavigation(Context context, NavigationOptions options, LocationEngine locationEngine) {
     navigation = new MapboxNavigation(context, accessToken, options, locationEngine);
     addNavigationListeners();
   }
 
   private void addNavigationListeners() {
-    navigation.addProgressChangeListener(new NavigationViewModelProgressChangeListener(this));
-    navigation.addOffRouteListener(offRouteListener);
-    navigation.addMilestoneEventListener(milestoneEventListener);
+    navigation.registerRouteProgressObserver(navigationViewVm);
+    navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.registerOffRouteObserver(offRouteListener);
     navigation.addNavigationEventListener(navigationEventListener);
-    navigation.addFasterRouteListener(fasterRouteListener);
+//    navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }
 
-  private void addMilestones(NavigationViewOptions options) {
-    List<Milestone> milestones = options.milestones();
-    if (milestones != null && !milestones.isEmpty()) {
-      navigation.addMilestones(milestones);
+  private OffRouteObserver offRouteListener = new OffRouteObserver() {
+    @Override
+    public void onOffRouteStateChanged(boolean offRoute) {
+      if (offRoute){
+        speechPlayer.onOffRoute();
+      }
     }
-  }
 
-  private OffRouteListener offRouteListener = new OffRouteListener() {
     @Override
     public void userOffRoute(Location location) {
-      speechPlayer.onOffRoute();
+
       Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
       handleOffRouteEvent(newOrigin);
     }
   };
 
-  private MilestoneEventListener milestoneEventListener = new MilestoneEventListener() {
-    @Override
-    public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
-      voiceInstructionCache.cache();
-      playVoiceAnnouncement(milestone);
-      updateBannerInstruction(routeProgress, milestone);
-    }
-  };
 
   private NavigationEventListener navigationEventListener = new NavigationEventListener() {
     @Override
@@ -501,30 +482,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private void deactivateInstructionPlayer() {
     if (speechPlayer != null) {
       speechPlayer.onDestroy();
-    }
-  }
-
-  private void playVoiceAnnouncement(Milestone milestone) {
-    if (milestone instanceof VoiceInstructionMilestone) {
-      voiceInstructionsToAnnounce++;
-      voiceInstructionCache.update(voiceInstructionsToAnnounce);
-      VoiceInstructions announcement = VoiceInstructions.builder()
-        .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
-        .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
-        .build();
-      announcement = retrieveAnnouncementFromSpeechEvent(announcement);
-      speechPlayer.play(announcement);
-    }
-  }
-
-  private void updateBannerInstruction(RouteProgress routeProgress, Milestone milestone) {
-    if (milestone instanceof BannerInstructionMilestone) {
-      BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      instructions = retrieveInstructionsFromBannerEvent(instructions);
-      if (instructions != null) {
-        BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
-        bannerInstructionModel.setValue(model);
-      }
     }
   }
 

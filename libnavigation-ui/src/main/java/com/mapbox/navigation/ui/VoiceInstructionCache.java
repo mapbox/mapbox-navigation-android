@@ -4,8 +4,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.util.ArrayList;
 import java.util.List;

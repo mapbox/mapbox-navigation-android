@@ -12,8 +12,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.navigation.ui.navigation.MapboxNavigationOptions;
+import com.mapbox.navigation.ui.navigation.NavigationConstants;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.

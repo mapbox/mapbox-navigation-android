@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.navigation.core.MapboxNavigation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,10 +49,13 @@ class MapWayName {
     executeFeatureFilterTask(roadLabelFeatures);
   }
 
-  void updateProgress(Location currentLocation, List<Point> currentStepPoints) {
+  void updateProgress(List<Point> currentStepPoints) {
     if (!this.currentStepPoints.equals(currentStepPoints)) {
       this.currentStepPoints = currentStepPoints;
     }
+  }
+
+  void updateLocation(Location currentLocation){
     if (this.currentLocation == null || !this.currentLocation.equals(currentLocation)) {
       this.currentLocation = currentLocation;
     }
@@ -64,7 +67,7 @@ class MapWayName {
 
   void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
-    navigation.addProgressChangeListener(progressChangeListener);
+    navigation.registerRouteProgressObserver(progressChangeListener);
   }
 
   boolean addOnWayNameChangedListener(OnWayNameChangedListener listener) {
@@ -77,7 +80,7 @@ class MapWayName {
 
   void onStart() {
     if (navigation != null) {
-      navigation.addProgressChangeListener(progressChangeListener);
+      navigation.registerRouteProgressObserver(progressChangeListener);
     }
   }
 
@@ -86,7 +89,7 @@ class MapWayName {
       filterTask.cancel(true);
     }
     if (navigation != null) {
-      navigation.removeProgressChangeListener(progressChangeListener);
+      navigation.unregisterRouteProgressObserver(progressChangeListener);
     }
   }
 

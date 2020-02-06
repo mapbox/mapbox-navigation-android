@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 /**
- * Used to play {@link SpeechAnnouncement}s.
+ * Used to play {@link VoiceInstructions}s.
  * <p>
  * Takes a {@link SpeechPlayerProvider} which will provide either a {@link MapboxSpeechPlayer}
  * or {@link AndroidSpeechPlayer} based on the given language - if it is supported by our Voice API.
@@ -26,14 +26,14 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
   }
 
   /**
-   * Plays the given {@link SpeechAnnouncement}.
+   * Plays the given {@link VoiceInstructions}.
    *
-   * @param speechAnnouncement with SSML and normal announcement text
+   * @param voiceInstructions with SSML and normal announcement text
    * @since 0.16.0
    */
   @Override
-  public void play(VoiceInstructions speechAnnouncement) {
-    speechPlayerProvider.retrieveSpeechPlayer().play(speechAnnouncement);
+  public void play(VoiceInstructions voiceInstructions) {
+    speechPlayerProvider.retrieveSpeechPlayer().play(voiceInstructions);
   }
 
   /**

@@ -17,8 +17,8 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.ui.BaseTest;
-import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.ui.navigation.camera.RouteInformation;
+import com.mapbox.navigation.ui.routeprogress.RouteProgress;
 
 import org.junit.Test;
 

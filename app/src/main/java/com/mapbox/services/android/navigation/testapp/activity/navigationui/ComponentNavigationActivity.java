@@ -40,6 +40,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
@@ -77,7 +78,7 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener,
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener,
   OffRouteListener, EnhancedLocationListener {
 
   private static final int FIRST = 0;

@@ -2,8 +2,8 @@ package com.mapbox.navigation.ui.instruction;
 
 import android.text.SpannableString;
 
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 public class InstructionModel {
 
@@ -15,7 +15,7 @@ public class InstructionModel {
     this.progress = progress;
     double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
     stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
-    this.drivingSide = progress.currentLegProgress().currentStep().drivingSide();
+    this.drivingSide = progress.currentLegProgress().currentStepProgress().step().drivingSide();
   }
 
   RouteProgress retrieveProgress() {

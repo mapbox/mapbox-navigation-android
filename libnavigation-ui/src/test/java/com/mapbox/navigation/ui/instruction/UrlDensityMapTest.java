@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.instruction;
 
-import com.mapbox.services.android.navigation.v5.internal.navigation.SdkVersionChecker;
+import com.mapbox.navigation.ui.internal.navigation.SdkVersionChecker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

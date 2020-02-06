@@ -37,7 +37,14 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.FeedbackButton;
 import com.mapbox.navigation.ui.NavigationButton;
 import com.mapbox.navigation.ui.NavigationViewModel;
@@ -48,18 +55,13 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 import com.mapbox.navigation.ui.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.navigation.ui.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.milestone.BannerInstructionMilestone;
+import com.mapbox.navigation.ui.milestone.Milestone;
+import com.mapbox.navigation.ui.navigation.NavigationConstants;
 import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
-import com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent;
-import com.mapbox.services.android.navigation.v5.milestone.BannerInstructionMilestone;
-import com.mapbox.services.android.navigation.v5.milestone.Milestone;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
-import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+import com.mapbox.navigation.utils.extensions.ContextEx;
 
 import timber.log.Timber;
 
@@ -72,8 +74,8 @@ import timber.log.Timber;
  * as the name of the destination / maneuver name / instruction based on what data is available
  * <p>
  * To automatically have this view update with information from
- * {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation},
- * add the view as a {@link ProgressChangeListener} and / or {@link OffRouteListener}
+ * {@link MapboxNavigation},
+ * add the view as a {@link RouteProgressObserver} and / or {@link OffRouteObserver}
  *
  * @since 0.6.0
  */
@@ -204,7 +206,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
           updateManeuverView(model.retrievePrimaryManeuverType(), model.retrievePrimaryManeuverModifier(),
-            model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
+                  model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
           updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
@@ -231,7 +233,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   /**
    * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
-   * previously added in {@link InstructionView#subscribe(NavigationViewModel)}
+   * previously added in {@link InstructionView#subscribe(LifecycleOwner, NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -244,7 +246,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
-   * Use this method inside a {@link ProgressChangeListener} to update this view with all other information
+   * Use this method inside a {@link RouteProgressObserver} to update this view with all other information
    * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(Milestone)}.
    * <p>
    * This includes the distance remaining, instruction list, turn lanes, and next step information.
@@ -437,7 +439,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     String language = ContextEx.inferDeviceLanguage(getContext());
     String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
-    distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
+    distanceFormatter = new MapboxDistanceFormatter(getContext(), language, unitType, roundingIncrement);
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -472,9 +474,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void initializeBackground() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewBannerBackground);
+              R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewListBackground);
+              R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (isLandscape()) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
@@ -500,7 +502,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
-      LinearLayoutManager.HORIZONTAL, false));
+            LinearLayoutManager.HORIZONTAL, false));
   }
 
   /**
@@ -620,9 +622,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
-      && !upcomingDistanceText.getText().toString()
-      .contentEquals(model.retrieveStepDistanceRemaining().toString());
+            && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
+            && !upcomingDistanceText.getText().toString()
+            .contentEquals(model.retrieveStepDistanceRemaining().toString());
   }
 
   /**
@@ -635,7 +637,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private InstructionLoader createInstructionLoader(TextView textView, BannerText
-    bannerText) {
+          bannerText) {
     if (hasComponents(bannerText)) {
       return new InstructionLoader(textView, bannerText);
     } else {
@@ -654,8 +656,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * @return true if new step, false if not
    */
   private boolean newStep(RouteProgress routeProgress) {
-    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStep());
-    currentStep = routeProgress.currentLegProgress().currentStep();
+    boolean newStep = currentStep == null || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
+    currentStep = routeProgress.currentLegProgress().currentStepProgress().step();
     return newStep;
   }
 
@@ -690,8 +692,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
     return subText != null
-      && subText.type() != null
-      && !subText.type().contains(COMPONENT_TYPE_LANE);
+            && subText.type() != null
+            && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
   private void showSubLayout() {
@@ -798,7 +800,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     updateDistanceText(model);
     updateInstructionList(model);
     if (newStep(model.retrieveProgress())) {
-      LegStep upComingStep = model.retrieveProgress().currentLegProgress().upComingStep();
+      LegStep upComingStep = model.retrieveProgress().currentLegProgress().upcomingStep();
       ImageCreator.getInstance().prefetchImageCache(upComingStep);
     }
   }

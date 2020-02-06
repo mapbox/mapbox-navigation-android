@@ -1,16 +1,16 @@
 package com.mapbox.navigation.ui;
 
-import android.location.Location;
-
 import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
-class MapOfflineManager implements ProgressChangeListener {
+import org.jetbrains.annotations.NotNull;
+
+class MapOfflineManager implements RouteProgressObserver {
 
   private final OfflineManager offlineManager;
   private final OfflineRegionDefinitionProvider definitionProvider;
@@ -44,11 +44,11 @@ class MapOfflineManager implements ProgressChangeListener {
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
+  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
     Geometry currentRouteGeometry = routeProgress.routeGeometryWithBuffer();
     if (previousRouteGeometry == null || !previousRouteGeometry.equals(currentRouteGeometry)) {
       previousRouteGeometry = currentRouteGeometry;
-      String routeSummary = routeProgress.directionsRoute().routeOptions().requestUuid();
+      String routeSummary = routeProgress.route().routeOptions().requestUuid();
       download(routeSummary, previousRouteGeometry, regionDownloadCallback);
     }
   }

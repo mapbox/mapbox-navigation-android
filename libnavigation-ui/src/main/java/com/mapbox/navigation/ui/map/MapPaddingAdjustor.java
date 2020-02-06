@@ -3,9 +3,9 @@ package com.mapbox.navigation.ui.map;
 import android.content.Context;
 import android.content.res.Resources;
 
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.services.android.navigation.ui.v5.R;
 
 class MapPaddingAdjustor {
 

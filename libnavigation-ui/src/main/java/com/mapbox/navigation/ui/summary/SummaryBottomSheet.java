@@ -9,24 +9,28 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.OnLifecycleEvent;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.base.typedef.RoundingIncrementKt;
+import com.mapbox.navigation.base.typedef.TimeFormatType;
+import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.ui.NavigationViewModel;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.navigation.ui.ThemeSwitcher;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
-import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.utils.extensions.ContextEx;
 
 import java.text.DecimalFormat;
+
+import static com.mapbox.navigation.base.typedef.RoundingIncrementKt.ROUNDING_INCREMENT_FIFTY;
 
 /**
  * A view with {@link com.google.android.material.bottomsheet.BottomSheetBehavior}
@@ -116,7 +120,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
-   * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
+   * previously added in {@link SummaryBottomSheet#subscribe(LifecycleOwner, NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -128,7 +132,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   /**
-   * Called in {@link ProgressChangeListener}, creates a new model and then
+   * Called in {@link RouteProgressObserver}, creates a new model and then
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
@@ -197,8 +201,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   private void initializeDistanceFormatter() {
     String language = ContextEx.inferDeviceLanguage(getContext());
     String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
-    int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
-    distanceFormatter = new DistanceFormatter(getContext(), language, unitType, roundingIncrement);
+    distanceFormatter = new MapboxDistanceFormatter(getContext(), language, unitType, RoundingIncrementKt.ROUNDING_INCREMENT_FIFTY);
   }
 
   /**

@@ -7,9 +7,9 @@ import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.ui.BaseTest;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.camera.RouteInformation;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.navigation.ui.navigation.MapboxNavigation;
+import com.mapbox.navigation.ui.navigation.camera.RouteInformation;
+import com.mapbox.navigation.ui.routeprogress.ProgressChangeListener;
 
 import org.junit.Test;
 

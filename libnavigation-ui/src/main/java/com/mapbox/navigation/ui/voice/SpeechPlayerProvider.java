@@ -88,9 +88,9 @@ public class SpeechPlayerProvider {
                           boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
     AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context);
     SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
-    SpeechListener speechListener = new NavigationSpeechListener(this, audioFocusManager);
-    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, speechListener, voiceInstructionLoader);
-    initializeAndroidSpeechPlayer(context, language, speechListener);
+    VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
+    initializeMapboxSpeechPlayer(context, language, voiceLanguageSupported, voiceListener, voiceInstructionLoader);
+    initializeAndroidSpeechPlayer(context, language, voiceListener);
     this.voiceInstructionLoader = voiceInstructionLoader;
     connectivityStatus = new ConnectivityStatusProvider(context);
   }
@@ -101,7 +101,7 @@ public class SpeechPlayerProvider {
   }
 
   private void initializeMapboxSpeechPlayer(Context context, String language, boolean voiceLanguageSupported,
-                                            SpeechListener listener, VoiceInstructionLoader voiceInstructionLoader) {
+                                            VoiceListener listener, VoiceInstructionLoader voiceInstructionLoader) {
     if (!voiceLanguageSupported) {
       return;
     }
@@ -111,7 +111,7 @@ public class SpeechPlayerProvider {
   }
 
   private void initializeAndroidSpeechPlayer(Context context, String language,
-                                             SpeechListener listener) {
+                                             VoiceListener listener) {
     androidSpeechPlayer = new AndroidSpeechPlayer(context, language, listener);
     speechPlayers.add(androidSpeechPlayer);
   }

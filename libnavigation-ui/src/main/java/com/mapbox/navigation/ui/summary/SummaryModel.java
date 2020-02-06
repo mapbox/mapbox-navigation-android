@@ -4,10 +4,9 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 
-import com.mapbox.services.android.navigation.v5.navigation.TimeFormatType;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
-import com.mapbox.services.android.navigation.v5.utils.time.TimeFormatter;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.base.typedef.TimeFormatType;
 
 import java.util.Calendar;
 

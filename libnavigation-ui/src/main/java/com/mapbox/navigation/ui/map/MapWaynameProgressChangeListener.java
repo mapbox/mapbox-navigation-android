@@ -2,10 +2,13 @@ package com.mapbox.navigation.ui.map;
 
 import android.location.Location;
 
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
-class MapWaynameProgressChangeListener implements ProgressChangeListener {
+import org.jetbrains.annotations.NotNull;
+
+class MapWaynameProgressChangeListener implements RouteProgressObserver, LocationObserver {
 
   private final MapWayName mapWayName;
 
@@ -14,7 +17,16 @@ class MapWaynameProgressChangeListener implements ProgressChangeListener {
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    mapWayName.updateProgress(location, routeProgress.currentStepPoints());
+  public void onRawLocationChanged(@NotNull Location rawLocation) {
+  }
+
+  @Override
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+    mapWayName.updateLocation(enhancedLocation);
+  }
+
+  @Override
+  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
+    mapWayName.updateProgress(routeProgress.currentLegProgress().currentStepProgress().stepPoints());
   }
 }

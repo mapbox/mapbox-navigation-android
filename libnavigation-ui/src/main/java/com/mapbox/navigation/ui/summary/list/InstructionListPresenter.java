@@ -9,9 +9,9 @@ import androidx.annotation.Nullable;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteLegProgress;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
-import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
+import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteLegProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +59,7 @@ class InstructionListPresenter {
 
   private boolean shouldUpdate(DistanceFormatter distanceFormatter) {
     return distanceFormatter != null
-      && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
+            && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
   }
 
   private void updateListView(@NonNull InstructionListView listView, BannerInstructions bannerInstructions,
@@ -114,8 +114,8 @@ class InstructionListPresenter {
   private void addBannerInstructions(RouteProgress routeProgress) {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
-      currentLeg = routeProgress.currentLeg();
-      drivingSide = routeProgress.currentLegProgress().currentStep().drivingSide();
+      currentLeg = routeProgress.currentLegProgress().routeLeg();
+      drivingSide = routeProgress.currentLegProgress().currentStepProgress().step().drivingSide();
       List<LegStep> steps = currentLeg.steps();
       for (LegStep step : steps) {
         List<BannerInstructions> bannerInstructions = step.bannerInstructions();
@@ -127,7 +127,7 @@ class InstructionListPresenter {
   }
 
   private boolean isNewLeg(RouteProgress routeProgress) {
-    return currentLeg == null || !currentLeg.equals(routeProgress.currentLeg());
+    return currentLeg == null || !currentLeg.equals(routeProgress.currentLegProgress());
   }
 
   private boolean updateInstructionList(RouteProgress routeProgress) {
@@ -135,10 +135,10 @@ class InstructionListPresenter {
       return false;
     }
     RouteLegProgress legProgress = routeProgress.currentLegProgress();
-    LegStep currentStep = legProgress.currentStep();
+    LegStep currentStep = legProgress.currentStepProgress().step();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
     BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
-      currentStep, stepDistanceRemaining
+            currentStep, stepDistanceRemaining
     );
     if (!instructions.contains(currentBannerInstructions)) {
       return false;
