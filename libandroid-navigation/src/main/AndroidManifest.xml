@@ -4,11 +4,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application>
-        <provider
-                android:name="com.mapbox.services.android.navigation.v5.internal.provider.MapboxNavigationProvider"
-                android:authorities="${applicationId}.mapboxnavigationinitprovider"
-                android:exported="false"
-                android:initOrder="200"/>
         <service android:name="com.mapbox.services.android.navigation.v5.internal.navigation.NavigationService"/>
     </application>
 

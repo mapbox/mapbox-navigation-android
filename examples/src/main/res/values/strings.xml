@@ -51,4 +51,5 @@
     <string name="offline_region_download_title">Download offline region</string>
     <string name="offline_version_title">Choose offline version</string>
     <string name="general_category_title">General</string>
+    <string name="start_navigation">Start Navigation</string>
 </resources>

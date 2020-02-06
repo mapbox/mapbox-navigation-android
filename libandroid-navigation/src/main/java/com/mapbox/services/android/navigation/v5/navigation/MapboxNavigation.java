@@ -18,7 +18,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
 import com.mapbox.services.android.navigation.BuildConfig;
-import com.mapbox.services.android.navigation.v5.internal.accounts.MapboxNavigationAccounts;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonParams;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonRequestBuilder;
 import com.mapbox.services.android.navigation.v5.internal.navigation.FreeDriveLocationUpdater;
@@ -433,7 +432,6 @@ public class MapboxNavigation implements ServiceConnection {
       MapboxMetricsReporter.disable();
       navigationService.stopSelf();
       navigationEventDispatcher.onNavigationEvent(false);
-      MapboxNavigationAccounts.getInstance(applicationContext).navigationStopped();
     }
   }
 
@@ -1131,7 +1129,6 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   private void startNavigationWith(@NonNull DirectionsRoute directionsRoute, DirectionsRouteType routeType) {
-    MapboxNavigationAccounts.getInstance(applicationContext).navigationStarted();
     ValidationUtils.validDirectionsRoute(directionsRoute, options.getDefaultMilestonesEnabled());
     this.directionsRoute = directionsRoute;
     routeRefresher = new RouteRefresher(this, new RouteRefresh(accessToken, applicationContext));

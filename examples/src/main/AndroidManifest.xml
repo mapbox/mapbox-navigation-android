@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mapbox.navigation.examples">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -14,10 +15,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <!-- Uncomment this line of code if you want to use MAU based billing
-        <meta-data android:name="com.mapbox.ManageSkuToken" android:value="false" />
-        -->
 
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait">

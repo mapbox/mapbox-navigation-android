@@ -16,10 +16,6 @@
 
         <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="${enableCrashReporting}" />
 
-        <!-- Uncomment this line of code if you want to use MAU based billing
-        <meta-data android:name="com.mapbox.ManageSkuToken" android:value="false" />
-        -->
-
         <activity
             android:name=".example.ui.ExampleActivity"
             android:screenOrientation="portrait"

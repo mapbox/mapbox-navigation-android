@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mapbox.navigation.core">
 
     <application>
@@ -8,5 +9,7 @@
             android:exported="false"
             android:initOrder="200"/>
         <service android:name=".trip.service.NavigationNotificationService" />
+
+        <meta-data android:name="com.mapbox.ManageSkuToken" android:value="false" />
     </application>
 </manifest>

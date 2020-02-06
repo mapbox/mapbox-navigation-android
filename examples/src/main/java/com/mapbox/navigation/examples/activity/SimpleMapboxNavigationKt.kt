@@ -1,10 +1,17 @@
 package com.mapbox.navigation.examples.activity
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
+import android.os.Looper
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -24,13 +31,13 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
-import kotlinx.android.synthetic.main.activity_trip_service.*
+import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
+import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
@@ -41,6 +48,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
 
+    private lateinit var localLocationEngine: LocationEngine
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,8 +57,13 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
+        localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
         mapboxNavigation = MapboxNavigation(applicationContext, Utils.getMapboxAccessToken(this))
-        mapboxNavigation.startTripSession()
+        startLocationUpdates()
+        startNavigation.setOnClickListener {
+            stopLocationUpdates()
+            mapboxNavigation.startTripSession()
+        }
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -102,14 +116,35 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-            locationComponent?.forceLocationUpdate(rawLocation)
-            Timber.e("raw location %s", rawLocation.toString())
+    private fun startLocationUpdates() {
+        val request = LocationEngineRequest.Builder(1000L)
+            .setFastestInterval(500L)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
+        try {
+            localLocationEngine.requestLocationUpdates(
+                request,
+                locationEngineCallback,
+                Looper.getMainLooper()
+            )
+            localLocationEngine.getLastLocation(locationEngineCallback)
+        } catch (exception: SecurityException) {
+            Timber.e(exception)
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        localLocationEngine.removeLocationUpdates(locationEngineCallback)
+    }
+
+    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
+        override fun onSuccess(result: LocationEngineResult?) {
+            result?.locations?.firstOrNull()?.let {
+                locationComponent?.forceLocationUpdate(it)
+            }
         }
 
-        override fun onEnhancedLocationChanged(enhancedLocation: Location) {
-            Timber.e("enhanced location %s", enhancedLocation.toString())
+        override fun onFailure(exception: Exception) {
         }
     }
 
@@ -133,17 +168,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.e("route request success %s", routes.toString())
+            startNavigation.visibility = VISIBLE
             return routes
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request failure %s", throwable.toString())
+            startNavigation.visibility = GONE
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
             Timber.e("route request canceled")
+            startNavigation.visibility = GONE
         }
     }
 
@@ -160,7 +198,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
     }
@@ -168,7 +205,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         mapView.onStop()
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
     }

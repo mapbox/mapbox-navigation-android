@@ -4,9 +4,9 @@ import android.content.Context
 import android.text.format.DateUtils
 import com.mapbox.android.accounts.navigation.sku.v1.MauSku
 import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
-import com.mapbox.android.accounts.navigation.sku.v1.TripsSku
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
+import java.lang.IllegalStateException
 
 // TODO: make the class internal
 class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
@@ -14,8 +14,6 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     companion object {
         private const val SKU_KEY = "sku"
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
-        private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
-        private const val TRIPS_REQUEST_COUNT_THRESHOLD = 5
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
         private var skuGenerator: SkuGenerator? = null
         private var INSTANCE: MapboxNavigationAccounts? = null
@@ -36,27 +34,32 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
             skuGenerator = when (Billing.getInstance(context).getBillingType()) {
                 Billing.BillingModel.MAU -> MauSku(
                     preferences,
-                    TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD
+                    TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD,
+                    context.applicationContext.packageName
                 )
-                Billing.BillingModel.TRIPS -> TripsSku(
-                    preferences, TIMER_EXPIRE_AFTER * TRIPS_TIMER_EXPIRE_THRESHOLD,
-                    TRIPS_REQUEST_COUNT_THRESHOLD
-                )
+                Billing.BillingModel.NO_SKU -> null
             }
         }
     }
 
-    override fun obtainSkuToken(resourceUrl: String?, querySize: Int): String {
-        val skuToken = skuGenerator?.generateToken() ?: ""
+    @Synchronized
+    override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
+        return skuGenerator?.let { generator ->
+            val skuToken = generator.generateToken()
+            check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty") }
 
-        return when (!resourceUrl.isNullOrEmpty() && querySize >= 0) {
-            true -> {
-                buildResourceUrlWithSku(resourceUrl, querySize, skuToken)
+            when {
+                querySize < 0 -> throw IllegalStateException("querySize cannot be less than 0")
+                resourceUrl.isEmpty() -> throw IllegalStateException("resourceUrl cannot be empty")
+                else -> {
+                    buildResourceUrlWithSku(resourceUrl, querySize, skuToken)
+                }
             }
-            false -> {
-                skuToken
-            }
-        }
+        } ?: resourceUrl
+    }
+
+    internal fun initializeSku() {
+        skuGenerator?.initializeSKU()
     }
 
     internal fun navigationStopped() {
@@ -73,10 +76,9 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         skuToken: String
     ): String {
         val urlBuilder = StringBuilder(resourceUrl)
-        when {
-            querySize < 0 -> throw IllegalArgumentException("query size cannot be negative")
-            querySize == 0 -> urlBuilder.append("?")
-            else -> urlBuilder.append("&")
+        when (querySize == 0) {
+            true -> urlBuilder.append("?")
+            false -> urlBuilder.append("&")
         }
         urlBuilder.append("$SKU_KEY=$skuToken")
         return urlBuilder.toString()
