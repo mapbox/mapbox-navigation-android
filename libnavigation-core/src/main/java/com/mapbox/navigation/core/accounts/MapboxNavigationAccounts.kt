@@ -14,8 +14,6 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     companion object {
         private const val SKU_KEY = "sku"
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
-        private const val TRIPS_TIMER_EXPIRE_THRESHOLD = 2
-        private const val TRIPS_REQUEST_COUNT_THRESHOLD = 5
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
         private var skuGenerator: SkuGenerator? = null
         private var INSTANCE: MapboxNavigationAccounts? = null
@@ -39,7 +37,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
                     TIMER_EXPIRE_AFTER * MAU_TIMER_EXPIRE_THRESHOLD,
                     context.applicationContext.packageName
                 )
-                Billing.BillingModel.TRIPS -> null
+                Billing.BillingModel.NO_SKU -> null
             }
         }
     }
