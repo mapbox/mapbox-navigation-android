@@ -558,7 +558,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 Mapbox Navigation uses portions of the Mapbox Android Core Library.
 URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+License: [The MIT License](https://opensource.org/licenses/MIT)
 
 ===========================================================================
 
@@ -570,7 +570,7 @@ License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 Mapbox Navigation uses portions of the Mapbox Android Telemetry Library.
 URL: [https://github.com/mapbox/mapbox-events-android](https://github.com/mapbox/mapbox-events-android)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+License: [The MIT License](https://opensource.org/licenses/MIT)
 
 ===========================================================================
 
