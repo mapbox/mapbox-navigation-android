@@ -14,7 +14,7 @@ internal class Billing private constructor() {
     }
 
     companion object {
-        private var INSTANCE: Billing? = null
+        internal var INSTANCE: Billing? = null
         private var billingType = BillingModel.MAU
 
         fun getInstance(context: Context): Billing =
@@ -37,11 +37,7 @@ internal class Billing private constructor() {
         }
 
         private fun setBillingType(context: Context) {
-            val applicationInfo =
-                getApplicationInfo(
-                    context
-                )
-            applicationInfo?.let { appInfo ->
+            getApplicationInfo(context)?.let { appInfo ->
                 appInfo.metaData?.let { metadata ->
                     billingType = when (metadata.getBoolean(KEY_META_DATA_MANAGE_SKU, DEFAULT_TOKEN_MANAGE_SKU)) {
                         true -> BillingModel.NO_SKU
