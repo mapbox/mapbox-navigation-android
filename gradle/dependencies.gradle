@@ -8,7 +8,7 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk              : '9.0.0-20200206.150107-26',
+      mapboxMapSdk              : '9.0.0-20200207.215725-27',
       mapboxSdkServices         : '5.1.0-beta.1',
       mapboxSdkDirectionsModels : '5.1.0-beta.1',
       mapboxEvents              : '4.5.1',
