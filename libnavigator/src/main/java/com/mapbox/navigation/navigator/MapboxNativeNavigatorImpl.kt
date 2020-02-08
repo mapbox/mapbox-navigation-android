@@ -101,6 +101,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Offline
 
+    override fun cacheLastRoute() {
+        navigator.cacheLastRoute()
+    }
+
     override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
         navigator.configureRouter(routerParams, httpClient)
 

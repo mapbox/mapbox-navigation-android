@@ -49,6 +49,8 @@ interface MapboxNativeNavigator {
 
     // Offline
 
+    fun cacheLastRoute()
+
     fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long
     fun getRoute(url: String): RouterResult
     fun unpackTiles(tarPath: String, destinationPath: String): Long
