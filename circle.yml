@@ -258,7 +258,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "pg-nn-master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
             make publish ;
             fi
       - store_artifacts:
@@ -307,7 +307,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK 1.0 to Bintray
           command: |
-            if [[ $CIRCLE_BRANCH == pg-nn-master ]]; then
+            if [[ $CIRCLE_BRANCH == master ]]; then
               version=$(cat gradle/artifact-settings.gradle | grep "versionName")
               if [[ $version != *"SNAPSHOT"* ]]; then
                 make 1.0-publish-to-bintray
