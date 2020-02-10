@@ -68,7 +68,9 @@ dependencies {
   ktlint dependenciesList.ktlint
 
   // Navigator
-  implementation dependenciesList.mapboxNavigator
+//  implementation dependenciesList.mapboxNavigator
+//  implementation dependenciesList.mapboxNavigatorSnapshot
+  implementation(name:'mapbox-navigation-native-debug', ext:'aar')
 
   implementation dependenciesList.kotlinStdLib
 

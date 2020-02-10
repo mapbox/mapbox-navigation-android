@@ -35,6 +35,7 @@ dependencies {
     api project(':libnavigation-base')
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')
+    implementation(name:'mapbox-navigation-native-debug', ext:'aar')
     implementation project(':libdirections-hybrid')
     implementation project(':libtrip-notification')
     api dependenciesList.mapboxSdkTurf

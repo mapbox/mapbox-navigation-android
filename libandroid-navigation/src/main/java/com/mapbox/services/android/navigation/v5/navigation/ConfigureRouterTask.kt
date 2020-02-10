@@ -12,11 +12,11 @@ internal class ConfigureRouterTask(
 ) : AsyncTask<Void, Void, Long>() {
 
     @Synchronized
-    override fun doInBackground(vararg paramsUnused: Void): Long =
-        navigator.configureRouter(
-            routerParams,
-            HttpClient(routerParams.endpointConfig?.userAgent ?: "", true)
-        )
+    override fun doInBackground(vararg paramsUnused: Void): Long = 1
+        // navigator.configureRouter(
+        //     routerParams,
+        //     HttpClient(routerParams.endpointConfig?.userAgent ?: "", true)
+        // )
 
     override fun onPostExecute(numberOfTiles: Long) {
         if (numberOfTiles >= 0) {

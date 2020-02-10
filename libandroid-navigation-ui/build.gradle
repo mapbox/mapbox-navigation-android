@@ -58,6 +58,7 @@ dependencies {
 
   // Navigation SDK
   api project(':libandroid-navigation')
+  implementation(name:'mapbox-navigation-native-debug', ext:'aar')
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk

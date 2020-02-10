@@ -61,7 +61,7 @@ internal class NavigationRouteProcessor {
     private fun updateRoute(route: DirectionsRoute, navigator: MapboxNavigator) {
         if (this.route != route) {
             this.route = route
-            routeGeometryWithBuffer = navigator.retrieveRouteGeometryWithBuffer()
+            // routeGeometryWithBuffer = navigator.retrieveRouteGeometryWithBuffer()
         }
     }
 
@@ -170,9 +170,9 @@ internal class NavigationRouteProcessor {
         progressBuilder: RouteProgress.Builder
     ) {
         var bannerInstruction = status.bannerInstruction
-        if (status.routeState == RouteState.INITIALIZED) {
-            bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION)
-        }
+        // if (status.routeState == RouteState.INITIALIZED) {
+        //     bannerInstruction = navigator.retrieveBannerInstruction(FIRST_BANNER_INSTRUCTION)
+        // }
         currentStep?.let {
             progressBuilder.bannerInstruction(bannerInstruction?.mapToDirectionsApi(it))
         }

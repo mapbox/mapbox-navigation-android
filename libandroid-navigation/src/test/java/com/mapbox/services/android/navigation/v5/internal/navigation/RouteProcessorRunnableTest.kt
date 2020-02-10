@@ -85,94 +85,94 @@ class RouteProcessorRunnableTest {
         verify { snapToRoute.getSnappedLocationWith(status, rawLocation) }
     }
 
-    @Test
-    fun onRun_legIndexIncrementsOnLegCompletionWithValidDistanceRemaining() {
-        val snapToRoute = mockk<SnapToRoute>(relaxed = true)
-        val factory = buildMockFactory(snapToRoute)
-        val previousStatus = buildMockStatus()
-        val status = buildMockStatus()
-        every { previousStatus.routeState } returns RouteState.COMPLETE
-        every { previousStatus.remainingLegDistance } returns 20f
-        val navigator = mockk<MapboxNavigator>(relaxed = true)
-        val route = buildTwoLegRoute()
-        val autoIncrementEnabled = true
-        val runnable = buildRouteProcessorRunnableWith(
-            navigator, factory, previousStatus, status, route, autoIncrementEnabled
-        )
-        val rawLocation = mockk<Location>()
-        runnable.updateRawLocation(rawLocation)
-
-        runnable.run()
-
-        verify { navigator.updateLegIndex(any()) }
-    }
-
-    @Test
-    fun onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidDistanceRemaining() {
-        val snapToRoute = mockk<SnapToRoute>(relaxed = true)
-        val factory = buildMockFactory(snapToRoute)
-        val previousStatus = buildMockStatus()
-        val status = buildMockStatus()
-        every { previousStatus.routeState } returns RouteState.COMPLETE
-        every { previousStatus.remainingLegDistance } returns 50f
-        val navigator = mockk<MapboxNavigator>()
-        val route = buildTwoLegRoute()
-        val autoIncrementEnabled = true
-        val runnable = buildRouteProcessorRunnableWith(
-            navigator, factory, previousStatus, status, route, autoIncrementEnabled
-        )
-        val rawLocation = mockk<Location>()
-        runnable.updateRawLocation(rawLocation)
-
-        runnable.run()
-
-        verify(exactly = 0) { navigator.updateLegIndex(any()) }
-    }
-
-    @Test
-    fun onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidLegsRemaining() {
-        val snapToRoute = mockk<SnapToRoute>(relaxed = true)
-        val factory = buildMockFactory(snapToRoute)
-        val previousStatus = buildMockStatus()
-        val status = buildMockStatus()
-        every { previousStatus.routeState } returns RouteState.COMPLETE
-        every { previousStatus.remainingLegDistance } returns 20f
-        every { previousStatus.legIndex } returns 1
-        val navigator = mockk<MapboxNavigator>()
-        val route = buildTwoLegRoute()
-        val autoIncrementEnabled = true
-        val runnable = buildRouteProcessorRunnableWith(
-            navigator, factory, previousStatus, status, route, autoIncrementEnabled
-        )
-        val rawLocation = mockk<Location>()
-        runnable.updateRawLocation(rawLocation)
-
-        runnable.run()
-
-        verify(exactly = 0) { navigator.updateLegIndex(eq(1)) }
-    }
-
-    @Test
-    fun onRun_legIndexDoesNotIncrementOnLegCompletionWithAutoIncrementDisabled() {
-        val snapToRoute = mockk<SnapToRoute>(relaxed = true)
-        val factory = buildMockFactory(snapToRoute)
-        val previousStatus = buildMockStatus()
-        val status = buildMockStatus()
-        every { previousStatus.routeState } returns RouteState.COMPLETE
-        every { previousStatus.remainingLegDistance } returns 20f
-        val navigator = mockk<MapboxNavigator>()
-        val route = buildTwoLegRoute()
-        val autoIncrementEnabled = false
-        val runnable = buildRouteProcessorRunnableWith(
-            navigator, factory, previousStatus, status, route, autoIncrementEnabled
-        )
-        val rawLocation = mockk<Location>()
-        runnable.updateRawLocation(rawLocation)
-
-        runnable.run()
-
-        verify(exactly = 0) { navigator.updateLegIndex(any()) }
-    }
+    // @Test
+    // fun onRun_legIndexIncrementsOnLegCompletionWithValidDistanceRemaining() {
+    //     val snapToRoute = mockk<SnapToRoute>(relaxed = true)
+    //     val factory = buildMockFactory(snapToRoute)
+    //     val previousStatus = buildMockStatus()
+    //     val status = buildMockStatus()
+    //     every { previousStatus.routeState } returns RouteState.COMPLETE
+    //     every { previousStatus.remainingLegDistance } returns 20f
+    //     val navigator = mockk<MapboxNavigator>(relaxed = true)
+    //     val route = buildTwoLegRoute()
+    //     val autoIncrementEnabled = true
+    //     val runnable = buildRouteProcessorRunnableWith(
+    //         navigator, factory, previousStatus, status, route, autoIncrementEnabled
+    //     )
+    //     val rawLocation = mockk<Location>()
+    //     runnable.updateRawLocation(rawLocation)
+    //
+    //     runnable.run()
+    //
+    //     verify { navigator.updateLegIndex(any()) }
+    // }
+    //
+    // @Test
+    // fun onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidDistanceRemaining() {
+    //     val snapToRoute = mockk<SnapToRoute>(relaxed = true)
+    //     val factory = buildMockFactory(snapToRoute)
+    //     val previousStatus = buildMockStatus()
+    //     val status = buildMockStatus()
+    //     every { previousStatus.routeState } returns RouteState.COMPLETE
+    //     every { previousStatus.remainingLegDistance } returns 50f
+    //     val navigator = mockk<MapboxNavigator>()
+    //     val route = buildTwoLegRoute()
+    //     val autoIncrementEnabled = true
+    //     val runnable = buildRouteProcessorRunnableWith(
+    //         navigator, factory, previousStatus, status, route, autoIncrementEnabled
+    //     )
+    //     val rawLocation = mockk<Location>()
+    //     runnable.updateRawLocation(rawLocation)
+    //
+    //     runnable.run()
+    //
+    //     verify(exactly = 0) { navigator.updateLegIndex(any()) }
+    // }
+    //
+    // @Test
+    // fun onRun_legIndexDoesNotIncrementsOnLegCompletionWithInvalidLegsRemaining() {
+    //     val snapToRoute = mockk<SnapToRoute>(relaxed = true)
+    //     val factory = buildMockFactory(snapToRoute)
+    //     val previousStatus = buildMockStatus()
+    //     val status = buildMockStatus()
+    //     every { previousStatus.routeState } returns RouteState.COMPLETE
+    //     every { previousStatus.remainingLegDistance } returns 20f
+    //     every { previousStatus.legIndex } returns 1
+    //     val navigator = mockk<MapboxNavigator>()
+    //     val route = buildTwoLegRoute()
+    //     val autoIncrementEnabled = true
+    //     val runnable = buildRouteProcessorRunnableWith(
+    //         navigator, factory, previousStatus, status, route, autoIncrementEnabled
+    //     )
+    //     val rawLocation = mockk<Location>()
+    //     runnable.updateRawLocation(rawLocation)
+    //
+    //     runnable.run()
+    //
+    //     verify(exactly = 0) { navigator.updateLegIndex(eq(1)) }
+    // }
+    //
+    // @Test
+    // fun onRun_legIndexDoesNotIncrementOnLegCompletionWithAutoIncrementDisabled() {
+    //     val snapToRoute = mockk<SnapToRoute>(relaxed = true)
+    //     val factory = buildMockFactory(snapToRoute)
+    //     val previousStatus = buildMockStatus()
+    //     val status = buildMockStatus()
+    //     every { previousStatus.routeState } returns RouteState.COMPLETE
+    //     every { previousStatus.remainingLegDistance } returns 20f
+    //     val navigator = mockk<MapboxNavigator>()
+    //     val route = buildTwoLegRoute()
+    //     val autoIncrementEnabled = false
+    //     val runnable = buildRouteProcessorRunnableWith(
+    //         navigator, factory, previousStatus, status, route, autoIncrementEnabled
+    //     )
+    //     val rawLocation = mockk<Location>()
+    //     runnable.updateRawLocation(rawLocation)
+    //
+    //     runnable.run()
+    //
+    //     verify(exactly = 0) { navigator.updateLegIndex(any()) }
+    // }
 
     private fun buildRouteProcessorRunnableWith(
         navigator: MapboxNavigator,

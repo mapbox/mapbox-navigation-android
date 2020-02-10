@@ -2,15 +2,9 @@ package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.gson.GeometryGeoJson
-import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.FixLocation
-import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.RouterResult
-import com.mapbox.navigator.VoiceInstruction
 import com.mapbox.services.android.navigation.v5.navigation.DirectionsRouteType
 import java.util.Date
 
@@ -29,10 +23,10 @@ internal class MapboxNavigator(val navigator: Navigator) {
         routeHandler.updateRoute(route, routeType)
     }
 
-    @Synchronized
-    fun updateLegIndex(index: Int): NavigationStatus {
-        return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index)
-    }
+    // @Synchronized
+    // fun updateLegIndex(index: Int): NavigationStatus {
+    //     return navigator.changeRouteLeg(INDEX_FIRST_ROUTE, index)
+    // }
 
     /**
      * Gets the history of state changing calls to the navigator this can be used to
@@ -64,27 +58,27 @@ internal class MapboxNavigator(val navigator: Navigator) {
     }
 
     @Synchronized
-    fun retrieveVoiceInstruction(index: Int): VoiceInstruction? {
-        return navigator.getVoiceInstruction(index)
+    fun retrieveVoiceInstruction(index: Int) {
+        navigator.getVoiceInstruction(index) {}
     }
 
     @Synchronized
-    fun setRoute(routeJson: String, routeIndex: Int, legIndex: Int): NavigationStatus {
-        return navigator.setRoute(routeJson, routeIndex, legIndex)
+    fun setRoute(routeJson: String, routeIndex: Int, legIndex: Int) {
+        navigator.setRoute(routeJson, routeIndex, legIndex) {}
     }
 
     @Synchronized
-    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int): Boolean {
-        return navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
+    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int) {
+        navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
     }
 
     @Synchronized
-    fun retrieveStatus(date: Date, lagInMilliseconds: Long): NavigationStatus {
+    fun retrieveStatus(date: Date, lagInMilliseconds: Long) {
         // We ask for a point slightly in the future to account for lag in location services
         if (lagInMilliseconds > 0) {
             date.time = date.time + lagInMilliseconds
         }
-        return navigator.getStatus(date)
+        navigator.getStatus(date) {}
     }
 
     fun updateLocation(raw: Location) {
@@ -95,19 +89,18 @@ internal class MapboxNavigator(val navigator: Navigator) {
     }
 
     @Synchronized
-    fun retrieveBannerInstruction(index: Int): BannerInstruction? {
-        return navigator.getBannerInstruction(index)
+    fun retrieveBannerInstruction(index: Int) {
+        navigator.getBannerInstruction(index) {}
     }
 
     @Synchronized
-    fun retrieveRouteGeometryWithBuffer(): Geometry? {
-        val routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) ?: return null
-        return GeometryGeoJson.fromJson(routeGeometryWithBuffer)
+    fun retrieveRouteGeometryWithBuffer() {
+        navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) {}
     }
 
     @Synchronized
-    fun retrieveElectronicHorizon(request: String): RouterResult {
-        return navigator.getElectronicHorizon(request)
+    fun retrieveElectronicHorizon(request: String) {
+        navigator.getElectronicHorizon(request) {}
     }
 
     private fun buildFixLocationFromLocation(location: Location): FixLocation {

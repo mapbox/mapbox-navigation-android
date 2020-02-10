@@ -110,7 +110,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .build(),
             NAVIGATOR_POLLING_DELAY,
-            MapboxNativeNavigatorImpl
+            MapboxNativeNavigatorImpl()
         )
     }
 

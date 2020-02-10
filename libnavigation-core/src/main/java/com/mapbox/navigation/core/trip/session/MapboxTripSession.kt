@@ -25,7 +25,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 // todo make internal
 class MapboxTripSession(
@@ -33,17 +32,20 @@ class MapboxTripSession(
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
     private val navigatorPollingDelay: Long,
-    private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
+    private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
     threadController: ThreadController = ThreadController
 ) : TripSession {
 
-    private val STATUS_POLLING_INTERVAL = 1000L
+    companion object {
+        private const val STATUS_POLLING_INTERVAL = 1000L
+    }
+
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
             if (value != null) {
                 ioJobController.scope.launch {
-                    navigator.setRoute(value)
+                    navigator.setRoute(value) {}
                 }
             }
         }
@@ -135,7 +137,7 @@ class MapboxTripSession(
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
         rawLocation?.let { locationObserver.onRawLocationChanged(it) }
-        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it, emptyList()) }
+        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it) }
     }
 
     override fun unregisterLocationObserver(locationObserver: LocationObserver) {
@@ -250,27 +252,29 @@ class MapboxTripSession(
     }
 
     private fun fireOffStatusPolling() {
-        mainJobController.scope.launch {
-            while (isActive) {
-                val status = navigatorPolling()
-                updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
-                updateRouteProgress(status.routeProgress)
-                isOffRoute = status.offRoute
-                delay(STATUS_POLLING_INTERVAL)
+        navigatorPolling { status ->
+            mainJobController.scope.launch {
+                while (isActive) {
+                    updateEnhancedLocation(status.enhancedLocation)
+                    updateRouteProgress(status.routeProgress)
+                    isOffRoute = status.offRoute
+                    delay(STATUS_POLLING_INTERVAL)
+                }
             }
         }
     }
 
-    private suspend fun navigatorPolling(): TripStatus =
-        withContext(ioJobController.scope.coroutineContext) {
-            val date = Date()
-            date.time = date.time + navigatorPollingDelay
-            navigator.getStatus(date)
-        }
+    private fun navigatorPolling(callback: (TripStatus) -> Unit) {
+        // withContext(ioJobController.scope.coroutineContext) {
+        val date = Date()
+        date.time = date.time + navigatorPollingDelay
+        navigator.getTripStatus(date, callback)
+        // }
+    }
 
-    private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
+    private fun updateEnhancedLocation(location: Location) {
         enhancedLocation = location
-        locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
+        locationObservers.forEach { it.onEnhancedLocationChanged(location) }
     }
 
     private fun updateRouteProgress(progress: RouteProgress) {

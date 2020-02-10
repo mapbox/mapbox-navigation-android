@@ -31,7 +31,7 @@ internal class OfflineRouteRetrievalTask(
         val url = offlineRoutes[FIRST_ROUTE].buildUrl()
 
         synchronized(navigator) {
-            routerResult = navigator.getRoute(url)
+            navigator.getRoute(url) {}
         }
 
         return offlineRoutes[FIRST_ROUTE].retrieveOfflineRoute(routerResult)

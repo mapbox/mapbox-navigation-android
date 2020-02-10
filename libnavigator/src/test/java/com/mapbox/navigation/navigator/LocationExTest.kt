@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator
 
 import android.location.Location
+import com.mapbox.navigation.utils.extensions.toFixLocation
 import java.util.Date
 import org.junit.Assert.assertEquals
 import org.junit.Test

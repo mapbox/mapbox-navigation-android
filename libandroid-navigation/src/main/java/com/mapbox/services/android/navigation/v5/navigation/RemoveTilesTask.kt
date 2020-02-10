@@ -12,8 +12,8 @@ internal class RemoveTilesTask(
     private val callback: OnOfflineTilesRemovedCallback
 ) : AsyncTask<Void, Void, Long>() {
 
-    override fun doInBackground(vararg paramsUnused: Void): Long =
-        navigator.removeTiles(tilePath, southwest, northeast)
+    override fun doInBackground(vararg paramsUnused: Void): Long = 1
+        // navigator.removeTiles(tilePath, southwest, northeast)
 
     public override fun onPostExecute(numberOfTiles: Long) = callback.onRemoved(numberOfTiles)
 }

@@ -24,39 +24,41 @@ interface MapboxNativeNavigator {
 
     // Route following
 
-    fun updateLocation(rawLocation: Location): Boolean
+    fun updateLocation(rawLocation: Location)
     fun updateSensorEvent(sensorEvent: SensorEvent): Boolean
-    fun getStatus(date: Date): TripStatus
+    fun getTripStatus(date: Date, callback: (TripStatus) -> Unit)
 
     // Routing
 
     fun setRoute(
         route: DirectionsRoute,
         routeIndex: Int = INDEX_FIRST_ROUTE,
-        legIndex: Int = INDEX_FIRST_LEG
-    ): NavigationStatus
+        legIndex: Int = INDEX_FIRST_LEG,
+        callback: (NavigationStatus) -> Unit
+    )
 
-    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int): Boolean
-    fun getBannerInstruction(index: Int): BannerInstruction?
+    fun updateAnnotations(legAnnotationJson: String, routeIndex: Int, legIndex: Int)
+    fun getBannerInstruction(index: Int, callback: (BannerInstruction?) -> Unit)
     fun getRouteGeometryWithBuffer(
         gridSize: Float = GRID_SIZE,
-        bufferDilation: Short = BUFFER_DILATION
-    ): String?
+        bufferDilation: Short = BUFFER_DILATION,
+        callback: (String) -> Unit
+    )
 
-    fun updateLegIndex(routeIndex: Int, legIndex: Int): NavigationStatus
+    fun updateLegIndex(routeIndex: Int, legIndex: Int, callback: (NavigationStatus) -> Unit)
 
     // Free Drive
 
-    fun getElectronicHorizon(request: String): RouterResult
+    fun getElectronicHorizon(request: String, callback: (RouterResult) -> Unit)
 
     // Offline
 
     fun cacheLastRoute()
 
-    fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long
-    fun getRoute(url: String): RouterResult
-    fun unpackTiles(tarPath: String, destinationPath: String): Long
-    fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long
+    // fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long
+    fun getRoute(url: String, callback: (RouterResult) -> Unit)
+    fun unpackTiles(tarPath: String, destinationPath: String, callback: (Long) -> Unit)
+    fun removeTiles(tilePath: String, southwest: Point, northeast: Point, callback: (Long) -> Unit)
 
     // History traces
 
@@ -67,9 +69,9 @@ interface MapboxNativeNavigator {
     // Configuration
 
     fun getConfig(): NavigatorConfig
-    fun setConfig(config: NavigatorConfig?)
+//    fun setConfig(config: NavigatorConfig?)
 
     // Other
 
-    fun getVoiceInstruction(index: Int): VoiceInstruction?
+    fun getVoiceInstruction(index: Int, callback: (VoiceInstruction?) -> Unit)
 }

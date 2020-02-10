@@ -26,7 +26,7 @@ class MapboxOfflineRouter {
         }
 
         this.tilePath = tileDir.absolutePath
-        offlineNavigator = OfflineNavigator(Navigator())
+        offlineNavigator = OfflineNavigator(Navigator(null, null, null))
         offlineTileVersions = OfflineTileVersions()
     }
 

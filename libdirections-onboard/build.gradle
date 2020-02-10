@@ -32,6 +32,7 @@ dependencies {
     api project(':libnavigation-base')
     implementation project(':libnavigator')
     implementation project(":libnavigation-util")
+    implementation(name:'mapbox-navigation-native-debug', ext:'aar')
 
     //ktlint
     ktlint dependenciesList.ktlint

@@ -93,6 +93,7 @@ dependencies {
     implementation project(':libnavigator')
 
     androidTestImplementation project(':libtesting-ui')
+    implementation(name:'mapbox-navigation-native-debug', ext:'aar')
 
     //ktlint
     ktlint dependenciesList.ktlint

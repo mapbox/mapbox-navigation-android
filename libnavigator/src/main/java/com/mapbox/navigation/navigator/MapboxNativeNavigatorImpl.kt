@@ -32,27 +32,33 @@ import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlin.math.roundToLong
 
-object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
+class MapboxNativeNavigatorImpl constructor(
+    config: NavigatorConfig? = null,
+    routerParams: RouterParams? = null,
+    httpClient: HttpInterface? = null
+) : MapboxNativeNavigator {
 
     // Order matters! https://kotlinlang.org/docs/reference/classes.html#constructors
     init {
         System.loadLibrary("navigator-android")
     }
 
-    private const val ONE_INDEX = 1
-    private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
-    private const val FIRST_BANNER_INSTRUCTION = 0
-    private const val GRID_SIZE = 0.0025f
-    private const val BUFFER_DILATION: Short = 1
-    private const val TWO_LEGS: Short = 2
+    companion object {
+        private const val ONE_INDEX = 1
+        private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
+        // private const val FIRST_BANNER_INSTRUCTION = 0
+        private const val GRID_SIZE = 0.0025f
+        private const val BUFFER_DILATION: Short = 1
+        private const val TWO_LEGS: Short = 2
+    }
 
-    private val navigator: Navigator = Navigator()
+    private val navigator: Navigator = Navigator(config, routerParams, httpClient)
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
 
     // Route following
 
-    override fun updateLocation(rawLocation: Location): Boolean =
+    override fun updateLocation(rawLocation: Location) =
         navigator.updateLocation(rawLocation.toFixLocation(Date()))
 
     override fun updateSensorEvent(sensorEvent: SensorEvent): Boolean {
@@ -62,50 +68,51 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         } ?: false
     }
 
-    override fun getStatus(date: Date): TripStatus {
-        val status = navigator.getStatus(date)
-        return TripStatus(
-            status.location.toLocation(),
-            status.key_points.map { it.toLocation() },
-            status.getRouteProgress(),
-            status.routeState == RouteState.OFFROUTE
-        )
-    }
+    override fun getTripStatus(date: Date, callback: (TripStatus) -> Unit) =
+        navigator.getStatus(date) { status ->
+            callback(
+                TripStatus(
+                    status.location.toLocation(),
+                    status.getRouteProgress(),
+                    status.routeState == RouteState.OFFROUTE
+                )
+            )
+        }
 
     // Routing
 
     override fun setRoute(
         route: DirectionsRoute,
         routeIndex: Int,
-        legIndex: Int
-    ): NavigationStatus {
+        legIndex: Int,
+        callback: (NavigationStatus) -> Unit
+    ) {
         this.route = route
-        val result = navigator.setRoute(route.toJson(), routeIndex, legIndex)
-        navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
+        navigator.setRoute(route.toJson(), routeIndex, legIndex, callback)
+        navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) {
             routeBufferGeoJson = GeometryGeoJson.fromJson(it)
         }
-        return result
     }
 
     override fun updateAnnotations(
         legAnnotationJson: String,
         routeIndex: Int,
         legIndex: Int
-    ): Boolean = navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
+    ) = navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
 
-    override fun getBannerInstruction(index: Int): BannerInstruction? =
-        navigator.getBannerInstruction(index)
+    override fun getBannerInstruction(index: Int, callback: (BannerInstruction?) -> Unit) =
+        navigator.getBannerInstruction(index, callback)
 
-    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? =
-        navigator.getRouteBufferGeoJson(gridSize, bufferDilation)
+    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short, callback: (String) -> Unit) =
+        navigator.getRouteBufferGeoJson(gridSize, bufferDilation, callback)
 
-    override fun updateLegIndex(routeIndex: Int, legIndex: Int): NavigationStatus =
-        navigator.changeRouteLeg(routeIndex, legIndex)
+    override fun updateLegIndex(routeIndex: Int, legIndex: Int, callback: (NavigationStatus) -> Unit) =
+        navigator.changeRouteLeg(routeIndex, legIndex, callback)
 
     // Free Drive
 
-    override fun getElectronicHorizon(request: String): RouterResult =
-        navigator.getElectronicHorizon(request)
+    override fun getElectronicHorizon(request: String, callback: (RouterResult) -> Unit) =
+        navigator.getElectronicHorizon(request, callback)
 
     // Offline
 
@@ -113,16 +120,17 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator.cacheLastRoute()
     }
 
-    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
-        navigator.configureRouter(routerParams, httpClient)
+    // override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
+    //     navigator.configureRouter(routerParams, httpClient)
 
-    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
+    override fun getRoute(url: String, callback: (RouterResult) -> Unit) =
+        navigator.getRoute(url, callback)
 
-    override fun unpackTiles(tarPath: String, destinationPath: String): Long =
-        navigator.unpackTiles(tarPath, destinationPath)
+    override fun unpackTiles(tarPath: String, destinationPath: String, callback: (Long) -> Unit) =
+        navigator.unpackTiles(tarPath, destinationPath, callback)
 
-    override fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long =
-        navigator.removeTiles(tilePath, southwest, northeast)
+    override fun removeTiles(tilePath: String, southwest: Point, northeast: Point, callback: (Long) -> Unit) =
+        navigator.removeTiles(tilePath, southwest, northeast, callback)
 
     // History traces
 
@@ -140,14 +148,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun getConfig(): NavigatorConfig = navigator.config
 
-    override fun setConfig(config: NavigatorConfig?) {
-        navigator.setConfig(config)
-    }
+    // override fun setConfig(config: NavigatorConfig?) {
+    //     navigator.setConfig(config)
+    // }
 
     // Other
 
-    override fun getVoiceInstruction(index: Int): VoiceInstruction? =
-        navigator.getVoiceInstruction(index)
+    override fun getVoiceInstruction(index: Int, callback: (VoiceInstruction?) -> Unit) =
+        navigator.getVoiceInstruction(index, callback)
 
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
         val upcomingStepIndex = stepIndex + ONE_INDEX
@@ -219,13 +227,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     routeState.convertState()?.also {
                         routeProgressBuilder.currentState(it)
 
-                        var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
-                        if (it == RouteProgressState.ROUTE_INITIALIZED) {
-                            bannerInstructions =
-                                getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi(
-                                    currentStep
-                                )
-                        }
+                        val bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
                         routeProgressBuilder.bannerInstructions(bannerInstructions)
                     }
                 }

@@ -48,12 +48,12 @@ internal class FreeDriveLocationUpdater(
             future = executorService.scheduleAtFixedRate({
                 if (rawLocation != null) {
                     // Pass the same lag as when in active guidance i.e. 1500 ms
-                    val enhancedLocation = getLocation(Date(), 1500, rawLocation)
-                    handler.post {
-                        navigationEventDispatcher.onEnhancedLocationUpdate(
-                            enhancedLocation
-                        )
-                    }
+                    // val enhancedLocation = getLocation(Date(), 1500, rawLocation)
+                    // handler.post {
+                    //     navigationEventDispatcher.onEnhancedLocationUpdate(
+                    //         enhancedLocation
+                    //     )
+                    // }
                 }
             }, 1500, 1000, TimeUnit.MILLISECONDS)
         }
@@ -104,10 +104,10 @@ internal class FreeDriveLocationUpdater(
         }
     }
 
-    private fun getLocation(date: Date, lagMillis: Long, rawLocation: Location?): Location {
-        val status = mapboxNavigator.retrieveStatus(date, lagMillis)
-        return getMapMatchedLocation(status, rawLocation)
-    }
+    // private fun getLocation(date: Date, lagMillis: Long, rawLocation: Location?): Location {
+    //     val status = mapboxNavigator.retrieveStatus(date, lagMillis)
+    //     return getMapMatchedLocation(status, rawLocation)
+    // }
 
     private fun getMapMatchedLocation(
         status: NavigationStatus,

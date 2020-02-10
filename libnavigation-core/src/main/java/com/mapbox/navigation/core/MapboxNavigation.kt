@@ -101,6 +101,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * @param context activity/fragment's context
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK
+ * @param navigatorNative implementation of [MapboxNativeNavigator] for debug puproses
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
@@ -113,6 +114,7 @@ constructor(
         context,
         accessToken
     ),
+    private val navigatorNative: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
@@ -308,21 +310,21 @@ constructor(
      * API used to retrieve logged location and route progress samples for debug purposes.
      */
     fun retrieveHistory(): String {
-        return MapboxNativeNavigatorImpl.getHistory()
+        return navigatorNative.getHistory()
     }
 
     /**
      * API used to enable/disable location and route progress samples logs for debug purposes.
      */
     fun toggleHistory(isEnabled: Boolean) {
-        MapboxNativeNavigatorImpl.toggleHistory(isEnabled)
+        navigatorNative.toggleHistory(isEnabled)
     }
 
     /**
      * API used to artificially add debug events to logs.
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        MapboxNativeNavigatorImpl.addHistoryEvent(eventType, eventJsonProperties)
+        navigatorNative.addHistoryEvent(eventType, eventJsonProperties)
     }
 
     /**

@@ -61,7 +61,7 @@ internal class OfflineNavigator @JvmOverloads constructor(
      * @param destinationPath where the tar will be unpacked
      */
     fun unpackTiles(tarPath: String, destinationPath: String) {
-        navigator.unpackTiles(tarPath, destinationPath)
+        navigator.unpackTiles(tarPath, destinationPath) {}
     }
 
     /**

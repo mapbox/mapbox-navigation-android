@@ -33,6 +33,7 @@ dependencies {
     implementation project(":libdirections-onboard")
     implementation project(":libdirections-offboard")
     implementation project(":libnavigation-util")
+    implementation(name:'mapbox-navigation-native-debug', ext:'aar')
 
     //ktlint
     ktlint dependenciesList.ktlint

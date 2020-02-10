@@ -39,56 +39,56 @@ internal class RouteProcessorRunnable(
     }
 
     private fun process() {
-        val mapboxNavigator = navigation.retrieveMapboxNavigator()
-        val options = navigation.options()
-        val route = navigation.route
-
-        val date = Date()
-        var status = mapboxNavigator.retrieveStatus(
-            date,
-            options.navigationLocationEngineIntervalLagInMilliseconds().toLong()
-        )
-        val previousStatus = routeProcessor.retrievePreviousStatus()
-        status = checkForNewLegIndex(
-            mapboxNavigator,
-            route,
-            status,
-            previousStatus,
-            options.enableAutoIncrementLegIndex()
-        )
-        val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
-        val routeRefresher = navigation.retrieveRouteRefresher()
-        ifNonNull(
-            routeRefresher,
-            routeProgress
-        ) { routeRefresher, routeProgress ->
-            if (routeRefresher.check(date)) {
-                routeRefresher.refresh(routeProgress)
-            }
-        }
-
-        ifNonNull(routeProgress) { routeProgress ->
-            val engineFactory = navigation.retrieveEngineFactory()
-            val userOffRoute =
-                isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory)
-            val snappedLocation =
-                findSnappedLocation(status, rawLocation, routeProgress, engineFactory)
-            val checkFasterRoute = checkFasterRoute(
-                options, snappedLocation, routeProgress, engineFactory,
-                userOffRoute
-            )
-            val milestones = findTriggeredMilestones(navigation, routeProgress)
-
-            sendUpdateToResponseHandler(
-                userOffRoute,
-                milestones,
-                snappedLocation,
-                checkFasterRoute,
-                routeProgress
-            )
-            routeProcessor.updatePreviousRouteProgress(routeProgress)
-            workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
-        }
+        // val mapboxNavigator = navigation.retrieveMapboxNavigator()
+        // val options = navigation.options()
+        // val route = navigation.route
+        //
+        // val date = Date()
+        // var status = mapboxNavigator.retrieveStatus(
+        //     date,
+        //     options.navigationLocationEngineIntervalLagInMilliseconds().toLong()
+        // )
+        // val previousStatus = routeProcessor.retrievePreviousStatus()
+        // status = checkForNewLegIndex(
+        //     mapboxNavigator,
+        //     route,
+        //     status,
+        //     previousStatus,
+        //     options.enableAutoIncrementLegIndex()
+        // )
+        // val routeProgress = routeProcessor.buildNewRouteProgress(mapboxNavigator, status, route)
+        // val routeRefresher = navigation.retrieveRouteRefresher()
+        // ifNonNull(
+        //     routeRefresher,
+        //     routeProgress
+        // ) { routeRefresher, routeProgress ->
+        //     if (routeRefresher.check(date)) {
+        //         routeRefresher.refresh(routeProgress)
+        //     }
+        // }
+        //
+        // ifNonNull(routeProgress) { routeProgress ->
+        //     val engineFactory = navigation.retrieveEngineFactory()
+        //     val userOffRoute =
+        //         isUserOffRoute(options, status, rawLocation, routeProgress, engineFactory)
+        //     val snappedLocation =
+        //         findSnappedLocation(status, rawLocation, routeProgress, engineFactory)
+        //     val checkFasterRoute = checkFasterRoute(
+        //         options, snappedLocation, routeProgress, engineFactory,
+        //         userOffRoute
+        //     )
+        //     val milestones = findTriggeredMilestones(navigation, routeProgress)
+        //
+        //     sendUpdateToResponseHandler(
+        //         userOffRoute,
+        //         milestones,
+        //         snappedLocation,
+        //         checkFasterRoute,
+        //         routeProgress
+        //     )
+        //     routeProcessor.updatePreviousRouteProgress(routeProgress)
+        //     workerHandler.postDelayed(this, ONE_SECOND_IN_MILLISECONDS.toLong())
+        // }
     }
 
     private fun checkForNewLegIndex(
@@ -109,7 +109,7 @@ internal class RouteProcessorRunnable(
         val isValidDistanceRemaining = previousStatus.remainingLegDistance < ARRIVAL_ZONE_RADIUS
         if (autoIncrementEnabled && canUpdateLeg && isValidDistanceRemaining) {
             val newLegIndex = previousLegIndex + 1
-            return mapboxNavigator.updateLegIndex(newLegIndex)
+            // return mapboxNavigator.updateLegIndex(newLegIndex)
         }
         return currentStatus
     }

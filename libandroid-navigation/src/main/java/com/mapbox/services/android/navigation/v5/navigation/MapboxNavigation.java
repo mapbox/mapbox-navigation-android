@@ -910,7 +910,7 @@ public class MapboxNavigation implements ServiceConnection {
     if (checkInvalidLegIndex(legIndex)) {
       return false;
     }
-    mapboxNavigator.updateLegIndex(legIndex);
+//    mapboxNavigator.updateLegIndex(legIndex);
     return true;
   }
 
@@ -927,7 +927,8 @@ public class MapboxNavigation implements ServiceConnection {
   }
 
   public String retrieveSsmlAnnouncementInstruction(int index) {
-    return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
+//    return mapboxNavigator.retrieveVoiceInstruction(index).getSsmlAnnouncement();
+    return "abc";
   }
 
   @Override
@@ -1075,12 +1076,12 @@ public class MapboxNavigation implements ServiceConnection {
 
   @NotNull
   private Navigator configureNavigator() {
-    Navigator navigator = new Navigator();
+    Navigator navigator = new Navigator(null, null, null);
     NavigatorConfig navigatorConfig = navigator.getConfig();
     navigatorConfig.setOffRouteThreshold(options.getOffRouteThreshold());
     navigatorConfig.setOffRouteThresholdWhenNearIntersection(options.getOffRouteThresholdWhenNearIntersection());
     navigatorConfig.setIntersectionRadiusForOffRouteDetection(options.getIntersectionRadiusForOffRouteDetection());
-    navigator.setConfig(navigatorConfig);
+//    navigator.setConfig(navigatorConfig);
     return navigator;
   }
 
