@@ -8,9 +8,7 @@ import android.os.Bundle
 import com.mapbox.android.accounts.v1.AccountsConstants
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 
 class BillingTest {
@@ -21,50 +19,60 @@ class BillingTest {
     private val applicationInfo: ApplicationInfo = mockk()
     private val metadata: Bundle = mockk()
 
-    @Before
-    fun setUp() {
+    @Test
+    fun verifyDefaultBillingType() {
         every { appContext.packageManager } returns packageManager
-    }
+        every { metadata.getBoolean(any()) } returns false
+        every { metadata.getBoolean(any(), any()) } returns false
+        applicationInfo.metaData = metadata
+        every { packageManager.getApplicationInfo(any(), any()) } returns applicationInfo
 
-    @After
-    fun cleanUp() {
+        val billingType = Billing.getInstance(appContext).getBillingType()
+
+        assertEquals(Billing.BillingModel.MAU, billingType)
+
         Billing.INSTANCE = null
     }
 
     @Test
-    fun verify_default_billing_type() {
+    fun verifyMauBillingType() {
+        every { appContext.packageManager } returns packageManager
         every { metadata.getBoolean(any()) } returns false
         every { metadata.getBoolean(any(), any()) } returns false
         applicationInfo.metaData = metadata
         every { packageManager.getApplicationInfo(any(), any()) } returns applicationInfo
 
-        assertEquals(Billing.BillingModel.MAU, Billing.getInstance(appContext).getBillingType())
+        val billingType = Billing.getInstance(appContext).getBillingType()
+
+        assertEquals(Billing.BillingModel.MAU, billingType)
+
+        Billing.INSTANCE = null
     }
 
     @Test
-    fun verify_mau_billing_type() {
-        every { metadata.getBoolean(any()) } returns false
-        every { metadata.getBoolean(any(), any()) } returns false
-        applicationInfo.metaData = metadata
-        every { packageManager.getApplicationInfo(any(), any()) } returns applicationInfo
-
-        assertEquals(Billing.BillingModel.MAU, Billing.getInstance(appContext).getBillingType())
-    }
-
-    @Test
-    fun verify_none_billing_type() {
+    fun verifyNoneBillingType() {
+        every { appContext.packageManager } returns packageManager
         every { metadata.getBoolean(any()) } returns AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
         every { metadata.getBoolean(any(), any()) } returns AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
         applicationInfo.metaData = metadata
         every { packageManager.getApplicationInfo(any(), any()) } returns applicationInfo
 
-        assertEquals(Billing.BillingModel.NO_SKU, Billing.getInstance(appContext).getBillingType())
+        val billingType = Billing.getInstance(appContext).getBillingType()
+
+        assertEquals(Billing.BillingModel.NO_SKU, billingType)
+
+        Billing.INSTANCE = null
     }
 
     @Test
-    fun verify_billing_type_when_packageNameNotFound() {
+    fun verifyBillingTypeWhenPackageNameNotFound() {
+        every { appContext.packageManager } returns packageManager
         every { packageManager.getApplicationInfo(any(), any()) } throws nameNotFoundException
+
         val billingType = Billing.getInstance(appContext).getBillingType()
+
         assertEquals(Billing.BillingModel.MAU, billingType)
+
+        Billing.INSTANCE = null
     }
 }
