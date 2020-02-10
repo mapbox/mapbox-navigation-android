@@ -415,7 +415,8 @@ class MapboxNavigation(
                 Router::class.java to NavigationModuleProvider.createModule(
                     MapboxNavigationModuleType.OffboardRouter,
                     ::paramsProvider
-                )
+                ),
+                Context::class.java to context.applicationContext
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
@@ -423,6 +424,7 @@ class MapboxNavigation(
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
+            // TODO replace with config + logger implementation OR add empty default constructor
             MapboxNavigationModuleType.OnboardRouter -> arrayOf()
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripNotification -> arrayOf(
