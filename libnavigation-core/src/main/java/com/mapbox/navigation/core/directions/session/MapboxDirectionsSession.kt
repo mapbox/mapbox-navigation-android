@@ -2,9 +2,8 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.core.NavigationComponentProvider
-import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import java.util.concurrent.CopyOnWriteArrayList
 
 // todo make internal
@@ -12,14 +11,8 @@ class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
 
-    private val fasterRouteInterval = 2 * 60 * 1000L // 2 minutes
     private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
-    private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
     private var routeOptions: RouteOptions? = null
-    private val fasterRouteTimer =
-        NavigationComponentProvider.createMapboxTimer(fasterRouteInterval) {
-            routeOptions?.let { requestFasterRoute(it) }
-        }
 
     override var routes: List<DirectionsRoute> = emptyList()
         set(value) {
@@ -28,11 +21,6 @@ class MapboxDirectionsSession(
                 return
             }
             field = value
-            if (value.isEmpty()) {
-                fasterRouteTimer.stop()
-            } else {
-                fasterRouteTimer.start()
-            }
             routesObservers.forEach { it.onRoutesChanged(value) }
         }
 
@@ -63,6 +51,34 @@ class MapboxDirectionsSession(
         })
     }
 
+    override fun requestFasterRoute(
+        adjustedRouteOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback
+    ) {
+        if (routes.isEmpty()) {
+            routesRequestCallback.onRoutesRequestCanceled(adjustedRouteOptions)
+            return
+        }
+        this.routeOptions = adjustedRouteOptions
+        router.getRoute(adjustedRouteOptions, object : Router.Callback {
+            override fun onResponse(routes: List<DirectionsRoute>) {
+                routesRequestCallback.onRoutesReady(routes)
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                ifNonNull(routeOptions) { options ->
+                    routesRequestCallback.onRoutesRequestFailure(throwable, options)
+                }
+            }
+
+            override fun onCanceled() {
+                ifNonNull(routeOptions) { options ->
+                    routesRequestCallback.onRoutesRequestCanceled(options)
+                }
+            }
+        })
+    }
+
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
         if (routes.isNotEmpty()) {
@@ -74,48 +90,11 @@ class MapboxDirectionsSession(
         routesObservers.remove(routesObserver)
     }
 
-    override fun registerFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
-        fasterRouteObservers.add(fasterRouteObserver)
-    }
-
-    override fun unregisterFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
-        fasterRouteObservers.remove(fasterRouteObserver)
-    }
-
     override fun unregisterAllRoutesObservers() {
         routesObservers.clear()
-        fasterRouteObservers.clear()
     }
 
     override fun shutDownSession() {
         cancel()
-        fasterRouteTimer.stop()
-    }
-
-    private fun requestFasterRoute(routeOptions: RouteOptions) {
-        if (routes.isEmpty()) {
-            return
-        }
-        router.getRoute(routeOptions, object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
-                val route = routes[0]
-                if (isRouteFaster(route)) {
-                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(route) }
-                }
-            }
-
-            override fun onFailure(throwable: Throwable) {
-                // do nothing
-            }
-
-            override fun onCanceled() {
-                // do nothing
-            }
-        })
-    }
-
-    private fun isRouteFaster(newRoute: DirectionsRoute): Boolean {
-        // TODO: Implement the logic to check if the route is faster
-        return false
     }
 }

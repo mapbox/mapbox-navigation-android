@@ -4,8 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
-import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.utils.timer.MapboxTimer
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -25,11 +23,8 @@ class MapboxDirectionsSessionTest {
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routesRequestCallback: RoutesRequestCallback = mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
-    private val fasterRouteObserver: FasterRouteObserver = mockk(relaxUnitFun = true)
-    private lateinit var callback: Router.Callback
     private val routes: List<DirectionsRoute> = listOf(mockk())
-    private val mapboxTimer: MapboxTimer = mockk(relaxUnitFun = true)
-    private lateinit var delayLambda: () -> Unit
+    private lateinit var callback: Router.Callback
 
     @Before
     fun setUp() {
@@ -37,12 +32,7 @@ class MapboxDirectionsSessionTest {
         every { router.getRoute(routeOptions, capture(listener)) } answers {
             callback = listener.captured
         }
-        val lambda = slot<() -> Unit>()
         mockkObject(NavigationComponentProvider)
-        every { NavigationComponentProvider.createMapboxTimer(120000L, capture(lambda)) } answers {
-            delayLambda = lambda.captured
-            mapboxTimer
-        }
         every { routesRequestCallback.onRoutesReady(any()) } answers {
             this.value
         }
@@ -110,82 +100,6 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
-    fun fasterRoute_timerStartedOnce() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        verify(exactly = 1) { mapboxTimer.start() }
-    }
-
-    @Test
-    fun fasterRoute_timerShutdown() {
-        session.shutDownSession()
-        verify { mapboxTimer.stop() }
-    }
-
-    @Test
-    fun fasterRoute_hasRoute() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        delayLambda()
-        verify(exactly = 1) { router.getRoute(routeOptions, callback) }
-    }
-
-    @Test
-    fun fasterRoute_noRoutes() {
-        delayLambda()
-        verify(exactly = 0) { router.getRoute(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_failedRoutes() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        val throwable: Throwable = mockk()
-        callback.onFailure(throwable)
-        delayLambda()
-        verify(exactly = 1) { router.getRoute(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_inProgress() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        delayLambda()
-        verify(exactly = 1) { router.getRoute(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_canceled() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        verify(exactly = 1) { router.cancel() }
-        callback.onResponse(routes)
-
-        clearMocks(router)
-        delayLambda()
-        session.cancel()
-        verify(exactly = 1) { router.cancel() }
-    }
-
-    @Test
-    fun fasterRoute_canceledByNewRequest() {
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        delayLambda()
-        clearMocks(router)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        verify(exactly = 1) { router.cancel() }
-    }
-
-    @Test
-    fun fasterRoute_fasterRouteNotAvailable() {
-        session.registerFasterRouteObserver(fasterRouteObserver)
-        session.requestRoutes(routeOptions, routesRequestCallback)
-        callback.onResponse(routes)
-        delayLambda()
-        callback.onResponse(routes)
-        verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
-    }
-
-    @Test
     fun routeSetter_set() {
         session.registerRoutesObserver(observer)
         session.routes = routes
@@ -229,6 +143,45 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun fasterRoute_availableRoutes() {
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        verify { routesRequestCallback.onRoutesReady(routes) }
+    }
+
+    @Test
+    fun fasterRoute_failedRoutes() {
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        val throwable: Throwable = mockk()
+        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        callback.onFailure(throwable)
+        verify { routesRequestCallback.onRoutesRequestFailure(any(), any()) }
+    }
+
+    @Test
+    fun fasterRoute_canceledRoutes() {
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        callback.onCanceled()
+        verify { routesRequestCallback.onRoutesRequestCanceled(any()) }
+    }
+
+    @Test
+    fun fasterRoute_canceledByNewRequest() {
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        clearMocks(router)
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        session.requestFasterRoute(routeOptions, routesRequestCallback)
+        verify(exactly = 1) { router.cancel() }
+    }
+
+    @Test
     fun unregisterAllRouteObservers() {
         session.registerRoutesObserver(observer)
         session.requestRoutes(routeOptions, routesRequestCallback)
@@ -236,7 +189,6 @@ class MapboxDirectionsSessionTest {
         session.unregisterAllRoutesObservers()
 
         callback.onResponse(routes)
-        delayLambda()
 
         verify { router.getRoute(routeOptions, callback) }
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
