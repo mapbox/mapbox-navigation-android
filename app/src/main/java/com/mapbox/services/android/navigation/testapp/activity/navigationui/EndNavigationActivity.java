@@ -34,7 +34,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public class EndNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener,
   Callback<DirectionsResponse>, ProgressChangeListener {

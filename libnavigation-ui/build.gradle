@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
@@ -59,6 +61,7 @@ dependencies {
   // Navigation SDK
   api project(':libnavigation-core')
   api project(':libnavigation-base')
+  api project(':libdirections-hybrid')
   implementation project(':libnavigation-util')
 
   // Mapbox

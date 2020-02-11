@@ -7,23 +7,23 @@ import androidx.core.util.Pair;
 
 import java.util.HashMap;
 
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_MERGE;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_MERGE;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
+import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
 
 class ManeuverViewMap extends HashMap<Pair<String, String>, ManeuverViewUpdate> {
 

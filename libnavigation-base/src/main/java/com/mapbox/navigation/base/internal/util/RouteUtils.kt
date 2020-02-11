@@ -6,7 +6,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 
-class RouteUtil {
+class RouteUtils {
 
     companion object {
         private const val FIRST_INSTRUCTION = 0

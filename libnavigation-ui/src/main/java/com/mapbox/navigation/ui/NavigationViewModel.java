@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.location.Location;
@@ -20,6 +21,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.internal.util.RouteUtils;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -27,6 +29,7 @@ import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.BannerInstructionModel;
@@ -60,7 +63,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private NavigationViewRouter router;
+  private Router router;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
@@ -83,20 +86,20 @@ public class NavigationViewModel extends AndroidViewModel {
   private NavigationViewModelProgressChangeListener navigationViewVm =
           new NavigationViewModelProgressChangeListener(this);
 
+  private NavigationViewOptions navigationViewOptions;
+
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
-    initializeRouter();
     this.routeUtils = new RouteUtils();
     this.connectivityController = new MapConnectivityController();
   }
 
   @TestOnly
-    // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
-                      NavigationViewRouter router) {
+                      Router router) {
     super(application);
     this.navigation = navigation;
     this.router = router;
@@ -105,7 +108,6 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @TestOnly
-    // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
                       LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
                       VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
@@ -139,45 +141,46 @@ public class NavigationViewModel extends AndroidViewModel {
     speechPlayer.setMuted(isMuted);
   }
 
-  /**
-   * Records a general feedback item with source
-   */
-  public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
-    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, EMPTY_STRING, feedbackSource);
-    shouldRecordScreenshot.setValue(true);
-  }
+  // TODO need Telemetry impl
+//  /**
+//   * Records a general feedback item with source
+//   */
+//  public void recordFeedback(@FeedbackEvent.FeedbackSource String feedbackSource) {
+//    feedbackId = navigation.recordFeedback(FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE, EMPTY_STRING, feedbackSource);
+//    shouldRecordScreenshot.setValue(true);
+//  }
 
-  /**
-   * Used to update an existing {@link FeedbackItem}
-   * with a feedback type and description.
-   * <p>
-   * Uses cached feedbackId to ensure the proper item is updated.
-   *
-   * @param feedbackItem item to be updated
-   * @since 0.7.0
-   */
-  public void updateFeedback(FeedbackItem feedbackItem) {
-    if (!TextUtils.isEmpty(feedbackId)) {
-      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
-      sendEventFeedback(feedbackItem);
-      feedbackId = null;
-      screenshot = null;
-    }
-  }
+//  /**
+//   * Used to update an existing {@link FeedbackItem}
+//   * with a feedback type and description.
+//   * <p>
+//   * Uses cached feedbackId to ensure the proper item is updated.
+//   *
+//   * @param feedbackItem item to be updated
+//   * @since 0.7.0
+//   */
+//  public void updateFeedback(FeedbackItem feedbackItem) {
+//    if (!TextUtils.isEmpty(feedbackId)) {
+//      navigation.updateFeedback(feedbackId, feedbackItem.getFeedbackType(), feedbackItem.getDescription(), screenshot);
+//      sendEventFeedback(feedbackItem);
+//      feedbackId = null;
+//      screenshot = null;
+//    }
+//  }
 
-  /**
-   * Used to cancel an existing {@link FeedbackItem}.
-   * <p>
-   * Uses cached feedbackId to ensure the proper item is cancelled.
-   *
-   * @since 0.7.0
-   */
-  public void cancelFeedback() {
-    if (!TextUtils.isEmpty(feedbackId)) {
-      navigation.cancelFeedback(feedbackId);
-      feedbackId = null;
-    }
-  }
+//  /**
+//   * Used to cancel an existing {@link FeedbackItem}.
+//   * <p>
+//   * Uses cached feedbackId to ensure the proper item is cancelled.
+//   *
+//   * @since 0.7.0
+//   */
+//  public void cancelFeedback() {
+//    if (!TextUtils.isEmpty(feedbackId)) {
+//      navigation.cancelFeedback(feedbackId);
+//      feedbackId = null;
+//    }
+//  }
 
   /**
    * Returns the current instance of {@link MapboxNavigation}.
@@ -194,27 +197,28 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   /**
-   * This method will pass {@link MapboxNavigationOptions} from the {@link NavigationViewOptions}
+   * This method will pass {@link NavigationOptions} from the {@link NavigationViewOptions}
    * to this view model to be used to initialize {@link MapboxNavigation}.
    *
    * @param options to init MapboxNavigation
    */
-  void initialize(NavigationViewOptions options) {
-    MapboxNavigationOptions navigationOptions = options.navigationOptions();
-    navigationOptions = navigationOptions.toBuilder().isFromNavigationUi(true).build();
+  void initialize(NavigationViewOptions options, Router router) {
+    NavigationOptions navigationOptions = options.navigationOptions();
+    navigationOptions = navigationOptions.toBuilder().build();
     initializeLanguage(options);
     initializeTimeFormat(navigationOptions);
     initializeDistanceFormatter(options);
     if (!isRunning()) {
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
       initializeNavigation(getApplication(), navigationOptions, locationEngine);
-      addMilestones(options);
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
       initializeMapOfflineManager(options);
     }
-    router.extractRouteOptions(options);
+    this.router = router;
+    this.navigationViewOptions = options;
+    router.getRoute(options.directionsRoute().routeOptions(), routeEngineCallback);
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -268,7 +272,6 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void updateLocation(Location location) {
-    router.updateLocation(location);
     navigationLocation.setValue(location);
   }
 
@@ -292,13 +295,6 @@ public class NavigationViewModel extends AndroidViewModel {
 
   MutableLiveData<Boolean> retrieveShouldRecordScreenshot() {
     return shouldRecordScreenshot;
-  }
-
-  private void initializeRouter() {
-    RouteFetcher onlineRouter = new RouteFetcher(getApplication(), accessToken);
-    Context applicationContext = getApplication().getApplicationContext();
-    ConnectivityStatusProvider connectivityStatus = new ConnectivityStatusProvider(applicationContext);
-    router = new NavigationViewRouter(onlineRouter, connectivityStatus, routeEngineListener);
   }
 
   private void initializeLocationEngine() {
@@ -397,62 +393,51 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerRouteProgressObserver(navigationViewVm);
     navigation.unregisterLocationObserver(navigationViewVm);
     navigation.registerOffRouteObserver(offRouteListener);
-    navigation.addNavigationEventListener(navigationEventListener);
 //    navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }
 
   private OffRouteObserver offRouteListener = new OffRouteObserver() {
     @Override
     public void onOffRouteStateChanged(boolean offRoute) {
-      if (offRoute){
+      if (offRoute) {
         speechPlayer.onOffRoute();
       }
     }
 
-    @Override
-    public void userOffRoute(Location location) {
-
-      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      handleOffRouteEvent(newOrigin);
-    }
+//    @Override
+//    public void userOffRoute(Location location) {
+//
+//      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+//      handleOffRouteEvent(newOrigin);
+//    }
   };
 
+  // TODO Faster route
+//  private FasterRouteListener fasterRouteListener = new FasterRouteListener() {
+//    @Override
+//    public void fasterRouteFound(DirectionsRoute directionsRoute) {
+//      updateRoute(directionsRoute);
+//    }
+//  };
 
-  private NavigationEventListener navigationEventListener = new NavigationEventListener() {
-    @Override
-    public void onRunning(boolean isRunning) {
-      NavigationViewModel.this.isRunning = isRunning;
-      sendNavigationStatusEvent(isRunning);
-    }
-  };
+  private Router.Callback routeEngineCallback = new NavigationViewRouteEngineListener(this);
 
-  private FasterRouteListener fasterRouteListener = new FasterRouteListener() {
-    @Override
-    public void fasterRouteFound(DirectionsRoute directionsRoute) {
-      updateRoute(directionsRoute);
-    }
-  };
-
-  private ViewRouteListener routeEngineListener = new NavigationViewRouteEngineListener(this);
-
+  @SuppressLint("MissingPermission")
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
-      navigation.startNavigation(route);
+      navigation.startTripSession(route);
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.preCache(route);
     }
   }
 
   private void updateReplayEngine(DirectionsRoute route) {
-    if (locationEngineConductor.updateSimulatedRoute(route)) {
-      LocationEngine replayEngine = locationEngineConductor.obtainLocationEngine();
-      navigation.setLocationEngine(replayEngine);
-    }
+    locationEngineConductor.updateSimulatedRoute(route);
   }
 
   private void destroyRouter() {
     if (router != null) {
-      router.onDestroy();
+      router.cancel();
     }
   }
 
@@ -464,7 +449,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void clearDynamicCameraMap() {
     if (navigation != null) {
-      Camera cameraEngine = navigation.getCameraEngine();
+      Camera cameraEngine = navigationViewOptions.camera();
       boolean isDynamicCamera = cameraEngine instanceof DynamicCamera;
       if (isDynamicCamera) {
         ((DynamicCamera) cameraEngine).clearMap();
@@ -497,23 +482,25 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  // TODO find route based on location and route progress
   private void handleOffRouteEvent(Point newOrigin) {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
-      router.findRouteFrom(routeProgress);
+//      route.findRouteFrom(routeProgress);
       isOffRoute.setValue(true);
     }
   }
 
-  private void sendNavigationStatusEvent(boolean isRunning) {
-    if (navigationViewEventDispatcher != null) {
-      if (isRunning) {
-        navigationViewEventDispatcher.onNavigationRunning();
-      } else {
-        navigationViewEventDispatcher.onNavigationFinished();
-      }
-    }
-  }
+  // TODO NavigationEvents wait for implementation
+//  private void sendNavigationStatusEvent(boolean isRunning) {
+//    if (navigationViewEventDispatcher != null) {
+//      if (isRunning) {
+//        navigationViewEventDispatcher.onNavigationRunning();
+//      } else {
+//        navigationViewEventDispatcher.onNavigationFinished();
+//      }
+//    }
+//  }
 
   private void sendEventOnRerouteAlong(DirectionsRoute route) {
     if (navigationViewEventDispatcher != null && isOffRoute()) {

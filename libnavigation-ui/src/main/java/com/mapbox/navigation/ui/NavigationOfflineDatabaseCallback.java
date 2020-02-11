@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui;
 
-import com.mapbox.navigation.ui.navigation.MapboxNavigation;
+import com.mapbox.navigation.core.MapboxNavigation;
 
 import timber.log.Timber;
 
@@ -16,7 +16,7 @@ class NavigationOfflineDatabaseCallback implements OfflineDatabaseLoadedCallback
 
   @Override
   public void onComplete() {
-    navigation.addProgressChangeListener(mapOfflineManager);
+    navigation.registerRouteProgressObserver(mapOfflineManager);
   }
 
   @Override

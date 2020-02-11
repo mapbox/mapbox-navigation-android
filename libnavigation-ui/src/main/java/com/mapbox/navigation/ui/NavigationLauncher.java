@@ -8,16 +8,18 @@ import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.ui.navigation.NavigationConstants;
+import com.mapbox.navigation.base.internal.NavigationConstants;
+import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.base.route.Router;
 
 /**
  * Use this class to launch the navigation UI
  * <p>
  * You can launch the UI a route you have already retrieved from
- * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}.
+ * {@link Router}.
  * </p><p>
  * For testing, you can launch with simulation, in which our
- * {@link com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine} will begin
+ * {@link ReplayRouteLocationEngine} will begin
  * following the given {@link DirectionsRoute} once the UI is initialized.
  * </p>
  */
@@ -25,7 +27,7 @@ public class NavigationLauncher {
 
   /**
    * Starts the UI with a {@link DirectionsRoute} already retrieved from
-   * {@link com.mapbox.services.android.navigation.v5.navigation.NavigationRoute}
+   * {@link Router}
    *
    * @param activity must be launched from another {@link Activity}
    * @param options  with fields to customize the navigation view

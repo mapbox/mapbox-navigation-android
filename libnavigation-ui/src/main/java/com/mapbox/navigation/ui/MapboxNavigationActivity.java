@@ -9,11 +9,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.navigation.base.internal.NavigationConstants;
+import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.route.hybrid.MapboxHybridRouter;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.navigation.ui.navigation.MapboxNavigationOptions;
-import com.mapbox.navigation.ui.navigation.NavigationConstants;
 
 /**
  * Serves as a launching point for the custom drop-in UI, {@link NavigationView}.
@@ -97,8 +98,8 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     options.navigationListener(this);
     extractRoute(options);
     extractConfiguration(options);
-    options.navigationOptions(new MapboxNavigationOptions.Builder().build());
-    navigationView.startNavigation(options.build());
+    options.navigationOptions(new NavigationOptions.Builder().build());
+    navigationView.startNavigation(options.build(), );
   }
 
   @Override

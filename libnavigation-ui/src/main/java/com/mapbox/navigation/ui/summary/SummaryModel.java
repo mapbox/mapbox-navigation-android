@@ -20,10 +20,10 @@ public class SummaryModel {
                       @TimeFormatType int timeFormatType) {
     distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
     double legDurationRemaining = progress.currentLegProgress().durationRemaining();
-    timeRemaining = TimeFormatter.formatTimeRemaining(context, legDurationRemaining);
+    timeRemaining =  SpannableStringBuilder.valueOf(""); //TimeFormatter.formatTimeRemaining(context, legDurationRemaining);
     Calendar time = Calendar.getInstance();
     boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
-    arrivalTime = TimeFormatter.formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
+    arrivalTime = ""; // TimeFormatter.formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
   }
 
   String getDistanceRemaining() {

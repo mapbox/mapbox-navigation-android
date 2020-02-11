@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui;
 
-
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -10,6 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
@@ -77,7 +77,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder navigationListener(NavigationListener navigationListener);
 
-    public abstract Builder progressChangeListener(RouteProgressObserver routeProgressObserver);
+    public abstract Builder routeProgressObserver(RouteProgressObserver routeProgressObserver);
 
     public abstract Builder locationObserver(LocationObserver locationObserver);
 
@@ -122,6 +122,14 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      * @return this builder
      */
     public abstract Builder offlineMapOptions(MapOfflineOptions mapOfflineOptions);
+
+    /**
+     * Add Navigation Camera
+     *
+     * @param camera {@link Camera}
+     * @return this builder
+     */
+    public abstract Builder camera(Camera camera);
 
     public abstract NavigationViewOptions build();
   }

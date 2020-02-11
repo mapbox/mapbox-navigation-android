@@ -1,8 +1,6 @@
 package com.mapbox.navigation.ui;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.ui.NavigationViewRouter;
-import com.mapbox.navigation.ui.OfflineRouteFoundCallback;
 import com.mapbox.navigation.ui.navigation.OfflineError;
 
 import org.junit.Test;

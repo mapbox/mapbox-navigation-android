@@ -85,15 +85,17 @@ public class VoiceInstructionLoader {
   void setupMapboxSpeechBuilder(String language) {
     if (mapboxSpeechBuilder == null) {
       mapboxSpeechBuilder = MapboxSpeech.builder()
-        .accessToken(accessToken)
-        .language(language)
-        .cache(cache)
-        .interceptor(provideOfflineCacheInterceptor());
+              .accessToken(accessToken)
+              .language(language)
+              .cache(cache)
+              .interceptor(provideOfflineCacheInterceptor());
     }
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
     if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
+      mapboxSpeechBuilder
+              .instruction(instruction); // TODO Sku interceptor
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
           .instruction(instruction)
           .textType(textType)
@@ -129,11 +131,11 @@ public class VoiceInstructionLoader {
         Request request = chain.request();
         if (!connectivityStatus.isConnected()) {
           CacheControl cacheControl = new CacheControl.Builder()
-            .maxStale(3, TimeUnit.DAYS)
-            .build();
+                  .maxStale(3, TimeUnit.DAYS)
+                  .build();
           request = request.newBuilder()
-            .cacheControl(cacheControl)
-            .build();
+                  .cacheControl(cacheControl)
+                  .build();
         }
         return chain.proceed(request);
       }

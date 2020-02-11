@@ -11,7 +11,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.navigation.ui.internal.navigation.SdkVersionChecker;
+import com.mapbox.navigation.ui.legacy.SdkVersionChecker;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * information needed to load the proper image into the TextView where appropriate.
    *
    * @param bannerComponents containing image info
-   * @param index of the BannerComponentNode which refers to the given BannerComponents
+   * @param index            of the BannerComponentNode which refers to the given BannerComponents
    */
   private void addShieldInfo(BannerComponents bannerComponents, int index) {
     bannerShieldList.add(new BannerShield(bannerComponents, index));
@@ -109,7 +109,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
    * into the given {@link TextView}.
    *
-   * @param textView   target for the banner text
+   * @param textView target for the banner text
    * @since 0.9.0
    */
   private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
@@ -137,7 +137,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
 
   private void fetchInstructions(LegStep legStep) {
     if (legStep == null || legStep.bannerInstructions() == null
-      || legStep.bannerInstructions().isEmpty()) {
+            || legStep.bannerInstructions().isEmpty()) {
       return;
     }
 
@@ -185,12 +185,12 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
 
     for (final BannerShield bannerShield : bannerShieldList) {
       targets.add(new InstructionTarget(textView, instructionSpannable, bannerShieldList, bannerShield,
-        new InstructionTarget.InstructionLoadedCallback() {
-          @Override
-          public void onInstructionLoaded(InstructionTarget target) {
-            targets.remove(target);
-          }
-        }));
+              new InstructionTarget.InstructionLoadedCallback() {
+                @Override
+                public void onInstructionLoaded(InstructionTarget target) {
+                  targets.remove(target);
+                }
+              }));
     }
     bannerShieldList.clear();
   }
@@ -198,7 +198,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
   private void loadTargets() {
     for (InstructionTarget target : new ArrayList<>(targets)) {
       picassoImageLoader.load(urlDensityMap.get(target.getShield().getUrl()))
-        .into(target);
+              .into(target);
     }
   }
 

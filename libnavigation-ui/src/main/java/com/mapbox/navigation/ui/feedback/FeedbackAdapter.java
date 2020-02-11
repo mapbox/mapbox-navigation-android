@@ -5,17 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.libnavigation.ui.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
-
-import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.metrics.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
@@ -23,14 +18,15 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
 
   FeedbackAdapter(Context context) {
-    feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_road_closure),
+    // TODO Telemetry impl
+   /* feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_road_closure),
       R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, EMPTY_FEEDBACK_DESCRIPTION));
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_not_allowed),
       R.drawable.ic_not_allowed, FEEDBACK_TYPE_NOT_ALLOWED, EMPTY_FEEDBACK_DESCRIPTION));
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_confusing_instruction),
       R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, EMPTY_FEEDBACK_DESCRIPTION));
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_bad_route),
-      R.drawable.ic_bad_route, FEEDBACK_TYPE_ROUTING_ERROR, EMPTY_FEEDBACK_DESCRIPTION));
+      R.drawable.ic_bad_route, FEEDBACK_TYPE_ROUTING_ERROR, EMPTY_FEEDBACK_DESCRIPTION));*/
   }
 
   @Override

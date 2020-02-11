@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -14,11 +13,6 @@ class RouteComparator {
 
   private static final int FIRST_ROUTE = 0;
   private static final int ONE_ROUTE = 1;
-  private final NavigationViewRouter navigationViewRouter;
-
-  RouteComparator(NavigationViewRouter navigationViewRouter) {
-    this.navigationViewRouter = navigationViewRouter;
-  }
 
   void compare(@NonNull DirectionsResponse response, @Nullable DirectionsRoute chosenRoute) {
     if (isValidRoute(response)) {
@@ -27,7 +21,6 @@ class RouteComparator {
       if (isNavigationRunning(chosenRoute)) {
         bestRoute = findMostSimilarRoute(routes, bestRoute, chosenRoute);
       }
-      navigationViewRouter.updateCurrentRoute(bestRoute);
     }
   }
 

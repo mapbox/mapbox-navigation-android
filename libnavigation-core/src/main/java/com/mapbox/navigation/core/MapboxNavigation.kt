@@ -177,6 +177,20 @@ constructor(
     }
 
     /**
+     * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
+     * or a `Free Drive` state otherwise.
+     *
+     * @param route [DirectionsRoute]
+     * @see [registerTripSessionStateObserver]
+     * @see [registerRouteProgressObserver]
+     */
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
+    fun startTripSession(route: DirectionsRoute) {
+        tripSession.route = route
+        startTripSession()
+    }
+
+    /**
      * Stops listening for location updates and enters an `Idle` state.
      *
      * @see [registerTripSessionStateObserver]
@@ -309,6 +323,9 @@ constructor(
     fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
         MapboxNativeNavigatorImpl.addHistoryEvent(eventType, eventJsonProperties)
     }
+
+    fun retrieveSsmlAnnouncementInstruction(index: Int): String? =
+        MapboxNativeNavigatorImpl.getVoiceInstruction(index)?.ssmlAnnouncement
 
     /**
      * Registers [LocationObserver]. The updates are available whenever the trip session is started.

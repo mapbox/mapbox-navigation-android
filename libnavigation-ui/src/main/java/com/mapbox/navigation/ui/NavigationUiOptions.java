@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui;
 import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigation.ui.camera.Camera;
 
 public abstract class NavigationUiOptions {
 
@@ -26,4 +27,7 @@ public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract MapOfflineOptions offlineMapOptions();
+
+  @Nullable
+  public abstract Camera camera();
 }

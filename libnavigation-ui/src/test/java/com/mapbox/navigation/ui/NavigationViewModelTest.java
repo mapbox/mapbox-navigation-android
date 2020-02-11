@@ -3,13 +3,6 @@ package com.mapbox.navigation.ui;
 import android.app.Application;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.ui.LocationEngineConductor;
-import com.mapbox.navigation.ui.MapConnectivityController;
-import com.mapbox.navigation.ui.MapOfflineManager;
-import com.mapbox.navigation.ui.NavigationViewEventDispatcher;
-import com.mapbox.navigation.ui.NavigationViewModel;
-import com.mapbox.navigation.ui.NavigationViewRouter;
-import com.mapbox.navigation.ui.VoiceInstructionCache;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 import com.mapbox.navigation.ui.navigation.MapboxNavigation;
 

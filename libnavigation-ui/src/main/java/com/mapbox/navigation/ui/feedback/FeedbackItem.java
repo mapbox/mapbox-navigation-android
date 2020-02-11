@@ -1,10 +1,8 @@
 package com.mapbox.navigation.ui.feedback;
 
-import com.mapbox.navigation.ui.internal.navigation.metrics.FeedbackEvent;
-
 public class FeedbackItem {
 
-  @FeedbackEvent.FeedbackType
+  //  @FeedbackEvent.FeedbackType // TODO Telemetry Impl
   private String feedbackType;
   private String feedbackText;
   private String description;
@@ -12,7 +10,8 @@ public class FeedbackItem {
 
   FeedbackItem(String feedbackText,
                int feedbackImage,
-               @FeedbackEvent.FeedbackType String feedbackType,
+//               @FeedbackEvent.FeedbackType // TODO Telemetry Impl
+               String feedbackType,
                String description) {
     this.feedbackText = feedbackText;
     this.feedbackImage = feedbackImage;
@@ -28,7 +27,7 @@ public class FeedbackItem {
     return feedbackImage;
   }
 
-  @FeedbackEvent.FeedbackType
+//  @FeedbackEvent.FeedbackType // TODO Telemetry Impl
   public String getFeedbackType() {
     return feedbackType;
   }

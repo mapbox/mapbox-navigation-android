@@ -40,6 +40,7 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.base.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.internal.NavigationConstants;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -55,11 +56,7 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 import com.mapbox.navigation.ui.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.navigation.ui.internal.navigation.metrics.FeedbackEvent;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
-import com.mapbox.navigation.ui.milestone.BannerInstructionMilestone;
-import com.mapbox.navigation.ui.milestone.Milestone;
-import com.mapbox.navigation.ui.navigation.NavigationConstants;
 import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 
@@ -170,13 +167,13 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
-    navigationViewModel.updateFeedback(feedbackItem);
+//    navigationViewModel.updateFeedback(feedbackItem); // TODO Telemetry impl
     alertView.showFeedbackSubmitted();
   }
 
   @Override
   public void onFeedbackDismissed() {
-    navigationViewModel.cancelFeedback();
+//    navigationViewModel.cancelFeedback(); // TODO Telemetry impl
   }
 
   /**
@@ -246,8 +243,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
-   * Use this method inside a {@link RouteProgressObserver} to update this view with all other information
-   * that is not updated by the {@link InstructionView#updateBannerInstructionsWith(Milestone)}.
+   * Use this method inside a {@link RouteProgressObserver} to update this view.
    * <p>
    * This includes the distance remaining, instruction list, turn lanes, and next step information.
    *
@@ -258,31 +254,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
       updateDataFromInstruction(model);
-    }
-  }
-
-  /**
-   * Use this in a {@link com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener} to update
-   * this view with new banner instructions.
-   * <p>
-   * This method will look at the type of milestone to determine when
-   * it should update.
-   *
-   * @param milestone for retrieving the new BannerInstructions
-   * @since 0.20.0
-   */
-  public void updateBannerInstructionsWith(Milestone milestone) {
-    if (milestone instanceof BannerInstructionMilestone) {
-      BannerInstructions instructions = ((BannerInstructionMilestone) milestone).getBannerInstructions();
-      if (instructions == null || instructions.primary() == null) {
-        return;
-      }
-      BannerText primary = instructions.primary();
-      String primaryManeuverModifier = primary.modifier();
-      String drivingSide = currentStep.drivingSide();
-      updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees(), drivingSide);
-      updateDataFromBannerText(primary, instructions.secondary());
-      updateSubStep(instructions.sub(), primaryManeuverModifier);
     }
   }
 
@@ -549,7 +520,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     feedbackButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
-        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
+//        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI); // TODO Telemetry impl
         showFeedbackBottomSheet();
       }
     });

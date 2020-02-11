@@ -1,10 +1,13 @@
 package com.mapbox.navigation.ui;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.route.Router;
 
+import org.jetbrains.annotations.NotNull;
 
-class NavigationViewRouteEngineListener implements ViewRouteListener {
+import java.util.List;
+
+class NavigationViewRouteEngineListener implements Router.Callback {
 
   private final NavigationViewModel navigationViewModel;
 
@@ -13,19 +16,17 @@ class NavigationViewRouteEngineListener implements ViewRouteListener {
   }
 
   @Override
-  public void onRouteUpdate(DirectionsRoute directionsRoute) {
-    navigationViewModel.updateRoute(directionsRoute);
+  public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
+    navigationViewModel.updateRoute(routes.get(0));
   }
 
   @Override
-  public void onRouteRequestError(String errorMessage) {
-    if (navigationViewModel.isOffRoute()) {
-      navigationViewModel.sendEventFailedReroute(errorMessage);
-    }
+  public void onFailure(@NotNull Throwable throwable) {
+    navigationViewModel.sendEventFailedReroute(throwable.getLocalizedMessage());
   }
 
-  @Override
-  public void onDestinationSet(Point destination) {
-    navigationViewModel.retrieveDestination().setValue(destination);
-  }
+//  @Override
+//  public void onDestinationSet(Point destination) {
+//    navigationViewModel.retrieveDestination().setValue(destination);
+//  }
 }

@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.map;
 import android.content.Context;
 
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.navigation.base.internal.NavigationConstants;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -113,7 +114,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
   private boolean validLowFpsManeuver(RouteLegProgress routeLegProgress) {
     final String maneuverModifier = routeLegProgress.currentStepProgress().step().maneuver().modifier();
     return maneuverModifier != null
-            && (maneuverModifier.equals(ConstantsEx.STEP_MANEUVER_MODIFIER_STRAIGHT)
+            && (maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT)
             || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
             || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT));
   }

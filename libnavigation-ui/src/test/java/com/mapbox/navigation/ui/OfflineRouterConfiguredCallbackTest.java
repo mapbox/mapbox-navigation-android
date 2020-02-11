@@ -1,8 +1,5 @@
 package com.mapbox.navigation.ui;
 
-import com.mapbox.navigation.ui.NavigationViewOfflineRouter;
-import com.mapbox.navigation.ui.OfflineRouterConfiguredCallback;
-
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.eq;
