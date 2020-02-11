@@ -130,16 +130,16 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun initViews() {
-        bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet_faster_route)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFasterRoute)
         bottomSheetBehavior.peekHeight = 0
-        faster_route_accept_progress.max = maxProgress.toInt()
+        fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
         }
-        dismiss_layout.setOnClickListener {
+        dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
         }
-        accept_layout.setOnClickListener {
+        acceptLayout.setOnClickListener {
             fasterRoute?.let {
                 mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
                     removeAt(0)
@@ -209,12 +209,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val fasterRouteSelectionTimer: CountDownTimer = object : CountDownTimer(startTimeInMillis, countdownInterval) {
         override fun onTick(millisUntilFinished: Long) {
-            Timber.e("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
-            faster_route_accept_progress.progress = (maxProgress - millisUntilFinished / countdownInterval).toInt()
+            Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+            fasterRouteAcceptProgress.progress = (maxProgress - millisUntilFinished / countdownInterval).toInt()
         }
 
         override fun onFinish() {
-            Timber.e("FASTER_ROUTE: finished")
+            Timber.d("FASTER_ROUTE: finished")
             this@SimpleMapboxNavigationKt.fasterRoute = null
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
