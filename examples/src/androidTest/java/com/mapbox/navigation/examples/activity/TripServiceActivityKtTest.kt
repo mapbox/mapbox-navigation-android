@@ -55,9 +55,10 @@ class TripServiceActivityKtTest :
 
         uiDevice.run {
             openNotification()
-            wait(Until.hasObject(By.res("com.mapbox.driver.navigation.examples:id/notificationDistanceText")), 1000)
-
-            val message = findObject(By.res("com.mapbox.driver.navigation.examples:id/notificationDistanceText")).text
+            val notificationDistance =
+                By.res("com.mapbox.navigation.examples:id/notificationDistanceText")
+            wait(Until.hasObject(notificationDistance), 1000)
+            val message = findObject(notificationDistance).text
 
             assertEquals("100 m", message)
             pressBack()
