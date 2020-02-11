@@ -101,7 +101,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Offline
 
-    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
+    override fun cacheLastRoute() {
+        navigator.cacheLastRoute()
+    }
+
+    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
         navigator.configureRouter(routerParams, httpClient)
 
     override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
@@ -312,5 +316,6 @@ private fun RouteState.convertState(): RouteProgressState? {
         RouteState.COMPLETE -> RouteProgressState.ROUTE_ARRIVED
         RouteState.OFFROUTE -> null // send in a callback instead
         RouteState.STALE -> RouteProgressState.LOCATION_STALE
+        RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
 }

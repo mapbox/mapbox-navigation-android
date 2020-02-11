@@ -127,14 +127,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             keyPoints: List<Location>
         ) {
             if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints.map {
-                    // workaround for https://github.com/mapbox/mapbox-location-native/pull/65#discussion_r375777857
-                    val lat = it.latitude
-                    val lon = it.longitude
-                    it.latitude = lon
-                    it.longitude = lat
-                    it
-                }, true)
+                locationComponent?.forceLocationUpdate(keyPoints, true)
             } else {
                 locationComponent?.forceLocationUpdate(enhancedLocation)
             }
