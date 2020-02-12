@@ -91,12 +91,7 @@ dependencies {
     implementation project(':liblogger')
     implementation project(':libnavigator')
 
-    androidTestImplementation(project(':libtesting')) {
-        exclude group: 'org.robolectric'
-        exclude group: 'io.mockk'
-    }
-    // downgrade because of https://github.com/mockk/mockk/issues/281
-    androidTestImplementation('io.mockk:mockk-android:1.9.2')
+    androidTestImplementation project(':libtesting-ui')
 
     //ktlint
     ktlint dependenciesList.ktlint

@@ -1,6 +1,1 @@
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    package="com.mapbox.navigation.testing">
-
-    <uses-sdk tools:overrideLibrary="com.schibsted.spain.barista, android_libs.ub_uiautomator" />
-
-</manifest>
+<manifest package="com.mapbox.navigation.testing" />
