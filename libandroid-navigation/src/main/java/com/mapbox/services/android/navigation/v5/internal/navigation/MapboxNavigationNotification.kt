@@ -8,11 +8,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
@@ -35,9 +38,6 @@ import java.util.Calendar
  * This is in charge of creating the persistent navigation session notification and updating it.
  */
 internal class MapboxNavigationNotification : NavigationNotification {
-
-    private val END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION"
-    private val SET_BACKGROUND_COLOR = "setBackgroundColor"
 
     private var notificationManager: NotificationManager? = null
     private lateinit var notification: Notification
@@ -310,20 +310,40 @@ internal class MapboxNavigationNotification : NavigationNotification {
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
     }
 
-    private fun updateManeuverImage(step: LegStep) {
-        val maneuverResource = getManeuverResource(step)
-        if (currentManeuverId != maneuverResource) {
-            currentManeuverId = maneuverResource
-            collapsedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
-            )
-            expandedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
-            )
+    private fun updateManeuverImage(legStep: LegStep) {
+        val maneuverImageId = getManeuverResource(legStep)
+        if (maneuverImageId != currentManeuverId) {
+            currentManeuverId = maneuverImageId
+            when (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                true -> {
+                    collapsedNotificationRemoteViews?.setImageViewResource(
+                            R.id.maneuverImage,
+                            maneuverImageId
+                    )
+                    expandedNotificationRemoteViews?.setImageViewResource(
+                            R.id.maneuverImage,
+                            maneuverImageId
+                    )
+                }
+                false -> {
+                    getManeuverBitmap(maneuverImageId)?.let { bitmap ->
+                        collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+                        expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+                    }
+                }
+            }
         }
     }
+
+    // Package private (no modifier) for testing purposes
+    fun getManeuverBitmap(maneuverResourceId: Int): Bitmap? =
+            AppCompatResources.getDrawable(applicationContext, maneuverResourceId)?.let { drawable ->
+                val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+                bitmap
+            }
 
     private fun getManeuverResource(step: LegStep): Int {
         val maneuver = step.maneuver()
@@ -338,7 +358,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
                 )
             ) {
                 obtainManeuverResourceFrom(maneuverType + maneuverModifier + drivingSide)
-            } else obtainManeuverResourceFrom(maneuverType + maneuverModifier)
+            } else {
+                obtainManeuverResourceFrom(maneuverType + maneuverModifier)
+            }
         }
         return obtainManeuverResourceFrom(maneuverType)
     }
@@ -424,5 +446,10 @@ internal class MapboxNavigationNotification : NavigationNotification {
             else -> {
             }
         }
+    }
+
+    companion object {
+        private const val END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION"
+        private const val SET_BACKGROUND_COLOR = "setBackgroundColor"
     }
 }

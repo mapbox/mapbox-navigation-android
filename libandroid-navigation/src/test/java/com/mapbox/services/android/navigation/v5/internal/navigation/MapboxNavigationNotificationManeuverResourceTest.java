@@ -21,6 +21,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Locale;
 
@@ -43,9 +44,11 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("KotlinInternalInJava")
 public class MapboxNavigationNotificationManeuverResourceTest extends BaseTest {
 
   private static final String DIRECTIONS_ROUTE_FIXTURE = "directions_v5_precision_6.json";
@@ -592,8 +595,12 @@ public class MapboxNavigationNotificationManeuverResourceTest extends BaseTest {
     MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
     Context mockedContext = createContext();
     Notification mockedNotification = mock(Notification.class);
-    return new MapboxNavigationNotification(mockedContext,
-      mockedMapboxNavigation, mockedNotification);
+    MapboxNavigationNotification notification = new MapboxNavigationNotification(mockedContext,
+            mockedMapboxNavigation, mockedNotification);
+
+    MapboxNavigationNotification spyNotification = Mockito.spy(notification);
+    doReturn(null).when(spyNotification).getManeuverBitmap(anyInt());
+    return spyNotification;
   }
 
   private MapboxNavigation createMapboxNavigation() {

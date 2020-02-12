@@ -8,10 +8,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.text.SpannableString
 import android.text.format.DateFormat
 import android.widget.RemoteViews
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
@@ -302,16 +305,35 @@ class MapboxTripNotification constructor(
         val maneuverImageId = getManeuverResource(legStep)
         if (maneuverImageId != currentManeuverId) {
             currentManeuverId = maneuverImageId
-            collapsedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverImageId
-            )
-            expandedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverImageId
-            )
+            when (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                true -> {
+                    collapsedNotificationRemoteViews?.setImageViewResource(
+                            R.id.maneuverImage,
+                            maneuverImageId
+                    )
+                    expandedNotificationRemoteViews?.setImageViewResource(
+                            R.id.maneuverImage,
+                            maneuverImageId
+                    )
+                }
+                false -> {
+                    getManeuverBitmap(maneuverImageId)?.let { bitmap ->
+                        collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+                        expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+                    }
+                }
+            }
         }
     }
+
+    private fun getManeuverBitmap(maneuverResourceId: Int): Bitmap? =
+            AppCompatResources.getDrawable(applicationContext, maneuverResourceId)?.let { drawable ->
+                val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                drawable.setBounds(0, 0, canvas.width, canvas.height)
+                drawable.draw(canvas)
+                bitmap
+            }
 
     private fun getManeuverResource(step: LegStep): Int {
         val stepManeuver = step.maneuver()
