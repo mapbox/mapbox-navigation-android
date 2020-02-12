@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.utils.timer.MapboxTimer
 import io.mockk.clearMocks
 import io.mockk.every
@@ -24,6 +25,7 @@ class MapboxDirectionsSessionTest {
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routesRequestCallback: RoutesRequestCallback = mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
+    private val fasterRouteObserver: FasterRouteObserver = mockk(relaxUnitFun = true)
     private lateinit var callback: Router.Callback
     private val routes: List<DirectionsRoute> = listOf(mockk())
     private val mapboxTimer: MapboxTimer = mockk(relaxUnitFun = true)
@@ -171,6 +173,16 @@ class MapboxDirectionsSessionTest {
         clearMocks(router)
         session.requestRoutes(routeOptions, routesRequestCallback)
         verify(exactly = 1) { router.cancel() }
+    }
+
+    @Test
+    fun fasterRoute_fasterRouteNotAvailable() {
+        session.registerFasterRouteObserver(fasterRouteObserver)
+        session.requestRoutes(routeOptions, routesRequestCallback)
+        callback.onResponse(routes)
+        delayLambda()
+        callback.onResponse(routes)
+        verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
     }
 
     @Test
