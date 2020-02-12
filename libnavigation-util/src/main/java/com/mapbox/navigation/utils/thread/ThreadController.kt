@@ -109,7 +109,7 @@ object ThreadController {
     }
 
     /**
-     * Same as [cancelAllNonUICoroutines], but using the MainThread dispatcher.
+     * Same as [getIOScopeAndRootJob], but using the MainThread dispatcher.
      */
     fun getMainScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(mainRootJob)
