@@ -39,5 +39,11 @@ enum class RouteProgressState {
      */
     LOCATION_STALE,
 
+    /**
+     * State when we start following a route.
+     *
+     * After a certain number of tracking points we gain confidence and switch to tracking state.
+     * We do map-matching rather than route line snapping during this state.
+     */
     ROUTE_UNCERTAIN
 }

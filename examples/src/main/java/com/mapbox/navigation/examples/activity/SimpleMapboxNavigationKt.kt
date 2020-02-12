@@ -119,7 +119,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val locationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
-            Timber.e("raw location %s", rawLocation.toString())
+            Timber.d("raw location %s", rawLocation.toString())
         }
 
         override fun onEnhancedLocationChanged(
@@ -131,8 +131,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 locationComponent?.forceLocationUpdate(enhancedLocation)
             }
-            Timber.e("enhanced location %s", enhancedLocation)
-            Timber.e("enhanced keyPoints %s", keyPoints)
+            Timber.d("enhanced location %s", enhancedLocation)
+            Timber.d("enhanced keyPoints %s", keyPoints)
         }
     }
 
@@ -170,7 +170,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            Timber.e("route progress %s", routeProgress.toString())
+            Timber.d("route progress %s", routeProgress.toString())
         }
     }
 
@@ -181,13 +181,13 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
                     .show()
             }
-            Timber.e("route changed %s", routes.toString())
+            Timber.d("route changed %s", routes.toString())
         }
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            Timber.e("route request success %s", routes.toString())
+            Timber.d("route request success %s", routes.toString())
             return routes
         }
 
@@ -198,7 +198,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             symbolManager?.deleteAll()
-            Timber.e("route request canceled")
+            Timber.d("route request canceled")
         }
     }
 
