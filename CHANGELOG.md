@@ -2,7 +2,7 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.42.4 - February 11, 2020
+### v0.42.5 - February 11, 2020
 
 * Backport #2315 to base-v0.42.1 [#2318](https://github.com/mapbox/mapbox-navigation-android/pull/2318)
 * Ensure to use valid MapRouteArrow and MapRouteLine Layer references during style change [#2315](https://github.com/mapbox/mapbox-navigation-android/pull/2315)
