@@ -264,14 +264,6 @@ jobs:
 #     - run:
 #         name: Check public documentation
 #         command: sh scripts/dokka-validate.sh
-      - run:
-          name: Generate Bintray credentials
-          command: |
-            if [ -n "${BINTRAY_USER}" ]; then
-              echo "BINTRAY_USER=$BINTRAY_USER
-              BINTRAY_API_KEY=$BINTRAY_API_KEY
-              GPG_PASSPHRASE=$GPG_PASSPHRASE"
-            fi
       - deploy:
           name: Publish Navigation SDK 1.0 to Bintray
           command: |

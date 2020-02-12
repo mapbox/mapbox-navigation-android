@@ -1,13 +1,19 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import com.mapbox.navigator.HttpCode
+import com.mapbox.navigator.HttpResponse
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
-import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
@@ -27,6 +33,7 @@ class HttpClientTest {
 
     private val httpClient = HttpClient(USER_AGENT)
     private val mockServer = MockWebServer()
+    private val httpResponseCallback: HttpResponse = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
@@ -41,22 +48,36 @@ class HttpClientTest {
 
     @Test
     fun `check success network response`() {
+        val latch = CountDownLatch(1)
+        every { httpResponseCallback.run(any(), any()) } answers {
+            latch.countDown()
+        }
         val mockResponse = buildResponse(SUCCESS_CODE, SUCCESS_BODY)
         mockServer.enqueue(mockResponse)
-        val response = httpClient.executeMockRequest()
+        httpClient.executeMockRequest(httpResponseCallback)
 
-        assertEquals(HttpCode.SUCCESS.name, response.code.name)
-        assertArrayEquals(SUCCESS_BODY.toByteArray(), response.bytes)
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail()
+        }
+
+        verify { httpResponseCallback.run(SUCCESS_BODY.toByteArray(), HttpCode.SUCCESS) }
     }
 
     @Test
     fun `check failure network response`() {
+        val latch = CountDownLatch(1)
+        every { httpResponseCallback.run(any(), any()) } answers {
+            latch.countDown()
+        }
         val mockResponse = buildResponse(FAILURE_CODE, FAILURE_BODY)
         mockServer.enqueue(mockResponse)
-        val response = httpClient.executeMockRequest()
+        httpClient.executeMockRequest(httpResponseCallback)
 
-        assertEquals(HttpCode.FAILURE.name, response.code.name)
-        assertArrayEquals(FAILURE_BODY.toByteArray(), response.bytes)
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail()
+        }
+
+        verify { httpResponseCallback.run(FAILURE_BODY.toByteArray(), HttpCode.FAILURE) }
     }
 
     @Test
@@ -76,7 +97,7 @@ class HttpClientTest {
             userAgent = USER_AGENT,
             clientBuilder = OkHttpClient.Builder().apply { networkInterceptors().add(interceptor) })
 
-        httpClient.executeMockRequest()
+        httpClient.executeMockRequest(httpResponseCallback)
     }
 
     @Test
@@ -97,7 +118,7 @@ class HttpClientTest {
             acceptGzipEncoding = true,
             clientBuilder = OkHttpClient.Builder().apply { networkInterceptors().add(interceptor) })
 
-        httpClientWithGzip.executeMockRequest()
+        httpClientWithGzip.executeMockRequest(httpResponseCallback)
     }
 
     private fun buildResponse(code: Int, body: String) =
@@ -106,5 +127,6 @@ class HttpClientTest {
             setBody(body)
         }
 
-    private fun HttpClient.executeMockRequest() = this.get(mockServer.url("/").toString())
+    private fun HttpClient.executeMockRequest(httpResponse: HttpResponse) =
+        this.get(mockServer.url("/").toString(), httpResponse)
 }

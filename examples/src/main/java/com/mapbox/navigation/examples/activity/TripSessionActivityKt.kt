@@ -40,8 +40,12 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap?.locationComponent?.forceLocationUpdate(rawLocation)
         }
 
-        override fun onEnhancedLocationChanged(enhancedLocation: Location) {
+        override fun onEnhancedLocationChanged(
+            enhancedLocation: Location,
+            keyPoints: List<Location>
+        ) {
             Timber.d("DEBUG enhanced location: $enhancedLocation")
+            Timber.d("DEBUG enhanced keyPoints: $keyPoints")
         }
     }
 
