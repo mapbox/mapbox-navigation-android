@@ -10,6 +10,15 @@ Mapbox welcomes participation and contributions from everyone.
 * Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
 * Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
 
+### v0.42.5 - February 11, 2020
+
+* Backport #2315 to base-v0.42.1 [#2318](https://github.com/mapbox/mapbox-navigation-android/pull/2318)
+* Ensure to use valid MapRouteArrow and MapRouteLine Layer references during style change [#2315](https://github.com/mapbox/mapbox-navigation-android/pull/2315)
+* Cherry pick #2307 (master) into base-v0.42.1 [#2308](https://github.com/mapbox/mapbox-navigation-android/pull/2308)
+* Bump mapbox-navigation-native version to 7.0.0 in base-v0.42.1 branch [#2294](https://github.com/mapbox/mapbox-navigation-android/pull/2294)
+* Cherry pick #2287 (master) into base-v0.42.1 [#2292](https://github.com/mapbox/mapbox-navigation-android/pull/2292)
+
+
 ### v0.42.4 - November 25, 2019
 
 * Bumped Java SDK dependency to `4.9.0` [#2043](https://github.com/mapbox/mapbox-navigation-android/pull/2043)

@@ -29,13 +29,13 @@ If you are looking to include this inside your project, please take a look at [t
 Add this snippet to your `build.gradle` file to use this SDK (`libandroid-navigation`):
 
 ```
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.4'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.5'
 ```
 
 And for `libandroid-navigation-ui`:
 
 ```
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.4'
+implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.5'
 ```
 **Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.
 
