@@ -12,6 +12,7 @@ import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
+import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -313,6 +314,10 @@ class MapboxTripNotificationTest {
         mockkStatic(TextUtils::class)
         val slot = slot<CharSequence>()
         every { TextUtils.isEmpty(capture(slot)) } answers { slot.captured.isEmpty() }
+
+        mockkStatic(AppCompatResources::class)
+        every { AppCompatResources.getDrawable(any(), any()) } returns null
+
         mockNotificationCreation()
     }
 
