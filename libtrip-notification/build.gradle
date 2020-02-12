@@ -38,6 +38,7 @@ dependencies {
     implementation project(':libnavigation-util')
 
     implementation dependenciesList.androidXCore
+    implementation dependenciesList.supportAppcompatV7
 
     implementation dependenciesList.coroutinesAndroid
 
