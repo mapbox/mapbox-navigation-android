@@ -515,7 +515,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // centering the map camera to the beginning of the provided route
     navigationMap.resumeCamera(lastLocation);
     navigation.startTripSession(route);
-    "".join()
     addEventToHistoryFile("start_navigation");
 
     // Location updates will be received from ProgressChangeListener
