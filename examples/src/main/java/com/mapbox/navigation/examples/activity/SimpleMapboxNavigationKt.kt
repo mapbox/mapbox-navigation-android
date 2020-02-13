@@ -39,12 +39,14 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
+    private val locationEngineCallback = MyLocationEngineCallback(this)
     private var mapboxMap: MapboxMap? = null
     private var navigationMapRoute: NavigationMapRoute? = null
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -157,17 +159,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         localLocationEngine.removeLocationUpdates(locationEngineCallback)
     }
 
-    private val locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.firstOrNull()?.let {
-                locationComponent?.forceLocationUpdate(it)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-        }
-    }
-
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
@@ -258,5 +249,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    private class MyLocationEngineCallback(activity: SimpleMapboxNavigationKt) :
+        LocationEngineCallback<LocationEngineResult> {
+
+        private val activityRef = WeakReference(activity)
+
+        override fun onSuccess(result: LocationEngineResult?) {
+            result?.locations?.firstOrNull()?.let {
+                activityRef.get()?.locationComponent?.forceLocationUpdate(it)
+            }
+        }
+
+        override fun onFailure(exception: Exception) {
+        }
     }
 }
