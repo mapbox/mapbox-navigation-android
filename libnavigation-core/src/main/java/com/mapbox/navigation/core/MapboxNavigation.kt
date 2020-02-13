@@ -28,6 +28,8 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.module.NavigationModuleProvider
+import com.mapbox.navigation.core.tiles.NavigationRouterParamsProvider
+import com.mapbox.navigation.core.tiles.RouterTilesParams
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -41,8 +43,9 @@ import com.mapbox.navigation.trip.notification.NotificationAction
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
-import java.lang.reflect.Field
 import kotlinx.coroutines.channels.ReceiveChannel
+import java.io.File
+import java.lang.reflect.Field
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -109,6 +112,7 @@ class MapboxNavigation(
     private val navigationSession = NavigationSession(context)
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
+    private val navigationRouterParamsProvider = NavigationRouterParamsProvider()
 
     private var notificationChannelField: Field? = null
 
@@ -145,6 +149,22 @@ class MapboxNavigation(
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
+    }
+
+    /**
+     * Tell the on-board navigator to start loading routing tiles. This feature is in development
+     * and does not give feedback on the status of the tiles being loaded, and does not manage
+     * stale router configurations that were loaded. This is not ready for production use.
+     *
+     * @param routerTilesParams describes the version of the router tiles
+     * @see [NavigationRouterParamsProvider] gives default values for the RouterTilesParams
+     */
+    fun configureRouter(routerTilesParams: RouterTilesParams) {
+        val fileKey = "${routerTilesParams.endpointHost}_${routerTilesParams.endpointHost}"
+        val tilePath = File(context.filesDir, fileKey).absolutePath
+        val routerParams = navigationRouterParamsProvider
+                .provideRouterParams(tilePath, routerTilesParams, accessToken ?: "")
+        MapboxNativeNavigatorImpl.configureRouter(routerParams, null)
     }
 
     /**
