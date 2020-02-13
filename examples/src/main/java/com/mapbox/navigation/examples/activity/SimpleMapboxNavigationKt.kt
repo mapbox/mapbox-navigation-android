@@ -3,11 +3,14 @@ package com.mapbox.navigation.examples.activity
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Looper
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -32,6 +35,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -40,33 +44,38 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
 import java.lang.ref.WeakReference
-import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
+import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
+    private val startTimeInMillis = 5000L
+    private val countdownInterval = 10L
+    private val maxProgress = startTimeInMillis / countdownInterval
     private val locationEngineCallback = MyLocationEngineCallback(this)
+
     private var mapboxMap: MapboxMap? = null
     private var navigationMapRoute: NavigationMapRoute? = null
-    private lateinit var mapboxNavigation: MapboxNavigation
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
+    private var fasterRoute: DirectionsRoute? = null
 
+    private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simple_mapbox_navigation)
 
+        initViews()
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
         mapboxNavigation = MapboxNavigation(applicationContext, Utils.getMapboxAccessToken(this))
-        startNavigation.setOnClickListener {
-            mapboxNavigation.startTripSession()
-        }
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -116,6 +125,28 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun initViews() {
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFasterRoute)
+        bottomSheetBehavior.peekHeight = 0
+        fasterRouteAcceptProgress.max = maxProgress.toInt()
+        startNavigation.setOnClickListener {
+            mapboxNavigation.startTripSession()
+        }
+        dismissLayout.setOnClickListener {
+            fasterRouteSelectionTimer.onFinish()
+        }
+        acceptLayout.setOnClickListener {
+            fasterRoute?.let {
+                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
+                    removeAt(0)
+                    add(0, it)
+                })
+                fasterRouteSelectionTimer.onFinish()
+            }
         }
     }
 
@@ -176,6 +207,27 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private val fasterRouteSelectionTimer: CountDownTimer = object : CountDownTimer(startTimeInMillis, countdownInterval) {
+        override fun onTick(millisUntilFinished: Long) {
+            Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+            fasterRouteAcceptProgress.progress = (maxProgress - millisUntilFinished / countdownInterval).toInt()
+        }
+
+        override fun onFinish() {
+            Timber.d("FASTER_ROUTE: finished")
+            this@SimpleMapboxNavigationKt.fasterRoute = null
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    private val fasterRouteObserver = object : FasterRouteObserver {
+        override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
+            this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
+            fasterRouteSelectionTimer.start()
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.d("route request success %s", routes.toString())
@@ -222,6 +274,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
     }
 
     override fun onStop() {
@@ -231,6 +284,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
         stopLocationUpdates()
     }
 

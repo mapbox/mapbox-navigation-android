@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.NavigationComponentProvider
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import java.util.concurrent.CopyOnWriteArrayList
 
 // todo make internal
@@ -13,6 +14,7 @@ class MapboxDirectionsSession(
 
     private val fasterRouteInterval = 2 * 60 * 1000L // 2 minutes
     private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
+    private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
     private var routeOptions: RouteOptions? = null
     private val fasterRouteTimer =
         NavigationComponentProvider.createMapboxTimer(fasterRouteInterval) {
@@ -72,8 +74,17 @@ class MapboxDirectionsSession(
         routesObservers.remove(routesObserver)
     }
 
+    override fun registerFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
+        fasterRouteObservers.add(fasterRouteObserver)
+    }
+
+    override fun unregisterFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
+        fasterRouteObservers.remove(fasterRouteObserver)
+    }
+
     override fun unregisterAllRoutesObservers() {
         routesObservers.clear()
+        fasterRouteObservers.clear()
     }
 
     override fun shutDownSession() {
@@ -87,8 +98,9 @@ class MapboxDirectionsSession(
         }
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
-                if (isRouteFaster(routes[0])) {
-                    this@MapboxDirectionsSession.routes = routes
+                val route = routes[0]
+                if (isRouteFaster(route)) {
+                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(route) }
                 }
             }
 
