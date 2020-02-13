@@ -10,25 +10,25 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
-import com.mapbox.services.android.navigation.testapp.R
-import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleMilestoneEventListener
-import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleOffRouteListener
-import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleProgressChangeListener
-import com.mapbox.services.android.navigation.testapp.example.ui.navigation.RouteFinder
+import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.network.ReplayRouteLocationEngine
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
-import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
-import com.mapbox.services.android.navigation.v5.utils.extensions.ifNonNull
+import com.mapbox.services.android.navigation.testapp.NavigationApplication.Companion.instance
+import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleOffRouteListener
+import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleProgressChangeListener
+import com.mapbox.services.android.navigation.testapp.example.ui.navigation.RouteFinder
+import okhttp3.Cache
 import java.io.File
 import java.util.Locale.US
-import okhttp3.Cache
 
 private const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
 private const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500
@@ -40,32 +40,30 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     val location: MutableLiveData<Location> = MutableLiveData()
     val routes: MutableLiveData<List<DirectionsRoute>> = MutableLiveData()
     val progress: MutableLiveData<RouteProgress> = MutableLiveData()
-    val milestone: MutableLiveData<Milestone> = MutableLiveData()
     val destination: MutableLiveData<Point> = MutableLiveData()
 
     var primaryRoute: DirectionsRoute? = null
     var isOffRoute: Boolean = false
 
-    private val locationEngine: LocationEngine
-    private val locationEngineCallback: ExampleLocationEngineCallback
+    private val locationEngine: LocationEngine by lazy(LazyThreadSafetyMode.NONE) {
+        LocationEngineProvider.getBestLocationEngine(getApplication())
+    }
+    private val locationEngineCallback: ExampleLocationEngineCallback by lazy(LazyThreadSafetyMode.NONE) {
+        ExampleLocationEngineCallback(location)
+    }
     private val speechPlayer: NavigationSpeechPlayer
-    private val navigation: MapboxNavigation
+    private var navigation: MapboxNavigation
 
     private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
-    val routeFinder: RouteFinder
+    private val routeFinder: RouteFinder
 
     init {
-        routeFinder = RouteFinder(
-            this, routes, accessToken, retrieveOfflineVersionFromPreferences(),
-            retrieveProfileFromPreferences()
-        )
-        // Initialize the location engine
-        locationEngine = LocationEngineProvider.getBestLocationEngine(getApplication())
-        locationEngineCallback = ExampleLocationEngineCallback(location)
+        navigation =
+            MapboxNavigation(getApplication(), accessToken, locationEngine = locationEngine)
 
-        // Initialize navigation and pass the LocationEngine
-        navigation = MapboxNavigation(getApplication(), accessToken)
-        navigation.locationEngine = locationEngine
+        routeFinder = RouteFinder(
+            this, routes, { navigation }, accessToken
+        )
 
         // Initialize the speech player and pass to milestone event listener for instructions
         val english = US.language // TODO localization
@@ -77,13 +75,11 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         val speechPlayerProvider =
             SpeechPlayerProvider(getApplication(), english, true, voiceInstructionLoader)
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
-        navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
-        navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
-        navigation.addOffRouteListener(ExampleOffRouteListener(this))
-    }
-
-    internal fun updateProfile() {
-        routeFinder.updateProfile(retrieveProfileFromPreferences())
+        ExampleProgressChangeListener(location, progress).let { routeProgressChangeListener ->
+            navigation.registerRouteProgressObserver(routeProgressChangeListener)
+            navigation.registerLocationObserver(routeProgressChangeListener)
+        }
+        navigation.registerOffRouteObserver(ExampleOffRouteListener(this))
     }
 
     override fun onCleared() {
@@ -97,6 +93,14 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
     fun findRouteToDestination() {
         ifNonNull(location.value, destination.value) { location, destination ->
+            navigation.requestRoutes(
+                RouteOptions.builder()
+                    .coordinates(
+                        Point.fromLngLat(location.longitude, location.latitude),
+                        destination = destination
+                    )
+                    .build()
+            )
             routeFinder.findRoute(location, destination)
         }
     }
@@ -109,19 +113,24 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         return primaryRoute != null
     }
 
+    @SuppressLint("MissingPermission")
     fun startNavigation() {
         primaryRoute?.let { primaryRoute ->
-            when (shouldSimulateRoute()) {
+            navigation = when (shouldSimulateRoute()) {
                 true -> {
                     val replayRouteLocationEngine = ReplayRouteLocationEngine()
                     replayRouteLocationEngine.assign(primaryRoute)
-                    navigation.locationEngine = replayRouteLocationEngine
+                    MapboxNavigation(
+                        getApplication(),
+                        accessToken,
+                        locationEngine = replayRouteLocationEngine
+                    )
                 }
                 false -> {
-                    navigation.locationEngine = locationEngine
+                    MapboxNavigation(getApplication(), accessToken, locationEngine = locationEngine)
                 }
             }
-            navigation.startNavigation(primaryRoute)
+            navigation.startTripSession(primaryRoute)
             removeLocation()
         }
     }
@@ -134,26 +143,21 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
     fun stopNavigation() {
         requestLocation()
-        navigation.stopNavigation()
+        navigation.stopTripSession()
     }
 
     fun retrieveNavigation(): MapboxNavigation {
         return navigation
     }
 
-    fun refreshOfflineVersionFromPreferences() {
-        val version = retrieveOfflineVersionFromPreferences()
-        routeFinder.updateOfflineVersion(version)
-    }
-
     private fun shutdown() {
-        val cameraEngine = navigation.cameraEngine
-        if (cameraEngine is DynamicCamera) {
-            cameraEngine.clearMap()
-        }
-        navigation.onDestroy()
-        speechPlayer.onDestroy()
-        removeLocation()
+        // val cameraEngine = navigation.cameraEngine
+        // if (cameraEngine is DynamicCamera) {
+        //     cameraEngine.clearMap()
+        // }
+        // navigation.onDestroy()
+        // speechPlayer.onDestroy()
+        // removeLocation()
     }
 
     @SuppressLint("MissingPermission")
@@ -164,34 +168,6 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
     private fun removeLocation() {
         locationEngine.removeLocationUpdates(locationEngineCallback)
-    }
-
-    private fun retrieveOfflineVersionFromPreferences(): String {
-        val context = getApplication<Application>()
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(context.getString(R.string.offline_version_key), "")
-    }
-
-    private fun retrieveProfileFromPreferences(): String {
-        val context = getApplication<Application>()
-        return normalizeForTraffic(
-            PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(
-                    context.getString(R.string.route_profile_key), context.getString(
-                        R.string
-                            .default_route_profile
-                    )
-                )
-        )
-    }
-
-    private fun normalizeForTraffic(string: String): String {
-        var normalizedString = string.toLowerCase()
-        if (string.equals("driving")) {
-            return "driving-traffic"
-        } else {
-            return normalizedString
-        }
     }
 
     private fun buildEngineRequest(): LocationEngineRequest {

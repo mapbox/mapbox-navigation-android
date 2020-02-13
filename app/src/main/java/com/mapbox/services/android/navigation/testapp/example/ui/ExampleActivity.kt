@@ -22,7 +22,9 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.AttributionDialogManager
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity
@@ -31,12 +33,6 @@ import com.mapbox.services.android.navigation.testapp.example.ui.autocomplete.Ex
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.PermissionRequestDialog
 import com.mapbox.services.android.navigation.testapp.example.utils.hideKeyboard
 import com.mapbox.services.android.navigation.testapp.example.utils.showKeyboard
-import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.services.android.navigation.v5.milestone.Milestone
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
-import com.mapbox.services.android.navigation.v5.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.services.android.navigation.v5.navigation.metrics.MetricsObserver
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import kotlinx.android.synthetic.main.activity_example.*
 import timber.log.Timber
 
@@ -59,7 +55,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
         setContentView(R.layout.activity_example)
         setupWith(savedInstanceState)
         addNavigationForHistory(viewModel.retrieveNavigation())
-        MapboxMetricsReporter.setMetricsObserver(this)
     }
 
     public override fun onStart() {
@@ -71,7 +66,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     public override fun onResume() {
         super.onResume()
         mapView.onResume()
-        viewModel.refreshOfflineVersionFromPreferences()
     }
 
     override fun onLowMemory() {
@@ -98,7 +92,6 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
-        MapboxMetricsReporter.removeObserver()
     }
 
     override fun onBackPressed() {
@@ -221,6 +214,10 @@ class ExampleActivity : HistoryActivity(), ExampleView {
         instructionView.visibility = visibility
     }
 
+    override fun updateInstructionViewWith(progress: RouteProgress) {
+        instructionView.updateDistanceWith(progress)
+    }
+
     override fun addMapProgressChangeListener(navigation: MapboxNavigation) {
         map?.addProgressChangeListener(navigation)
     }
@@ -251,7 +248,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            viewModel.updateProfile()
+            // viewModel.updateProfile()
         }
     }
 

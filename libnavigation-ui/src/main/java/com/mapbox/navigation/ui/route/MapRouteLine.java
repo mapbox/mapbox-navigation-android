@@ -240,7 +240,7 @@ class MapRouteLine {
     draw(route);
   }
 
-  void draw(List<DirectionsRoute> directionsRoutes) {
+  void draw(List<? extends DirectionsRoute> directionsRoutes) {
     if (directionsRoutes.isEmpty()) {
       return;
     }
@@ -336,7 +336,7 @@ class MapRouteLine {
     }
   }
 
-  private void generateRouteFeatureCollectionsFrom(List<DirectionsRoute> routes) {
+  private void generateRouteFeatureCollectionsFrom(List<? extends DirectionsRoute> routes) {
     // Retrieve a possibly null task. The retrieve is atomic.
     FeatureProcessingTask task = featureProcessingTaskRef.getAndSet(retrieveFeatureProcessingTask(routes));
     // If the previous task is valid, cancel it.
@@ -358,7 +358,7 @@ class MapRouteLine {
     this.featureProcessingTask = featureProcessingTask;
   }
 
-  private FeatureProcessingTask retrieveFeatureProcessingTask(List<DirectionsRoute> routes) {
+  private FeatureProcessingTask retrieveFeatureProcessingTask(List<? extends DirectionsRoute> routes) {
     if (isFeatureProcessingTaskInjected) {
       return featureProcessingTask;
     }

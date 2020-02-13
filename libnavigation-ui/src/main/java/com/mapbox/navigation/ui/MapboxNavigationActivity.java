@@ -99,7 +99,7 @@ public class MapboxNavigationActivity extends AppCompatActivity implements OnNav
     extractRoute(options);
     extractConfiguration(options);
     options.navigationOptions(new NavigationOptions.Builder().build());
-    navigationView.startNavigation(options.build(), );
+//    navigationView.startNavigation(options.build(), );
   }
 
   @Override

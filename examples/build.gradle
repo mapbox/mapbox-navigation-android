@@ -106,6 +106,7 @@ dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-ui')
     implementation dependenciesList.mapboxAnnotationPlugin
+    implementation dependenciesList.mapboxSdkTurf
 
     // Support libraries
     implementation dependenciesList.androidXCore

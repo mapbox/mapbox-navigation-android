@@ -20,14 +20,14 @@ import static com.mapbox.navigation.ui.route.RouteConstants.PRIMARY_ROUTE_PROPER
 
 class FeatureProcessingTask extends Thread {
 
-  private final List<DirectionsRoute> routes;
+  private final List<? extends DirectionsRoute> routes;
   private final List<FeatureCollection> routeFeatureCollections = new ArrayList<>();
   private final WeakReference<OnRouteFeaturesProcessedCallback> callbackWeakReference;
   private final HashMap<LineString, DirectionsRoute> routeLineStrings = new HashMap<>();
   private AtomicBoolean cancelThread = new AtomicBoolean(false);
   private Handler postHandler;
 
-  FeatureProcessingTask(List<DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback, Handler handler) {
+  FeatureProcessingTask(List<? extends DirectionsRoute> routes, OnRouteFeaturesProcessedCallback callback, Handler handler) {
     this.routes = routes;
     this.callbackWeakReference = new WeakReference<>(callback);
     this.postHandler = handler;

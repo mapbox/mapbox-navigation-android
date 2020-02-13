@@ -97,15 +97,6 @@
                 android:value=".MainActivity"/>
         </activity>
 
-        <activity
-            android:name=".activity.OfflineRegionDownloadActivity"
-            android:label="@string/title_component_navigation"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".NavigationSettingsActivity"/>
-        </activity>
-
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

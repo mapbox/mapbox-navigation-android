@@ -1,12 +1,11 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
-import android.location.Location
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
-import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener
 
-class ExampleOffRouteListener(private val viewModel: ExampleViewModel) : OffRouteListener {
+class ExampleOffRouteListener(private val viewModel: ExampleViewModel) : OffRouteObserver {
 
-    override fun userOffRoute(location: Location) {
+    override fun onOffRouteStateChanged(offRoute: Boolean) {
         viewModel.isOffRoute = true
         viewModel.findRouteToDestination()
     }

@@ -9,36 +9,36 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
 import com.mapbox.navigation.ui.OnNavigationReadyCallback;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.navigation.ui.listeners.RouteListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.testapp.R;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Response;
-
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, RouteListener, ProgressChangeListener {
+        NavigationListener, RouteListener, LocationObserver, RouteObserver {
 
   private NavigationView navigationView;
   private boolean dropoffDialogShown;
   private Location lastKnownLocation;
 
   private List<Point> points = new ArrayList<>();
+
+  private MapboxNavigation mapboxNavigation;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,12 +53,14 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     navigationView = findViewById(R.id.navigationView);
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this);
+    mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
   }
 
   @Override
   public void onStart() {
     super.onStart();
     navigationView.onStart();
+    mapboxNavigation.unregisterRouteObserver(this);
   }
 
   @Override
@@ -103,6 +105,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   public void onStop() {
     super.onStop();
     navigationView.onStop();
+    mapboxNavigation.registerRouteObserver(this);
   }
 
   @Override
@@ -162,9 +165,35 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    lastKnownLocation = location;
+  public void onRawLocationChanged(@NotNull Location rawLocation) {
+
   }
+
+  @Override
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+    lastKnownLocation = enhancedLocation;
+  }
+
+  /*
+    RouteObserver
+  */
+  @Override
+  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+    startNavigation(routes.get(0));
+  }
+
+  @Override
+  public void onRoutesRequested() {
+
+  }
+
+  @Override
+  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
+
+  }
+  /*
+    RouteObserver end
+  */
 
   private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions navigationViewOptions = setupOptions(directionsRoute);
@@ -175,43 +204,35 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
     alertDialog.setMessage(getString(R.string.dropoff_dialog_text));
     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.dropoff_dialog_positive_text),
-      (dialogInterface, in) -> fetchRoute(getLastKnownLocation(), points.remove(0)));
+            (dialogInterface, in) -> fetchRoute(getLastKnownLocation(), points.remove(0)));
     alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.dropoff_dialog_negative_text),
-      (dialogInterface, in) -> {
-        // Do nothing
-      });
+            (dialogInterface, in) -> {
+              // Do nothing
+            });
 
     alertDialog.show();
   }
 
   private void fetchRoute(Point origin, Point destination) {
-    NavigationRoute.builder(this)
-      .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination)
-      .alternatives(true)
-      .build()
-      .getRoute(new SimplifiedCallback() {
-        @Override
-        public void onResponse(@NotNull Call<DirectionsResponse> call, @NotNull Response<DirectionsResponse> response) {
-          DirectionsResponse directionsResponse = response.body();
-          if (directionsResponse != null && !directionsResponse.routes().isEmpty()) {
-            startNavigation(directionsResponse.routes().get(0));
-          }
-        }
-      });
+    mapboxNavigation.requestRoutes(
+            RouteOptions.builder()
+                    .accessToken(Mapbox.getAccessToken())
+                    .coordinates(Arrays.asList(origin, destination))
+                    .alternatives(true)
+                    .build()
+    );
   }
 
   private NavigationViewOptions setupOptions(DirectionsRoute directionsRoute) {
     dropoffDialogShown = false;
 
-    NavigationViewOptions.Builder options = NavigationViewOptions.builder();
-    options.directionsRoute(directionsRoute)
-      .navigationListener(this)
-      .progressChangeListener(this)
-      .routeListener(this)
-      .shouldSimulateRoute(true);
-    return options.build();
+    return NavigationViewOptions.builder()
+            .directionsRoute(directionsRoute)
+            .navigationListener(this)
+            .locationObserver(this)
+            .routeListener(this)
+            .shouldSimulateRoute(true)
+            .build();
   }
 
   private Point getLastKnownLocation() {

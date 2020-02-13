@@ -1,6 +1,5 @@
 package com.mapbox.services.android.navigation.testapp.activity;
 
-
 import android.location.Location;
 
 import androidx.annotation.NonNull;

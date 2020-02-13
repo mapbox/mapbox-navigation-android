@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.listeners;
 
+import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
 
@@ -19,7 +20,7 @@ public interface NavigationListener {
   void onCancelNavigation();
 
   /**
-   * Will be triggered when {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}
+   * Will be triggered when {@link MapboxNavigation}
    * has finished and the service is completely shut down.
    *
    * @since 0.8.0
@@ -27,7 +28,7 @@ public interface NavigationListener {
   void onNavigationFinished();
 
   /**
-   * Will be triggered when {@link com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation}
+   * Will be triggered when {@link MapboxNavigation}
    * has been initialized and the user is navigating the given route.
    *
    * @since 0.8.0

@@ -63,7 +63,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private Router router;
   private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
@@ -98,11 +97,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
   @TestOnly
   NavigationViewModel(Application application, MapboxNavigation navigation,
-                      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
-                      Router router) {
+                      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager) {
     super(application);
     this.navigation = navigation;
-    this.router = router;
     this.connectivityController = connectivityController;
     this.mapOfflineManager = mapOfflineManager;
   }
@@ -122,7 +119,6 @@ public class NavigationViewModel extends AndroidViewModel {
   @Override
   protected void onCleared() {
     super.onCleared();
-    destroyRouter();
   }
 
   public void onDestroy(boolean isChangingConfigurations) {
@@ -202,7 +198,8 @@ public class NavigationViewModel extends AndroidViewModel {
    *
    * @param options to init MapboxNavigation
    */
-  void initialize(NavigationViewOptions options, Router router) {
+  @SuppressLint("MissingPermission")
+  void initialize(NavigationViewOptions options) {
     NavigationOptions navigationOptions = options.navigationOptions();
     navigationOptions = navigationOptions.toBuilder().build();
     initializeLanguage(options);
@@ -216,9 +213,8 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigationSpeechPlayer(options);
       initializeMapOfflineManager(options);
     }
-    this.router = router;
     this.navigationViewOptions = options;
-    router.getRoute(options.directionsRoute().routeOptions(), routeEngineCallback);
+    navigation.startTripSession(options.directionsRoute());
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -433,12 +429,6 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void updateReplayEngine(DirectionsRoute route) {
     locationEngineConductor.updateSimulatedRoute(route);
-  }
-
-  private void destroyRouter() {
-    if (router != null) {
-      router.cancel();
-    }
   }
 
   private void endNavigation() {

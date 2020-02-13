@@ -353,7 +353,7 @@ public class NavigationMapboxMap {
    *
    * @param routes to be drawn
    */
-  public void drawRoutes(@NonNull List<DirectionsRoute> routes) {
+  public void drawRoutes(@NonNull List<? extends DirectionsRoute> routes) {
     mapRoute.addRoutes(routes);
   }
 

@@ -394,8 +394,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param options with containing route / coordinate data
    */
-  public void startNavigation(NavigationViewOptions options, Router router) {
-    initializeNavigation(options, router);
+  public void startNavigation(NavigationViewOptions options) {
+    initializeNavigation(options);
   }
 
   /**
@@ -630,9 +630,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
-  private void initializeNavigation(NavigationViewOptions options, Router router) {
+  private void initializeNavigation(NavigationViewOptions options) {
     establish(options);
-    navigationViewModel.initialize(options, router);
+    navigationViewModel.initialize(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
 

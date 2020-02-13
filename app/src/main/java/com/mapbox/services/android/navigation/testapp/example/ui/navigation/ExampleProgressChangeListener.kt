@@ -2,16 +2,23 @@ package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
 import android.location.Location
 import androidx.lifecycle.MutableLiveData
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
 class ExampleProgressChangeListener(
     private val location: MutableLiveData<Location>,
     private val progress: MutableLiveData<RouteProgress>
-) : ProgressChangeListener {
+) : RouteProgressObserver, LocationObserver {
 
-    override fun onProgressChange(location: Location, progress: RouteProgress) {
-        this.location.value = location
-        this.progress.value = progress
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        this.progress.value = routeProgress
+    }
+
+    override fun onRawLocationChanged(rawLocation: Location) {
+    }
+
+    override fun onEnhancedLocationChanged(enhancedLocation: Location) {
+        this.location.value = enhancedLocation
     }
 }

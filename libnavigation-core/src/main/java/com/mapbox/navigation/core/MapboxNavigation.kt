@@ -177,20 +177,6 @@ constructor(
     }
 
     /**
-     * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
-     * or a `Free Drive` state otherwise.
-     *
-     * @param route [DirectionsRoute]
-     * @see [registerTripSessionStateObserver]
-     * @see [registerRouteProgressObserver]
-     */
-    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
-    fun startTripSession(route: DirectionsRoute) {
-        tripSession.route = route
-        startTripSession()
-    }
-
-    /**
      * Stops listening for location updates and enters an `Idle` state.
      *
      * @see [registerTripSessionStateObserver]

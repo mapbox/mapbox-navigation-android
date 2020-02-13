@@ -26,6 +26,7 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.LineString;
@@ -42,6 +43,9 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.directions.session.RouteObserver;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.navigation.ui.NavigationLauncher;
@@ -50,15 +54,14 @@ import com.mapbox.navigation.ui.camera.CameraUpdateMode;
 import com.mapbox.navigation.ui.camera.NavigationCameraUpdate;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.utils.extensions.ContextEx;
-import com.mapbox.services.android.navigation.v5.utils.extensions.LocaleEx;
+import com.mapbox.services.android.navigation.testapp.utils.ContextEx;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -72,7 +75,7 @@ import timber.log.Timber;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener {
+  MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener, RouteObserver {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -81,6 +84,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
   private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 500;
 
+  private MapboxNavigation mapboxNavigation;
   private final NavigationLauncherLocationCallback callback = new NavigationLauncherLocationCallback(this);
   private final List<Point> wayPoints = new ArrayList<>();
   private LocationEngine locationEngine;
@@ -105,6 +109,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
+    mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
   }
 
   @Override
@@ -226,6 +231,29 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     route = directionsRoute;
   }
 
+  @Override
+  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+    hideLoading();
+    route = routes.get(0);
+    if (route.distance() > 25d) {
+      launchRouteBtn.setEnabled(true);
+      map.drawRoutes(routes);
+      boundCameraToRoute();
+    } else {
+      Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
+    }
+  }
+
+  @Override
+  public void onRoutesRequested() {
+    loading.setVisibility(View.VISIBLE);
+  }
+
+  @Override
+  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
+
+  }
+
   void updateCurrentLocation(Point currentLocation) {
     this.currentLocation = currentLocation;
   }
@@ -253,39 +281,22 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   }
 
   private void fetchRoute() {
-    NavigationRoute.Builder builder = NavigationRoute.builder(this)
+    ArrayList<Point> coordinates = new ArrayList<>();
+    coordinates.add(currentLocation);
+    coordinates.addAll(wayPoints);
+
+    RouteOptions.Builder builder = RouteOptions.builder()
       .accessToken(Mapbox.getAccessToken())
-      .origin(currentLocation)
+      .coordinates(coordinates)
       .profile(getRouteProfileFromSharedPreferences())
       .alternatives(true);
-
-    for (Point wayPoint : wayPoints) {
-      builder.addWaypoint(wayPoint);
-    }
-
     setFieldsFromSharedPreferences(builder);
-    builder.build().getRoute(new SimplifiedCallback() {
-      @Override
-      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-        if (validRouteResponse(response)) {
-          hideLoading();
-          route = response.body().routes().get(0);
-          if (route.distance() > 25d) {
-            launchRouteBtn.setEnabled(true);
-            map.drawRoutes(response.body().routes());
-            boundCameraToRoute();
-          } else {
-            Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
-          }
-        }
-      }
-    });
-    loading.setVisibility(View.VISIBLE);
+    mapboxNavigation.requestRoutes(builder.build());
   }
 
-  private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
+  private void setFieldsFromSharedPreferences(RouteOptions.Builder builder) {
     builder
-      .language(getLanguageFromSharedPreferences())
+      .language(getLanguageFromSharedPreferences().getLanguage())
       .voiceUnits(getUnitTypeFromSharedPreferences());
   }
 

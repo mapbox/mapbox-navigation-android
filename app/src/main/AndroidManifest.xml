@@ -42,14 +42,6 @@
         </activity>
 
         <activity
-            android:name=".activity.RerouteActivity"
-            android:label="@string/title_reroute">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
             android:name=".activity.navigationui.NavigationMapRouteActivity"
             android:label="@string/title_navigation_route_ui">
             <meta-data

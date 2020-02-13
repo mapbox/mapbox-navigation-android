@@ -2,7 +2,6 @@ package com.mapbox.services.android.navigation.testapp.activity.navigationui.fra
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -17,29 +16,37 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.SimplifiedCallback;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
 import com.mapbox.navigation.ui.OnNavigationReadyCallback;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.SimplifiedCallback;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener,
-  ProgressChangeListener {
+        RouteProgressObserver, RouteObserver {
 
   private static final double ORIGIN_LONGITUDE = -3.714873;
   private static final double ORIGIN_LATITUDE = 40.397389;
   private static final double DESTINATION_LONGITUDE = -3.712331;
   private static final double DESTINATION_LATITUDE = 40.401686;
 
+  private MapboxNavigation mapboxNavigation;
   private NavigationView navigationView;
   private DirectionsRoute directionsRoute;
 
@@ -57,6 +64,8 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
     navigationView = view.findViewById(R.id.navigation_view_fragment);
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this);
+    mapboxNavigation = new MapboxNavigation(view.getContext().getApplicationContext(), Mapbox.getAccessToken());
+    mapboxNavigation.registerRouteObserver(this);
   }
 
   @Override
@@ -107,6 +116,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   public void onDestroyView() {
     super.onDestroyView();
     navigationView.onDestroy();
+    mapboxNavigation.unregisterRouteObserver(this);
   }
 
   @Override
@@ -133,7 +143,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   }
 
   @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
+  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
     boolean isInTunnel = routeProgress.inTunnel();
     boolean wasInTunnel = wasInTunnel();
     if (isInTunnel) {
@@ -149,6 +159,28 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
     }
   }
 
+  /*
+    RouteObserver
+   */
+  @Override
+  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+    directionsRoute = routes.get(0);
+    startNavigation();
+  }
+
+  @Override
+  public void onRoutesRequested() {
+
+  }
+
+  @Override
+  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
+
+  }
+  /*
+    RouteObserver end
+   */
+
   private void updateNightMode() {
     if (wasNavigationStopped()) {
       updateWasNavigationStopped(false);
@@ -158,18 +190,10 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   }
 
   private void fetchRoute(Point origin, Point destination) {
-    NavigationRoute.builder(getContext())
-      .accessToken(Mapbox.getAccessToken())
-      .origin(origin)
-      .destination(destination)
-      .build()
-      .getRoute(new SimplifiedCallback() {
-        @Override
-        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-          directionsRoute = response.body().routes().get(0);
-          startNavigation();
-        }
-      });
+    mapboxNavigation.requestRoutes(RouteOptions.builder()
+            .accessToken(Mapbox.getAccessToken())
+            .coordinates(Arrays.asList(origin, destination))
+            .build());
   }
 
   private void startNavigation() {
@@ -177,11 +201,11 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
       return;
     }
     NavigationViewOptions options = NavigationViewOptions.builder()
-      .directionsRoute(directionsRoute)
-      .shouldSimulateRoute(true)
-      .navigationListener(NavigationFragment.this)
-      .progressChangeListener(this)
-      .build();
+            .directionsRoute(directionsRoute)
+            .shouldSimulateRoute(true)
+            .navigationListener(NavigationFragment.this)
+            .routeProgressObserver(this)
+            .build();
     navigationView.startNavigation(options);
   }
 

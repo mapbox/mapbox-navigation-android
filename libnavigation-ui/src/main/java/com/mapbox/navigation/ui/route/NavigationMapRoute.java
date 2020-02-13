@@ -207,7 +207,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    *                         the routes are considered alternatives.
    * @since 0.8.0
    */
-  public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
+  public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
     routeLine.draw(directionsRoutes);
   }
 
