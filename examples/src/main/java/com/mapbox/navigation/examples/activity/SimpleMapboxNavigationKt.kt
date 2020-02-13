@@ -35,8 +35,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
