@@ -13,6 +13,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.services.android.navigation.v5.utils.extensions.getUnitTypeForLocale
 import com.mapbox.services.android.navigation.v5.utils.extensions.inferDeviceLocale
 import java.util.Locale
+import kotlin.collections.ArrayList
 import okhttp3.EventListener
 import okhttp3.Interceptor
 import retrofit2.Call
@@ -341,7 +342,7 @@ internal constructor(
          * @since 0.5.0
          */
         fun annotations(@DirectionsCriteria.AnnotationCriteria vararg annotations: String?): Builder {
-            directionsBuilder.annotations(*annotations)
+            directionsBuilder.annotations(listOf(*annotations))
             return this
         }
 
@@ -407,7 +408,12 @@ internal constructor(
          * @since 0.5.0
          */
         fun radiuses(@FloatRange(from = 0.0) vararg radiuses: Double): Builder {
-            directionsBuilder.radiuses(*radiuses)
+            val result = Array(radiuses.size) { 0.0 }
+            var index = 0
+            for (i in radiuses) {
+                result[index++] = i
+            }
+            directionsBuilder.radiuses(listOf(*result))
             return this
         }
 
@@ -496,7 +502,7 @@ internal constructor(
          * @since 0.15.0
          */
         fun addApproaches(vararg approaches: String?): Builder {
-            directionsBuilder.addApproaches(*approaches)
+            directionsBuilder.approaches(listOf(*approaches))
             return this
         }
 
@@ -518,7 +524,7 @@ internal constructor(
             for (i in indices) {
                 result[index++] = i
             }
-            directionsBuilder.addWaypointIndices(*result)
+            directionsBuilder.waypointIndices(listOf(*result))
             return this
         }
 
@@ -533,7 +539,7 @@ internal constructor(
          * @since 0.15.0
          */
         fun addWaypointNames(vararg waypointNames: String): Builder {
-            directionsBuilder.addWaypointNames(*waypointNames)
+            directionsBuilder.waypointNames(listOf(*waypointNames))
             return this
         }
 
@@ -553,7 +559,7 @@ internal constructor(
          * @since 0.26.0
          */
         fun addWaypointTargets(vararg waypointTargets: Point?): Builder {
-            directionsBuilder.addWaypointTargets(*waypointTargets)
+            directionsBuilder.waypointTargets(listOf(*waypointTargets))
             return this
         }
 
@@ -675,40 +681,24 @@ internal constructor(
                 directionsBuilder.accessToken(options.accessToken())
             }
 
-            if (!TextUtils.isEmpty(options.annotations())) {
-                directionsBuilder.annotations(options.annotations())
+            options.annotationsList()?.let {
+                directionsBuilder.annotations(it)
             }
 
-            options.approaches()?.let { approaches ->
-                if (approaches.isNotEmpty()) {
-                    val result =
-                        approaches.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                    directionsBuilder.addApproaches(*result)
-                }
+            options.approachesList()?.let {
+                directionsBuilder.approaches(it)
             }
 
-            options.waypointIndices()?.let { waypointIndices ->
-                if (waypointIndices.isNotEmpty()) {
-                    val splitWaypointIndices = parseWaypointIndices(waypointIndices)
-                    directionsBuilder.addWaypointIndices(*splitWaypointIndices)
-                }
+            options.waypointIndicesList()?.let {
+                directionsBuilder.waypointIndices(it)
             }
 
-            options.waypointNames()?.let { waypointNames ->
-                if (waypointNames.isNotEmpty()) {
-                    val names =
-                        waypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray()
-                    directionsBuilder.addWaypointNames(*names)
-                }
+            options.waypointNamesList()?.let {
+                directionsBuilder.waypointNames(it)
             }
 
-            options.waypointTargets()?.let { waypointTargets ->
-                if (waypointTargets.isNotEmpty()) {
-                    val splitWaypointTargets = parseWaypointTargets(waypointTargets)
-                    directionsBuilder.addWaypointTargets(*splitWaypointTargets)
-                }
+            options.waypointTargetsList()?.let {
+                directionsBuilder.waypointTargets(it)
             }
 
             val walkingOptions = options.walkingOptions()

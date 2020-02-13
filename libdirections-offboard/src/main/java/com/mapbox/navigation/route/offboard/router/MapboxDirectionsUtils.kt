@@ -4,18 +4,12 @@ package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.extensions.SEMICOLON
-import com.mapbox.navigation.base.extensions.checkFields
-import com.mapbox.navigation.base.extensions.convertToListOfDoubles
-import com.mapbox.navigation.base.extensions.convertToListOfPairsOfDoubles
-import com.mapbox.navigation.base.extensions.parseWaypointIndices
-import com.mapbox.navigation.base.extensions.parseWaypointTargets
 import java.util.Locale
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
 
 fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirections.Builder {
-    options.checkFields()
+    check(options.coordinates().size >= 2) { "At least 2 coordinates should be provided." }
 
     baseUrl(options.baseUrl())
     user(options.user())
@@ -34,25 +28,12 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
     options.language()?.let {
         language(Locale(it))
     }
-    options.radiuses()?.let { radiuses ->
-        if (radiuses.isNotEmpty()) {
-            radiuses.convertToListOfDoubles(SEMICOLON[0])?.toDoubleArray()?.let { result ->
-                radiuses(*result)
-            }
-        }
+    options.radiusesList()?.let {
+        radiuses(it)
     }
 
-    options.bearings()?.let { bearings ->
-        if (bearings.isNotEmpty()) {
-            bearings.convertToListOfPairsOfDoubles()
-                ?.forEach { pair ->
-                    if (pair != null) {
-                        addBearing(pair.first, pair.second)
-                    } else {
-                        addBearing(null, null)
-                    }
-                }
-        }
+    options.bearingsList()?.let { it ->
+        bearings(it)
     }
 
     continueStraight(options.continueStraight() ?: false)
@@ -68,7 +49,7 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
 
     steps(options.steps() ?: true)
 
-    options.annotations()?.let {
+    options.annotationsList()?.let {
         annotations(it)
     }
 
@@ -89,36 +70,20 @@ fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirectio
         exclude(it)
     }
 
-    options.approaches()?.let { approaches ->
-        if (approaches.isNotEmpty()) {
-            val result =
-                approaches.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-            addApproaches(*result)
-        }
+    options.approachesList()?.let { it ->
+        approaches(it)
     }
 
-    options.waypointIndices()?.let { waypointIndices ->
-        if (waypointIndices.isNotEmpty()) {
-            val splitWaypointIndices = parseWaypointIndices(waypointIndices)
-            addWaypointIndices(*splitWaypointIndices)
-        }
+    options.waypointIndicesList()?.let { it ->
+        waypointIndices(it)
     }
 
-    options.waypointNames()?.let { waypointNames ->
-        if (waypointNames.isNotEmpty()) {
-            val names =
-                waypointNames.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()
-            addWaypointNames(*names)
-        }
+    options.waypointNamesList()?.let { it ->
+        waypointNames(it)
     }
 
-    options.waypointTargets()?.let { waypointTargets ->
-        if (waypointTargets.isNotEmpty()) {
-            val splitWaypointTargets = parseWaypointTargets(waypointTargets)
-            addWaypointTargets(*splitWaypointTargets)
-        }
+    options.waypointTargetsList()?.let { it ->
+        waypointTargets(it)
     }
 
     options.walkingOptions()?.let {

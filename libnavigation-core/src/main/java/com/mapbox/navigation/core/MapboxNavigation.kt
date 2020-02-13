@@ -13,7 +13,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
@@ -482,27 +481,15 @@ class MapboxNavigation(
                     }
             )
 
-            val bearingElements = routeOptions.bearings()?.split(";")
-            val originTolerance =
-                    bearingElements?.getOrNull(0)?.split(",")?.getOrNull(1)?.toDouble()
-            bearingElements?.subList(index + 1, coordinates.size)?.map { element ->
-                element.split(",").let { components ->
-                    if (components.size == 2) {
-                        Pair(components[0].toDouble(), components[1].toDouble())
-                    } else {
-                        null
-                    }
-                }
-            }?.toMutableList()?.also { pairs ->
-                pairs.add(
-                        0,
-                        Pair(
-                                location.bearing.toDouble(),
-                                originTolerance ?: DEFAULT_REROUTE_BEARING_TOLERANCE
-                        )
-                )
-                optionsBuilder.bearings(*pairs.toTypedArray())
-            }
+            val bearings = mutableListOf<List<Double>>()
+
+            val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1) ?: DEFAULT_REROUTE_BEARING_TOLERANCE
+            val currentAngle = location.bearing.toDouble()
+
+            bearings.add(listOf(currentAngle, originTolerance))
+            bearings.addAll(routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList())
+
+            optionsBuilder.bearingsList(bearings)
 
             // todo implement options.radiuses
             // todo implement options.approaches
