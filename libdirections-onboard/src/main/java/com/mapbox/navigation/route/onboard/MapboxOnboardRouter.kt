@@ -12,7 +12,6 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
-import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.RouterParams
@@ -49,7 +48,6 @@ class MapboxOnboardRouter(
         if (!tileDir.exists()) {
             tileDir.mkdirs()
         }
-        val httpClient = HttpClient()
         val routerParams = RouterParams(
             config.tilePath,
             config.inMemoryTileCache,
@@ -60,11 +58,11 @@ class MapboxOnboardRouter(
                     it.host,
                     it.version,
                     it.token,
-                    httpClient.userAgent,
+                    it.userAgent,
                     ""
                 )
             })
-        navigatorNative.configureRouter(routerParams, httpClient)
+        navigatorNative.configureRouter(routerParams, null)
     }
 
     override fun getRoute(
