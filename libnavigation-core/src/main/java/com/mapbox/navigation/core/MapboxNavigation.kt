@@ -16,6 +16,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL
+import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig

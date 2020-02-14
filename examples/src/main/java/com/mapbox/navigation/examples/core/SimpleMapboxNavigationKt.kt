@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Environment
 import android.os.Looper
 import android.view.View
 import android.view.View.GONE
@@ -31,7 +32,15 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
+import com.mapbox.navigation.base.options.Endpoint
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
+import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
+import com.mapbox.navigation.base.typedef.UNDEFINED
+import com.mapbox.navigation.core.MapboxDistanceFormatter
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -52,6 +61,7 @@ import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
+import java.io.File
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 

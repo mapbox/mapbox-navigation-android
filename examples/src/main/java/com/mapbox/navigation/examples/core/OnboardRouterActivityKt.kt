@@ -16,6 +16,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
@@ -62,14 +63,19 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             null,
             null,
             null,
-            null // working with pre-fetched tiles only
+             Endpoint(
+                     "https://api-routing-tiles-staging.tilestream.net",
+                     "2019_04_13-00_00_11",
+                     Utils.getMapboxAccessToken(this),
+                     "MapboxNavigationNative"
+             )
         )
         onboardRouter = MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
     }
 
     private fun newOrigin() {
         clearMap()
-        val latLng = LatLng(47.05991, 9.49183)
+        val latLng = LatLng(53.895309, 27.556007)
         origin = Point.fromLngLat(latLng.longitude, latLng.latitude)
         mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
     }

@@ -109,7 +109,7 @@ class MapboxOnboardRouter(
         // mainJobControl.scope.launch {
             try {
                 getRoute(url) { routerResult ->
-                    mainJobControl.scope.launch {
+//                    mainJobControl.scope.launch {
                         val routes: List<DirectionsRoute> = try {
                             parseDirectionsRoutes(routerResult.json)
                         } catch (e: RuntimeException) {
@@ -120,8 +120,7 @@ class MapboxOnboardRouter(
                             !routes.isNullOrEmpty() -> callback.onResponse(routes)
                             else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
                         }
-                    }
-
+//                    }
                 }
             } catch (e: CancellationException) {
                 callback.onCanceled()
@@ -132,10 +131,10 @@ class MapboxOnboardRouter(
     internal fun getRoute(url: String, callback: (RouterResult) -> Unit) =
         navigatorNative.getRoute(url, callback)
 
-    private suspend fun parseDirectionsRoutes(json: String): List<DirectionsRoute> =
-        withContext(ThreadController.IODispatcher) {
+    private fun parseDirectionsRoutes(json: String): List<DirectionsRoute> =
+//        withContext(ThreadController.IODispatcher) {
             DirectionsResponse.fromJson(json).routes()
-        }
+//        }
 
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
