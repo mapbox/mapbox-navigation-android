@@ -5,14 +5,17 @@ import android.content.Context
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
@@ -25,10 +28,12 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.BeforeClass
@@ -69,6 +74,10 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
+        mockkObject(NavigationModuleProvider)
+        val hybridRouter: Router = mockk(relaxUnitFun = true)
+        every { NavigationModuleProvider.createModule<Router>(MapboxNavigationModuleType.HybridRouter, any()) } returns hybridRouter
+
         mockkObject(NavigationComponentProvider)
 
         every { context.inferDeviceLocale() } returns Locale.US
@@ -253,4 +262,10 @@ class MapboxNavigationTest {
             .coordinates(emptyList())
             .geometries("")
             .requestUuid("")
+
+    @After
+    fun tearDown() {
+        unmockkObject(NavigationModuleProvider)
+        unmockkObject(NavigationComponentProvider)
+    }
 }

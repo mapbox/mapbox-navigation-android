@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -80,7 +81,7 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
             null // working with pre-fetched tiles only
     );
 
-    onboardRouter = new MapboxOnboardRouter(config, null);
+    onboardRouter = new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config);
   }
 
 

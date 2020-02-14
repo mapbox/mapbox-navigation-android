@@ -3,6 +3,8 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
+import android.os.Environment
+import android.util.Log
 import android.location.Location
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
@@ -16,6 +18,7 @@ import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
+import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
@@ -39,13 +42,17 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.trip.notification.NotificationAction
+import com.mapbox.navigation.utils.network.NetworkStatusService
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.timer.MapboxTimer
+import java.io.File
 import java.lang.reflect.Field
+import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
 
@@ -100,7 +107,10 @@ import kotlinx.coroutines.channels.ReceiveChannel
 class MapboxNavigation(
     private val context: Context,
     private val accessToken: String?,
-    private val navigationOptions: NavigationOptions = defaultNavigationOptions(context),
+    private val navigationOptions: NavigationOptions = defaultNavigationOptions(
+        context,
+        accessToken
+    ),
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
@@ -123,7 +133,7 @@ class MapboxNavigation(
         ThreadController.init()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             NavigationModuleProvider.createModule(
-                MapboxNavigationModuleType.OffboardRouter,
+                MapboxNavigationModuleType.HybridRouter,
                 ::paramsProvider
             )
         )
@@ -522,7 +532,8 @@ class MapboxNavigation(
                 Router::class.java to NavigationModuleProvider.createModule(
                     MapboxNavigationModuleType.OffboardRouter,
                     ::paramsProvider
-                )
+                ),
+                NetworkStatusService::class.java to NetworkStatusService(context.applicationContext)
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
@@ -530,7 +541,14 @@ class MapboxNavigation(
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
-            MapboxNavigationModuleType.OnboardRouter -> arrayOf()
+            MapboxNavigationModuleType.OnboardRouter -> {
+                check(accessToken != null) { "You need to provide an access token in order to use the default OnboardRouter." }
+                arrayOf(
+                    MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
+                    MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig()
+                        ?: throw RuntimeException("You need to provide a router configuration in order to use the default OnboardRouter."))
+                )
+            }
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
@@ -551,19 +569,45 @@ class MapboxNavigation(
          * Use [NavigationOptions.toBuilder] to easily customize selected options.
          */
         @JvmStatic
-        fun defaultNavigationOptions(context: Context): NavigationOptions {
-            return NavigationOptions.Builder(
-                NONE_SPECIFIED,
-                ROUNDING_INCREMENT_FIFTY,
-                DEFAULT_NAVIGATOR_POLLING_DELAY,
-                DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL,
-                MapboxDistanceFormatter(
-                    context.applicationContext,
-                    null,
-                    UNDEFINED,
-                    ROUNDING_INCREMENT_FIFTY
+        fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
+            val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
+            val tilesVersion = "2019_04_13-00_00_11"
+            return NavigationOptions.Builder()
+                .timeFormatType(NONE_SPECIFIED)
+                .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
+                .fasterRouteDetectorInterval(DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
+                .distanceFormatter(
+                    MapboxDistanceFormatter(
+                        context.applicationContext,
+                        null,
+                        UNDEFINED,
+                        ROUNDING_INCREMENT_FIFTY
+                    )
                 )
-            ).build()
+                .onboardRouterConfig(
+                    MapboxOnboardRouterConfig(
+                        obtainOfflineTilesDir(tilesUri.host, tilesVersion),
+                        null,
+                        null,
+                        2,
+                        Endpoint(
+                            tilesUri.toString(),
+                            tilesVersion,
+                            accessToken ?: "",
+                            "MapboxNavigationNative"
+                        )
+                    )
+                ).build()
+        }
+
+        private fun obtainOfflineTilesDir(host: String, version: String): String {
+            val offlineDir = Environment.getExternalStoragePublicDirectory("Offline")
+            if (!offlineDir.exists()) {
+                Log.d("MapboxNavigation", "Offline directory does not exist")
+                offlineDir.mkdirs()
+            }
+            return File(offlineDir, "$host/$version").absolutePath
         }
     }
 }

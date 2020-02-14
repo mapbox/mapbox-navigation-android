@@ -1,19 +1,16 @@
 package com.mapbox.navigation.route.onboard
 
+import android.util.Log
 import com.google.gson.Gson
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.logger.Logger
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.utils.exceptions.NavigationException
@@ -33,33 +30,25 @@ import kotlinx.coroutines.withContext
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  */
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
-class MapboxOnboardRouter : Router {
+class MapboxOnboardRouter(
+    private val navigatorNative: MapboxNativeNavigator,
+    config: MapboxOnboardRouterConfig
+) : Router {
 
     companion object {
         private const val TILES_DIR_NAME = "tiles"
     }
 
-    private val navigatorNative: MapboxNativeNavigator
-    private val config: MapboxOnboardRouterConfig
-    private val logger: Logger?
     private val mainJobControl by lazy {
         ThreadController.getMainScopeAndRootJob()
     }
     private val gson = Gson()
 
-    /**
-     * @param config [MapboxOnboardRouterConfig]
-     * @param logger [Logger]
-     */
-    constructor(config: MapboxOnboardRouterConfig, logger: Logger?) {
+    init {
         val tileDir = File(config.tilePath, TILES_DIR_NAME)
         if (!tileDir.exists()) {
             tileDir.mkdirs()
         }
-
-        this.navigatorNative = MapboxNativeNavigatorImpl
-        this.config = config
-        this.logger = logger
         val httpClient = HttpClient()
         val routerParams = RouterParams(
             config.tilePath,
@@ -75,18 +64,7 @@ class MapboxOnboardRouter : Router {
                     ""
                 )
             })
-        MapboxNativeNavigatorImpl.configureRouter(routerParams, httpClient)
-    }
-
-    // Package private for testing purposes
-    internal constructor(
-        navigator: MapboxNativeNavigator,
-        config: MapboxOnboardRouterConfig,
-        logger: Logger
-    ) {
-        this.navigatorNative = navigator
-        this.config = config
-        this.logger = logger
+        navigatorNative.configureRouter(routerParams, httpClient)
     }
 
     override fun getRoute(
@@ -156,7 +134,7 @@ class MapboxOnboardRouter : Router {
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
-        logger?.e(Tag("MapboxOnboardRouter"), Message(errorMessage))
+        Log.e("MapboxOnboardRouter", errorMessage)
         return errorMessage
     }
 }

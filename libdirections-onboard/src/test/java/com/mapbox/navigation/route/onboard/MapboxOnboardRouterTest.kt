@@ -5,9 +5,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.logger.Logger
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
@@ -57,7 +54,6 @@ class MapboxOnboardRouterTest {
     private lateinit var onboardRouter: MapboxOnboardRouter
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
-    private val logger: Logger = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
     private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
     private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
@@ -65,7 +61,8 @@ class MapboxOnboardRouterTest {
 
     @Before
     fun setUp() {
-        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(TILE_PATH), logger)
+        every { navigator.configureRouter(any(), any()) } returns 0
+        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(TILE_PATH))
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE
@@ -93,7 +90,6 @@ class MapboxOnboardRouterTest {
 
         verify { navigator.getRoute(URL.toString()) }
         verify { routerCallback.onFailure(capture(exceptionSlot)) }
-        verify { logger.e(eq(Tag(TAG)), eq(Message(ERROR_MESSAGE))) }
         assertEquals(ERROR_MESSAGE, exceptionSlot.captured.message)
     }
 
