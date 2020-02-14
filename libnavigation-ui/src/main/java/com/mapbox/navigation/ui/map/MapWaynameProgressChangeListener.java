@@ -8,6 +8,8 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 class MapWaynameProgressChangeListener implements RouteProgressObserver, LocationObserver {
 
   private final MapWayName mapWayName;
@@ -21,7 +23,7 @@ class MapWaynameProgressChangeListener implements RouteProgressObserver, Locatio
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     mapWayName.updateLocation(enhancedLocation);
   }
 

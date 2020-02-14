@@ -45,15 +45,15 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.extensions.LocaleEx;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
-import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
-import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.NavigationLauncher;
 import com.mapbox.navigation.ui.NavigationLauncherOptions;
 import com.mapbox.navigation.ui.camera.CameraUpdateMode;
 import com.mapbox.navigation.ui.camera.NavigationCameraUpdate;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
+import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.utils.ContextEx;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,21 +61,19 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-  MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener, RouteObserver {
+        MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener, RoutesObserver {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -135,7 +133,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     super.onActivityResult(requestCode, resultCode, data);
     if (requestCode == CHANGE_SETTING_REQUEST_CODE && resultCode == RESULT_OK) {
       boolean shouldRefetch = data.getBooleanExtra(NavigationSettingsActivity.UNIT_TYPE_CHANGED, false)
-        || data.getBooleanExtra(NavigationSettingsActivity.LANGUAGE_CHANGED, false);
+              || data.getBooleanExtra(NavigationSettingsActivity.LANGUAGE_CHANGED, false);
       if (!wayPoints.isEmpty() && shouldRefetch) {
         fetchRoute();
       }
@@ -148,7 +146,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     mapView.onStart();
   }
 
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   @Override
   public void onResume() {
     super.onResume();
@@ -244,16 +242,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
   }
 
-  @Override
-  public void onRoutesRequested() {
-    loading.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
-  }
-
   void updateCurrentLocation(Point currentLocation) {
     this.currentLocation = currentLocation;
   }
@@ -272,7 +260,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     startActivityForResult(new Intent(this, NavigationSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
   }
 
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   private void initializeLocationEngine() {
     locationEngine = LocationEngineProvider.getBestLocationEngine(getApplicationContext());
     LocationEngineRequest request = buildEngineRequest();
@@ -286,18 +274,18 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     coordinates.addAll(wayPoints);
 
     RouteOptions.Builder builder = RouteOptions.builder()
-      .accessToken(Mapbox.getAccessToken())
-      .coordinates(coordinates)
-      .profile(getRouteProfileFromSharedPreferences())
-      .alternatives(true);
+            .accessToken(Mapbox.getAccessToken())
+            .coordinates(coordinates)
+            .profile(getRouteProfileFromSharedPreferences())
+            .alternatives(true);
     setFieldsFromSharedPreferences(builder);
     mapboxNavigation.requestRoutes(builder.build());
   }
 
   private void setFieldsFromSharedPreferences(RouteOptions.Builder builder) {
     builder
-      .language(getLanguageFromSharedPreferences().getLanguage())
-      .voiceUnits(getUnitTypeFromSharedPreferences());
+            .language(getLanguageFromSharedPreferences().getLanguage())
+            .voiceUnits(getUnitTypeFromSharedPreferences());
   }
 
   private String getUnitTypeFromSharedPreferences() {
@@ -305,7 +293,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     String defaultUnitType = getString(R.string.default_unit_type);
     String unitType = sharedPreferences.getString(getString(R.string.unit_type_key), defaultUnitType);
     if (unitType.equals(defaultUnitType)) {
-      unitType = LocaleEx.getUnitTypeForLocale( ContextEx.inferDeviceLocale(this));
+      unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(this));
     }
 
     return unitType;
@@ -330,7 +318,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private String getRouteProfileFromSharedPreferences() {
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     return sharedPreferences.getString(
-      getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+            getString(R.string.route_profile_key), DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
     );
   }
 
@@ -351,11 +339,11 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
 
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-      .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences());
+            .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences());
     CameraPosition initialPosition = new CameraPosition.Builder()
-      .target(new LatLng(currentLocation.latitude(), currentLocation.longitude()))
-      .zoom(INITIAL_ZOOM)
-      .build();
+            .target(new LatLng(currentLocation.latitude(), currentLocation.longitude()))
+            .zoom(INITIAL_ZOOM)
+            .build();
     optionsBuilder.initialMapCameraPosition(initialPosition);
     optionsBuilder.directionsRoute(route);
     String offlinePath = obtainOfflinePath();
@@ -389,7 +377,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   public void boundCameraToRoute() {
     if (route != null) {
       List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
-        Constants.PRECISION_6).coordinates();
+              Constants.PRECISION_6).coordinates();
       List<LatLng> bboxPoints = new ArrayList<>();
       for (Point point : routeCoords) {
         bboxPoints.add(new LatLng(point.latitude(), point.longitude()));
@@ -399,7 +387,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
           LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
           // left, top, right, bottom
           int topPadding = launchBtnFrame.getHeight() * 2;
-          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, topPadding, 50, 100});
+          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[]{50, topPadding, 50, 100});
         } catch (InvalidLatLngBoundsException exception) {
           Toast.makeText(this, R.string.error_valid_route_not_found, Toast.LENGTH_SHORT).show();
         }
@@ -431,9 +419,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @NonNull
   private LocationEngineRequest buildEngineRequest() {
     return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
-      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-      .build();
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+            .build();
   }
 
   private static class NavigationLauncherLocationCallback implements LocationEngineCallback<LocationEngineResult> {

@@ -34,7 +34,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
 import com.mapbox.navigation.ui.OnNavigationReadyCallback;
@@ -47,17 +47,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
 
 public class DualNavigationMapActivity extends AppCompatActivity implements OnNavigationReadyCallback,
         NavigationListener, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
-        OnRouteSelectionChangeListener, RouteObserver {
+        OnRouteSelectionChangeListener, RoutesObserver {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -100,7 +97,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
       launchNavigation();
     });
     mapboxNavigation = new MapboxNavigation(getApplicationContext(), getString(R.string.mapbox_access_token));
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -144,16 +141,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     if (isNavigationRunning) {
       launchNavigation();
     }
-  }
-
-  @Override
-  public void onRoutesRequested() {
-    updateLoadingTo(true);
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
   }
 
   /*
@@ -247,7 +234,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     super.onDestroy();
     navigationView.onDestroy();
     mapView.onDestroy();
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   void onLocationFound(Location location) {

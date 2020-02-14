@@ -18,7 +18,7 @@ class ExampleProgressChangeListener(
     override fun onRawLocationChanged(rawLocation: Location) {
     }
 
-    override fun onEnhancedLocationChanged(enhancedLocation: Location) {
+    override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
         this.location.value = enhancedLocation
     }
 }

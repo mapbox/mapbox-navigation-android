@@ -35,7 +35,7 @@ import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -53,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -62,7 +63,7 @@ import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapClickListener, RouteProgressObserver, LocationObserver,
-        OffRouteObserver, RouteObserver, LoggerObserver {
+        OffRouteObserver, RoutesObserver, LoggerObserver {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -135,7 +136,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 
       ((ReplayRouteLocationEngine) locationEngine).assign(route);
       mapboxMap.getLocationComponent().setLocationComponentEnabled(true);
-      navigation.startTripSession(route);
+      navigation.setRoutes(Arrays.asList(route));
+      navigation.startTripSession();
       mapboxMap.removeOnMapClickListener(this);
     }
   }
@@ -240,16 +242,6 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onRoutesRequested() {
-
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    MapboxLogger.INSTANCE.e(new Message("onFailure: navigation.requestRoutes()"), throwable);
-  }
-
-  @Override
   public void onOffRouteStateChanged(boolean offRoute) {
     Toast.makeText(this, "off-route called", Toast.LENGTH_LONG).show();
   }
@@ -260,7 +252,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     mapboxMap.getLocationComponent().forceLocationUpdate(enhancedLocation);
   }
 

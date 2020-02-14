@@ -25,8 +25,8 @@ class NavigationViewRouteEngineListener implements Router.Callback {
     navigationViewModel.sendEventFailedReroute(throwable.getLocalizedMessage());
   }
 
-//  @Override
-//  public void onDestinationSet(Point destination) {
-//    navigationViewModel.retrieveDestination().setValue(destination);
-//  }
+  @Override
+  public void onCanceled() {
+
+  }
 }

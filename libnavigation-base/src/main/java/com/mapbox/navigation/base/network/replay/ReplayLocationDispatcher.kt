@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.network.replay
 
 import android.location.Location
 import android.os.Handler
+import org.jetbrains.annotations.TestOnly
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -23,7 +24,7 @@ internal class ReplayLocationDispatcher : Runnable {
         initialize()
     }
 
-    // For testing only
+    @TestOnly
     constructor(locationsToReplay: MutableList<Location>, handler: Handler) {
         checkValidInput(locationsToReplay)
         this.locationsToReplay = locationsToReplay

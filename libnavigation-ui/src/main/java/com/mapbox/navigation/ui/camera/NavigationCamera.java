@@ -92,7 +92,7 @@ public class NavigationCamera implements LifecycleObserver {
   private boolean isCameraResetting;
   private CameraAnimationDelegate animationDelegate;
 
-  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver(){
+  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override
     public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
       NavigationCamera.this.currentRouteProgress = routeProgress;
@@ -101,12 +101,13 @@ public class NavigationCamera implements LifecycleObserver {
   };
 
   private LocationObserver locationObserver = new LocationObserver() {
+
     @Override
     public void onRawLocationChanged(@NotNull Location rawLocation) {
     }
 
     @Override
-    public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+    public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
       NavigationCamera.this.currentLocation = enhancedLocation;
       tryToBuildRouteInformationAndAdjustCamera();
     }
@@ -407,7 +408,7 @@ public class NavigationCamera implements LifecycleObserver {
     updateCameraTrackingMode(trackingCameraMode);
   }
 
-  private void tryToBuildRouteInformationAndAdjustCamera(){
+  private void tryToBuildRouteInformationAndAdjustCamera() {
     if (isTrackingEnabled()) {
       currentRouteInformation = new RouteInformation(currentRouteProgress.route(), currentLocation, currentRouteProgress);
       if (!isCameraResetting) {

@@ -44,6 +44,7 @@ import com.mapbox.navigation.utils.extensions.ContextEx;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
+import java.util.Arrays;
 
 import okhttp3.Cache;
 
@@ -214,7 +215,8 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeMapOfflineManager(options);
     }
     this.navigationViewOptions = options;
-    navigation.startTripSession(options.directionsRoute());
+    navigation.setRoutes(Arrays.asList(options.directionsRoute()));
+    navigation.startTripSession();
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -421,7 +423,8 @@ public class NavigationViewModel extends AndroidViewModel {
   @SuppressLint("MissingPermission")
   private void startNavigation(DirectionsRoute route) {
     if (route != null) {
-      navigation.startTripSession(route);
+      navigation.setRoutes(Arrays.asList(route));
+      navigation.startTripSession();
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.preCache(route);
     }

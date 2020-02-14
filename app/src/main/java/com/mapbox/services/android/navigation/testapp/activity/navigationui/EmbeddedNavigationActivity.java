@@ -22,7 +22,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
@@ -32,7 +31,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
@@ -49,13 +48,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
         NavigationListener, LocationObserver, InstructionListListener, SpeechAnnouncementListener,
-        BannerInstructionsListener, RouteObserver {
+        BannerInstructionsListener, RoutesObserver {
 
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
@@ -93,7 +90,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this, initialPosition);
     mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -159,7 +156,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       saveNightModeToPreferences(AppCompatDelegate.MODE_NIGHT_AUTO);
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     }
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override
@@ -183,7 +180,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     setSpeed(enhancedLocation);
   }
 
@@ -254,16 +251,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   @Override
   public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
     startNavigation(routes.get(0));
-  }
-
-  @Override
-  public void onRoutesRequested() {
-
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
   }
 
   /**

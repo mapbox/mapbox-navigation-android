@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -198,6 +199,7 @@ class ReplayRouteLocationEngine(private val logger: Logger? = null) : LocationEn
 
     private fun scheduleNextDispatch() {
         val currentMockedPoints = mockedLocations.size
+        Log.d("TAG", "currentMockedPoints size = ${mockedLocations.size}")
         when {
             currentMockedPoints == ZERO -> handler.postDelayed(this, DO_NOT_DELAY.toLong())
             currentMockedPoints <= MOCKED_POINTS_LEFT_THRESHOLD -> handler.postDelayed(

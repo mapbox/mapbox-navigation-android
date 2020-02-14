@@ -227,6 +227,7 @@ class MapboxTripSession(
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
                 updateRawLocation(it)
+                Log.d("TAG", "location = ${it.latitude}; ${it.longitude}")
             }
         }
 

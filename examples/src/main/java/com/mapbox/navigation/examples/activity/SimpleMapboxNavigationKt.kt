@@ -42,11 +42,13 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import java.lang.ref.WeakReference
+import com.mapbox.navigation.ui.route.NavigationMapRoute
+import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
@@ -206,18 +208,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val fasterRouteSelectionTimer: CountDownTimer = object : CountDownTimer(startTimeInMillis, countdownInterval) {
-        override fun onTick(millisUntilFinished: Long) {
-            Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
-            fasterRouteAcceptProgress.progress = (maxProgress - millisUntilFinished / countdownInterval).toInt()
-        }
+    private val fasterRouteSelectionTimer: CountDownTimer =
+        object : CountDownTimer(startTimeInMillis, countdownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+                fasterRouteAcceptProgress.progress =
+                    (maxProgress - millisUntilFinished / countdownInterval).toInt()
+            }
 
-        override fun onFinish() {
-            Timber.d("FASTER_ROUTE: finished")
-            this@SimpleMapboxNavigationKt.fasterRoute = null
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            override fun onFinish() {
+                Timber.d("FASTER_ROUTE: finished")
+                this@SimpleMapboxNavigationKt.fasterRoute = null
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
         }
-    }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {

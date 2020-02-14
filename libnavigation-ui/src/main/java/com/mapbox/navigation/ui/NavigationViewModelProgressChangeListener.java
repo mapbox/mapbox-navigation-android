@@ -8,6 +8,8 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 class NavigationViewModelProgressChangeListener implements RouteProgressObserver, LocationObserver {
 
   private final NavigationViewModel viewModel;
@@ -18,12 +20,11 @@ class NavigationViewModelProgressChangeListener implements RouteProgressObserver
 
   @Override
   public void onRawLocationChanged(@NotNull Location rawLocation) {
-    viewModel.updateLocation(rawLocation);
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
-
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
+    viewModel.updateLocation(enhancedLocation);
   }
 
   @Override

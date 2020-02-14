@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -25,8 +26,9 @@ public class HistoryActivity extends AppCompatActivity {
   private LocationObserver enhancedLocationObserver = new LocationObserver() {
 
     @Override
-    public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+    public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
       executeStoreHistoryTask();
+
     }
 
     @Override

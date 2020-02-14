@@ -14,7 +14,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class WaypointNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-        NavigationListener, RouteListener, LocationObserver, RouteObserver {
+        NavigationListener, RouteListener, LocationObserver, RoutesObserver {
 
   private NavigationView navigationView;
   private boolean dropoffDialogShown;
@@ -60,7 +60,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   public void onStart() {
     super.onStart();
     navigationView.onStart();
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   public void onStop() {
     super.onStop();
     navigationView.onStop();
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override
@@ -170,27 +170,18 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     lastKnownLocation = enhancedLocation;
   }
 
   /*
-    RouteObserver
-  */
+      RouteObserver
+    */
   @Override
   public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
     startNavigation(routes.get(0));
   }
 
-  @Override
-  public void onRoutesRequested() {
-
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
-  }
   /*
     RouteObserver end
   */

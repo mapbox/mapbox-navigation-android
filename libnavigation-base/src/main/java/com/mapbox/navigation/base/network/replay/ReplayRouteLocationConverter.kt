@@ -104,14 +104,14 @@ internal class ReplayRouteLocationConverter(
 
     private fun calculateStepPoints(): List<Point> {
         val stepPoints = ArrayList<Point>()
-        // val line = LineString.fromPolyline(
-        //     route.legs()?.let { legs ->
-        //         legs[currentLeg]?.steps()?.let { steps ->
-        //             steps[currentStep].geometry()
-        //         }
-        //     } ?: "", Constants.PRECISION_6
-        // )
-        // stepPoints.addAll(sliceRoute(line))
+        val line = LineString.fromPolyline(
+            route.legs()?.let { legs ->
+                legs[currentLeg]?.steps()?.let { steps ->
+                    steps[currentStep].geometry()
+                }
+            } ?: "", 6 // Use a precision of 6 decimal places when encoding or decoding a polyline
+        )
+        stepPoints.addAll(sliceRoute(line))
         increaseIndex()
 
         return stepPoints

@@ -36,7 +36,7 @@ import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -60,7 +60,7 @@ import timber.log.Timber;
 
 public class MockNavigationActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapClickListener, RouteProgressObserver, LocationObserver,
-        OffRouteObserver, RouteObserver, MetricsObserver {
+        OffRouteObserver, RoutesObserver, MetricsObserver {
 
   private static final int BEGIN_ROUTE_MILESTONE = 1001;
   private static final double TWENTY_FIVE_METERS = 25d;
@@ -77,7 +77,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   // Navigation related variables
   private LocationEngine locationEngine;
   private MapboxNavigation navigation;
-  private DirectionsRoute route;
+  private DirectionsRoute routes;
   private NavigationMapRoute navigationMapRoute;
   private Point destination;
   private Point waypoint;
@@ -130,7 +130,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @OnClick(R.id.startRouteButton)
   public void onStartRouteClick() {
     boolean isValidNavigation = navigation != null;
-    boolean isValidRoute = route != null && route.distance() > TWENTY_FIVE_METERS;
+    boolean isValidRoute = !navigation.getRoutes().isEmpty() && navigation.getRoutes().get(0).distance() > TWENTY_FIVE_METERS;
     if (isValidNavigation && isValidRoute) {
 
       // Hide the start button
@@ -141,9 +141,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
       navigation.registerLocationObserver(this);
       navigation.registerOffRouteObserver(this);
 
-      ((ReplayRouteLocationEngine) locationEngine).assign(route);
+      ((ReplayRouteLocationEngine) locationEngine).assign(navigation.getRoutes().get(0));
       mapboxMap.getLocationComponent().setLocationComponentEnabled(true);
-      navigation.startTripSession(route);
+      navigation.startTripSession();
       mapboxMap.removeOnMapClickListener(this);
     }
   }
@@ -249,7 +249,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     mapboxMap.getLocationComponent().forceLocationUpdate(enhancedLocation);
   }
 
@@ -316,21 +316,11 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @SuppressLint("MissingPermission")
   @Override
   public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    navigation.startTripSession(routes.get(0));
+    navigation.setRoutes(routes);
+    navigation.startTripSession();
     isRefreshing = false;
-    MockNavigationActivity.this.route = routes.get(0);
     navigationMapRoute.addRoutes(routes);
     startRouteButton.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onRoutesRequested() {
-    isRefreshing = true;
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    isRefreshing = false;
   }
 
   @Override

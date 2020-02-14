@@ -24,7 +24,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
@@ -43,7 +43,7 @@ import retrofit2.Response;
 import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public class EndNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener,
-        RouteObserver, RouteProgressObserver {
+        RoutesObserver, RouteProgressObserver {
 
   private NavigationView navigationView;
   private MapboxNavigation mapboxNavigation;
@@ -68,7 +68,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     navigationView.initialize(this);
     launchNavigationFab.setOnClickListener(v -> launchNavigation());
     mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -87,15 +87,6 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     if (isNavigationRunning) {
       launchNavigation();
     }
-  }
-
-  @Override
-  public void onRoutesRequested() {
-    updateLoadingTo(true);
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
   }
 
   @Override
@@ -264,6 +255,6 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   protected void onDestroy() {
     super.onDestroy();
     navigationView.onDestroy();
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 }

@@ -25,7 +25,6 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -43,7 +42,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -71,13 +70,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Cache;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, RouteProgressObserver, LocationObserver, RouteObserver,
+        MapboxMap.OnMapLongClickListener, RouteProgressObserver, LocationObserver, RoutesObserver,
         OffRouteObserver {
 
   private static final int FIRST = 0;
@@ -244,14 +240,14 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   @Override
   public void onRawLocationChanged(@NotNull Location rawLocation) {
-
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation) {
+  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
     checkFirstUpdate(enhancedLocation);
     updateLocation(enhancedLocation);
   }
+
   /*
    * LocationObserver end
    */
@@ -514,7 +510,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Alternatively, NavigationMapboxMap#startCamera could be used here,
     // centering the map camera to the beginning of the provided route
     navigationMap.resumeCamera(lastLocation);
-    navigation.startTripSession(route);
+    navigation.setRoutes(Arrays.asList(route));
+    navigation.startTripSession();
     addEventToHistoryFile("start_navigation");
 
     // Location updates will be received from ProgressChangeListener
@@ -535,7 +532,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
       route = routes.get(FIRST);
       navigationMap.drawRoute(route);
       if (isOffRoute) {
-        navigation.startTripSession(route);
+        navigation.setRoutes(routes);
+        navigation.startTripSession();
       } else {
         startNavigationFab.show();
       }
@@ -574,15 +572,6 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     handleRoute(routes, false);
   }
 
-  @Override
-  public void onRoutesRequested() {
-
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
-  }
   /*
    * LocationEngine callback
    */

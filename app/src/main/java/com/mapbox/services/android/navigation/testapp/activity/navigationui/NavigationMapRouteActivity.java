@@ -29,7 +29,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.testapp.R;
 
@@ -44,7 +44,7 @@ import butterknife.OnClick;
 import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, RouteObserver {
+        MapboxMap.OnMapLongClickListener, RoutesObserver {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
 
@@ -72,7 +72,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
     mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @OnClick(R.id.fabStyles)
@@ -110,16 +110,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     navigationMapRoute.addRoutes(routes);
     routeLoading.setVisibility(View.INVISIBLE);
     fabRemoveRoute.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onRoutesRequested() {
-    routeLoading.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-    Timber.e(throwable);
   }
 
   @Override
@@ -162,7 +152,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override

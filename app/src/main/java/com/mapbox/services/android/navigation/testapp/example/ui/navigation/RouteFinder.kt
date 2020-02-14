@@ -2,16 +2,14 @@ package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
 import android.location.Location
 import android.os.Environment
-import android.preference.PreferenceManager
 import androidx.lifecycle.MutableLiveData
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RouteObserver
-import com.mapbox.services.android.navigation.testapp.NavigationApplication
-import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.services.android.navigation.testapp.example.ui.ExampleViewModel
 import timber.log.Timber
 
@@ -20,15 +18,16 @@ class RouteFinder(
     private val routes: MutableLiveData<List<DirectionsRoute>>,
     private val navigation: () -> MapboxNavigation,
     private val accessToken: String
-) : RouteObserver {
+) : RoutesObserver {
 
     init {
-        navigation().registerRouteObserver(this)
+        navigation().registerRoutesObserver(this)
     }
 
     internal fun findRoute(location: Location, destination: Point) {
         navigation().requestRoutes(
             RouteOptions.builder()
+                .applyDefaultParams()
                 .accessToken(accessToken)
                 .coordinates(
                     origin = Point.fromLngLat(
@@ -42,15 +41,6 @@ class RouteFinder(
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
         updateRoutes(routes)
-    }
-
-    override fun onRoutesRequested() {
-        routes.value = emptyList()
-        viewModel.primaryRoute = null
-    }
-
-    override fun onRoutesRequestFailure(throwable: Throwable) {
-        Timber.d(throwable)
     }
 
     private fun obtainOfflineDirectory(): String {

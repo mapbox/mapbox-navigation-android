@@ -14,32 +14,27 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RouteObserver;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationViewOptions;
 import com.mapbox.navigation.ui.OnNavigationReadyCallback;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.SimplifiedCallback;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Response;
-
 public class NavigationFragment extends Fragment implements OnNavigationReadyCallback, NavigationListener,
-        RouteProgressObserver, RouteObserver {
+        RouteProgressObserver, RoutesObserver {
 
   private static final double ORIGIN_LONGITUDE = -3.714873;
   private static final double ORIGIN_LATITUDE = 40.397389;
@@ -65,7 +60,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this);
     mapboxNavigation = new MapboxNavigation(view.getContext().getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRouteObserver(this);
+    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -116,7 +111,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   public void onDestroyView() {
     super.onDestroyView();
     navigationView.onDestroy();
-    mapboxNavigation.unregisterRouteObserver(this);
+    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override
@@ -168,15 +163,6 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
     startNavigation();
   }
 
-  @Override
-  public void onRoutesRequested() {
-
-  }
-
-  @Override
-  public void onRoutesRequestFailure(@NotNull Throwable throwable) {
-
-  }
   /*
     RouteObserver end
    */
