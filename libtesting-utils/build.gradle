@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+
 android {
     compileSdkVersion androidVersions.compileSdkVersion
     buildToolsVersion androidVersions.buildToolsVersion
@@ -22,9 +22,6 @@ android {
 }
 
 dependencies {
-    api dependenciesList.androidxTestJunit
-    api dependenciesList.junit
-    api dependenciesList.coroutinesTestAndroid
-    api dependenciesList.mockk
-    api dependenciesList.robolectric
+    implementation dependenciesList.junit
+    implementation dependenciesList.coroutinesTestAndroid
 }

@@ -13,4 +13,4 @@ include ':app',
         ':libnavigation-util',
         ':libnavigation-core',
         ':libtesting-ui',
-        ':libtesting'
+        ':libtesting-utils'

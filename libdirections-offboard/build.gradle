@@ -42,7 +42,7 @@ dependencies {
 
     implementation dependenciesList.mapboxSdkServices
 
-    testImplementation project(':libtesting')
+    apply from: "${rootDir}/gradle/testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
