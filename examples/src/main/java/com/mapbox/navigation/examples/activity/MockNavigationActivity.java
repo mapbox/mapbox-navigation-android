@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -222,7 +223,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     coordinates.add(destination);
 
     navigation.requestRoutes(
-            RouteOptions.builder()
+            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
                     .accessToken(Mapbox.getAccessToken())
                     .coordinates(coordinates)
                     .build()

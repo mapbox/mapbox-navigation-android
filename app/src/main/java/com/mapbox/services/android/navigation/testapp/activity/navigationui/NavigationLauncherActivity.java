@@ -44,6 +44,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.NavigationLauncher;
@@ -273,7 +274,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     coordinates.add(currentLocation);
     coordinates.addAll(wayPoints);
 
-    RouteOptions.Builder builder = RouteOptions.builder()
+    RouteOptions.Builder builder = MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
             .accessToken(Mapbox.getAccessToken())
             .coordinates(coordinates)
             .profile(getRouteProfileFromSharedPreferences())

@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
@@ -240,7 +241,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private void fetchRoute() {
     mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
+            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
                     .accessToken(Mapbox.getAccessToken())
                     .coordinates(Arrays.asList(ORIGIN, DESTINATION))
                     .alternatives(true)

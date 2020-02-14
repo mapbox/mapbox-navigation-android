@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -121,7 +122,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     coordinates.addAll(Arrays.asList(middlePickup, destination));
     coordinates.add(destination);
 
-    mapboxNavigation.requestRoutes(RouteOptions.builder()
+    mapboxNavigation.requestRoutes(MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
             .accessToken(getString(R.string.mapbox_access_token))
             .coordinates(coordinates)
             .alternatives(true)

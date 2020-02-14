@@ -18,6 +18,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -176,7 +177,7 @@ public class NavigationFragment extends Fragment implements OnNavigationReadyCal
   }
 
   private void fetchRoute(Point origin, Point destination) {
-    mapboxNavigation.requestRoutes(RouteOptions.builder()
+    mapboxNavigation.requestRoutes(MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
             .accessToken(Mapbox.getAccessToken())
             .coordinates(Arrays.asList(origin, destination))
             .build());

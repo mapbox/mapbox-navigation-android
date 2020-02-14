@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
@@ -210,7 +211,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   public void findRoute(Point origin, Point destination) {
-    mapboxNavigation.requestRoutes(RouteOptions.builder()
+    mapboxNavigation.requestRoutes(MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
             .accessToken(Mapbox.getAccessToken())
             .coordinates(Arrays.asList(origin, destination))
             .alternatives(true)

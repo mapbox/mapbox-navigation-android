@@ -39,6 +39,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -485,7 +486,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void calculateRouteWith(Point destination, boolean isOffRoute) {
     Point origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
     navigation.requestRoutes(
-            RouteOptions.builder()
+            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
                     .accessToken(Mapbox.getAccessToken())
                     .coordinates(Arrays.asList(origin, destination))
                     .build()

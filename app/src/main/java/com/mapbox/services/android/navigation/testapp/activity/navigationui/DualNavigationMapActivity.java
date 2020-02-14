@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.ui.NavigationView;
@@ -260,7 +261,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
 
   private void fetchRoute() {
     mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
+            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
                     .accessToken(getString(R.string.mapbox_access_token))
                     .coordinates(Arrays.asList(origin, destination))
                     .alternatives(true)

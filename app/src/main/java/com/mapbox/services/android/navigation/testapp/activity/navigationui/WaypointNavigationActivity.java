@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
@@ -206,7 +207,7 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
 
   private void fetchRoute(Point origin, Point destination) {
     mapboxNavigation.requestRoutes(
-            RouteOptions.builder()
+            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
                     .accessToken(Mapbox.getAccessToken())
                     .coordinates(Arrays.asList(origin, destination))
                     .alternatives(true)
