@@ -46,7 +46,7 @@ dependencies {
 
     implementation dependenciesList.mapboxSdkGeoJSON
 
-    testImplementation project(':libtesting')
+    apply from: "${rootDir}/gradle/testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+
 android {
     compileSdkVersion androidVersions.compileSdkVersion
     buildToolsVersion androidVersions.buildToolsVersion
@@ -22,17 +22,6 @@ android {
 }
 
 dependencies {
-    api dependenciesList.androidxTestJunit
-
-    api(dependenciesList.barista) {
-        exclude group: 'org.jetbrains.kotlin'
-        exclude group: 'androidx.annotation'
-    }
-
-    api dependenciesList.mockk
-    api dependenciesList.junit
-    api dependenciesList.robolectric
-    api dependenciesList.coroutinesTestAndroid
-
-    implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.junit
+    implementation dependenciesList.coroutinesTestAndroid
 }

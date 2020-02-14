@@ -40,7 +40,8 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
 
-    testImplementation project(":libtesting")
+    testImplementation project(':libtesting-utils')
+    apply from: "${rootDir}/gradle/testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
