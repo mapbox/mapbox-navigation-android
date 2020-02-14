@@ -8,13 +8,21 @@ import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import timber.log.Timber;
 
 public class NavigationSettingsActivity extends PreferenceActivity {
 
@@ -51,8 +59,29 @@ public class NavigationSettingsActivity extends PreferenceActivity {
     public void onCreate(final Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
+
       String gitHashTitle = String.format("Last Commit Hash: %s", BuildConfig.GIT_HASH);
       findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
+
+      findPreference(getString(R.string.nav_native_history_retrieve_key)).setOnPreferenceClickListener(preference -> {
+        String history = MapboxNativeNavigatorImpl.INSTANCE.getHistory();
+        File path = Environment.getExternalStoragePublicDirectory("navigation_debug");
+        if (!path.exists()) {
+          path.mkdirs();
+        }
+        File file = new File(
+            Environment.getExternalStoragePublicDirectory("navigation_debug"),
+            "history_" + System.currentTimeMillis() + ".json"
+        );
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file))) {
+          outputStreamWriter.write(history);
+          Toast.makeText(getActivity(), "Saved to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+          Timber.i("History file saved to %s", file.getAbsolutePath());
+        } catch (IOException ex) {
+          Timber.e("History file write failed: %s", ex.toString());
+        }
+        return true;
+      });
     }
 
     @Override

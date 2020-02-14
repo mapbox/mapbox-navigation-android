@@ -40,6 +40,9 @@
     <string name="route_profile_key" translatable="false">route_profile</string>
     <string name="default_route_profile">driving-traffic</string>
     <string name="git_hash_key" translatable="false">git_hash</string>
+    <string name="nav_native_history_retrieve_key" translatable="false">nav_native_history_retrieve</string>
+    <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
+    <string name="nav_native_history_collect" translatable="false">Collect Nav Native history</string>
     <string name="offline_version_key" translatable="false">offline_preference_key</string>
     <string name="offline_region_download" translatable="false">offline_region_download</string>
     <string name="offline_enabled" translatable="false">offline_region_download</string>

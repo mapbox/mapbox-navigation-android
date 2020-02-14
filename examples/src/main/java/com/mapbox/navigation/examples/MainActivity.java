@@ -1,8 +1,10 @@
 package com.mapbox.navigation.examples;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,6 +30,7 @@ import com.mapbox.navigation.examples.activity.OnboardRouterActivityKt;
 import com.mapbox.navigation.examples.activity.SimpleMapboxNavigationKt;
 import com.mapbox.navigation.examples.activity.TripServiceActivityKt;
 import com.mapbox.navigation.examples.activity.TripSessionActivityKt;
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     ButterKnife.bind(this);
+
+    updateNavNativeHistoryCollection();
 
     settingsFab.setOnClickListener(v -> startActivityForResult(
             new Intent(MainActivity.this, NavigationSettingsActivity.class),
@@ -159,6 +165,20 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
       permissionsNeeded.add(permission);
       ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 10);
     }
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == CHANGE_SETTING_REQUEST_CODE) {
+      updateNavNativeHistoryCollection();
+    }
+  }
+
+  private void updateNavNativeHistoryCollection() {
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    MapboxNativeNavigatorImpl.INSTANCE.toggleHistory(
+            prefs.getBoolean(getString(R.string.nav_native_history_collect_key), false));
   }
 
   /*
