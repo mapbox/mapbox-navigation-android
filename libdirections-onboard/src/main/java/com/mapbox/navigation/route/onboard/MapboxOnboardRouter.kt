@@ -109,7 +109,7 @@ class MapboxOnboardRouter(
         // mainJobControl.scope.launch {
             try {
                 getRoute(url) { routerResult ->
-//                    mainJobControl.scope.launch {
+                    mainJobControl.scope.launch {
                         val routes: List<DirectionsRoute> = try {
                             parseDirectionsRoutes(routerResult.json)
                         } catch (e: RuntimeException) {
@@ -120,7 +120,7 @@ class MapboxOnboardRouter(
                             !routes.isNullOrEmpty() -> callback.onResponse(routes)
                             else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
                         }
-//                    }
+                    }
                 }
             } catch (e: CancellationException) {
                 callback.onCanceled()
