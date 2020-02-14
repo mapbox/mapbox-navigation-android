@@ -73,6 +73,7 @@ class MapboxNativeNavigatorImpl constructor(
             callback(
                 TripStatus(
                     status.location.toLocation(),
+                    emptyList(),
                     status.getRouteProgress(),
                     status.routeState == RouteState.OFFROUTE
                 )
@@ -117,7 +118,7 @@ class MapboxNativeNavigatorImpl constructor(
     // Offline
 
     override fun cacheLastRoute() {
-        navigator.cacheLastRoute()
+        navigator.cacheLastRoute {}
     }
 
     // override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
@@ -326,6 +327,6 @@ private fun RouteState.convertState(): RouteProgressState? {
         RouteState.COMPLETE -> RouteProgressState.ROUTE_ARRIVED
         RouteState.OFFROUTE -> null // send in a callback instead
         RouteState.STALE -> RouteProgressState.LOCATION_STALE
-        RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
+//        RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
 }

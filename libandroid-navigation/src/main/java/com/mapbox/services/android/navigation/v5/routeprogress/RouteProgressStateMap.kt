@@ -10,7 +10,7 @@ class RouteProgressStateMap : HashMap<RouteState, RouteProgressState?>() {
         put(RouteState.COMPLETE, RouteProgressState.ROUTE_ARRIVED)
         put(RouteState.TRACKING, RouteProgressState.LOCATION_TRACKING)
         put(RouteState.STALE, RouteProgressState.LOCATION_STALE)
-        put(RouteState.UNCERTAIN, RouteProgressState.ROUTE_UNCERTAIN)
+//        put(RouteState.UNCERTAIN, RouteProgressState.ROUTE_UNCERTAIN)
         put(RouteState.OFFROUTE, null) // Ignore off-route (info already provided via listener)
     }
 }

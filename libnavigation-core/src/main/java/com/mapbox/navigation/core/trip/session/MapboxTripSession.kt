@@ -44,9 +44,7 @@ class MapboxTripSession(
         set(value) {
             field = value
             if (value != null) {
-                ioJobController.scope.launch {
-                    navigator.setRoute(value) {}
-                }
+                navigator.setRoute(value) {}
             }
         }
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
@@ -137,7 +135,7 @@ class MapboxTripSession(
     override fun registerLocationObserver(locationObserver: LocationObserver) {
         locationObservers.add(locationObserver)
         rawLocation?.let { locationObserver.onRawLocationChanged(it) }
-        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it) }
+        enhancedLocation?.let { locationObserver.onEnhancedLocationChanged(it, emptyList()) }
     }
 
     override fun unregisterLocationObserver(locationObserver: LocationObserver) {
@@ -274,7 +272,7 @@ class MapboxTripSession(
 
     private fun updateEnhancedLocation(location: Location) {
         enhancedLocation = location
-        locationObservers.forEach { it.onEnhancedLocationChanged(location) }
+        locationObservers.forEach { it.onEnhancedLocationChanged(location, emptyList()) }
     }
 
     private fun updateRouteProgress(progress: RouteProgress) {
