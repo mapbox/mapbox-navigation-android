@@ -57,6 +57,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
     private val accessToken: String = instance.resources.getString(R.string.mapbox_access_token)
     private val routeFinder: RouteFinder
+    private val progressChangeListener: ExampleProgressChangeListener
 
     init {
         navigation =
@@ -76,7 +77,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         val speechPlayerProvider =
             SpeechPlayerProvider(getApplication(), english, true, voiceInstructionLoader)
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
-        ExampleProgressChangeListener(location, progress).let { routeProgressChangeListener ->
+        progressChangeListener = ExampleProgressChangeListener(location, progress).also { routeProgressChangeListener ->
             navigation.registerRouteProgressObserver(routeProgressChangeListener)
             navigation.registerLocationObserver(routeProgressChangeListener)
         }
@@ -162,6 +163,8 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
         navigation.onDestroy()
         speechPlayer.onDestroy()
         removeLocation()
+        navigation.unregisterRouteProgressObserver(progressChangeListener)
+        navigation.unregisterLocationObserver(progressChangeListener)
     }
 
     @SuppressLint("MissingPermission")

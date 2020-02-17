@@ -199,7 +199,6 @@ class ReplayRouteLocationEngine(private val logger: Logger? = null) : LocationEn
 
     private fun scheduleNextDispatch() {
         val currentMockedPoints = mockedLocations.size
-        Log.d("TAG", "currentMockedPoints size = ${mockedLocations.size}")
         when {
             currentMockedPoints == ZERO -> handler.postDelayed(this, DO_NOT_DELAY.toLong())
             currentMockedPoints <= MOCKED_POINTS_LEFT_THRESHOLD -> handler.postDelayed(

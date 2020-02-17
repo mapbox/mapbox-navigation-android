@@ -216,6 +216,7 @@ class ExampleActivity : HistoryActivity(), ExampleView {
 
     override fun updateInstructionViewWith(progress: RouteProgress) {
         instructionView.updateDistanceWith(progress)
+        instructionView.updateBannerInstructionsWith(progress.bannerInstructions())
     }
 
     override fun addMapProgressChangeListener(navigation: MapboxNavigation) {
