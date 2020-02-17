@@ -158,7 +158,7 @@ class MapboxNavigation(
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigationOptions.navigatorPollingDelay()
+            navigationOptions.navigatorPollingDelay
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
@@ -545,7 +545,7 @@ class MapboxNavigation(
                 check(accessToken != null) { "You need to provide an access token in order to use the default OnboardRouter." }
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                    MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig()
+                    MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
                         ?: throw RuntimeException("You need to provide a router configuration in order to use the default OnboardRouter."))
                 )
             }

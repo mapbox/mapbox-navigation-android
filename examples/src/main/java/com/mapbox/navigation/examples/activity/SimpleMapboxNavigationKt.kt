@@ -207,18 +207,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val fasterRouteSelectionTimer: CountDownTimer = object : CountDownTimer(startTimeInMillis, countdownInterval) {
-        override fun onTick(millisUntilFinished: Long) {
-            Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
-            fasterRouteAcceptProgress.progress = (maxProgress - millisUntilFinished / countdownInterval).toInt()
-        }
+    private val fasterRouteSelectionTimer: CountDownTimer =
+        object : CountDownTimer(startTimeInMillis, countdownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+                fasterRouteAcceptProgress.progress =
+                    (maxProgress - millisUntilFinished / countdownInterval).toInt()
+            }
 
-        override fun onFinish() {
-            Timber.d("FASTER_ROUTE: finished")
-            this@SimpleMapboxNavigationKt.fasterRoute = null
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            override fun onFinish() {
+                Timber.d("FASTER_ROUTE: finished")
+                this@SimpleMapboxNavigationKt.fasterRoute = null
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
         }
-    }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {

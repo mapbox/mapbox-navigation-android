@@ -20,12 +20,12 @@ class NavigationOptionsTest {
     fun whenBuilderBuildWithNoValuesCalledThenDefaultValuesUsed() {
         val options = NavigationOptions.Builder().build()
 
-        assertEquals(options.roundingIncrement(), ROUNDING_INCREMENT_FIFTY)
-        assertEquals(options.timeFormatType(), NONE_SPECIFIED)
-        assertEquals(options.navigatorPollingDelay(), DEFAULT_NAVIGATOR_POLLING_DELAY)
-        assertEquals(options.distanceFormatter(), null)
-        assertEquals(options.onboardRouterConfig(), null)
-        assertEquals(options.fasterRouteDetectorInterval(), DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
+        assertEquals(options.roundingIncrement, ROUNDING_INCREMENT_FIFTY)
+        assertEquals(options.timeFormatType, NONE_SPECIFIED)
+        assertEquals(options.navigatorPollingDelay, DEFAULT_NAVIGATOR_POLLING_DELAY)
+        assertEquals(options.distanceFormatter, null)
+        assertEquals(options.onboardRouterConfig, null)
+        assertEquals(options.fasterRouteDetectorInterval, DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
     }
 
     @Test
@@ -50,12 +50,12 @@ class NavigationOptionsTest {
             .fasterRouteDetectorInterval(fasterRouteInterval)
             .build()
 
-        assertEquals(options.roundingIncrement(), roundingIncrement)
-        assertEquals(options.timeFormatType(), timeFormat)
-        assertEquals(options.navigatorPollingDelay(), pollingDelay)
-        assertEquals(options.distanceFormatter(), distanceFormatter)
-        assertEquals(options.onboardRouterConfig(), routerConfig)
-        assertEquals(options.fasterRouteDetectorInterval(), fasterRouteInterval)
+        assertEquals(options.roundingIncrement, roundingIncrement)
+        assertEquals(options.timeFormatType, timeFormat)
+        assertEquals(options.navigatorPollingDelay, pollingDelay)
+        assertEquals(options.distanceFormatter, distanceFormatter)
+        assertEquals(options.onboardRouterConfig, routerConfig)
+        assertEquals(options.fasterRouteDetectorInterval, fasterRouteInterval)
     }
 
     @Test
@@ -90,11 +90,11 @@ class NavigationOptionsTest {
             .fasterRouteDetectorInterval(newFasterRouteInterval)
             .build()
 
-        assertEquals(options.roundingIncrement(), roundingIncrement)
-        assertEquals(options.timeFormatType(), newTimeFormat)
-        assertEquals(options.navigatorPollingDelay(), newPollingDelay)
-        assertEquals(options.distanceFormatter(), distanceFormatter)
-        assertEquals(options.onboardRouterConfig(), routerConfig)
-        assertEquals(options.fasterRouteDetectorInterval(), newFasterRouteInterval)
+        assertEquals(options.roundingIncrement, roundingIncrement)
+        assertEquals(options.timeFormatType, newTimeFormat)
+        assertEquals(options.navigatorPollingDelay, newPollingDelay)
+        assertEquals(options.distanceFormatter, distanceFormatter)
+        assertEquals(options.onboardRouterConfig, routerConfig)
+        assertEquals(options.fasterRouteDetectorInterval, newFasterRouteInterval)
     }
 }
