@@ -49,7 +49,7 @@ class MapboxOnboardRouter(
             tileDir.mkdirs()
         }
         val routerParams = RouterParams(
-            config.tilePath,
+            tileDir.absolutePath,
             config.inMemoryTileCache,
             config.mapMatchingSpatialCache,
             config.threadsCount,

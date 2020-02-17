@@ -3,7 +3,6 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
-import android.os.Environment
 import android.util.Log
 import android.location.Location
 import androidx.annotation.RequiresPermission
@@ -571,7 +570,7 @@ class MapboxNavigation(
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
             val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-            val tilesVersion = "2019_04_13-00_00_11"
+            val tilesVersion = "2020_02_02-03_00_00"
             return NavigationOptions.Builder()
                 .timeFormatType(NONE_SPECIFIED)
                 .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
@@ -587,7 +586,7 @@ class MapboxNavigation(
                 )
                 .onboardRouterConfig(
                     MapboxOnboardRouterConfig(
-                        obtainOfflineTilesDir(tilesUri.host, tilesVersion),
+                        obtainOfflineTilesDir(context, tilesUri.host, tilesVersion),
                         null,
                         null,
                         2,
@@ -601,13 +600,8 @@ class MapboxNavigation(
                 ).build()
         }
 
-        private fun obtainOfflineTilesDir(host: String, version: String): String {
-            val offlineDir = Environment.getExternalStoragePublicDirectory("Offline")
-            if (!offlineDir.exists()) {
-                Log.d("MapboxNavigation", "Offline directory does not exist")
-                offlineDir.mkdirs()
-            }
-            return File(offlineDir, "$host/$version").absolutePath
+        private fun obtainOfflineTilesDir(context: Context, host: String, version: String): String {
+            return File(context.filesDir, "Offline/$host/$version").absolutePath
         }
     }
 }
