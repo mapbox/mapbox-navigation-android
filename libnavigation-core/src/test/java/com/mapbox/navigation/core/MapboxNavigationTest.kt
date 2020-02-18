@@ -15,10 +15,10 @@ import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.core.directions.session.DirectionsSession
-import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
@@ -76,7 +76,12 @@ class MapboxNavigationTest {
     fun setUp() {
         mockkObject(NavigationModuleProvider)
         val hybridRouter: Router = mockk(relaxUnitFun = true)
-        every { NavigationModuleProvider.createModule<Router>(MapboxNavigationModuleType.HybridRouter, any()) } returns hybridRouter
+        every {
+            NavigationModuleProvider.createModule<Router>(
+                MapboxNavigationModuleType.HybridRouter,
+                any()
+            )
+        } returns hybridRouter
 
         mockkObject(NavigationComponentProvider)
 
@@ -92,14 +97,14 @@ class MapboxNavigationTest {
         mockDirectionSession()
 
         val navigationOptions = NavigationOptions
-                .Builder()
-                .distanceFormatter(distanceFormatter)
-                .fasterRouteDetectorInterval(1000L)
-                .navigatorPollingDelay(1500L)
-                .onboardRouterConfig(onBoardRouterConfig)
-                .roundingIncrement(1)
-                .timeFormatType(NONE_SPECIFIED)
-                .build()
+            .Builder()
+            .distanceFormatter(distanceFormatter)
+            .fasterRouteDetectorInterval(1000L)
+            .navigatorPollingDelay(1500L)
+            .onboardRouterConfig(onBoardRouterConfig)
+            .roundingIncrement(1)
+            .timeFormatType(NONE_SPECIFIED)
+            .build()
 
         mapboxNavigation =
             MapboxNavigation(
@@ -210,8 +215,8 @@ class MapboxNavigationTest {
     private fun mockTripService() {
         every {
             NavigationComponentProvider.createTripService(
-                    applicationContext,
-                    any()
+                applicationContext,
+                any()
             )
         } returns tripService
     }
@@ -243,10 +248,10 @@ class MapboxNavigationTest {
     private fun mockTripSession() {
         every {
             NavigationComponentProvider.createTripSession(
-                    tripService,
-                    locationEngine,
-                    locationEngineRequest,
-                    any()
+                tripService,
+                locationEngine,
+                locationEngineRequest,
+                any()
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location

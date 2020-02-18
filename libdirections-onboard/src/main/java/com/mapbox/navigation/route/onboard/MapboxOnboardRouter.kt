@@ -44,25 +44,27 @@ class MapboxOnboardRouter(
     private val gson = Gson()
 
     init {
-        val tileDir = File(config.tilePath, TILES_DIR_NAME)
-        if (!tileDir.exists()) {
-            tileDir.mkdirs()
+        if (config.tilePath.isNotEmpty()) {
+            val tileDir = File(config.tilePath, TILES_DIR_NAME)
+            if (!tileDir.exists()) {
+                tileDir.mkdirs()
+            }
+            val routerParams = RouterParams(
+                tileDir.absolutePath,
+                config.inMemoryTileCache,
+                config.mapMatchingSpatialCache,
+                config.threadsCount,
+                config.endpoint?.let {
+                    TileEndpointConfiguration(
+                        it.host,
+                        it.version,
+                        it.token,
+                        it.userAgent,
+                        ""
+                    )
+                })
+            navigatorNative.configureRouter(routerParams, null)
         }
-        val routerParams = RouterParams(
-            tileDir.absolutePath,
-            config.inMemoryTileCache,
-            config.mapMatchingSpatialCache,
-            config.threadsCount,
-            config.endpoint?.let {
-                TileEndpointConfiguration(
-                    it.host,
-                    it.version,
-                    it.token,
-                    it.userAgent,
-                    ""
-                )
-            })
-        navigatorNative.configureRouter(routerParams, null)
     }
 
     override fun getRoute(

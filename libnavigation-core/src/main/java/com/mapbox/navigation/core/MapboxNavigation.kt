@@ -3,7 +3,6 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
-import android.util.Log
 import android.location.Location
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
@@ -163,7 +162,7 @@ class MapboxNavigation(
         tripSession.registerStateObserver(navigationSession)
 
         fasterRouteTimer = NavigationComponentProvider
-                .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval()) {
+                .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
             requestFasterRoute()
         }
     }
@@ -569,9 +568,7 @@ class MapboxNavigation(
          */
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
-            val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-            val tilesVersion = "2020_02_02-03_00_00"
-            return NavigationOptions.Builder()
+            val builder = NavigationOptions.Builder()
                 .timeFormatType(NONE_SPECIFIED)
                 .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
                 .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
@@ -584,24 +581,33 @@ class MapboxNavigation(
                         ROUNDING_INCREMENT_FIFTY
                     )
                 )
-                .onboardRouterConfig(
-                    MapboxOnboardRouterConfig(
-                        obtainOfflineTilesDir(context, tilesUri.host, tilesVersion),
-                        null,
-                        null,
-                        2,
-                        Endpoint(
-                            tilesUri.toString(),
-                            tilesVersion,
-                            accessToken ?: "",
-                            "MapboxNavigationNative"
-                        )
-                    )
-                ).build()
-        }
 
-        private fun obtainOfflineTilesDir(context: Context, host: String, version: String): String {
-            return File(context.filesDir, "Offline/$host/$version").absolutePath
+            // TODO provide a production routing tiles endpoint
+            val tilesUri = URI("")
+            val tilesVersion = ""
+            val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
+                File(
+                    context.filesDir,
+                    "Offline/${tilesUri.host}/$tilesVersion"
+                ).absolutePath
+            } else ""
+
+            builder.onboardRouterConfig(
+                MapboxOnboardRouterConfig(
+                    tilesDir,
+                    null,
+                    null,
+                    2,
+                    Endpoint(
+                        tilesUri.toString(),
+                        tilesVersion,
+                        accessToken ?: "",
+                        "MapboxNavigationNative"
+                    )
+                )
+            )
+
+            return builder.build()
         }
     }
 }

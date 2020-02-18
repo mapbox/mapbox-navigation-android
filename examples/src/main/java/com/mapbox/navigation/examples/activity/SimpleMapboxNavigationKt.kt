@@ -43,7 +43,9 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import java.io.File
 import java.lang.ref.WeakReference
+import java.net.URI
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
@@ -75,7 +77,38 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
-        mapboxNavigation = MapboxNavigation(applicationContext, Utils.getMapboxAccessToken(this))
+
+        val options =
+            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
+
+        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
+        val tilesVersion = "2020_02_02-03_00_00"
+
+        val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
+            ?.host(tilesUri.host)
+            ?.version(tilesVersion)
+            ?.build()
+
+        val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
+            ?.tilePath(
+                File(
+                    filesDir,
+                    "Offline/${tilesUri.host}/$tilesVersion"
+                ).absolutePath
+            )
+            ?.endpoint(endpoint)
+            ?.build()
+
+        val newOptions =
+            options.toBuilder()
+                .onboardRouterConfig(onboardRouterConfig)
+                .build()
+
+        mapboxNavigation = MapboxNavigation(
+            applicationContext,
+            Utils.getMapboxAccessToken(this),
+            navigationOptions = newOptions
+        )
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {

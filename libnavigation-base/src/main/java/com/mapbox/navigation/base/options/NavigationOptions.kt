@@ -7,6 +7,7 @@ import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.TimeFormatType
 
 const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
+const val DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL = 2 * 60 * 1000L // 2 minutes
 
 data class NavigationOptions constructor(
     @RoundingIncrement val roundingIncrement: Int,
