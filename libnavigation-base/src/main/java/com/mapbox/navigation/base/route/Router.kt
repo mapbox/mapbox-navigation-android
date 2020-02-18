@@ -24,6 +24,8 @@ interface Router {
      */
     fun cancel()
 
+    fun shutdown()
+
     /**
      * Callback for Router fetching
      */

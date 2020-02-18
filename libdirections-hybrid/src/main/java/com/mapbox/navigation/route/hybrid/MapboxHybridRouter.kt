@@ -119,4 +119,8 @@ class MapboxHybridRouter(
         onboardRouter.cancel()
         offboardRouter.cancel()
     }
+
+    override fun shutdown() {
+        cancel()
+    }
 }

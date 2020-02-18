@@ -317,6 +317,10 @@ class MapboxNativeNavigatorImpl constructor(
             .ssmlAnnouncement(this.ssmlAnnouncement)
             .build()
     }
+
+    override fun shutdown() {
+        navigator.shutdown()
+    }
 }
 
 private fun RouteState.convertState(): RouteProgressState? {

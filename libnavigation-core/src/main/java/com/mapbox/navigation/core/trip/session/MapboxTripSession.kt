@@ -237,11 +237,7 @@ class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
-        ioJobController.scope.launch {
-            rawLocation.let {
-                navigator.updateLocation(it)
-            }
-        }
+        navigator.updateLocation(rawLocation)
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         if (this.rawLocation == null) {
             fireOffStatusPolling()

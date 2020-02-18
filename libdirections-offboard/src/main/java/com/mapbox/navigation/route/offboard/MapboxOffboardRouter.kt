@@ -68,4 +68,8 @@ class MapboxOffboardRouter(
         mapboxDirections?.cancelCall()
         mapboxDirections = null
     }
+
+    override fun shutdown() {
+        cancel()
+    }
 }
