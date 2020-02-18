@@ -32,6 +32,7 @@ class MapboxDirectionsSessionTest {
         every { router.getRoute(routeOptions, capture(listener)) } answers {
             callback = listener.captured
         }
+        every { routes[0].routeOptions() } returns routeOptions
         mockkObject(NavigationComponentProvider)
         every { routesRequestCallback.onRoutesReady(any()) } answers {
             this.value
@@ -87,9 +88,8 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun getRouteOptions() {
-        val routeOptions: RouteOptions = mockk()
         session.requestRoutes(routeOptions, routesRequestCallback)
-
+        callback.onResponse(routes)
         assertEquals(routeOptions, session.getRouteOptions())
     }
 
@@ -120,6 +120,7 @@ class MapboxDirectionsSessionTest {
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onResponse(routes)
         val newRoutes: List<DirectionsRoute> = listOf(mockk())
+        every { newRoutes[0].routeOptions() } returns routeOptions
         session.routes = newRoutes
         verify(exactly = 1) { observer.onRoutesChanged(newRoutes) }
     }

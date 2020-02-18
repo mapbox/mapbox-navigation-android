@@ -21,6 +21,9 @@ class MapboxDirectionsSession(
                 return
             }
             field = value
+            if (!routes.isEmpty()) {
+                this.routeOptions = routes[0].routeOptions()
+            }
             routesObservers.forEach { it.onRoutesChanged(value) }
         }
 
@@ -35,7 +38,6 @@ class MapboxDirectionsSession(
         routesRequestCallback: RoutesRequestCallback
     ) {
         routes = emptyList()
-        this.routeOptions = routeOptions
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 this@MapboxDirectionsSession.routes = routesRequestCallback.onRoutesReady(routes)
@@ -59,7 +61,6 @@ class MapboxDirectionsSession(
             routesRequestCallback.onRoutesRequestCanceled(adjustedRouteOptions)
             return
         }
-        this.routeOptions = adjustedRouteOptions
         router.getRoute(adjustedRouteOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 routesRequestCallback.onRoutesReady(routes)
