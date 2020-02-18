@@ -120,6 +120,10 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     @SuppressLint("MissingPermission")
     fun startNavigation() {
         primaryRoute?.let { primaryRoute ->
+
+            navigation.unregisterLocationObserver(progressChangeListener)
+            navigation.unregisterRouteProgressObserver(progressChangeListener)
+
             navigation = when (shouldSimulateRoute()) {
                 true -> {
                     val replayRouteLocationEngine = ReplayRouteLocationEngine()
@@ -134,6 +138,9 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
                     MapboxNavigation(getApplication(), accessToken, locationEngine = locationEngine)
                 }
             }
+            navigation.registerRouteProgressObserver(progressChangeListener)
+            navigation.registerLocationObserver(progressChangeListener)
+
             navigation.setRoutes(listOf(primaryRoute))
             navigation.startTripSession()
             removeLocation()
