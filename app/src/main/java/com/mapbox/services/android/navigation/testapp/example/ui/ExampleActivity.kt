@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.transition.TransitionManager
+import androidx.transition.Visibility
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.geocoding.v5.models.CarmenFeature
@@ -294,6 +295,8 @@ class ExampleActivity : HistoryActivity(), ExampleView {
         behavior.peekHeight = resources.getDimension(R.dimen.bottom_sheet_peek_height).toInt()
         behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         behavior.setBottomSheetCallback(AutoCompleteBottomSheetCallback(presenter))
+        // TODO need to fix flow
+        autocompleteBottomSheet.visibility = View.INVISIBLE
 
         autocompleteView.setOnClickListener { presenter.onAutocompleteClick() }
         autocompleteView.setAdapter(ExampleAutocompleteAdapter(this))

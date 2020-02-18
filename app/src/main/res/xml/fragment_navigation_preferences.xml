@@ -47,11 +47,11 @@
             android:title="@string/route_profile"/>
 
     </PreferenceCategory>
-
     <PreferenceCategory
         android:title="@string/offline_category_title">
 
-        <CheckBoxPreference
+        <!--TODO need fix flow-->
+     <!--   <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/offline_enabled"
             android:title="@string/offline_enabled_title"/>
@@ -63,7 +63,7 @@
                 android:action="android.intent.action.VIEW"
                 android:targetClass="com.mapbox.services.android.navigation.testapp.activity.OfflineRegionDownloadActivity"
                 android:targetPackage="com.mapbox.services.android.navigation.app"/>
-        </Preference>
+        </Preference>-->
 
         <ListPreference
             android:enabled="false"
