@@ -120,6 +120,10 @@ class MapboxTripSession(
         state = TripSessionState.STOPPED
     }
 
+    override fun shutdown() {
+        navigator.shutdown()
+    }
+
     private fun stopLocationUpdates() {
         locationEngine.removeLocationUpdates(locationEngineCallback)
     }
