@@ -7,7 +7,25 @@ workflows:
       - build
       - build-1.0
       - release
-      - release-1.0
+      - release-1.0-snapshot
+      - release-1.0:
+          filters:
+            tags:
+              only: /^release-1.0-.*/
+            branches:
+              ignore: /.*/
+      - release-1.0-qa:
+          filters:
+            tags:
+              only: /^qa-release-1.0-.*/
+            branches:
+              ignore: /.*/
+      - release-1.0-prod:
+          filters:
+            tags:
+              only: /^prod-release-1.0-.*/
+            branches:
+              ignore: /.*/
       - ui-tests
       - publish:
           filters:
@@ -248,10 +266,38 @@ jobs:
           command: |
             ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt "${CIRCLE_SHA1}"
 
+  release-1.0-snapshot:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    steps:
+      - checkout
+      - run:
+          name: Build Navigation SDK 1.0 (SNAPSHOT release)
+          command: make 1.0-build-release
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - deploy:
+          name: Publish Navigation SDK 1.0 to Artifactory
+          command: |
+            if [[ $CIRCLE_BRANCH == master ]]; then
+              version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+              if [[ $version == *"SNAPSHOT"* ]]; then
+                make 1.0-publish-to-artifactory
+              fi
+            fi
+
   release-1.0:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox
     steps:
       - checkout
       - run:
@@ -267,13 +313,61 @@ jobs:
       - deploy:
           name: Publish Navigation SDK 1.0 to Bintray
           command: |
-            if [[ $CIRCLE_BRANCH == master ]]; then
-              version=$(cat gradle/artifact-settings.gradle | grep "versionName")
-              if [[ $version != *"SNAPSHOT"* ]]; then
-                make 1.0-publish-to-bintray
-              else
-                make 1.0-publish-to-artifactory
-              fi
+            version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+            if [[ $version != *"SNAPSHOT"* ]]; then
+              make 1.0-publish-to-bintray
+            fi
+
+  release-1.0-qa:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_private
+    steps:
+      - checkout
+      - run:
+          name: Build Navigation SDK 1.0 (QA release)
+          command: make 1.0-build-release
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - deploy:
+          name: Publish Navigation SDK 1.0 to Bintray
+          command: |
+            version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+            if [[ $version != *"SNAPSHOT"* ]]; then
+              make 1.0-publish-to-bintray
+            fi
+
+  release-1.0-prod:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_collab
+    steps:
+      - checkout
+      - run:
+          name: Build Navigation SDK 1.0 (Prod release)
+          command: make 1.0-build-release
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - deploy:
+          name: Publish Navigation SDK 1.0 to Bintray
+          command: |
+            version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+            if [[ $version != *"SNAPSHOT"* ]]; then
+              make 1.0-publish-to-bintray
             fi
 # ------------------------------------------------------------------------------
   publish:
