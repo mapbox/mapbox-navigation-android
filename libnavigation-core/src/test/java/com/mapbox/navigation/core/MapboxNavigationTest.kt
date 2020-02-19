@@ -218,6 +218,7 @@ class MapboxNavigationTest {
     private fun mockLocation() {
         every { location.longitude } returns -122.789876
         every { location.latitude } returns 37.657483
+        every { location.bearing } returns 10f
     }
 
     private fun mockDirectionSession() {

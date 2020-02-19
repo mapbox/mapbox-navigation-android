@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.extensions.bearings
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
@@ -174,7 +173,7 @@ class NavigationRouteTest {
                         origin = Point.fromLngLat(1.0, 2.0),
                         destination = Point.fromLngLat(1.0, 5.0)
                     )
-                    .bearings(Pair(90.0, 90.0), null)
+                    .bearingsList(listOf(listOf(90.0, 90.0), listOf(null, null)))
                     .build()
             )
             .build()
@@ -195,7 +194,7 @@ class NavigationRouteTest {
                         listOf(Point.fromLngLat(3.0, 4.0), Point.fromLngLat(5.0, 6.0)),
                         Point.fromLngLat(7.0, 8.0)
                     )
-                    .bearings(Pair(10.0, 10.0), Pair(20.0, 20.0), Pair(30.0, 30.0), Pair(40.0, 40.0))
+                    .bearingsList(listOf(listOf(10.0, 10.0), listOf(20.0, 20.0), listOf(30.0, 30.0), listOf(40.0, 40.0)))
                     .build()
             )
             .build()
