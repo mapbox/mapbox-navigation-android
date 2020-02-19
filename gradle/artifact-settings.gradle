@@ -10,7 +10,7 @@ ext {
     mapboxArtifactScmUrl = 'scm:git@github.com:mapbox/mapbox-navigation-android.git'
     mapboxArtifactLicenseName = 'BSD'
     mapboxArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    versionName = '1.0.0-SNAPSHOT'
+    versionName = '1.0.0-qa.1'
 
     mapboxBintrayUserOrg = 'mapbox'
     mapboxBintrayRepoName = System.getenv('BINTRAY_REPO') ?: 'mapbox_private'
