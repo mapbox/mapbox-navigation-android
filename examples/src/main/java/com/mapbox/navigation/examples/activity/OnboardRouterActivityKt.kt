@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
@@ -63,7 +64,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             null,
             null // working with pre-fetched tiles only
         )
-        onboardRouter = MapboxOnboardRouter(config, null)
+        onboardRouter = MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
     }
 
     private fun newOrigin() {

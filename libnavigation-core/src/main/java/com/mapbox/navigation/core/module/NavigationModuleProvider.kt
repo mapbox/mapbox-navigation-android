@@ -11,7 +11,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 
 internal object NavigationModuleProvider {
 
-    inline fun <reified T> createModule(
+    fun <T> createModule(
         type: MapboxNavigationModuleType,
         // finding a constructor requires exact params types, not subclass/implementations,
         // that's why we need to pass the expected interface class as well
@@ -85,11 +85,7 @@ internal object NavigationModuleProvider {
                 }
             }
 
-            if (instance is T) {
-                return instance
-            } else {
-                throw MapboxInvalidModuleException(type)
-            }
+            return instance as T
         } catch (ex: Exception) {
             throw if (ex is MapboxInvalidModuleException) {
                 ex

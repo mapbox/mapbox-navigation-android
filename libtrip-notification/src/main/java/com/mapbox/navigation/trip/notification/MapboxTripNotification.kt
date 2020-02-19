@@ -66,7 +66,7 @@ class MapboxTripNotification constructor(
     private val navigationNotificationProvider = NavigationNotificationProvider
     private val notificationReceiver = NotificationActionReceiver()
     private val distanceFormatter: DistanceFormatter =
-        navigationOptions.distanceFormatter()
+        navigationOptions.distanceFormatter
             ?: throw IllegalArgumentException("Distance formatter is required.")
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
@@ -268,7 +268,7 @@ class MapboxTripNotification constructor(
     ): String? =
         ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
             val legDurationRemaining = currentLegProgress.durationRemaining()
-            val timeFormatType = navigationOptions.timeFormatType()
+            val timeFormatType = navigationOptions.timeFormatType
             val arrivalTime = formatTime(
                 time,
                 legDurationRemaining.toDouble(),
