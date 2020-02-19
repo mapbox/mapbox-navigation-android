@@ -89,11 +89,17 @@ public class SnapToRoute extends Snap {
 
     // Measure 1 meter ahead of the users current location, only if the distance remaining isn't zero
     Point futurePoint = createFuturePoint(distanceAhead, upcomingLineString, currentLineString);
-    Point currentPoint = TurfMeasurement.along(currentLineString, distanceTraveled, TurfConstants.UNIT_METERS);
+    Point currentPoint = null;
+    if (currentLineString.coordinates().size() > 0)
+      currentPoint = TurfMeasurement.along(currentLineString, distanceTraveled, TurfConstants.UNIT_METERS);
 
-    // Get bearing and convert azimuth to degrees
-    double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
-    return (float) MathUtils.wrap(azimuth, 0, 360);
+    if (currentPoint != null) {
+      // Get bearing and convert azimuth to degrees
+      double azimuth = TurfMeasurement.bearing(currentPoint, futurePoint);
+      return (float) MathUtils.wrap(azimuth, 0, 360);
+    } else {
+      return 0f;
+    }
   }
 
   @NonNull
