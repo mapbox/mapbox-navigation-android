@@ -15,9 +15,9 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.extensions.ifNonNull
-import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
@@ -26,9 +26,9 @@ import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleOffRouteListener
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.ExampleProgressChangeListener
 import com.mapbox.services.android.navigation.testapp.example.ui.navigation.RouteFinder
-import okhttp3.Cache
 import java.io.File
 import java.util.Locale.US
+import okhttp3.Cache
 
 private const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
 private const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500

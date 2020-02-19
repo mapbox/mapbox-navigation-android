@@ -43,12 +43,12 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.route.NavigationMapRoute
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_simple_mapbox_navigation.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import timber.log.Timber
-import java.lang.ref.WeakReference
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 

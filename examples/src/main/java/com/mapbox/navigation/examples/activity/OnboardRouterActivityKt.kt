@@ -21,8 +21,8 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
-import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.ui.route.NavigationMapRoute
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.io.File

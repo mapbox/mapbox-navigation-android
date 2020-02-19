@@ -2,9 +2,9 @@ package com.mapbox.navigation.core.location.replay
 
 import android.location.Location
 import android.os.Handler
-import org.jetbrains.annotations.TestOnly
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
+import org.jetbrains.annotations.TestOnly
 
 internal class ReplayLocationDispatcher : Runnable {
     private var locationsToReplay: MutableList<Location>

@@ -19,11 +19,10 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.NAVIGATION_PERMISSIONS_REQUEST
-import com.mapbox.navigation.ui.camera.DynamicCamera
-import com.mapbox.navigation.ui.camera.NavigationCamera
 
 private const val DEFAULT_ZOOM = 12.0
 private const val DEFAULT_BEARING = 0.0
