@@ -1,10 +1,9 @@
-package com.mapbox.navigation.base.network
+package com.mapbox.navigation.core.location
 
 import android.app.PendingIntent
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -12,15 +11,19 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.location.ReplayLocationConverter
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.base.network.replay.ReplayLocationDispatcher
-import com.mapbox.navigation.base.network.replay.ReplayRouteLocationConverter
-import com.mapbox.navigation.base.network.replay.ReplayRouteLocationListener
+import com.mapbox.navigation.core.location.replay.ReplayLocationDispatcher
+import com.mapbox.navigation.core.location.replay.ReplayRouteLocationConverter
+import com.mapbox.navigation.core.location.replay.ReplayRouteLocationListener
 import java.util.ArrayList
 
-class ReplayRouteLocationEngine(private val logger: Logger? = null) : LocationEngine, Runnable {
-    private lateinit var converter: ReplayRouteLocationConverter
+class ReplayRouteLocationEngine(
+    val logger: Logger? = null,
+    private val converter: ReplayLocationConverter
+) : LocationEngine, Runnable {
+
     private var speed = DEFAULT_SPEED
     private var delay = DEFAULT_DELAY
     private val handler: Handler = Handler()
@@ -30,6 +33,14 @@ class ReplayRouteLocationEngine(private val logger: Logger? = null) : LocationEn
     private lateinit var lastLocation: Location
     private var route: DirectionsRoute? = null
     private var point: Point? = null
+
+    constructor(logger: Logger? = null) : this(
+        logger,
+        ReplayRouteLocationConverter(
+            DEFAULT_SPEED,
+            DEFAULT_DELAY
+        )
+    )
 
     companion object {
         private const val HEAD = 0
@@ -142,12 +153,6 @@ class ReplayRouteLocationEngine(private val logger: Logger? = null) : LocationEn
         callback: LocationEngineCallback<LocationEngineResult>
     ) {
         handler.removeCallbacks(this)
-        converter =
-            ReplayRouteLocationConverter(
-                route,
-                speed,
-                delay
-            )
         converter.initializeTime()
         mockedLocations = converter.toLocations().toMutableList()
         dispatcher = obtainDispatcher(callback)

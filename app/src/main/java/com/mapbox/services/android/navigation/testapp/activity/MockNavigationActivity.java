@@ -33,7 +33,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
 import com.mapbox.navigation.base.metrics.MetricEvent;
 import com.mapbox.navigation.base.metrics.MetricsObserver;
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -115,7 +115,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
 //      .navigationNotification(customNotification)
             .build();
 
-    locationEngine = new ReplayRouteLocationEngine();
+    locationEngine = new ReplayRouteLocationEngine(null);
     navigation = new MapboxNavigation(
             this,
             Mapbox.getAccessToken(),

@@ -9,7 +9,7 @@ import android.preference.PreferenceManager;
 import com.google.gson.Gson;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.internal.NavigationConstants;
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.route.Router;
 
 /**

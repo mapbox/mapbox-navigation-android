@@ -101,7 +101,6 @@ dependencies {
   testImplementation dependenciesList.mockk
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
-  compile project(path: ':libnavigation-core')
 }
 
 apply from: 'javadoc.gradle'

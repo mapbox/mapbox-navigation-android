@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.network.replay
+package com.mapbox.navigation.core.location.replay
 
 import android.location.Location
 import android.os.Handler

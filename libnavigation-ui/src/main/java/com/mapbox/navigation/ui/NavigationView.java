@@ -32,7 +32,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.typedef.TimeFormatType;

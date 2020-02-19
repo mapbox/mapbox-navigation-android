@@ -5,7 +5,7 @@ import android.content.Context;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 
 class LocationEngineConductor {
 
@@ -32,7 +32,7 @@ class LocationEngineConductor {
     if (locationEngine != null) {
       this.locationEngine = locationEngine;
     } else if (simulateRoute) {
-      this.locationEngine = new ReplayRouteLocationEngine();
+      this.locationEngine = new ReplayRouteLocationEngine(null);
     } else {
       this.locationEngine = LocationEngineProvider.getBestLocationEngine(context);
     }

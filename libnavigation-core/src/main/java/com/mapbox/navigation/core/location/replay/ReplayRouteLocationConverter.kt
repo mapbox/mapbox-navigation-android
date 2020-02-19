@@ -1,25 +1,27 @@
-package com.mapbox.navigation.base.network.replay
+package com.mapbox.navigation.core.location.replay
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.location.ReplayLocationConverter
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.util.ArrayList
 
 internal class ReplayRouteLocationConverter(
-    private var route: DirectionsRoute,
     private var speed: Int,
     private var delay: Int
-) {
+) : ReplayLocationConverter {
+
     private val distance: Double
     private var currentLeg: Int = 0
     private var currentStep: Int = 0
     private var time: Long = 0
+    private val route: DirectionsRoute? = null
 
-    val isMultiLegRoute: Boolean
-        get() = route.legs()?.let { legs ->
+    override val isMultiLegRoute: Boolean
+        get() = route?.legs()?.let { legs ->
             legs.size > 1
         } ?: false
 
@@ -35,21 +37,25 @@ internal class ReplayRouteLocationConverter(
         distance = calculateDistancePerSec()
     }
 
-    fun updateSpeed(customSpeedInKmPerHour: Int) {
+    override fun updateSpeed(customSpeedInKmPerHour: Int) {
         this.speed = customSpeedInKmPerHour
     }
 
-    fun updateDelay(customDelayInSeconds: Int) {
+    override fun updateDelay(customDelayInSeconds: Int) {
         this.delay = customDelayInSeconds
     }
 
-    fun toLocations(): List<Location> {
+    override fun toLocations(): List<Location> {
         val stepPoints = calculateStepPoints()
 
         return calculateMockLocations(stepPoints)
     }
 
-    fun initializeTime() {
+    override fun setRoute(route: DirectionsRoute) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun initializeTime() {
         this.time = System.currentTimeMillis()
     }
 
@@ -59,7 +65,7 @@ internal class ReplayRouteLocationConverter(
      * @param lineString our route geometry.
      * @return list of sliced [Point]s.
      */
-    fun sliceRoute(lineString: LineString): List<Point> {
+    override fun sliceRoute(lineString: LineString): List<Point> {
         val distanceMeters = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS)
         if (distanceMeters <= 0) {
             return emptyList()
@@ -75,7 +81,7 @@ internal class ReplayRouteLocationConverter(
         return points
     }
 
-    fun calculateMockLocations(points: List<Point>): List<Location> {
+    override fun calculateMockLocations(points: List<Point>): List<Location> {
         val pointsToCopy = ArrayList(points)
         val mockedLocations = ArrayList<Location>()
         for (point in points) {
@@ -105,7 +111,7 @@ internal class ReplayRouteLocationConverter(
     private fun calculateStepPoints(): List<Point> {
         val stepPoints = ArrayList<Point>()
         val line = LineString.fromPolyline(
-            route.legs()?.let { legs ->
+            route?.legs()?.let { legs ->
                 legs[currentLeg]?.steps()?.let { steps ->
                     steps[currentStep].geometry()
                 }
@@ -118,10 +124,10 @@ internal class ReplayRouteLocationConverter(
     }
 
     private fun increaseIndex() {
-        val stepsSize: Int = route.legs()?.let { legs ->
+        val stepsSize: Int = route?.legs()?.let { legs ->
             legs[currentLeg]?.steps()?.size
         } ?: 0
-        val legsSize: Int = route.legs()?.size ?: 0
+        val legsSize: Int = route?.legs()?.size ?: 0
         if (currentStep < stepsSize - 1) {
             currentStep++
         } else if (currentLeg < legsSize - 1) {

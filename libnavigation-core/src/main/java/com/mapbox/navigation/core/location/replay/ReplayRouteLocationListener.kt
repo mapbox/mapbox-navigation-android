@@ -1,9 +1,9 @@
-package com.mapbox.navigation.base.network.replay
+package com.mapbox.navigation.core.location.replay
 
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 
 internal class ReplayRouteLocationListener(
     private val engine: ReplayRouteLocationEngine,

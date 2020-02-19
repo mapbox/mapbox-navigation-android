@@ -12,11 +12,10 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.extensions.ifNonNull
-import com.mapbox.navigation.base.network.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer

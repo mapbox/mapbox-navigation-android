@@ -1,8 +1,8 @@
-package com.mapbox.services.android.navigation.v5.internal.location.replay
+package com.mapbox.navigation.core.location.replay
 
 import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
-import com.mapbox.navigation.base.network.replay.TimestampAdapter
+import com.mapbox.navigation.core.location.replay.TimestampAdapter
 import java.util.Date
 
 internal data class ReplayLocationDto(
