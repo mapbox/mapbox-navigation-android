@@ -25,72 +25,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.SimpleMapboxNavigationKt"
-            android:label="@string/title_simple_navigation_kotlin"
-            android:screenOrientation="portrait">
+        <activity android:name=".CoreActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity android:name=".UIActivity"
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
 
         <activity
-            android:name=".activity.MockNavigationActivity"
-            android:label="@string/title_mock_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.OffboardRouterActivityKt"
-            android:label="@string/title_offboard_router_kotlin">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.OffboardRouterActivityJava"
-            android:label="@string/title_offboard_router_java">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.OnboardRouterActivityKt"
-            android:label="@string/title_onboard_router_kotlin">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.OnboardRouterActivityJava"
-            android:label="@string/title_onboard_router_java">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity android:name=".activity.TripServiceActivityKt"
-            android:label="@string/title_trip_service_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity android:name=".activity.TripSessionActivityKt"
-            android:label="@string/title_trip_session_kotlin"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".NavigationSettingsActivity"
+            android:name=".settings.NavigationSettingsActivity"
+            android:screenOrientation="portrait"
             android:label="@string/settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -98,12 +49,76 @@
         </activity>
 
         <activity
-            android:name=".activity.OfflineRegionDownloadActivity"
+            android:name=".settings.OfflineRegionDownloadActivity"
             android:label="@string/title_component_navigation"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".NavigationSettingsActivity"/>
+                android:value=".settings.NavigationSettingsActivity"/>
+        </activity>
+
+        <activity android:name=".core.SimpleMapboxNavigationKt"
+            android:label="@string/title_simple_navigation_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity
+            android:name=".ui.MockNavigationActivity"
+            android:label="@string/title_mock_navigation">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".core.OffboardRouterActivityKt"
+            android:label="@string/title_offboard_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity
+            android:name=".core.OffboardRouterActivityJava"
+            android:label="@string/title_offboard_router_java">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity
+            android:name=".core.OnboardRouterActivityKt"
+            android:label="@string/title_onboard_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity
+            android:name=".core.OnboardRouterActivityJava"
+            android:label="@string/title_onboard_router_java">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity android:name=".core.TripServiceActivityKt"
+            android:label="@string/title_trip_service_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity android:name=".core.TripSessionActivityKt"
+            android:label="@string/title_trip_session_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
         </activity>
 
         <meta-data

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity.notification;
+package com.mapbox.navigation.examples.ui.notification;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

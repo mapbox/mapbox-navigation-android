@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity;
+package com.mapbox.navigation.examples.ui;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -33,7 +33,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.base.logger.model.Tag;
 import com.mapbox.navigation.examples.R;
-import com.mapbox.navigation.examples.activity.notification.CustomNavigationNotification;
+import com.mapbox.navigation.examples.ui.notification.CustomNavigationNotification;
 import com.mapbox.navigation.examples.utils.Utils;
 import com.mapbox.navigation.logger.LogEntry;
 import com.mapbox.navigation.logger.LogPriority;

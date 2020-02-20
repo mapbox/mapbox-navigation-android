@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity
+package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.location.Location
@@ -56,7 +56,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val startTimeInMillis = 5000L
     private val countdownInterval = 10L
     private val maxProgress = startTimeInMillis / countdownInterval
-    private val locationEngineCallback = MyLocationEngineCallback(this)
+    private val locationEngineCallback =
+        MyLocationEngineCallback(this)
 
     private var mapboxMap: MapboxMap? = null
     private var navigationMapRoute: NavigationMapRoute? = null

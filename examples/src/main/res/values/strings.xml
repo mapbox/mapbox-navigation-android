@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Mapbox 1.0 Navigation SDK for Android</string>
 
+    <!-- MainActivity -->
+    <string name="navigation_core_sdk_title">Navigation Core SDK</string>
+    <string name="navigation_core_sdk_description">Hosts examples to demonstrate the use of the Core SDK</string>
+
+    <string name="navigation_ui_sdk_title">Navigation UI SDK</string>
+    <string name="navigation_ui_sdk_description">Hosts examples to demonstrate the use of the UI SDK</string>
+
     <string name="title_mock_navigation">Mock Navigation</string>
     <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
 
