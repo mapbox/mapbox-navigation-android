@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.RoutesObserver
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 
 internal class NavigationSession(private val context: Context) : RoutesObserver,
@@ -57,12 +58,11 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
         hasRoutes = routes.isNotEmpty()
     }
 
-    override fun onSessionStarted() {
-        isDriving = true
-    }
-
-    override fun onSessionStopped() {
-        isDriving = false
+    override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+        isDriving = when (tripSessionState) {
+            TripSessionState.STARTED -> true
+            TripSessionState.STOPPED -> false
+        }
     }
 
     private enum class State {

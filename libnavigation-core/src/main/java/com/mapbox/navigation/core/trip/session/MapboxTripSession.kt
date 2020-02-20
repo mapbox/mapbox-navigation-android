@@ -59,16 +59,13 @@ class MapboxTripSession(
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
 
-    private var isStarted: Boolean = false
+    private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
             if (field == value) {
                 return
             }
             field = value
-            when (field) {
-                true -> stateObservers.forEach { it.onSessionStarted() }
-                false -> stateObservers.forEach { it.onSessionStopped() }
-            }
+            stateObservers.forEach { it.onSessionStateChanged(value) }
         }
 
     private var isOffRoute: Boolean = false
@@ -90,13 +87,15 @@ class MapboxTripSession(
 
     override fun getRouteProgress() = routeProgress
 
+    override fun getState(): TripSessionState = state
+
     override fun start() {
-        if (isStarted) {
+        if (state == TripSessionState.STARTED) {
             return
         }
         tripService.startService()
         startLocationUpdates()
-        isStarted = true
+        state = TripSessionState.STARTED
     }
 
     private fun startLocationUpdates() {
@@ -109,7 +108,7 @@ class MapboxTripSession(
     }
 
     override fun stop() {
-        if (!isStarted) {
+        if (state == TripSessionState.STOPPED) {
             return
         }
         tripService.stopService()
@@ -117,7 +116,7 @@ class MapboxTripSession(
         ioJobController.job.cancelChildren()
         mainJobController.job.cancelChildren()
         reset()
-        isStarted = false
+        state = TripSessionState.STOPPED
     }
 
     private fun stopLocationUpdates() {
@@ -174,11 +173,7 @@ class MapboxTripSession(
 
     override fun registerStateObserver(stateObserver: TripSessionStateObserver) {
         stateObservers.add(stateObserver)
-        if (isStarted) {
-            stateObserver.onSessionStarted()
-        } else {
-            stateObserver.onSessionStopped()
-        }
+        stateObserver.onSessionStateChanged(state)
     }
 
     override fun unregisterStateObserver(stateObserver: TripSessionStateObserver) {

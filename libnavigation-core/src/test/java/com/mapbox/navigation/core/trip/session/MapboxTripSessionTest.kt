@@ -17,6 +17,7 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.NavigationStatus
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -68,6 +69,8 @@ class MapboxTripSessionTest {
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
+
+    private val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
@@ -344,6 +347,61 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun stateObserverImmediateStop() {
+        tripSession.registerStateObserver(stateObserver)
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
+    }
+
+    @Test
+    fun stateObserverImmediateStart() {
+        tripSession.start()
+        tripSession.registerStateObserver(stateObserver)
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STARTED) }
+    }
+
+    @Test
+    fun stateObserverStart() {
+        tripSession.registerStateObserver(stateObserver)
+        tripSession.start()
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STARTED) }
+    }
+
+    @Test
+    fun stateObserverStop() {
+        tripSession.start()
+        tripSession.registerStateObserver(stateObserver)
+        tripSession.stop()
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
+    }
+
+    @Test
+    fun stateObserverDoubleStart() {
+        tripSession.registerStateObserver(stateObserver)
+        tripSession.start()
+        tripSession.start()
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STARTED) }
+    }
+
+    @Test
+    fun stateObserverDoubleStop() {
+        tripSession.start()
+        tripSession.registerStateObserver(stateObserver)
+        tripSession.stop()
+        tripSession.stop()
+        verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }
+    }
+
+    @Test
+    fun stateObserverUnregister() {
+        tripSession.registerStateObserver(stateObserver)
+        clearMocks(stateObserver)
+        tripSession.unregisterStateObserver(stateObserver)
+        tripSession.start()
+        tripSession.stop()
+        verify(exactly = 0) { stateObserver.onSessionStateChanged(any()) }
+    }
+
+    @Test
     fun unregisterAllLocationObservers() = coroutineRule.runBlockingTest {
         every { routeProgress.bannerInstructions() } returns null
         every { routeProgress.voiceInstructions() } returns null
@@ -412,19 +470,13 @@ class MapboxTripSessionTest {
 
     @Test
     fun unregisterAllStateObservers() = coroutineRule.runBlockingTest {
-        val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
-
         tripSession.registerStateObserver(stateObserver)
-
-        tripSession.start()
-
+        clearMocks(stateObserver)
         tripSession.unregisterAllStateObservers()
 
-        // stop() would normally trigger a call to stateObserver.onSessionStopped()
         tripSession.stop()
 
-        verify(exactly = 1) { stateObserver.onSessionStarted() }
-        verify(exactly = 1) { stateObserver.onSessionStopped() }
+        verify(exactly = 0) { stateObserver.onSessionStateChanged(any()) }
     }
 
     @Test

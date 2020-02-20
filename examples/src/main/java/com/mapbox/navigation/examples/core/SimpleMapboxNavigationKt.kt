@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
@@ -49,6 +50,7 @@ import java.net.URI
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
+import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
@@ -56,8 +58,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val startTimeInMillis = 5000L
     private val countdownInterval = 10L
     private val maxProgress = startTimeInMillis / countdownInterval
-    private val locationEngineCallback =
-        MyLocationEngineCallback(this)
+    private val locationEngineCallback = MyLocationEngineCallback(this)
+    private val restartSessionEventChannel = Channel<RestartTripSessionAction>(1)
 
     private var mapboxMap: MapboxMap? = null
     private var navigationMapRoute: NavigationMapRoute? = null
@@ -282,14 +284,17 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val tripSessionStateObserver = object : TripSessionStateObserver {
-        override fun onSessionStarted() {
-            stopLocationUpdates()
-            startNavigation.visibility = GONE
-        }
-
-        override fun onSessionStopped() {
-            startLocationUpdates()
-            startNavigation.visibility = VISIBLE
+        override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+            when (tripSessionState) {
+                TripSessionState.STARTED -> {
+                    stopLocationUpdates()
+                    startNavigation.visibility = GONE
+                }
+                TripSessionState.STOPPED -> {
+                    startLocationUpdates()
+                    startNavigation.visibility = VISIBLE
+                }
+            }
         }
     }
 
@@ -303,9 +308,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onPause()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
         mapView.onStart()
+
+        restartSessionEventChannel.poll()?.also {
+            mapboxNavigation.startTripSession()
+        }
+
         mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
@@ -316,12 +327,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         mapView.onStop()
+
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
         stopLocationUpdates()
+
+        if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+            // use this to kill the service and hide the notification when going into the background in the Free Drive state,
+            // but also ensure to restart Free Drive when coming back from background by using the channel
+            mapboxNavigation.stopTripSession()
+            restartSessionEventChannel.offer(RestartTripSessionAction)
+        }
     }
 
     override fun onLowMemory() {
@@ -334,6 +353,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onDestroy()
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
+        restartSessionEventChannel.cancel()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -355,4 +375,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         override fun onFailure(exception: Exception) {
         }
     }
+
+    private object RestartTripSessionAction
 }

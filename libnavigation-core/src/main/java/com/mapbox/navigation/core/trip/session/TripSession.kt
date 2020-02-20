@@ -17,6 +17,7 @@ internal interface TripSession {
     fun getRawLocation(): Location?
     fun getEnhancedLocation(): Location?
     fun getRouteProgress(): RouteProgress?
+    fun getState(): TripSessionState
 
     fun start()
     fun stop()
