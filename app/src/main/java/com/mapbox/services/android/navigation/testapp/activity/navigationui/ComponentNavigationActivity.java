@@ -123,8 +123,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private boolean isFreeDriveEnabled = false;
   private boolean isFreeDriveCameraConfigured = false;
   private Handler handler = new Handler();
-  private Runnable updateTracking =
-          () -> navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
+  private Runnable updateTracking = () -> navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
 
   private enum MapState {
     INFO,
@@ -244,7 +243,10 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
+  public void onEnhancedLocationChanged(
+          @NotNull Location enhancedLocation,
+          @NotNull List<? extends Location> keyPoints
+  ) {
     checkFirstUpdate(enhancedLocation);
     updateLocation(enhancedLocation);
   }

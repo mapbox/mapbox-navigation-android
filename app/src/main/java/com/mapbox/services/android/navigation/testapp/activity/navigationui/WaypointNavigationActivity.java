@@ -171,7 +171,10 @@ public class WaypointNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
+  public void onEnhancedLocationChanged(
+          @NotNull Location enhancedLocation,
+          @NotNull List<? extends Location> keyPoints
+  ) {
     lastKnownLocation = enhancedLocation;
   }
 

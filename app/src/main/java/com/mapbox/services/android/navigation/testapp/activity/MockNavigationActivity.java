@@ -104,34 +104,28 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
-//    routeRefresh = new RouteRefresh(Mapbox.getAccessToken(), getApplicationContext());
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
-
-    Context context = getApplicationContext();
-//    CustomNavigationNotification customNotification = new CustomNavigationNotification(context);
-    NavigationOptions options = new NavigationOptions.Builder()
-//      .navigationNotification(customNotification)
-            .build();
 
     locationEngine = new ReplayRouteLocationEngine(null);
     navigation = new MapboxNavigation(
             this,
             Mapbox.getAccessToken(),
-            options,
+            new NavigationOptions.Builder().build(),
             locationEngine
     );
     MapboxMetricsReporter.INSTANCE.setMetricsObserver(this);
 
-//    customNotification.register(new MyBroadcastReceiver(navigation), context);
   }
 
   @SuppressLint("MissingPermission")
   @OnClick(R.id.startRouteButton)
   public void onStartRouteClick() {
     boolean isValidNavigation = navigation != null;
-    boolean isValidRoute = !navigation.getRoutes().isEmpty() && navigation.getRoutes().get(0).distance() > TWENTY_FIVE_METERS;
+    boolean isValidRoute =
+            !navigation.getRoutes().isEmpty()
+                    && navigation.getRoutes().get(0).distance() > TWENTY_FIVE_METERS;
     if (isValidNavigation && isValidRoute) {
 
       // Hide the start button
@@ -250,13 +244,17 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
+  public void onEnhancedLocationChanged(
+          @NotNull Location enhancedLocation,
+          @NotNull List<? extends Location> keyPoints
+  ) {
     mapboxMap.getLocationComponent().forceLocationUpdate(enhancedLocation);
   }
 
   @Override
   public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-//    if (!isRefreshing) { TODO impl
+//     TODO impl
+//    if (!isRefreshing) {
 //      isRefreshing = true;
 //      routeRefresh.refresh(routeProgress, this);
 //    }

@@ -18,15 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
-import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.EndNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationLauncherActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
-import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,11 +57,11 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 //        getString(R.string.description_mock_navigation),
 //        MockNavigationActivity.class
 //      ),
-      new SampleItem(
-        getString(R.string.title_navigation_route_ui),
-        getString(R.string.description_navigation_route_ui),
-        NavigationMapRouteActivity.class
-      )
+            new SampleItem(
+                    getString(R.string.title_navigation_route_ui),
+                    getString(R.string.description_navigation_route_ui),
+                    NavigationMapRouteActivity.class
+            )
 //            ,
 //      new SampleItem(
 //        getString(R.string.title_waypoint_navigation),
@@ -134,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
     Toast.makeText(this, "This app needs location and storage permissions"
-      + "in order to show its functionality.", Toast.LENGTH_LONG).show();
+            + "in order to show its functionality.", Toast.LENGTH_LONG).show();
   }
 
   @Override
@@ -182,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     @Override
     public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       View view = LayoutInflater
-        .from(parent.getContext())
-        .inflate(R.layout.item_main_feature, parent, false);
+              .from(parent.getContext())
+              .inflate(R.layout.item_main_feature, parent, false);
 
       view.setOnClickListener(clickedView -> {
         int position = recyclerView.getChildLayoutPosition(clickedView);

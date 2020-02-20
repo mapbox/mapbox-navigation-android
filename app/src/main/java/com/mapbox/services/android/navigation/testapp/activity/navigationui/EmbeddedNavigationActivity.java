@@ -52,8 +52,8 @@ import java.util.List;
 import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-        NavigationListener, LocationObserver, InstructionListListener, SpeechAnnouncementListener,
-        BannerInstructionsListener, RoutesObserver {
+  NavigationListener, LocationObserver, InstructionListListener, SpeechAnnouncementListener,
+  BannerInstructionsListener, RoutesObserver {
 
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
@@ -85,9 +85,9 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
     setSpeedWidgetAnchor(R.id.summaryBottomSheet);
 
     CameraPosition initialPosition = new CameraPosition.Builder()
-            .target(new LatLng(ORIGIN.latitude(), ORIGIN.longitude()))
-            .zoom(INITIAL_ZOOM)
-            .build();
+      .target(new LatLng(ORIGIN.latitude(), ORIGIN.longitude()))
+      .zoom(INITIAL_ZOOM)
+      .build();
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this, initialPosition);
     mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
@@ -181,7 +181,10 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onEnhancedLocationChanged(@NotNull Location enhancedLocation, @NotNull List<? extends Location> keyPoints) {
+  public void onEnhancedLocationChanged(
+    @NotNull Location enhancedLocation,
+    @NotNull List<? extends Location> keyPoints
+  ) {
     setSpeed(enhancedLocation);
   }
 
@@ -208,16 +211,16 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private void startNavigation(DirectionsRoute directionsRoute) {
     NavigationViewOptions.Builder options =
-            NavigationViewOptions.builder()
-                    .navigationListener(this)
-                    .directionsRoute(directionsRoute)
-                    .shouldSimulateRoute(true)
-                    .locationObserver(this)
-                    .instructionListListener(this)
-                    .speechAnnouncementListener(this)
-                    .bannerInstructionsListener(this)
-                    .offlineRoutingTilesPath(obtainOfflineDirectory())
-                    .offlineRoutingTilesVersion(obtainOfflineTileVersion());
+      NavigationViewOptions.builder()
+        .navigationListener(this)
+        .directionsRoute(directionsRoute)
+        .shouldSimulateRoute(true)
+        .locationObserver(this)
+        .instructionListListener(this)
+        .speechAnnouncementListener(this)
+        .bannerInstructionsListener(this)
+        .offlineRoutingTilesPath(obtainOfflineDirectory())
+        .offlineRoutingTilesVersion(obtainOfflineTileVersion());
     setBottomSheetCallback(options);
     setupStyleFab();
     setupNightModeFab();
@@ -236,16 +239,16 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private String obtainOfflineTileVersion() {
     return PreferenceManager.getDefaultSharedPreferences(this)
-            .getString(getString(R.string.offline_version_key), "");
+      .getString(getString(R.string.offline_version_key), "");
   }
 
   private void fetchRoute() {
     mapboxNavigation.requestRoutes(
-            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-                    .accessToken(Mapbox.getAccessToken())
-                    .coordinates(Arrays.asList(ORIGIN, DESTINATION))
-                    .alternatives(true)
-                    .build()
+      MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
+        .accessToken(Mapbox.getAccessToken())
+        .coordinates(Arrays.asList(ORIGIN, DESTINATION))
+        .alternatives(true)
+        .build()
     );
   }
 
@@ -305,16 +308,16 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private void setupStyleFab() {
     fabStyleToggle.setOnClickListener(view ->
-            navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
+      navigationView.retrieveNavigationMapboxMap().retrieveMap().setStyle(styleCycle.getNextStyle()));
   }
 
   private static class StyleCycle {
     private static final String[] STYLES = new String[]{
-            Style.MAPBOX_STREETS,
-            Style.OUTDOORS,
-            Style.LIGHT,
-            Style.DARK,
-            Style.SATELLITE_STREETS
+      Style.MAPBOX_STREETS,
+      Style.OUTDOORS,
+      Style.LIGHT,
+      Style.DARK,
+      Style.SATELLITE_STREETS
     };
 
     private int index;
@@ -344,7 +347,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
   private int getCurrentNightMode() {
     return getResources().getConfiguration().uiMode
-            & Configuration.UI_MODE_NIGHT_MASK;
+      & Configuration.UI_MODE_NIGHT_MASK;
   }
 
   private void alternateNightMode(int currentNightMode) {
@@ -377,10 +380,10 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
 
     SpannableString spannableString = new SpannableString(string);
     spannableString.setSpan(new AbsoluteSizeSpan(mphTextSize),
-            string.length() - 4, string.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+      string.length() - 4, string.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
     spannableString.setSpan(new AbsoluteSizeSpan(speedTextSize),
-            0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+      0, string.length() - 3, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
     speedWidget.setText(spannableString);
     if (!instructionListShown) {
