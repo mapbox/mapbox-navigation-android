@@ -18,11 +18,13 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.services.android.navigation.testapp.NavigationApplication
 import com.mapbox.services.android.navigation.testapp.R
 import com.mapbox.services.android.navigation.testapp.example.ui.permissions.NAVIGATION_PERMISSIONS_REQUEST
+import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
+import com.mapbox.services.android.navigation.v5.milestone.Milestone
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 private const val DEFAULT_ZOOM = 12.0
 private const val DEFAULT_BEARING = 0.0
@@ -166,6 +168,12 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
         }
     }
 
+    fun onMilestoneUpdate(milestone: Milestone?) {
+        milestone?.let {
+            view.updateInstructionViewWith(it)
+        }
+    }
+
     fun onMapLongClick(point: LatLng): Boolean {
         viewModel.destination.value = Point.fromLngLat(point.longitude, point.latitude)
         viewModel.findRouteToDestination()
@@ -196,11 +204,12 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
         viewModel.location.observe(owner, Observer { onLocationUpdate(it) })
         viewModel.routes.observe(owner, Observer { onRouteFound(it) })
         viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
+        viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
         viewModel.activateLocationEngine()
     }
 
     fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
-        // viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
+        viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
     }
 
     private fun buildCameraUpdateFrom(location: Location): CameraUpdate {

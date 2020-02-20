@@ -25,8 +25,9 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.gestures.MoveGestureDetector;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -39,30 +40,29 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
-import com.mapbox.navigation.base.options.NavigationOptions;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.core.trip.session.OffRouteObserver;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
-import com.mapbox.navigation.ui.camera.DynamicCamera;
-import com.mapbox.navigation.ui.camera.NavigationCamera;
-import com.mapbox.navigation.ui.camera.NavigationCameraUpdate;
-import com.mapbox.navigation.ui.instruction.InstructionView;
-import com.mapbox.navigation.ui.map.NavigationMapboxMap;
-import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
-import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
-import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.testapp.activity.HistoryActivity;
-
-import org.jetbrains.annotations.NotNull;
+import com.mapbox.services.android.navigation.ui.v5.camera.DynamicCamera;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera;
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdate;
+import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
+import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
+import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
+import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader;
+import com.mapbox.services.android.navigation.v5.milestone.Milestone;
+import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
+import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -71,11 +71,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Cache;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import timber.log.Timber;
 
 public class ComponentNavigationActivity extends HistoryActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, RouteProgressObserver, LocationObserver, RoutesObserver,
-        OffRouteObserver {
+  MapboxMap.OnMapLongClickListener, ProgressChangeListener, MilestoneEventListener,
+  OffRouteListener, EnhancedLocationListener {
 
   private static final int FIRST = 0;
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
@@ -123,14 +126,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private boolean isFreeDriveEnabled = false;
   private boolean isFreeDriveCameraConfigured = false;
   private Handler handler = new Handler();
-  private Runnable updateTracking = () -> navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
+  private Runnable updateTracking =
+    () -> navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
 
   private enum MapState {
     INFO,
     NAVIGATION
   }
-
-  private DynamicCamera camera;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -235,42 +237,39 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   }
 
   /*
-   * LocationObserver
+   * Navigation listeners
    */
 
   @Override
-  public void onRawLocationChanged(@NotNull Location rawLocation) {
-  }
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    // Cache "snapped" Locations for re-route Directions API requests
+    // TODO This is for testing / debugging purposes
+    Timber.d("DEBUG snapped %s", location.toString());
+    updateLocation(location);
 
-  @Override
-  public void onEnhancedLocationChanged(
-          @NotNull Location enhancedLocation,
-          @NotNull List<? extends Location> keyPoints
-  ) {
-    checkFirstUpdate(enhancedLocation);
-    updateLocation(enhancedLocation);
-  }
-
-  /*
-   * LocationObserver end
-   */
-
-  /*
-   * RouteProgressObserver
-   */
-  @Override
-  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
+    // Update InstructionView data from RouteProgress
     instructionView.updateDistanceWith(routeProgress);
   }
 
-  /*
-   * RouteProgressObserver end
-   */
-
+  @Override
+  public void onEnhancedLocationUpdate(Location location) {
+    // TODO This is for testing / debugging purposes
+    Timber.d("DEBUG enhanced %s", location.toString());
+    checkFirstUpdate(location);
+    updateLocation(location);
+  }
 
   @Override
-  public void onOffRouteStateChanged(boolean offRoute) {
-    calculateRouteWith(destination, offRoute);
+  public void onMilestoneEvent(RouteProgress routeProgress, String instruction, Milestone milestone) {
+    playAnnouncement(milestone);
+
+    // Update InstructionView banner instructions
+    instructionView.updateBannerInstructionsWith(milestone);
+  }
+
+  @Override
+  public void userOffRoute(Location location) {
+    calculateRouteWith(destination, true);
   }
 
   /*
@@ -332,13 +331,9 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Prevent leaks
     removeLocationEngineListener();
 
-    camera.clearMap();
+    ((DynamicCamera) navigation.getCameraEngine()).clearMap();
     // MapboxNavigation will shutdown the LocationEngine
-    navigation.unregisterRouteProgressObserver(this);
-    navigation.unregisterLocationObserver(this);
-    navigation.unregisterOffRouteObserver(this);
     navigation.onDestroy();
-
   }
 
   void checkFirstUpdate(Location location) {
@@ -364,11 +359,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private void initializeSpeechPlayer() {
     String english = Locale.US.getLanguage();
     Cache cache = new Cache(new File(getApplication().getCacheDir(), COMPONENT_NAVIGATION_INSTRUCTION_CACHE),
-            TEN_MEGABYTE_CACHE_SIZE);
+      TEN_MEGABYTE_CACHE_SIZE);
     VoiceInstructionLoader voiceInstructionLoader = new VoiceInstructionLoader(getApplication(),
-            Mapbox.getAccessToken(), cache);
+      Mapbox.getAccessToken(), cache);
     SpeechPlayerProvider speechPlayerProvider = new SpeechPlayerProvider(getApplication(), english, true,
-            voiceInstructionLoader);
+      voiceInstructionLoader);
     speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
@@ -380,14 +375,14 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void initializeNavigation(MapboxMap mapboxMap) {
     navigation = new MapboxNavigation(this, Mapbox.getAccessToken(),
-            new NavigationOptions.Builder().build(), locationEngine);
+      new MapboxNavigationOptions.Builder().build(), locationEngine);
     addNavigationForHistory(navigation);
     addLocationEngineListener();
     sendAnomalyFab.show();
-    camera = new DynamicCamera(mapboxMap);
-    navigation.registerRouteProgressObserver(this);
-    navigation.registerLocationObserver(this);
-    navigation.registerOffRouteObserver(this);
+    navigation.setCameraEngine(new DynamicCamera(mapboxMap));
+    navigation.addProgressChangeListener(this);
+    navigation.addMilestoneEventListener(this);
+    navigation.addOffRouteListener(this);
     navigationMap.addProgressChangeListener(navigation);
   }
 
@@ -395,25 +390,35 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     Snackbar.make(navigationLayout, text, duration).show();
   }
 
+  private void playAnnouncement(Milestone milestone) {
+    if (milestone instanceof VoiceInstructionMilestone) {
+      VoiceInstructions announcement = VoiceInstructions.builder()
+              .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
+              .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
+        .build();
+      speechPlayer.play(announcement);
+    }
+  }
+
   private void moveCameraTo(Location location) {
     CameraPosition cameraPosition = buildCameraPositionFrom(location, location.getBearing());
     navigationMap.retrieveMap().animateCamera(
-            CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
     );
   }
 
   private void moveCameraToInclude(Point destination) {
     LatLng origin = new LatLng(lastLocation);
     LatLngBounds bounds = new LatLngBounds.Builder()
-            .include(origin)
-            .include(new LatLng(destination.latitude(), destination.longitude()))
-            .build();
+      .include(origin)
+      .include(new LatLng(destination.latitude(), destination.longitude()))
+      .build();
     Resources resources = getResources();
     int routeCameraPadding = (int) resources.getDimension(R.dimen.component_navigation_route_camera_padding);
     int[] padding = {routeCameraPadding, routeCameraPadding, routeCameraPadding, routeCameraPadding};
     CameraPosition cameraPosition = navigationMap.retrieveMap().getCameraForLatLngBounds(bounds, padding);
     navigationMap.retrieveMap().animateCamera(
-            CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
     );
   }
 
@@ -423,7 +428,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     }
     CameraPosition cameraPosition = buildCameraPositionFrom(lastLocation, DEFAULT_BEARING);
     navigationMap.retrieveMap().animateCamera(
-            CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
+      CameraUpdateFactory.newCameraPosition(cameraPosition), TWO_SECONDS_IN_MILLISECONDS
     );
   }
 
@@ -444,11 +449,11 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @NonNull
   private CameraPosition buildCameraPositionFrom(Location location, double bearing, double zoom) {
     return new CameraPosition.Builder()
-            .zoom(zoom)
-            .target(new LatLng(location.getLatitude(), location.getLongitude()))
-            .bearing(bearing)
-            .tilt(DEFAULT_TILT)
-            .build();
+      .zoom(zoom)
+      .target(new LatLng(location.getLatitude(), location.getLongitude()))
+      .bearing(bearing)
+      .tilt(DEFAULT_TILT)
+      .build();
   }
 
   private void adjustMapPaddingForNavigation() {
@@ -464,38 +469,48 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     navigationMap.clearMarkers();
     addEventToHistoryFile("cancel_navigation");
     executeStoreHistoryTask();
-    navigation.stopTripSession();
+    navigation.stopNavigation();
     moveCameraOverhead();
   }
 
   private void removeLocationEngineListener() {
     if (locationEngine != null) {
-//      navigation.disableFreeDrive(); // TODO Electronic horizon
+      navigation.disableFreeDrive();
       isFreeDriveEnabled = false;
-      navigation.unregisterLocationObserver(this);
+      navigation.removeEnhancedLocationListener(this);
     }
   }
 
   @SuppressLint("MissingPermission")
   private void addLocationEngineListener() {
     if (locationEngine != null) {
-      navigation.registerLocationObserver(this);
-//      navigation.enableFreeDrive(); // TODO Electronic horizon
+      navigation.addEnhancedLocationListener(this);
+      navigation.enableFreeDrive();
       isFreeDriveEnabled = true;
     }
   }
 
   private void calculateRouteWith(Point destination, boolean isOffRoute) {
     Point origin = Point.fromLngLat(lastLocation.getLongitude(), lastLocation.getLatitude());
-    navigation.requestRoutes(
-            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-                    .accessToken(Mapbox.getAccessToken())
-                    .coordinates(Arrays.asList(origin, destination))
-                    .build()
-    );
+    Double bearing = Float.valueOf(lastLocation.getBearing()).doubleValue();
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin, bearing, BEARING_TOLERANCE)
+      .destination(destination)
+      .build()
+      .getRoute(new Callback<DirectionsResponse>() {
+        @Override
+        public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+          handleRoute(response, isOffRoute);
+        }
+
+        @Override
+        public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
+          Timber.e(throwable);
+        }
+      });
   }
 
-  @SuppressLint("MissingPermission")
   private void quickStartNavigation() {
     // Transition to navigation state
     mapState = MapState.NAVIGATION;
@@ -513,8 +528,7 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     // Alternatively, NavigationMapboxMap#startCamera could be used here,
     // centering the map camera to the beginning of the provided route
     navigationMap.resumeCamera(lastLocation);
-    navigation.setRoutes(Arrays.asList(route));
-    navigation.startTripSession();
+    navigation.startNavigation(route);
     addEventToHistoryFile("start_navigation");
 
     // Location updates will be received from ProgressChangeListener
@@ -529,14 +543,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     }
   }
 
-  @SuppressLint("MissingPermission")
-  private void handleRoute(List<? extends DirectionsRoute> routes, boolean isOffRoute) {
+  private void handleRoute(Response<DirectionsResponse> response, boolean isOffRoute) {
+    List<DirectionsRoute> routes = response.body().routes();
     if (!routes.isEmpty()) {
       route = routes.get(FIRST);
       navigationMap.drawRoute(route);
       if (isOffRoute) {
-        navigation.setRoutes(routes);
-        navigation.startTripSession();
+        navigation.startNavigation(route);
       } else {
         startNavigationFab.show();
       }
@@ -561,18 +574,13 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   @NonNull
   private LocationEngineRequest buildEngineRequest() {
     return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-            .build();
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
   }
 
   private void trackCameraDelayed() {
     handler.postDelayed(updateTracking, TWO_SECONDS_IN_MILLISECONDS);
-  }
-
-  @Override
-  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    handleRoute(routes, false);
   }
 
   /*

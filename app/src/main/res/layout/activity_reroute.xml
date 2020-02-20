@@ -18,7 +18,7 @@
         app:mapbox_cameraZoom="10"
         app:mapbox_uiAttribution="false"/>
 
-    <com.mapbox.navigation.ui.instruction.InstructionView
+    <com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView
         android:id="@+id/instructionView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

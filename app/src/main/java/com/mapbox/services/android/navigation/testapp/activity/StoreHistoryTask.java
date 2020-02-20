@@ -3,7 +3,7 @@ package com.mapbox.services.android.navigation.testapp.activity;
 import android.os.AsyncTask;
 import android.os.Environment;
 
-import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 
 import java.io.File;
 import java.io.FileOutputStream;

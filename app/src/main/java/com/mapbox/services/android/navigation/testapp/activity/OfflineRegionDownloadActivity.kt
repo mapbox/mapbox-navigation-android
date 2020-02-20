@@ -33,11 +33,18 @@ import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.services.android.navigation.testapp.R
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError
+import com.mapbox.services.android.navigation.v5.navigation.OfflineTiles
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesRemovedCallback
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback
+import com.mapbox.services.android.navigation.v5.navigation.RouteTileDownloadListener
 import kotlinx.android.synthetic.main.activity_offline_region_download.*
 import org.json.JSONObject
 import timber.log.Timber
 
-class OfflineRegionDownloadActivity : AppCompatActivity() {
+class OfflineRegionDownloadActivity : AppCompatActivity(), RouteTileDownloadListener,
+    OnOfflineTilesRemovedCallback {
 
     companion object {
         private const val EXTERNAL_STORAGE_PERMISSION = 1
@@ -66,7 +73,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
                 northEast.longitude, northEast.latitude
             )
         }
-
+    private val mapboxOfflineRouter: MapboxOfflineRouter
+        get() {
+            return MapboxOfflineRouter(obtainOfflineDirectory())
+        }
     private lateinit var offlineManager: OfflineManager
     private var offlineRegion: OfflineRegion? = null
     private val offlineRegionCallback = object : OfflineManager.CreateOfflineRegionCallback {
@@ -90,10 +100,10 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
         override fun onStatusChanged(offlineRegionStatus: OfflineRegionStatus?) {
             offlineRegionStatus?.let { status ->
                 Timber.d(
-                    "%s/%s resources; %s bytes downloaded.",
-                    status.completedResourceCount,
-                    status.requiredResourceCount,
-                    status.completedResourceSize
+                        "%s/%s resources; %s bytes downloaded.",
+                        status.completedResourceCount,
+                        status.requiredResourceCount,
+                        status.completedResourceSize
                 )
                 if (status.isComplete && !isDownloadCompleted) {
                     isDownloadCompleted = true
@@ -120,18 +130,18 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
 
     private fun setupSpinner() {
         val token = Mapbox.getAccessToken() ?: return
-        // mapboxOfflineRouter
-        //     .fetchAvailableTileVersions(token,
-        //         object : OnTileVersionsFoundCallback {
-        //             override fun onVersionsFound(availableVersions: List<String>) {
-        //                 setupSpinner(availableVersions)
-        //             }
-        //
-        //             override fun onError(error: OfflineError) {
-        //                 onVersionFetchFailed()
-        //             }
-        //         }
-        //     )
+        mapboxOfflineRouter
+            .fetchAvailableTileVersions(token,
+                object : OnTileVersionsFoundCallback {
+                    override fun onVersionsFound(availableVersions: List<String>) {
+                        setupSpinner(availableVersions)
+                    }
+
+                    override fun onError(error: OfflineError) {
+                        onVersionFetchFailed()
+                    }
+                }
+            )
     }
 
     fun onVersionFetchFailed() {
@@ -252,8 +262,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
         // val minZoom: Double = mapboxMap.cameraPosition.zoom
         // val maxZoom: Double = mapboxMap.maxZoomLevel
         val pixelRatio: Float = this.resources.displayMetrics.density
-        val definition =
-            OfflineTilePyramidRegionDefinition(styleUrl, bounds, minZoom, maxZoom, pixelRatio)
+        val definition = OfflineTilePyramidRegionDefinition(styleUrl, bounds, minZoom, maxZoom, pixelRatio)
         // TODO Testing downloading a Geometry using OfflineGeometryRegionDefinition as definition
         // val definition: OfflineGeometryRegionDefinition = OfflineGeometryRegionDefinition(
         //        styleUrl, geometry, minZoom, maxZoom, pixelRatio)
@@ -275,19 +284,19 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
 
     private fun downloadSelectedRegion() {
         val token = Mapbox.getAccessToken() ?: return
-        // val builder = OfflineTiles.builder(applicationContext)
-        //     .accessToken(token)
-        //     .version(versionSpinner.selectedItem as String)
-        //     .boundingBox(boundingBox)
-        //
-        // mapboxOfflineRouter.downloadTiles(builder.build(), this)
+        val builder = OfflineTiles.builder(applicationContext)
+            .accessToken(token)
+            .version(versionSpinner.selectedItem as String)
+            .boundingBox(boundingBox)
+
+        mapboxOfflineRouter.downloadTiles(builder.build(), this)
     }
 
     private fun removeSelectedRegion() {
         showRemoving(true, "Removing tiles....")
-        // retrieveOfflineVersionFromPreferences()?.let { version ->
-        //     mapboxOfflineRouter.removeTiles(version, boundingBox, this)
-        // }
+        retrieveOfflineVersionFromPreferences()?.let { version ->
+            mapboxOfflineRouter.removeTiles(version, boundingBox, this)
+        }
     }
 
     private fun retrieveOfflineVersionFromPreferences(): String? {
@@ -337,26 +346,26 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
    * Download listeners
    */
 
-    // override fun onError(error: OfflineError) {
-    //     setDownloadButtonEnabled(true)
-    //     isDownloadCompleted = false
-    //     showToast("There was an error with the download: ${error.message}. Please try again.")
-    // }
-    //
-    // override fun onProgressUpdate(percent: Int) {
-    //     showDownloading(false, "$percent%...")
-    // }
-    //
-    // override fun onCompletion() {
-    //     setDownloadButtonEnabled(true)
-    //     isDownloadCompleted = false
-    //     showToast("Download complete")
-    // }
-    //
-    // override fun onRemoved(numberOfTiles: Long) {
-    //     showRemoving(false, "Remove Region")
-    //     showToast("$numberOfTiles routing tiles were removed")
-    // }
+    override fun onError(error: OfflineError) {
+        setDownloadButtonEnabled(true)
+        isDownloadCompleted = false
+        showToast("There was an error with the download: ${error.message}. Please try again.")
+    }
+
+    override fun onProgressUpdate(percent: Int) {
+        showDownloading(false, "$percent%...")
+    }
+
+    override fun onCompletion() {
+        setDownloadButtonEnabled(true)
+        isDownloadCompleted = false
+        showToast("Download complete")
+    }
+
+    override fun onRemoved(numberOfTiles: Long) {
+        showRemoving(false, "Remove Region")
+        showToast("$numberOfTiles routing tiles were removed")
+    }
 
     /*
    * Basic mapView boilerplate
@@ -400,8 +409,7 @@ class OfflineRegionDownloadActivity : AppCompatActivity() {
 
     private fun showToast(str: String) {
         Toast.makeText(
-            applicationContext,
-            str,
+            applicationContext, str,
             Toast.LENGTH_SHORT
         ).show()
     }

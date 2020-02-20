@@ -7,8 +7,8 @@ import android.os.Looper;
 import androidx.test.espresso.IdlingResource;
 
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.navigation.ui.NavigationView;
-import com.mapbox.navigation.ui.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
 
 public class OnNavigationReadyIdlingResource implements IdlingResource, OnNavigationReadyCallback {
 

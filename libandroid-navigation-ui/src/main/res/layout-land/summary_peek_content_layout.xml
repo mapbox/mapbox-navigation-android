@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/summaryPeekContent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    tools:showIn="@layout/summary_content_layout">
+
+    <TextView
+        android:id="@+id/timeRemainingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/navigationViewPrimaryText"
+        android:includeFontPadding="false"
+        android:textSize="26sp"
+        tools:text="5 min"/>
+
+    <ImageView
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:tint="?attr/navigationViewSecondary"
+        app:srcCompat="@drawable/ic_circle"/>
+
+    <TextView
+        android:id="@+id/distanceRemainingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textColor="?attr/navigationViewSecondaryText"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="24sp"
+        tools:text="17 miles"/>
+
+    <ImageView
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:tint="?attr/navigationViewSecondary"
+        app:srcCompat="@drawable/ic_circle"/>
+
+    <TextView
+        android:id="@+id/arrivalTimeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textColor="?attr/navigationViewSecondaryText"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="24sp"
+        tools:text="10:38am"/>
+
+</LinearLayout>

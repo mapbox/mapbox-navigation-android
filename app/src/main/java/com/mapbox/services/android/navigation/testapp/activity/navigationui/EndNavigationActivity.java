@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.View;
@@ -14,40 +15,31 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
-import com.mapbox.navigation.ui.NavigationView;
-import com.mapbox.navigation.ui.NavigationViewOptions;
-import com.mapbox.navigation.ui.OnNavigationReadyCallback;
-import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.mapbox.navigation.base.internal.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 public class EndNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback, NavigationListener,
-        RoutesObserver, RouteProgressObserver {
+  Callback<DirectionsResponse>, ProgressChangeListener {
 
   private NavigationView navigationView;
-  private MapboxNavigation mapboxNavigation;
   private ProgressBar loading;
   private TextView message;
   private FloatingActionButton launchNavigationFab;
@@ -68,8 +60,6 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     initializeViews(savedInstanceState);
     navigationView.initialize(this);
     launchNavigationFab.setOnClickListener(v -> launchNavigation());
-    mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -79,21 +69,27 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   }
 
   @Override
-  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    updateLoadingTo(false);
-    message.setText("Launch Navigation");
-    launchNavigationFab.setVisibility(View.VISIBLE);
-    launchNavigationFab.show();
-    route = routes.get(0);
-    if (isNavigationRunning) {
-      launchNavigation();
+  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    if (validRouteResponse(response)) {
+      updateLoadingTo(false);
+      message.setText("Launch Navigation");
+      launchNavigationFab.setVisibility(View.VISIBLE);
+      launchNavigationFab.show();
+      route = response.body().routes().get(0);
+      if (isNavigationRunning) {
+        launchNavigation();
+      }
     }
   }
 
   @Override
-  public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-    boolean isCurrentStepArrival = routeProgress.currentLegProgress().currentStepProgress().step().maneuver().type()
-            .contains(STEP_MANEUVER_TYPE_ARRIVE);
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  }
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    boolean isCurrentStepArrival = routeProgress.currentLegProgress().currentStep().maneuver().type()
+      .contains(STEP_MANEUVER_TYPE_ARRIVE);
 
     if (isCurrentStepArrival && !paellaPickedUp) {
       updateUiDelivering();
@@ -117,16 +113,16 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   }
 
   private void fetchRoute() {
-    ArrayList<Point> coordinates = new ArrayList<>();
-    coordinates.add(origin);
-    coordinates.addAll(Arrays.asList(middlePickup, destination));
-    coordinates.add(destination);
-
-    mapboxNavigation.requestRoutes(MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-            .accessToken(getString(R.string.mapbox_access_token))
-            .coordinates(coordinates)
-            .alternatives(true)
-            .build());
+    NavigationRoute builder = NavigationRoute.builder(this)
+      .accessToken(getString(R.string.mapbox_access_token))
+      .origin(origin)
+      .addWaypoint(pickup)
+      .addWaypoint(middlePickup)
+      .destination(destination)
+      .addWaypointIndices(0, 2, 3)
+      .alternatives(true)
+      .build();
+    builder.getRoute(this);
     updateLoadingTo(true);
   }
 
@@ -143,10 +139,10 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     constraintSet.connect(R.id.message, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, 0);
     constraintSet.applyTo(endNavigationLayout);
     NavigationViewOptions.Builder options = NavigationViewOptions.builder()
-            .navigationListener(this)
-            .routeProgressObserver(this)
-            .directionsRoute(route)
-            .shouldSimulateRoute(true);
+      .navigationListener(this)
+      .progressChangeListener(this)
+      .directionsRoute(route)
+      .shouldSimulateRoute(true);
     navigationView.startNavigation(options.build());
     updateUiPickingUp();
   }
@@ -154,8 +150,8 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   private void drawPaella() {
     Icon paellaIcon = IconFactory.getInstance(this).fromResource(R.drawable.paella_icon);
     paella = navigationView.retrieveNavigationMapboxMap().retrieveMap().addMarker(new MarkerOptions()
-            .position(new LatLng(37.760615, -122.424306))
-            .icon(paellaIcon)
+      .position(new LatLng(37.760615, -122.424306))
+      .icon(paellaIcon)
     );
   }
 
@@ -199,7 +195,7 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
     navigationView.setVisibility(View.GONE);
     message.setText("Launch Navigation");
     message.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT,
-            ConstraintLayout.LayoutParams.MATCH_PARENT));
+      ConstraintLayout.LayoutParams.MATCH_PARENT));
     launchNavigationFab.show();
   }
 
@@ -256,6 +252,5 @@ public class EndNavigationActivity extends AppCompatActivity implements OnNaviga
   protected void onDestroy() {
     super.onDestroy();
     navigationView.onDestroy();
-    mapboxNavigation.unregisterRoutesObserver(this);
   }
 }

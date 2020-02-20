@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="56dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="?attr/navigationViewBannerBackground"
+    app:cardUseCompatPadding="true"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <TextView
+        android:id="@+id/alertText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="?attr/navigationViewBannerPrimaryText"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:maxLines="1"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        tools:text="Report Problem"/>
+
+    <ProgressBar
+        android:id="@+id/alertProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:progressDrawable="@drawable/alert_progress_drawable"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_gravity="bottom"
+        tools:progress="2000"
+        android:max="5000"/>
+
+</androidx.cardview.widget.CardView>

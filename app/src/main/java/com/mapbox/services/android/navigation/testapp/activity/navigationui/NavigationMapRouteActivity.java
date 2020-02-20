@@ -14,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -28,23 +28,22 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
-import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import timber.log.Timber;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, RoutesObserver {
+  MapboxMap.OnMapLongClickListener, Callback<DirectionsResponse> {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
 
@@ -55,7 +54,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @BindView(R.id.fabRemoveRoute)
   FloatingActionButton fabRemoveRoute;
 
-  private MapboxNavigation mapboxNavigation;
   private MapboxMap mapboxMap;
   private NavigationMapRoute navigationMapRoute;
   private StyleCycle styleCycle = new StyleCycle();
@@ -71,8 +69,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
-    mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @OnClick(R.id.fabStyles)
@@ -106,10 +102,20 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   @Override
-  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    navigationMapRoute.addRoutes(routes);
-    routeLoading.setVisibility(View.INVISIBLE);
-    fabRemoveRoute.setVisibility(View.VISIBLE);
+  public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+    if (response.isSuccessful()
+      && response.body() != null
+      && !response.body().routes().isEmpty()) {
+      List<DirectionsRoute> routes = response.body().routes();
+      navigationMapRoute.addRoutes(routes);
+      routeLoading.setVisibility(View.INVISIBLE);
+      fabRemoveRoute.setVisibility(View.VISIBLE);
+    }
+  }
+
+  @Override
+  public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable throwable) {
+    Timber.e(throwable);
   }
 
   @Override
@@ -152,7 +158,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
-    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override
@@ -179,9 +184,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     } else if (destinationMarker == null) {
       destinationMarker = mapboxMap.addMarker(new MarkerOptions().position(point));
       Point originPoint = Point.fromLngLat(
-              originMarker.getPosition().getLongitude(), originMarker.getPosition().getLatitude());
+        originMarker.getPosition().getLongitude(), originMarker.getPosition().getLatitude());
       Point destinationPoint = Point.fromLngLat(
-              destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
+        destinationMarker.getPosition().getLongitude(), destinationMarker.getPosition().getLatitude());
       Snackbar.make(mapView, "Destination selected", Snackbar.LENGTH_SHORT).show();
       findRoute(originPoint, destinationPoint);
       routeLoading.setVisibility(View.VISIBLE);
@@ -210,20 +215,22 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   public void findRoute(Point origin, Point destination) {
-    mapboxNavigation.requestRoutes(MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-            .accessToken(Mapbox.getAccessToken())
-            .coordinates(Arrays.asList(origin, destination))
-            .alternatives(true)
-            .build());
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(origin)
+      .destination(destination)
+      .alternatives(true)
+      .build()
+      .getRoute(this);
   }
 
   private static class StyleCycle {
-    private static final String[] STYLES = new String[]{
-            Style.MAPBOX_STREETS,
-            Style.OUTDOORS,
-            Style.LIGHT,
-            Style.DARK,
-            Style.SATELLITE_STREETS
+    private static final String[] STYLES = new String[] {
+      Style.MAPBOX_STREETS,
+      Style.OUTDOORS,
+      Style.LIGHT,
+      Style.DARK,
+      Style.SATELLITE_STREETS
     };
 
     private int index;

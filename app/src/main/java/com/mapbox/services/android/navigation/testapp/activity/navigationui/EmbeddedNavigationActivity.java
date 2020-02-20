@@ -22,44 +22,40 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
-import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.ui.NavigationView;
-import com.mapbox.navigation.ui.NavigationViewOptions;
-import com.mapbox.navigation.ui.OnNavigationReadyCallback;
-import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
-import com.mapbox.navigation.ui.listeners.InstructionListListener;
-import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
 import com.mapbox.services.android.navigation.testapp.R;
-
-import org.jetbrains.annotations.NotNull;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Response;
 import timber.log.Timber;
 
 public class EmbeddedNavigationActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-  NavigationListener, LocationObserver, InstructionListListener, SpeechAnnouncementListener,
-  BannerInstructionsListener, RoutesObserver {
+  NavigationListener, ProgressChangeListener, InstructionListListener, SpeechAnnouncementListener,
+  BannerInstructionsListener {
 
   private static final Point ORIGIN = Point.fromLngLat(-77.03194990754128, 38.909664963450105);
   private static final Point DESTINATION = Point.fromLngLat(-77.0270025730133, 38.91057077063121);
   private static final int INITIAL_ZOOM = 16;
 
-  private MapboxNavigation mapboxNavigation;
   private NavigationView navigationView;
   private View spacer;
   private TextView speedWidget;
@@ -90,8 +86,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       .build();
     navigationView.onCreate(savedInstanceState);
     navigationView.initialize(this, initialPosition);
-    mapboxNavigation = new MapboxNavigation(getApplicationContext(), Mapbox.getAccessToken());
-    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -157,7 +151,6 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
       saveNightModeToPreferences(AppCompatDelegate.MODE_NIGHT_AUTO);
       AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
     }
-    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   @Override
@@ -177,15 +170,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public void onRawLocationChanged(@NotNull Location rawLocation) {
-  }
-
-  @Override
-  public void onEnhancedLocationChanged(
-    @NotNull Location enhancedLocation,
-    @NotNull List<? extends Location> keyPoints
-  ) {
-    setSpeed(enhancedLocation);
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    setSpeed(location);
   }
 
   @Override
@@ -215,7 +201,7 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
         .navigationListener(this)
         .directionsRoute(directionsRoute)
         .shouldSimulateRoute(true)
-        .locationObserver(this)
+        .progressChangeListener(this)
         .instructionListListener(this)
         .speechAnnouncementListener(this)
         .bannerInstructionsListener(this)
@@ -243,18 +229,19 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   private void fetchRoute() {
-    mapboxNavigation.requestRoutes(
-      MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-        .accessToken(Mapbox.getAccessToken())
-        .coordinates(Arrays.asList(ORIGIN, DESTINATION))
-        .alternatives(true)
-        .build()
-    );
-  }
-
-  @Override
-  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    startNavigation(routes.get(0));
+    NavigationRoute.builder(this)
+      .accessToken(Mapbox.getAccessToken())
+      .origin(ORIGIN)
+      .destination(DESTINATION)
+      .alternatives(true)
+      .build()
+      .getRoute(new SimplifiedCallback() {
+        @Override
+        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+          DirectionsRoute directionsRoute = response.body().routes().get(0);
+          startNavigation(directionsRoute);
+        }
+      });
   }
 
   /**

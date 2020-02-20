@@ -10,10 +10,11 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
-import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.ui.camera.NavigationCamera
-import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener
+import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener
+import com.mapbox.services.android.navigation.v5.milestone.Milestone
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 interface ExampleView : PermissionsListener, OnMapReadyCallback,
     OnFeatureClickListener, OnRouteSelectionChangeListener {
@@ -53,6 +54,8 @@ interface ExampleView : PermissionsListener, OnMapReadyCallback,
     fun updateInstructionViewVisibility(visibility: Int)
 
     fun updateInstructionViewWith(progress: RouteProgress)
+
+    fun updateInstructionViewWith(milestone: Milestone)
 
     fun addMapProgressChangeListener(navigation: MapboxNavigation)
 

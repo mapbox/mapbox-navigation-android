@@ -1,6 +1,7 @@
 include ':app',
         ':examples',
         ':libandroid-navigation',
+        ':libandroid-navigation-ui',
         ':libnavigation-ui',
         ':libnavigator',
         ':libnavigation-base',

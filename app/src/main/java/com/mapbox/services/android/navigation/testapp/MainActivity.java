@@ -18,7 +18,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.services.android.navigation.testapp.activity.MockNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.RerouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.ComponentNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.DualNavigationMapActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.EmbeddedNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.EndNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationLauncherActivity;
 import com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationMapRouteActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.WaypointNavigationActivity;
+import com.mapbox.services.android.navigation.testapp.activity.navigationui.fragment.FragmentNavigationActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,53 +45,56 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     setContentView(R.layout.activity_main);
 
     final List<SampleItem> samples = new ArrayList<>(Arrays.asList(
-            // TODO test and fix one by one
-//      new SampleItem(
-//        getString(R.string.title_navigation_launcher),
-//        getString(R.string.description_navigation_launcher),
-//        NavigationLauncherActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_end_navigation),
-//        getString(R.string.description_end_navigation),
-//        EndNavigationActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_dual_navigation_map),
-//        getString(R.string.description_dual_navigation_map),
-//        DualNavigationMapActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_mock_navigation),
-//        getString(R.string.description_mock_navigation),
-//        MockNavigationActivity.class
-//      ),
-            new SampleItem(
-                    getString(R.string.title_navigation_route_ui),
-                    getString(R.string.description_navigation_route_ui),
-                    NavigationMapRouteActivity.class
-            )
-//            ,
-//      new SampleItem(
-//        getString(R.string.title_waypoint_navigation),
-//        getString(R.string.description_waypoint_navigation),
-//        WaypointNavigationActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_embedded_navigation),
-//        getString(R.string.description_embedded_navigation),
-//        EmbeddedNavigationActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_fragment_navigation),
-//        getString(R.string.description_fragment_navigation),
-//        FragmentNavigationActivity.class
-//      ),
-//      new SampleItem(
-//        getString(R.string.title_component_navigation),
-//        getString(R.string.description_component_navigation),
-//        ComponentNavigationActivity.class
-//      )
+      new SampleItem(
+        getString(R.string.title_navigation_launcher),
+        getString(R.string.description_navigation_launcher),
+        NavigationLauncherActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_end_navigation),
+        getString(R.string.description_end_navigation),
+        EndNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_dual_navigation_map),
+        getString(R.string.description_dual_navigation_map),
+        DualNavigationMapActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_mock_navigation),
+        getString(R.string.description_mock_navigation),
+        MockNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_reroute),
+        getString(R.string.description_reroute),
+        RerouteActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_navigation_route_ui),
+        getString(R.string.description_navigation_route_ui),
+        NavigationMapRouteActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_waypoint_navigation),
+        getString(R.string.description_waypoint_navigation),
+        WaypointNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_embedded_navigation),
+        getString(R.string.description_embedded_navigation),
+        EmbeddedNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_fragment_navigation),
+        getString(R.string.description_fragment_navigation),
+        FragmentNavigationActivity.class
+      ),
+      new SampleItem(
+        getString(R.string.title_component_navigation),
+        getString(R.string.description_component_navigation),
+        ComponentNavigationActivity.class
+      )
     ));
 
     // RecyclerView
@@ -126,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
   @Override
   public void onExplanationNeeded(List<String> permissionsToExplain) {
     Toast.makeText(this, "This app needs location and storage permissions"
-            + "in order to show its functionality.", Toast.LENGTH_LONG).show();
+      + "in order to show its functionality.", Toast.LENGTH_LONG).show();
   }
 
   @Override
@@ -174,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     @Override
     public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       View view = LayoutInflater
-              .from(parent.getContext())
-              .inflate(R.layout.item_main_feature, parent, false);
+        .from(parent.getContext())
+        .inflate(R.layout.item_main_feature, parent, false);
 
       view.setOnClickListener(clickedView -> {
         int position = recyclerView.getChildLayoutPosition(clickedView);

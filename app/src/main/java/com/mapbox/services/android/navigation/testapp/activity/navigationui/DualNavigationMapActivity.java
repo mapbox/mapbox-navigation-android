@@ -21,7 +21,6 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -33,29 +32,25 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils;
-import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.ui.NavigationView;
-import com.mapbox.navigation.ui.NavigationViewOptions;
-import com.mapbox.navigation.ui.OnNavigationReadyCallback;
-import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.navigation.ui.route.NavigationMapRoute;
-import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.testapp.R;
-
-import org.jetbrains.annotations.NotNull;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.ui.v5.OnNavigationReadyCallback;
+import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
 public class DualNavigationMapActivity extends AppCompatActivity implements OnNavigationReadyCallback,
-        NavigationListener, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
-        OnRouteSelectionChangeListener, RoutesObserver {
+  NavigationListener, Callback<DirectionsResponse>, OnMapReadyCallback, MapboxMap.OnMapLongClickListener,
+  OnRouteSelectionChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
   private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -79,7 +74,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   private boolean[] constraintChanged;
   private ConstraintSet navigationMapConstraint;
   private ConstraintSet navigationMapExpandedConstraint;
-  private MapboxNavigation mapboxNavigation;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,13 +86,11 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     navigationMapExpandedConstraint = new ConstraintSet();
     navigationMapExpandedConstraint.clone(this, R.layout.activity_dual_navigation_map_expanded);
 
-    constraintChanged = new boolean[]{false};
+    constraintChanged = new boolean[] {false};
     launchNavigationFab.setOnClickListener(v -> {
       expandCollapse();
       launchNavigation();
     });
-    mapboxNavigation = new MapboxNavigation(getApplicationContext(), getString(R.string.mapbox_access_token));
-    mapboxNavigation.registerRoutesObserver(this);
   }
 
   @Override
@@ -129,24 +121,22 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     return true;
   }
 
-  /*
-   * RouteObserver
-   */
-
   @Override
-  public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-    updateLoadingTo(false);
-    launchNavigationFab.show();
-    route = routes.get(0);
-    mapRoute.addRoutes(routes);
-    if (isNavigationRunning) {
-      launchNavigation();
+  public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+    if (validRouteResponse(response)) {
+      updateLoadingTo(false);
+      launchNavigationFab.show();
+      route = response.body().routes().get(0);
+      mapRoute.addRoutes(response.body().routes());
+      if (isNavigationRunning) {
+        launchNavigation();
+      }
     }
   }
 
-  /*
-   * RouteObserver end
-   */
+  @Override
+  public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
+  }
 
   @Override
   public void onCancelNavigation() {
@@ -235,7 +225,6 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     super.onDestroy();
     navigationView.onDestroy();
     mapView.onDestroy();
-    mapboxNavigation.unregisterRoutesObserver(this);
   }
 
   void onLocationFound(Location location) {
@@ -260,20 +249,21 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   }
 
   private void fetchRoute() {
-    mapboxNavigation.requestRoutes(
-            MapboxRouteOptionsUtils.applyDefaultParams(RouteOptions.builder())
-                    .accessToken(getString(R.string.mapbox_access_token))
-                    .coordinates(Arrays.asList(origin, destination))
-                    .alternatives(true)
-                    .build());
+    NavigationRoute builder = NavigationRoute.builder(this)
+      .accessToken(getString(R.string.mapbox_access_token))
+      .origin(origin)
+      .destination(destination)
+      .alternatives(true)
+      .build();
+    builder.getRoute(this);
   }
 
   private void launchNavigation() {
     launchNavigationFab.hide();
     navigationView.setVisibility(View.VISIBLE);
     NavigationViewOptions.Builder options = NavigationViewOptions.builder()
-            .navigationListener(this)
-            .directionsRoute(route);
+      .navigationListener(this)
+      .directionsRoute(route);
     navigationView.startNavigation(options.build());
   }
 
@@ -310,9 +300,9 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   @NonNull
   private LocationEngineRequest buildEngineRequest() {
     return new LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-            .build();
+      .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+      .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+      .build();
   }
 
   @SuppressLint("MissingPermission")
@@ -332,7 +322,7 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
     if (position != null) {
       if (currentMarker == null) {
         MarkerOptions markerViewOptions = new MarkerOptions()
-                .position(position);
+          .position(position);
         currentMarker = mapboxMap.addMarker(markerViewOptions);
       } else {
         currentMarker.setPosition(position);

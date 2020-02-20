@@ -11,7 +11,7 @@ import androidx.test.espresso.IdlingResourceTimeoutException;
 import androidx.test.rule.ActivityTestRule;
 
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.navigation.ui.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
 
 import junit.framework.Assert;
 

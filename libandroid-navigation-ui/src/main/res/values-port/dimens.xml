@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="instruction_layout_height">96dp</dimen>
+    <dimen name="summary_bottomsheet_height">72dp</dimen>
+    <dimen name="wayname_view_height">32dp</dimen>
+
+    <dimen name="route_overview_left_right_padding">35dp</dimen>
+    <dimen name="route_overview_buffer_padding">25dp</dimen>
+</resources>
