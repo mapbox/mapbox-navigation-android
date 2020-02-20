@@ -26,7 +26,8 @@ abstract class NodeCreator<N extends BannerComponentNode, V extends NodeVerifier
    * @param textView to populate
    * @param bannerComponentNodes containing instructions
    */
-  void preProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {}
+  void preProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  }
 
   /**
    * Coordinators which make edits to the text after it's been populated into the text view should
@@ -35,5 +36,6 @@ abstract class NodeCreator<N extends BannerComponentNode, V extends NodeVerifier
    * @param textView to populate
    * @param bannerComponentNodes containing instructions
    */
-  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {}
+  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  }
 }
