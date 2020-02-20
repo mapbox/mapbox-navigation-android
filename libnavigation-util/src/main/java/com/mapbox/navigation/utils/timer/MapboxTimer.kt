@@ -15,21 +15,18 @@ import kotlinx.coroutines.launch
  */
 class MapboxTimer(private val restartAfter: Long, private val executeLambda: () -> Unit) {
     private val mainControllerJobScope = ThreadController.getMainScopeAndRootJob()
-    private var timerJob: Job = Job()
-    init {
-        timerJob.cancel()
-    }
 
-    fun start() {
-        if (timerJob.isActive) {
-            return
-        }
-        timerJob = mainControllerJobScope.scope.launch {
-            while (isActive) {
+    private val timerJob: Job by lazy {
+        mainControllerJobScope.scope.launch {
+            while(isActive) {
                 delay(restartAfter)
                 executeLambda()
             }
         }
+    }
+
+    fun start() {
+        timerJob.let {  }
     }
 
     fun stop() {
