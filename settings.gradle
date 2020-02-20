@@ -12,5 +12,6 @@ include ':app',
         ':liblogger',
         ':libnavigation-util',
         ':libnavigation-core',
+        ':libnavigation-ui',
         ':libtesting-ui',
         ':libtesting-utils'

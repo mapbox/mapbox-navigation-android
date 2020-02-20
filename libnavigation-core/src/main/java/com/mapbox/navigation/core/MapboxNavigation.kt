@@ -102,7 +102,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
-class MapboxNavigation(
+class MapboxNavigation
+@JvmOverloads
+constructor(
     private val context: Context,
     private val accessToken: String?,
     private val navigationOptions: NavigationOptions = defaultNavigationOptions(
@@ -162,9 +164,9 @@ class MapboxNavigation(
         tripSession.registerStateObserver(navigationSession)
 
         fasterRouteTimer = NavigationComponentProvider
-                .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
-            requestFasterRoute()
-        }
+            .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
+                requestFasterRoute()
+            }
     }
 
     /**
@@ -479,23 +481,29 @@ class MapboxNavigation(
         }
     }
 
-    private fun buildAdjustedRouteOptions(routeOptions: RouteOptions, location: Location): RouteOptions {
+    private fun buildAdjustedRouteOptions(
+        routeOptions: RouteOptions,
+        location: Location
+    ): RouteOptions {
         val optionsBuilder = routeOptions.toBuilder()
         val coordinates = routeOptions.coordinates()
         tripSession.getRouteProgress()?.currentLegProgress()?.legIndex()?.let { index ->
             optionsBuilder.coordinates(
-                    coordinates.drop(index + 1).toMutableList().apply {
-                        add(0, Point.fromLngLat(location.longitude, location.latitude))
-                    }
+                coordinates.drop(index + 1).toMutableList().apply {
+                    add(0, Point.fromLngLat(location.longitude, location.latitude))
+                }
             )
 
             val bearings = mutableListOf<List<Double>>()
 
-            val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1) ?: DEFAULT_REROUTE_BEARING_TOLERANCE
+            val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
+                ?: DEFAULT_REROUTE_BEARING_TOLERANCE
             val currentAngle = location.bearing.toDouble()
 
             bearings.add(listOf(currentAngle, originTolerance))
-            bearings.addAll(routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList())
+            bearings.addAll(
+                routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList()
+            )
 
             optionsBuilder.bearingsList(bearings)
 
