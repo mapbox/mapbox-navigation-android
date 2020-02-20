@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples;
+package com.mapbox.navigation.examples.settings;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.mapbox.navigation.examples.BuildConfig;
+import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity
+package com.mapbox.navigation.examples.core
 
 import android.os.Bundle
 import android.os.Environment

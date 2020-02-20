@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity
+package com.mapbox.navigation.examples.settings
 
 import android.Manifest
 import android.content.pm.PackageManager

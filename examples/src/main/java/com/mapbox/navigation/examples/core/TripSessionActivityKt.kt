@@ -1,4 +1,4 @@
-package com.mapbox.navigation.examples.activity
+package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.location.Location
