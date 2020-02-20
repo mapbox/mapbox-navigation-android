@@ -39,4 +39,17 @@ class MapboxTimerTest {
 
         assertEquals(1, counter)
     }
+
+    @Test
+    fun stop_when_timerCanceled_lambdaNotCalled() = runBlocking {
+        var lambdaCalled = false
+        val testLambda = {  lambdaCalled = true }
+
+        val timer = MapboxTimer(100L, testLambda)
+        timer.start()
+        timer.stop()
+        delay(150)
+
+        assertFalse(lambdaCalled)
+    }
 }
