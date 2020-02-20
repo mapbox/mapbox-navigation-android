@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -192,6 +193,11 @@ constructor(
     fun stopTripSession() {
         tripSession.stop()
     }
+
+    /**
+     * Return the current [TripSessionState].
+     */
+    fun getTripSessionState() = tripSession.getState()
 
     /**
      * Requests a route using the provided [Router] implementation.

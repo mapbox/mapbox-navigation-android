@@ -3,6 +3,7 @@ package com.mapbox.navigation.core
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -34,7 +35,7 @@ class NavigationSessionTest {
 
     @Test
     fun drive_only() {
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         verify(exactly = 0) { accounts.navigationStarted() }
         verify(exactly = 0) { accounts.navigationStopped() }
     }
@@ -49,7 +50,7 @@ class NavigationSessionTest {
 
     @Test
     fun drive_route() {
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
         verify(exactly = 1) { accounts.navigationStarted() }
@@ -59,13 +60,13 @@ class NavigationSessionTest {
     fun route_drive() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         verify(exactly = 1) { accounts.navigationStarted() }
     }
 
     @Test
     fun drive_route_noRoute() {
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
         navigationSession.onRoutesChanged(emptyList())
@@ -74,10 +75,10 @@ class NavigationSessionTest {
 
     @Test
     fun drive_route_noDrive() {
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStopped()
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
         verify(exactly = 1) { accounts.navigationStopped() }
     }
 
@@ -85,7 +86,7 @@ class NavigationSessionTest {
     fun route_drive_noRoute() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         navigationSession.onRoutesChanged(emptyList())
         verify(exactly = 1) { accounts.navigationStopped() }
     }
@@ -94,8 +95,8 @@ class NavigationSessionTest {
     fun route_drive_noDrive() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
-        navigationSession.onSessionStopped()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
         verify(exactly = 1) { accounts.navigationStopped() }
     }
 
@@ -103,9 +104,9 @@ class NavigationSessionTest {
     fun route_drive_noRoute_noDrive() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         navigationSession.onRoutesChanged(emptyList())
-        navigationSession.onSessionStopped()
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
         verify(exactly = 1) { accounts.navigationStopped() }
     }
 
@@ -113,8 +114,8 @@ class NavigationSessionTest {
     fun route_drive_noDrive_noRoute() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
-        navigationSession.onSessionStopped()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
         navigationSession.onRoutesChanged(emptyList())
         verify(exactly = 1) { accounts.navigationStopped() }
     }
@@ -123,9 +124,9 @@ class NavigationSessionTest {
     fun restart_drive() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
-        navigationSession.onSessionStopped()
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         verify(exactly = 2) { accounts.navigationStarted() }
     }
 
@@ -133,7 +134,7 @@ class NavigationSessionTest {
     fun restart_route() {
         routes.add(route)
         navigationSession.onRoutesChanged(routes)
-        navigationSession.onSessionStarted()
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         navigationSession.onRoutesChanged(emptyList())
         navigationSession.onRoutesChanged(routes)
         verify(exactly = 2) { accounts.navigationStarted() }
