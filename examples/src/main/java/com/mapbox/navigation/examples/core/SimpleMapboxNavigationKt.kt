@@ -42,7 +42,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute
+import com.mapbox.navigation.ui.route.NavigationMapRoute
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI

@@ -25,7 +25,7 @@ import com.mapbox.navigation.examples.utils.Utils;
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.navigation.ui.route.NavigationMapRoute;
 
 import org.jetbrains.annotations.NotNull;
 

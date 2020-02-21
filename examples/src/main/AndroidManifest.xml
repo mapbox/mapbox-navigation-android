@@ -48,29 +48,12 @@
                 android:value=".MainActivity"/>
         </activity>
 
-        <activity
-            android:name=".settings.OfflineRegionDownloadActivity"
-            android:label="@string/title_component_navigation"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".settings.NavigationSettingsActivity"/>
-        </activity>
-
         <activity android:name=".core.SimpleMapboxNavigationKt"
             android:label="@string/title_simple_navigation_kotlin"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity"/>
-        </activity>
-
-        <activity
-            android:name=".ui.MockNavigationActivity"
-            android:label="@string/title_mock_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
         </activity>
 
         <activity

@@ -64,7 +64,6 @@ dependencies {
 
   // Mapbox
   implementation dependenciesList.mapboxSdkServices
-  implementation dependenciesList.mapboxSdkTurf
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk

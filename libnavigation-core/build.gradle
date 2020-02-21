@@ -37,7 +37,7 @@ dependencies {
     implementation project(':libnavigator')
     implementation project(':libdirections-hybrid')
     implementation project(':libtrip-notification')
-    implementation dependenciesList.mapboxSdkTurf
+    api dependenciesList.mapboxSdkTurf
     implementation dependenciesList.mapboxAndroidAccounts
 
     //ktlint
