@@ -56,15 +56,6 @@
             android:key="@string/offline_enabled"
             android:title="@string/offline_enabled_title"/>
 
-        <Preference
-            android:key="@string/offline_region_download"
-            android:title="@string/offline_region_download_title">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetClass="com.mapbox.navigation.examples.settings.OfflineRegionDownloadActivity"
-                android:targetPackage="com.mapbox.navigation.examples"/>
-        </Preference>
-
         <ListPreference
             android:enabled="false"
             android:key="@string/offline_version_key"
