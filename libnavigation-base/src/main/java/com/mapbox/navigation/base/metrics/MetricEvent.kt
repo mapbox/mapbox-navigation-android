@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.metrics
 
 import androidx.annotation.StringDef
 import com.google.gson.Gson
+import com.mapbox.android.telemetry.Event
 
 interface MetricEvent {
 
@@ -13,6 +14,7 @@ interface MetricEvent {
         NavigationMetrics.REROUTE,
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
+        NavigationMetrics.FASTER_ROUTE,
         NavigationMetrics.APP_USER_TURNSTILE
     )
     annotation class Metric
@@ -30,9 +32,22 @@ object NavigationMetrics {
     const val REROUTE = "navigation.reroute"
     const val FEEDBACK = "navigation.feedback"
     const val INITIAL_GPS = "initial_gps_event"
+    const val FASTER_ROUTE = "navigation.fasterRoute"
     const val APP_USER_TURNSTILE = "appUserTurnstile"
 }
 
 object DirectionsMetrics {
     const val ROUTE_RETRIEVAL = "route_retrieval_event"
+}
+fun MetricEvent.toTelemetryEvent(): Event? =
+when (metricName) {
+    DirectionsMetrics.ROUTE_RETRIEVAL,
+    NavigationMetrics.ARRIVE,
+    NavigationMetrics.CANCEL_SESSION,
+    NavigationMetrics.DEPART,
+    NavigationMetrics.REROUTE,
+    NavigationMetrics.FEEDBACK,
+    NavigationMetrics.INITIAL_GPS -> this as Event
+    NavigationMetrics.APP_USER_TURNSTILE -> (this as NavigationAppUserTurnstileEvent).event
+    else -> null
 }

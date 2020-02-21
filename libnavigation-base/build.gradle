@@ -33,6 +33,7 @@ dependencies {
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxSdkDirectionsModels
+    api dependenciesList.mapboxEvents
 
     implementation dependenciesList.supportAnnotation
 

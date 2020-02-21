@@ -31,8 +31,10 @@ android {
 }
 
 dependencies {
+    api dependenciesList.mapboxSdkTurf
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.mapboxSdkServices
 
     //ktlint
     ktlint dependenciesList.ktlint

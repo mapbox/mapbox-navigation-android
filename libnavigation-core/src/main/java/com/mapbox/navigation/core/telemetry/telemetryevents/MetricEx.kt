@@ -1,12 +1,12 @@
-package com.mapbox.navigation.metrics.internal.utils.extensions
+package com.mapbox.navigation.core.telemetry.telemetryevents
 
 import com.mapbox.android.telemetry.Event
 import com.mapbox.navigation.base.metrics.DirectionsMetrics
 import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
-import com.mapbox.navigation.metrics.internal.NavigationAppUserTurnstileEvent
 
-internal fun MetricEvent.toTelemetryEvent(): Event? =
+fun MetricEvent.toTelemetryEvent(): Event? =
     when (metricName) {
         DirectionsMetrics.ROUTE_RETRIEVAL,
         NavigationMetrics.ARRIVE,
