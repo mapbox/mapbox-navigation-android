@@ -19,7 +19,7 @@ class MapboxTimerTest {
     @Test
     fun start() = runBlocking {
         var counter = 0
-        val testLambda = {  counter += 1 }
+        val testLambda = { counter += 1 }
 
         MapboxTimer(100L, testLambda).start()
         delay(220)
@@ -44,7 +44,7 @@ class MapboxTimerTest {
     @Test
     fun stop_when_timerCanceled_lambdaNotCalled() = runBlocking {
         var lambdaCalled = false
-        val testLambda = {  lambdaCalled = true }
+        val testLambda = { lambdaCalled = true }
 
         val timer = MapboxTimer(100L, testLambda)
         timer.start()
@@ -55,9 +55,9 @@ class MapboxTimerTest {
     }
 
     @Test
-    fun executeLambda_notCalled_when_startNotCalled() = runBlocking  {
+    fun executeLambda_notCalled_when_startNotCalled() = runBlocking {
         var lambdaCalled = false
-        val testLambda = {  lambdaCalled = true }
+        val testLambda = { lambdaCalled = true }
 
         MapboxTimer(0L, testLambda)
         delay(10)

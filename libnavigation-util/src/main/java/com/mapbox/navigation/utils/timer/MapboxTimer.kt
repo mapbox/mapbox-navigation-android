@@ -18,7 +18,7 @@ class MapboxTimer(private val restartAfter: Long, private val executeLambda: () 
 
     private val timerJob: Job by lazy {
         mainControllerJobScope.scope.launch {
-            while(isActive) {
+            while (isActive) {
                 delay(restartAfter)
                 executeLambda()
             }
@@ -26,7 +26,7 @@ class MapboxTimer(private val restartAfter: Long, private val executeLambda: () 
     }
 
     fun start() {
-        timerJob.let {  }
+        timerJob.let {}
     }
 
     fun stop() {
