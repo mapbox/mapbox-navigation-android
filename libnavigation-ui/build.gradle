@@ -1,0 +1,109 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+  compileSdkVersion androidVersions.compileSdkVersion
+  buildToolsVersion androidVersions.buildToolsVersion
+
+  defaultConfig {
+    minSdkVersion androidVersions.minSdkVersion
+    targetSdkVersion androidVersions.targetSdkVersion
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    vectorDrawables.useSupportLibrary = true
+
+    buildConfigField('String',
+        "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-ui-android")
+    )
+    buildConfigField 'String',
+        "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-ui-android/%s\"",
+        project.VERSION_NAME
+    )
+    consumerProguardFiles 'proguard-consumer.pro'
+  }
+
+  configurations {
+    javadocDeps
+  }
+
+  buildTypes {
+    debug {
+      testCoverageEnabled = true
+    }
+  }
+
+  testOptions {
+    unitTests.returnDefaultValues = true
+    unitTests.includeAndroidResources = true
+    unitTests.all {
+      maxHeapSize = "1024m"
+      jacoco {
+        includeNoLocationClasses = true
+      }
+    }
+  }
+
+  licenseReport {
+    generateHtmlReport = false
+    generateJsonReport = true
+    copyHtmlReportToAssets = false
+    copyJsonReportToAssets = false
+  }
+}
+
+dependencies {
+  //ktlint
+  ktlint dependenciesList.ktlint
+
+  // Navigation SDK
+  api project(':libnavigation-core')
+  implementation project(':libnavigation-util')
+
+  // Mapbox
+  implementation dependenciesList.mapboxSdkServices
+  implementation dependenciesList.mapboxSdkTurf
+
+  // Mapbox Maps SDK
+  implementation dependenciesList.mapboxMapSdk
+  implementation dependenciesList.mapboxAnnotationPlugin
+
+  // Support libraries
+  implementation dependenciesList.supportDesign
+  implementation dependenciesList.supportRecyclerView
+  implementation dependenciesList.supportConstraintLayout
+  implementation dependenciesList.supportCardView
+
+  // Architecture libraries
+  implementation dependenciesList.lifecycleExtensions
+  annotationProcessor dependenciesList.lifecycleCompiler
+
+  // AutoValues
+  annotationProcessor dependenciesList.autoValue
+  compileOnly dependenciesList.autoValue
+
+  // Picasso
+  implementation dependenciesList.picasso
+
+  // Timber
+  implementation dependenciesList.timber
+
+  // Mapbox Map SDK Javadoc
+  javadocDeps dependenciesList.mapboxMapSdk
+
+  // Unit testing
+  testImplementation dependenciesList.junit
+  testImplementation dependenciesList.mockito
+  testImplementation dependenciesList.mockk
+  testImplementation dependenciesList.robolectric
+  testImplementation dependenciesList.json
+}
+
+apply from: 'javadoc.gradle'
+apply from: "${rootDir}/gradle/mvn-push-android.gradle"
+apply from: "${rootDir}/gradle/checkstyle.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/dependencies-graph.gradle"
+apply from: "${rootDir}/gradle/dependency-updates.gradle"

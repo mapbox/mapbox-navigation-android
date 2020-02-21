@@ -12,7 +12,7 @@ import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.VoiceUnit
 import com.mapbox.navigation.trip.notification.R
-import com.mapbox.navigation.trip.notification.utils.extension.getUnitTypeForLocale
+import com.mapbox.navigation.trip.notification.utils.extensions.getUnitTypeForLocale
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.turf.TurfConstants.UNIT_FEET
 import com.mapbox.turf.TurfConstants.UNIT_KILOMETERS
