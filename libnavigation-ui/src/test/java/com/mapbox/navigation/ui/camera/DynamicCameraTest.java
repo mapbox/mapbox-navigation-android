@@ -13,6 +13,8 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.constants.Constants;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.ui.BaseTest;
@@ -26,6 +28,7 @@ import java.util.List;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,18 +55,18 @@ public class DynamicCameraTest extends BaseTest {
 
   @Test
   public void onCameraPositionNull_engineReturnsDefaultZoom() throws Exception {
-    /*DynamicCamera theCameraEngine = buildDynamicCamera();
+    DynamicCamera theCameraEngine = buildDynamicCamera();
     RouteInformation anyRouteInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double defaultZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(15d, defaultZoom);*/
+    assertEquals(15d, defaultZoom);
   }
 
   @Test
   public void onCameraPositionZoomGreaterThanMax_engineReturnsMaxCameraZoom() throws Exception {
-    /*MapboxMap mapboxMap = mock(MapboxMap.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
     CameraPosition cameraPositionWithZoomGreaterThanMax = new CameraPosition.Builder()
       .zoom(20d)
       .build();
@@ -74,12 +77,12 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(16d, maxCameraZoom);*/
+    assertEquals(16d, maxCameraZoom);
   }
 
   @Test
   public void onCameraPositionZoomLessThanMin_engineReturnsMinCameraZoom() throws Exception {
-    /*MapboxMap mapboxMap = mock(MapboxMap.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
     CameraPosition cameraPositionWithZoomLessThanMin = new CameraPosition.Builder()
       .zoom(10d)
       .build();
@@ -90,12 +93,12 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(12d, maxCameraZoom);*/
+    assertEquals(12d, maxCameraZoom);
   }
 
   @Test
   public void onCameraPositionZoomGreaterThanMinAndLessThanMax_engineReturnsCameraPositionZoom() throws Exception {
-    /*MapboxMap mapboxMap = mock(MapboxMap.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
     CameraPosition cameraPositionWithZoomGreaterThanMinAndLessThanMax = new CameraPosition.Builder()
       .zoom(14d)
       .build();
@@ -106,7 +109,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(14d, maxCameraZoom);*/
+    assertEquals(14d, maxCameraZoom);
   }
 
   @Test
@@ -132,35 +135,35 @@ public class DynamicCameraTest extends BaseTest {
 
   @Test
   public void onHighDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
-    /*DynamicCamera cameraEngine = buildDynamicCamera();
+    DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(1000d));
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(60d, tilt);*/
+    assertEquals(60d, tilt);
   }
 
   @Test
   public void onMediumDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
-    /*DynamicCamera cameraEngine = buildDynamicCamera();
+    DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(200d));
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt);*/
+    assertEquals(45d, tilt);
   }
 
   @Test
   public void onLowDistanceRemaining_engineCreatesCorrectTilt() throws Exception {
-    /*DynamicCamera cameraEngine = buildDynamicCamera();
+    DynamicCamera cameraEngine = buildDynamicCamera();
     RouteInformation routeInformation = new RouteInformation(null,
       buildDefaultLocationUpdate(-77.0339782574523, 38.89993519985637), buildDefaultRouteProgress(null));
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt);*/
+    assertEquals(45d, tilt);
   }
 
   @Test
