@@ -31,12 +31,13 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
-import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
+import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.instruction.ImageCreator;
 import com.mapbox.navigation.ui.instruction.InstructionView;
@@ -635,6 +636,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationViewModel.initialize(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
+
+    if (options.camera() == null) {
+      navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
+    } else {
+      navigationMap.setCamera(options.camera());
+    }
 
     if (!isSubscribed) {
       initializeClickListeners();

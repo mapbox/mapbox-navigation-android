@@ -11,6 +11,7 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
+import com.mapbox.navigation.ui.camera.SimpleCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
@@ -319,6 +320,22 @@ public class NavigationMapboxMapTest {
     map.addCustomMarker(options);
 
     verify(navigationSymbolManager).addCustomSymbolFor(options);
+  }
+
+  @Test
+  public void setCamera_setsCameraOnMapCamera() {
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapWayName, mapFpsDelegate,
+            mapRoute, mapCamera, locationFpsDelegate);
+    SimpleCamera simpleCamera = new SimpleCamera();
+
+    theNavigationMap.setCamera(simpleCamera);
+
+    verify(mapCamera).setCamera(simpleCamera);
   }
 
   private List<Source> buildMockSourcesWith(String url) {

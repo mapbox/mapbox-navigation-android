@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
+import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
@@ -805,5 +806,9 @@ public class NavigationMapboxMap {
       mapFpsDelegate.onStop();
       removeFpsListenersFromCamera();
     }
+  }
+
+  public void setCamera(Camera camera) {
+    mapCamera.setCamera(camera);
   }
 }
