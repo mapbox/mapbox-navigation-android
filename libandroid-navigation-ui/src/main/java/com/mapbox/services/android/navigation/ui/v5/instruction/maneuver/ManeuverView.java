@@ -16,26 +16,18 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper;
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewUpdate;
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuversStyleKit;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_VIEW_UPDATE_MAP;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.ROUNDABOUT_MANEUVER_TYPES;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverType;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROTARY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_FORK;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROTARY;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN;
 
 
 /**
@@ -48,35 +40,6 @@ public class ManeuverView extends View {
   private static final float TOP_ROUNDABOUT_ANGLE_LIMIT = 300f;
   private static final float BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f;
   private static final float DEFAULT_ROUNDABOUT_ANGLE = 180f;
-  private static final Map<Pair<String, String>, ManeuverViewUpdate> MANEUVER_VIEW_UPDATE_MAP = new ManeuverViewMap();
-  private static final Set<String> SHOULD_FLIP_MODIFIERS = new HashSet<String>() {
-    {
-      add(STEP_MANEUVER_MODIFIER_SLIGHT_LEFT);
-      add(STEP_MANEUVER_MODIFIER_LEFT);
-      add(STEP_MANEUVER_MODIFIER_SHARP_LEFT);
-      add(STEP_MANEUVER_MODIFIER_UTURN);
-    }
-  };
-  private static final Set<String> ROUNDABOUT_MANEUVER_TYPES = new HashSet<String>() {
-    {
-      add(STEP_MANEUVER_TYPE_ROTARY);
-      add(STEP_MANEUVER_TYPE_ROUNDABOUT);
-      add(STEP_MANEUVER_TYPE_ROUNDABOUT_TURN);
-      add(STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT);
-      add(STEP_MANEUVER_TYPE_EXIT_ROTARY);
-    }
-  };
-  private static final Set<String> MANEUVER_TYPES_WITH_NULL_MODIFIERS = new HashSet<String>() {
-    {
-      add(STEP_MANEUVER_TYPE_OFF_RAMP);
-      add(STEP_MANEUVER_TYPE_FORK);
-      add(STEP_MANEUVER_TYPE_ROUNDABOUT);
-      add(STEP_MANEUVER_TYPE_ROUNDABOUT_TURN);
-      add(STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT);
-      add(STEP_MANEUVER_TYPE_ROTARY);
-      add(STEP_MANEUVER_TYPE_EXIT_ROTARY);
-    }
-  };
 
   @ManeuverType
   private String maneuverType = null;
@@ -235,15 +198,9 @@ public class ManeuverView extends View {
     if (maneuverViewUpdate != null) {
       maneuverViewUpdate.updateManeuverView(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
     }
-    boolean flip = SHOULD_FLIP_MODIFIERS.contains(maneuverModifier);
-    if (ROUNDABOUT_MANEUVER_TYPES.contains(maneuverType)) {
-      flip = STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide);
-    }
-    if (STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide) && STEP_MANEUVER_MODIFIER_UTURN.contains(maneuverModifier)) {
-      setScaleX(flip ? 1 : -1);
-    } else {
-      setScaleX(flip ? -1 : 1);
-    }
+
+    boolean flip = ManeuverViewHelper.isManeuverIconNeedFlip(maneuverType, maneuverModifier, drivingSide);
+    setScaleX(flip ? -1 : 1);
   }
 
   private void initializeColorFrom(AttributeSet attributeSet) {

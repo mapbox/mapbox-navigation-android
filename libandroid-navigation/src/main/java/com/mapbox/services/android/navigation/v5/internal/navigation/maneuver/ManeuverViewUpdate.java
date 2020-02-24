@@ -1,8 +1,8 @@
-package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
+package com.mapbox.services.android.navigation.v5.internal.navigation.maneuver;
 
 import android.graphics.Canvas;
 import android.graphics.PointF;
 
-interface ManeuverViewUpdate {
+public interface ManeuverViewUpdate {
   void updateManeuverView(Canvas canvas, int primaryColor, int secondaryColor, PointF size, float roundaboutAngle);
 }

@@ -1,4 +1,4 @@
-package com.mapbox.services.android.navigation.ui.v5.instruction.maneuver;
+package com.mapbox.services.android.navigation.v5.internal.navigation.maneuver;
 
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;

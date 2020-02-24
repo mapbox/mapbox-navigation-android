@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/maneuverImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/notification_maneuver_image_view_width"
+        android:layout_height="@dimen/notification_maneuver_image_view_height"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
