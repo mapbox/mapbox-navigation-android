@@ -3,6 +3,7 @@ package com.mapbox.navigation.utils.timer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -42,37 +43,36 @@ class MapboxTimerTest {
     }
 
     @Test
-    fun stop_when_timerCanceled_lambdaNotCalled() = runBlocking {
+    fun stop_when_timerCanceled_lambdaNotCalled() = runBlockingTest {
         var lambdaCalled = false
         val testLambda = { lambdaCalled = true }
 
         val timer = MapboxTimer(100L, testLambda)
         timer.start()
         timer.stop()
-        delay(150)
+        advanceTimeBy(150)
 
         assertFalse(lambdaCalled)
     }
 
     @Test
-    fun executeLambda_notCalled_when_startNotCalled() = runBlocking {
+    fun executeLambda_notCalled_when_startNotCalled() = runBlockingTest {
         var lambdaCalled = false
         val testLambda = { lambdaCalled = true }
 
         MapboxTimer(0L, testLambda)
-        delay(10)
+        advanceTimeBy(10)
 
         assertFalse(lambdaCalled)
     }
 
     @Test
-    fun timerNotStartedUntilStartCalled() = runBlocking {
+    fun timerNotStartedUntilStartCalled() = runBlockingTest {
         var counter = 0
         val testLambda = { counter += 1 }
 
         MapboxTimer(100L, testLambda)
-
-        delay(200L)
+        advanceTimeBy(200L)
 
         assertEquals(0, counter)
     }
