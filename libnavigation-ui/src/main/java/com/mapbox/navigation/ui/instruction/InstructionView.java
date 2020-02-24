@@ -38,8 +38,9 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.libnavigation.ui.R;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
-import com.mapbox.navigation.ui.legacy.NavigationConstants;
+import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -55,10 +56,14 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 import com.mapbox.navigation.ui.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.navigation.ui.junction.RouteJunction;
+import com.mapbox.navigation.ui.junction.RouteJunctionModel;
+import com.mapbox.navigation.ui.legacy.NavigationConstants;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
 import com.mapbox.navigation.ui.utils.LocaleEx;
 import com.mapbox.navigation.utils.extensions.ContextEx;
+import com.squareup.picasso.Picasso;
 
 import timber.log.Timber;
 
@@ -111,6 +116,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
   private LifecycleOwner lifecycleOwner;
+
+  private String guidanceImageUrl = "";
+  private RouteJunction routeJunction = null;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -203,7 +211,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
           updateManeuverView(model.retrievePrimaryManeuverType(), model.retrievePrimaryManeuverModifier(),
-                  model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
+            model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
           updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
@@ -223,6 +231,16 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
+    navigationViewModel.routeJunctionModel.observe(lifecycleOwner, new Observer<RouteJunctionModel>() {
+      @Override
+      public void onChanged(RouteJunctionModel routeJunctionModel) {
+        if (routeJunctionModel != null) {
+          determineGuidanceView(routeJunctionModel.getRouteProgress());
+        } else {
+          animateHideGuidanceViewImage();
+        }
+      }
+    });
     subscribeAlertView();
     initializeButtonListeners();
     showButtons();
@@ -239,6 +257,35 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       navigationViewModel.instructionModel.removeObservers(lifecycleOwner);
       navigationViewModel.bannerInstructionModel.removeObservers(lifecycleOwner);
       navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
+      navigationViewModel.routeJunctionModel.removeObservers(lifecycleOwner);
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
+  public void determineGuidanceView(RouteProgress routeProgress) {
+    if (routeProgress != null && !isRerouting) {
+      double currentStepTotalDistance = 0.0;
+      float currentStepDistanceTraveled = 0f;
+      String guidanceUrl = null;
+
+      RouteLegProgress legProgress = routeProgress.currentLegProgress();
+      if (legProgress != null && legProgress.currentStepProgress() != null) {
+        guidanceUrl = legProgress.currentStepProgress().guidanceViewURL();
+        if (legProgress.currentStepProgress().step() != null) {
+          currentStepTotalDistance = legProgress.currentStepProgress().step().distance();
+          currentStepDistanceTraveled = legProgress.currentStepProgress().distanceTraveled();
+        }
+      }
+      if (guidanceUrl != null && !this.guidanceImageUrl.equals(guidanceUrl)) {
+        guidanceImageUrl = guidanceUrl;
+      }
+      if (currentStepTotalDistance != 0.0) {
+        if (routeJunction != null) {
+          hideGuidanceView(currentStepTotalDistance);
+        } else {
+          showGuidanceView(currentStepDistanceTraveled, currentStepTotalDistance);
+        }
+      }
     }
   }
 
@@ -336,6 +383,32 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
     instructionListLayout.setVisibility(GONE);
     onInstructionListVisibilityChanged(false);
+  }
+
+  /////////////////////////////////////////
+  private void showGuidanceView(float currentStepDistanceTraveled, double currentStepTotalDistance) {
+    int metersBeforeShowGuidanceView = 200;
+    if (currentStepTotalDistance <= metersBeforeShowGuidanceView) {
+      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
+      animateShowGuidanceViewImage();
+      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+    } else if (currentStepDistanceTraveled + metersBeforeShowGuidanceView >= currentStepTotalDistance) {
+      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
+      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+      animateShowGuidanceViewImage();
+    }
+  }
+
+  private void hideGuidanceView(double currentStepTotalDistance) {
+    if (currentStepTotalDistance != routeJunction.getDistanceToHideView()) {
+      guidanceImageUrl = "";
+      routeJunction = null;
+      animateHideGuidanceViewImage();
+    }
+  }
+
+  private String appendTokenTo() {
+    return guidanceImageUrl + "&access_token=" + Mapbox.getAccessToken();
   }
 
   private boolean isLandscape() {
@@ -450,9 +523,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void initializeBackground() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-              R.attr.navigationViewBannerBackground);
+        R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-              R.attr.navigationViewListBackground);
+        R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (isLandscape()) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
@@ -478,7 +551,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
-            LinearLayoutManager.HORIZONTAL, false));
+      LinearLayoutManager.HORIZONTAL, false));
   }
 
   /**
@@ -598,9 +671,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-            && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
-            && !upcomingDistanceText.getText().toString()
-            .contentEquals(model.retrieveStepDistanceRemaining().toString());
+      && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
+      && !upcomingDistanceText.getText().toString()
+      .contentEquals(model.retrieveStepDistanceRemaining().toString());
   }
 
   /**
@@ -613,7 +686,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private InstructionLoader createInstructionLoader(TextView textView, BannerText
-          bannerText) {
+    bannerText) {
     if (hasComponents(bannerText)) {
       return new InstructionLoader(textView, bannerText);
     } else {
@@ -669,8 +742,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
     return subText != null
-            && subText.type() != null
-            && !subText.type().contains(COMPONENT_TYPE_LANE);
+      && subText.type() != null
+      && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
   private void showSubLayout() {
@@ -687,14 +760,14 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  public void showGuidanceViewImage() {
+  private void animateShowGuidanceViewImage() {
     if (guidanceViewImage.getVisibility() == GONE) {
       beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED, new DecelerateInterpolator());
       guidanceViewImage.setVisibility(VISIBLE);
     }
   }
 
-  public void hideGuidanceViewImage() {
+  private void animateHideGuidanceViewImage() {
     if (guidanceViewImage.getVisibility() == VISIBLE) {
       beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_HIDE_TRANSITION_SPEED, new DecelerateInterpolator());
       guidanceViewImage.setVisibility(GONE);
