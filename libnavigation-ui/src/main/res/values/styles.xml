@@ -16,7 +16,7 @@
         <item name="roundedLineCap">true</item>
     </style>
 
-    <style name="NavigationViewLight" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="NavigationViewLight" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
