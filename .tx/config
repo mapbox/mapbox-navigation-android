@@ -21,3 +21,9 @@ source_file = libandroid-navigation-ui/src/main/res/values/strings.xml
 source_lang = en
 type = ANDROID
 
+[mapbox-navigation-sdk-for-android.libtrip-notification-strings-file]
+file_filter = libtrip-notification/src/main/res/values-<lang>/strings.xml
+source_file = libtrip-notification/src/main/res/values/strings.xml
+source_lang = en
+type = ANDROID
+
