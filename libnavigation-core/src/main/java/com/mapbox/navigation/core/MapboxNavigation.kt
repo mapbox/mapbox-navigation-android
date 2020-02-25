@@ -135,7 +135,8 @@ constructor(
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
     private val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
-
+    private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME = "com.mapbox.navigation.trip.notification.MapboxTripNotification"
+    private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
     /**
      * Obtains a user agent string based on where this code is being called from
      */
@@ -156,9 +157,9 @@ constructor(
             MapboxNavigationModuleType.TripNotification,
             ::paramsProvider
         )
-        if (notification.javaClass.name == "com.mapbox.navigation.trip.notification.MapboxTripNotification") {
+        if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
-                notification.javaClass.getDeclaredField("notificationActionButtonChannel").apply {
+                notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
                     isAccessible = true
                 }
         }
