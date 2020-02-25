@@ -1,40 +1,14 @@
 package com.mapbox.navigation.utils
 
-import android.content.Context
 import android.location.Location
-import android.media.AudioManager
-import android.provider.Settings
 import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.core.telemetry.audio.AudioTypeChain
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.floor
-
-fun obtainVolumeLevel(context: Context): Int {
-    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    return floor(
-            PERCENT_NORMALIZER * audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) /
-                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-    ).toInt()
-}
-
-fun obtainScreenBrightness(context: Context): Int =
-        try {
-            val systemScreenBrightness = Settings.System.getInt(
-                    context.contentResolver,
-                    Settings.System.SCREEN_BRIGHTNESS
-            )
-            calculateScreenBrightnessPercentage(systemScreenBrightness)
-        } catch (exception: Settings.SettingNotFoundException) {
-            BRIGHTNESS_EXCEPTION_VALUE
-        }
-
-fun obtainAudioType(context: Context): String =
-        AudioTypeChain().setup().obtainAudioType(context)
 
 private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
         floor(PERCENT_NORMALIZER * screenBrightness / SCREEN_BRIGHTNESS_MAX).toInt()

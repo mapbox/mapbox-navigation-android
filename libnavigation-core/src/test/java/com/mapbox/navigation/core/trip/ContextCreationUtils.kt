@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.location.LocationManager
@@ -31,8 +30,6 @@ fun createContext(packageName: String): Context {
     val mockedResources = mockk<Resources>(relaxed = true)
     every { mockedResources.configuration } returns (mockedConfiguration)
     every { mockedContext.resources } returns (mockedResources)
-    val mockedPackageManager = mockk<PackageManager>(relaxed = true)
-    every { mockedContext.packageManager } returns (mockedPackageManager)
     every { mockedContext.packageName } returns (packageName)
     every { mockedContext.getString(any()) } returns "FORMAT_STRING"
     val notificationManager = mockk<NotificationManager>(relaxed = true)
