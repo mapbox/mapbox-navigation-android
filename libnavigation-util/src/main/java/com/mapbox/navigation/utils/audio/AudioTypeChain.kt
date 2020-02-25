@@ -1,5 +1,7 @@
 package com.mapbox.navigation.core.telemetry.audio
 
+import com.mapbox.navigation.utils.audio.AudioTypeResolver
+
 class AudioTypeChain {
 
     fun setup(
