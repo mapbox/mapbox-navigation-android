@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.session
 
+import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -45,4 +46,5 @@ internal interface TripSession {
     fun registerVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterAllVoiceInstructionsObservers()
+    fun updateSensorEvent(sensorEvent: SensorEvent)
 }

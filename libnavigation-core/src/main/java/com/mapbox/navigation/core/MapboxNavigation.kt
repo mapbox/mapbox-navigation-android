@@ -3,6 +3,7 @@ package com.mapbox.navigation.core
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
+import android.hardware.SensorEvent
 import android.location.Location
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
@@ -570,6 +571,10 @@ constructor(
             MapboxNavigationModuleType.TripSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.Logger -> arrayOf()
         }
+    }
+
+    fun updateSensorEvent(sensorEvent: SensorEvent) {
+        tripSession.updateSensorEvent(sensorEvent)
     }
 
     companion object {
