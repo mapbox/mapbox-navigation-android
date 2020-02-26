@@ -17,7 +17,6 @@ import io.mockk.mockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import org.junit.Ignore
 import org.junit.Test
 
 class MapboxNavigationTelemetryTest {
@@ -59,22 +58,8 @@ class MapboxNavigationTelemetryTest {
     }
 
     // TODO added @Ignore because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
-    @Ignore
     @Test
     fun telemetryInitTest() {
-        // every { mockNavigation.registerOffRouteObserver(any()) } just Runs
-        // every { mockNavigation.registerRouteProgressObserver(any()) } just Runs
-        // every { mockNavigation.registerTripSessionStateObserver(any()) } just Runs
-        // every { mockNavigation.registerFasterRouteObserver(any()) } just Runs
-        // every { mockedSharedPreferences.getString("mapboxTelemetryState", any()) } returns "ENABLED"
-        // every { mockedSharedPreferences.getString("mapboxTelemetryState", TelemetryEnabler.State.DISABLED.name) } returns TelemetryEnabler.State.DISABLED.name
-        // every { mockedSharedPreferences.getString("mapboxVendorId", "") } returns ""
-        // every { mockedSharedPreferences.edit() } returns mockedEditor
-        // every { mockedEditor.putString(any(), any()) } returns mockedEditor
-        // every { mockedEditor.apply() } just Runs
-        // // assert that the first call to initialize() returns true and the second returns false
-        // MapboxNavigationTelemetry.pauseTelemetry(true)
-        // MapboxMetricsReporter.init(mockContext, token, "User agent")
         every { mockContext.applicationContext } returns applicationContext
         val alarmManager = mockk<AlarmManager>()
         every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
@@ -83,7 +68,7 @@ class MapboxNavigationTelemetryTest {
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
         // TODO commented out because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
         // MapboxMetricsReporter.init(mockContext, token, "User agent")
-        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name))
+        assert(MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name))
         assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name))
     }
 
