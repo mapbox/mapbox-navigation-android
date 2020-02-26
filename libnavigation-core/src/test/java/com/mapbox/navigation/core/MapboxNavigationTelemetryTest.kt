@@ -7,7 +7,6 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.android.telemetry.MapboxTelemetryConstants
 import com.mapbox.android.telemetry.TelemetryEnabler
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.createContext
@@ -19,6 +18,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +28,7 @@ import org.junit.Before
 import org.junit.Test
 
 class MapboxNavigationTelemetryTest {
-    private val mockContext = createContext("com.mapbox.android.telemetry")
+    private lateinit var mockContext: Context
     private val mockNavigation = mockk<MapboxNavigation>()
     private val mockLocationEngine = mockk<LocationEngine>()
     private val mockLocationEngineRequest = mockk<LocationEngineRequest>()
@@ -41,9 +41,11 @@ class MapboxNavigationTelemetryTest {
     @Before
     fun setUp() {
         every { telemetry.enable() } returns true
-        every { mockContext.applicationContext } returns mockContext
+        mockContext = createContext("com.mapbox.android.telemetry")
         every { mockNavigation.registerRouteProgressObserver(any()) } answers {}
         every { mockLocationEngine.requestLocationUpdates(any(), any<LocationEngineCallback<LocationEngineResult>>(), null) } just Runs
+        mockkConstructor(MapboxTelemetry::class)
+        every { anyConstructed<MapboxTelemetry>().enable() } returns true
     }
 
     @After
@@ -63,14 +65,11 @@ class MapboxNavigationTelemetryTest {
 
     @Test
     fun TelemetryInitTest() {
-        every { mockContext.packageManager } returns mockk(relaxed = true)
-        every { mockContext.applicationContext.packageManager } returns mockk(relaxed = true)
         every { mockNavigation.registerOffRouteObserver(any()) } just Runs
         every { mockNavigation.registerRouteProgressObserver(any()) } just Runs
         every { mockNavigation.registerTripSessionStateObserver(any()) } just Runs
         every { mockNavigation.registerFasterRouteObserver(any()) } just Runs
         every { mockedSharedPreferences.getString("mapboxTelemetryState", any()) } returns "ENABLED"
-        every { mockContext.getSharedPreferences(MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE) } returns mockedSharedPreferences
         every { mockedSharedPreferences.getString("mapboxTelemetryState", TelemetryEnabler.State.DISABLED.name) } returns TelemetryEnabler.State.DISABLED.name
         every { mockedSharedPreferences.getString("mapboxVendorId", "") } returns ""
         every { mockedSharedPreferences.edit() } returns mockedEditor
@@ -79,8 +78,8 @@ class MapboxNavigationTelemetryTest {
         // assert that the first call to initialize() returns true and the second returns false
         MapboxNavigationTelemetry.pauseTelemetry(true)
         MapboxMetricsReporter.init(mockContext, token, "User agent")
-        assert(MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, telemetry, mockLocationEngineRequest, MapboxMetricsReporter))
-        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, telemetry, mockLocationEngineRequest, MapboxMetricsReporter))
+        assert(MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, mockLocationEngineRequest, MapboxMetricsReporter))
+        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, mockLocationEngineRequest, MapboxMetricsReporter))
     }
 
 //    @Test

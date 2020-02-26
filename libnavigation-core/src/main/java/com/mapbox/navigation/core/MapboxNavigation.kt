@@ -9,7 +9,6 @@ import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -187,7 +186,6 @@ constructor(
                     token,
                     this,
                     locationEngine,
-                    MapboxTelemetry(context, token, obtainUserAgent()),
                     locationEngineRequest,
                     MapboxMetricsReporter)
         }

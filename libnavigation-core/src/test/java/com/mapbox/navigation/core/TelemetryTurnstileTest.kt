@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
@@ -18,6 +17,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -27,11 +27,9 @@ import org.junit.Before
 import org.junit.Test
 
 class TelemetryTurnstileTest {
-    private val mockContext = createContext("com.mapbox.navigation.core.telemetry")
+    private lateinit var mockContext: Context
     private val mockNavigation = mockk<MapboxNavigation>()
     private val mockLocationEngine = mockk<LocationEngine>()
-    private val mockLocationEngineRequest = mockk<LocationEngineRequest>()
-    private val telemetry = mockk<MapboxTelemetry>()
     private var token = "pk.1234.PABLO'S-FAKE-TOKEN"
     private val mockedSharedPreferences: SharedPreferences = mockk()
     val mockedEditor: SharedPreferences.Editor = mockk()
@@ -39,8 +37,7 @@ class TelemetryTurnstileTest {
     private var expectedJson = "{\"metricName\":\"navigation.feedback\",\"userFeedback\":{\"feedbackType\":\"FEEDBACK_TYPE_ACCIDENT\",\"description\":\"big bad accident\",\"source\":\"FEEDBACK_SOURCE_USER\",\"screenShot\":\"screen shot\"},\"userId\":\"b1962a72-58eb-42f9-b76f-0cbd363950de\",\"audio\":\"unknown\",\"locationsBefore\":[],\"locationsAfter\":[],\"feedbackId\":\"779c8b02-06fd-4073-adb2-dbfc7c66b860\",\"screenshot\":\"screen shot\",\"step\":{\"upcomingType\":\"\",\"upcomingModifier\":\"\",\"upcomingName\":\"\",\"previousType\":\"\",\"previousModifier\":\"\",\"previousName\":\"\",\"distance\":0,\"duration\":0,\"distanceRemaining\":0,\"durationRemaining\":0}}"
     @Before
     fun setUp() {
-        every { telemetry.enable() } returns true
-        every { mockContext.applicationContext } returns mockContext
+        mockContext = createContext("com.mapbox.navigation.core.telemetry")
         every { mockNavigation.registerRouteProgressObserver(any()) } answers {}
         every { mockLocationEngine.requestLocationUpdates(any(), any<LocationEngineCallback<LocationEngineResult>>(), null) } just Runs
     }
@@ -62,6 +59,8 @@ class TelemetryTurnstileTest {
 
     @Test
     fun UserTurnstileEventTest() {
+        mockkConstructor(MapboxTelemetry::class)
+        every { anyConstructed<MapboxTelemetry>().enable() } returns true
         every { mockNavigation.registerOffRouteObserver(any()) } just Runs
         every { mockNavigation.registerRouteProgressObserver(any()) } just Runs
         every { mockNavigation.registerTripSessionStateObserver(any()) } just Runs
