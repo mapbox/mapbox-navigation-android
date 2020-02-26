@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation.maneuver
 
 import androidx.core.util.Pair
-
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT

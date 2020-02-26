@@ -77,9 +77,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     // For testing only
     constructor(
-            applicationContext: Context,
-            mapboxNavigation: MapboxNavigation,
-            notification: Notification
+        applicationContext: Context,
+        mapboxNavigation: MapboxNavigation,
+        notification: Notification
     ) {
         this.applicationContext = applicationContext
         this.notification = notification
@@ -157,8 +157,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     private fun initializeDistanceFormatter(
-            applicationContext: Context,
-            mapboxNavigation: MapboxNavigation
+        applicationContext: Context,
+        mapboxNavigation: MapboxNavigation
     ) {
         val routeOptions = mapboxNavigation.route.routeOptions()
         var language: String = applicationContext.inferDeviceLanguage()
@@ -259,7 +259,6 @@ internal class MapboxNavigationNotification : NavigationNotification {
         ) {
             updateViewsWithInstruction(bannerInstruction.primary().text())
             instructionText = bannerInstruction.primary().text()
-            currentManeuverType = bannerInstruction.primary().type()
         }
     }
 
