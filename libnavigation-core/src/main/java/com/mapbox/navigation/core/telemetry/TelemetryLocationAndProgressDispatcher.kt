@@ -1,11 +1,9 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
-import android.util.Log
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.MAX_TIME_LOCATION_COLLECTION
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
@@ -23,9 +21,8 @@ import kotlinx.coroutines.launch
 internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
-        RouteProgressObserver, LocationEngineCallback<LocationEngineResult> {
+        RouteProgressObserver, LocationObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference<Location>(Location("Default"))
-    private var firstLocation: AtomicReference<Location> = AtomicReference<Location>(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimeStamp> = AtomicReference(RouteProgressWithTimeStamp(0, RouteProgress.Builder().build()))
     private val channelOnRouteProgress = Channel<RouteProgressWithTimeStamp>(Channel.CONFLATED) // we want just the last notification
     private val offRouteLocationsBeforeOffroute = ArrayDeque<Location>()
@@ -130,50 +127,25 @@ internal class TelemetryLocationAndProgressDispatcher :
         return channelBufferReady
     }
 
-    private val predicateSetFirstLocation: (Location) -> Unit = { location: Location ->
-        firstLocation.set(location)
-        lastLocation.set(location)
-    }
-    private val predicateSetNextLocation: (Location) -> Unit = { location: Location ->
-        lastLocation.set(location)
-    }
-
-    private var predicateSetLocation = predicateSetFirstLocation
-
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val data = RouteProgressWithTimeStamp(Time.SystemImpl.millis(), routeProgress)
         this.routeProgress.set(data)
         channelOnRouteProgress.offer(data)
     }
 
-    override fun onSuccess(locationEngineResult: LocationEngineResult?) {
-        locationEngineResult?.lastLocation?.let { location ->
-            channelLocation.offer(location)
-            channelLastNSecondsOfLocations.offer(location)
-            predicateSetLocation(location)
-        }
-    }
-
-    override fun onFailure(exception: java.lang.Exception) {
-        Log.e(MapboxNavigationTelemetry.TAG, "Location engine returned an error $exception")
-    }
-
     fun getRouteProgressChannel(): ReceiveChannel<RouteProgressWithTimeStamp> = channelOnRouteProgress
     fun getLastLocation() = lastLocation.get()
-    fun getFirstLocation() = firstLocation.get()
     fun getRouteProgress() = routeProgress.get()
 
     suspend fun getLastNSecondsOfLocations() = channelBufferReady.receive()
 
-    fun markFirstLocation(): Location {
-        predicateSetLocation = predicateSetNextLocation
-        firstLocation.set(lastLocation.get())
-        return firstLocation.get()
+    override fun onRawLocationChanged(rawLocation: Location) {
+        // Do nothing
     }
 
-    fun unmarkFirstLocation(): Location {
-        predicateSetLocation = predicateSetFirstLocation
-        firstLocation.set(lastLocation.get())
-        return firstLocation.get()
+    override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
+        channelLocation.offer(enhancedLocation)
+        channelLastNSecondsOfLocations.offer(enhancedLocation)
+        lastLocation.set(enhancedLocation)
     }
 }

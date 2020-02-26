@@ -5,8 +5,6 @@ import android.location.Location
 import android.os.Build
 import android.util.Log
 import com.google.gson.Gson
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -55,7 +53,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.jetbrains.annotations.TestOnly
 
-private data class DynamicalyUpdatedRouteValues(
+private data class DynamicallyUpdatedRouteValues(
     var distanceRemaining: AtomicLong,
     var timeRemaining: AtomicInteger,
     var rerouteCount: AtomicInteger,
@@ -79,24 +77,24 @@ private data class DynamicalyUpdatedRouteValues(
  */
 internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     // Public constants
-    const val LOCATION_BUFFER_MAX_SIZE = 20
-    const val MAX_TIME_LOCATION_COLLECTION = 20000L
-    val TAG = "MAPBOX_TELEMETRY"
+    internal const val LOCATION_BUFFER_MAX_SIZE = 20
+    internal const val MAX_TIME_LOCATION_COLLECTION = 20000L
+    internal const val TAG = "MAPBOX_TELEMETRY"
 
     // Private variables
     private lateinit var context: Context
     private lateinit var mapboxToken: String
 
     private var metricsMetadata: TelemetryMetadata? = null // The metadata class required by every telemetry event
-    private val jobControlIOScope = ThreadController.getIOScopeAndRootJob() // the job contoller used in this code. The code is single threaded all calls are performed on the Dispatchers.IO thread
+    private val jobControlUIScope = ThreadController.getMainScopeAndRootJob() // the job contoller used in this code. The code is single threaded all calls are performed on the Dispatchers.IO thread
     private val channelTelemetryEvent = Channel<MetricEvent>(Channel.CONFLATED) // used in testing to sample the events sent to the server
-    private lateinit var metricsReporter: MetricsReporter // The legacy metrics reporter
+    private lateinit var metricsReporter: MetricsReporter
     private var offRouteProcessing = AtomicBoolean(false) // A switch used to prevent multiple off-route events from generating events.
 
     /**
      * This class holds all mutable state of the Telemetry object
      */
-    private val dynamicValues = DynamicalyUpdatedRouteValues(AtomicLong(0),
+    private val dynamicValues = DynamicallyUpdatedRouteValues(AtomicLong(0),
             AtomicInteger(0),
             AtomicInteger(0),
             AtomicBoolean(false),
@@ -104,7 +102,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             AtomicInteger(0),
             AtomicLong(0))
 
-    private lateinit var locationEngine: LocationEngine
+    private var locationEngineName: String = "no name"
 
     private val CURRENT_SESSION_CONTROL: AtomicReference<CurrentSessionState> = AtomicReference(CurrentSessionState.SESSION_END) // A switch that maintains session state (start/end)
 
@@ -123,11 +121,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
-                    callbackDispatcher.markFirstLocation()
+                    callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()
+                    postUserEventDelegate = postUserFeedbackEventAfterInit // Telemetry is initialized and the user selected a route. Alow user feedback events to be posted
                     handleSessionStart()
                 }
                 TripSessionState.STOPPED -> {
-                    callbackDispatcher.unmarkFirstLocation()
+                    postUserEventDelegate = postUserEventBeforeInit // The navigation session is over, disallow posting user feedbak events
                     handleSessionCanceled()
                     handleSessionStop()
                 }
@@ -166,7 +165,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     dynamicValues.timeOfRerouteEvent.set(Time.SystemImpl.millis())
                 }
                 false -> {
-                    jobControlIOScope.scope.launch {
+                    jobControlUIScope.scope.launch {
                         val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                         metricsMetadata?.let { telemetryMetadata ->
                             var timeSinceLastEvent = (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
@@ -192,7 +191,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     // postUserFeedbackEvent
     private val postUserEventBeforeInit: (String, String, String, String?) -> Unit = { _, _, _, _ ->
-        throw NavigationException("Telemetry must be initialized before calling this method. Call MapboxNavigationTelemetry.initialize()")
+        Log.d(TAG, "Not in a navigation session, Cannot send user feedback events")
     }
 
     /**
@@ -208,15 +207,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val primaryInitializer: (Context, String, MapboxNavigation, LocationEngine, LocationEngineRequest, MetricsReporter) -> Boolean = { context, token, mapboxNavigation, locationEngine, locationEngineRequest, metricsReporter ->
+    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName ->
         this.context = context
         mapboxToken = token
-        this.locationEngine = locationEngine
         validateAccessToken(mapboxToken)
         this.metricsReporter = metricsReporter
         initializer = postInitialize // prevent primaryInitializer() from being called more than once.
-        postUserEventDelegate = postUserFeedbackEventAfterInit // now that the object has been initialized we can post user feedback events
-        registerForNotification(mapboxNavigation, locationEngineRequest)
+        registerForNotification(mapboxNavigation)
         // TODO commented out because was causing test failures - AppUserTurnstile tries to access MapboxTelemetry static Context and mockks don't survive across tests
         // postTurnstileEvent()
         true
@@ -224,7 +221,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private var initializer = primaryInitializer // The initialize dispatchers that points to either pre or post initialization lambda
 
     // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitialize: (Context, String, MapboxNavigation, LocationEngine, LocationEngineRequest, MetricsReporter) -> Boolean = { _, _, _, _, _, _ -> false }
+    private var postInitialize: (Context, String, MapboxNavigation, MetricsReporter, String) -> Boolean = { _, _, _, _, _ -> false }
 
     /**
      * This method must be called before using the Telemetry object
@@ -233,10 +230,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         context: Context,
         mapboxToken: String,
         mapboxNavigation: MapboxNavigation,
-        locationEngine: LocationEngine,
-        locationEngineRequest: LocationEngineRequest,
-        metricsReporter: MetricsReporter
-    ) = initializer(context, mapboxToken, mapboxNavigation, locationEngine, locationEngineRequest, metricsReporter)
+        metricsReporter: MetricsReporter,
+        locationEngineName: String
+    ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName)
 
     /**
      * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method [getLastNSecondsOfLocations] it calls is itself suspendable
@@ -274,7 +270,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private fun postUserFeedbackHelper(@TelemetryUserFeedback.FeedbackType feedbackType: String, description: String, @TelemetryUserFeedback.FeedbackSource feedbackSource: String, scrShot: String?) {
         val lastProgress = callbackDispatcher.getRouteProgress()
         metricsMetadata?.let { metaData ->
-            jobControlIOScope.scope.launch {
+            jobControlUIScope.scope.launch {
                 val feedbackEvent = TelemetryUserFeedback(feedbackSource,
                         feedbackType,
                         description,
@@ -331,7 +327,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * This method clears the state data for the Telemetry object in responce to session_end
      */
     private fun handleSessionStop() {
-        callbackDispatcher.unmarkFirstLocation()
         dynamicValues.routeArrived.set(false)
         dynamicValues.routeCanceled.set(false)
         dynamicValues.distanceRemaining.set(0)
@@ -381,9 +376,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         directionsRoute: DirectionsRoute,
         location: Location
     ) {
-        jobControlIOScope.scope.launch {
+        jobControlUIScope.scope.launch {
             // Initialize identifiers unique to this session
-            populateEventMetadata(directionsRoute, locationEngine, location).apply {
+            populateEventMetadata(directionsRoute, locationEngineName, location).apply {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
                 startTimestamp = Date().toString()
                 metricsMetadata = this
@@ -450,12 +445,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         CURRENT_SESSION_CONTROL.set(CurrentSessionState.SESSION_END)
     }
 
-    private fun registerForNotification(mapboxNavigation: MapboxNavigation, locationEngineRequest: LocationEngineRequest) {
+    private fun registerForNotification(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.registerOffRouteObserver(rerouteObserver)
         mapboxNavigation.registerRouteProgressObserver(callbackDispatcher)
         mapboxNavigation.registerTripSessionStateObserver(sessionStateObserver)
         mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
-        locationEngine.requestLocationUpdates(locationEngineRequest, callbackDispatcher, null)
+        mapboxNavigation.registerLocationObserver(callbackDispatcher)
     }
 
     private fun validateAccessToken(accessToken: String?) {
@@ -469,7 +464,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     private fun populateEventMetadata(
         directionsRoute: DirectionsRoute,
-        locationEngine: LocationEngine,
+        locationEngineName: String,
         currentLocation: Location
     ): TelemetryMetadata {
         val isFromNavigationUi = false // TODO:OZ this must be set from MapboxNavigation when the UI SDK is ported and becomes available
@@ -479,8 +474,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 device = Build.DEVICE,
                 sdkIdentifier = if (isFromNavigationUi) MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER else MAPBOX_NAVIGATION_SDK_IDENTIFIER,
                 sdkVersion = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
-                simulation = MOCK_PROVIDER == locationEngine.javaClass.name,
-                locationEngine = locationEngine.javaClass.name,
+                simulation = MOCK_PROVIDER == locationEngineName,
+                locationEngine = locationEngineName,
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                 originalRequestIdentifier = directionsRoute.routeOptions()?.requestUuid(),
                 requestIdentifier = directionsRoute.routeOptions()?.requestUuid(),

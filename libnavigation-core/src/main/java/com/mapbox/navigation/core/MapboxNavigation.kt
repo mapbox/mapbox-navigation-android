@@ -186,9 +186,8 @@ constructor(
             MapboxNavigationTelemetry.initialize(context.applicationContext,
                     token,
                     this,
-                    locationEngine,
-                    locationEngineRequest,
-                    MapboxMetricsReporter)
+                    MapboxMetricsReporter,
+                    locationEngine.javaClass.name)
         }
     }
 

@@ -83,8 +83,8 @@ class MapboxNavigationTelemetryTest {
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
         // TODO commented out because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
         // MapboxMetricsReporter.init(mockContext, token, "User agent")
-        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, mockLocationEngineRequest, MapboxMetricsReporter))
-        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, mockLocationEngine, mockLocationEngineRequest, MapboxMetricsReporter))
+        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name))
+        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name))
     }
 
 //    @Test
