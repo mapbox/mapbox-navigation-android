@@ -180,7 +180,8 @@ constructor(
                 requestFasterRoute()
             }
         ifNonNull(accessToken) { token ->
-            MapboxMetricsReporter.init(context, token, obtainUserAgent())
+            // TODO commented out because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
+            // MapboxMetricsReporter.init(context, token, obtainUserAgent())
             // Initialize telemetry. This will cause a turnstile event to be sent to the back end servers
             MapboxNavigationTelemetry.initialize(context.applicationContext,
                     token,
