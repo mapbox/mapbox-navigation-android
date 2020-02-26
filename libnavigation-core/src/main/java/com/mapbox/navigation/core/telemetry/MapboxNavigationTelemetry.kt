@@ -8,7 +8,6 @@ import com.google.gson.Gson
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.telemetry.AppUserTurnstile
-import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.metrics.MetricEvent
@@ -106,7 +105,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             AtomicLong(0))
 
     private lateinit var locationEngine: LocationEngine
-    private lateinit var mapboxTelemetry: MapboxTelemetry
 
     private val CURRENT_SESSION_CONTROL: AtomicReference<CurrentSessionState> = AtomicReference(CurrentSessionState.SESSION_END) // A switch that maintains session state (start/end)
 
@@ -210,7 +208,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val primaryInitializer: (Context, String, MapboxNavigation, LocationEngine, MapboxTelemetry, LocationEngineRequest, MetricsReporter) -> Boolean = { context, token, mapboxNavigation, locationEngine, telemetry, locationEngineRequest, metricsReporter ->
+    private val primaryInitializer: (Context, String, MapboxNavigation, LocationEngine, LocationEngineRequest, MetricsReporter) -> Boolean = { context, token, mapboxNavigation, locationEngine, locationEngineRequest, metricsReporter ->
         this.context = context
         mapboxToken = token
         this.locationEngine = locationEngine
@@ -219,14 +217,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         initializer = postInitialize // prevent primaryInitializer() from being called more than once.
         postUserEventDelegate = postUserFeedbackEventAfterInit // now that the object has been initialized we can post user feedback events
         registerForNotification(mapboxNavigation, locationEngineRequest)
-        mapboxTelemetry = telemetry
         postTurnstileEvent()
         true
     }
     private var initializer = primaryInitializer // The initialize dispatchers that points to either pre or post initialization lambda
 
     // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitialize: (Context, String, MapboxNavigation, LocationEngine, MapboxTelemetry, LocationEngineRequest, MetricsReporter) -> Boolean = { _, _, _, _, _, _, _ -> false }
+    private var postInitialize: (Context, String, MapboxNavigation, LocationEngine, LocationEngineRequest, MetricsReporter) -> Boolean = { _, _, _, _, _, _ -> false }
 
     /**
      * This method must be called before using the Telemetry object
@@ -236,10 +233,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxToken: String,
         mapboxNavigation: MapboxNavigation,
         locationEngine: LocationEngine,
-        telemetry: MapboxTelemetry,
         locationEngineRequest: LocationEngineRequest,
         metricsReporter: MetricsReporter
-    ) = initializer(context, mapboxToken, mapboxNavigation, locationEngine, telemetry, locationEngineRequest, metricsReporter)
+    ) = initializer(context, mapboxToken, mapboxNavigation, locationEngine, locationEngineRequest, metricsReporter)
 
     /**
      * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method [getLastNSecondsOfLocations] it calls is itself suspendable

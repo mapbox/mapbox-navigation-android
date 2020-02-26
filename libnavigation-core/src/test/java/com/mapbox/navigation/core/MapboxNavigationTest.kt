@@ -24,7 +24,9 @@ import com.mapbox.navigation.core.trip.createContext
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.utils.timer.MapboxTimer
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -78,8 +80,9 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
-        mockedContext = createContext("com.mapbox.navigation.core")
+        mockedContext = createContext("com.mapbox.android.telemetry")
         mockkObject(NavigationModuleProvider)
+        mockkObject(MapboxMetricsReporter)
         val hybridRouter: Router = mockk(relaxUnitFun = true)
         every {
             NavigationModuleProvider.createModule<Router>(
@@ -114,6 +117,12 @@ class MapboxNavigationTest {
                 locationEngine,
                 locationEngineRequest
             )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+        clearAllMocks()
     }
 
     @Test
