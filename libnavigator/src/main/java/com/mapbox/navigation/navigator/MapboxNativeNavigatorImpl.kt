@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator
 
+import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -53,6 +54,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun updateLocation(rawLocation: Location): Boolean =
         navigator.updateLocation(rawLocation.toFixLocation(Date()))
+
+    override fun updateSensorEvent(sensorEvent: SensorEvent): Boolean {
+        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
+        return ifNonNull(value) { navigatorSensorData ->
+            navigator.updateSensorData(navigatorSensorData)
+        } ?: false
+    }
 
     override fun getStatus(date: Date): TripStatus {
         val status = navigator.getStatus(date)

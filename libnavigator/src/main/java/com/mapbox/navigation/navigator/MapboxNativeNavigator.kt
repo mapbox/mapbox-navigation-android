@@ -1,5 +1,6 @@
 package com.mapbox.navigation.navigator
 
+import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
@@ -24,6 +25,7 @@ interface MapboxNativeNavigator {
     // Route following
 
     fun updateLocation(rawLocation: Location): Boolean
+    fun updateSensorEvent(sensorEvent: SensorEvent): Boolean
     fun getStatus(date: Date): TripStatus
 
     // Routing
