@@ -242,12 +242,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         val lastProgress = callbackDispatcher.getRouteProgress()
         metricsMetadata?.let { metadata ->
             telemetryThreadControl.scope.launch {
+                val twoBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                 val feedbackEvent = TelemetryUserFeedback(feedbackSource,
                         feedbackType,
                         description,
                         TelemetryUtils.retrieveVendorId(),
-                        locationsBefore = callbackDispatcher.getLastNSecondsOfLocations().toTypedArray(),
-                        locationsAfter = callbackDispatcher.getLastNSecondsOfLocations().toTypedArray(),
+                        locationsBefore = twoBuffers.first.toTypedArray(),
+                        locationsAfter = twoBuffers.second.toTypedArray(),
                         feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                         screenshot = scrShot,
                         step = lastProgress.routeProgress.currentLegProgress()?.let { populateTelemetryStep(it) },
