@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.utils.thread.JobControl
@@ -45,8 +46,8 @@ class MapboxNavigationTelemetryTest {
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
         // TODO commented out because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
         // MapboxMetricsReporter.init(mockContext, token, "User agent")
-        assert(MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name, ThreadController.getMainScopeAndRootJob()))
-        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name, ThreadController.getMainScopeAndRootJob()))
+        assert(MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name, ThreadController.getMainScopeAndRootJob(), NavigationOptions.Builder().build()))
+        assert(!MapboxNavigationTelemetry.initialize(mockContext, token, mockNavigation, MapboxMetricsReporter, LocationEngine::javaClass.name, ThreadController.getMainScopeAndRootJob(), NavigationOptions.Builder().build()))
     }
 
 //    @Test
