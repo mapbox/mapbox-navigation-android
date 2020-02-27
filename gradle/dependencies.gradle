@@ -11,7 +11,7 @@ ext {
       mapboxMapSdk              : '9.1.0-SNAPSHOT',
       mapboxSdkServices         : '5.1.0-SNAPSHOT',
       mapboxSdkDirectionsModels : '5.1.0-SNAPSHOT',
-      mapboxEvents              : '4.5.1',
+      mapboxEvents              : '4.7.3',
       mapboxCore                : '1.3.0',
       mapboxNavigator           : 'km-add-bindings-for-sensor-data-SNAPSHOT-1',
       mapboxCrashMonitor        : '2.0.0',
