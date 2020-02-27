@@ -132,15 +132,8 @@ constructor(
     private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
 
     private var notificationChannelField: Field? = null
-    private val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
-    private val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME = "com.mapbox.navigation.trip.notification.MapboxTripNotification"
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
-    /**
-     * Obtains a user agent string based on where this code is being called from
-     */
-    private fun obtainUserAgent(): String =
-            MAPBOX_NAVIGATION_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
 
     init {
         ThreadController.init()
@@ -187,7 +180,8 @@ constructor(
                     token,
                     this,
                     MapboxMetricsReporter,
-                    locationEngine.javaClass.name)
+                    locationEngine.javaClass.name,
+                    ThreadController.getMainScopeAndRootJob())
         }
     }
 

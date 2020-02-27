@@ -33,7 +33,7 @@ import com.mapbox.navigation.utils.obtainAbsoluteDistance
 import com.mapbox.navigation.utils.obtainGeometry
 import com.mapbox.navigation.utils.obtainRouteDestination
 import com.mapbox.navigation.utils.obtainStepCount
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ifChannelException
 import com.mapbox.navigation.utils.time.Time
 import java.util.Date
@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -76,12 +75,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     internal const val TAG = "MAPBOX_TELEMETRY"
 
     // Private variables
-    private lateinit var context: Context
+    private lateinit var context: Context // Must be context.getApplicationContext
     private lateinit var mapboxToken: String
 
     private var metricsMetadata: TelemetryMetadata? = null // The metadata class required by every telemetry event
-    private val jobControlUIScope = ThreadController.getMainScopeAndRootJob() // the job contoller used in this code. The code is single threaded all calls are performed on the Dispatchers.IO thread
-    private val channelTelemetryEvent = Channel<MetricEvent>(Channel.CONFLATED) // used in testing to sample the events sent to the server
+    private lateinit var jobControlUIScope: JobControl
     private lateinit var metricsReporter: MetricsReporter
     private var offRouteProcessing = AtomicBoolean(false) // A switch used to prevent multiple off-route events from generating events.
 
@@ -201,8 +199,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName ->
+    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName, jobControl ->
         this.context = context
+        jobControlUIScope = jobControl
         mapboxToken = token
         validateAccessToken(mapboxToken)
         this.metricsReporter = metricsReporter
@@ -215,7 +214,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private var initializer = primaryInitializer // The initialize dispatchers that points to either pre or post initialization lambda
 
     // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitialize: (Context, String, MapboxNavigation, MetricsReporter, String) -> Boolean = { _, _, _, _, _ -> false }
+    private var postInitialize: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl) -> Boolean = { _, _, _, _, _, _ -> false }
 
     /**
      * This method must be called before using the Telemetry object
@@ -225,8 +224,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxToken: String,
         mapboxNavigation: MapboxNavigation,
         metricsReporter: MetricsReporter,
-        locationEngineName: String
-    ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName)
+        locationEngineName: String,
+        jobControl: JobControl
+    ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName, jobControl)
 
     /**
      * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method [getLastNSecondsOfLocations] it calls is itself suspendable
