@@ -1,11 +1,13 @@
 package com.mapbox.navigation.ui.camera;
 
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.BaseTest;
 
 import org.junit.Test;
@@ -81,15 +83,13 @@ public class NavigationCameraTest extends BaseTest {
     assertTrue(camera.isTrackingEnabled());
   }
 
-  /*@Test
+  @Test
   public void onResetCamera_dynamicCameraIsReset() {
     MapboxMap mapboxMap = mock(MapboxMap.class);
     when(mapboxMap.getCameraPosition()).thenReturn(mock(CameraPosition.class));
-    MapboxNavigation navigation = mock(MapboxNavigation.class);
     DynamicCamera dynamicCamera = mock(DynamicCamera.class);
-    when(navigation.getCameraEngine()).thenReturn(dynamicCamera);
-    RouteInformation currentRouteInformation = mock(RouteInformation.class);
-    NavigationCamera camera = buildCamera(mapboxMap, navigation, currentRouteInformation);
+    NavigationCamera camera = buildCamera(mapboxMap);
+    camera.setCamera(dynamicCamera);
 
     camera.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
 
@@ -98,25 +98,25 @@ public class NavigationCameraTest extends BaseTest {
 
   @Test
   public void onStartWithNullRoute_progressListenerIsAdded() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    ProgressChangeListener listener = mock(ProgressChangeListener.class);
-    NavigationCamera camera = buildCamera(navigation, listener);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
 
     camera.start(null);
 
-    verify(navigation, times(1)).addProgressChangeListener(listener);
+    verify(navigation, times(1)).registerRouteProgressObserver(any(RouteProgressObserver.class));
   }
 
   @Test
   public void onResumeWithNullLocation_progressListenerIsAdded() {
+    MapboxMap mapboxMap = mock(MapboxMap.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    ProgressChangeListener listener = mock(ProgressChangeListener.class);
-    NavigationCamera camera = buildCamera(navigation, listener);
+    NavigationCamera camera = buildCamera(mapboxMap, navigation);
 
     camera.resume(null);
 
-    verify(navigation, times(1)).addProgressChangeListener(listener);
-  }*/
+    verify(navigation, times(1)).registerRouteProgressObserver(any(RouteProgressObserver.class));
+  }
 
   @Test
   public void update_defaultIsIgnoredWhileTracking() {
@@ -196,14 +196,7 @@ public class NavigationCameraTest extends BaseTest {
     return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class), locationComponent);
   }
 
-  /*private NavigationCamera buildCamera(MapboxNavigation navigation, ProgressChangeListener listener) {
-    return new NavigationCamera(mock(MapboxMap.class), navigation, listener,
-      mock(LocationComponent.class), mock(RouteInformation.class));
+  private NavigationCamera buildCamera(MapboxMap mapboxMap, MapboxNavigation mapboxNavigation) {
+    return new NavigationCamera(mapboxMap, mapboxNavigation, mock(LocationComponent.class));
   }
-
-  private NavigationCamera buildCamera(MapboxMap mapboxMap, MapboxNavigation navigation,
-                                       RouteInformation routeInformation) {
-    return new NavigationCamera(mapboxMap, navigation, mock(ProgressChangeListener.class),
-      mock(LocationComponent.class), routeInformation);
-  }*/
 }
