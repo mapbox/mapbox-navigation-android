@@ -19,7 +19,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
-import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.examples.R
@@ -33,6 +32,7 @@ import com.mapbox.navigation.logger.MapboxLogger
 import com.mapbox.navigation.logger.VERBOSE
 import com.mapbox.navigation.logger.WARN
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
+import com.mapbox.navigation.metrics.internal.MetricsObserver
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
@@ -45,7 +45,7 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     Router.Callback,
-    MetricsObserver,
+        MetricsObserver,
     LoggerObserver {
 
     private var mapboxMap: MapboxMap? = null

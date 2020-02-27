@@ -4,13 +4,9 @@ import android.content.Context
 import android.location.Location
 import android.os.Build
 import android.util.Log
-import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.metrics.MetricEvent
-import com.mapbox.navigation.base.metrics.MetricsReporter
-import com.mapbox.navigation.base.metrics.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
@@ -29,6 +25,9 @@ import com.mapbox.navigation.core.telemetry.telemetryevents.TelemetryUserFeedbac
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.metrics.internal.MetricsReporter
+import com.mapbox.navigation.metrics.internal.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.obtainAbsoluteDistance
 import com.mapbox.navigation.utils.obtainGeometry
@@ -36,7 +35,6 @@ import com.mapbox.navigation.utils.obtainRouteDestination
 import com.mapbox.navigation.utils.obtainStepCount
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.ifChannelException
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.time.Time
 import java.util.Date
 import java.util.Locale
@@ -45,13 +43,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.TestOnly
 
 private data class DynamicallyUpdatedRouteValues(
     var distanceRemaining: AtomicLong,
@@ -139,13 +133,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            metricsMetadata?.let { metaData ->
+            metricsMetadata?.let { metadata ->
                 var telemetryStep: TelemetryStep? = null
                 callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.let { routeProgress ->
                     telemetryStep = populateTelemetryStep(routeProgress)
                 }
                 metricsReporter.addEvent(TelemetryFasterRoute(
-                        Metadata = metaData,
+                        metadata = metadata,
                         newDistanceRemaining = fasterRoute.distance()?.toInt() ?: -1,
                         newDurationRemaining = fasterRoute.duration()?.toInt() ?: -1,
                         newGeometry = fasterRoute.geometry(),
@@ -242,34 +236,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         postUserEventDelegate(feedbackType, description, feedbackSource, scrShot)
     }
 
-    @TestOnly
-    fun pauseTelemetry(flag: Boolean) {
-        initializer = when (flag) {
-            true -> {
-                primaryInitializer
-            }
-            false -> {
-                postInitialize
-            }
-        }
-    }
-
-    @TestOnly
-    suspend fun dumpTelemetryJsonPayloadAsync(scope: CoroutineScope): Deferred<String> {
-        val result = CompletableDeferred<String>()
-        scope.monitorChannelWithException(channelTelemetryEvent, predicate = { event ->
-            result.complete(Gson().toJson(event))
-        })
-
-        return result
-    }
-
     /**
      * Helper class that posts user feedback. The call is available only after initialization
      */
     private fun postUserFeedbackHelper(@TelemetryUserFeedback.FeedbackType feedbackType: String, description: String, @TelemetryUserFeedback.FeedbackSource feedbackSource: String, scrShot: String?) {
         val lastProgress = callbackDispatcher.getRouteProgress()
-        metricsMetadata?.let { metaData ->
+        metricsMetadata?.let { metadata ->
             jobControlUIScope.scope.launch {
                 val feedbackEvent = TelemetryUserFeedback(feedbackSource,
                         feedbackType,
@@ -280,7 +252,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                         screenshot = scrShot,
                         step = lastProgress.routeProgress.currentLegProgress()?.let { populateTelemetryStep(it) },
-                        Metadata = metaData
+                        Metadata = metadata
                 )
                 metricsReporter.addEvent(feedbackEvent)
             }
@@ -407,8 +379,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             distanceCompleted = routeData.routeProgress.distanceTraveled().toInt()
                         }
                         dynamicValues.routeCanceled.set(false)
-                        metricsMetadata?.let { metaData ->
-                            metricsReporter.addEvent(TelemetryArrival(arrivalTimestamp = Date().toString(), Metadata = metaData))
+                        metricsMetadata?.let { metadata ->
+                            metricsReporter.addEvent(TelemetryArrival(arrivalTimestamp = Date().toString(), Metadata = metadata))
                         }
                         continueRunning = false
                     }
