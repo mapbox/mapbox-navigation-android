@@ -1,4 +1,6 @@
-package com.mapbox.navigation.base.metrics
+package com.mapbox.navigation.metrics.internal
+
+import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
 
 /**
  * Interface for observe metric events handled.
