@@ -79,7 +79,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private lateinit var mapboxToken: String
 
     private var metricsMetadata: TelemetryMetadata? = null // The metadata class required by every telemetry event
-    private lateinit var jobControlUIScope: JobControl
+    private lateinit var telemetryThreadControl: JobControl
     private lateinit var metricsReporter: MetricsReporter
     private var offRouteProcessing = AtomicBoolean(false) // A switch used to prevent multiple off-route events from generating events.
 
@@ -157,7 +157,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     dynamicValues.timeOfRerouteEvent.set(Time.SystemImpl.millis())
                 }
                 false -> {
-                    jobControlUIScope.scope.launch {
+                    telemetryThreadControl.scope.launch {
                         val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                         metricsMetadata?.let { telemetryMetadata ->
                             var timeSinceLastEvent = (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
@@ -201,7 +201,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName, jobControl ->
         this.context = context
-        jobControlUIScope = jobControl
+        telemetryThreadControl = jobControl
         mapboxToken = token
         validateAccessToken(mapboxToken)
         this.metricsReporter = metricsReporter
@@ -242,7 +242,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private fun postUserFeedbackHelper(@TelemetryUserFeedback.FeedbackType feedbackType: String, description: String, @TelemetryUserFeedback.FeedbackSource feedbackSource: String, scrShot: String?) {
         val lastProgress = callbackDispatcher.getRouteProgress()
         metricsMetadata?.let { metadata ->
-            jobControlUIScope.scope.launch {
+            telemetryThreadControl.scope.launch {
                 val feedbackEvent = TelemetryUserFeedback(feedbackSource,
                         feedbackType,
                         description,
@@ -348,7 +348,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         directionsRoute: DirectionsRoute,
         location: Location
     ) {
-        jobControlUIScope.scope.launch {
+        telemetryThreadControl.scope.launch {
             // Initialize identifiers unique to this session
             populateEventMetadata(directionsRoute, locationEngineName, location).apply {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
