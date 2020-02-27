@@ -61,12 +61,12 @@ class MapboxNativeNavigatorImpl constructor(
     override fun updateLocation(rawLocation: Location) =
         navigator.updateLocation(rawLocation.toFixLocation(Date()))
 
-    override fun updateSensorEvent(sensorEvent: SensorEvent): Boolean {
-        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
-        return ifNonNull(value) { navigatorSensorData ->
-            navigator.updateSensorData(navigatorSensorData)
-        } ?: false
-    }
+//    override fun updateSensorEvent(sensorEvent: SensorEvent) {
+//        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
+//        ifNonNull(value) { navigatorSensorData ->
+//            navigator.updateSensorData(navigatorSensorData)
+//        }
+//    }
 
     override fun getTripStatus(date: Date, callback: (TripStatus) -> Unit) =
         navigator.getStatus(date) { status ->

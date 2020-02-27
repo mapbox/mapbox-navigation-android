@@ -25,6 +25,9 @@ import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigator.HttpInterface
+import com.mapbox.navigator.RouterParams
+import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.io.File
@@ -70,7 +73,26 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
                      "MapboxNavigationNative"
              )
         )
-        onboardRouter = MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
+
+        val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
+        if (!tileDir.exists()) {
+            tileDir.mkdirs()
+        }
+        val routerParams = RouterParams(
+                tileDir.absolutePath,
+                config.inMemoryTileCache,
+                config.mapMatchingSpatialCache,
+                config.threadsCount,
+                config.endpoint?.let {
+                    TileEndpointConfiguration(
+                            it.host,
+                            it.version,
+                            it.token,
+                            it.userAgent,
+                            ""
+                    )
+                })
+        onboardRouter = MapboxOnboardRouter(MapboxNativeNavigatorImpl(routerParams = routerParams), config)
     }
 
     private fun newOrigin() {
@@ -190,6 +212,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onDestroy() {
         super.onDestroy()
         onboardRouter.cancel()
+        onboardRouter.shutdown()
         mapboxMap.removeOnMapClickListener(this)
         mapView.onDestroy()
     }

@@ -66,7 +66,8 @@ public class NavigationSettingsActivity extends PreferenceActivity {
       findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
 
       findPreference(getString(R.string.nav_native_history_retrieve_key)).setOnPreferenceClickListener(preference -> {
-        String history = MapboxNativeNavigatorImpl.INSTANCE.getHistory();
+        MapboxNativeNavigatorImpl nativeNavigator = new MapboxNativeNavigatorImpl();
+        String history = nativeNavigator.getHistory();
         File path = Environment.getExternalStoragePublicDirectory("navigation_debug");
         if (!path.exists()) {
           path.mkdirs();
@@ -82,6 +83,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
         } catch (IOException ex) {
           Timber.e("History file write failed: %s", ex.toString());
         }
+        nativeNavigator.shutdown();
         return true;
       });
     }

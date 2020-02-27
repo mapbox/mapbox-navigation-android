@@ -99,8 +99,10 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private fun updateNavNativeHistoryCollection() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        MapboxNativeNavigatorImpl.toggleHistory(
-            prefs.getBoolean(getString(R.string.nav_native_history_collect_key), false)
+        val navigatorNative = MapboxNativeNavigatorImpl()
+        navigatorNative.toggleHistory(
+                prefs.getBoolean(getString(R.string.nav_native_history_collect_key), false)
         )
+        navigatorNative.shutdown()
     }
 }

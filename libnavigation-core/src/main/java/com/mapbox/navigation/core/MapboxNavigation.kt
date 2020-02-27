@@ -102,7 +102,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * @param context activity/fragment's context
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK
- * @param navigatorNative implementation of [MapboxNativeNavigator] for debug puproses
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
@@ -115,8 +114,8 @@ constructor(
         context,
         accessToken
     ),
-    private val navigatorNative: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
+    private val navigatorNative: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
@@ -512,18 +511,23 @@ constructor(
                 }
             )
 
-            val bearings = mutableListOf<List<Double>>()
+            val bearings = mutableListOf<Double>()
 
-            val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
-                ?: DEFAULT_REROUTE_BEARING_TOLERANCE
+//            val originTolerance = routeOptions.bearings()?.split(",")
+//                    ?.getOrNull(0)?.getOrNull(1)?.toDouble()
+//                ?: DEFAULT_REROUTE_BEARING_TOLERANCE
             val currentAngle = location.bearing.toDouble()
 
-            bearings.add(listOf(currentAngle, originTolerance))
+            bearings.add(currentAngle)
+//            bearings.addAll(
+//                routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList()
+//            )
             bearings.addAll(
-                routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList()
+                    routeOptions.bearings()?.split(",")?.drop(index + 1)
+                            ?.map { it.toDouble() } ?: emptyList()
             )
 
-            optionsBuilder.bearingsList(bearings)
+            optionsBuilder.bearings(bearings.joinToString())
 
             // todo implement options.radiuses
             // todo implement options.approaches
@@ -568,7 +572,7 @@ constructor(
             MapboxNavigationModuleType.OnboardRouter -> {
                 check(accessToken != null) { "You need to provide an access token in order to use the default OnboardRouter." }
                 arrayOf(
-                    MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
+                    MapboxNativeNavigator::class.java to navigatorNative,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
                         ?: throw RuntimeException("You need to provide a router configuration in order to use the default OnboardRouter."))
                 )

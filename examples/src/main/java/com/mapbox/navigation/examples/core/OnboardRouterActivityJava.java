@@ -81,7 +81,7 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
             null // working with pre-fetched tiles only
     );
 
-    onboardRouter = new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config);
+    onboardRouter = new MapboxOnboardRouter(new MapboxNativeNavigatorImpl(), config);
   }
 
 
@@ -207,6 +207,7 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
     super.onDestroy();
     if (onboardRouter != null) {
       onboardRouter.cancel();
+      onboardRouter.shutdown();
       onboardRouter = null;
     }
     if (mapboxMap != null) {

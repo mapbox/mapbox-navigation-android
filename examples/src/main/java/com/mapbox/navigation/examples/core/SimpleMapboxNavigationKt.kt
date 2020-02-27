@@ -52,7 +52,11 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.ui.route.NavigationMapRoute
+import com.mapbox.navigator.RouterParams
+import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -61,7 +65,6 @@ import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
-import java.io.File
 
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
@@ -117,10 +120,34 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 .onboardRouterConfig(onboardRouterConfig)
                 .build()
 
+        val navigatorNative = newOptions.onboardRouterConfig?.let { config ->
+            val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
+            if (!tileDir.exists()) {
+                tileDir.mkdirs()
+            }
+            val routerParams = RouterParams(
+                    tileDir.absolutePath,
+                    config.inMemoryTileCache,
+                    config.mapMatchingSpatialCache,
+                    config.threadsCount,
+                    config.endpoint?.let {
+                        TileEndpointConfiguration(
+                                it.host,
+                                it.version,
+                                it.token,
+                                it.userAgent,
+                                ""
+                        )
+                    })
+            MapboxNativeNavigatorImpl(routerParams = routerParams)
+        } ?: MapboxNativeNavigatorImpl()
+
+
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             Utils.getMapboxAccessToken(this),
-            navigationOptions = newOptions
+            navigationOptions = newOptions,
+            navigatorNative = navigatorNative
         )
     }
 

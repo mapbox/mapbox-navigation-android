@@ -224,7 +224,7 @@ class MapboxTripSession(
     }
 
     override fun updateSensorEvent(sensorEvent: SensorEvent) {
-        navigator.updateSensorEvent(sensorEvent)
+//        navigator.updateSensorEvent(sensorEvent)
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {

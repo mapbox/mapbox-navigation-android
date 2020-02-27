@@ -33,13 +33,13 @@ import kotlinx.coroutines.withContext
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  */
 @MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
-class MapboxOnboardRouter(
+class MapboxOnboardRouter constructor(
     private val navigatorNative: MapboxNativeNavigator,
     config: MapboxOnboardRouterConfig
 ) : Router {
 
     companion object {
-        private const val TILES_DIR_NAME = "tiles"
+        const val TILES_DIR_NAME = "tiles"
     }
 
     private val mainJobControl by lazy {
@@ -47,29 +47,29 @@ class MapboxOnboardRouter(
     }
     private val gson = Gson()
 
-    init {
-        if (config.tilePath.isNotEmpty()) {
-            val tileDir = File(config.tilePath, TILES_DIR_NAME)
-            if (!tileDir.exists()) {
-                tileDir.mkdirs()
-            }
-            val routerParams = RouterParams(
-                tileDir.absolutePath,
-                config.inMemoryTileCache,
-                config.mapMatchingSpatialCache,
-                config.threadsCount,
-                config.endpoint?.let {
-                    TileEndpointConfiguration(
-                        it.host,
-                        it.version,
-                        it.token,
-                        it.userAgent,
-                        ""
-                    )
-                })
-            navigatorNative.configureRouter(routerParams, null)
-        }
-    }
+//    init {
+//        if (config.tilePath.isNotEmpty()) {
+//            val tileDir = File(config.tilePath, TILES_DIR_NAME)
+//            if (!tileDir.exists()) {
+//                tileDir.mkdirs()
+//            }
+//            val routerParams = RouterParams(
+//                tileDir.absolutePath,
+//                config.inMemoryTileCache,
+//                config.mapMatchingSpatialCache,
+//                config.threadsCount,
+//                config.endpoint?.let {
+//                    TileEndpointConfiguration(
+//                        it.host,
+//                        it.version,
+//                        it.token,
+//                        it.userAgent,
+//                        ""
+//                    )
+//                })
+//            navigatorNative.configureRouter(routerParams, null)
+//        }
+//    }
 
     override fun getRoute(
         routeOptions: RouteOptions,
