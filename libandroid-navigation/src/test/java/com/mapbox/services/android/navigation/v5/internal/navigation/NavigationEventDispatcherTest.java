@@ -4,6 +4,8 @@ import android.content.Context;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.work.Configuration;
+import androidx.work.testing.WorkManagerTestInitHelper;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -73,6 +75,8 @@ public class NavigationEventDispatcherTest extends BaseTest {
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
     Context context = RuntimeEnvironment.application;
+    Configuration config = new Configuration.Builder().build();
+    WorkManagerTestInitHelper.initializeTestWorkManager(context, config);
     navigation = new MapboxNavigation(
             context,
             ACCESS_TOKEN,

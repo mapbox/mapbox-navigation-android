@@ -54,7 +54,8 @@ ext {
       okhttp                    : '3.12.0',
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
-      barista                   : '3.2.0'
+      barista                   : '3.2.0',
+      workTesting               : '2.2.0'
   ]
   dependenciesList = [
       // mapbox
@@ -129,6 +130,7 @@ ext {
       testEspressoIntents       : "androidx.test.espresso:espresso-intents:${version.espressoVersion}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
       barista                   : "com.schibsted.spain:barista:${version.barista}",
+      workTesting               : "androidx.work:work-testing:${version.workTesting}",
 
       // unit test
       junit                     : "junit:junit:${version.junit}",
