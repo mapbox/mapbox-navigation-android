@@ -15,7 +15,9 @@ data class NavigationOptions constructor(
     val navigatorPollingDelay: Long,
     val fasterRouteDetectorInterval: Long,
     val distanceFormatter: DistanceFormatter?,
-    val onboardRouterConfig: MapboxOnboardRouterConfig?
+    val onboardRouterConfig: MapboxOnboardRouterConfig?,
+    val mapboxNavigationVersionName: String = "1.0-SNAPSHOT",
+    val mapboxNavigationSdkIdentifier: String = "mapbox-navigation-android"
 ) {
 
     /**
@@ -28,6 +30,7 @@ data class NavigationOptions constructor(
         fasterRouteDetectorInterval,
         distanceFormatter,
         onboardRouterConfig
+
     )
 
     data class Builder(
@@ -36,7 +39,9 @@ data class NavigationOptions constructor(
         private var navigatorPollingDelay: Long = DEFAULT_NAVIGATOR_POLLING_DELAY,
         private var fasterRouteDetectorInterval: Long = DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL,
         private var distanceFormatter: DistanceFormatter? = null,
-        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
+        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null,
+        private var mapboxNavigationVersionName: String = "1.0-SNAPSHOT",
+        private var mapboxNavigationSdkIdentifier: String = "mapbox-navigation-android"
     ) {
 
         fun roundingIncrement(roundingIncrement: Int) =
@@ -57,6 +62,12 @@ data class NavigationOptions constructor(
         fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig?) =
             apply { this.onboardRouterConfig = onboardRouterConfig }
 
+        fun versionName(name: String) =
+                apply { this.mapboxNavigationVersionName = name }
+
+        fun sdkName(name: String) =
+                apply { this.mapboxNavigationSdkIdentifier = name }
+
         fun build(): NavigationOptions {
             return NavigationOptions(
                 roundingIncrement,
@@ -64,7 +75,9 @@ data class NavigationOptions constructor(
                 navigatorPollingDelay,
                 fasterRouteDetectorInterval,
                 distanceFormatter,
-                onboardRouterConfig
+                onboardRouterConfig,
+                mapboxNavigationVersionName,
+                mapboxNavigationSdkIdentifier
             )
         }
     }

@@ -7,12 +7,10 @@ import android.util.Log
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.telemetry.telemetryevents.MAPBOX_NAVIGATION_SDK_IDENTIFIER
-import com.mapbox.navigation.core.telemetry.telemetryevents.MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER
 import com.mapbox.navigation.core.telemetry.telemetryevents.MOCK_PROVIDER
 import com.mapbox.navigation.core.telemetry.telemetryevents.TelemetryArrival
 import com.mapbox.navigation.core.telemetry.telemetryevents.TelemetryCancel
@@ -77,11 +75,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     // Private variables
     private lateinit var context: Context // Must be context.getApplicationContext
     private lateinit var mapboxToken: String
-
-    private var metricsMetadata: TelemetryMetadata? = null // The metadata class required by every telemetry event
     private lateinit var telemetryThreadControl: JobControl
     private lateinit var metricsReporter: MetricsReporter
+    private lateinit var navigationOptions: NavigationOptions
     private var offRouteProcessing = AtomicBoolean(false) // A switch used to prevent multiple off-route events from generating events.
+    private var metricsMetadata: TelemetryMetadata? = null // The metadata class required by every telemetry event
 
     /**
      * This class holds all mutable state of the Telemetry object
@@ -199,7 +197,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName, jobControl ->
+    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName, jobControl, options ->
         this.context = context
         telemetryThreadControl = jobControl
         mapboxToken = token
@@ -214,7 +212,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private var initializer = primaryInitializer // The initialize dispatchers that points to either pre or post initialization lambda
 
     // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitialize: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl) -> Boolean = { _, _, _, _, _, _ -> false }
+    private var postInitialize: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions) -> Boolean = { _, _, _, _, _, _, _ -> false }
 
     /**
      * This method must be called before using the Telemetry object
@@ -225,8 +223,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation: MapboxNavigation,
         metricsReporter: MetricsReporter,
         locationEngineName: String,
-        jobControl: JobControl
-    ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName, jobControl)
+        jobControl: JobControl,
+        options: NavigationOptions
+    ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName, jobControl, options)
 
     /**
      * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method [getLastNSecondsOfLocations] it calls is itself suspendable
@@ -335,7 +334,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private fun postTurnstileEvent() {
         // AppUserTurnstile is implemented in mapbox-telemetry-sdk
-        val appUserTurnstileEvent = AppUserTurnstile(MAPBOX_NAVIGATION_SDK_IDENTIFIER, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME) // TODO:OZ obtain the SDK identifier from MapboxNavigation
+        val appUserTurnstileEvent = AppUserTurnstile(navigationOptions.mapboxNavigationSdkIdentifier, navigationOptions.mapboxNavigationVersionName)
         val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
         metricsReporter.addEvent(event)
     }
@@ -444,8 +443,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 created = Date().toString(),
                 startTimestamp = Date().toString(),
                 device = Build.DEVICE,
-                sdkIdentifier = if (isFromNavigationUi) MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER else MAPBOX_NAVIGATION_SDK_IDENTIFIER,
-                sdkVersion = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
+                sdkIdentifier = navigationOptions.mapboxNavigationSdkIdentifier,
+                sdkVersion = navigationOptions.mapboxNavigationVersionName,
                 simulation = MOCK_PROVIDER == locationEngineName,
                 locationEngine = locationEngineName,
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),

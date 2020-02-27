@@ -2,8 +2,6 @@ package com.mapbox.navigation.core.telemetry.telemetryevents
 
 import android.os.Build
 
-const val MAPBOX_NAVIGATION_SDK_IDENTIFIER = "mapbox-navigation-android"
-const val MAPBOX_NAVIGATION_UI_SDK_IDENTIFIER = "mapbox-navigation-ui-android"
 const val MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine"
 const val CurrentVersion = 7 // TODO:OZ legacy Telemetry code set this version to 7 but the docs state 4
 
