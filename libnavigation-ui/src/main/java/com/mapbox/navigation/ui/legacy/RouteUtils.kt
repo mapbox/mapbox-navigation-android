@@ -19,6 +19,7 @@ class RouteUtils {
         private const val FIRST_POSITION = 0
         private const val SECOND_POSITION = 1
         private const val SEMICOLON = ";"
+        private const val DEFAULT_MAX_METERS_AWAY_TO_TRIGGER_FINAL_DESTINATION_ARRIVAL = 25f
     }
 
     /**
@@ -32,6 +33,10 @@ class RouteUtils {
         routeProgress.currentState()?.let { currentState ->
             currentState == RouteProgressState.ROUTE_ARRIVED
         } ?: false
+
+    fun deviceCloseEnoughToFinalDestination(routeProgress: RouteProgress, maxMeters: Float?): Boolean =
+            (routeProgress.distanceRemaining() <= maxMeters
+                    ?: DEFAULT_MAX_METERS_AWAY_TO_TRIGGER_FINAL_DESTINATION_ARRIVAL)
 
     /**
      * Looks at the current [RouteProgress] list of legs and

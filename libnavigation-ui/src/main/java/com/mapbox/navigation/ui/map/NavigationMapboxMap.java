@@ -7,11 +7,6 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 
-import androidx.annotation.AnyRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
-
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.libnavigation.ui.R;
@@ -23,7 +18,6 @@ import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
@@ -33,12 +27,18 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
+import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer;
+import com.mapbox.navigation.ui.arrival.DestinationBuildingFootprintLayer;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import androidx.annotation.AnyRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
@@ -82,6 +82,8 @@ public class NavigationMapboxMap {
   @Nullable
   private MapFpsDelegate mapFpsDelegate;
   private LocationFpsDelegate locationFpsDelegate;
+  private BuildingExtrusionLayer buildingExtrusionLayer;
+  private DestinationBuildingFootprintLayer destinationBuildingFootprintLayer;
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}
@@ -115,6 +117,7 @@ public class NavigationMapboxMap {
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
     initializeCamera(mapboxMap, locationComponent);
     initializeLocationFpsDelegate(mapboxMap, locationComponent);
+    initializeArrivalExperience(mapboxMap, mapView);
   }
 
 
@@ -572,6 +575,26 @@ public class NavigationMapboxMap {
   }
 
   /**
+   * Updates the visibility of the building extrusion layer. Extrusions are added during the arrival experience.
+   *
+   * @param isVisible true if the building extrusions should be visible, false otherwise
+   */
+  public void updateBuildingExtrusionVisibility(boolean isVisible) {
+    buildingExtrusionLayer.updateVisibility(isVisible);
+  }
+
+  /**
+   * Updates the visibility of the destination building footprint highlight
+   * {@link com.mapbox.mapboxsdk.style.layers.FillLayer}. This layer is added during the arrival
+   * experience so that the final destination can be seen more easily.
+   *
+   * @param isVisible true if the building extrusions should be visible, false otherwise
+   */
+  public void updateDestinationFootprintHighlightVisibility(boolean isVisible) {
+    destinationBuildingFootprintLayer.updateVisibility(isVisible);
+  }
+
+  /**
    * Add a {@link OnCameraTrackingChangedListener} to the {@link LocationComponent} that is
    * wrapped within this class.
    * <p>
@@ -690,6 +713,11 @@ public class NavigationMapboxMap {
 
   private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
     locationFpsDelegate = new LocationFpsDelegate(map, locationComponent);
+  }
+
+  private void initializeArrivalExperience(MapboxMap map, MapView mapView) {
+    buildingExtrusionLayer = new BuildingExtrusionLayer(map, mapView);
+    destinationBuildingFootprintLayer = new DestinationBuildingFootprintLayer(map, mapView);
   }
 
   private void initializeWayName(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {

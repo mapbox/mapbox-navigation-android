@@ -112,6 +112,23 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".ui.FinalDestinationBuildingFootprintHighlightActivityKt"
+            android:label="@string/title_final_destination_building_highlight_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity"/>
+        </activity>
+
+
+        <activity android:name=".ui.ArrivalUiBuildingExtrusionLayerActivityKt"
+            android:label="@string/title_arrival_ui_building_extrusions_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity"/>
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

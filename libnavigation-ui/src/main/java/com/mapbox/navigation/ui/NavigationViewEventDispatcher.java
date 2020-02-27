@@ -158,6 +158,12 @@ class NavigationViewEventDispatcher {
     }
   }
 
+  void onFinalDestinationArrival() {
+    if (routeListener != null) {
+      routeListener.onFinalDestinationArrival();
+    }
+  }
+
   void onBottomSheetStateChanged(View bottomSheet, int newState) {
     if (bottomSheetCallback != null) {
       bottomSheetCallback.onStateChanged(bottomSheet, newState);

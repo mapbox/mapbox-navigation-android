@@ -269,6 +269,10 @@ public class NavigationViewModel extends AndroidViewModel {
   void updateRouteProgress(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
     sendEventArrival(routeProgress);
+    if (routeUtils.deviceCloseEnoughToFinalDestination(routeProgress,
+      navigationViewOptions.maxMetersToTriggerDestinationArrival())) {
+      sendEventFinalDestinationArrival();
+    }
     instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
     summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
     routeJunctionModel.setValue(new RouteJunctionModel(routeProgress));
@@ -477,6 +481,12 @@ public class NavigationViewModel extends AndroidViewModel {
   private void sendEventArrival(RouteProgress routeProgress) {
     if (navigationViewEventDispatcher != null && routeUtils.isArrivalEvent(routeProgress)) {
       navigationViewEventDispatcher.onArrival();
+    }
+  }
+
+  private void sendEventFinalDestinationArrival() {
+    if (navigationViewEventDispatcher != null) {
+      navigationViewEventDispatcher.onFinalDestinationArrival();
     }
   }
 
