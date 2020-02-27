@@ -501,16 +501,21 @@ constructor(
                 }
             )
 
-            val bearings = mutableListOf<List<Double>>()
+            val bearings = mutableListOf<List<Double>?>()
 
             val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
                 ?: DEFAULT_REROUTE_BEARING_TOLERANCE
             val currentAngle = location.bearing.toDouble()
 
             bearings.add(listOf(currentAngle, originTolerance))
-            bearings.addAll(
-                routeOptions.bearingsList()?.subList(index + 1, coordinates.size) ?: emptyList()
-            )
+            val originalBearings = routeOptions.bearingsList()
+            if (originalBearings != null) {
+                bearings.addAll(originalBearings.subList(index + 1, coordinates.size))
+            } else {
+                while (bearings.size < coordinates.size) {
+                    bearings.add(null)
+                }
+            }
 
             optionsBuilder.bearingsList(bearings)
 
