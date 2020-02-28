@@ -242,6 +242,17 @@ commands:
           name: Generate documentation
           command: make javadoc-dokka
 
+  trigger-benchmark-run:
+    steps:
+      - run:
+          name: Trigger benchmark run on mobile-metrics
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+
 jobs:
   build:
     working_directory: ~/code
@@ -362,6 +373,7 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+      - trigger-benchmark-run
       - run:
           name: Check & Publish Binary Size
           command: |
