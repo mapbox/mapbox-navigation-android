@@ -32,6 +32,9 @@
     <string name="title_simple_navigation_kotlin" translatable="false">Simple Mapbox Navigation Kotlin</string>
     <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
 
+    <string name="title_navigation_view" translatable="false">Navigation View</string>
+    <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn</string>
+
     <string name="title_navigate_instruction_view" translatable="false">Navigate with InstructionView</string>
     <string name="description_navigate_instruction_view" translatable="false">Shows how to integrate InstructionView with core SDK.</string>
 
