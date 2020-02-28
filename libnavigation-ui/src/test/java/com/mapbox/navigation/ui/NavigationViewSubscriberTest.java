@@ -72,12 +72,14 @@ public class NavigationViewSubscriberTest {
     when(navigationViewModel.retrieveNavigationLocation()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveDestination()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveShouldRecordScreenshot()).thenReturn(mock(MutableLiveData.class));
+    when(navigationViewModel.retrieveRouteProgressUpdates()).thenReturn(mock(MutableLiveData.class));
 
     theNavigationViewSubscriber.subscribe();
 
     verify(navigationViewModel.retrieveRoute()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveNavigationLocation()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveDestination()).observe(eq(lifecycleOwner), any(Observer.class));
+    verify(navigationViewModel.retrieveRouteProgressUpdates()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveShouldRecordScreenshot()).observe(eq(lifecycleOwner), any(Observer.class));
   }
 }

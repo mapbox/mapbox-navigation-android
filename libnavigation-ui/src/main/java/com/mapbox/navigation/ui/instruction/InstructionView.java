@@ -172,13 +172,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
-    // navigationViewModel.updateFeedback(feedbackItem); // TODO Telemetry impl
+    navigationViewModel.updateFeedback(feedbackItem);
     alertView.showFeedbackSubmitted();
   }
 
   @Override
   public void onFeedbackDismissed() {
-    // navigationViewModel.cancelFeedback(); // TODO Telemetry impl
   }
 
   /**
@@ -195,7 +194,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.instructionModel.observe(lifecycleOwner, new Observer<InstructionModel>() {
+    navigationViewModel.retrieveInstructionModel().observe(lifecycleOwner, new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
@@ -203,22 +202,23 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.bannerInstructionModel.observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
-      @Override
-      public void onChanged(@Nullable BannerInstructionModel model) {
-        if (model != null) {
-          updateManeuverView(
-              model.retrievePrimaryManeuverType(),
-              model.retrievePrimaryManeuverModifier(),
-              model.retrievePrimaryRoundaboutAngle(),
-              model.retrieveDrivingSide()
-          );
-          updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-          updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
-        }
-      }
-    });
-    navigationViewModel.isOffRoute.observe(lifecycleOwner, new Observer<Boolean>() {
+    navigationViewModel.retrieveBannerInstructionModel()
+        .observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
+          @Override
+          public void onChanged(@Nullable BannerInstructionModel model) {
+            if (model != null) {
+              updateManeuverView(
+                  model.retrievePrimaryManeuverType(),
+                  model.retrievePrimaryManeuverModifier(),
+                  model.retrievePrimaryRoundaboutAngle(),
+                  model.retrieveDrivingSide()
+              );
+              updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
+              updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+            }
+          }
+        });
+    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -598,7 +598,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     feedbackButton.addOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View view) {
-        // navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI); // TODO Telemetry impl
         showFeedbackBottomSheet();
       }
     });

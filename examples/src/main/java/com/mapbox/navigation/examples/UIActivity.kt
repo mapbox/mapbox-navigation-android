@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionLayerActivityKt
 import com.mapbox.navigation.examples.ui.FinalDestinationBuildingFootprintHighlightActivityKt
+import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
 
 class UIActivity : AppCompatActivity() {
@@ -33,6 +34,11 @@ class UIActivity : AppCompatActivity() {
     private fun buildSampleList(): List<SampleItem> {
         // Return list of all activities demonstrating UI SDK capabilities
         return listOf(
+            SampleItem(
+                    getString(R.string.title_navigation_view),
+                    getString(R.string.description_navigation_view),
+                    NavigationViewActivity::class.java
+            ),
             SampleItem(
                     getString(R.string.title_final_destination_building_highlight_kotlin),
                     getString(R.string.description_final_destination_building_highlight_kotlin),
