@@ -6,6 +6,4 @@
     <color name="ic_launcher_background">#2D4E73</color>
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
-    <color name="jungleAccentOrange">#FF9900</color>
-    <color name="rawLocationUncertainGray">#858585</color>
 </resources>

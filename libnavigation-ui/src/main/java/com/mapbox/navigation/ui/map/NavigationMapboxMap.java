@@ -31,6 +31,8 @@ import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer;
 import com.mapbox.navigation.ui.arrival.DestinationBuildingFootprintLayer;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
+import com.mapbox.navigation.ui.puck.NavigationPuckPresenter;
+import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
@@ -79,6 +81,7 @@ public class NavigationMapboxMap {
   private MapLayerInteractor layerInteractor;
   private NavigationMapRoute mapRoute;
   private NavigationCamera mapCamera;
+  private NavigationPuckPresenter navigationPuckPresenter;
   @Nullable
   private MapWayName mapWayName;
   @Nullable
@@ -304,6 +307,10 @@ public class NavigationMapboxMap {
     mapCamera.addProgressChangeListener(navigation);
     mapWayName.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
+
+    if (navigationPuckPresenter != null) {
+      navigationPuckPresenter.addProgressChangeListener(navigation);
+    }
   }
 
   /**
@@ -509,6 +516,10 @@ public class NavigationMapboxMap {
     handleWayNameOnStart();
     handleFpsOnStart();
     locationFpsDelegate.onStart();
+
+    if (navigationPuckPresenter != null) {
+      navigationPuckPresenter.onStart();
+    }
   }
 
   /**
@@ -521,6 +532,10 @@ public class NavigationMapboxMap {
     handleWayNameOnStop();
     handleFpsOnStop();
     locationFpsDelegate.onStop();
+
+    if (navigationPuckPresenter != null) {
+      navigationPuckPresenter.onStop();
+    }
   }
 
   /**
@@ -845,6 +860,10 @@ public class NavigationMapboxMap {
 
   public void setCamera(Camera camera) {
     mapCamera.setCamera(camera);
+  }
+
+  public void setPuckDrawableSupplier(PuckDrawableSupplier supplier) {
+    this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
   }
 
   public void updateCurrentLocationDrawable(@DrawableRes int gpsDrawable) {

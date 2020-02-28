@@ -6,6 +6,7 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.navigation.ui.camera.Camera;
+import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 
 @AutoValue
 public abstract class NavigationLauncherOptions extends NavigationUiOptions {
@@ -29,6 +30,8 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
     public abstract Builder initialMapCameraPosition(@Nullable CameraPosition initialMapCameraPosition);
 
     public abstract Builder camera(Camera camera);
+
+    public abstract Builder puckDrawableSupplier(PuckDrawableSupplier puckDrawableSupplier);
 
     /**
      * Add an offline path for loading offline routing data.

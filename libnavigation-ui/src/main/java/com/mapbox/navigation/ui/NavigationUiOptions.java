@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.ui.camera.Camera;
+import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 
 public abstract class NavigationUiOptions {
 
@@ -30,4 +31,7 @@ public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract Camera camera();
+
+  @Nullable
+  public abstract PuckDrawableSupplier puckDrawableSupplier();
 }
