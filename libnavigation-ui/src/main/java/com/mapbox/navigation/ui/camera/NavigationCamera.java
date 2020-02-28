@@ -105,6 +105,7 @@ public class NavigationCamera implements LifecycleObserver {
 
     @Override
     public void onRawLocationChanged(@NotNull Location rawLocation) {
+      rawLocation.toString();
     }
 
     @Override
@@ -408,7 +409,7 @@ public class NavigationCamera implements LifecycleObserver {
   }
 
   private void tryToBuildRouteInformationAndAdjustCamera() {
-    if (isTrackingEnabled()) {
+    if (isTrackingEnabled() && currentRouteProgress != null) {
       currentRouteInformation =
         new RouteInformation(currentRouteProgress.route(), currentLocation, currentRouteProgress);
       if (!isCameraResetting) {

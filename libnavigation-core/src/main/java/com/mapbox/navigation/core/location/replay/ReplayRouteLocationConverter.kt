@@ -17,7 +17,7 @@ internal class ReplayRouteLocationConverter(
     private var currentLeg: Int = 0
     private var currentStep: Int = 0
     private var time: Long = 0
-    private val route: DirectionsRoute? = null
+    private var route: DirectionsRoute? = null
 
     override val isMultiLegRoute: Boolean
         get() = route?.legs()?.let { legs ->
@@ -51,7 +51,7 @@ internal class ReplayRouteLocationConverter(
     }
 
     override fun setRoute(route: DirectionsRoute) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        this.route = route
     }
 
     override fun initializeTime() {
