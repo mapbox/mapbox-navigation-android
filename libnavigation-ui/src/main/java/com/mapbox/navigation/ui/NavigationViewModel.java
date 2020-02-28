@@ -390,7 +390,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private void addNavigationListeners() {
     navigation.registerRouteProgressObserver(navigationViewVm);
-    navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.registerLocationObserver(navigationViewVm);
     navigation.registerOffRouteObserver(offRouteListener);
     // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }

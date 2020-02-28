@@ -104,6 +104,14 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".ui.NavigationViewActivity"
+            android:label="@string/title_navigation_view"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity"/>
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />
