@@ -13,6 +13,7 @@ import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
 import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
+import com.mapbox.navigation.examples.core.ReRouteActivity
 import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
 import com.mapbox.navigation.examples.core.TripServiceActivityKt
 import com.mapbox.navigation.examples.core.TripSessionActivityKt
@@ -79,6 +80,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_guidance_view),
                 getString(R.string.description_guidance_view),
                 GuidanceViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_reroute_view),
+                getString(R.string.description_reroute_view),
+                ReRouteActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_basic_navigation_kotlin),
