@@ -67,7 +67,7 @@ class MapWayName {
 
   void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
-    navigation.registerRouteProgressObserver(progressChangeListener);
+    registerObservers();
   }
 
   boolean addOnWayNameChangedListener(OnWayNameChangedListener listener) {
@@ -79,17 +79,27 @@ class MapWayName {
   }
 
   void onStart() {
-    if (navigation != null) {
-      navigation.registerRouteProgressObserver(progressChangeListener);
-    }
+    registerObservers();
   }
 
   void onStop() {
     if (isTaskRunning()) {
       filterTask.cancel(true);
     }
+    unregisterObservers();
+  }
+
+  private void registerObservers() {
+    if (navigation != null) {
+      navigation.registerRouteProgressObserver(progressChangeListener);
+      navigation.registerLocationObserver(progressChangeListener);
+    }
+  }
+
+  private void unregisterObservers() {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(progressChangeListener);
+      navigation.unregisterLocationObserver(progressChangeListener);
     }
   }
 
