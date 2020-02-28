@@ -40,7 +40,6 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
@@ -57,6 +56,10 @@ import java.lang.reflect.Field
 import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
+
+private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
+private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access in order to use the default OffboardRouter."
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -173,9 +176,7 @@ constructor(
                 requestFasterRoute()
             }
         ifNonNull(accessToken) { token ->
-            // TODO commented out because was causing test failures - init creates MapboxTelemetry which assigns static Context but mockks don't survive across tests
-            // MapboxMetricsReporter.init(context, token, obtainUserAgent())
-            // Initialize telemetry. This will cause a turnstile event to be sent to the back end servers
+            MapboxMetricsReporter.init(context, accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION), obtainUserAgent(navigationOptions))
             MapboxNavigationTelemetry.initialize(
                     context.applicationContext,
                     token,
@@ -227,7 +228,13 @@ constructor(
     fun requestRoutes(routeOptions: RouteOptions) {
         directionsSession.requestRoutes(routeOptions, defaultRoutesRequestCallback)
     }
-
+    private fun obtainUserAgent(options: NavigationOptions): String {
+        return if (options.isFromNavigationUi) {
+            MAPBOX_NAVIGATION_UI_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
+        } else {
+            MAPBOX_NAVIGATION_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
+        }
+    }
     private val defaultRoutesRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             return routes
@@ -571,16 +578,16 @@ constructor(
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
-                    ?: throw RuntimeException("You need to provide an access in order to use the default OffboardRouter.")),
+                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION)),
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxNavigationModuleType.OnboardRouter -> {
-                check(accessToken != null) { "You need to provide an access token in order to use the default OnboardRouter." }
+                check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION }
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
-                        ?: throw RuntimeException("You need to provide a router configuration in order to use the default OnboardRouter."))
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION))
                 )
             }
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version

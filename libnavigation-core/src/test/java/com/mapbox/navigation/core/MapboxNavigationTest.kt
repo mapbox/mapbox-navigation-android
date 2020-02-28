@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core
 
-import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -97,12 +97,14 @@ class MapboxNavigationTest {
 
         every { context.inferDeviceLocale() } returns Locale.US
         every { context.applicationContext } returns applicationContext
-        val notificationManager = mockk<NotificationManager>()
-        every { applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
-        val alarmManager = mockk<AlarmManager>()
-        every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
+        every { context.packageManager as PackageManager } returns mockk()
+        every { context.applicationContext.packageManager } returns mockk()
+        every { applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager } returns mockk()
+        every { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager } returns mockk()
+        every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns mockk()
+
         val sharedPreferences = mockk<SharedPreferences>(relaxed = true)
-        every { applicationContext.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE); } returns sharedPreferences
+        every { applicationContext.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE) } returns sharedPreferences
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
 
         mockLocation()

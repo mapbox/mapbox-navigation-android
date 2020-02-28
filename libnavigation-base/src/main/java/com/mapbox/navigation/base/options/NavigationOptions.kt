@@ -17,7 +17,7 @@ data class NavigationOptions constructor(
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
     val mapboxNavigationVersionName: String = "1.0-SNAPSHOT",
-    val mapboxNavigationSdkIdentifier: String = "mapbox-navigation-android"
+    val isFromNavigationUi: Boolean = false
 ) {
 
     /**
@@ -30,7 +30,6 @@ data class NavigationOptions constructor(
         fasterRouteDetectorInterval,
         distanceFormatter,
         onboardRouterConfig
-
     )
 
     data class Builder(
@@ -41,7 +40,7 @@ data class NavigationOptions constructor(
         private var distanceFormatter: DistanceFormatter? = null,
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null,
         private var mapboxNavigationVersionName: String = "1.0-SNAPSHOT",
-        private var mapboxNavigationSdkIdentifier: String = "mapbox-navigation-android"
+        private var isFromNavigationUi: Boolean = false
     ) {
 
         fun roundingIncrement(roundingIncrement: Int) =
@@ -65,8 +64,8 @@ data class NavigationOptions constructor(
         fun versionName(name: String) =
                 apply { this.mapboxNavigationVersionName = name }
 
-        fun sdkName(name: String) =
-                apply { this.mapboxNavigationSdkIdentifier = name }
+        fun sdkName(flag: Boolean) =
+                apply { this.isFromNavigationUi = flag }
 
         fun build(): NavigationOptions {
             return NavigationOptions(
@@ -77,7 +76,7 @@ data class NavigationOptions constructor(
                 distanceFormatter,
                 onboardRouterConfig,
                 mapboxNavigationVersionName,
-                mapboxNavigationSdkIdentifier
+                isFromNavigationUi
             )
         }
     }

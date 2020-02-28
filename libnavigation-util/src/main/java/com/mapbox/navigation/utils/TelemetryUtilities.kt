@@ -8,10 +8,6 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import kotlin.math.floor
-
-private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
-        floor(PERCENT_NORMALIZER * screenBrightness / SCREEN_BRIGHTNESS_MAX).toInt()
 
 fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
         ifNonNull(directionsRoute, directionsRoute?.geometry()) { _, geometry ->
