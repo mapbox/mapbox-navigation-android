@@ -45,7 +45,7 @@ class OffboardRouterActivityKt : AppCompatActivity(),
     OnMapReadyCallback,
     MapboxMap.OnMapClickListener,
     Router.Callback,
-        MetricsObserver,
+    MetricsObserver,
     LoggerObserver {
 
     private var mapboxMap: MapboxMap? = null

@@ -21,7 +21,7 @@ internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
         RouteProgressObserver, LocationObserver {
-    private var lastLocation: AtomicReference<Location> = AtomicReference<Location>(Location("Default"))
+    private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimeStamp> = AtomicReference(RouteProgressWithTimeStamp(0, RouteProgress.Builder().build()))
     private val channelOnRouteProgress = Channel<RouteProgressWithTimeStamp>(Channel.CONFLATED) // we want just the last notification
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
@@ -35,8 +35,8 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     /**
      * This method accumulates locations. The number of locations is limited by [MapboxNavigationTelemetry.LOCATION_BUFFER_MAX_SIZE].
-     * Once this limit is reached, an item is removed before another is added. The method returns [true] if the queue reaches capacity,
-     * [false] otherwise
+     * Once this limit is reached, an item is removed before another is added. The method returns true if the queue reaches capacity,
+     * false otherwise
      */
     private fun accumulateLocationAsync(location: Location, queue: ArrayDeque<Location>): Boolean {
         var result = false
@@ -57,12 +57,12 @@ internal class TelemetryLocationAndProgressDispatcher :
      * This method returns a [Pair] of buffers. The first represents a fixed number of locations before an off route event,
      * while the second represents a fixed number of locations after the off route event
      */
-    fun getLocationBuffersAsync() = accumulatePostOffRouteEventLocationsAsync()
+    fun getLocationBuffersAsync() = accumulatePosEventLocationsAsync()
 
     /**
      * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events
      */
-    private fun accumulatePostOffRouteEventLocationsAsync(): Deferred<OffRouteBuffers> {
+    private fun accumulatePosEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
         jobControl.scope.launch {
             val monitorControl = CompletableDeferred<ArrayDeque<Location>>() // This variable will be signalled once enough location data is accumulated

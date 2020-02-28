@@ -1,9 +1,11 @@
 package com.mapbox.navigation.core.telemetry
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Build
 import android.util.Log
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -63,16 +65,14 @@ private data class DynamicallyUpdatedRouteValues(
 - navigation.reroute
 - navigation.fasterRoute
 - navigation.arrive
- The class must be initialized before any telemetry events are reported. Attempting to use telemetry before initialization is called will throw an exception. Initialization maybe called multiple times, the call is idempotent.
- The class has two public methods, postUserFeedbackEvent() and initialize().
+The class must be initialized before any telemetry events are reported. Attempting to use telemetry before initialization is called will throw an exception. Initialization maybe called multiple times, the call is idempotent.
+The class has two public methods, postUserFeedbackEvent() and initialize().
  */
+@SuppressLint("StaticFieldLeak")
 internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
-    // Public constants
     internal const val LOCATION_BUFFER_MAX_SIZE = 20
-    internal const val MAX_TIME_LOCATION_COLLECTION = 20000L
     internal const val TAG = "MAPBOX_TELEMETRY"
 
-    // Private variables
     private lateinit var context: Context // Must be context.getApplicationContext
     private lateinit var mapboxToken: String
     private lateinit var telemetryThreadControl: JobControl
@@ -92,7 +92,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             AtomicInteger(0),
             AtomicLong(0))
 
-    private var locationEngineName: String = "no name"
+    private var locationEngineName: String = LocationEngine::javaClass.name
 
     private val CURRENT_SESSION_CONTROL: AtomicReference<CurrentSessionState> = AtomicReference(CurrentSessionState.SESSION_END) // A switch that maintains session state (start/end)
 
@@ -197,16 +197,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions) -> Boolean = { context, token, mapboxNavigation, metricsReporter, locationEngineName, jobControl, options ->
+    private val primaryInitializer: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions) -> Boolean = { context, token, mapboxNavigation, metricsReporter, name, jobControl, options ->
         this.context = context
+        locationEngineName = name
+        navigationOptions = options
         telemetryThreadControl = jobControl
         mapboxToken = token
         validateAccessToken(mapboxToken)
         this.metricsReporter = metricsReporter
         initializer = postInitialize // prevent primaryInitializer() from being called more than once.
         registerForNotification(mapboxNavigation)
-        // TODO commented out because was causing test failures - AppUserTurnstile tries to access MapboxTelemetry static Context and mockks don't survive across tests
-        // postTurnstileEvent()
+        postTurnstileEvent()
         true
     }
     private var initializer = primaryInitializer // The initialize dispatchers that points to either pre or post initialization lambda
@@ -228,8 +229,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     ) = initializer(context, mapboxToken, mapboxNavigation, metricsReporter, locationEngineName, jobControl, options)
 
     /**
-     * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method [getLastNSecondsOfLocations] it calls is itself suspendable
-     * The method may suspend for as long as 40 seconds.
+     * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method it calls is itself suspendable
+     * The method may suspend until it collects 40 location events. The worst case scenario is a 40 second suspension, 20 is best case
      */
     override fun postUserFeedbackEvent(@TelemetryUserFeedback.FeedbackType feedbackType: String, description: String, @TelemetryUserFeedback.FeedbackSource feedbackSource: String, scrShot: String?) {
         postUserEventDelegate(feedbackType, description, feedbackSource, scrShot)
@@ -258,6 +259,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             }
         }
     }
+
     /**
      * This method terminates the current session. The call is idempotent.
      */
@@ -331,11 +333,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     /**
      * This method is used by a lambda. Since the Telemetry class is a singleton, U.I. elements may call postTurnstileEvent() before the singleton is initialized.
-     * A labda guards against this possibility
+     * A lambda guards against this possibility
      */
     private fun postTurnstileEvent() {
         // AppUserTurnstile is implemented in mapbox-telemetry-sdk
-        val appUserTurnstileEvent = AppUserTurnstile(navigationOptions.mapboxNavigationSdkIdentifier, navigationOptions.mapboxNavigationVersionName)
+        val sdkType = if (navigationOptions.isFromNavigationUi) "mapbox-navigation-ui-android" else "mapbox-navigation-android"
+        val appUserTurnstileEvent = AppUserTurnstile(sdkType, navigationOptions.mapboxNavigationVersionName)
         val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
         metricsReporter.addEvent(event)
     }
@@ -363,7 +366,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     /**
-     * This method waits for an [ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
+     * This method waits for an [RouteProgressState.ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
      * sends the telemetry data to the servers.
      */
     private suspend fun monitorArrivalEvent() {
@@ -404,7 +407,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             requestIdentifier = directionsRoute.routeOptions()?.requestUuid()
             originalGeometry = directionsRoute.geometry()
         }
-        metricsMetadata ?.let {
+        metricsMetadata?.let {
             return TelemetryDepartureEvent(it)
         }
         return null
@@ -439,12 +442,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         locationEngineName: String,
         currentLocation: Location
     ): TelemetryMetadata {
-        val isFromNavigationUi = false // TODO:OZ this must be set from MapboxNavigation when the UI SDK is ported and becomes available
+        val sdkType = if (navigationOptions.isFromNavigationUi) "mapbox-navigation-ui-android" else "mapbox-navigation-android"
         return TelemetryMetadata(
                 created = Date().toString(),
                 startTimestamp = Date().toString(),
                 device = Build.DEVICE,
-                sdkIdentifier = navigationOptions.mapboxNavigationSdkIdentifier,
+                sdkIdentifier = sdkType,
                 sdkVersion = navigationOptions.mapboxNavigationVersionName,
                 simulation = MOCK_PROVIDER == locationEngineName,
                 locationEngine = locationEngineName,
