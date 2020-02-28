@@ -50,7 +50,7 @@ class MapWayName {
   }
 
   void updateProgress(List<Point> currentStepPoints) {
-    if (!this.currentStepPoints.equals(currentStepPoints)) {
+    if (currentStepPoints != null && !this.currentStepPoints.equals(currentStepPoints)) {
       this.currentStepPoints = currentStepPoints;
     }
   }
