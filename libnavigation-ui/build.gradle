@@ -61,6 +61,7 @@ dependencies {
   // Navigation SDK
   api project(':libnavigation-core')
   implementation project(':libnavigation-util')
+  implementation project(':libtrip-notification')
 
   // Mapbox
   implementation dependenciesList.mapboxSdkServices
