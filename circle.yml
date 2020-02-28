@@ -41,6 +41,8 @@ workflows:
               only: /^testapp-.*/
             branches:
               ignore: /.*/
+      # TODO Temporal job added for debugging purposes
+      - benchmark
 
 commands:
   restore-gradle-cache:
@@ -242,15 +244,14 @@ commands:
           name: Generate documentation
           command: make javadoc-dokka
 
+  # TODO Hardcoding mobile-metrics branch for debugging purposes
   trigger-benchmark-run:
     steps:
       - run:
           name: Trigger benchmark run on mobile-metrics
           command: |
             if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-              if [[ $CIRCLE_BRANCH == master ]]; then
-                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-benchmark https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
-              fi
+              curl -X POST --header "Content-Type: application/json" -d '{"build_parameters": {"CIRCLE_JOB": "android-navigation-benchmark", "BENCHMARK_BUILD_SDK_VERSION": "0.43.0-SNAPSHOT", "BENCHMARK_BRANCH": "'"$CIRCLE_BRANCH"'"}}' https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/pg-revive-navigation-metrics?circle-token=$MOBILE_METRICS_TOKEN
             fi
 
 jobs:
@@ -484,3 +485,11 @@ jobs:
           name: Release to Google Play
           command: ./gradlew :app:publishRelease
 # ------------------------------------------------------------------------------
+  # TODO Temporal job added for debugging purposes
+  benchmark:
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    working_directory: ~/code
+    steps:
+      - trigger-benchmark-run
+
