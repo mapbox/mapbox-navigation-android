@@ -29,13 +29,7 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.navigation.utils.timer.MapboxTimer
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.slot
-import io.mockk.unmockkObject
-import io.mockk.verify
+import io.mockk.*
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -375,12 +369,6 @@ class MapboxNavigationTest {
             .coordinates(emptyList())
             .geometries("")
             .requestUuid("")
-
-    @After
-    fun tearDown() {
-        unmockkObject(NavigationModuleProvider)
-        unmockkObject(NavigationComponentProvider)
-    }
 
     private fun provideRouteOptionsWithCoordinates() =
             provideDefaultRouteOptionsBuilder()
