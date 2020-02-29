@@ -23,12 +23,16 @@ import androidx.core.util.Pair
 import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.services.android.navigation.R
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.DEFAULT_ROUNDABOUT_ANGLE
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_VIEW_UPDATE_MAP
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.ROUNDABOUT_MANEUVER_TYPES
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.adjustRoundaboutAngle
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.isManeuverIconNeedFlip
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
@@ -49,6 +53,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
         private set
     var currentManeuverModifier: String? = null
         private set
+    private var currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
 
     private var notificationManager: NotificationManager? = null
     private lateinit var notification: Notification
@@ -125,8 +130,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
         routeProgress.bannerInstruction()?.let { bannerInstructions ->
             if (updateManeuverState(bannerInstructions)) {
-                updateManeuverImage(bannerInstructions.primary().degrees()?.toFloat() ?: 0f, routeProgress.currentLegProgress?.currentStep?.drivingSide()
-                        ?: return@let)
+                updateManeuverImage(routeProgress.currentLegProgress?.currentStep?.drivingSide()
+                        ?: STEP_MANEUVER_MODIFIER_RIGHT)
             }
         }
     }
@@ -315,9 +320,9 @@ internal class MapboxNavigationNotification : NavigationNotification {
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
     }
 
-    private fun updateManeuverImage(roundaboutAngle: Float, drivingSide: String) {
+    private fun updateManeuverImage(drivingSide: String) {
         getManeuverBitmap(currentManeuverType ?: "",
-                currentManeuverModifier, drivingSide, roundaboutAngle).let { bitmap ->
+                currentManeuverModifier, drivingSide, currentRoundaboutAngle).let { bitmap ->
             collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
             expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
         }
@@ -326,11 +331,18 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private fun updateManeuverState(bannerInstruction: BannerInstructions): Boolean {
         val previousManeuverType = currentManeuverType
         val previousManeuverModifier = currentManeuverModifier
+        val previousRoundaboutAngle = currentRoundaboutAngle
 
         currentManeuverType = bannerInstruction.primary().type()
         currentManeuverModifier = bannerInstruction.primary().modifier()
+        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType))
+            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
+        else
+            DEFAULT_ROUNDABOUT_ANGLE
 
-        return !TextUtils.equals(currentManeuverType, previousManeuverType) || !TextUtils.equals(currentManeuverModifier, previousManeuverModifier)
+        return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
+                !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
+                currentRoundaboutAngle != previousRoundaboutAngle
     }
 
     fun getManeuverBitmap(maneuverType: String, maneuverModifier: String?, drivingSide: String, roundaboutAngle: Float): Bitmap {

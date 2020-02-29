@@ -21,6 +21,11 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.
 
 object ManeuverViewHelper {
 
+    const val DEFAULT_ROUNDABOUT_ANGLE = 180f
+
+    private const val TOP_ROUNDABOUT_ANGLE_LIMIT = 300f
+    private const val BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f
+
     @JvmField
     val MANEUVER_VIEW_UPDATE_MAP: Map<Pair<String, String>, ManeuverViewUpdate> = object : HashMap<Pair<String, String>, ManeuverViewUpdate>() {
         init {
@@ -162,4 +167,12 @@ object ManeuverViewHelper {
             flip
         }
     }
+
+    @JvmStatic
+    fun adjustRoundaboutAngle(roundaboutAngle: Float): Float =
+            when {
+                roundaboutAngle < BOTTOM_ROUNDABOUT_ANGLE_LIMIT -> BOTTOM_ROUNDABOUT_ANGLE_LIMIT
+                roundaboutAngle > TOP_ROUNDABOUT_ANGLE_LIMIT -> TOP_ROUNDABOUT_ANGLE_LIMIT
+                else -> roundaboutAngle
+            }
 }

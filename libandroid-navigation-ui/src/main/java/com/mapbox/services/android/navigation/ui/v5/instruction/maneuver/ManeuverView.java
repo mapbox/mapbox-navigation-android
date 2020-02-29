@@ -20,6 +20,7 @@ import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.Ma
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewUpdate;
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuversStyleKit;
 
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.DEFAULT_ROUNDABOUT_ANGLE;
 import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
 import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_VIEW_UPDATE_MAP;
 import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.ROUNDABOUT_MANEUVER_TYPES;
@@ -36,10 +37,6 @@ import static com.mapbox.services.android.navigation.v5.navigation.NavigationCon
  * @since 0.6.0
  */
 public class ManeuverView extends View {
-
-  private static final float TOP_ROUNDABOUT_ANGLE_LIMIT = 300f;
-  private static final float BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f;
-  private static final float DEFAULT_ROUNDABOUT_ANGLE = 180f;
 
   @ManeuverType
   private String maneuverType = null;
@@ -238,32 +235,11 @@ public class ManeuverView extends View {
   }
 
   private void updateRoundaboutAngle(float roundaboutAngle) {
-    if (checkRoundaboutBottomLimit(roundaboutAngle)) {
-      return;
-    }
-    if (checkRoundaboutTopLimit(roundaboutAngle)) {
-      return;
-    }
-    this.roundaboutAngle = roundaboutAngle;
+    this.roundaboutAngle = ManeuverViewHelper.adjustRoundaboutAngle(roundaboutAngle);
   }
 
   private void updateDrivingSide(String drivingSide) {
     this.drivingSide = drivingSide;
   }
 
-  private boolean checkRoundaboutBottomLimit(float roundaboutAngle) {
-    if (roundaboutAngle < BOTTOM_ROUNDABOUT_ANGLE_LIMIT) {
-      this.roundaboutAngle = BOTTOM_ROUNDABOUT_ANGLE_LIMIT;
-      return true;
-    }
-    return false;
-  }
-
-  private boolean checkRoundaboutTopLimit(float roundaboutAngle) {
-    if (roundaboutAngle > TOP_ROUNDABOUT_ANGLE_LIMIT) {
-      this.roundaboutAngle = TOP_ROUNDABOUT_ANGLE_LIMIT;
-      return true;
-    }
-    return false;
-  }
 }
