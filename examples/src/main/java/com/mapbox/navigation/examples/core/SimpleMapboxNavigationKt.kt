@@ -88,7 +88,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         val tilesVersion = "2020_02_02-03_00_00"
 
         val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
-            ?.host(tilesUri.host)
+            ?.host(tilesUri.toString())
             ?.version(tilesVersion)
             ?.build()
 
