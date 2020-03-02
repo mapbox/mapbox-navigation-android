@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import androidx.annotation.AnyRes;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -161,6 +162,7 @@ public class NavigationMapboxMap {
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapboxMap mapboxMap, MapLayerInteractor layerInteractor, MapPaddingAdjustor adjustor) {
     this.layerInteractor = layerInteractor;
+    this.mapboxMap = mapboxMap;
     initializeWayName(mapboxMap, adjustor);
   }
 
@@ -838,5 +840,18 @@ public class NavigationMapboxMap {
 
   public void setCamera(Camera camera) {
     mapCamera.setCamera(camera);
+  }
+
+  public void updateCurrentLocationDrawable(@DrawableRes int gpsDrawable) {
+    if (mapboxMap != null) {
+      LocationComponentOptions options = mapboxMap.getLocationComponent().getLocationComponentOptions();
+      if (options.gpsDrawable() != gpsDrawable) {
+        LocationComponentOptions newOptions = options.toBuilder()
+          .gpsDrawable(gpsDrawable)
+          .padding(mapboxMap.getPadding())
+          .build();
+        mapboxMap.getLocationComponent().applyStyle(newOptions);
+      }
+    }
   }
 }

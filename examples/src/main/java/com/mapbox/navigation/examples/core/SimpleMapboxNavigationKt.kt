@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
@@ -34,6 +35,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -236,6 +238,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
+            updatePuck(routeProgress)
         }
     }
 
@@ -311,6 +314,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun initDynamicCamera(route: DirectionsRoute) {
+        navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
         navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
         navigationMapboxMap.startCamera(route)
     }
@@ -415,5 +419,17 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    private fun updatePuck(routeProgress: RouteProgress) {
+        val drawableId = when (routeProgress.currentState()) {
+            RouteProgressState.ROUTE_INVALID -> R.drawable.logistics_user_puck_icon_uncertain_location
+            RouteProgressState.ROUTE_INITIALIZED -> R.drawable.logistics_user_puck_icon
+            RouteProgressState.LOCATION_TRACKING -> R.drawable.logistics_user_puck_icon
+            RouteProgressState.ROUTE_ARRIVED -> R.drawable.logistics_user_puck_icon_uncertain_location
+            RouteProgressState.LOCATION_STALE -> R.drawable.logistics_user_puck_icon
+            else -> R.drawable.logistics_user_puck_icon_uncertain_location
+        }
+        navigationMapboxMap.updateCurrentLocationDrawable(drawableId)
     }
 }
