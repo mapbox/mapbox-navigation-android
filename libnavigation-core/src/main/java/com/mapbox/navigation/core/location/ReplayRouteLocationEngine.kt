@@ -153,6 +153,7 @@ class ReplayRouteLocationEngine(
         callback: LocationEngineCallback<LocationEngineResult>
     ) {
         handler.removeCallbacks(this)
+        converter.setRoute(route)
         converter.initializeTime()
         mockedLocations = converter.toLocations().toMutableList()
         dispatcher = obtainDispatcher(callback)

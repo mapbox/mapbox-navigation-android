@@ -5,6 +5,7 @@ import android.location.Location
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Looper
+import android.preference.PreferenceManager
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -31,11 +32,13 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -43,7 +46,9 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import com.mapbox.navigation.ui.route.NavigationMapRoute
+import com.mapbox.navigation.ui.camera.DynamicCamera
+import com.mapbox.navigation.ui.camera.NavigationCamera
+import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -62,7 +67,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val restartSessionEventChannel = Channel<RestartTripSessionAction>(1)
 
     private var mapboxMap: MapboxMap? = null
-    private var navigationMapRoute: NavigationMapRoute? = null
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
     private var fasterRoute: DirectionsRoute? = null
@@ -70,6 +74,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,11 +113,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 .onboardRouterConfig(onboardRouterConfig)
                 .build()
 
-        mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            Utils.getMapboxAccessToken(this),
-            navigationOptions = newOptions
-        )
+        mapboxNavigation = getMapboxNavigation(newOptions)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -150,17 +152,18 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
             }
+            symbolManager = SymbolManager(mapView, mapboxMap, style)
+            style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
-            navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
-            navigationMapRoute?.setOnRouteSelectionChangeListener { route ->
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
+            navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
+            navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
                 mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
                     remove(route)
                     add(0, route)
                 })
             }
-
-            symbolManager = SymbolManager(mapView, mapboxMap, style)
-            style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
         }
     }
 
@@ -171,6 +174,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
+            navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
         }
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
@@ -229,12 +234,13 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
+            Timber.d("route progress %s", routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.name())
         }
     }
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapRoute?.addRoutes(routes)
+            navigationMapboxMap.drawRoutes(routes)
             if (routes.isEmpty()) {
                 Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
                     .show()
@@ -269,6 +275,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             Timber.d("route request success %s", routes.toString())
+            replayRouteLocationEngine.assign(routes[0])
             return routes
         }
 
@@ -377,4 +384,26 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private object RestartTripSessionAction
+
+    private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
+        return if (shouldSimulateRoute()) {
+            return MapboxNavigation(
+                    applicationContext,
+                    Utils.getMapboxAccessToken(this),
+                    navigationOptions = options,
+                    locationEngine = replayRouteLocationEngine
+            )
+        } else {
+            MapboxNavigation(
+                    applicationContext,
+                    Utils.getMapboxAccessToken(this),
+                    navigationOptions = options
+            )
+        }
+    }
+
+    private fun shouldSimulateRoute(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+                .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
 }
