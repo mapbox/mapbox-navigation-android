@@ -30,7 +30,7 @@ class ReplayRouteLocationEngine(
     private lateinit var mockedLocations: MutableList<Location>
     private lateinit var dispatcher: ReplayLocationDispatcher
     private lateinit var replayLocationListener: ReplayRouteLocationListener
-    private lateinit var lastLocation: Location
+    private var lastLocation = Location(REPLAY_ROUTE)
     private var route: DirectionsRoute? = null
     private var point: Point? = null
 
@@ -57,7 +57,7 @@ class ReplayRouteLocationEngine(
         private const val DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS =
             "Delay must be greater than 0 seconds."
         private const val REPLAY_ROUTE =
-            "com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine"
+            "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
     }
 
     fun assign(route: DirectionsRoute) {
@@ -71,7 +71,6 @@ class ReplayRouteLocationEngine(
     }
 
     fun assignLastLocation(currentPosition: Point) {
-        initializeLastLocation()
         lastLocation.longitude = currentPosition.longitude()
         lastLocation.latitude = currentPosition.latitude()
     }
@@ -223,11 +222,5 @@ class ReplayRouteLocationEngine(
         } ?: point?.let {
             startRoute(it, lastLocation, callback)
         } ?: callback.onFailure(Exception("No route found to replay."))
-    }
-
-    private fun initializeLastLocation() {
-        if (!::lastLocation.isInitialized) {
-            lastLocation = Location(REPLAY_ROUTE)
-        }
     }
 }
