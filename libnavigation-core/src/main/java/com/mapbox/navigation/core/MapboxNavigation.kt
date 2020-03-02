@@ -59,7 +59,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access in order to use the default OffboardRouter."
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARDROUTER = "You need to provide an token access in order to use the default OffboardRouter."
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARDROUTER = "You need to provide an token access in order to use the default OnboardRouter."
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -176,7 +177,7 @@ constructor(
                 requestFasterRoute()
             }
         ifNonNull(accessToken) { token ->
-            MapboxMetricsReporter.init(context, accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION), obtainUserAgent(navigationOptions))
+            MapboxMetricsReporter.init(context, accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARDROUTER), obtainUserAgent(navigationOptions.isFromNavigationUi))
             MapboxNavigationTelemetry.initialize(
                     context.applicationContext,
                     token,
@@ -228,11 +229,11 @@ constructor(
     fun requestRoutes(routeOptions: RouteOptions) {
         directionsSession.requestRoutes(routeOptions, defaultRoutesRequestCallback)
     }
-    private fun obtainUserAgent(options: NavigationOptions): String {
-        return if (options.isFromNavigationUi) {
-            MAPBOX_NAVIGATION_UI_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
+    private fun obtainUserAgent(isFromNavigationUi: Boolean): String {
+        return if (isFromNavigationUi) {
+            "$MAPBOX_NAVIGATION_UI_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
         } else {
-            MAPBOX_NAVIGATION_USER_AGENT_BASE + BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME
+            "{MAPBOX_NAVIGATION_USER_AGENT_BASE}/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
         }
     }
     private val defaultRoutesRequestCallback = object : RoutesRequestCallback {
@@ -578,16 +579,16 @@ constructor(
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
-                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION)),
+                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARDROUTER)),
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxNavigationModuleType.OnboardRouter -> {
-                check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION }
+                check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARDROUTER }
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION))
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARDROUTER))
                 )
             }
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version

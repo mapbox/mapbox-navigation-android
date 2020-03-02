@@ -1,9 +1,9 @@
 package com.mapbox.navigation.core
 
+import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -11,7 +11,6 @@ import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFE
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
@@ -25,16 +24,20 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import com.mapbox.navigation.utils.timer.MapboxTimer
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.unmockkObject
+import io.mockk.verify
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.BeforeClass
@@ -66,9 +69,6 @@ class MapboxNavigationTest {
     private lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
-        private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
-        private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
-
         @BeforeClass
         @JvmStatic
         fun initialize() {
@@ -82,8 +82,8 @@ class MapboxNavigationTest {
         val hybridRouter: Router = mockk(relaxUnitFun = true)
         every {
             NavigationModuleProvider.createModule<Router>(
-                MapboxNavigationModuleType.HybridRouter,
-                any()
+                    MapboxNavigationModuleType.HybridRouter,
+                    any()
             )
         } returns hybridRouter
 
@@ -91,14 +91,12 @@ class MapboxNavigationTest {
 
         every { context.inferDeviceLocale() } returns Locale.US
         every { context.applicationContext } returns applicationContext
-        every { context.packageManager as PackageManager } returns mockk()
-        every { context.applicationContext.packageManager } returns mockk()
-        every { applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager } returns mockk()
-        every { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager } returns mockk()
-        every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns mockk()
-
+        val notificationManager = mockk<NotificationManager>()
+        every { applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
+        val alarmManager = mockk<AlarmManager>()
+        every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
         val sharedPreferences = mockk<SharedPreferences>(relaxed = true)
-        every { applicationContext.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE) } returns sharedPreferences
+        every { applicationContext.getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE); } returns sharedPreferences
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
 
         mockLocation()
@@ -108,23 +106,23 @@ class MapboxNavigationTest {
         mockDirectionSession()
 
         val navigationOptions = NavigationOptions
-            .Builder()
-            .distanceFormatter(distanceFormatter)
-            .fasterRouteDetectorInterval(1000L)
-            .navigatorPollingDelay(1500L)
-            .onboardRouterConfig(onBoardRouterConfig)
-            .roundingIncrement(1)
-            .timeFormatType(NONE_SPECIFIED)
-            .build()
+                .Builder()
+                .distanceFormatter(distanceFormatter)
+                .fasterRouteDetectorInterval(1000L)
+                .navigatorPollingDelay(1500L)
+                .onboardRouterConfig(onBoardRouterConfig)
+                .roundingIncrement(1)
+                .timeFormatType(NONE_SPECIFIED)
+                .build()
 
         mapboxNavigation =
-            MapboxNavigation(
-                context,
-                accessToken,
-                navigationOptions,
-                locationEngine,
-                locationEngineRequest
-            )
+                MapboxNavigation(
+                        context,
+                        accessToken,
+                        navigationOptions,
+                        locationEngine,
+                        locationEngineRequest
+                )
     }
 
     @Test
@@ -223,101 +221,11 @@ class MapboxNavigationTest {
         verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
     }
 
-    @Test
-    fun reRoute_called() {
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
-
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
-
-        verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun reRoute_called_with_null_bearings() {
-        val routeOptions = provideRouteOptionsWithCoordinates()
-        every { directionsSession.getRouteOptions() } returns routeOptions
-
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
-
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
-
-        val optionsSlot = slot<RouteOptions>()
-        verify(exactly = 1) { directionsSession.requestRoutes(capture(optionsSlot), any()) }
-
-        val expectedBearings = listOf(
-                listOf(DEFAULT_REROUTE_BEARING_ANGLE.toDouble(), DEFAULT_REROUTE_BEARING_TOLERANCE),
-                null,
-                null,
-                null
-        )
-        val actualBearings = optionsSlot.captured.bearingsList()
-
-        assertEquals(expectedBearings, actualBearings)
-    }
-
-    @Test
-    fun reRoute_called_with_bearings() {
-        val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
-        every { directionsSession.getRouteOptions() } returns routeOptions
-
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
-
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
-
-        val optionsSlot = slot<RouteOptions>()
-        verify(exactly = 1) { directionsSession.requestRoutes(capture(optionsSlot), any()) }
-
-        val expectedBearings = listOf(
-                listOf(DEFAULT_REROUTE_BEARING_ANGLE.toDouble(), 10.0),
-                listOf(20.0, 20.0),
-                listOf(30.0, 30.0),
-                listOf(40.0, 40.0)
-        )
-        val actualBearings = optionsSlot.captured.bearingsList()
-
-        assertEquals(expectedBearings, actualBearings)
-    }
-
-    @Test
-    fun reRoute_not_called() {
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
-
-        offRouteObserverSlot.captured.onOffRouteStateChanged(false)
-
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
-    }
-
-    @Test
-    fun internalRouteObserver_notEmpty() {
-        val primary: DirectionsRoute = mockk()
-        val secondary: DirectionsRoute = mockk()
-        val routes = listOf(primary, secondary)
-        val routeObserversSlot = mutableListOf<RoutesObserver>()
-        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
-        routeObserversSlot[0].onRoutesChanged(routes)
-
-        verify { tripSession.route = primary }
-    }
-
-    @Test
-    fun internalRouteObserver_empty() {
-        val routes = emptyList<DirectionsRoute>()
-        val routeObserversSlot = mutableListOf<RoutesObserver>()
-        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
-        routeObserversSlot[0].onRoutesChanged(routes)
-
-        verify { tripSession.route = null }
-    }
-
     private fun mockTripService() {
         every {
             NavigationComponentProvider.createTripService(
-                applicationContext,
-                any()
+                    applicationContext,
+                    any()
             )
         } returns tripService
     }
@@ -333,7 +241,7 @@ class MapboxNavigationTest {
     private fun mockLocation() {
         every { location.longitude } returns -122.789876
         every { location.latitude } returns 37.657483
-        every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+        every { location.bearing } returns 10f
     }
 
     private fun mockDirectionSession() {
@@ -349,50 +257,29 @@ class MapboxNavigationTest {
     private fun mockTripSession() {
         every {
             NavigationComponentProvider.createTripSession(
-                tripService,
-                locationEngine,
-                locationEngineRequest,
-                any()
+                    tripService,
+                    locationEngine,
+                    locationEngineRequest,
+                    any()
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location
         every { tripSession.getRouteProgress() } returns routeProgress
-        every { tripSession.getRawLocation() } returns location
     }
 
     private fun provideDefaultRouteOptionsBuilder() =
-        RouteOptions.builder()
-            .accessToken(accessToken)
-            .baseUrl(RouteUrl.BASE_URL)
-            .user(RouteUrl.PROFILE_DEFAULT_USER)
-            .profile(RouteUrl.PROFILE_DRIVING)
-            .coordinates(emptyList())
-            .geometries("")
-            .requestUuid("")
-
-    private fun provideRouteOptionsWithCoordinates() =
-            provideDefaultRouteOptionsBuilder()
-                .coordinates(listOf(
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0),
-                    Point.fromLngLat(1.0, 1.0)))
-                .build()
-
-    private fun provideRouteOptionsWithCoordinatesAndBearings() =
-            provideRouteOptionsWithCoordinates()
-                .toBuilder()
-                .bearingsList(listOf(
-                    listOf(10.0, 10.0),
-                    listOf(20.0, 20.0),
-                    listOf(30.0, 30.0),
-                    listOf(40.0, 40.0),
-                    listOf(50.0, 50.0),
-                    listOf(60.0, 60.0)))
-                .build()
+            RouteOptions.builder()
+                    .accessToken(accessToken)
+                    .baseUrl(RouteUrl.BASE_URL)
+                    .user(RouteUrl.PROFILE_DEFAULT_USER)
+                    .profile(RouteUrl.PROFILE_DRIVING)
+                    .coordinates(emptyList())
+                    .geometries("")
+                    .requestUuid("")
 
     @After
     fun tearDown() {
-        unmockkAll()
+        unmockkObject(NavigationModuleProvider)
+        unmockkObject(NavigationComponentProvider)
     }
 }
