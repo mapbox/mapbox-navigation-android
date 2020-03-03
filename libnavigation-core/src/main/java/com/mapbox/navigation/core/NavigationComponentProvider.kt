@@ -11,6 +11,7 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.utils.timer.MapboxTimer
 
 internal object NavigationComponentProvider {
@@ -29,12 +30,14 @@ internal object NavigationComponentProvider {
         tripService: TripService,
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
-        navigatorPollingDelay: Long
+        navigatorPollingDelay: Long,
+        nativeNavigator: MapboxNativeNavigator
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
         locationEngineRequest,
-        navigatorPollingDelay
+        navigatorPollingDelay,
+        nativeNavigator
     )
 
     fun createMapboxTimer(

@@ -12,6 +12,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.JsonObject
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -32,15 +33,9 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.UNDEFINED
-import com.mapbox.navigation.core.MapboxDistanceFormatter
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -54,6 +49,7 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
+import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
@@ -79,6 +75,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
     private var fasterRoute: DirectionsRoute? = null
+    private var isFreeDriveEnabled = false
+    private var isFreeDriveCameraConfigured = false
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
@@ -94,63 +92,124 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
-        val options =
-            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
+        setupMapboxNavigation()
 
-        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-        val tilesVersion = "2020_02_02-03_00_00"
-
-        val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
-            ?.host(tilesUri.host)
-            ?.version(tilesVersion)
-            ?.build()
-
-        val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
-            ?.tilePath(
-                File(
-                    filesDir,
-                    "Offline/${tilesUri.host}/$tilesVersion"
-                ).absolutePath
-            )
-            ?.endpoint(endpoint)
-            ?.build()
-
-        val newOptions =
-            options.toBuilder()
-                .onboardRouterConfig(onboardRouterConfig)
-                .build()
-
-        val navigatorNative = newOptions.onboardRouterConfig?.let { config ->
-            val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
-            if (!tileDir.exists()) {
-                tileDir.mkdirs()
-            }
-            val routerParams = RouterParams(
-                    tileDir.absolutePath,
-                    config.inMemoryTileCache,
-                    config.mapMatchingSpatialCache,
-                    config.threadsCount,
-                    config.endpoint?.let {
-                        TileEndpointConfiguration(
-                                it.host,
-                                it.version,
-                                it.token,
-                                it.userAgent,
-                                ""
-                        )
-                    })
-            MapboxNativeNavigatorImpl(routerParams = routerParams)
-        } ?: MapboxNativeNavigatorImpl()
-
-
-        mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            Utils.getMapboxAccessToken(this),
-            navigationOptions = newOptions,
-            navigatorNative = navigatorNative
-        )
+//        val options =
+//            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
+//
+//        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
+//        val tilesVersion = "2019_04_13-00_00_11"
+//
+//        val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
+//            ?.host(tilesUri.host)
+//            ?.version(tilesVersion)
+//            ?.userAgent("MapboxNavigationNative")
+//            ?.build()
+//
+//        val file = File(
+//                Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
+//                "2019_04_13-00_00_11"
+//        )
+//        val fileTiles = File(file, "tiles")
+//
+//        val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
+//            ?.tilePath(fileTiles.absolutePath)
+//            ?.endpoint(endpoint)
+//            ?.build()
+//
+//        val newOptions =
+//            options.toBuilder()
+//                .onboardRouterConfig(onboardRouterConfig)
+//                .build()
+//
+//        val navigatorNative = newOptions.onboardRouterConfig?.let { config ->
+//            val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
+//            if (!tileDir.exists()) {
+//                tileDir.mkdirs()
+//            }
+//            val routerParams = RouterParams(
+//                    tileDir.absolutePath,
+//                    config.inMemoryTileCache,
+//                    config.mapMatchingSpatialCache,
+//                    config.threadsCount,
+//                    config.endpoint?.let {
+//                        TileEndpointConfiguration(
+//                                it.host,
+//                                it.version,
+//                                it.token,
+//                                it.userAgent,
+//                                ""
+//                        )
+//                    })
+//            val httpClient = HttpClient()
+//
+//            MapboxNativeNavigatorImpl(routerParams = routerParams, httpClient = httpClient)
+//        } ?: MapboxNativeNavigatorImpl()
+//
+//
+//        mapboxNavigation = MapboxNavigation(
+//            applicationContext,
+//            Utils.getMapboxAccessToken(this),
+//            navigationOptions = newOptions,
+//            navigatorNative = navigatorNative
+//        )
     }
 
+    private fun setupMapboxNavigation() {
+        val file = File(
+                Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
+                "2019_04_13-00_00_11"
+        )
+        val fileTiles = File(file, "tiles")
+        val config = MapboxOnboardRouterConfig(
+                fileTiles.absolutePath,
+                null,
+                null,
+                null,
+                Endpoint(
+                        "https://api-routing-tiles-staging.tilestream.net",
+                        "2019_04_13-00_00_11",
+                        Utils.getMapboxAccessToken(this),
+                        "MapboxNavigationNative"
+                )
+        )
+
+        val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
+        if (!tileDir.exists()) {
+            tileDir.mkdirs()
+        }
+        val routerParams = RouterParams(
+                tileDir.absolutePath,
+                config.inMemoryTileCache,
+                config.mapMatchingSpatialCache,
+                config.threadsCount,
+                config.endpoint?.let {
+                    TileEndpointConfiguration(
+                            it.host,
+                            it.version,
+                            it.token,
+                            it.userAgent,
+                            ""
+                    )
+                }
+        )
+        val httpClient = HttpClient()
+        val navigatorNative = MapboxNativeNavigatorImpl(
+                routerParams = routerParams,
+                httpClient = httpClient
+        )
+
+        mapboxNavigation = MapboxNavigation(
+                applicationContext,
+                Utils.getMapboxAccessToken(this),
+                navigationOptions = MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this)),
+                navigatorNative = navigatorNative
+        )
+
+        mapboxNavigation.toggleHistory(true)
+    }
+
+    @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
@@ -198,6 +257,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
+
+//            mapboxNavigation.enableFreeDrive()
+            mapboxNavigation.startTripSession()
         }
     }
 
@@ -208,6 +270,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
+            mapboxNavigation.startNavigation()
+//            mapboxNavigation.disableFreeDrive()
         }
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
@@ -225,6 +289,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val locationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("lat", rawLocation.latitude)
+            jsonObject.addProperty("lng", rawLocation.longitude)
+            mapboxNavigation.addHistoryEvent("RAW_LOCATION", jsonObject.toString())
             Timber.d("raw location %s", rawLocation.toString())
         }
 
@@ -232,6 +300,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             enhancedLocation: Location,
             keyPoints: List<Location>
         ) {
+            val jsonObject = JsonObject()
+            jsonObject.addProperty("lat", enhancedLocation.latitude)
+            jsonObject.addProperty("lng", enhancedLocation.longitude)
+            mapboxNavigation.addHistoryEvent("ENHANCED_LOCATION", jsonObject.toString())
             if (keyPoints.isNotEmpty()) {
                 locationComponent?.forceLocationUpdate(keyPoints, true)
             } else {
@@ -390,6 +462,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onDestroy()
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
+        mapboxNavigation.toggleHistory(false)
         restartSessionEventChannel.cancel()
     }
 

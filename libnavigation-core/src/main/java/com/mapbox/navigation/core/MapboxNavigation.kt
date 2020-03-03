@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.hardware.SensorEvent
 import android.location.Location
+import android.os.Environment
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -16,7 +17,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL
-import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
@@ -33,6 +33,9 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.freedrive.ElectronicHorizonParams
+import com.mapbox.navigation.core.freedrive.ElectronicHorizonRequestBuilder
+import com.mapbox.navigation.core.freedrive.FreeDriveLocationUpdater
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -53,9 +56,10 @@ import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.timer.MapboxTimer
 import java.io.File
 import java.lang.reflect.Field
-import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -130,6 +134,9 @@ constructor(
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteTimer: MapboxTimer
     private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
+    private val freeDriveLocationUpdater: FreeDriveLocationUpdater
+    private val isFreeDriveEnabled = AtomicBoolean(false)
+    private val isActiveGuidanceOnGoing = AtomicBoolean(false)
 
     private var notificationChannelField: Field? = null
 
@@ -137,12 +144,20 @@ constructor(
         ThreadController.init()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             NavigationModuleProvider.createModule(
-                MapboxNavigationModuleType.HybridRouter,
+                MapboxNavigationModuleType.OnboardRouter,
                 ::paramsProvider
             )
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
+
+        freeDriveLocationUpdater = FreeDriveLocationUpdater(
+                locationEngine,
+                locationEngineRequest,
+                navigatorNative,
+                Executors.newScheduledThreadPool(2),
+                ElectronicHorizonRequestBuilder,
+                ElectronicHorizonParams.Builder().build())
 
         val notification: TripNotification = NavigationModuleProvider.createModule(
             MapboxNavigationModuleType.TripNotification,
@@ -162,7 +177,8 @@ constructor(
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigationOptions.navigatorPollingDelay
+            navigationOptions.navigatorPollingDelay,
+            navigatorNative
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
@@ -171,6 +187,8 @@ constructor(
             .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
                 requestFasterRoute()
             }
+
+        addHistoryEvent("START_SESSION", "true")
     }
 
     /**
@@ -187,6 +205,9 @@ constructor(
             monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
         }
     }
+    fun startNavigation() {
+        isActiveGuidanceOnGoing.set(true)
+    }
 
     /**
      * Stops listening for location updates and enters an `Idle` state.
@@ -195,6 +216,59 @@ constructor(
      */
     fun stopTripSession() {
         tripSession.stop()
+
+        isActiveGuidanceOnGoing.set(false)
+        if (isFreeDriveEnabled.get()) {
+            enableFreeDrive()
+        }
+    }
+
+    /**
+     * Call this when the navigation session needs to end before the user reaches their final
+     * destination.
+     *
+     *
+     * Ending the navigation session ends and unbinds the navigation service meaning any milestone,
+     * progress change, or off-route listeners will not be invoked anymore. A call returning false
+     * will occur to [NavigationEventListener.onRunning] to notify you when the service
+     * ends.
+     *
+     *
+     * @since 0.1.0
+     */
+//    fun stopNavigation() {
+////        isActiveGuidanceOnGoing.set(false)
+////        if (isFreeDriveEnabled.get()) {
+////            enableFreeDrive()
+////        }
+////        stopNavigationService()
+////    }
+
+
+    private fun killFreeDrive() {
+        freeDriveLocationUpdater.kill()
+    }
+
+    /**
+     * Calling this method enables free drive mode.
+     *
+     *
+     * Best enhanced [Location] updates are received if an [EnhancedLocationListener] has been
+     * added using [.addEnhancedLocationListener].
+     */
+    fun enableFreeDrive() {
+        isFreeDriveEnabled.set(true)
+        if (!isActiveGuidanceOnGoing.get()) {
+            freeDriveLocationUpdater.start()
+        }
+    }
+
+    /**
+     * Calling this method disables free drive mode.
+     */
+    fun disableFreeDrive() {
+        isFreeDriveEnabled.set(false)
+        freeDriveLocationUpdater.stop()
     }
 
     /**
@@ -294,6 +368,7 @@ constructor(
     fun onDestroy() {
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
+        killFreeDrive()
         directionsSession.shutDownSession()
         directionsSession.unregisterAllRoutesObservers()
         tripSession.shutdown()
@@ -311,28 +386,21 @@ constructor(
      * API used to retrieve logged location and route progress samples for debug purposes.
      */
     fun retrieveHistory(): String {
-        val navigatorNative = MapboxNativeNavigatorImpl()
-        val history = navigatorNative.getHistory()
-        navigatorNative.shutdown()
-        return history
+        return navigatorNative.getHistory()
     }
 
     /**
      * API used to enable/disable location and route progress samples logs for debug purposes.
      */
     fun toggleHistory(isEnabled: Boolean) {
-        val navigatorNative = MapboxNativeNavigatorImpl()
         navigatorNative.toggleHistory(isEnabled)
-        navigatorNative.shutdown()
     }
 
     /**
      * API used to artificially add debug events to logs.
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        val navigatorNative = MapboxNativeNavigatorImpl()
         navigatorNative.addHistoryEvent(eventType, eventJsonProperties)
-        navigatorNative.shutdown()
     }
 
     /**
@@ -616,30 +684,26 @@ constructor(
                     )
                 )
 
-            // TODO provide a production routing tiles endpoint
-            val tilesUri = URI("")
-            val tilesVersion = ""
-            val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
-                File(
-                    context.filesDir,
-                    "Offline/${tilesUri.host}/$tilesVersion"
-                ).absolutePath
-            } else ""
-
-            builder.onboardRouterConfig(
-                MapboxOnboardRouterConfig(
-                    tilesDir,
+            val file = File(
+                    Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
+                    "2019_04_13-00_00_11"
+            )
+            val fileTiles = File(file, "tiles")
+            val config = MapboxOnboardRouterConfig(
+                    fileTiles.absolutePath,
                     null,
                     null,
                     2,
+                    // TODO provide a production routing tiles endpoint
                     Endpoint(
-                        tilesUri.toString(),
-                        tilesVersion,
-                        accessToken ?: "",
-                        "MapboxNavigationNative"
+                            "https://api-routing-tiles-staging.tilestream.net",
+                            "2019_04_13-00_00_11",
+                            accessToken ?: "",
+                            "MapboxNavigationNative"
                     )
-                )
             )
+
+            builder.onboardRouterConfig(config)
 
             return builder.build()
         }

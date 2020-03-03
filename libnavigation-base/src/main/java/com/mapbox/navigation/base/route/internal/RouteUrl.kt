@@ -38,7 +38,7 @@ class RouteUrl(
         const val VOICE_INSTRUCTION_DEFAULT_VALUE = true
         const val BANNER_INSTRUCTION_DEFAULT_VALUE = true
         const val ROUNDABOUT_EXITS_DEFAULT_VALUE = true
-        const val ENABLE_REFRESH_DEFAULT_VALUE = true
+        const val ENABLE_REFRESH_DEFAULT_VALUE = false
 
         /**
          * Mapbox default username.

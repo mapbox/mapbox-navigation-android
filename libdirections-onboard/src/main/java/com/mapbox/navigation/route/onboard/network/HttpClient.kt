@@ -19,7 +19,7 @@ import okio.buffer
 import okio.sink
 
 @Keep
-internal class HttpClient(
+class HttpClient(
     internal val userAgent: String = USER_AGENT,
     private val acceptGzipEncoding: Boolean = false,
     private val logger: Logger? = null,

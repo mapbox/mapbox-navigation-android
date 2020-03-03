@@ -27,7 +27,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 // todo make internal
-class MapboxTripSession(
+class MapboxTripSession constructor(
     override val tripService: TripService,
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
@@ -250,15 +250,15 @@ class MapboxTripSession(
     }
 
     private fun fireOffStatusPolling() {
-        navigatorPolling { status ->
-            mainJobController.scope.launch {
-                while (isActive) {
+        mainJobController.scope.launch {
+            navigatorPolling { status ->
+//                while (isActive) {
                     updateEnhancedLocation(status.enhancedLocation)
                     updateRouteProgress(status.routeProgress)
                     isOffRoute = status.offRoute
-                    delay(STATUS_POLLING_INTERVAL)
-                }
+//                }
             }
+            delay(STATUS_POLLING_INTERVAL)
         }
     }
 
