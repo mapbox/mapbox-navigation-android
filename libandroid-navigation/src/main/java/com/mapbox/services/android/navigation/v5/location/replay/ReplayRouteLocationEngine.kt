@@ -25,7 +25,7 @@ class ReplayRouteLocationEngine : LocationEngine, Runnable {
     private lateinit var mockedLocations: MutableList<Location>
     private lateinit var dispatcher: ReplayLocationDispatcher
     private lateinit var replayLocationListener: ReplayRouteLocationListener
-    private lateinit var lastLocation: Location
+    private var lastLocation = Location(REPLAY_ROUTE)
     private var route: DirectionsRoute? = null
     private var point: Point? = null
 
@@ -58,7 +58,6 @@ class ReplayRouteLocationEngine : LocationEngine, Runnable {
     }
 
     fun assignLastLocation(currentPosition: Point) {
-        initializeLastLocation()
         lastLocation.longitude = currentPosition.longitude()
         lastLocation.latitude = currentPosition.latitude()
     }
@@ -216,11 +215,5 @@ class ReplayRouteLocationEngine : LocationEngine, Runnable {
         } ?: point?.let {
             startRoute(it, lastLocation, callback)
         } ?: callback.onFailure(Exception("No route found to replay."))
-    }
-
-    private fun initializeLastLocation() {
-        if (!::lastLocation.isInitialized) {
-            lastLocation = Location(REPLAY_ROUTE)
-        }
     }
 }
