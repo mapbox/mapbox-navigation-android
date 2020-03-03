@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.os.Build;
 
 class MapBatteryMonitor {
 
@@ -20,9 +19,7 @@ class MapBatteryMonitor {
     boolean pluggedUsb = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
     boolean pluggedAc = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
     boolean isPlugged = pluggedUsb || pluggedAc;
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-      isPlugged = isPlugged || chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
-    }
+    isPlugged = isPlugged || chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     return isPlugged;
   }
 

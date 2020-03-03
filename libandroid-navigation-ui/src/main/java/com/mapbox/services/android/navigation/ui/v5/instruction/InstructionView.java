@@ -37,10 +37,10 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.FeedbackButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationButton;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
+import com.mapbox.services.android.navigation.ui.v5.R;
 import com.mapbox.services.android.navigation.ui.v5.SoundButton;
 import com.mapbox.services.android.navigation.ui.v5.ThemeSwitcher;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
@@ -203,8 +203,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
-          updateBannerInstructions(model.retrievePrimaryBannerText(),
-                  model.retrieveSecondaryBannerText(), model.retrieveSubBannerText(), model.retrieveDrivingSide());
+          updateBannerInstructions(
+            model.retrievePrimaryBannerText(),
+            model.retrieveSecondaryBannerText(),
+            model.retrieveSubBannerText(),
+            model.retrieveDrivingSide()
+          );
         }
       }
     });
@@ -275,8 +279,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   public void updateBannerInstructionsWith(BannerInstructions instructions) {
     if (instructions != null) {
-      updateBannerInstructions(instructions.primary(),
-              instructions.secondary(), instructions.sub(), currentStep.drivingSide());
+      updateBannerInstructions(
+        instructions.primary(),
+        instructions.secondary(),
+        instructions.sub(),
+        currentStep.drivingSide()
+      );
     }
   }
 
@@ -782,9 +790,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void cancelDelayedTransition() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      clearAnimation();
-    }
+    clearAnimation();
   }
 
   private void updateDataFromInstruction(InstructionModel model) {

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.voice;
 
 import android.content.Context;
-import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 
@@ -64,8 +63,6 @@ class AndroidSpeechPlayer implements SpeechPlayer {
     if (!canPlay) {
       return;
     }
-
-    fireInstructionListenerIfApi14();
 
     HashMap<String, String> params = new HashMap<>(1);
     params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, DEFAULT_UTTERANCE_ID);
@@ -131,19 +128,8 @@ class AndroidSpeechPlayer implements SpeechPlayer {
     textToSpeech.setLanguage(language);
   }
 
-  private void fireInstructionListenerIfApi14() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      voiceListener.onStart();
-    }
-  }
-
   private void setVoiceListener(final VoiceListener voiceListener) {
     this.voiceListener = voiceListener;
-
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-      textToSpeech.setOnUtteranceCompletedListener(new Api14UtteranceListener(voiceListener));
-    } else {
-      textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(voiceListener));
-    }
+    textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(voiceListener));
   }
 }

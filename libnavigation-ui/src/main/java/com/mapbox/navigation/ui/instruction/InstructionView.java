@@ -210,8 +210,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
-          updateManeuverView(model.retrievePrimaryManeuverType(), model.retrievePrimaryManeuverModifier(),
-            model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
+          updateManeuverView(
+            model.retrievePrimaryManeuverType(),
+            model.retrievePrimaryManeuverModifier(),
+            model.retrievePrimaryRoundaboutAngle(),
+            model.retrieveDrivingSide()
+          );
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
           updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
@@ -685,8 +689,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     upcomingDistanceText.setText(model.retrieveStepDistanceRemaining());
   }
 
-  private InstructionLoader createInstructionLoader(TextView textView, BannerText
-    bannerText) {
+  private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
     if (hasComponents(bannerText)) {
       return new InstructionLoader(textView, bannerText);
     } else {
@@ -841,9 +844,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void cancelDelayedTransition() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      clearAnimation();
-    }
+    clearAnimation();
   }
 
   private void updateDataFromInstruction(InstructionModel model) {
