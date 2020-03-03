@@ -16,14 +16,14 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
 import com.mapbox.services.android.navigation.ui.v5.R;
-import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper;
-import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewUpdate;
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper;
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconDrawer;
 import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuversStyleKit;
 
-import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.DEFAULT_ROUNDABOUT_ANGLE;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.MANEUVER_VIEW_UPDATE_MAP;
-import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverViewHelper.ROUNDABOUT_MANEUVER_TYPES;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
+import static com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverModifier;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ManeuverType;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
@@ -191,12 +191,12 @@ public class ManeuverView extends View {
       return;
     }
 
-    ManeuverViewUpdate maneuverViewUpdate = MANEUVER_VIEW_UPDATE_MAP.get(maneuverTypeAndModifier);
-    if (maneuverViewUpdate != null) {
-      maneuverViewUpdate.updateManeuverView(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
+    ManeuverIconDrawer maneuverIconDrawer = MANEUVER_ICON_DRAWER_MAP.get(maneuverTypeAndModifier);
+    if (maneuverIconDrawer != null) {
+      maneuverIconDrawer.drawManeuverIcon(canvas, primaryColor, secondaryColor, size, roundaboutAngle);
     }
 
-    boolean flip = ManeuverViewHelper.isManeuverIconNeedFlip(maneuverType, maneuverModifier, drivingSide);
+    boolean flip = ManeuverIconHelper.isManeuverIconNeedFlip(maneuverType, maneuverModifier, drivingSide);
     setScaleX(flip ? -1 : 1);
   }
 
@@ -235,7 +235,7 @@ public class ManeuverView extends View {
   }
 
   private void updateRoundaboutAngle(float roundaboutAngle) {
-    this.roundaboutAngle = ManeuverViewHelper.adjustRoundaboutAngle(roundaboutAngle);
+    this.roundaboutAngle = ManeuverIconHelper.adjustRoundaboutAngle(roundaboutAngle);
   }
 
   private void updateDrivingSide(String drivingSide) {
