@@ -347,6 +347,13 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun setRoute_nullable() {
+        tripSession.route = null
+
+        verify { navigator.setRoute(null) }
+    }
+
+    @Test
     fun stateObserverImmediateStop() {
         tripSession.registerStateObserver(stateObserver)
         verify(exactly = 1) { stateObserver.onSessionStateChanged(TripSessionState.STOPPED) }

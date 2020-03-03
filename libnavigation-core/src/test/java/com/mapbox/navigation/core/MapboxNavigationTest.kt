@@ -16,6 +16,7 @@ import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.core.directions.session.DirectionsSession
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
@@ -284,6 +285,28 @@ class MapboxNavigationTest {
         offRouteObserverSlot.captured.onOffRouteStateChanged(false)
 
         verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
+    }
+
+    @Test
+    fun internalRouteObserver_notEmpty() {
+        val primary: DirectionsRoute = mockk()
+        val secondary: DirectionsRoute = mockk()
+        val routes = listOf(primary, secondary)
+        val routeObserversSlot = mutableListOf<RoutesObserver>()
+        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+        routeObserversSlot[0].onRoutesChanged(routes)
+
+        verify { tripSession.route = primary }
+    }
+
+    @Test
+    fun internalRouteObserver_empty() {
+        val routes = emptyList<DirectionsRoute>()
+        val routeObserversSlot = mutableListOf<RoutesObserver>()
+        verify { directionsSession.registerRoutesObserver(capture(routeObserversSlot)) }
+        routeObserversSlot[0].onRoutesChanged(routes)
+
+        verify { tripSession.route = null }
     }
 
     private fun mockTripService() {
