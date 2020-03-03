@@ -41,10 +41,8 @@ class MapboxTripSession(
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
-            if (value != null) {
-                ioJobController.scope.launch {
-                    navigator.setRoute(value)
-                }
+            ioJobController.scope.launch {
+                navigator.setRoute(value)
             }
         }
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()

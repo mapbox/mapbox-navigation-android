@@ -174,8 +174,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
-            navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+            val routes = mapboxNavigation.getRoutes()
+            if (routes.isNotEmpty()) {
+                initDynamicCamera(routes[0])
+            }
         }
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
@@ -234,7 +236,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
-            Timber.d("route progress %s", routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.name())
         }
     }
 
@@ -244,6 +245,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
             if (routes.isEmpty()) {
                 Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
                     .show()
+            } else {
+                if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+                    initDynamicCamera(routes[0])
+                }
             }
             Timber.d("route changed %s", routes.toString())
         }
@@ -303,6 +308,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun initDynamicCamera(route: DirectionsRoute) {
+        navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+        navigationMapboxMap.startCamera(route)
     }
 
     public override fun onResume() {
@@ -388,22 +398,22 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
         return if (shouldSimulateRoute()) {
             return MapboxNavigation(
-                    applicationContext,
-                    Utils.getMapboxAccessToken(this),
-                    navigationOptions = options,
-                    locationEngine = replayRouteLocationEngine
+                applicationContext,
+                Utils.getMapboxAccessToken(this),
+                navigationOptions = options,
+                locationEngine = replayRouteLocationEngine
             )
         } else {
             MapboxNavigation(
-                    applicationContext,
-                    Utils.getMapboxAccessToken(this),
-                    navigationOptions = options
+                applicationContext,
+                Utils.getMapboxAccessToken(this),
+                navigationOptions = options
             )
         }
     }
 
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
-                .getBoolean(this.getString(R.string.simulate_route_key), false)
+            .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 }

@@ -21,7 +21,7 @@ class MapboxDirectionsSession(
                 return
             }
             field = value
-            if (!routes.isEmpty()) {
+            if (routes.isNotEmpty()) {
                 this.routeOptions = routes[0].routeOptions()
             }
             routesObservers.forEach { it.onRoutesChanged(value) }

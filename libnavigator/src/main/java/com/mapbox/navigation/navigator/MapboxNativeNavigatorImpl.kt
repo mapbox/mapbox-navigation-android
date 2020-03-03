@@ -75,12 +75,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     // Routing
 
     override fun setRoute(
-        route: DirectionsRoute,
+        route: DirectionsRoute?,
         routeIndex: Int,
         legIndex: Int
     ): NavigationStatus {
         this.route = route
-        val result = navigator.setRoute(route.toJson(), routeIndex, legIndex)
+        val result = navigator.setRoute(route?.toJson() ?: "{}", routeIndex, legIndex)
         navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
             routeBufferGeoJson = GeometryGeoJson.fromJson(it)
         }

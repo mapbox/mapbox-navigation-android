@@ -31,7 +31,7 @@ interface MapboxNativeNavigator {
     // Routing
 
     fun setRoute(
-        route: DirectionsRoute,
+        route: DirectionsRoute?,
         routeIndex: Int = INDEX_FIRST_ROUTE,
         legIndex: Int = INDEX_FIRST_LEG
     ): NavigationStatus
