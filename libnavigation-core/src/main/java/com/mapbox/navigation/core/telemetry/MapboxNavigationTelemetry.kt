@@ -156,6 +156,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 }
                 false -> {
                     telemetryThreadControl.scope.launch {
+                        dynamicValues.rerouteCount.addAndGet(1) // increment reroute count
+                        dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
                         val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                         metricsMetadata?.let { telemetryMetadata ->
                             var timeSinceLastEvent = (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
@@ -353,7 +355,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     ) {
         telemetryThreadControl.scope.launch {
             // Initialize identifiers unique to this session
-            populateEventMetadata(directionsRoute, locationEngineName, location).apply {
+            populateEventMetadataAndUpdateState(directionsRoute, locationEngineName, location).apply {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
                 startTimestamp = Date().toString()
                 metricsMetadata = this
@@ -361,7 +363,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             telemetryDeparture(directionsRoute)?.let { metricEvent ->
                 metricsReporter.addEvent(metricEvent)
             }
-            monitorArrivalEvent()
+            monitorRoutProgress()
         }
     }
 
@@ -369,7 +371,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * This method waits for an [RouteProgressState.ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
      * sends the telemetry data to the servers.
      */
-    private suspend fun monitorArrivalEvent() {
+    private suspend fun monitorRoutProgress() {
         var continueRunning = true
         while (coroutineContext.isActive && continueRunning) {
             try {
@@ -380,12 +382,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             lat = callbackDispatcher.getLastLocation().latitude.toFloat()
                             lng = callbackDispatcher.getLastLocation().longitude.toFloat()
                             distanceCompleted = routeData.routeProgress.distanceTraveled().toInt()
+                            dynamicValues.routeArrived.set(true)
                         }
                         dynamicValues.routeCanceled.set(false)
                         metricsMetadata?.let { metadata ->
                             metricsReporter.addEvent(TelemetryArrival(arrivalTimestamp = Date().toString(), Metadata = metadata))
                         }
                         continueRunning = false
+                    }
+                    RouteProgressState.LOCATION_TRACKING -> {
+                        dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
+                        dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
                     }
                     else -> {
                         // Do nothing
@@ -437,12 +444,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         }
     }
 
-    private fun populateEventMetadata(
+    private fun populateEventMetadataAndUpdateState(
         directionsRoute: DirectionsRoute,
         locationEngineName: String,
         currentLocation: Location
     ): TelemetryMetadata {
         val sdkType = if (navigationOptions.isFromNavigationUi) "mapbox-navigation-ui-android" else "mapbox-navigation-android"
+        dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
+        dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
         return TelemetryMetadata(
                 created = Date().toString(),
                 startTimestamp = Date().toString(),
