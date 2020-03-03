@@ -34,10 +34,14 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("KotlinInternalInJava")
 @RunWith(RobolectricTestRunner.class)
 public class MapboxNavigationNotificationTest extends BaseTest {
 
   private static final String DIRECTIONS_ROUTE_FIXTURE = "directions_v5_precision_6.json";
+  private static final String BANNER_TEXT_YOU_WILL_ARRIVE = "You will arrive";
+  private static final String BANNER_TEXT_YOU_HAVE_ARRIVED = "You have arrived";
+
   private DirectionsRoute route;
 
   @Before
@@ -51,16 +55,13 @@ public class MapboxNavigationNotificationTest extends BaseTest {
 
   @Test
   public void checksArrivalTime() throws Exception {
-    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
-    Context mockedContext = createContext();
-    Notification mockedNotification = mock(Notification.class);
-    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
-      mockedMapboxNavigation, mockedNotification);
+    MapboxNavigationNotification mapboxNavigationNotification = createMapboxNavigationNotification();
+
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     Calendar mockedTime = Calendar.getInstance();
     mockedTime.setTimeZone(TimeZone.getTimeZone("UTC"));
-    long aprilFifteenThreeFourtyFourFiftyThreePmTwoThousandNineteen = 1555357493308L;
-    mockedTime.setTimeInMillis(aprilFifteenThreeFourtyFourFiftyThreePmTwoThousandNineteen);
+    long aprilFifteenThreeFortyFourFiftyThreePmTwoThousandNineteen = 1555357493308L;
+    mockedTime.setTimeInMillis(aprilFifteenThreeFortyFourFiftyThreePmTwoThousandNineteen);
 
     String formattedArrivalTime = mapboxNavigationNotification.generateArrivalTime(routeProgress, mockedTime);
 
@@ -69,11 +70,8 @@ public class MapboxNavigationNotificationTest extends BaseTest {
 
   @Test
   public void checksInstructionTextNotUpdatedIfRouteProgressBannerInstructionIsNull() throws Exception {
-    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
-    Context mockedContext = createContext();
-    Notification mockedNotification = mock(Notification.class);
-    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
-      mockedMapboxNavigation, mockedNotification);
+    MapboxNavigationNotification mapboxNavigationNotification = createMapboxNavigationNotification();
+
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
 
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
@@ -83,14 +81,11 @@ public class MapboxNavigationNotificationTest extends BaseTest {
 
   @Test
   public void checksInstructionTextIsUpdatedIfInstructionTextIsNotInitialized() throws Exception {
-    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
-    Context mockedContext = createContext();
-    Notification mockedNotification = mock(Notification.class);
-    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
-      mockedMapboxNavigation, mockedNotification);
+    MapboxNavigationNotification mapboxNavigationNotification = createMapboxNavigationNotification();
+
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     BannerText aBannerSection = BannerText.builder()
-            .text("You have arrived")
+            .text(BANNER_TEXT_YOU_HAVE_ARRIVED)
             .build();
     BannerInstructions aBannerInstruction = BannerInstructions.builder()
             .primary(aBannerSection)
@@ -100,19 +95,16 @@ public class MapboxNavigationNotificationTest extends BaseTest {
 
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
 
-    assertEquals("You have arrived", mapboxNavigationNotification.retrieveInstructionText());
+    assertEquals(BANNER_TEXT_YOU_HAVE_ARRIVED, mapboxNavigationNotification.retrieveInstructionText());
   }
 
   @Test
   public void checksInstructionTextIsUpdatedIfInstructionTextIsInitializedAndManeuverIsDifferent() throws Exception {
-    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
-    Context mockedContext = createContext();
-    Notification mockedNotification = mock(Notification.class);
-    MapboxNavigationNotification mapboxNavigationNotification = new MapboxNavigationNotification(mockedContext,
-      mockedMapboxNavigation, mockedNotification);
+    MapboxNavigationNotification mapboxNavigationNotification = createMapboxNavigationNotification();
+
     RouteProgress routeProgress = buildDefaultTestRouteProgress();
     BannerText willArriveBannerSection = BannerText.builder()
-            .text("You will arrive")
+            .text(BANNER_TEXT_YOU_WILL_ARRIVE)
             .build();
     BannerInstructions willArriveBannerInstruction = BannerInstructions.builder()
             .primary(willArriveBannerSection)
@@ -120,9 +112,9 @@ public class MapboxNavigationNotificationTest extends BaseTest {
             .build();
     routeProgress = routeProgress.toBuilder().bannerInstruction(willArriveBannerInstruction).build();
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
-    assertEquals("You will arrive", mapboxNavigationNotification.retrieveInstructionText());
+    assertEquals(BANNER_TEXT_YOU_WILL_ARRIVE, mapboxNavigationNotification.retrieveInstructionText());
     BannerText haveArrivedBannerSection = BannerText.builder()
-            .text("You have arrived")
+            .text(BANNER_TEXT_YOU_HAVE_ARRIVED)
             .build();
     BannerInstructions haveArrivedBannerInstruction = BannerInstructions.builder()
             .primary(haveArrivedBannerSection)
@@ -132,28 +124,43 @@ public class MapboxNavigationNotificationTest extends BaseTest {
 
     mapboxNavigationNotification.updateNotificationViews(routeProgress);
 
-    assertEquals("You have arrived", mapboxNavigationNotification.retrieveInstructionText());
+    assertEquals(BANNER_TEXT_YOU_HAVE_ARRIVED, mapboxNavigationNotification.retrieveInstructionText());
+  }
+
+  private MapboxNavigationNotification createMapboxNavigationNotification() {
+    MapboxNavigation mockedMapboxNavigation = createMapboxNavigation();
+    Context mockedContext = createContext();
+    Notification mockedNotification = mock(Notification.class);
+
+    return new MapboxNavigationNotification(mockedContext,
+            mockedMapboxNavigation, mockedNotification);
   }
 
   private MapboxNavigation createMapboxNavigation() {
     MapboxNavigation mockedMapboxNavigation = mock(MapboxNavigation.class);
     when(mockedMapboxNavigation.getRoute()).thenReturn(route);
+
     MapboxNavigationOptions mockedMapboxNavigationOptions = mock(MapboxNavigationOptions.class);
     when(mockedMapboxNavigation.options()).thenReturn(mockedMapboxNavigationOptions);
     when(mockedMapboxNavigationOptions.roundingIncrement()).thenReturn(NavigationConstants.ROUNDING_INCREMENT_FIVE);
+
     return mockedMapboxNavigation;
   }
 
   private Context createContext() {
     Context mockedContext = mock(Context.class);
-    Configuration mockedConfiguration = new Configuration();
-    mockedConfiguration.locale = new Locale("en");
+    when(mockedContext.getString(anyInt())).thenReturn("%s ETA");
+
     Resources mockedResources = mock(Resources.class);
     when(mockedContext.getResources()).thenReturn(mockedResources);
+
+    Configuration mockedConfiguration = new Configuration();
+    mockedConfiguration.locale = new Locale("en");
     when(mockedResources.getConfiguration()).thenReturn(mockedConfiguration);
+
     PackageManager mockedPackageManager = mock(PackageManager.class);
     when(mockedContext.getPackageManager()).thenReturn(mockedPackageManager);
-    when(mockedContext.getString(anyInt())).thenReturn("%s ETA");
+
     return mockedContext;
   }
 }
