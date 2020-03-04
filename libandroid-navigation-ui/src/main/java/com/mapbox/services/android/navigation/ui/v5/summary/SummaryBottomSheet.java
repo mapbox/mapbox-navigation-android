@@ -115,7 +115,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * Unsubscribes {@link NavigationViewModel} {@link android.arch.lifecycle.LiveData} objects
-   * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
+   * previously added in {@link SummaryBottomSheet#subscribe(LifecycleOwner, NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
