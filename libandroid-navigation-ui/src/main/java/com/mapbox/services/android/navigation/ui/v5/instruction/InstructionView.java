@@ -229,7 +229,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   /**
    * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
-   * previously added in {@link InstructionView#subscribe(NavigationViewModel)}
+   * previously added in {@link InstructionView#subscribe(LifecycleOwner, NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
