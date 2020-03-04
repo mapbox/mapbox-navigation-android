@@ -258,15 +258,19 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   public void updateBannerInstructionsWith(BannerInstructions instructions) {
-    if (instructions == null || instructions.primary() == null) {
-      return;
+    if (instructions != null) {
+      updateBannerInstructions(instructions.primary(),
+              instructions.secondary(), instructions.sub(), currentStep.drivingSide());
     }
-    BannerText primary = instructions.primary();
-    String primaryManeuverModifier = primary.modifier();
-    String drivingSide = currentStep.drivingSide();
-    updateManeuverView(primary.type(), primaryManeuverModifier, primary.degrees(), drivingSide);
-    updateDataFromBannerText(primary, instructions.secondary());
-    updateSubStep(instructions.sub(), primaryManeuverModifier);
+  }
+
+  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
+                                        BannerText subBanner, String currentDrivingSide) {
+    if (primaryBanner != null) {
+      updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
+      updateDataFromBannerText(primaryBanner, secondaryBanner);
+      updateSubStep(subBanner, primaryBanner.modifier());
+    }
   }
 
   /**

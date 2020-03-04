@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.instruction.maneuver;
+package com.mapbox.navigation.trip.notification.maneuver;
 
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;

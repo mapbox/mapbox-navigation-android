@@ -10,21 +10,31 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.PointF
 import android.os.Build
 import android.text.SpannableString
+import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
 import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
+import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
+import com.mapbox.navigation.trip.notification.maneuver.STEP_MANEUVER_MODIFIER_RIGHT
+import com.mapbox.navigation.trip.notification.maneuver.STEP_MANEUVER_TYPE_ARRIVE
 import com.mapbox.navigation.trip.notification.utils.time.TimeFormatter.formatTime
 import com.mapbox.navigation.utils.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.NAVIGATION_NOTIFICATION_CHANNEL
@@ -55,7 +65,12 @@ class MapboxTripNotification constructor(
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
     }
 
-    private var currentManeuverId = 0
+    var currentManeuverType: String? = null
+        private set
+    var currentManeuverModifier: String? = null
+        private set
+    private var currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
+
     private var currentInstructionText: String? = null
     private var currentDistanceText: SpannableString? = null
     private var collapsedNotificationRemoteViews: RemoteViews? = null
@@ -105,7 +120,8 @@ class MapboxTripNotification constructor(
     }
 
     override fun onTripSessionStopped() {
-        currentManeuverId = 0
+        currentManeuverType = null
+        currentManeuverModifier = null
         currentInstructionText = null
         currentDistanceText = null
 
@@ -219,10 +235,16 @@ class MapboxTripNotification constructor(
     private fun updateNotificationViews(routeProgress: RouteProgress) {
         updateInstructionText(routeProgress.bannerInstructions())
         updateDistanceText(routeProgress)
-        generateArrivalTime(routeProgress, Calendar.getInstance())?.let { formattedTime ->
+        generateArrivalTime(routeProgress)?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
-            val step = routeProgress.currentLegProgress()?.upcomingStep()
-            step?.let { updateManeuverImage(it) }
+        }
+        routeProgress.bannerInstructions()?.let { bannerInstructions ->
+            if (updateManeuverState(bannerInstructions)) {
+                updateManeuverImage(
+                    routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
+                        ?: STEP_MANEUVER_MODIFIER_RIGHT
+                )
+            }
         }
     }
 
@@ -264,7 +286,7 @@ class MapboxTripNotification constructor(
 
     private fun generateArrivalTime(
         routeProgress: RouteProgress,
-        time: Calendar
+        time: Calendar = Calendar.getInstance()
     ): String? =
         ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
             val legDurationRemaining = currentLegProgress.durationRemaining()
@@ -301,70 +323,91 @@ class MapboxTripNotification constructor(
                 false
         } ?: false
 
-    private fun updateManeuverImage(legStep: LegStep) {
-        val maneuverImageId = getManeuverResource(legStep)
-        if (maneuverImageId != currentManeuverId) {
-            currentManeuverId = maneuverImageId
-            when (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                true -> {
-                    collapsedNotificationRemoteViews?.setImageViewResource(
-                            R.id.maneuverImage,
-                            maneuverImageId
-                    )
-                    expandedNotificationRemoteViews?.setImageViewResource(
-                            R.id.maneuverImage,
-                            maneuverImageId
-                    )
-                }
-                false -> {
-                    getManeuverBitmap(maneuverImageId)?.let { bitmap ->
-                        collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
-                        expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
-                    }
-                }
-            }
+    private fun updateManeuverImage(drivingSide: String) {
+        getManeuverBitmap(
+            currentManeuverType ?: "",
+            currentManeuverModifier, drivingSide, currentRoundaboutAngle
+        )?.let { bitmap ->
+            collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+            expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
         }
     }
 
-    private fun getManeuverBitmap(maneuverResourceId: Int): Bitmap? =
-            AppCompatResources.getDrawable(applicationContext, maneuverResourceId)?.let { drawable ->
-                val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
-                drawable.setBounds(0, 0, canvas.width, canvas.height)
-                drawable.draw(canvas)
-                bitmap
-            }
+    private fun updateManeuverState(bannerInstruction: BannerInstructions): Boolean {
+        val previousManeuverType = currentManeuverType
+        val previousManeuverModifier = currentManeuverModifier
+        val previousRoundaboutAngle = currentRoundaboutAngle
 
-    private fun getManeuverResource(step: LegStep): Int {
-        val stepManeuver = step.maneuver()
-        val maneuverType = stepManeuver.type()
-        val maneuverModifier = stepManeuver.modifier()
-        val maneuverResourceString = if (maneuverModifier.isNullOrEmpty().not()) {
-            val drivingSide = step.drivingSide()
-            val isLeftSideDriving = isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                maneuverType,
-                maneuverModifier,
+        currentManeuverType = bannerInstruction.primary().type()
+        currentManeuverModifier = bannerInstruction.primary().modifier()
+
+        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType))
+            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
+        else
+            DEFAULT_ROUNDABOUT_ANGLE
+
+        return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
+            !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
+            currentRoundaboutAngle != previousRoundaboutAngle
+    }
+
+    private fun getManeuverBitmap(
+        maneuverType: String,
+        maneuverModifier: String?,
+        drivingSide: String,
+        roundaboutAngle: Float
+    ): Bitmap? {
+        val maneuver = when {
+            MANEUVER_TYPES_WITH_NULL_MODIFIERS.contains(maneuverType) -> Pair(maneuverType, null)
+            !STEP_MANEUVER_TYPE_ARRIVE.contentEquals(maneuverType) && maneuverModifier != null -> Pair(
+                null,
+                maneuverModifier
+            )
+            else -> Pair(maneuverType, maneuverModifier)
+        }
+
+        val width =
+            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_width)
+        val height =
+            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_height)
+
+        val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val maneuverCanvas = Canvas(maneuverImage)
+
+        MANEUVER_ICON_DRAWER_MAP[maneuver]?.drawManeuverIcon(
+            maneuverCanvas,
+            ContextCompat.getColor(
+                applicationContext,
+                R.color.mapbox_navigation_view_color_banner_maneuver_primary
+            ),
+            ContextCompat.getColor(
+                applicationContext,
+                R.color.mapbox_navigation_view_color_banner_maneuver_secondary
+            ),
+            PointF(width.toFloat(), height.toFloat()),
+            roundaboutAngle
+        )
+
+        maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
+
+        return if (isManeuverIconNeedFlip(
+                currentManeuverType,
+                currentManeuverModifier,
                 drivingSide
             )
-            when (isLeftSideDriving) {
-                true -> maneuverType + maneuverModifier + drivingSide
-                false -> maneuverType + maneuverModifier
-            }
+        ) {
+            Bitmap.createBitmap(
+                maneuverImage,
+                0,
+                0,
+                width,
+                height,
+                Matrix().apply { preScale(-1f, 1f) },
+                false
+            )
         } else {
-            maneuverType
+            maneuverImage
         }
-        return ManeuverResource.obtainManeuverResource(maneuverResourceString)
-    }
-
-    private fun isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-        maneuverType: String?,
-        maneuverModifier: String?,
-        drivingSide: String?
-    ): Boolean {
-        return STEP_MANEUVER_MODIFIER_LEFT == drivingSide &&
-            (STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
-                STEP_MANEUVER_TYPE_ROTARY == maneuverType ||
-                STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier)
     }
 
     private fun onEndNavigationBtnClick() {

@@ -12,7 +12,6 @@ import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
 import android.widget.RemoteViews
-import androidx.appcompat.content.res.AppCompatResources
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -32,10 +31,13 @@ import io.mockk.verify
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
 private const val FORMAT_STRING = "%s 454545 ETA"
+private const val MANEUVER_TYPE = "MANEUVER TYPE"
+private const val MANEUVER_MODIFIER = "MANEUVER MODIFIER"
 
 class MapboxTripNotificationTest {
 
@@ -179,6 +181,8 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
+        assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
 
     @Test
@@ -236,6 +240,8 @@ class MapboxTripNotificationTest {
         verify(exactly = 2) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
+        assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
 
     @Test
@@ -257,6 +263,8 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { expandedViews.setTextViewText(any(), initialPrimaryText) }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), changedPrimaryText) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), changedPrimaryText) }
+        assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
+        assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
 
     @Test
@@ -274,12 +282,16 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertNull(notification.currentManeuverType)
+        assertNull(notification.currentManeuverModifier)
 
         notification.updateNotification(routeProgress)
 
         verify(exactly = 2) { bannerText.text() }
         verify(exactly = 2) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 2) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
+        assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
 
     @Test
@@ -295,6 +307,8 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
+        assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
 
         notification.onTripSessionStopped()
         notification.onTripSessionStarted()
@@ -308,15 +322,14 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        assertNull(notification.currentManeuverType)
+        assertNull(notification.currentManeuverModifier)
     }
 
     private fun mockUpdateNotificationAndroidInteractions() {
         mockkStatic(TextUtils::class)
         val slot = slot<CharSequence>()
         every { TextUtils.isEmpty(capture(slot)) } answers { slot.captured.isEmpty() }
-
-        mockkStatic(AppCompatResources::class)
-        every { AppCompatResources.getDrawable(any(), any()) } returns null
 
         mockNotificationCreation()
     }
@@ -329,13 +342,17 @@ class MapboxTripNotificationTest {
 
     private fun mockBannerText(
         routeProgress: RouteProgress,
-        primaryText: () -> String
+        primaryText: () -> String,
+        primaryType: () -> String = { MANEUVER_TYPE },
+        primaryModifier: () -> String = { MANEUVER_MODIFIER }
     ): BannerText {
         val bannerText = mockk<BannerText>()
         val bannerInstructions = mockk<BannerInstructions>()
         every { routeProgress.bannerInstructions() } returns bannerInstructions
         every { bannerInstructions.primary() } returns bannerText
         every { bannerText.text() } answers { primaryText() }
+        every { bannerText.type() } answers { primaryType() }
+        every { bannerText.modifier() } answers { primaryModifier() }
         return bannerText
     }
 

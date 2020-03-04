@@ -23,6 +23,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-consumer.pro'
     }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -38,7 +42,6 @@ dependencies {
     implementation project(':libnavigation-util')
 
     implementation dependenciesList.androidXCore
-    implementation dependenciesList.supportAppcompatV7
 
     implementation dependenciesList.coroutinesAndroid
 
