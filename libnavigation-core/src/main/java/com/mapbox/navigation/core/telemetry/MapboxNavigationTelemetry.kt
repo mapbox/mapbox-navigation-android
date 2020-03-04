@@ -11,6 +11,7 @@ import com.mapbox.android.telemetry.TelemetryUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.telemetry.telemetryevents.MOCK_PROVIDER
@@ -340,7 +341,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private fun postTurnstileEvent() {
         // AppUserTurnstile is implemented in mapbox-telemetry-sdk
         val sdkType = if (navigationOptions.isFromNavigationUi) "mapbox-navigation-ui-android" else "mapbox-navigation-android"
-        val appUserTurnstileEvent = AppUserTurnstile(sdkType, navigationOptions.mapboxNavigationVersionName)
+        val appUserTurnstileEvent = AppUserTurnstile(sdkType, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
         val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
         metricsReporter.addEvent(event)
     }
@@ -457,7 +458,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 startTimestamp = Date().toString(),
                 device = Build.DEVICE,
                 sdkIdentifier = sdkType,
-                sdkVersion = navigationOptions.mapboxNavigationVersionName,
+                sdkVersion = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
                 simulation = MOCK_PROVIDER == locationEngineName,
                 locationEngine = locationEngineName,
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),

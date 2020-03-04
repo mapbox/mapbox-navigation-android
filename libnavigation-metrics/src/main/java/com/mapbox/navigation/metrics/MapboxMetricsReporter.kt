@@ -3,7 +3,6 @@ package com.mapbox.navigation.metrics
 import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.navigation.metrics.internal.MetricsObserver
 import com.mapbox.navigation.metrics.internal.MetricsReporter
 import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
 import com.mapbox.navigation.metrics.internal.utils.extentions.toTelemetryEvent

@@ -61,6 +61,7 @@ private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARDROUTER = "You need to provide an token access in order to use the default OffboardRouter."
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARDROUTER = "You need to provide an token access in order to use the default OnboardRouter."
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required"
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -177,7 +178,7 @@ constructor(
                 requestFasterRoute()
             }
         ifNonNull(accessToken) { token ->
-            MapboxMetricsReporter.init(context, accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARDROUTER), obtainUserAgent(navigationOptions.isFromNavigationUi))
+            MapboxMetricsReporter.init(context, accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION), obtainUserAgent(navigationOptions.isFromNavigationUi))
             MapboxNavigationTelemetry.initialize(
                     context.applicationContext,
                     token,
@@ -233,7 +234,7 @@ constructor(
         return if (isFromNavigationUi) {
             "$MAPBOX_NAVIGATION_UI_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
         } else {
-            "{MAPBOX_NAVIGATION_USER_AGENT_BASE}/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
+            "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
         }
     }
     private val defaultRoutesRequestCallback = object : RoutesRequestCallback {

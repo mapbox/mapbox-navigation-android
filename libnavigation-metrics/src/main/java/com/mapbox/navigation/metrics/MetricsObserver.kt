@@ -1,4 +1,4 @@
-package com.mapbox.navigation.metrics.internal
+package com.mapbox.navigation.metrics
 
 import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
 
