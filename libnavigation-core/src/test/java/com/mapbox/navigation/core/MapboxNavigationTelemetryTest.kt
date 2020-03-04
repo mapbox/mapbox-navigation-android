@@ -15,7 +15,7 @@ class MapboxNavigationTelemetryTest {
     private val mockContext = mockk<Context>()
     private val applicationContext: Context = mockk(relaxed = true)
     private val mockNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
-    private var token = "pk.1234.PABLO'S-FAKE-TOKEN"
+    private var token = "pk.1234"
 
     @Before
     fun setup() {
@@ -25,7 +25,12 @@ class MapboxNavigationTelemetryTest {
         every { applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager } returns alarmManager
         every { mockContext.applicationContext } returns applicationContext
         every { applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager } returns alarmManager
-        every { applicationContext.getSharedPreferences(MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE); } returns sharedPreferences
+        every {
+            applicationContext.getSharedPreferences(
+                MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES,
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
     }
 

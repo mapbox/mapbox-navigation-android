@@ -1,7 +1,4 @@
-package com.mapbox.navigation.metrics.internal
-
-import com.mapbox.navigation.metrics.MetricsObserver
-import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
+package com.mapbox.navigation.base.metrics
 
 /**
  * Defines API for handling metric events.

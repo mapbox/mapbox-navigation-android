@@ -59,8 +59,8 @@ data class NavigationOptions constructor(
         fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig?) =
             apply { this.onboardRouterConfig = onboardRouterConfig }
 
-        fun sdkName(flag: Boolean) =
-                apply { this.isFromNavigationUi = flag }
+        fun isFromNavigationUi(flag: Boolean) =
+            apply { this.isFromNavigationUi = flag }
 
         fun build(): NavigationOptions {
             return NavigationOptions(

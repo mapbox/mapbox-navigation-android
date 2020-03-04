@@ -23,10 +23,12 @@ import kotlinx.coroutines.launch
 internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
-        RouteProgressObserver, LocationObserver, RoutesObserver {
+    RouteProgressObserver, LocationObserver, RoutesObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
-    private var routeProgress: AtomicReference<RouteProgressWithTimeStamp> = AtomicReference(RouteProgressWithTimeStamp(0, RouteProgress.Builder().build()))
-    private val channelOnRouteProgress = Channel<RouteProgressWithTimeStamp>(Channel.CONFLATED) // we want just the last notification
+    private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
+        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
+    private val channelOnRouteProgress =
+        Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private val routeAvailable = AtomicBoolean(false)
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
     private var channelLastNSecondsOfLocations = Channel<Location>(Channel.CONFLATED)
@@ -69,12 +71,14 @@ internal class TelemetryLocationAndProgressDispatcher :
     private fun accumulatePosEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
         jobControl.scope.launch {
-            val monitorControl = CompletableDeferred<ArrayDeque<Location>>() // This variable will be signalled once enough location data is accumulated
+            val monitorControl =
+                CompletableDeferred<ArrayDeque<Location>>() // This variable will be signaled once enough location data is accumulated
             val preOffRoute = mutableListOf<Location>() // receiver for pre-offroute event locations
             preOffRoute.addAll(monitorControl.await()) // Once signaled, copy the locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
             monitorLocationChannel(monitorControl) // Start accumulating post event locations
-            val postOffRoute = mutableListOf<Location>() // receive buffer for post-offline event locations
+            val postOffRoute =
+                mutableListOf<Location>() // receive buffer for post-offline event locations
             postOffRoute.addAll(monitorControl.await()) // copy post event locations
             monitorJob = monitorLocationChannel() // restart monitor
             result.complete(Pair(preOffRoute, postOffRoute)) // notify caller the job is complete
@@ -88,10 +92,17 @@ internal class TelemetryLocationAndProgressDispatcher :
      * notified via a deferred object
      */
     private fun monitorLocationChannel(result: CompletableDeferred<ArrayDeque<Location>>? = null): Job {
-        val workLocationQueue = ArrayDeque<Location>() // Allocate work buffer to collect locations while the channel is receiving
-        return jobControl.scope.monitorChannelWithException(channelLocation, { location -> // Listen to the location channel
-            if (accumulateLocationAsync(location, workLocationQueue)) { // Populate the work buffer with locations as they become avaialble
-                val locationQueue = ArrayDeque<Location>() // Now that we have the desired number of locations, allocate the return buffer
+        val workLocationQueue =
+            ArrayDeque<Location>() // Allocate work buffer to collect locations while the channel is receiving
+        return jobControl.scope.monitorChannelWithException(channelLocation, { location ->
+            // Listen to the location channel
+            if (accumulateLocationAsync(
+                    location,
+                    workLocationQueue
+                )
+            ) { // Populate the work buffer with locations as they become available
+                val locationQueue =
+                    ArrayDeque<Location>() // Now that we have the desired number of locations, allocate the return buffer
                 locationQueue.addAll(workLocationQueue) // Copy the collected data to the return buffer
                 workLocationQueue.clear() // Clear the work area in preparation for more locations
                 result?.complete(locationQueue) // Notify whomever is listening of the result
@@ -100,14 +111,16 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        val data = RouteProgressWithTimeStamp(Time.SystemImpl.millis(), routeProgress)
+        val data = RouteProgressWithTimestamp(Time.SystemImpl.millis(), routeProgress)
         this.routeProgress.set(data)
         channelOnRouteProgress.offer(data)
     }
 
-    fun getRouteProgressChannel(): ReceiveChannel<RouteProgressWithTimeStamp> = channelOnRouteProgress
+    fun getRouteProgressChannel(): ReceiveChannel<RouteProgressWithTimestamp> =
+        channelOnRouteProgress
+
     fun getLastLocation(): Location = lastLocation.get()
-    fun getRouteProgress(): RouteProgressWithTimeStamp = routeProgress.get()
+    fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
     fun getRoutesAvailable() = routeAvailable.get()
 
     override fun onRawLocationChanged(rawLocation: Location) {

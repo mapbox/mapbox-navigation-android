@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.telemetry.telemetryevents
+package com.mapbox.navigation.core.telemetry.events
 
 /**
  * Documentation is here [https://paper.dropbox.com/doc/Navigation-Telemetry-Events-V1--AuUz~~~rEVK7iNB3dQ4_tF97Ag-iid3ZImnt4dsW7Z6zC3Lc]

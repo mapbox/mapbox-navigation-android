@@ -1,12 +1,12 @@
-package com.mapbox.navigation.core.telemetry.telemetryevents
+package com.mapbox.navigation.metrics.internal.utils.extensions
 
 import com.mapbox.android.telemetry.Event
+import com.mapbox.navigation.base.metrics.DirectionsMetrics
+import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.internal.NavigationAppUserTurnstileEvent
-import com.mapbox.navigation.metrics.internal.utils.extentions.DirectionsMetrics
-import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
-import com.mapbox.navigation.metrics.internal.utils.extentions.NavigationMetrics
 
-fun MetricEvent.toTelemetryEvent(): Event? =
+internal fun MetricEvent.toTelemetryEvent(): Event? =
     when (metricName) {
         DirectionsMetrics.ROUTE_RETRIEVAL,
         NavigationMetrics.ARRIVE,
@@ -14,7 +14,8 @@ fun MetricEvent.toTelemetryEvent(): Event? =
         NavigationMetrics.DEPART,
         NavigationMetrics.REROUTE,
         NavigationMetrics.FEEDBACK,
-        NavigationMetrics.INITIAL_GPS -> this as Event
+        NavigationMetrics.INITIAL_GPS,
+        NavigationMetrics.FASTER_ROUTE -> this as Event
         NavigationMetrics.APP_USER_TURNSTILE -> (this as NavigationAppUserTurnstileEvent).event
         else -> null
     }

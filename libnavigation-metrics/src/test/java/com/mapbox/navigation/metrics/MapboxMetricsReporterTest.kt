@@ -4,9 +4,9 @@ import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
-import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
-import com.mapbox.navigation.metrics.internal.utils.extentions.NavigationMetrics
-import com.mapbox.navigation.metrics.internal.utils.extentions.toTelemetryEvent
+import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
+import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
@@ -73,7 +73,8 @@ class MapboxMetricsReporterTest {
         unmockkObject(ThreadController)
     }
 
-    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
+    @Test
+    fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsTrue() {
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
         val isDebugLoggingEnabled = true
         MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)
@@ -81,7 +82,8 @@ class MapboxMetricsReporterTest {
         verify { mapboxTelemetry.updateDebugLoggingEnabled(true) }
     }
 
-    @Test fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
+    @Test
+    fun telemetryCallsUpdateDebugLoggingEnabledWhenToggleLoggingIsFalse() {
         val mapboxTelemetry = initMetricsReporterWithTelemetry()
         val isDebugLoggingEnabled = false
         MapboxMetricsReporter.toggleLogging(isDebugLoggingEnabled)

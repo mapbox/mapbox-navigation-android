@@ -1,9 +1,10 @@
-package com.mapbox.navigation.core.telemetry.telemetryevents
+package com.mapbox.navigation.core.telemetry.events
 
 import android.os.Build
 
-const val MOCK_PROVIDER = "com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine"
-const val CurrentVersion = 7 // TODO:OZ legacy Telemetry code set this version to 7 but the docs state 4
+const val MOCK_PROVIDER = "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
+// TODO:OZ legacy Telemetry code set this version to 7 but the docs state 4
+const val CURRENT_VERSION = 7
 
 /**
  * Documentation is here [https://paper.dropbox.com/doc/Navigation-Telemetry-Events-V1--AuUz~~~rEVK7iNB3dQ4_tF97Ag-iid3ZImnt4dsW7Z6zC3Lc]
@@ -17,7 +18,7 @@ data class TelemetryMetadata(
     var device: String, // Identifier for the device e.g. iPhone7,1                                                                                                                                                                                                                                                                              string  Required
     var sdkIdentifier: String, // e.g. mapbox-navigation-ui-ios, mapbox-navigation-ios, mapbox-navigation-ui-android, mapbox-navigation-android string  Required
     var sdkVersion: String, // SDK version string e.g. 0.3.0 string  Required
-    var eventVersion: Int = CurrentVersion, // Integer to version event payloads, so that it’s easier to handle event format changes later; currently 4 int     Required
+    var eventVersion: Int = CURRENT_VERSION, // Integer to version event payloads, so that it’s easier to handle event format changes later; currently 4 int     Required
     var profile: String = "mapbox/driving-traffic", // E.g. mapbox/driving-traffic, mapbox/cycling string  Required
     var simulation: Boolean = false, // Bool that indicates whether route simulation was enabled in the SDK bool    Required
     var locationEngine: String, // String representing the class name of the location engine used for navigation, e.g. CLLocationManager or NavigationLocationManager on iOS, and LostLocationEngine and GoogleLocationEngine, AndroidLocationEngine on Android string  Required  6
