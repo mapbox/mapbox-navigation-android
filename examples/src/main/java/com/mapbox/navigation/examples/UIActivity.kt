@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
+import com.mapbox.navigation.examples.ui.StartStopNavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
 
 class UIActivity : AppCompatActivity() {
@@ -35,6 +36,11 @@ class UIActivity : AppCompatActivity() {
                 getString(R.string.title_navigation_view),
                 getString(R.string.description_navigation_view),
                 NavigationViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_start_stop_navigation_view),
+                getString(R.string.description_start_stop_navigation_view),
+                StartStopNavigationViewActivity::class.java
             )
         )
     }

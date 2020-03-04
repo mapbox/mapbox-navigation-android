@@ -115,10 +115,11 @@ class InstructionListPresenter {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
       currentLeg = routeProgress.currentLegProgress().routeLeg();
-      if(routeProgress.currentLegProgress().currentStepProgress() != null && routeProgress.currentLegProgress().currentStepProgress().step() != null) {
+      if (routeProgress.currentLegProgress().currentStepProgress() != null
+        && routeProgress.currentLegProgress().currentStepProgress().step() != null) {
         drivingSide = routeProgress.currentLegProgress().currentStepProgress().step().drivingSide();
       }
-      if(currentLeg != null) {
+      if (currentLeg != null) {
         List<LegStep> steps = currentLeg.steps();
         for (LegStep step : steps) {
           List<BannerInstructions> bannerInstructions = step.bannerInstructions();

@@ -104,39 +104,22 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
         }
     }
 
-//    override fun onMapLongClick(point: LatLng): Boolean {
-//        mapboxMap.locationComponent.lastKnownLocation?.let {
-//            origin = Point.fromLngLat(point.longitude, point.latitude)
-//        }
-//        if (!::destination.isInitialized) {
-//            destination = Point.fromLngLat(point.longitude, point.latitude)
-//            navigationView.addMarker(destination)
-//            //navigationView.showRoutes(origin, destination)
-//
-//            // next section temporary until I figure out
-//            // where the initial route is going to come from that's
-//            // needed for NavigationViewOptions
-//
-////            mapboxNavigation.requestRoutes(
-////                    RouteOptions.builder().applyDefaultParams()
-////                            .accessToken(Utils.getMapboxAccessToken(applicationContext))
-////                            .coordinates(origin, null, destination)
-////                            .alternatives(true)
-////                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-////                            .build(),
-////                            routesReqCallback
-////            )
-//
-//            // end temporary section
-//
-//            return true
-//        }
-//        return false
-//    }
-
-
-
-
+    private fun startLocationUpdates() {
+        val request = LocationEngineRequest.Builder(1000L)
+            .setFastestInterval(500L)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
+        try {
+            localLocationEngine.requestLocationUpdates(
+                request,
+                locationEngineCallback,
+                null
+            )
+            localLocationEngine.getLastLocation(locationEngineCallback)
+        } catch (exception: SecurityException) {
+            Timber.e(exception)
+        }
+    }
 
     override fun onNavigationRunning() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

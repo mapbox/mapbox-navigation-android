@@ -15,7 +15,8 @@ public class InstructionModel {
     this.progress = progress;
     double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
     stepDistanceRemaining = distanceFormatter.formatDistance(distanceRemaining);
-    if(progress.currentLegProgress().currentStepProgress() != null && progress.currentLegProgress().currentStepProgress().step() != null) {
+    if (progress.currentLegProgress().currentStepProgress() != null
+      && progress.currentLegProgress().currentStepProgress().step() != null) {
       this.drivingSide = progress.currentLegProgress().currentStepProgress().step().drivingSide();
     }
   }

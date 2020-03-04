@@ -35,6 +35,9 @@
     <string name="title_navigation_view" translatable="false">Navigation View</string>
     <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn</string>
 
+    <string name="title_start_stop_navigation_view" translatable="false">Start and stop navigation</string>
+    <string name="description_start_stop_navigation_view" translatable="false">Shows how to use NavigationView to only start and stop navigation in Kotlin code.</string>
+
     <string name="title_component_navigation">MapboxNavigation with UI components</string>
     <string name="description_component_navigation">MapboxNavigation with UI components</string>
 

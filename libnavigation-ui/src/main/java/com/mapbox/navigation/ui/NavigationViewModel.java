@@ -7,12 +7,6 @@ import android.location.Location;
 import android.os.Environment;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
@@ -54,15 +48,18 @@ import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.navigation.utils.network.NetworkStatusService;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import okhttp3.Cache;
 import timber.log.Timber;
 
@@ -349,7 +346,8 @@ public class NavigationViewModel extends AndroidViewModel {
       MapboxNavigationAccounts.getInstance(context)
     );
     final MapboxOnboardRouterConfig onboardRouterConfig = buildMapboxOnboardRouterConfig();
-    final MapboxOnboardRouter onboardRouter = new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, onboardRouterConfig);
+    final MapboxOnboardRouter onboardRouter = new
+      MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, onboardRouterConfig);
     router = new MapboxHybridRouter(onboardRouter, offboardRouter, new NetworkStatusService(context));
   }
 
@@ -439,7 +437,7 @@ public class NavigationViewModel extends AndroidViewModel {
     locationEngineConductor.initializeLocationEngine(getApplication(), locationEngine, shouldReplayRoute);
 
     final LocationEngine locationEngineToReturn = locationEngineConductor.obtainLocationEngine();
-    if(locationEngineToReturn instanceof ReplayRouteLocationEngine) {
+    if (locationEngineToReturn instanceof ReplayRouteLocationEngine) {
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
       ((ReplayRouteLocationEngine) locationEngineToReturn).assignLastLocation(lastLocation);
       ((ReplayRouteLocationEngine) locationEngineToReturn).assign(options.directionsRoute());
