@@ -8,7 +8,7 @@ import androidx.annotation.StringDef
  *
  * @since 0.1.0
  */
-internal object NavigationConstants {
+object NavigationConstants {
 
     /**
      * If default voice instructions are enabled, this identifier will be used to differentiate them

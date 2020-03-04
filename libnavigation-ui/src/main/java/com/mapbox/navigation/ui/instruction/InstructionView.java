@@ -190,7 +190,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.instructionModel.observe(lifecycleOwner, new Observer<InstructionModel>() {
+    navigationViewModel.retrieveInstructionModel().observe(lifecycleOwner, new Observer<InstructionModel>() {
       @Override
       public void onChanged(@Nullable InstructionModel model) {
         if (model != null) {
@@ -198,7 +198,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.bannerInstructionModel.observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
+    navigationViewModel.retrieveBannerInstructionModel().observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
@@ -209,7 +209,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.isOffRoute.observe(lifecycleOwner, new Observer<Boolean>() {
+    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -236,9 +236,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void unsubscribe() {
     if (navigationViewModel != null) {
-      navigationViewModel.instructionModel.removeObservers(lifecycleOwner);
-      navigationViewModel.bannerInstructionModel.removeObservers(lifecycleOwner);
-      navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveInstructionModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveBannerInstructionModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
     }
   }
 
