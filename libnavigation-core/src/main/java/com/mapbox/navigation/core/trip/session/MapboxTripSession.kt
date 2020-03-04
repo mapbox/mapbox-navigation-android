@@ -163,7 +163,7 @@ class MapboxTripSession(
     }
 
     override fun unregisterOffRouteObserver(offRouteObserver: OffRouteObserver) {
-        offRouteObservers.add(offRouteObserver)
+        offRouteObservers.remove(offRouteObserver)
     }
 
     override fun unregisterAllOffRouteObservers() {
