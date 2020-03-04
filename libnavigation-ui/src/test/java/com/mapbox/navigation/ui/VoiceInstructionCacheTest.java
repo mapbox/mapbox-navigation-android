@@ -6,9 +6,12 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,7 +22,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
 
   private static final String DIRECTIONS_PRECISION_6 = "directions_v5_precision_6.json";
 
-  /*@Test
+  @Test
   public void checksPreCachingCachesNineInstructions() throws Exception {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
@@ -35,7 +38,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
     verify(aVoiceInstructionLoader, times(1))
       .cacheInstructions(voiceInstructionsToCache.capture());
     assertEquals(9, voiceInstructionsToCache.getValue().size());
-  }*/
+  }
 
   @Test
   public void checksCacheIsNotCalledIfIsVoiceInstructionsToCacheThresholdNotReached() {
@@ -50,7 +53,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
     verifyZeroInteractions(aVoiceInstructionLoader);
   }
 
-  /*@Test
+  @Test
   public void checksCaching() throws Exception {
     MapboxNavigation aMapboxNavigation = mock(MapboxNavigation.class);
     VoiceInstructionLoader aVoiceInstructionLoader = mock(VoiceInstructionLoader.class);
@@ -73,7 +76,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
     assertEquals(9, capturedVoiceInstructionsToCache.get(0).size());
     assertEquals(10, capturedVoiceInstructionsToCache.get(1).size());
     assertEquals(2, capturedVoiceInstructionsToCache.get(2).size());
-  }*/
+  }
 
   @Test
   public void checksEvictVoiceInstructionsIsCalledWhenCaching() throws Exception {

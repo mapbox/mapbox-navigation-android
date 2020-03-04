@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
@@ -42,6 +43,7 @@ import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
@@ -243,6 +245,7 @@ public class NavigationViewModel extends AndroidViewModel {
   void stopNavigation() {
     navigation.unregisterRouteProgressObserver(navigationViewVm);
     navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.stopTripSession();
   }
 
@@ -400,8 +403,16 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerRouteProgressObserver(navigationViewVm);
     navigation.unregisterLocationObserver(navigationViewVm);
     navigation.registerOffRouteObserver(offRouteListener);
+    navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }
+
+  private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
+    @Override
+    public void onNewVoiceInstructions(@NotNull VoiceInstructions voiceInstructions) {
+      speechPlayer.play(voiceInstructions);
+    }
+  };
 
   private OffRouteObserver offRouteListener = new OffRouteObserver() {
     @Override

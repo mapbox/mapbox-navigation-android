@@ -46,14 +46,13 @@ class VoiceInstructionCache {
       }
     }
     List<String> voiceInstructionsToCache = new ArrayList<>();
-    // TODO add to MapbxoNavigation retrieveSsmlAnnouncementInstruction from Navigator
-    /*for (int i = currentVoiceInstructionsCachedIndex; i < totalVoiceInstructions; i++) {
+    for (int i = currentVoiceInstructionsCachedIndex; i < totalVoiceInstructions; i++) {
       voiceInstructionsToCache.add(navigation.retrieveSsmlAnnouncementInstruction(i));
       currentVoiceInstructionsCachedIndex++;
       if ((currentVoiceInstructionsCachedIndex + 1) % MAX_VOICE_INSTRUCTIONS_TO_CACHE == 0) {
         break;
       }
-    }*/
+    }
     voiceInstructionLoader.cacheInstructions(voiceInstructionsToCache);
   }
 
@@ -66,14 +65,13 @@ class VoiceInstructionCache {
       isVoiceInstructionsToCacheThresholdReached = false;
       voiceInstructionLoader.evictVoiceInstructions();
       List<String> voiceInstructionsToCache = new ArrayList<>();
-      // TODO add to MapbxoNavigation retrieveSsmlAnnouncementInstruction from Navigator
-      /*for (int i = currentVoiceInstructionsCachedIndex; i < totalVoiceInstructions; i++) {
+      for (int i = currentVoiceInstructionsCachedIndex; i < totalVoiceInstructions; i++) {
         voiceInstructionsToCache.add(navigation.retrieveSsmlAnnouncementInstruction(i));
         currentVoiceInstructionsCachedIndex++;
         if ((currentVoiceInstructionsCachedIndex + 1) % MAX_VOICE_INSTRUCTIONS_TO_CACHE == 0) {
           break;
         }
-      }*/
+      }
       voiceInstructionLoader.cacheInstructions(voiceInstructionsToCache);
     }
   }

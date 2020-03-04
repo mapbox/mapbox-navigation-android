@@ -20,6 +20,8 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.LocationComponent
@@ -45,23 +47,32 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
+import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
+import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
+import java.util.Locale
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
+import okhttp3.Cache
 import timber.log.Timber
 
-class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
+class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
+    VoiceInstructionsObserver {
 
+    private val VOICE_INSTRUCTION_CACHE =
+        "voice-instruction-cache"
     private val startTimeInMillis = 5000L
     private val countdownInterval = 10L
     private val maxProgress = startTimeInMillis / countdownInterval
@@ -77,6 +88,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private lateinit var speechPlayer: NavigationSpeechPlayer
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
 
     @SuppressLint("MissingPermission")
@@ -167,6 +179,17 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 })
             }
         }
+
+        initializeSpeechPlayer()
+    }
+
+    private fun initializeSpeechPlayer() {
+        val cache = Cache(File(application.cacheDir, VOICE_INSTRUCTION_CACHE), 10 * 1024 * 1024)
+        val voiceInstructionLoader =
+            VoiceInstructionLoader(application, Mapbox.getAccessToken(), cache)
+        val speechPlayerProvider =
+            SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
+        speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 
     @SuppressLint("MissingPermission")
@@ -175,6 +198,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
+            mapboxNavigation.registerVoiceInstructionsObserver(this)
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.getRoutes()
             if (routes.isNotEmpty()) {
@@ -335,6 +359,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onStart()
 
         restartSessionEventChannel.poll()?.also {
+            mapboxNavigation.registerVoiceInstructionsObserver(this)
             mapboxNavigation.startTripSession()
         }
 
@@ -359,6 +384,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
+            mapboxNavigation.unregisterVoiceInstructionsObserver(this)
             mapboxNavigation.stopTripSession()
             restartSessionEventChannel.offer(RestartTripSessionAction)
         }
@@ -372,14 +398,23 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         mapView.onDestroy()
+
+        mapboxNavigation.unregisterVoiceInstructionsObserver(this)
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
+
         restartSessionEventChannel.cancel()
+
+        speechPlayer.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
+        speechPlayer.play(voiceInstructions)
     }
 
     private class MyLocationEngineCallback(activity: SimpleMapboxNavigationKt) :
