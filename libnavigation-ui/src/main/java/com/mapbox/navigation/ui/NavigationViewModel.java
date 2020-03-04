@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.location.Location;
 import android.os.Environment;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -37,6 +41,8 @@ import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession;
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 import com.mapbox.navigation.route.hybrid.MapboxHybridRouter;
@@ -69,6 +75,7 @@ import java.util.Date;
 import java.util.List;
 
 import okhttp3.Cache;
+import timber.log.Timber;
 
 public class NavigationViewModel extends AndroidViewModel {
 
@@ -85,6 +92,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
+  private final MutableLiveData<Location> locationUpdates = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private LocationEngineConductor locationEngineConductor;
@@ -331,6 +339,8 @@ public class NavigationViewModel extends AndroidViewModel {
     return shouldRecordScreenshot;
   }
 
+  LiveData<Location> retrieveLocationUdpates() { return locationUpdates; }
+
   public LiveData<InstructionModel> retrieveInstructionModel() {
     return instructionModel;
   }
@@ -447,6 +457,7 @@ public class NavigationViewModel extends AndroidViewModel {
     if(locationEngineToReturn instanceof ReplayRouteLocationEngine) {
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
       ((ReplayRouteLocationEngine) locationEngineToReturn).assignLastLocation(lastLocation);
+      ((ReplayRouteLocationEngine) locationEngineToReturn).assign(options.directionsRoute());
     }
     return locationEngineToReturn;
   }
@@ -495,7 +506,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };*/
 
-  private Router.Callback routeEngineCallback = new NavigationViewRouteEngineListener(this);
+  //private Router.Callback routeEngineCallback = new NavigationViewRouteEngineListener(this);
 
   @SuppressLint("MissingPermission")
   private void startNavigation(DirectionsRoute route) {
@@ -619,13 +630,6 @@ public class NavigationViewModel extends AndroidViewModel {
       null // working with pre-fetched tiles only
     );
   }
-
-//  private TripSessionStateObserver tripSessionStateObserver = new TripSessionStateObserver() {
-//    @Override
-//    public void onSessionStateChanged(@NotNull TripSessionState tripSessionState) {
-//
-//    }
-//  };
 
   private Point getOriginOfRoute(final DirectionsRoute directionsRoute) {
     return PolylineUtils.decode(directionsRoute.geometry(), 6).get(0);
