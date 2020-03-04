@@ -1,5 +1,6 @@
 package com.mapbox.navigation.metrics.internal
 
+import com.mapbox.navigation.metrics.MetricsObserver
 import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
 
 /**
@@ -19,7 +20,7 @@ interface MetricsReporter {
      *
      * @param metricsObserver the [MetricsObserver] that is called when a new metric event is triggered
      */
-    fun setMetricsObserver(metricsObserver: com.mapbox.navigation.metrics.internal.MetricsObserver)
+    fun setMetricsObserver(metricsObserver: MetricsObserver)
 
     /**
      * Remove metrics observer
