@@ -55,7 +55,6 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File
 import java.lang.ref.WeakReference
-import java.net.URI
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
@@ -93,66 +92,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
         setupMapboxNavigation()
-
-//        val options =
-//            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
-//
-//        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-//        val tilesVersion = "2019_04_13-00_00_11"
-//
-//        val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
-//            ?.host(tilesUri.host)
-//            ?.version(tilesVersion)
-//            ?.userAgent("MapboxNavigationNative")
-//            ?.build()
-//
-//        val file = File(
-//                Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
-//                "2019_04_13-00_00_11"
-//        )
-//        val fileTiles = File(file, "tiles")
-//
-//        val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
-//            ?.tilePath(fileTiles.absolutePath)
-//            ?.endpoint(endpoint)
-//            ?.build()
-//
-//        val newOptions =
-//            options.toBuilder()
-//                .onboardRouterConfig(onboardRouterConfig)
-//                .build()
-//
-//        val navigatorNative = newOptions.onboardRouterConfig?.let { config ->
-//            val tileDir = File(config.tilePath, MapboxOnboardRouter.TILES_DIR_NAME)
-//            if (!tileDir.exists()) {
-//                tileDir.mkdirs()
-//            }
-//            val routerParams = RouterParams(
-//                    tileDir.absolutePath,
-//                    config.inMemoryTileCache,
-//                    config.mapMatchingSpatialCache,
-//                    config.threadsCount,
-//                    config.endpoint?.let {
-//                        TileEndpointConfiguration(
-//                                it.host,
-//                                it.version,
-//                                it.token,
-//                                it.userAgent,
-//                                ""
-//                        )
-//                    })
-//            val httpClient = HttpClient()
-//
-//            MapboxNativeNavigatorImpl(routerParams = routerParams, httpClient = httpClient)
-//        } ?: MapboxNativeNavigatorImpl()
-//
-//
-//        mapboxNavigation = MapboxNavigation(
-//            applicationContext,
-//            Utils.getMapboxAccessToken(this),
-//            navigationOptions = newOptions,
-//            navigatorNative = navigatorNative
-//        )
     }
 
     private fun setupMapboxNavigation() {
@@ -194,9 +133,19 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
                 }
         )
         val httpClient = HttpClient()
-        val navigatorNative = MapboxNativeNavigatorImpl(
+        val navigatorNativeStub = MapboxNativeNavigatorImpl(
                 routerParams = routerParams,
                 httpClient = httpClient
+        )
+        val navigationConfig = navigatorNativeStub.getConfig()
+        navigatorNativeStub.shutdown()
+        navigationConfig.mppMaxRequestTimeMs = 500
+        navigationConfig.ehMaxRequestTimeMs = 500
+
+        val navigatorNative = MapboxNativeNavigatorImpl(
+                routerParams = routerParams,
+                httpClient = httpClient,
+                config = navigationConfig
         )
 
         mapboxNavigation = MapboxNavigation(
@@ -437,6 +386,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback {
         super.onStop()
         mapView.onStop()
 
+        Timber.e("HISTORY_LOG: %s", mapboxNavigation.retrieveHistory())
         mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)

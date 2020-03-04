@@ -19,12 +19,10 @@ import com.mapbox.navigation.navigator.TripStatus
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.timer.MapboxTimer
+import kotlinx.coroutines.*
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 // todo make internal
 class MapboxTripSession constructor(
@@ -250,24 +248,22 @@ class MapboxTripSession constructor(
     }
 
     private fun fireOffStatusPolling() {
-        mainJobController.scope.launch {
+        val timer = MapboxTimer(STATUS_POLLING_INTERVAL) {
             navigatorPolling { status ->
-//                while (isActive) {
+                GlobalScope.launch(Dispatchers.Main) {
                     updateEnhancedLocation(status.enhancedLocation)
                     updateRouteProgress(status.routeProgress)
                     isOffRoute = status.offRoute
-//                }
+                }
             }
-            delay(STATUS_POLLING_INTERVAL)
         }
+        timer.start()
     }
 
     private fun navigatorPolling(callback: (TripStatus) -> Unit) {
-        // withContext(ioJobController.scope.coroutineContext) {
         val date = Date()
         date.time = date.time + navigatorPollingDelay
         navigator.getTripStatus(date, callback)
-        // }
     }
 
     private fun updateEnhancedLocation(location: Location) {
