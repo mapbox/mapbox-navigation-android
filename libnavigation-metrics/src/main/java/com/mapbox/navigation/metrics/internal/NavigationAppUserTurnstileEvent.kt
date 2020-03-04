@@ -2,8 +2,8 @@ package com.mapbox.navigation.metrics.internal
 
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
-import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
-import com.mapbox.navigation.metrics.internal.utils.extentions.NavigationMetrics
+import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 class NavigationAppUserTurnstileEvent(
     val event: AppUserTurnstile

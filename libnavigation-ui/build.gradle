@@ -15,13 +15,6 @@ android {
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
 
-    buildConfigField('String',
-        "MAPBOX_NAVIGATION_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-navigation-ui-android")
-    )
-    buildConfigField 'String',
-        "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-ui-android/%s\"",
-        project.VERSION_NAME
-    )
     consumerProguardFiles 'proguard-consumer.pro'
   }
 
@@ -65,6 +58,7 @@ dependencies {
 
   // Mapbox
   implementation dependenciesList.mapboxSdkServices
+  implementation dependenciesList.mapboxSdkTurf
 
   // Mapbox Maps SDK
   implementation dependenciesList.mapboxMapSdk

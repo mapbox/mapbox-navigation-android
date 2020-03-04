@@ -1,12 +1,12 @@
-package com.mapbox.navigation.core.telemetry.telemetryevents
+package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Parcel
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
-import com.mapbox.navigation.metrics.internal.utils.extentions.MetricEvent
-import com.mapbox.navigation.metrics.internal.utils.extentions.NavigationMetrics
+import com.mapbox.navigation.base.metrics.MetricEvent
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 /**
  * Documentation is here [https://paper.dropbox.com/doc/Navigation-Telemetry-Events-V1--AuUz~~~rEVK7iNB3dQ4_tF97Ag-iid3ZImnt4dsW7Z6zC3Lc]
@@ -25,11 +25,14 @@ class TelemetryReroute(
     val feedbackId: String,
     val screenshot: String? = null,
     val step: TelemetryStep? = null,
-    var Metadata: TelemetryMetadata
+    var metadata: TelemetryMetadata
 ) : MetricEvent, Event() {
-    val event = "navigation.reroute"
+    val event = NavigationMetrics.REROUTE
+
     override fun writeToParcel(dest: Parcel?, flags: Int) {}
+
     override fun describeContents() = 0
+
     override val metricName: String
         get() = NavigationMetrics.REROUTE
 

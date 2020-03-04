@@ -25,10 +25,6 @@ android {
         buildConfigField('String',
                 "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
         )
-        buildConfigField "String",
-                "MAPBOX_NAVIGATION_EVENTS_USER_AGENT", String.format("\"mapbox-navigation-android/%s\"",
-                project.VERSION_NAME
-        )
     }
 
     testOptions {
@@ -46,6 +42,7 @@ dependencies {
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-metrics')
     implementation dependenciesList.mapboxAndroidAccounts
+    implementation dependenciesList.mapboxSdkTurf
 
     //ktlint
     ktlint dependenciesList.ktlint
