@@ -54,6 +54,10 @@ dependencies {
   // Navigation SDK
   api project(':libnavigation-core')
   implementation project(':libnavigation-util')
+  implementation project(':libdirections-hybrid')
+  implementation project(':libdirections-offboard')
+  implementation project(':libdirections-onboard')
+  implementation project(':libnavigator')
   implementation project(':libtrip-notification')
 
   // Mapbox
