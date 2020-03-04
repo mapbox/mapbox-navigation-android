@@ -288,6 +288,7 @@ constructor(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
+        MapboxNavigationTelemetry.unregisterListeners(this)
         fasterRouteObservers.clear()
         fasterRouteTimer.stop()
     }

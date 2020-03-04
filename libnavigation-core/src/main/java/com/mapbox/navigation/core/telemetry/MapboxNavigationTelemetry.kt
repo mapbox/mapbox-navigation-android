@@ -278,6 +278,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         postUserEventDelegate(feedbackType, description, feedbackSource, screenshot)
     }
 
+    override fun unregisterListeners(mapboxNavigation: MapboxNavigation) {
+        mapboxNavigation.unregisterOffRouteObserver(rerouteObserver)
+        mapboxNavigation.unregisterRouteProgressObserver(callbackDispatcher)
+        mapboxNavigation.unregisterTripSessionStateObserver(sessionStateObserver)
+        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
+    }
+
     /**
      * Helper class that posts user feedback. The call is available only after initialization
      */
@@ -553,7 +561,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             applicationState = TelemetryUtils.obtainApplicationState(context),
             batteryPluggedIn = TelemetryUtils.isPluggedIn(context),
             batteryLevel = TelemetryUtils.obtainBatteryLevel(context),
-            connectivity = TelemetryUtils.obtainCellularNetworkType(context)
+            connectivity = TelemetryUtils.obtainCellularNetworkType(context),
+            screenBrightness = obtainScreenBrightness(context),
+            volumeLevel = obtainVolumeLevel(context),
+            audioType = obtainAudioType(context)
         )
     }
 

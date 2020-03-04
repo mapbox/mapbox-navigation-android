@@ -27,7 +27,7 @@ class TelemetryUserFeedback(
     val step: TelemetryStep? = null,
     var metadata: TelemetryMetadata
 ) : MetricEvent, Event() {
-    val event = "navigation.feedback"
+    val event = NavigationMetrics.FEEDBACK
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {}
 

@@ -1,16 +1,13 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.time.Time
 import java.util.ArrayDeque
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -23,13 +20,12 @@ import kotlinx.coroutines.launch
 internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
-    RouteProgressObserver, LocationObserver, RoutesObserver {
+    RouteProgressObserver, LocationObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
         AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
-    private val routeAvailable = AtomicBoolean(false)
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
     private var channelLastNSecondsOfLocations = Channel<Location>(Channel.CONFLATED)
     private var jobControl = ThreadController.getIOScopeAndRootJob()
@@ -121,7 +117,6 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     fun getLastLocation(): Location = lastLocation.get()
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
-    fun getRoutesAvailable() = routeAvailable.get()
 
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
@@ -131,9 +126,5 @@ internal class TelemetryLocationAndProgressDispatcher :
         channelLocation.offer(enhancedLocation)
         channelLastNSecondsOfLocations.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
-    }
-
-    override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-        routeAvailable.set(routes.isNotEmpty())
     }
 }

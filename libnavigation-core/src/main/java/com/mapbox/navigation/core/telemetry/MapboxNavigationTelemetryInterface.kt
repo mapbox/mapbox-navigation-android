@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 
 interface MapboxNavigationTelemetryInterface {
@@ -9,4 +10,5 @@ interface MapboxNavigationTelemetryInterface {
         @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
         screenshot: String?
     )
+    fun unregisterListeners(mapboxNavigation: MapboxNavigation)
 }
