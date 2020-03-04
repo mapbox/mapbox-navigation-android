@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -358,6 +359,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   @Override
   public void startCamera(DirectionsRoute directionsRoute) {
     if (navigationMap != null) {
+      // todo ? navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
       navigationMap.startCamera(directionsRoute);
     }
   }
@@ -395,6 +397,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param options with containing route / coordinate data
    */
+  @SuppressLint("MissingPermission")
   public void startNavigation(NavigationViewOptions options) {
     navigationMap.drawRoute(options.directionsRoute());
     initializeNavigation(options);
