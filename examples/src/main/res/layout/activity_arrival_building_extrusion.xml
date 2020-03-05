@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ArrivalUiBuildingExtrusionLayerActivityKt">
+
+    <include layout="@layout/content_simple_mapbox_navigation" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/adjust_building_extrusion_color_and_opacity_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="80dp"
+        app:srcCompat="@drawable/ic_refresh" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/adjust_building_extrusion_visibility_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        tools:visibility="visible"
+        android:visibility="invisible"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="160dp"
+        app:srcCompat="@drawable/ic_dismiss" />
+
+</FrameLayout>

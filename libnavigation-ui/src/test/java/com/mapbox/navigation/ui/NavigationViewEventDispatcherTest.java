@@ -237,6 +237,28 @@ public class NavigationViewEventDispatcherTest {
   }
 
   @Test
+  public void setFinalDestinationArrivalListener_finalDestinationArrivalListenerIsCalled() throws Exception {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    RouteListener routeListener = mock(RouteListener.class);
+    eventDispatcher.assignRouteListener(routeListener);
+
+    eventDispatcher.onFinalDestinationArrival();
+
+    verify(routeListener, times(1)).onFinalDestinationArrival();
+  }
+
+  @Test
+  public void setFinalDestinationArrivalListener_finalDestinationArrivalListenerIsNotCalled() throws Exception {
+    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
+    RouteListener routeListener = mock(RouteListener.class);
+
+    eventDispatcher.onFinalDestinationArrival();
+
+    verify(routeListener, times(0)).onFinalDestinationArrival();
+  }
+
+
+  @Test
   public void setFeedbackListener_feedbackOpenIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);

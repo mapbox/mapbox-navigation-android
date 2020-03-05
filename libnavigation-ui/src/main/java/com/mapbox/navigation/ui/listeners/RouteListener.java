@@ -65,4 +65,13 @@ public interface RouteListener {
    * @since 0.14.0
    */
   void onArrival();
+
+  /**
+   * Will trigger when a user has arrived at the final destination on
+   * the {@link DirectionsRoute}. The final destination is considered final
+   * {@link com.mapbox.api.directions.v5.models.DirectionsWaypoint} on the route.
+   *
+   * @since 0.42.5
+   */
+  void onFinalDestinationArrival();
 }

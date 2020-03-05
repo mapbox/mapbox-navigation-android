@@ -7,6 +7,7 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.options.NavigationOptions;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.Camera;
@@ -56,6 +57,9 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract LocationEngine locationEngine();
 
+  @Nullable
+  public abstract Float maxMetersToTriggerDestinationArrival();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -92,6 +96,17 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder speechPlayer(SpeechPlayer speechPlayer);
 
     public abstract Builder locationEngine(LocationEngine locationEngine);
+
+    /**
+     * The number of meters the device needs to be away from the final route destination to trigger
+     * {@link RouteListener#onFinalDestinationArrival()}. Once
+     * {@link RouteProgress#distanceRemaining()} is equal to or less than this meter number,
+     * the Nav UI SDK will fire the arrival method.
+     *
+     * @param maxMetersToTriggerDestinationArrival the number of meters away from the final destination
+     * @return this builder
+     */
+    public abstract Builder maxMetersToTriggerDestinationArrival(Float maxMetersToTriggerDestinationArrival);
 
     /**
      * Add an offline path for loading offline routing data.
