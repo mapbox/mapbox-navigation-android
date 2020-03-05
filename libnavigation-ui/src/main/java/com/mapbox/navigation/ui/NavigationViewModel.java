@@ -32,6 +32,7 @@ import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.BannerInstructionModel;
 import com.mapbox.navigation.ui.instruction.InstructionModel;
+import com.mapbox.navigation.ui.junction.RouteJunctionModel;
 import com.mapbox.navigation.ui.legacy.RouteUtils;
 import com.mapbox.navigation.ui.summary.SummaryModel;
 import com.mapbox.navigation.ui.utils.LocaleEx;
@@ -58,6 +59,7 @@ public class NavigationViewModel extends AndroidViewModel {
   public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
   public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
   public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  public final MutableLiveData<RouteJunctionModel> routeJunctionModel = new MutableLiveData<>();
   private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -255,6 +257,7 @@ public class NavigationViewModel extends AndroidViewModel {
   void updateRoute(DirectionsRoute route) {
     this.route.setValue(route);
     if (!isChangingConfigurations) {
+      routeJunctionModel.setValue(null);
       startNavigation(route);
       updateReplayEngine(route);
       sendEventOnRerouteAlong(route);
@@ -268,6 +271,7 @@ public class NavigationViewModel extends AndroidViewModel {
     sendEventArrival(routeProgress);
     instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
     summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
+    routeJunctionModel.setValue(new RouteJunctionModel(routeProgress));
   }
 
   void updateLocation(Location location) {
