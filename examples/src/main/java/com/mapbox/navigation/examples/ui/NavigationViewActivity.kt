@@ -16,12 +16,11 @@ import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_navigation_view.*
-import timber.log.Timber
 import com.mapbox.navigation.examples.utils.Utils
+
 class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener {
 
 
-    private val locationEngineCallback = MyLocationEngineCallback()
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
@@ -59,7 +58,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     override fun onPause() {
         super.onPause()
         navigationView.onPause()
-        stopLocationUpdates()
+        //stopLocationUpdates()
     }
 
     override fun onDestroy() {
@@ -92,7 +91,6 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
                 this.mapboxMap = navMapboxMap.retrieveMap()
                 //this.mapboxMap.addOnMapLongClickListener(this@NavigationViewActivity)
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
-                startLocationUpdates()
 
                 val directionsRoute = getDirectionsRoute()
                 val optionsBuilder = NavigationViewOptions.builder()
@@ -136,62 +134,9 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
 //        return false
 //    }
 
-//    private val routesReqCallback = object : RoutesRequestCallback {
-//        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-//            Timber.d("route request success %s", routes.toString())
-//
-////            val optionsBuilder = NavigationViewOptions.builder()
-////            optionsBuilder.navigationListener(this@NavigationViewActivity)
-////            //extractRoute(this)
-////            //extractConfiguration(options)
-////            optionsBuilder.directionsRoute(routes[0])
-////            optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
-////            navigationView.startNavigation(optionsBuilder.build())
-////
-//            navigationView.drawRoute(routes[0])
-//
-//            return routes
-//        }
-//
-//        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-//            Timber.e("route request failure %s", throwable.toString())
-//        }
-//
-//        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-//            Timber.d("route request canceled")
-//        }
-//    }
 
-    private fun startLocationUpdates() {
-        val request = LocationEngineRequest.Builder(1000L)
-            .setFastestInterval(500L)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
-        try {
-            localLocationEngine.requestLocationUpdates(
-                request,
-                locationEngineCallback,
-                null
-            )
-            localLocationEngine.getLastLocation(locationEngineCallback)
-        } catch (exception: SecurityException) {
-            Timber.e(exception)
-        }
-    }
 
-    private fun stopLocationUpdates() {
-        localLocationEngine.removeLocationUpdates(locationEngineCallback)
-    }
 
-    inner class MyLocationEngineCallback : LocationEngineCallback<LocationEngineResult> {
-
-        override fun onSuccess(result: LocationEngineResult?) {
-            result?.lastLocation?.let { navigationView.updateNavigationMap(it) }
-        }
-
-        override fun onFailure(exception: Exception) {
-        }
-    }
 
     override fun onNavigationRunning() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
