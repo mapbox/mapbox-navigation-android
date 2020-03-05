@@ -38,6 +38,7 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
@@ -46,7 +47,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
-import java.util.Locale
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
