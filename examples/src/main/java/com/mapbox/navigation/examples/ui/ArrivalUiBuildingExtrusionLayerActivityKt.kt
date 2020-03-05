@@ -46,15 +46,15 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer
 import com.mapbox.navigation.ui.route.NavigationMapRoute
+import java.io.File
+import java.lang.ref.WeakReference
+import java.net.URI
 import kotlinx.android.synthetic.main.activity_arrival_building_extrusion.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
-import java.io.File
-import java.lang.ref.WeakReference
-import java.net.URI
 
 class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
