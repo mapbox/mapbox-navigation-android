@@ -27,7 +27,6 @@ internal class TelemetryLocationAndProgressDispatcher :
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
-    private var channelLastNSecondsOfLocations = Channel<Location>(Channel.CONFLATED)
     private var jobControl = ThreadController.getIOScopeAndRootJob()
     private var monitorJob: Job = Job()
 
@@ -124,7 +123,6 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
         channelLocation.offer(enhancedLocation)
-        channelLastNSecondsOfLocations.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
     }
 }
