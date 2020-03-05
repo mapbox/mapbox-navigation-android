@@ -139,7 +139,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 }
             metricsReporter.addEvent(
                 TelemetryFasterRoute(
-                    metadata = populateEventMetadataAndUpdateState(Date()),
+                    metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName),
                     newDistanceRemaining = fasterRoute.distance()?.toInt() ?: -1,
                     newDurationRemaining = fasterRoute.duration()?.toInt() ?: -1,
                     newGeometry = fasterRoute.geometry(),
@@ -174,7 +174,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                 newDistanceRemaining = callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt(),
                                 locationsBefore = offRouteBuffers.first.toTypedArray(),
                                 locationsAfter = offRouteBuffers.second.toTypedArray(),
-                                metadata = populateEventMetadataAndUpdateState(Date()),
+                                metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName),
                                 feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                                 secondsSinceLastReroute = timeSinceLastEvent / 1000
                             )
@@ -303,7 +303,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
                         populateTelemetryStep(routeLegProgress)
                     },
-                    metadata = populateEventMetadataAndUpdateState(Date())
+                    metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName)
                 )
                 metricsReporter.addEvent(feedbackEvent)
             }
@@ -337,12 +337,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             true -> {
                 val cancelEvent = TelemetryCancel(
                     arrivalTimestamp = Date().toString(),
-                    metadata = populateEventMetadataAndUpdateState(Date())
+                    metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName)
                 )
                 metricsReporter.addEvent(cancelEvent)
             }
             false -> {
-                val cancelEvent = TelemetryCancel(metadata = populateEventMetadataAndUpdateState(Date()))
+                val cancelEvent = TelemetryCancel(metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName))
                 metricsReporter.addEvent(cancelEvent)
             }
         }
@@ -436,7 +436,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             metricsReporter.addEvent(
                             TelemetryArrival(
                                 arrivalTimestamp = Date().toString(),
-                                metadata = populateEventMetadataAndUpdateState(Date()).apply {
+                                metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName).apply {
                                     lat = callbackDispatcher.getLastLocation().latitude.toFloat()
                                     lng = callbackDispatcher.getLastLocation().longitude.toFloat()
                                     distanceCompleted = routeData.routeProgress.distanceTraveled().toInt()
@@ -463,7 +463,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     private fun telemetryDeparture(directionsRoute: DirectionsRoute): MetricEvent {
-        return TelemetryDepartureEvent(populateEventMetadataAndUpdateState(Date()).apply {
+        return TelemetryDepartureEvent(populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName).apply {
             lat = callbackDispatcher.getLastLocation().latitude.toFloat()
             lng = callbackDispatcher.getLastLocation().longitude.toFloat()
             originalRequestIdentifier = directionsRoute.routeOptions()?.requestUuid()
@@ -499,7 +499,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private fun populateEventMetadataAndUpdateState(
         creationDate: Date,
         directionsRoute: DirectionsRoute? = null,
-        locationEngineName: String? = null,
+        locationEngineName: String,
         currentLocation: Location? = null
     ): TelemetryMetadata {
         val sdkType = generateSdkIdentifier()
@@ -512,7 +512,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             sdkIdentifier = sdkType,
             sdkVersion = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
             simulation = MOCK_PROVIDER == locationEngineName,
-            locationEngine = locationEngineName ?: "no name",
+            locationEngine = locationEngineName,
             sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),
             originalRequestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
             requestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
