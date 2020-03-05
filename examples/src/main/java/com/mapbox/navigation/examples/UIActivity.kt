@@ -6,9 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionLayerActivityKt
 import com.mapbox.navigation.examples.ui.FinalDestinationBuildingFootprintHighlightActivityKt
+import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
 
 class UIActivity : AppCompatActivity() {
