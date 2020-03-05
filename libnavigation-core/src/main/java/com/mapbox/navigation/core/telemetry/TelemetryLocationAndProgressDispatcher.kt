@@ -60,12 +60,12 @@ internal class TelemetryLocationAndProgressDispatcher :
      * This method returns a [Pair] of buffers. The first represents a fixed number of locations before an off route event,
      * while the second represents a fixed number of locations after the off route event
      */
-    fun getLocationBuffersAsync() = accumulatePosEventLocationsAsync()
+    fun getLocationBuffersAsync() = accumulatePostEventLocationsAsync()
 
     /**
      * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events
      */
-    private fun accumulatePosEventLocationsAsync(): Deferred<OffRouteBuffers> {
+    private fun accumulatePostEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
         jobControl.scope.launch {
             val monitorControl =
@@ -118,7 +118,7 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     fun getLastLocation(): Location = lastLocation.get()
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
-    fun isRouteSelected(): AtomicReference<RouteAvailable?> = routeSelected
+    fun isRouteAvailable(): AtomicReference<RouteAvailable?> = routeSelected
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
     }
@@ -129,6 +129,13 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-        routeSelected.set(RouteAvailable(routes[0]))
+        when (routes.isEmpty()) {
+            true -> {
+                routeSelected.set(null)
+            }
+            false -> {
+                routeSelected.set(RouteAvailable(routes[0]))
+            }
+        }
     }
 }

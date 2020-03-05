@@ -34,6 +34,7 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -607,7 +608,15 @@ constructor(
 
     companion object {
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
-
+        @JvmStatic
+        fun postUserFeedback(
+            @TelemetryUserFeedback.FeedbackType feedbackType: String,
+            description: String,
+            @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
+            screenshot: String?
+        ) {
+            MapboxNavigationTelemetry.postUserFeedbackEvent(feedbackType, description, feedbackSource, screenshot)
+        }
         /**
          * Returns a pre-build set of [NavigationOptions] with smart defaults.
          *

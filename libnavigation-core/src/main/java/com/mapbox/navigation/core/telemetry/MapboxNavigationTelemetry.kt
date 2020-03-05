@@ -103,7 +103,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             TelemetryLocationAndProgressDispatcher() // The class responds to most notification events
 
     private fun telemetryEventGate(event: MetricEvent) {
-        when (callbackDispatcher.isRouteSelected().get()) {
+        when (callbackDispatcher.isRouteAvailable().get()) {
             null -> {
                 Log.i(TAG, "Route not selected. Telemetry event not sent")
             }
@@ -334,7 +334,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         dynamicValues.distanceRemaining.set(0)
         dynamicValues.rerouteCount.set(0)
         dynamicValues.timeRemaining.set(0)
-        callbackDispatcher.isRouteSelected().set(null)
+        callbackDispatcher.isRouteAvailable().set(null)
     }
 
     /**
@@ -342,7 +342,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * Every session start is guaranteed to have a session end.
      */
     private fun handleSessionStart() {
-        callbackDispatcher.isRouteSelected().get()?.route?.let { directionsRoute ->
+        callbackDispatcher.isRouteAvailable().get()?.route?.let { directionsRoute ->
             // Expected session == SESSION_END
             CURRENT_SESSION_CONTROL.compareAndSet(
                     CurrentSessionState.SESSION_END,
@@ -364,7 +364,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     /**
      * This method is used by a lambda. Since the Telemetry class is a singleton, U.I. elements may call postTurnstileEvent() before the singleton is initialized.
-     * This method is used by a lambda. Since the Telemetry class is a singleton, U.I. elements may call postTurnstileEvent() before the singleton is initialized.
      * A lambda guards against this possibility
      */
     private fun postTurnstileEvent() {
@@ -373,7 +372,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         val appUserTurnstileEvent =
                 AppUserTurnstile(sdkType, BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME)
         val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
-        telemetryEventGate(event)
+        metricsReporter.addEvent(event)
     }
 
     /**
@@ -448,13 +447,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             requestIdentifier = directionsRoute.routeOptions()?.requestUuid()
             originalGeometry = directionsRoute.geometry()
         })
-    }
-
-    /**
-     * This method ends the session by setting CURRENT_SESSION_CONTROL to SESSION_END
-     */
-    private fun sessionEndHelper() {
-        CURRENT_SESSION_CONTROL.set(CurrentSessionState.SESSION_END)
     }
 
     private fun registerForNotification(mapboxNavigation: MapboxNavigation) {
