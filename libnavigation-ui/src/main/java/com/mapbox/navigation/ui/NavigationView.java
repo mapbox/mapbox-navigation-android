@@ -34,6 +34,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -390,6 +391,35 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       int[] padding = buildRouteOverviewPadding(getContext());
       navigationMap.showRouteOverview(padding);
     }
+  }
+
+  @Override
+  public void updatePuckState(RouteProgress routeProgress) {
+    int puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+    switch (routeProgress.currentState()) {
+      case ROUTE_INVALID:
+          puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+        break;
+      case ROUTE_INITIALIZED:
+          puckDrawable = R.drawable.user_puck_icon;
+        break;
+      case LOCATION_TRACKING:
+        puckDrawable = R.drawable.user_puck_icon;
+        break;
+      case ROUTE_ARRIVED:
+        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+        break;
+      case LOCATION_STALE:
+        puckDrawable = R.drawable.user_puck_icon;
+        break;
+      default:
+        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+        break;
+    }
+
+    // todo this call is in a different work stream that hasn't
+    // been merged yet.
+    // navigationMap.updateCurrentLocationDrawable();
   }
 
   /**
