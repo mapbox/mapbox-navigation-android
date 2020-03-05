@@ -10,5 +10,6 @@ interface MapboxNavigationTelemetryInterface {
         @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
         screenshot: String?
     )
+
     fun unregisterListeners(mapboxNavigation: MapboxNavigation)
 }
