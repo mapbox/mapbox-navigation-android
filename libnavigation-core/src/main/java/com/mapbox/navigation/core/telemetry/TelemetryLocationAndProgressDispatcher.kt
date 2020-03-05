@@ -1,7 +1,9 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.thread.ThreadController
@@ -20,7 +22,7 @@ import kotlinx.coroutines.launch
 internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
-    RouteProgressObserver, LocationObserver {
+    RouteProgressObserver, LocationObserver, RoutesObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
         AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
@@ -29,7 +31,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
     private var jobControl = ThreadController.getIOScopeAndRootJob()
     private var monitorJob: Job = Job()
-
+    private val routeSelected = AtomicReference<RouteAvailable?>(null)
     init {
         monitorJob = monitorLocationChannel()
     }
@@ -116,7 +118,7 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     fun getLastLocation(): Location = lastLocation.get()
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
-
+    fun isRouteSelected(): AtomicReference<RouteAvailable?> = routeSelected
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
     }
@@ -124,5 +126,9 @@ internal class TelemetryLocationAndProgressDispatcher :
     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
         channelLocation.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
+    }
+
+    override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+        routeSelected.set(RouteAvailable(routes[0]))
     }
 }
