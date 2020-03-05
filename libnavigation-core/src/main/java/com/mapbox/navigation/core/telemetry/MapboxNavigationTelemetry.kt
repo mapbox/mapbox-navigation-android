@@ -306,25 +306,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     /**
-     * This method terminates the current session. The call is idempotent.
-     */
-    private fun endSession() {
-        CURRENT_SESSION_CONTROL.compareAndSet(
-                CurrentSessionState.SESSION_START,
-                CurrentSessionState.SESSION_END
-        ).let { previousSessionState ->
-            when (previousSessionState) {
-                true -> {
-                    sessionEndHelper()
-                }
-                false -> {
-                    // Do nothing. A session cannot be ended twice and calling it multiple times has not detrimental effects
-                }
-            }
-        }
-    }
-
-    /**
      * This method posts a cancel event in response to onSessionEnd
      */
     private fun handleSessionCanceled() {
@@ -336,12 +317,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName)
                 )
                 telemetryEventGate(cancelEvent)
-                callbackDispatcher.isRouteSelected().set(null)
             }
             false -> {
                 val cancelEvent = TelemetryCancel(metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName))
                 telemetryEventGate(cancelEvent)
-                callbackDispatcher.isRouteSelected().set(null)
             }
         }
     }
@@ -355,6 +334,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         dynamicValues.distanceRemaining.set(0)
         dynamicValues.rerouteCount.set(0)
         dynamicValues.timeRemaining.set(0)
+        callbackDispatcher.isRouteSelected().set(null)
     }
 
     /**
@@ -373,7 +353,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         sessionStartHelper(directionsRoute, callbackDispatcher.getLastLocation())
                     }
                     false -> {
-                        endSession()
+                        handleSessionStop()
                         sessionStartHelper(directionsRoute, callbackDispatcher.getLastLocation())
                         Log.e(TAG, "sessionEnd() not called. Calling it by default")
                     }
