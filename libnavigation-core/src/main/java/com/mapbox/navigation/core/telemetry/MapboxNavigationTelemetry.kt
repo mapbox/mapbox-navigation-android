@@ -76,8 +76,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private lateinit var telemetryThreadControl: JobControl
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
-    private var offRouteProcessing =
-        AtomicBoolean(false) // A switch used to prevent multiple off-route events from generating events.
+    private val sessionGate = AtomicBoolean(false)
     /**
      * This class holds all mutable state of the Telemetry object
      */
@@ -112,16 +111,20 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
-                    callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()
-                    postUserEventDelegate =
-                        postUserFeedbackEventAfterInit // Telemetry is initialized and the user selected a route. Allow user feedback events to be posted
-                    handleSessionStart()
+                    if (sessionGate.compareAndSet(false, true)) {
+                        callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()
+                        postUserEventDelegate =
+                                postUserFeedbackEventAfterInit // Telemetry is initialized and the user selected a route. Allow user feedback events to be posted
+                        handleSessionStart()
+                    }
                 }
                 TripSessionState.STOPPED -> {
-                    postUserEventDelegate =
-                        postUserEventBeforeInit // The navigation session is over, disallow posting user feedback events
-                    handleSessionCanceled()
-                    handleSessionStop()
+                    if (sessionGate.compareAndSet(true, false)) {
+                        postUserEventDelegate =
+                                postUserEventBeforeInit // The navigation session is over, disallow posting user feedback events
+                        handleSessionCanceled()
+                        handleSessionStop()
+                    }
                 }
             }
         }
@@ -154,33 +157,32 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private val rerouteObserver = object : OffRouteObserver {
         override fun onOffRouteStateChanged(offRoute: Boolean) {
-            when (offRouteProcessing.compareAndSet(false, true)) {
+            when (offRoute) {
                 true -> {
-                    Log.i(TAG, "OffRoute message ignored. Previous message processing in progress")
-                    dynamicValues.timeOfRerouteEvent.set(Time.SystemImpl.millis())
-                }
-                false -> {
                     telemetryThreadControl.scope.launch {
+                        dynamicValues.timeOfRerouteEvent.set(Time.SystemImpl.millis())
                         dynamicValues.rerouteCount.addAndGet(1) // increment reroute count
                         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
                         val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                         var timeSinceLastEvent =
-                            (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
+                                (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
                         if (timeSinceLastEvent < 1000) {
                             timeSinceLastEvent = 0
                         }
                         metricsReporter.addEvent(
-                            TelemetryReroute(
-                                newDistanceRemaining = callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt(),
-                                locationsBefore = offRouteBuffers.first.toTypedArray(),
-                                locationsAfter = offRouteBuffers.second.toTypedArray(),
-                                metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName),
-                                feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-                                secondsSinceLastReroute = timeSinceLastEvent / 1000
-                            )
+                                TelemetryReroute(
+                                    newDistanceRemaining = callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt(),
+                                    locationsBefore = offRouteBuffers.first.toTypedArray(),
+                                    locationsAfter = offRouteBuffers.second.toTypedArray(),
+                                    metadata = populateEventMetadataAndUpdateState(Date(), locationEngineName = locationEngineName),
+                                    feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                                    secondsSinceLastReroute = timeSinceLastEvent / 1000
+                                )
                         )
                     }
-                    offRouteProcessing.set(false)
+                }
+                false -> {
+                    Log.i(TAG, "On route")
                 }
             }
         }
