@@ -68,8 +68,8 @@ fun obtainAbsoluteDistance(
         .toInt()
 }
 
-fun obtainRouteDestination(route: DirectionsRoute): Point =
-    route.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
+fun obtainRouteDestination(route: DirectionsRoute?): Point =
+    route?.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
         ?: Point.fromLngLat(0.0, 0.0)
 
 fun obtainVolumeLevel(context: Context): Int {

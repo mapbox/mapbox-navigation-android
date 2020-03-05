@@ -135,22 +135,20 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            metricsMetadata?.let { metadata ->
-                var telemetryStep: TelemetryStep? = null
-                callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()
-                    ?.let { routeProgress ->
-                        telemetryStep = populateTelemetryStep(routeProgress)
-                    }
-                metricsReporter.addEvent(
-                    TelemetryFasterRoute(
-                        metadata = metadata,
-                        newDistanceRemaining = fasterRoute.distance()?.toInt() ?: -1,
-                        newDurationRemaining = fasterRoute.duration()?.toInt() ?: -1,
-                        newGeometry = fasterRoute.geometry(),
-                        step = telemetryStep
-                    )
+            var telemetryStep: TelemetryStep? = null
+            callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()
+                ?.let { routeProgress ->
+                    telemetryStep = populateTelemetryStep(routeProgress)
+                }
+            metricsReporter.addEvent(
+                TelemetryFasterRoute(
+                    metadata = populateEventMetadataAndUpdateState(Date()),
+                    newDistanceRemaining = fasterRoute.distance()?.toInt() ?: -1,
+                    newDurationRemaining = fasterRoute.duration()?.toInt() ?: -1,
+                    newGeometry = fasterRoute.geometry(),
+                    step = telemetryStep
                 )
-            }
+            )
         }
     }
 
@@ -169,25 +167,23 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         dynamicValues.rerouteCount.addAndGet(1) // increment reroute count
                         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
                         val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
-                        metricsMetadata?.let { telemetryMetadata ->
-                            var timeSinceLastEvent =
-                                (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
-                            if (timeSinceLastEvent < 1000) {
-                                timeSinceLastEvent = 0
-                            }
-                            metricsReporter.addEvent(
-                                TelemetryReroute(
-                                    newDistanceRemaining = callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt(),
-                                    locationsBefore = offRouteBuffers.first.toTypedArray(),
-                                    locationsAfter = offRouteBuffers.second.toTypedArray(),
-                                    metadata = telemetryMetadata,
-                                    feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-                                    secondsSinceLastReroute = timeSinceLastEvent / 1000
-                                )
-                            )
+                        var timeSinceLastEvent =
+                            (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
+                        if (timeSinceLastEvent < 1000) {
+                            timeSinceLastEvent = 0
                         }
-                        offRouteProcessing.set(false)
+                        metricsReporter.addEvent(
+                            TelemetryReroute(
+                                newDistanceRemaining = callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt(),
+                                locationsBefore = offRouteBuffers.first.toTypedArray(),
+                                locationsAfter = offRouteBuffers.second.toTypedArray(),
+                                metadata = populateEventMetadataAndUpdateState(Date()),
+                                feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                                secondsSinceLastReroute = timeSinceLastEvent / 1000
+                            )
+                        )
                     }
+                    offRouteProcessing.set(false)
                 }
             }
         }
@@ -296,7 +292,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         screenshot: String?
     ) {
         val lastProgress = callbackDispatcher.getRouteProgress()
-        metricsMetadata?.let { metadata ->
             telemetryThreadControl.scope.launch {
                 val twoBuffers = callbackDispatcher.getLocationBuffersAsync().await()
                 val feedbackEvent = TelemetryUserFeedback(
@@ -308,16 +303,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     locationsAfter = twoBuffers.second.toTypedArray(),
                     feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                     screenshot = screenshot,
-                    step = lastProgress.routeProgress.currentLegProgress()?.let {
-                        populateTelemetryStep(
-                            it
-                        )
+                    step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
+                        populateTelemetryStep(routeLegProgress)
                     },
-                    metadata = metadata
+                    metadata = populateEventMetadataAndUpdateState(Date())
                 )
                 metricsReporter.addEvent(feedbackEvent)
             }
-        }
     }
 
     /**
@@ -346,13 +338,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         dynamicValues.routeCanceled.set(true) // Set cancel state unconditionally
         when (dynamicValues.routeArrived.get()) {
             true -> {
-                metricsMetadata?.let { telemetryData ->
-                    val cancelEvent = TelemetryCancel(
-                        arrivalTimestamp = Date().toString(),
-                        metadata = telemetryData
-                    )
-                    metricsReporter.addEvent(cancelEvent)
-                }
+                val cancelEvent = TelemetryCancel(
+                    arrivalTimestamp = Date().toString(),
+                    metadata = populateEventMetadataAndUpdateState(Date())
+                )
+                metricsReporter.addEvent(cancelEvent)
             }
             false -> {
                 metricsMetadata?.let { telemetryData ->
@@ -423,6 +413,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         telemetryThreadControl.scope.launch {
             // Initialize identifiers unique to this session
             populateEventMetadataAndUpdateState(
+                Date(),
                 directionsRoute,
                 locationEngineName,
                 location
@@ -431,9 +422,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 startTimestamp = Date().toString()
                 metricsMetadata = this
             }
-            telemetryDeparture(directionsRoute)?.let { metricEvent ->
-                metricsReporter.addEvent(metricEvent)
-            }
+            metricsReporter.addEvent(telemetryDeparture(directionsRoute))
             monitorRoutProgress()
         }
     }
@@ -456,14 +445,12 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             dynamicValues.routeArrived.set(true)
                         }
                         dynamicValues.routeCanceled.set(false)
-                        metricsMetadata?.let { metadata ->
                             metricsReporter.addEvent(
-                                TelemetryArrival(
-                                    arrivalTimestamp = Date().toString(),
-                                    metadata = metadata
-                                )
+                            TelemetryArrival(
+                                arrivalTimestamp = Date().toString(),
+                                metadata = populateEventMetadataAndUpdateState(Date())
                             )
-                        }
+                        )
                         continueRunning = false
                     }
                     RouteProgressState.LOCATION_TRACKING -> {
@@ -482,7 +469,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         }
     }
 
-    private fun telemetryDeparture(directionsRoute: DirectionsRoute): MetricEvent? {
+    private fun telemetryDeparture(directionsRoute: DirectionsRoute): MetricEvent {
         metricsMetadata?.apply {
             lat = callbackDispatcher.getLastLocation().latitude.toFloat()
             lng = callbackDispatcher.getLastLocation().longitude.toFloat()
@@ -490,10 +477,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             requestIdentifier = directionsRoute.routeOptions()?.requestUuid()
             originalGeometry = directionsRoute.geometry()
         }
-        metricsMetadata?.let {
-            return TelemetryDepartureEvent(it)
-        }
-        return null
+        return TelemetryDepartureEvent(populateEventMetadataAndUpdateState(Date()))
     }
 
     /**
@@ -521,33 +505,34 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     private fun populateEventMetadataAndUpdateState(
-        directionsRoute: DirectionsRoute,
-        locationEngineName: String,
-        currentLocation: Location
+        creationDate: Date,
+        directionsRoute: DirectionsRoute? = null,
+        locationEngineName: String? = null,
+        currentLocation: Location? = null
     ): TelemetryMetadata {
         val sdkType = generateSdkIdentifier()
         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
         dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
         return TelemetryMetadata(
-            created = Date().toString(),
+            created = creationDate.toString(),
             startTimestamp = Date().toString(),
             device = Build.DEVICE,
             sdkIdentifier = sdkType,
             sdkVersion = BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME,
             simulation = MOCK_PROVIDER == locationEngineName,
-            locationEngine = locationEngineName,
+            locationEngine = locationEngineName ?: "no name",
             sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-            originalRequestIdentifier = directionsRoute.routeOptions()?.requestUuid(),
-            requestIdentifier = directionsRoute.routeOptions()?.requestUuid(),
-            lat = currentLocation.latitude.toFloat(),
-            lng = currentLocation.longitude.toFloat(),
+            originalRequestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
+            requestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
+            lat = currentLocation?.latitude?.toFloat() ?: 0f,
+            lng = currentLocation?.longitude?.toFloat() ?: 0f,
             originalGeometry = obtainGeometry(directionsRoute),
-            originalEstimatedDistance = directionsRoute.distance()?.toInt() ?: 0,
-            originalEstimatedDuration = directionsRoute.duration()?.toInt() ?: 0,
+            originalEstimatedDistance = directionsRoute?.distance()?.toInt() ?: 0,
+            originalEstimatedDuration = directionsRoute?.duration()?.toInt() ?: 0,
             originalStepCount = obtainStepCount(directionsRoute),
             geometry = obtainGeometry(directionsRoute),
-            estimatedDistance = directionsRoute.distance()?.toInt() ?: 0,
-            estimatedDuration = directionsRoute.duration()?.toInt() ?: 0,
+            estimatedDistance = directionsRoute?.distance()?.toInt() ?: 0,
+            estimatedDuration = directionsRoute?.duration()?.toInt() ?: 0,
             stepCount = obtainStepCount(directionsRoute),
             distanceCompleted = 0,
             distanceRemaining = dynamicValues.distanceRemaining.get().toInt(),
