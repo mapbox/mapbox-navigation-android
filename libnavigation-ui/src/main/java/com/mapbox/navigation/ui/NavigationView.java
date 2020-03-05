@@ -395,6 +395,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   @Override
   public void updatePuckState(RouteProgress routeProgress) {
+    if(routeProgress == null || routeProgress.currentState() == null) {
+      return;
+    }
+
     int puckDrawable = R.drawable.user_puck_icon_uncertain_location;
     switch (routeProgress.currentState()) {
       case ROUTE_INVALID:

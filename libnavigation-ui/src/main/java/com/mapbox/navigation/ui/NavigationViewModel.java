@@ -14,6 +14,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -56,14 +58,17 @@ import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.mapbox.navigation.utils.network.NetworkStatusService;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import okhttp3.Cache;
+import timber.log.Timber;
 
 public class NavigationViewModel extends AndroidViewModel {
 
@@ -479,7 +484,19 @@ public class NavigationViewModel extends AndroidViewModel {
     public void onOffRouteStateChanged(boolean offRoute) {
       if (offRoute) {
         speechPlayer.onOffRoute();
+        locationEngineConductor.obtainLocationEngine().getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
+          @Override
+          public void onSuccess(LocationEngineResult result) {
+            handleOffRouteEvent(Point.fromLngLat(result.getLastLocation().getLongitude(), result.getLastLocation().getLatitude()));
+          }
+
+          @Override
+          public void onFailure(@NonNull Exception exception) {
+
+          }
+        });
       }
+      isOffRoute.setValue(offRoute);
     }
 
     /*@Override
@@ -565,8 +582,30 @@ public class NavigationViewModel extends AndroidViewModel {
   private void handleOffRouteEvent(Point newOrigin) {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
+
+      router.getRoute(
+        this.navigationViewOptions.directionsRoute().routeOptions(),
+        new Router.Callback() {
+          @Override
+          public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
+            navigation.setRoutes(routes);
+            route.setValue(routes.get(0));
+          }
+
+          @Override
+          public void onFailure(@NotNull Throwable throwable) {
+            Timber.e(throwable);
+          }
+
+          @Override
+          public void onCanceled() {
+            int i = 0;
+          }
+        }
+      );
+
       // route.findRouteFrom(routeProgress)
-      isOffRoute.setValue(true);
+      //isOffRoute.setValue(true);
     }
   }
 
