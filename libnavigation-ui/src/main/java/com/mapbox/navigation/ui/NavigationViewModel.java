@@ -63,6 +63,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -492,19 +493,12 @@ public class NavigationViewModel extends AndroidViewModel {
 
           @Override
           public void onFailure(@NonNull Exception exception) {
-
+             // todo
           }
         });
       }
       isOffRoute.setValue(offRoute);
     }
-
-    /*@Override
-    public void userOffRoute(Location location) {
-
-      Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-      handleOffRouteEvent(newOrigin);
-    }*/
   };
 
   // TODO Faster route
@@ -583,8 +577,19 @@ public class NavigationViewModel extends AndroidViewModel {
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
 
+      final List<Point> previousCoordinates =
+        this.navigationViewOptions.directionsRoute().routeOptions().coordinates();
+      final List<Point> newCoordinates = new ArrayList<>();
+      newCoordinates.add(newOrigin);
+      newCoordinates.add(previousCoordinates.get(1));
+
+      final RouteOptions updatedOptions = this.navigationViewOptions.directionsRoute()
+        .routeOptions()
+        .toBuilder()
+        .coordinates(newCoordinates).build();
+
       router.getRoute(
-        this.navigationViewOptions.directionsRoute().routeOptions(),
+        updatedOptions,
         new Router.Callback() {
           @Override
           public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
@@ -595,17 +600,15 @@ public class NavigationViewModel extends AndroidViewModel {
           @Override
           public void onFailure(@NotNull Throwable throwable) {
             Timber.e(throwable);
+            // todo
           }
 
           @Override
           public void onCanceled() {
-            int i = 0;
+            // todo
           }
         }
       );
-
-      // route.findRouteFrom(routeProgress)
-      //isOffRoute.setValue(true);
     }
   }
 
