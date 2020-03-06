@@ -429,7 +429,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 startTimestamp = Date().toString()
             }
             telemetryEventGate(telemetryDeparture(directionsRoute))
-            monitorRoutProgress()
+            monitorRouteProgress()
         }
     }
 
@@ -437,7 +437,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * This method waits for an [RouteProgressState.ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
      * sends the telemetry data to the servers.
      */
-    private suspend fun monitorRoutProgress() {
+    private suspend fun monitorRouteProgress() {
         var continueRunning = true
         while (coroutineContext.isActive && continueRunning) {
             try {
