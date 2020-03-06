@@ -25,7 +25,7 @@ interface MapboxNativeNavigator {
     // Route following
 
     fun updateLocation(rawLocation: Location)
-//    fun updateSensorEvent(sensorEvent: SensorEvent)
+    fun updateSensorEvent(sensorEvent: SensorEvent)
     fun getTripStatus(date: Date, callback: (TripStatus) -> Unit)
 
     // Routing
@@ -55,7 +55,6 @@ interface MapboxNativeNavigator {
 
     fun cacheLastRoute()
 
-    // fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long
     fun getRoute(url: String, callback: (RouterResult) -> Unit)
     fun unpackTiles(tarPath: String, destinationPath: String, callback: (Long) -> Unit)
     fun removeTiles(tilePath: String, southwest: Point, northeast: Point, callback: (Long) -> Unit)
@@ -69,7 +68,6 @@ interface MapboxNativeNavigator {
     // Configuration
 
     fun getConfig(): NavigatorConfig
-//    fun setConfig(config: NavigatorConfig?)
 
     // Other
 

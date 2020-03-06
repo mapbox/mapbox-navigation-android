@@ -30,7 +30,7 @@ class MapboxTripSession constructor(
     override val locationEngine: LocationEngine,
     override val locationEngineRequest: LocationEngineRequest,
     private val navigatorPollingDelay: Long,
-    private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
+    private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl.getInstance(),
     threadController: ThreadController = ThreadController
 ) : TripSession {
 
@@ -222,7 +222,7 @@ class MapboxTripSession constructor(
     }
 
     override fun updateSensorEvent(sensorEvent: SensorEvent) {
-//        navigator.updateSensorEvent(sensorEvent)
+        navigator.updateSensorEvent(sensorEvent)
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {

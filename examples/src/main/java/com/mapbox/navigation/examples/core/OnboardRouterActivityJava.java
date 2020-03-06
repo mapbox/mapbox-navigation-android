@@ -19,13 +19,18 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.options.Endpoint;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
+import com.mapbox.navigation.navigator.MapboxNativeNavigator;
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
+import com.mapbox.navigation.route.onboard.network.HttpClient;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
+import com.mapbox.navigator.RouterParams;
+import com.mapbox.navigator.TileEndpointConfiguration;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -78,10 +83,38 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
             null,
             null,
             null,
-            null // working with pre-fetched tiles only
+            new Endpoint(
+              "https://api-routing-tiles-staging.tilestream.net",
+              "2019_04_13-00_00_11",
+              Utils.getMapboxAccessToken(this),
+              "MapboxNavigationNative"
+            )
     );
 
-    onboardRouter = new MapboxOnboardRouter(new MapboxNativeNavigatorImpl(), config);
+    File tileDir = new File(config.getTilePath(), MapboxOnboardRouter.TILES_DIR_NAME);
+    if (!tileDir.exists()) {
+      tileDir.mkdirs();
+    }
+    RouterParams routerParams = new RouterParams(
+      tileDir.getAbsolutePath(),
+      config.getInMemoryTileCache(),
+      config.getMapMatchingSpatialCache(),
+      config.getThreadsCount(),
+      new TileEndpointConfiguration(
+        config.getEndpoint().getHost(),
+        config.getEndpoint().getVersion(),
+        config.getEndpoint().getToken(),
+        config.getEndpoint().getUserAgent(),
+        ""
+      )
+    );
+    HttpClient httpClient = new HttpClient();
+    MapboxNativeNavigator nativeNavigator = MapboxNativeNavigatorImpl.Companion.getInstance(
+      routerParams,
+      httpClient
+    );
+
+    onboardRouter = new MapboxOnboardRouter(nativeNavigator, config);
   }
 
 

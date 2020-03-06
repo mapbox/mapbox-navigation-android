@@ -32,6 +32,9 @@
     <string name="title_simple_navigation_kotlin" translatable="false">Simple Mapbox Navigation Kotlin</string>
     <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
 
+    <string name="title_free_drive_kotlin" translatable="false">Free Drive Kotlin</string>
+    <string name="description_free_drive_kotlin" translatable="false">Shows how to use the Free Drive mode in Kotlin code.</string>
+
     <string name="title_component_navigation">MapboxNavigation with UI components</string>
     <string name="description_component_navigation">MapboxNavigation with UI components</string>
 

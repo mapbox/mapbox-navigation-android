@@ -33,9 +33,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.freedrive.ElectronicHorizonParams
-import com.mapbox.navigation.core.freedrive.ElectronicHorizonRequestBuilder
-import com.mapbox.navigation.core.freedrive.FreeDriveLocationUpdater
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -58,8 +55,6 @@ import java.io.File
 import java.lang.reflect.Field
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -119,7 +114,7 @@ constructor(
         accessToken
     ),
     locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
-    private val navigatorNative: MapboxNativeNavigator = MapboxNativeNavigatorImpl(),
+    private val navigatorNative: MapboxNativeNavigator = MapboxNativeNavigatorImpl.getInstance(),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
@@ -134,9 +129,6 @@ constructor(
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteTimer: MapboxTimer
     private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
-    private val freeDriveLocationUpdater: FreeDriveLocationUpdater
-    private val isFreeDriveEnabled = AtomicBoolean(false)
-    private val isActiveGuidanceOnGoing = AtomicBoolean(false)
 
     private var notificationChannelField: Field? = null
 
@@ -150,14 +142,6 @@ constructor(
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
-
-        freeDriveLocationUpdater = FreeDriveLocationUpdater(
-                locationEngine,
-                locationEngineRequest,
-                navigatorNative,
-                Executors.newScheduledThreadPool(2),
-                ElectronicHorizonRequestBuilder,
-                ElectronicHorizonParams.Builder().build())
 
         val notification: TripNotification = NavigationModuleProvider.createModule(
             MapboxNavigationModuleType.TripNotification,
@@ -187,8 +171,6 @@ constructor(
             .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
                 requestFasterRoute()
             }
-
-        addHistoryEvent("START_SESSION", "true")
     }
 
     /**
@@ -205,9 +187,6 @@ constructor(
             monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
         }
     }
-    fun startNavigation() {
-        isActiveGuidanceOnGoing.set(true)
-    }
 
     /**
      * Stops listening for location updates and enters an `Idle` state.
@@ -216,59 +195,6 @@ constructor(
      */
     fun stopTripSession() {
         tripSession.stop()
-
-        isActiveGuidanceOnGoing.set(false)
-        if (isFreeDriveEnabled.get()) {
-            enableFreeDrive()
-        }
-    }
-
-    /**
-     * Call this when the navigation session needs to end before the user reaches their final
-     * destination.
-     *
-     *
-     * Ending the navigation session ends and unbinds the navigation service meaning any milestone,
-     * progress change, or off-route listeners will not be invoked anymore. A call returning false
-     * will occur to [NavigationEventListener.onRunning] to notify you when the service
-     * ends.
-     *
-     *
-     * @since 0.1.0
-     */
-//    fun stopNavigation() {
-////        isActiveGuidanceOnGoing.set(false)
-////        if (isFreeDriveEnabled.get()) {
-////            enableFreeDrive()
-////        }
-////        stopNavigationService()
-////    }
-
-
-    private fun killFreeDrive() {
-        freeDriveLocationUpdater.kill()
-    }
-
-    /**
-     * Calling this method enables free drive mode.
-     *
-     *
-     * Best enhanced [Location] updates are received if an [EnhancedLocationListener] has been
-     * added using [.addEnhancedLocationListener].
-     */
-    fun enableFreeDrive() {
-        isFreeDriveEnabled.set(true)
-        if (!isActiveGuidanceOnGoing.get()) {
-            freeDriveLocationUpdater.start()
-        }
-    }
-
-    /**
-     * Calling this method disables free drive mode.
-     */
-    fun disableFreeDrive() {
-        isFreeDriveEnabled.set(false)
-        freeDriveLocationUpdater.stop()
     }
 
     /**
@@ -368,7 +294,6 @@ constructor(
     fun onDestroy() {
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
-        killFreeDrive()
         directionsSession.shutDownSession()
         directionsSession.unregisterAllRoutesObservers()
         tripSession.shutdown()

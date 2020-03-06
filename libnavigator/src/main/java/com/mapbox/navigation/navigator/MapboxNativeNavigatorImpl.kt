@@ -32,10 +32,10 @@ import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlin.math.roundToLong
 
-class MapboxNativeNavigatorImpl constructor(
-    config: NavigatorConfig? = null,
+class MapboxNativeNavigatorImpl private constructor(
     routerParams: RouterParams? = null,
-    httpClient: HttpInterface? = null
+    httpClient: HttpInterface? = null,
+    config: NavigatorConfig? = null
 ) : MapboxNativeNavigator {
 
     // Order matters! https://kotlinlang.org/docs/reference/classes.html#constructors
@@ -50,6 +50,34 @@ class MapboxNativeNavigatorImpl constructor(
         private const val GRID_SIZE = 0.0025f
         private const val BUFFER_DILATION: Short = 1
         private const val TWO_LEGS: Short = 2
+
+        @Volatile private var INSTANCE: MapboxNativeNavigatorImpl? = null
+
+        @JvmOverloads
+        fun getInstance(routerParams: RouterParams? = null,
+                        httpClient: HttpInterface? = null,
+                        config: NavigatorConfig? = null
+        ): MapboxNativeNavigatorImpl =
+                INSTANCE ?: synchronized(this) {
+                    INSTANCE ?: MapboxNativeNavigatorImpl(
+                            routerParams,
+                            httpClient,
+                            config
+                    ).also { INSTANCE = it }
+                }
+
+//        TODO: only for case when we need reinit Navigator,
+//        TODO: for example when we need to change some NavigatorConfig value
+        fun initInstance(routerParams: RouterParams? = null,
+                         httpClient: HttpInterface? = null,
+                         config: NavigatorConfig? = null
+        ) {
+            INSTANCE = MapboxNativeNavigatorImpl(
+                    routerParams,
+                    httpClient,
+                    config
+            )
+        }
     }
 
     private val navigator: Navigator = Navigator(config, routerParams, httpClient)
@@ -61,12 +89,12 @@ class MapboxNativeNavigatorImpl constructor(
     override fun updateLocation(rawLocation: Location) =
         navigator.updateLocation(rawLocation.toFixLocation(Date()))
 
-//    override fun updateSensorEvent(sensorEvent: SensorEvent) {
-//        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
-//        ifNonNull(value) { navigatorSensorData ->
-//            navigator.updateSensorData(navigatorSensorData)
-//        }
-//    }
+    override fun updateSensorEvent(sensorEvent: SensorEvent) {
+        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
+        ifNonNull(value) { navigatorSensorData ->
+            navigator.updateSensorData(navigatorSensorData)
+        }
+    }
 
     override fun getTripStatus(date: Date, callback: (TripStatus) -> Unit) =
         navigator.getStatus(date) { status ->
@@ -121,9 +149,6 @@ class MapboxNativeNavigatorImpl constructor(
         navigator.cacheLastRoute {}
     }
 
-    // override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface): Long =
-    //     navigator.configureRouter(routerParams, httpClient)
-
     override fun getRoute(url: String, callback: (RouterResult) -> Unit) =
         navigator.getRoute(url, callback)
 
@@ -148,10 +173,6 @@ class MapboxNativeNavigatorImpl constructor(
     // Configuration
 
     override fun getConfig(): NavigatorConfig = navigator.config
-
-    // override fun setConfig(config: NavigatorConfig?) {
-    //     navigator.setConfig(config)
-    // }
 
     // Other
 

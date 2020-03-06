@@ -23,6 +23,7 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
+import com.mapbox.navigation.route.onboard.network.HttpClient
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigator.HttpInterface
@@ -92,7 +93,13 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
                             ""
                     )
                 })
-        onboardRouter = MapboxOnboardRouter(MapboxNativeNavigatorImpl(routerParams = routerParams), config)
+        val httpClient = HttpClient()
+        val navigatorNative = MapboxNativeNavigatorImpl.getInstance(
+                routerParams = routerParams,
+                httpClient = httpClient
+        )
+
+        onboardRouter = MapboxOnboardRouter(navigatorNative, config)
     }
 
     private fun newOrigin() {
