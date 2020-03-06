@@ -615,8 +615,14 @@ constructor(
             @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
             screenshot: String?
         ) {
-            MapboxNavigationTelemetry.postUserFeedbackEvent(feedbackType, description, feedbackSource, screenshot)
+            MapboxNavigationTelemetry.postUserFeedbackEvent(
+                feedbackType,
+                description,
+                feedbackSource,
+                screenshot
+            )
         }
+
         /**
          * Returns a pre-build set of [NavigationOptions] with smart defaults.
          *

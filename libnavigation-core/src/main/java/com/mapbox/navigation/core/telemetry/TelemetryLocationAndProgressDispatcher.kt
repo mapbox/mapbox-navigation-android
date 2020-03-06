@@ -65,6 +65,7 @@ internal class TelemetryLocationAndProgressDispatcher :
      * while the second represents a fixed number of locations after the off route event
      */
     fun getLocationBuffersAsync() = accumulatePostEventLocationsAsync()
+
     fun cancelAccumulationJob() = accumulationJob.cancel()
 
     /**
@@ -82,7 +83,8 @@ internal class TelemetryLocationAndProgressDispatcher :
             preOffRoute.addAll(preEventLocationBuffer.await()) // Once signaled, copy the locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
-            monitorJob = monitorLocationChannel(monitorControl) // Start accumulating post event locations
+            monitorJob =
+                monitorLocationChannel(monitorControl) // Start accumulating post event locations
             postOffRoute.addAll(monitorControl.await()) // copy post event locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
@@ -91,7 +93,12 @@ internal class TelemetryLocationAndProgressDispatcher :
         jobControl.scope.launch {
             select<Unit> {
                 accumulationJob.onJoin {
-                    result.complete(Pair(preOffRoute, postOffRoute)) // notify caller the job is complete
+                    result.complete(
+                        Pair(
+                            preOffRoute,
+                            postOffRoute
+                        )
+                    ) // notify caller the job is complete
                 }
             }
         }

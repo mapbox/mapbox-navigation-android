@@ -101,7 +101,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         setContentView(R.layout.activity_simple_mapbox_navigation)
         findViewById<Button>(R.id.btn_send_user_feadback)?.let { button ->
             button.setOnClickListener {
-                MapboxNavigation.postUserFeedback(TelemetryUserFeedback.FEEDBACK_TYPE_GENERAL_ISSUE, "User feedback test at: ${Date().time}", TelemetryUserFeedback.FEEDBACK_SOURCE_UI, null)
+                MapboxNavigation.postUserFeedback(
+                    TelemetryUserFeedback.FEEDBACK_TYPE_GENERAL_ISSUE,
+                    "User feedback test at: ${Date().time}",
+                    TelemetryUserFeedback.FEEDBACK_SOURCE_UI,
+                    null
+                )
             }
         }
         initViews()

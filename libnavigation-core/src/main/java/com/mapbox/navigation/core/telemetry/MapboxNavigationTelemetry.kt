@@ -322,25 +322,29 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private fun handleSessionCanceled() {
         dynamicValues.routeCanceled.set(true) // Set cancel state unconditionally
-        if (CURRENT_SESSION_CONTROL.compareAndSet(CurrentSessionState.SESSION_START, CurrentSessionState.SESSION_END)) {
+        if (CURRENT_SESSION_CONTROL.compareAndSet(
+                CurrentSessionState.SESSION_START,
+                CurrentSessionState.SESSION_END
+            )
+        ) {
             when (dynamicValues.routeArrived.get()) {
                 true -> {
                     val cancelEvent = TelemetryCancel(
-                            arrivalTimestamp = Date().toString(),
-                            metadata = populateEventMetadataAndUpdateState(
-                                    Date(),
-                                    locationEngineName = locationEngineName
-                            )
+                        arrivalTimestamp = Date().toString(),
+                        metadata = populateEventMetadataAndUpdateState(
+                            Date(),
+                            locationEngineName = locationEngineName
+                        )
                     )
                     callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
                 }
                 false -> {
                     val cancelEvent = TelemetryCancel(
-                            metadata = populateEventMetadataAndUpdateState(
-                                    Date(),
-                                    locationEngineName = locationEngineName
-                            )
+                        metadata = populateEventMetadataAndUpdateState(
+                            Date(),
+                            locationEngineName = locationEngineName
+                        )
                     )
                     callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
