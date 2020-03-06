@@ -31,9 +31,10 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
     private var jobControl = ThreadController.getIOScopeAndRootJob()
     private var monitorJob: Job = Job()
+    private val preEventLocationBuffer = CompletableDeferred<ArrayDeque<Location>>()
     private val routeSelected = AtomicReference<RouteAvailable?>(null)
     init {
-        monitorJob = monitorLocationChannel()
+        monitorJob = monitorLocationChannel(preEventLocationBuffer)
     }
 
     /**
@@ -71,12 +72,15 @@ internal class TelemetryLocationAndProgressDispatcher :
             val monitorControl =
                 CompletableDeferred<ArrayDeque<Location>>() // This variable will be signaled once enough location data is accumulated
             val preOffRoute = mutableListOf<Location>() // receiver for pre-offroute event locations
-            preOffRoute.addAll(monitorControl.await()) // Once signaled, copy the locations
+            preOffRoute.addAll(preEventLocationBuffer.await()) // Once signaled, copy the locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
-            monitorLocationChannel(monitorControl) // Start accumulating post event locations
+
+            monitorJob = monitorLocationChannel(monitorControl) // Start accumulating post event locations
             val postOffRoute =
                 mutableListOf<Location>() // receive buffer for post-offline event locations
             postOffRoute.addAll(monitorControl.await()) // copy post event locations
+            monitorJob.cancel() // Cancel the monitor before calling it again. This call suspends
+
             monitorJob = monitorLocationChannel() // restart monitor
             result.complete(Pair(preOffRoute, postOffRoute)) // notify caller the job is complete
         }
