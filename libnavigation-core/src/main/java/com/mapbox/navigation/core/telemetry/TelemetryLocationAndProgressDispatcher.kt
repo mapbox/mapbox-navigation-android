@@ -68,7 +68,9 @@ internal class TelemetryLocationAndProgressDispatcher :
     fun cancelAccumulationJob() = accumulationJob.cancel()
 
     /**
-     * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events
+     * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events.
+     * The buffers are sent to the caller if the job completes or is canceled. This job maybe canceled by a navigation.cancel event.
+     * This code is shared between user feedback events and off-route events
      */
     private fun accumulatePostEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
