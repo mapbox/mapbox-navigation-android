@@ -332,6 +332,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                     locationEngineName = locationEngineName
                             )
                     )
+                    callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
                 }
                 false -> {
@@ -341,6 +342,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                     locationEngineName = locationEngineName
                             )
                     )
+                    callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
                 }
             }

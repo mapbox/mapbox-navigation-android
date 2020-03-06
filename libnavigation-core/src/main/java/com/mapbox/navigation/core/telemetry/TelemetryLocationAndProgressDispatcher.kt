@@ -18,6 +18,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 
 internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
 
@@ -33,6 +34,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var monitorJob: Job = Job()
     private val preEventLocationBuffer = CompletableDeferred<ArrayDeque<Location>>()
     private val routeSelected = AtomicReference<RouteAvailable?>(null)
+    private var accumulationJob: Job = Job()
 
     init {
         monitorJob = monitorLocationChannel(preEventLocationBuffer)
@@ -63,27 +65,33 @@ internal class TelemetryLocationAndProgressDispatcher :
      * while the second represents a fixed number of locations after the off route event
      */
     fun getLocationBuffersAsync() = accumulatePostEventLocationsAsync()
+    fun cancelAccumulationJob() = accumulationJob.cancel()
 
     /**
      * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events
      */
     private fun accumulatePostEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
-        jobControl.scope.launch {
+        val preOffRoute = mutableListOf<Location>()
+        val postOffRoute = mutableListOf<Location>()
+        accumulationJob = jobControl.scope.launch {
             val monitorControl =
                 CompletableDeferred<ArrayDeque<Location>>() // This variable will be signaled once enough location data is accumulated
-            val preOffRoute = mutableListOf<Location>() // receiver for pre-offroute event locations
             preOffRoute.addAll(preEventLocationBuffer.await()) // Once signaled, copy the locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
             monitorJob = monitorLocationChannel(monitorControl) // Start accumulating post event locations
-            val postOffRoute =
-                mutableListOf<Location>() // receive buffer for post-offline event locations
             postOffRoute.addAll(monitorControl.await()) // copy post event locations
-            monitorJob.cancel() // Cancel the monitor before calling it again. This call suspends
+            monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
             monitorJob = monitorLocationChannel() // restart monitor
-            result.complete(Pair(preOffRoute, postOffRoute)) // notify caller the job is complete
+        }
+        jobControl.scope.launch {
+            select<Unit> {
+                accumulationJob.onJoin {
+                    result.complete(Pair(preOffRoute, postOffRoute)) // notify caller the job is complete
+                }
+            }
         }
         return result
     }
