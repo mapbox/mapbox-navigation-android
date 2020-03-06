@@ -150,7 +150,8 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     }
 
     override fun onCancelNavigation() {
-    // todo
+        navigationView.stopNavigation()
+        finish()
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {

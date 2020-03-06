@@ -487,8 +487,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
     @Override
     public void onNewVoiceInstructions(@NotNull VoiceInstructions voiceInstructions) {
-      retrieveAnnouncementFromSpeechEvent(voiceInstructions);
-      speechPlayer.play(voiceInstructions);
+      speechPlayer.play(retrieveAnnouncementFromSpeechEvent(voiceInstructions));
     }
   };
 
