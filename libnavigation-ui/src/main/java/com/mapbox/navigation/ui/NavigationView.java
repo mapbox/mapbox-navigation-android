@@ -360,7 +360,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   @Override
   public void startCamera(DirectionsRoute directionsRoute) {
     if (navigationMap != null) {
-      // todo ? navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
+      navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
+      navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
       navigationMap.startCamera(directionsRoute);
     }
   }
@@ -399,7 +400,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       return;
     }
 
-    int puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+    int puckDrawable;
     switch (routeProgress.currentState()) {
       case ROUTE_INVALID:
           puckDrawable = R.drawable.user_puck_icon_uncertain_location;
@@ -420,10 +421,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
         puckDrawable = R.drawable.user_puck_icon_uncertain_location;
         break;
     }
-
-    // todo this call is in a different work stream that hasn't
-    // been merged yet.
-    // navigationMap.updateCurrentLocationDrawable();
+    navigationMap.updateCurrentLocationDrawable(puckDrawable);
   }
 
   /**
@@ -435,6 +433,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   public void startNavigation(NavigationViewOptions options) {
     navigationMap.drawRoute(options.directionsRoute());
     initializeNavigation(options);
+    startCamera(options.directionsRoute());
   }
 
   /**
