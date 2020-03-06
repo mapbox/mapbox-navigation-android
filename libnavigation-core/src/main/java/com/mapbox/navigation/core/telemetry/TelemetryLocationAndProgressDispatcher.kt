@@ -33,6 +33,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var monitorJob: Job = Job()
     private val preEventLocationBuffer = CompletableDeferred<ArrayDeque<Location>>()
     private val routeSelected = AtomicReference<RouteAvailable?>(null)
+
     init {
         monitorJob = monitorLocationChannel(preEventLocationBuffer)
     }
@@ -121,8 +122,11 @@ internal class TelemetryLocationAndProgressDispatcher :
         channelOnRouteProgress
 
     fun getLastLocation(): Location = lastLocation.get()
+
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
+
     fun isRouteAvailable(): AtomicReference<RouteAvailable?> = routeSelected
+
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
     }

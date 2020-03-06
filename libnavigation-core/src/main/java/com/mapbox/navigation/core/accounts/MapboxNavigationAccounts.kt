@@ -17,6 +17,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
         private var skuGenerator: SkuGenerator? = null
         private var INSTANCE: MapboxNavigationAccounts? = null
+        private var skuToken: String = ""
 
         @JvmStatic
         fun getInstance(context: Context): MapboxNavigationAccounts =
@@ -45,7 +46,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->
-            val skuToken = generator.generateToken()
+            skuToken = generator.generateToken()
             check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty") }
 
             when {
@@ -69,6 +70,8 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     internal fun navigationStarted() {
         skuGenerator?.onNavigationStart()
     }
+
+    internal fun obtainSkuToken(): String = skuToken
 
     private fun buildResourceUrlWithSku(
         resourceUrl: String,
