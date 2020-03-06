@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -14,11 +15,13 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
+import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_navigation_view.*
 
-class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener {
+class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
+    BannerInstructionsListener {
 
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var mapboxMap: MapboxMap
@@ -95,12 +98,17 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
                 val optionsBuilder = NavigationViewOptions.builder()
                 optionsBuilder.navigationListener(this)
                 optionsBuilder.directionsRoute(directionsRoute)
-                optionsBuilder.shouldSimulateRoute(false)
+                optionsBuilder.shouldSimulateRoute(true)
+                optionsBuilder.bannerInstructionsListener(this)
                 // extractConfiguration(options)
                 optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }
+    }
+
+    override fun willDisplay(instructions: BannerInstructions?): BannerInstructions {
+        return instructions!!
     }
 
 //    override fun onMapLongClick(point: LatLng): Boolean {

@@ -34,6 +34,7 @@ import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts;
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
@@ -272,6 +273,7 @@ public class NavigationViewModel extends AndroidViewModel {
   void stopNavigation() {
     navigation.unregisterRouteProgressObserver(navigationViewVm);
     navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.stopTripSession();
   }
@@ -311,6 +313,14 @@ public class NavigationViewModel extends AndroidViewModel {
 
   void updateLocation(Location location) {
     navigationLocation.setValue(location);
+  }
+
+  private void updateBannerInstruction(BannerInstructions bannerInstructions) {
+    BannerInstructions instructions = retrieveInstructionsFromBannerEvent(bannerInstructions);
+    if (instructions != null) {
+      BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
+      bannerInstructionModel.setValue(model);
+    }
   }
 
   void sendEventFailedReroute(String errorMessage) {
@@ -469,6 +479,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerRouteProgressObserver(navigationViewVm);
     navigation.registerLocationObserver(navigationViewVm);
     navigation.registerOffRouteObserver(offRouteListener);
+    navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }
@@ -498,6 +509,13 @@ public class NavigationViewModel extends AndroidViewModel {
         });
       }
       isOffRoute.setValue(offRoute);
+    }
+  };
+
+  private BannerInstructionsObserver bannerInstructionsObserver = new BannerInstructionsObserver() {
+    @Override
+    public void onNewBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
+      updateBannerInstruction(bannerInstructions);
     }
   };
 
