@@ -5,7 +5,15 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 
 internal object FasterRouteDetector {
 
+    /**
+     * This threshold optimizes for the current route. For example, if you're 40 minutes
+     * away and there is an alternative that is 1 minute faster, it will be ignored.
+     */
+    private const val PERCENTAGE_THRESHOLD = 0.90
+
     fun isRouteFaster(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
-        return false
+        val newRouteDuration = newRoute.duration() ?: return false
+        val weightedDuration = routeProgress.durationRemaining().toDouble() * PERCENTAGE_THRESHOLD
+        return newRouteDuration < weightedDuration
     }
 }
