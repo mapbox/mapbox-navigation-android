@@ -266,6 +266,20 @@ commands:
           name: Generate documentation
           command: make javadoc-dokka
 
+  track-performance:
+    steps:
+      - run:
+          name: Track performance of the Navigation 1.0
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+               curl -u ${MOBILE_METRICS_TOKEN}: \
+                 -d build_parameters[CIRCLE_JOB]=android-navigation-benchmark \
+                 -d build_parameters[BENCHMARK_COMMIT]= ${CIRCLE_SHA1} \
+                 https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+
 jobs:
   build:
     working_directory: ~/code
@@ -405,6 +419,7 @@ jobs:
       #         command: sh scripts/dokka-validate.sh
       - publish-artifacts:
           repository: "artifactory"
+      - track-performance
 
   release-1_0:
     working_directory: ~/code
