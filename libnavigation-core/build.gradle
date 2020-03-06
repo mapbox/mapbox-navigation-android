@@ -40,7 +40,6 @@ dependencies {
     api dependenciesList.mapboxSdkTurf
     implementation dependenciesList.mapboxAndroidAccounts
 
-    //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
