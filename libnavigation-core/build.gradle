@@ -47,6 +47,7 @@ dependencies {
 
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation 'com.google.truth:truth:1.0'
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"

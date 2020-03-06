@@ -1,12 +1,11 @@
 package com.mapbox.navigation.core.fasterroute
 
+import com.google.common.truth.Truth.assertThat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.every
 import io.mockk.mockk
 import java.util.concurrent.TimeUnit
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FasterRouteDetectorTest {
@@ -20,7 +19,7 @@ class FasterRouteDetectorTest {
 
         val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
-        assertTrue(isFasterRoute)
+        assertThat(isFasterRoute).isTrue()
     }
 
     @Test
@@ -32,7 +31,7 @@ class FasterRouteDetectorTest {
 
         val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
-        assertFalse(isFasterRoute)
+        assertThat(isFasterRoute).isFalse()
     }
 
     @Test
@@ -44,6 +43,6 @@ class FasterRouteDetectorTest {
 
         val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
-        assertFalse(isFasterRoute)
+        assertThat(isFasterRoute).isFalse()
     }
 }
