@@ -10,6 +10,7 @@ import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.time.Time
 import java.util.ArrayDeque
+import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -27,6 +28,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
         AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
+    private val channelRouteSelected = Channel<RouteAvailable>(Channel.CONFLATED)
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var channelLocation = Channel<Location>(Channel.CONFLATED)
@@ -68,6 +70,7 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     fun cancelAccumulationJob() = accumulationJob.cancel()
 
+    fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelRouteSelected
     /**
      * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events.
      * The buffers are sent to the caller if the job completes or is canceled. This job maybe canceled by a navigation.cancel event.
@@ -75,17 +78,17 @@ internal class TelemetryLocationAndProgressDispatcher :
      */
     private fun accumulatePostEventLocationsAsync(): Deferred<OffRouteBuffers> {
         val result = CompletableDeferred<OffRouteBuffers>()
-        val preOffRoute = mutableListOf<Location>()
-        val postOffRoute = mutableListOf<Location>()
+        val preEventLocationBuffer = mutableListOf<Location>()
+        val postEventLocationBuffer = mutableListOf<Location>()
         accumulationJob = jobControl.scope.launch {
             val monitorControl =
                 CompletableDeferred<ArrayDeque<Location>>() // This variable will be signaled once enough location data is accumulated
-            preOffRoute.addAll(preEventLocationBuffer.await()) // Once signaled, copy the locations
+            preEventLocationBuffer.addAll(this@TelemetryLocationAndProgressDispatcher.preEventLocationBuffer.await()) // Once signaled, copy the locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
             monitorJob =
                 monitorLocationChannel(monitorControl) // Start accumulating post event locations
-            postOffRoute.addAll(monitorControl.await()) // copy post event locations
+            postEventLocationBuffer.addAll(monitorControl.await()) // copy post event locations
             monitorJob.cancelAndJoin() // Cancel the monitor before calling it again. This call suspends
 
             monitorJob = monitorLocationChannel() // restart monitor
@@ -95,8 +98,8 @@ internal class TelemetryLocationAndProgressDispatcher :
                 accumulationJob.onJoin {
                     result.complete(
                         Pair(
-                            preOffRoute,
-                            postOffRoute
+                            preEventLocationBuffer,
+                            postEventLocationBuffer
                         )
                     ) // notify caller the job is complete
                 }
@@ -159,7 +162,9 @@ internal class TelemetryLocationAndProgressDispatcher :
                 routeSelected.set(null)
             }
             false -> {
-                routeSelected.set(RouteAvailable(routes[0]))
+                val date = Date()
+                channelRouteSelected.offer(RouteAvailable(routes[0], date))
+                routeSelected.set(RouteAvailable(routes[0], date))
             }
         }
     }
