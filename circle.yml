@@ -43,20 +43,6 @@ workflows:
               ignore: /.*/
 
 commands:
-  restore-gradle-cache:
-    steps:
-      - restore_cache:
-          keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "libandroid-navigation/build.gradle" }}-{{ checksum  "libandroid-navigation-ui/build.gradle" }}
-            - jars-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "libandroid-navigation/build.gradle" }}-{{ checksum  "libandroid-navigation-ui/build.gradle" }}
-
   restore-gradle-cache-1_0:
     steps:
       - restore_cache:
@@ -278,7 +264,7 @@ jobs:
       GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false
     steps:
       - checkout
-      - restore-gradle-cache
+      - restore-gradle-cache-1_0
       - validate-license
       - static-code-analysis-java
       - static-code-analysis-kotlin
