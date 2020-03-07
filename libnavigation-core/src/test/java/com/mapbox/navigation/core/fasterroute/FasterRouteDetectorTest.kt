@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -20,6 +21,7 @@ class FasterRouteDetectorTest {
 
         val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
+        assertNotNull(newRoute.duration())
         assertTrue(isFasterRoute)
     }
 
