@@ -18,7 +18,7 @@ import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
+import com.mapbox.navigation.core.fasterroute.FasterRouteDetectorWHAT
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
@@ -212,8 +212,8 @@ class MapboxNavigationTest {
 
     @Test
     fun fasterRoute_fasterRouteNotAvailable() {
-        mockkObject(FasterRouteDetector)
-        every { FasterRouteDetector.isRouteFaster(any(), any()) } returns false
+        mockkObject(FasterRouteDetectorWHAT)
+        every { FasterRouteDetectorWHAT.isRouteFaster(any(), any()) } returns false
         mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
         delayLambda()
         verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }

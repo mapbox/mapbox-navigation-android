@@ -10,7 +10,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class FasterRouteDetectorTest {
+class FasterRouteDetectorWHATTest {
 
     @Test
     fun shouldDetectWhenRouteIsFaster() {
@@ -19,7 +19,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(10)
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = FasterRouteDetectorWHAT.isRouteFaster(newRoute, routeProgress)
 
         assertNotNull(newRoute.duration())
         assertTrue(isFasterRoute)
@@ -32,7 +32,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(10)
 
-        val isFasterRoute = FasterRouteDetector.testSameThing(newRoute, routeProgress)
+        val isFasterRoute = FasterRouteDetectorWHAT.testSameThing(newRoute, routeProgress)
 
         assertNotNull(newRoute.duration())
         assertTrue(isFasterRoute)
@@ -45,7 +45,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(10)
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = FasterRouteDetectorWHAT.isRouteFaster(newRoute, routeProgress)
 
         assertFalse(isFasterRoute)
     }
@@ -57,7 +57,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(60)
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = FasterRouteDetectorWHAT.isRouteFaster(newRoute, routeProgress)
 
         assertFalse(isFasterRoute)
     }

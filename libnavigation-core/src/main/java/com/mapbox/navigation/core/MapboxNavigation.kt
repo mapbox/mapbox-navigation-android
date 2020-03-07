@@ -30,7 +30,7 @@ import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
+import com.mapbox.navigation.core.fasterroute.FasterRouteDetectorWHAT
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
@@ -231,7 +231,7 @@ constructor(
     private val fasterRouteRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             tripSession.getRouteProgress()?.let { progress ->
-                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
+                if (FasterRouteDetectorWHAT.isRouteFaster(routes[0], progress)) {
                     fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
                 }
             }
