@@ -111,6 +111,7 @@ afterEvaluate { project ->
     source = android.sourceSets.main.java.srcDirs
     options.addBooleanOption('Xdoclint:none', true)
     exclude '**/R.java', '**/BuildConfig.java', '**/*.kt'
+    println "test androidJavadocs"
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
   }
 
