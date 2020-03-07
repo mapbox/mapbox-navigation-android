@@ -59,7 +59,6 @@ import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 import com.mapbox.navigation.ui.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.navigation.ui.junction.RouteJunction;
 import com.mapbox.navigation.ui.junction.RouteJunctionModel;
-import com.mapbox.navigation.ui.legacy.NavigationConstants;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
 import com.mapbox.navigation.ui.utils.LocaleEx;
