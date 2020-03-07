@@ -61,7 +61,7 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavigation-ui/build.gradle" }}
             - deps-
       - run:
           name: Download Dependencies
@@ -69,7 +69,7 @@ commands:
       - save_cache:
           paths:
             - ~/.gradle
-          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavigation-ui/build.gradle" }}
 
   validate-license:
     steps:
@@ -97,6 +97,10 @@ commands:
           command: |
             ./gradlew testDebugUnitTestCoverage
             pip install --user codecov && /root/.local/bin/codecov
+      - store-results:
+          module_target: "libandroid-navigation"
+      - store-results:
+          module_target: "libandroid-navigation-ui"
 
   build-module:
     parameters:
@@ -156,7 +160,7 @@ commands:
     steps:
       - store_artifacts:
           path: << parameters.module_target >>/build/reports
-          destination: reports
+          destination: << parameters.module_target >>/reports
       - store_test_results:
           path: << parameters.module_target >>/build/test-results
 
@@ -177,6 +181,26 @@ commands:
       - run:
           name: Run Navigation SDK 1.0 Unit Tests
           command: make 1.0-unit-tests
+      - store-results:
+          module_target: "libdirections-hybrid"
+      - store-results:
+          module_target: "libdirections-offboard"
+      - store-results:
+          module_target: "libdirections-onboard"
+      - store-results:
+          module_target: "liblogger"
+      - store-results:
+          module_target: "libnavigation-base"
+      - store-results:
+          module_target: "libnavigation-core"
+      - store-results:
+          module_target: "libnavigation-metrics"
+      - store-results:
+          module_target: "libnavigation-util"
+      - store-results:
+          module_target: "libnavigator"
+      - store-results:
+          module_target: "libtrip-notification"
 
   run-firebase-instrumentation:
     parameters:
