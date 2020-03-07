@@ -10,7 +10,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - pg-fix-ci
       - release-1_0-snapshot:
           filters:
             branches:
@@ -370,7 +370,9 @@ jobs:
       - build-module:
           module_target: "libandroid-navigation-ui"
           variant: "Release"
-      - publish-maven
+      - run:
+          name: Test publish
+          command: make publish
       - store-results:
           module_target: "libandroid-navigation"
       - store-results:
