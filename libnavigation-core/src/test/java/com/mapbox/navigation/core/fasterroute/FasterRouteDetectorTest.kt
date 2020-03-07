@@ -38,9 +38,9 @@ class FasterRouteDetectorTest {
     @Test
     fun shouldNotAllowSlightlyFasterRoutes() {
         val newRoute: DirectionsRoute = mockk()
-        every { newRoute.duration() } returns TimeUnit.MINUTES.toSeconds(49).toDouble()
+        every { newRoute.duration() } returns TimeUnit.MINUTES.toSeconds(59).toDouble()
         val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(50)
+        every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(60)
 
         val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
