@@ -161,6 +161,9 @@ commands:
       - store_artifacts:
           path: << parameters.module_target >>/build/reports
           destination: << parameters.module_target >>/reports
+      - store_artifacts:
+          path: << parameters.module_target >>/build/tmp
+          destination: << parameters.module_target >>/tmp
       - store_test_results:
           path: << parameters.module_target >>/build/test-results
 
@@ -370,9 +373,7 @@ jobs:
       - build-module:
           module_target: "libandroid-navigation-ui"
           variant: "Release"
-      - run:
-          name: Test publish
-          command: make publish
+      - publish-maven
       - store-results:
           module_target: "libandroid-navigation"
       - store-results:
