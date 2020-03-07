@@ -11,13 +11,13 @@ internal object FasterRouteDetector {
      */
     private const val PERCENTAGE_THRESHOLD = 0.90
 
-    fun isRouteFaster(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
+    fun testSameThing(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
         val newRouteDuration = newRoute.duration() ?: return false
         val weightedDuration = routeProgress.durationRemaining().toDouble() * PERCENTAGE_THRESHOLD
         return newRouteDuration < weightedDuration
     }
-
-    fun testSameThing(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
+    
+    fun isRouteFaster(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
         val newRouteDuration = newRoute.duration() ?: return false
         val weightedDuration = routeProgress.durationRemaining().toDouble() * PERCENTAGE_THRESHOLD
         return newRouteDuration < weightedDuration
