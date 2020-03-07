@@ -26,6 +26,19 @@ class FasterRouteDetectorTest {
     }
 
     @Test
+    fun shouldDetectWhenRouteIsFaster2() {
+        val newRoute: DirectionsRoute = mockk()
+        every { newRoute.duration() } returns TimeUnit.MINUTES.toSeconds(5).toDouble()
+        val routeProgress: RouteProgress = mockk()
+        every { routeProgress.durationRemaining() } returns TimeUnit.MINUTES.toSeconds(10)
+
+        val isFasterRoute = FasterRouteDetector.testSameThing(newRoute, routeProgress)
+
+        assertNotNull(newRoute.duration())
+        assertTrue(isFasterRoute)
+    }
+
+    @Test
     fun shouldDefaultToFalseWhenDurationIsNull() {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns null
