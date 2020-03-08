@@ -108,10 +108,11 @@ afterEvaluate { project ->
   }
 
   task androidJavadocs(type: Javadoc) {
+    failOnError = false
     source = android.sourceSets.main.java.srcDirs
     options.addBooleanOption('Xdoclint:none', true)
-    options.linksOffline("http://d.android.com/reference/", "${android.sdkDirectory}/docs/reference")
-    exclude '**/R.java', '**/BuildConfig.java', '**/*.kt'
+    excludes = ['**/*.kt']
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
   }
 
   task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
@@ -134,9 +135,7 @@ afterEvaluate { project ->
 afterEvaluate { project ->
   android.libraryVariants.all { variant ->
     tasks.androidJavadocs.doFirst {
-      source = variant.sourceSets.collect { it.java.sourceFiles }.inject { m, i -> m + i }
-      classpath += variant.javaCompile.classpath
-      classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+      classpath += files(variant.javaCompile.classpath.files)
     }
   }
 }
