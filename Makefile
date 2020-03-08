@@ -32,8 +32,8 @@ javadoc-dokka:
 	./gradlew :libnavigation-core:dokka
 
 publish:
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives --info
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives --info
+	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
+	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
 
 publish-local:
 	# This publishes to ~/.m2/repository/com/mapbox/mapboxsdk

@@ -161,9 +161,6 @@ commands:
       - store_artifacts:
           path: << parameters.module_target >>/build/reports
           destination: << parameters.module_target >>/reports
-      - store_artifacts:
-          path: << parameters.module_target >>/build/tmp
-          destination: << parameters.module_target >>/tmp
       - store_test_results:
           path: << parameters.module_target >>/build/test-results
 

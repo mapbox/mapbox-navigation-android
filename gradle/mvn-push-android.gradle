@@ -108,7 +108,6 @@ afterEvaluate { project ->
   }
 
   task androidJavadocs(type: Javadoc) {
-    failOnError = false
     source = android.sourceSets.main.java.srcDirs
     options.addBooleanOption('Xdoclint:none', true)
     excludes = ['**/*.kt']
