@@ -50,7 +50,6 @@ private data class DynamicallyUpdatedRouteValues(
     var rerouteCount: AtomicInteger,
     var routeCanceled: AtomicBoolean,
     var routeArrived: AtomicBoolean,
-    var offRouteCount: AtomicInteger,
     val timeOfRerouteEvent: AtomicLong
 )
 
@@ -70,7 +69,7 @@ The class has two public methods, postUserFeedbackEvent() and initialize().
 @SuppressLint("StaticFieldLeak")
 internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     internal const val LOCATION_BUFFER_MAX_SIZE = 20
-    internal const val ONE_SECOND = 1000
+    private const val ONE_SECOND = 1000
     internal const val TAG = "MAPBOX_TELEMETRY"
 
     private lateinit var context: Context // Must be context.getApplicationContext
@@ -87,7 +86,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             AtomicInteger(0),
             AtomicBoolean(false),
             AtomicBoolean(false),
-            AtomicInteger(0),
             AtomicLong(0)
     )
 
@@ -226,14 +224,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * The lambda that is called if the SDK client did not initialize telemetry. If telemetry is not initialized,
      * calls to post a user feedback event will fail with this exception
      */
-    private val postUserEventBeforeInit: (String, String, String, String?) -> Unit = { _, _, _, _ ->
+    private val postUserEventBeforeInit: suspend (String, String, String, String?) -> Unit = { _, _, _, _ ->
         Log.d(TAG, "Not in a navigation session, Cannot send user feedback events")
     }
 
     /**
      * The lambda that is called once telemetry is initialized.
      */
-    private val postUserFeedbackEventAfterInit: (String, String, String, String?) -> Unit =
+    private val postUserFeedbackEventAfterInit: suspend (String, String, String, String?) -> Unit =
             { feedbackType, description, feedbackSource, screenshot ->
                 postUserFeedbackHelper(
                         feedbackType,
@@ -305,40 +303,43 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
         screenshot: String?
     ) {
-        postUserEventDelegate(feedbackType, description, feedbackSource, screenshot)
+        telemetryThreadControl.scope.launch {
+            postUserEventDelegate(feedbackType, description, feedbackSource, screenshot)
+        }
     }
 
     /**
      * Helper class that posts user feedback. The call is available only after initialization
      */
-    private fun postUserFeedbackHelper(
+    private suspend fun postUserFeedbackHelper(
         @TelemetryUserFeedback.FeedbackType feedbackType: String,
         description: String,
         @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
         screenshot: String?
     ) {
         val lastProgress = callbackDispatcher.getRouteProgress()
-        telemetryThreadControl.scope.launch {
-            val twoBuffers = callbackDispatcher.getLocationBuffersAsync().await()
-            val feedbackEvent = TelemetryUserFeedback(
-                    feedbackSource,
-                    feedbackType,
-                    description,
-                    TelemetryUtils.retrieveVendorId(),
-                    locationsBefore = twoBuffers.first.toTypedArray(),
-                    locationsAfter = twoBuffers.second.toTypedArray(),
-                    feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-                    screenshot = screenshot,
-                    step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
-                        populateTelemetryStep(routeLegProgress)
-                    },
-                    metadata = populateEventMetadataAndUpdateState(
-                            Date(),
-                            locationEngineName = locationEngineName
-                    )
-            )
-            metricsReporter.addEvent(feedbackEvent)
-        }
+        val childCount = telemetryThreadControl.job.children.count()
+        Log.i(TAG, "child count = $childCount")
+        val twoBuffers = callbackDispatcher.getLocationBuffersAsync().await()
+        val feedbackEvent = TelemetryUserFeedback(
+                feedbackSource = feedbackSource,
+                feedbackType = feedbackType,
+                description = description,
+                userId = TelemetryUtils.retrieveVendorId(),
+                locationsBefore = twoBuffers.first.toTypedArray(),
+                locationsAfter = twoBuffers.second.toTypedArray(),
+                feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                screenshot = screenshot,
+                step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
+                    populateTelemetryStep(routeLegProgress)
+                },
+                metadata = populateEventMetadataAndUpdateState(
+                        Date(),
+                        locationEngineName = locationEngineName
+                )
+        )
+        Log.i(TAG, "Calling addEvent")
+        metricsReporter.addEvent(feedbackEvent)
     }
 
     /**
