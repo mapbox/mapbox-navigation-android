@@ -126,6 +126,7 @@ constructor(
     private val navigationSession = NavigationSession(context)
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
+    private val fasterRouteDetector = FasterRouteDetector()
     private val fasterRouteTimer: MapboxTimer
     private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
 
@@ -231,7 +232,7 @@ constructor(
     private val fasterRouteRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
             tripSession.getRouteProgress()?.let { progress ->
-                if (FasterRouteDetector.isNewRouteFaster(routes[0], progress)) {
+                if (fasterRouteDetector.isNewRouteFaster(routes[0], progress)) {
                     fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
                 }
             }
