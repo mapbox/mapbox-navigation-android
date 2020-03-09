@@ -166,15 +166,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private fun handleOffRouteEvent() {
         dynamicValues.timeOfRerouteEvent.set(Time.SystemImpl.millis())
-        dynamicValues.rerouteCount.addAndGet(1) // increment reroute count
+        val rerouteCount = dynamicValues.rerouteCount.addAndGet(1) // increment reroute count
         val prevRoute = callbackDispatcher.getRouteProgress()
         telemetryThreadControl.scope.launch {
             val newRoute = callbackDispatcher.getDirectionsRouteChannel()
-                .receive() // Suspend until we get a value
+                    .receive() // Suspend until we get a value
             dynamicValues.distanceRemaining.set(newRoute.route.distance()?.toLong() ?: -1)
-            val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
             var timeSinceLastEvent =
-                (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
+                    (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
             if (timeSinceLastEvent < ONE_SECOND) {
                 timeSinceLastEvent = 0
             }
@@ -184,29 +183,35 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     if (nullableLegList[0].steps()?.isNotEmpty() == true) {
                         nullableLegList[0].steps()?.let { legsList ->
                             populateTelemetryStep(
-                                legsList[0],
-                                prevRoute.routeProgress.currentLegProgress()
+                                    legsList[0],
+                                    prevRoute.routeProgress.currentLegProgress()
                             )
                         }
                     }
                 }
             }
-            telemetryEventGate(
-                TelemetryReroute(
-                    newDistanceRemaining = newRoute.route.distance()?.toInt() ?: -1,
-                    newDurationRemaining = newRoute.route.duration()?.toInt() ?: -1,
-                    newGeometry = obtainGeometry(newRoute.route),
-                    step = telemetryStep,
-                    locationsBefore = beforeAfterLocationBuffers.first.toTypedArray(),
-                    locationsAfter = beforeAfterLocationBuffers.second.toTypedArray(),
-                    metadata = populateEventMetadataAndUpdateState(
-                        Date(),
-                        locationEngineName = locationEngineName
-                    ),
-                    feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-                    secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
+            callbackDispatcher.addLocationEventDescriptor(ItemAccumulationEventDescriptor(
+                    ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
+                    ArrayDeque()
+            ) { preEventBuffer, postEventBuffer ->
+                telemetryEventGate(
+                    TelemetryReroute(
+                        newDistanceRemaining = newRoute.route.distance()?.toInt() ?: -1,
+                        newDurationRemaining = newRoute.route.duration()?.toInt() ?: -1,
+                        newGeometry = obtainGeometry(newRoute.route),
+                        step = telemetryStep,
+                        locationsBefore = preEventBuffer.toTypedArray(),
+                        locationsAfter = postEventBuffer.toTypedArray(),
+                        metadata = populateEventMetadataAndUpdateState(
+                                Date(),
+                                rerouteCount = rerouteCount,
+                                locationEngineName = locationEngineName
+                        ),
+                        feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                        secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
+                    )
                 )
-            )
+            })
         }
     }
 
@@ -317,7 +322,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * Helper class that posts user feedback. The call is available only after initialization
      */
-    private suspend fun postUserFeedbackHelper(
+    private fun postUserFeedbackHelper(
         @TelemetryUserFeedback.FeedbackType feedbackType: String,
         description: String,
         @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
