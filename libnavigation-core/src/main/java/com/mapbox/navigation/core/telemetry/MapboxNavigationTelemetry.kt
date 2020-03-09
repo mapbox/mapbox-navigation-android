@@ -546,14 +546,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     private fun populateEventMetadataAndUpdateState(
         creationDate: Date,
-        directionsRoute: DirectionsRoute? = null,
+        route: DirectionsRoute? = null,
         locationEngineName: String,
-        currentLocation: Location? = null
+        lastLocation: Location? = null
     ): TelemetryMetadata {
         val sdkType = generateSdkIdentifier()
         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
         dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
-        return TelemetryMetadata(
+        val directionsRoute = callbackDispatcher.getLastDirectionsRoute().get()?.route ?: route
+        val location = callbackDispatcher.getLastLocation()
+        val temp =
+        TelemetryMetadata(
                 created = creationDate.toString(),
                 startTimestamp = Date().toString(),
                 device = Build.DEVICE,
@@ -564,10 +567,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                 originalRequestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
                 requestIdentifier = directionsRoute?.routeOptions()?.requestUuid(),
-                lat = currentLocation?.latitude?.toFloat() ?: 0f,
-                lng = currentLocation?.longitude?.toFloat() ?: 0f,
-                originalGeometry = obtainGeometry(directionsRoute),
-                originalEstimatedDistance = directionsRoute?.distance()?.toInt() ?: 0,
+                lat = lastLocation?.longitude?.toFloat() ?: location.longitude.toFloat(),
+                lng = lastLocation?.latitude?.toFloat() ?: location.longitude.toFloat(),
+                originalGeometry = obtainGeometry(callbackDispatcher.getLastDirectionsRoute().get()?.route),
+                originalEstimatedDistance = callbackDispatcher.getLastDirectionsRoute().get()?.route?.distance()?.toInt() ?: 0,
                 originalEstimatedDuration = directionsRoute?.duration()?.toInt() ?: 0,
                 originalStepCount = obtainStepCount(directionsRoute),
                 geometry = obtainGeometry(directionsRoute),
@@ -591,6 +594,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 volumeLevel = obtainVolumeLevel(context),
                 audioType = obtainAudioType(context)
         )
+        return temp
     }
 
     private fun generateSdkIdentifier() =

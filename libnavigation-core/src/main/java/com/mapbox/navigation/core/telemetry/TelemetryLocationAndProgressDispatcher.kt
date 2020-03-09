@@ -122,6 +122,9 @@ internal class TelemetryLocationAndProgressDispatcher :
      * This channel becomes signaled if a navigation route is selected
      */
     fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelRouteSelected
+
+    fun getLastDirectionsRoute() = routeSelected
+
     /**
      * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events.
      * The buffers are sent to the caller if the job completes or is canceled. This job maybe canceled by a navigation.cancel event.
@@ -168,6 +171,7 @@ internal class TelemetryLocationAndProgressDispatcher :
         jobControl.scope.launch {
             val locationQueue = ArrayDeque<Location>() // Temporary buffer to collect locations while waiting for completion
             while (currentLocationBuffer.size() <= LOCATION_BUFFER_MAX_SIZE && isActive) { // If the buffer is full, copy its contents
+                locationQueue.clear()
                 locationQueue.addAll(currentLocationBuffer.getCopy()) // Copy the collected data to the return buffer
                 if (getDataNow && currentLocationBuffer.size() >= 1) { // The caller does not wish to wait for LOCATION_BUFFER_MAX_SIZE items before getting the data. If there is at least one item in the buffer, return it.
                     result.complete(locationQueue) // Notify
