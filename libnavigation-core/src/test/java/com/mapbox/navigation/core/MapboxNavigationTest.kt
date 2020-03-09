@@ -60,6 +60,7 @@ class MapboxNavigationTest {
     private val onBoardRouterConfig: MapboxOnboardRouterConfig = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
+    private val fasterRouteDetector: FasterRouteDetector = mockk()
     private val fasterRouteObserver: FasterRouteObserver = mockk(relaxUnitFun = true)
     private val mapboxTimer: MapboxTimer = mockk(relaxUnitFun = true)
     private val routes: List<DirectionsRoute> = listOf(mockk())
@@ -213,7 +214,7 @@ class MapboxNavigationTest {
     @Test
     fun fasterRoute_fasterRouteNotAvailable() {
         mockkObject(FasterRouteDetector)
-        every { FasterRouteDetector.isNewRouteFaster(any(), any()) } returns false
+        every { fasterRouteDetector.isNewRouteFaster(any(), any()) } returns false
         mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
         delayLambda()
         verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
