@@ -335,7 +335,7 @@ class MapboxOnboardRouterTest {
 
         private val URL = RouteUrl(
             accessToken = ACCESS_TOKEN,
-            orgin = origin,
+            origin = origin,
             waypoints = waypoints,
             destination = destination
         ).getRequest()

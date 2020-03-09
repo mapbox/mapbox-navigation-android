@@ -54,7 +54,6 @@ import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import com.mapbox.navigation.utils.timer.MapboxTimer
-import kotlinx.coroutines.channels.ReceiveChannel
 import java.io.File
 import java.lang.reflect.Field
 import java.net.URI
@@ -502,7 +501,7 @@ constructor(
     private fun reRoute() {
         ifNonNull(
             directionsSession.getRouteOptions(),
-            tripSession.getEnhancedLocation()
+            tripSession.getRawLocation()
         ) { options, location ->
             val optionsRebuilt = buildAdjustedRouteOptions(options, location)
             directionsSession.requestRoutes(
@@ -558,7 +557,6 @@ constructor(
                     mutableListOf<String>().also {
                         it.addAll(routeOptions.approachesList()!!.subList(index, coordinates.size))
                     }
-
                 })
                 .waypointIndicesList(let waypointIndicesList@{
                     if (routeOptions.waypointIndicesList().isNullOrEmpty()) {
