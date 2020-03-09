@@ -21,7 +21,7 @@ class FasterRouteDetectorWHATTest {
 
         val isFasterRoute = FasterRouteDetectorWHAT.isRouteFaster(newRoute, routeProgress)
 
-        assertNotNull(newRoute.duration())
+        assertTrue(newRoute.duration()!! < routeProgress.durationRemaining())
         assertTrue(isFasterRoute)
     }
 
