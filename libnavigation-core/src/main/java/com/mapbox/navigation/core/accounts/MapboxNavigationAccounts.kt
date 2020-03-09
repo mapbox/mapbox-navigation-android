@@ -60,7 +60,10 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     }
 
     internal fun initializeSku() {
-        skuGenerator?.initializeSKU()
+        skuGenerator?.apply {
+            initializeSKU()
+            skuToken = generateToken()
+        }
     }
 
     internal fun navigationStopped() {
