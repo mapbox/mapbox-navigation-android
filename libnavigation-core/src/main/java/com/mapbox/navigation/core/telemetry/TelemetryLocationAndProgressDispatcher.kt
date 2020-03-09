@@ -26,27 +26,28 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 
-internal typealias OffRouteBuffers = Pair<List<Location>, List<Location>>
+internal typealias BeforeAfterLocationBuffers = Pair<List<Location>, List<Location>>
 
 internal class TelemetryLocationAndProgressDispatcher :
-        RouteProgressObserver, LocationObserver, RoutesObserver {
+    RouteProgressObserver, LocationObserver, RoutesObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
-            AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
-    private val channelRouteSelected = Channel<RouteAvailable>(Channel.CONFLATED)
-    private val channelLocationRecieved = Channel<Location>(Channel.CONFLATED)
+        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
+    private val channelRouteAvailable = Channel<RouteAvailable>(Channel.CONFLATED)
+    private val channelLocationReceived = Channel<Location>(Channel.CONFLATED)
     private val channelOnRouteProgress =
-            Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
+        Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var jobControl = ThreadController.getIOScopeAndRootJob()
-    private val routeSelected = AtomicReference<RouteAvailable?>(null)
+    private val routeAvailable = AtomicReference<RouteAvailable?>(null)
     private var accumulationJob: Job = Job()
-    private val currentLocationBuffer = SynchronizedLocationbuffer()
+    private val currentLocationBuffer = SynchronizedLocationBuffer()
 
     /**
-     * Thi class provides thread-safe access to a mutable list of locations
+     * This class provides thread-safe access to a mutable list of locations
      */
-    private class SynchronizedLocationbuffer {
-        private val synchronizedCollection: MutableList<Location> = Collections.synchronizedList(mutableListOf<Location>())
+    private class SynchronizedLocationBuffer {
+        private val synchronizedCollection: MutableList<Location> =
+            Collections.synchronizedList(mutableListOf<Location>())
 
         fun addLocation(location: Location) {
             synchronized(synchronizedCollection) {
@@ -81,7 +82,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     init {
-        jobControl.scope.monitorChannelWithException(channelLocationRecieved, { location ->
+        jobControl.scope.monitorChannelWithException(channelLocationReceived, { location ->
             accumulateLocationAsync(location, currentLocationBuffer)
         })
     }
@@ -91,7 +92,10 @@ internal class TelemetryLocationAndProgressDispatcher :
      * Once this limit is reached, an item is removed before another is added. The method returns true if the queue reaches capacity,
      * false otherwise
      */
-    private fun accumulateLocationAsync(location: Location, queue: SynchronizedLocationbuffer): Boolean {
+    private fun accumulateLocationAsync(
+        location: Location,
+        queue: SynchronizedLocationBuffer
+    ): Boolean {
         var result = false
         when (queue.size() >= LOCATION_BUFFER_MAX_SIZE + 1) {
             true -> {
@@ -107,10 +111,10 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     /**
-     * This method returns a [Pair] of buffers. The first represents a fixed number of locations before an  event of interest (offroute or user feedback),
+     * This method returns a [Pair] of buffers. The first represents a fixed number of locations before an event of interest (offroute or user feedback),
      * while the second represents a fixed number of locations after same event
      */
-    fun getLocationBuffersAsync() = accumulatePostEventLocationsAsync()
+    fun getLocationBuffersAsync() = accumulateLocationsAsync()
 
     /**
      * This method cancels all jobs that accumulate telemetry data. The side effect of this call is to call Telemetry.addEvent(), which may cause events to be sent
@@ -121,26 +125,28 @@ internal class TelemetryLocationAndProgressDispatcher :
     /**
      * This channel becomes signaled if a navigation route is selected
      */
-    fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelRouteSelected
+    fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelRouteAvailable
 
-    fun getLastDirectionsRoute() = routeSelected
+    fun getLastDirectionsRoute() = routeAvailable
 
     /**
-     * This method populates two location buffers. One with pre-offroute events and the other with post-offroute events.
-     * The buffers are sent to the caller if the job completes or is canceled. This job maybe canceled by a navigation.cancel event.
+     * This method populates two location buffers. One with pre events and the other with post events.
+     * The buffers are sent to the caller if the job completes or is canceled. This job may be canceled by a navigation.cancel event.
      * This code is shared between user feedback events and off-route events
      */
-    private fun accumulatePostEventLocationsAsync(): Deferred<OffRouteBuffers> {
-        val result = CompletableDeferred<OffRouteBuffers>()
-        val preEventBuffer = mutableListOf<Location>()
-        val postEventBuffer = mutableListOf<Location>()
+    private fun accumulateLocationsAsync(): Deferred<BeforeAfterLocationBuffers> {
+        val result = CompletableDeferred<BeforeAfterLocationBuffers>()
+        val preBuffer = mutableListOf<Location>()
+        val postBuffer = mutableListOf<Location>()
         accumulationJob = jobControl.scope.launch {
-            val preEventLocationBuffer = acquireAccumulatedLocations(true) // grab whatever is in the location buffer. This will return at least 1 location value
-            postEventBuffer.addAll(preEventLocationBuffer.await()) // copy pre event locations
+            val preEventLocationBuffer =
+                acquireAccumulatedLocations(true) // grab whatever is in the location buffer. This will return at least 1 location value
+            postBuffer.addAll(preEventLocationBuffer.await()) // copy pre event locations
             currentLocationBuffer.clear()
 
-            val postEventLocationBuffer = acquireAccumulatedLocations() // accumulate post event locations
-            postEventBuffer.addAll(postEventLocationBuffer.await())
+            val postEventLocationBuffer =
+                acquireAccumulatedLocations() // accumulate post event locations
+            postBuffer.addAll(postEventLocationBuffer.await())
             currentLocationBuffer.clear()
 
             Log.d(TAG, "resetting location monitor")
@@ -150,10 +156,10 @@ internal class TelemetryLocationAndProgressDispatcher :
             select<Unit> {
                 accumulationJob.onJoin {
                     result.complete(
-                            Pair(
-                                preEventBuffer,
-                                postEventBuffer
-                            )
+                        Pair(
+                            preBuffer,
+                            postBuffer
+                        )
                     ) // notify caller the job is complete
                 }
             }
@@ -169,7 +175,8 @@ internal class TelemetryLocationAndProgressDispatcher :
     private fun acquireAccumulatedLocations(getDataNow: Boolean = false): CompletableDeferred<ArrayDeque<Location>> {
         val result = CompletableDeferred<ArrayDeque<Location>>()
         jobControl.scope.launch {
-            val locationQueue = ArrayDeque<Location>() // Temporary buffer to collect locations while waiting for completion
+            val locationQueue =
+                ArrayDeque<Location>() // Temporary buffer to collect locations while waiting for completion
             while (currentLocationBuffer.size() <= LOCATION_BUFFER_MAX_SIZE && isActive) { // If the buffer is full, copy its contents
                 locationQueue.clear()
                 locationQueue.addAll(currentLocationBuffer.getCopy()) // Copy the collected data to the return buffer
@@ -192,32 +199,32 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     fun getRouteProgressChannel(): ReceiveChannel<RouteProgressWithTimestamp> =
-            channelOnRouteProgress
+        channelOnRouteProgress
 
     fun getLastLocation(): Location = lastLocation.get()
 
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
 
-    fun isRouteAvailable(): AtomicReference<RouteAvailable?> = routeSelected
+    fun isRouteAvailable(): AtomicReference<RouteAvailable?> = routeAvailable
 
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
     }
 
     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
-        channelLocationRecieved.offer(enhancedLocation)
+        channelLocationReceived.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
     }
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
         when (routes.isEmpty()) {
             true -> {
-                routeSelected.set(null)
+                routeAvailable.set(null)
             }
             false -> {
                 val date = Date()
-                channelRouteSelected.offer(RouteAvailable(routes[0], date))
-                routeSelected.set(RouteAvailable(routes[0], date))
+                channelRouteAvailable.offer(RouteAvailable(routes[0], date))
+                routeAvailable.set(RouteAvailable(routes[0], date))
             }
         }
     }

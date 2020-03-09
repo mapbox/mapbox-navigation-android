@@ -44,20 +44,20 @@ fun populateTelemetryStep(legProgress: RouteLegProgress): TelemetryStep {
 
 fun populateTelemetryStep(legProgress: LegStep, prevLeg: RouteLegProgress?): TelemetryStep {
     return TelemetryStep(
-            legProgress.maneuver().instruction() ?: "",
-            legProgress.maneuver().type() ?: "",
-            legProgress.maneuver().type() ?: "",
-            legProgress.name() ?: "",
+        legProgress.maneuver().instruction() ?: "",
+        legProgress.maneuver().type() ?: "",
+        legProgress.maneuver().type() ?: "",
+        legProgress.name() ?: "",
 
-            prevLeg?.currentStepProgress()?.step()?.maneuver()?.instruction() ?: "",
-            prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-            prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-            prevLeg?.currentStepProgress()?.step()?.name() ?: "",
+        prevLeg?.currentStepProgress()?.step()?.maneuver()?.instruction() ?: "",
+        prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
+        prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
+        prevLeg?.currentStepProgress()?.step()?.name() ?: "",
 
-            prevLeg?.currentStepProgress()?.distanceTraveled()?.toInt() ?: 0,
-            prevLeg?.currentStepProgress()?.durationRemaining()?.toInt() ?: 0,
-            legProgress.distance().toInt(),
-            legProgress.duration().toInt()
+        prevLeg?.currentStepProgress()?.distanceTraveled()?.toInt() ?: 0,
+        prevLeg?.currentStepProgress()?.durationRemaining()?.toInt() ?: 0,
+        legProgress.distance().toInt(),
+        legProgress.duration().toInt()
     )
 }
 
@@ -116,13 +116,13 @@ fun obtainAudioType(context: Context): String =
 
 fun getRouteGeometry(newDirectionsRoute: DirectionsRoute): String {
     val geometryPositions = PolylineUtils.decode(
-            newDirectionsRoute.geometry() ?: "",
-            PRECISION_6
+        newDirectionsRoute.geometry() ?: "",
+        PRECISION_6
     )
     PolylineUtils.encode(geometryPositions, PRECISION_5)
     return PolylineUtils.encode(
-            geometryPositions,
-            PRECISION_5
+        geometryPositions,
+        PRECISION_5
     )
 }
 
