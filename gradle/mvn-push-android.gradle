@@ -109,7 +109,7 @@ afterEvaluate { project ->
 
   task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
-    options.addBooleanOption('Xdoclint:none', true)
+    options.addStringOption('Xdoclint:none', '-quiet')
     exclude '**/*.kt'
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
   }
@@ -122,12 +122,6 @@ afterEvaluate { project ->
   task androidSourcesJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.sourceFiles
-  }
-
-  tasks.withType(Javadoc) {
-    options.addStringOption('encoding', 'UTF-8')
-    options.addStringOption('docencoding', 'UTF-8')
-    options.addStringOption('charset', 'UTF-8')
   }
 
   artifacts {
