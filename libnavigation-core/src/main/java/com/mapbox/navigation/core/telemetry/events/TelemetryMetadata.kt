@@ -44,8 +44,8 @@ data class TelemetryMetadata(
     var audioType: String? = null, // Audio output: speaker, bluetooth, headphones, unknown string  Optional
     var screenBrightness: Int = 0, // Optional               Int from 0 (screen off) to 100 (full brightness). Useful for knowing if the user is using the app with the screen on int     Optional
     var applicationState: String? = null, // e.g. backgrounded, active, etc. Another alternative to screenBrightness for determining if the user is using the app in the foreground or background string  Optional
-    var percentTimeInForeground: Int = 0, // Optional         The current percent (from 0  to 100) of the elapsed navigation session where the current app was displayed in the foreground. Keep track of the total time navigation is in the foreground and compare against the time since the start of the navigation session to compute the current percentTimeInForeground  int     Optional  6
-    var percentTimeInPortrait: Int = 0, // Optional           Of the time when the app is in the foreground (see percentTimeInForeground), represents the current percent (from 0 to 100) where the app was in portrait orientation. int     Optional  6
+    var percentTimeInForeground: Int = 0, // TODO:OZ not optional
+    var percentTimeInPortrait: Int = 0, // TODO:OZ not optional
     var batteryPluggedIn: Boolean = false, // Optional              e.g. true if charging or full, false if discharging or unknown bool    Optional
     var batteryLevel: Int = 0, // Optional                    Int from 0 (empty) to 100 (fully charged); -1 if unknownint     Optional
     var connectivity: String? = null // E.g. none, wifi, gprs, edge, 3g, 4g, lte                                                                                                                                                                                                                                                                  string  Optional

@@ -34,6 +34,7 @@ import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ifChannelException
 import com.mapbox.navigation.utils.time.Time
+import java.util.ArrayDeque
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
@@ -171,7 +172,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             val newRoute = callbackDispatcher.getDirectionsRouteChannel()
                 .receive() // Suspend until we get a value
             dynamicValues.distanceRemaining.set(newRoute.route.distance()?.toLong() ?: -1)
-            val beforeAfterLocationBuffers = callbackDispatcher.getLocationBuffersAsync().await()
+            val offRouteBuffers = callbackDispatcher.getLocationBuffersAsync().await()
             var timeSinceLastEvent =
                 (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
             if (timeSinceLastEvent < ONE_SECOND) {
@@ -323,28 +324,30 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         screenshot: String?
     ) {
         val lastProgress = callbackDispatcher.getRouteProgress()
-        val childCount = telemetryThreadControl.job.children.count()
-        Log.i(TAG, "child count = $childCount")
-        val twoBuffers = callbackDispatcher.getLocationBuffersAsync().await()
-        val feedbackEvent = TelemetryUserFeedback(
-            feedbackSource = feedbackSource,
-            feedbackType = feedbackType,
-            description = description,
-            userId = TelemetryUtils.retrieveVendorId(),
-            locationsBefore = twoBuffers.first.toTypedArray(),
-            locationsAfter = twoBuffers.second.toTypedArray(),
-            feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-            screenshot = screenshot,
-            step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
-                populateTelemetryStep(routeLegProgress)
-            },
-            metadata = populateEventMetadataAndUpdateState(
-                Date(),
-                locationEngineName = locationEngineName
+        callbackDispatcher.addLocationEventDescriptor(ItemAccumulationEventDescriptor(
+                ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
+                ArrayDeque()
+        ) { preEventBuffer, postEventBuffer ->
+            val feedbackEvent = TelemetryUserFeedback(
+                feedbackSource = feedbackSource,
+                feedbackType = feedbackType,
+                description = description,
+                userId = TelemetryUtils.retrieveVendorId(),
+                locationsBefore = preEventBuffer.toTypedArray(),
+                locationsAfter = postEventBuffer.toTypedArray(),
+                feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                screenshot = screenshot,
+                step = lastProgress.routeProgress.currentLegProgress()?.let { routeLegProgress ->
+                    populateTelemetryStep(routeLegProgress)
+                },
+                metadata = populateEventMetadataAndUpdateState(
+                        Date(),
+                        locationEngineName = locationEngineName
+                )
             )
-        )
-        Log.i(TAG, "Calling addEvent")
-        metricsReporter.addEvent(feedbackEvent)
+            Log.i(TAG, "Calling addEvent")
+            metricsReporter.addEvent(feedbackEvent)
+        })
     }
 
     /**
@@ -366,8 +369,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             locationEngineName = locationEngineName
                         )
                     )
-                    callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
+                    callbackDispatcher.cancelAccumulationJob()
                 }
                 false -> {
                     val cancelEvent = TelemetryCancel(
@@ -376,8 +379,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             locationEngineName = locationEngineName
                         )
                     )
-                    callbackDispatcher.cancelAccumulationJob()
                     telemetryEventGate(cancelEvent)
+                    callbackDispatcher.cancelAccumulationJob()
                 }
             }
         }
@@ -458,8 +461,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
                 startTimestamp = Date().toString()
             }
-            telemetryEventGate(telemetryDeparture(directionsRoute))
-            monitorRouteProgress()
+            telemetryEventGate(telemetryDeparture(directionsRoute)) // TODO:OZ send this data only after RouteProgress. Get Lat/Lng from RouteProgress
+            monitorSession()
         }
     }
 
@@ -467,7 +470,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * This method waits for an [RouteProgressState.ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
      * sends the telemetry data to the servers.
      */
-    private suspend fun monitorRouteProgress() {
+    private suspend fun monitorSession() {
         var continueRunning = true
         while (coroutineContext.isActive && continueRunning) {
             try {
@@ -480,13 +483,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             TelemetryArrival(
                                 arrivalTimestamp = Date().toString(),
                                 metadata = populateEventMetadataAndUpdateState(
-                                    Date(),
-                                    locationEngineName = locationEngineName
+                                        Date(),
+                                        locationEngineName = locationEngineName
                                 ).apply {
                                     lat = callbackDispatcher.getLastLocation().latitude.toFloat()
                                     lng = callbackDispatcher.getLastLocation().longitude.toFloat()
                                     distanceCompleted =
-                                        routeData.routeProgress.distanceTraveled().toInt()
+                                            routeData.routeProgress.distanceTraveled().toInt() // TODO: Log this data to see what is returned from the SDK
                                     dynamicValues.routeArrived.set(true)
                                 }
                             )
@@ -554,7 +557,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         creationDate: Date,
         route: DirectionsRoute? = null,
         locationEngineName: String,
-        lastLocation: Location? = null
+        lastLocation: Location? = null,
+        rerouteCount: Int? = null
     ): TelemetryMetadata {
         val sdkType = generateSdkIdentifier()
         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
@@ -581,18 +585,18 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 originalEstimatedDuration = directionsRoute?.duration()?.toInt() ?: 0,
                 originalStepCount = obtainStepCount(directionsRoute),
                 geometry = obtainGeometry(directionsRoute),
-                estimatedDistance = directionsRoute?.distance()?.toInt() ?: 0,
-                estimatedDuration = directionsRoute?.duration()?.toInt() ?: 0,
+                estimatedDistance = directionsRoute?.distance()?.toInt() ?: 0, // TODO:OZ verify
+                estimatedDuration = directionsRoute?.duration()?.toInt() ?: 0, // TODO:OZ verify
                 stepCount = obtainStepCount(directionsRoute),
-                distanceCompleted = 0,
+                distanceCompleted = 0, // TODO:OZ verify
                 distanceRemaining = dynamicValues.distanceRemaining.get().toInt(),
                 absoluteDistanceToDestination = obtainAbsoluteDistance(
                     callbackDispatcher.getLastLocation(),
                     obtainRouteDestination(directionsRoute)
                 ),
                 durationRemaining = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()?.toInt()
-                    ?: 0,
-                rerouteCount = dynamicValues.rerouteCount.get(),
+                        ?: 0,
+                rerouteCount = rerouteCount ?: 0,
                 applicationState = TelemetryUtils.obtainApplicationState(context),
                 batteryPluggedIn = TelemetryUtils.isPluggedIn(context),
                 batteryLevel = TelemetryUtils.obtainBatteryLevel(context),
