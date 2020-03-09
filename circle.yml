@@ -364,13 +364,12 @@ jobs:
       - checkout
       - validate-license
       - generate-maven-credentials
-      - build-module:
-          module_target: "libandroid-navigation"
-          variant: "Release"
-      - build-module:
-          module_target: "libandroid-navigation-ui"
-          variant: "Release"
-      - publish-maven
+      - run:
+          name: Build Navigation SDK
+          command: make build-release
+      - run:
+          name: Publish Navigation SDK To Maven Central
+          command: make publish
       - store-results:
           module_target: "libandroid-navigation"
       - store-results:
