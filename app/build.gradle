@@ -95,6 +95,9 @@ dependencies {
   implementation dependenciesList.mapboxMapSdk
   implementation dependenciesList.mapboxSearchSdk
   implementation dependenciesList.mapboxCrashMonitor
+  // implementation(name:'mapbox-navigation-native-debug', ext:'aar')
+  api project(path: ':NavNative')
+
 
   // Support libraries
   implementation dependenciesList.supportAppcompatV7

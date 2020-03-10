@@ -33,6 +33,7 @@ dependencies {
     implementation project(":libdirections-onboard")
     implementation project(":libdirections-offboard")
     implementation project(":libnavigation-util")
+    api project(path: ':NavNative')
 
     //ktlint
     ktlint dependenciesList.ktlint

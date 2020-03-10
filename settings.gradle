@@ -1,3 +1,6 @@
+include ':NavNative'
+project(':NavNative').projectDir = new File("../experiment/mapbox-navigation-native/platform/android")
+
 include ':app',
         ':examples',
         ':libandroid-navigation',

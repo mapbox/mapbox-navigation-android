@@ -32,10 +32,9 @@ dependencies {
     implementation(project(':libnavigation-base'))
 
     // Navigator
-    api dependenciesList.mapboxNavigator
-
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
+    api project(path: ':NavNative')
 
     //ktlint
     ktlint dependenciesList.ktlint
