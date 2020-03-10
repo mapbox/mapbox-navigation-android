@@ -19,7 +19,7 @@ class VoiceInstructionCache {
   private final ConnectivityStatusProvider connectivityStatus;
   private int totalVoiceInstructions = 0;
   private int currentVoiceInstructionsCachedIndex = 0;
-  private boolean isVoiceInstructionsToCacheThresholdReached = false;
+  private boolean isVoiceInstructionsToCacheThresholdReached = true;
 
   VoiceInstructionCache(MapboxNavigation navigation, VoiceInstructionLoader voiceInstructionLoader,
                         ConnectivityStatusProvider connectivityStatus) {
@@ -28,32 +28,37 @@ class VoiceInstructionCache {
     this.connectivityStatus = connectivityStatus;
   }
 
-  void preCache(DirectionsRoute route) {
-    if (!connectivityStatus.isConnected()) {
+  void initCache(DirectionsRoute route) {
+    totalVoiceInstructions = 0;
+
+    List<RouteLeg> routeLegs = route.legs();
+    if (routeLegs == null) {
       return;
     }
 
-    totalVoiceInstructions = 0;
-    currentVoiceInstructionsCachedIndex = 0;
-    isVoiceInstructionsToCacheThresholdReached = false;
-    for (int i = 0; i < route.legs().size(); i++) {
-      RouteLeg leg = route.legs().get(i);
-      for (int j = 0; j < leg.steps().size(); j++) {
-        LegStep step = leg.steps().get(j);
-        for (VoiceInstructions ignored : step.voiceInstructions()) {
-          totalVoiceInstructions++;
+    for (int i = 0; i < routeLegs.size(); i++) {
+      RouteLeg leg = routeLegs.get(i);
+      if (leg == null) {
+        continue;
+      }
+
+      List<LegStep> legSteps = leg.steps();
+      if (legSteps == null) {
+        continue;
+      }
+
+      for (int j = 0; j < legSteps.size(); j++) {
+        LegStep step = legSteps.get(j);
+        if (step == null) {
+          continue;
+        }
+
+        List<VoiceInstructions> voiceInstructions = step.voiceInstructions();
+        if (voiceInstructions != null) {
+          totalVoiceInstructions += voiceInstructions.size();
         }
       }
     }
-    List<String> voiceInstructionsToCache = new ArrayList<>();
-    for (int i = currentVoiceInstructionsCachedIndex; i < totalVoiceInstructions; i++) {
-      voiceInstructionsToCache.add(navigation.retrieveSsmlAnnouncementInstruction(i));
-      currentVoiceInstructionsCachedIndex++;
-      if ((currentVoiceInstructionsCachedIndex + 1) % MAX_VOICE_INSTRUCTIONS_TO_CACHE == 0) {
-        break;
-      }
-    }
-    voiceInstructionLoader.cacheInstructions(voiceInstructionsToCache);
   }
 
   void cache() {

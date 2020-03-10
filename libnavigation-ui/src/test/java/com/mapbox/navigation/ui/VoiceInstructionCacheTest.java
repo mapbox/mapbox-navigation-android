@@ -33,7 +33,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
     DirectionsRoute aRoute = buildDirectionsRoute();
     ArgumentCaptor<List> voiceInstructionsToCache = ArgumentCaptor.forClass(List.class);
 
-    theVoiceInstructionCache.preCache(aRoute);
+    theVoiceInstructionCache.initCache(aRoute);
 
     verify(aVoiceInstructionLoader, times(1))
       .cacheInstructions(voiceInstructionsToCache.capture());
@@ -64,7 +64,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
     DirectionsRoute twentyOneInstructionsRoute = buildDirectionsRoute();
     ArgumentCaptor<List> voiceInstructionsToCache = ArgumentCaptor.forClass(List.class);
 
-    theVoiceInstructionCache.preCache(twentyOneInstructionsRoute);
+    theVoiceInstructionCache.initCache(twentyOneInstructionsRoute);
     theVoiceInstructionCache.update(5);
     theVoiceInstructionCache.cache();
     theVoiceInstructionCache.update(10);
@@ -88,7 +88,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
       aVoiceInstructionLoader, aConnectivityStatus);
     DirectionsRoute aRoute = buildDirectionsRoute();
 
-    theVoiceInstructionCache.preCache(aRoute);
+    theVoiceInstructionCache.initCache(aRoute);
     theVoiceInstructionCache.update(5);
     theVoiceInstructionCache.cache();
 
@@ -105,7 +105,7 @@ public class VoiceInstructionCacheTest extends BaseTest {
       aVoiceInstructionLoader, aConnectivityStatus);
     DirectionsRoute aRoute = buildDirectionsRoute();
 
-    theVoiceInstructionCache.preCache(aRoute);
+    theVoiceInstructionCache.initCache(aRoute);
 
     verifyZeroInteractions(aVoiceInstructionLoader);
   }

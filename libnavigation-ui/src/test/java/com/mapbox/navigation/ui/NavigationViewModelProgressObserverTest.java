@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui;
 
-import android.location.Location;
-
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 import org.junit.Test;
@@ -10,16 +8,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class NavigationViewModelProgressChangeListenerTest {
+public class NavigationViewModelProgressObserverTest {
 
   @Test
   public void checksNavigationViewModelRouteProgressIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
-    NavigationViewModelProgressChangeListener theNavigationViewModelProgressChangeListener =
-            new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
+    NavigationViewModelProgressObserver theNavigationViewModelProgressObserver =
+            new NavigationViewModelProgressObserver(mockedNavigationViewModel);
     RouteProgress theRouteProgress = mock(RouteProgress.class);
 
-    theNavigationViewModelProgressChangeListener.onRouteProgressChanged(theRouteProgress);
+    theNavigationViewModelProgressObserver.onRouteProgressChanged(theRouteProgress);
 
     verify(mockedNavigationViewModel).updateRouteProgress(eq(theRouteProgress));
   }
@@ -27,8 +25,8 @@ public class NavigationViewModelProgressChangeListenerTest {
   /*@Test
   public void checksNavigationViewModelLocationIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
-    NavigationViewModelProgressChangeListener theNavigationViewModelProgressChangeListener =
-            new NavigationViewModelProgressChangeListener(mockedNavigationViewModel);
+    NavigationViewModelProgressObserver theNavigationViewModelProgressChangeListener =
+            new NavigationViewModelProgressObserver(mockedNavigationViewModel);
     Location theLocation = mock(Location.class);
 
     theNavigationViewModelProgressChangeListener.onRawLocationChanged(theLocation);

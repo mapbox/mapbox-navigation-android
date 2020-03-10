@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class NavigationViewModelProgressChangeListener implements RouteProgressObserver, LocationObserver {
+class NavigationViewModelProgressObserver implements RouteProgressObserver, LocationObserver {
 
   private final NavigationViewModel viewModel;
 
-  NavigationViewModelProgressChangeListener(NavigationViewModel viewModel) {
+  NavigationViewModelProgressObserver(NavigationViewModel viewModel) {
     this.viewModel = viewModel;
   }
 
