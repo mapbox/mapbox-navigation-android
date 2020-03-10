@@ -38,7 +38,7 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
-    <!-- 100 char per line max, unless unavoidable -->
+    <!-- 120 char per line max, unless unavoidable -->
     <module name="LineLength">
         <property name="max" value="120"/>
         <property name="ignorePattern"
