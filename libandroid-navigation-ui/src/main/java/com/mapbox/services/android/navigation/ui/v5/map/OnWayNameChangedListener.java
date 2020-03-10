@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
  * <p>
  * This listener is triggered when a new way name is found along the route.  It will be triggered
  * regardless of the map way name visibility
- * ({@link com.mapbox.services.android.navigation.ui.v5.NavigationView#updateWayNameVisibility(boolean)}).
+ * ({@link com.mapbox.services.android.navigation.ui.v5.NavigationView#setWayNameActive(boolean)}).
  * This is so you can hide our implementation of the way name UI and update your own if you'd like.
  */
 public interface OnWayNameChangedListener {

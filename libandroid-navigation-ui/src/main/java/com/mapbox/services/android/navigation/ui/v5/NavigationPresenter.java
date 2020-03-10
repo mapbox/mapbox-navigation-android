@@ -25,7 +25,10 @@ class NavigationPresenter {
   void onRecenterClick() {
     view.setSummaryBehaviorHideable(false);
     view.setSummaryBehaviorState(BottomSheetBehavior.STATE_EXPANDED);
-    view.updateWayNameVisibility(true);
+    view.setWayNameActive(true);
+    if (!TextUtils.isEmpty(view.retrieveWayNameText())) {
+      view.setWayNameVisibility(true);
+    }
     view.resetCameraPosition();
     view.hideRecenterBtn();
   }
@@ -34,7 +37,8 @@ class NavigationPresenter {
     if (!view.isSummaryBottomSheetHidden()) {
       view.setSummaryBehaviorHideable(true);
       view.setSummaryBehaviorState(BottomSheetBehavior.STATE_HIDDEN);
-      view.updateWayNameVisibility(false);
+      view.setWayNameActive(false);
+      view.setWayNameVisibility(false);
     }
   }
 
@@ -71,19 +75,23 @@ class NavigationPresenter {
 
   void onWayNameChanged(@NonNull String wayName) {
     if (TextUtils.isEmpty(wayName) || view.isSummaryBottomSheetHidden()) {
-      view.updateWayNameVisibility(false);
+      view.setWayNameActive(false);
+      view.setWayNameVisibility(false);
       return;
     }
     view.updateWayNameView(wayName);
-    view.updateWayNameVisibility(true);
+    view.setWayNameActive(true);
+    view.setWayNameVisibility(true);
   }
 
   void onNavigationStopped() {
-    view.updateWayNameVisibility(false);
+    view.setWayNameActive(false);
+    view.setWayNameVisibility(false);
   }
 
   void onRouteOverviewClick() {
-    view.updateWayNameVisibility(false);
+    view.setWayNameActive(false);
+    view.setWayNameVisibility(false);
     view.updateCameraRouteOverview();
     view.showRecenterBtn();
   }
