@@ -150,8 +150,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     /**
      * Add a puck drawable supplier to customize the look of the puck when navigating.
      *
-     * @param puckDrawableSupplier
-     * @return
+     * @param puckDrawableSupplier the supplier for returning the appropriate drawable resource
+     * @return this builder
      */
     public abstract Builder puckDrawableSupplier(PuckDrawableSupplier puckDrawableSupplier);
 

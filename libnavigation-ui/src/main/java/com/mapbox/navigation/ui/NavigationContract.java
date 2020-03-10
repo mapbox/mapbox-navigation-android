@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 public interface NavigationContract {
 
