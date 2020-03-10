@@ -465,7 +465,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void updateReplayEngine(DirectionsRoute route) { locationEngineConductor.updateSimulatedRoute(route);
+  private void updateReplayEngine(DirectionsRoute route) {
+    locationEngineConductor.updateSimulatedRoute(route);
   }
 
   private void endNavigation() {
