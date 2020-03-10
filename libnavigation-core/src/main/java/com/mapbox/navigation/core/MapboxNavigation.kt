@@ -204,61 +204,20 @@ constructor(
      * Requests a route using the provided [Router] implementation.
      * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
      *
-     * @param routeOptions params for the route request
-     * @see [registerRoutesObserver]
-     * @see [registerRouteProgressObserver]
-     */
-    fun requestRoutes(routeOptions: RouteOptions) {
-        directionsSession.requestRoutes(routeOptions, defaultRoutesRequestCallback)
-    }
-
-    private val defaultRoutesRequestCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            return routes
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-    }
-
-    private val fasterRouteRequestCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            tripSession.getRouteProgress()?.let { progress ->
-                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
-                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
-                }
-            }
-            return routes
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-    }
-
-    /**
-     * Requests a route using the provided [Router] implementation.
-     * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     *
+     * Use [MapboxNavigation.setRoutes] to supply a transformed list of routes, or a list from an external source, to be managed by the SDK.
      *
      * @param routeOptions params for the route request
      * @param routesRequestCallback listener that gets notified when request state changes
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
      */
-    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback) {
+    @JvmOverloads
+    fun requestRoutes(
+        routeOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback? = null
+    ) {
         directionsSession.requestRoutes(routeOptions, routesRequestCallback)
     }
 
@@ -269,6 +228,8 @@ constructor(
      *
      * If the list is not empty, the route at index 0 is going to be treated as the primary route
      * and used for route progress, off route events and map-matching calculations.
+     *
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
      * @param routes a list of [DirectionsRoute]s
      */
@@ -481,6 +442,26 @@ constructor(
         }
     }
 
+    private val fasterRouteRequestCallback = object : RoutesRequestCallback {
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            tripSession.getRouteProgress()?.let { progress ->
+                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
+                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
+                }
+            }
+        }
+
+        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+
+        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+    }
+
     private fun reRoute() {
         ifNonNull(
             directionsSession.getRouteOptions(),
@@ -489,7 +470,7 @@ constructor(
             val optionsRebuilt = buildAdjustedRouteOptions(options, location)
             directionsSession.requestRoutes(
                 optionsRebuilt,
-                defaultRoutesRequestCallback // todo cache the original callback and reach out to the user before setting the route
+                null
             )
         }
     }

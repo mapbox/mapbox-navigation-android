@@ -307,10 +307,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
             Timber.d("route request success %s", routes.toString())
             replayRouteLocationEngine.assign(routes[0])
-            return routes
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {

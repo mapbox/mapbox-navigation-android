@@ -35,20 +35,24 @@ class MapboxDirectionsSession(
 
     override fun requestRoutes(
         routeOptions: RouteOptions,
-        routesRequestCallback: RoutesRequestCallback
+        routesRequestCallback: RoutesRequestCallback?
     ) {
         routes = emptyList()
         router.getRoute(routeOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
-                this@MapboxDirectionsSession.routes = routesRequestCallback.onRoutesReady(routes)
+                this@MapboxDirectionsSession.routes = routes
+                routesRequestCallback?.onRoutesReady(routes)
+                // todo log in the future
             }
 
             override fun onFailure(throwable: Throwable) {
-                routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
+                routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
+                // todo log in the future
             }
 
             override fun onCanceled() {
-                routesRequestCallback.onRoutesRequestCanceled(routeOptions)
+                routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+                // todo log in the future
             }
         })
     }
