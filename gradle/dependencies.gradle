@@ -8,7 +8,7 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk              : '9.1.0-SNAPSHOT',
+      mapboxMapSdk              : '9.1.0-alpha.1',
       mapboxSdkServices         : '5.1.0-SNAPSHOT',
       mapboxSdkDirectionsModels : '5.1.0-SNAPSHOT',
       mapboxEvents              : '4.7.3',
@@ -44,7 +44,7 @@ ext {
       picasso                   : '2.71828',
       gmsLocation               : '16.0.0',
       ktlint                    : '0.34.2',
-      kotlinStdLib              : '1.3.61',
+      kotlinStdLib              : '1.3.70',
       ankoCommon                : '0.10.0',
       firebaseCore              : '16.0.7',
       crashlytics               : '2.9.9',
@@ -162,7 +162,7 @@ ext {
       gradle           : '3.5.3',
       dependencyGraph  : '0.3.0',
       dependencyUpdates: '0.20.0',
-      kotlin           : '1.3.61',
+      kotlin           : '1.3.70',
       license          : '0.8.5',
       jacoco           : '0.8.2',
       playPublisher    : '2.3.0',
