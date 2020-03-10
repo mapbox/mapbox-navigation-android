@@ -123,7 +123,7 @@ constructor(
         context,
         accessToken
     ),
-    locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
+    val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
@@ -194,7 +194,8 @@ constructor(
                 MapboxMetricsReporter,
                 locationEngine.javaClass.name,
                 ThreadController.getMainScopeAndRootJob(),
-                navigationOptions
+                navigationOptions,
+                locationEngine
             )
         }
     }
@@ -289,7 +290,7 @@ constructor(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
-        MapboxNavigationTelemetry.unregisterListeners(this)
+        MapboxNavigationTelemetry.unregisterListeners(this, locationEngine)
         fasterRouteObservers.clear()
         fasterRouteTimer.stop()
     }

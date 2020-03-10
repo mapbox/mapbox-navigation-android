@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.telemetry
 
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 
@@ -11,5 +12,5 @@ interface MapboxNavigationTelemetryInterface {
         screenshot: String?
     )
 
-    fun unregisterListeners(mapboxNavigation: MapboxNavigation)
+    fun unregisterListeners(mapboxNavigation: MapboxNavigation, locationEngine: LocationEngine)
 }

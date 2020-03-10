@@ -21,21 +21,27 @@ import kotlinx.coroutines.selects.select
 
 internal class TelemetryLocationAndProgressDispatcher :
     RouteProgressObserver, LocationObserver, RoutesObserver {
-    private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
+    private var lastLocation: AtomicReference<Location?> = AtomicReference(null)
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
         AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
-    private val channelRouteSelected = Channel<RouteAvailable>(Channel.CONFLATED)
+    private val channelOffRouteEvent = Channel<RouteAvailable>(Channel.CONFLATED)
     private val channelLocationReceived_1 = Channel<Location>(Channel.CONFLATED)
     private val channelLocationReceived_2 = Channel<Location>(Channel.CONFLATED)
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var jobControl = ThreadController.getIOScopeAndRootJob()
-    private val routeSelected = AtomicReference<RouteAvailable?>(null)
-    private var originalRoute: DirectionsRoute? = null
+    private var originalRoute = AtomicReference<RouteAvailable?>(null)
     private var accumulationJob: Job = Job()
     private val currentLocationBuffer = SynchronizedItemBuffer<Location>()
     private val locationEventBuffer = SynchronizedItemBuffer<ItemAccumulationEventDescriptor<Location>>()
-
+    private val originalRoutePreInit = { routes: List<DirectionsRoute> ->
+        if (originalRoute.get() == null) {
+            originalRoute.set(RouteAvailable(routes[0], Date()))
+            origianlRouteDeligate = originalRoutePostInit
+        }
+    }
+    private val originalRoutePostInit = { routes: List<DirectionsRoute> -> Unit }
+    private var origianlRouteDeligate: (List<DirectionsRoute>) -> Unit = originalRoutePreInit
     /**
      * This class provides thread-safe access to a mutable list of locations
      */
@@ -164,13 +170,11 @@ internal class TelemetryLocationAndProgressDispatcher :
     /**
      * This channel becomes signaled if a navigation route is selected
      */
-    fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelRouteSelected
-
-    fun getLastDirectionsRoute() = routeSelected
+    fun getDirectionsRouteChannel(): ReceiveChannel<RouteAvailable> = channelOffRouteEvent
 
     fun getCopyOfCurrentLocationBuffer() = currentLocationBuffer.getCopy()
 
-    fun getOriginalRoute() = originalRoute
+    fun getOriginalRoute() = originalRoute.get()
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val data = RouteProgressWithTimestamp(Time.SystemImpl.millis(), routeProgress)
@@ -181,11 +185,15 @@ internal class TelemetryLocationAndProgressDispatcher :
     fun getRouteProgressChannel(): ReceiveChannel<RouteProgressWithTimestamp> =
         channelOnRouteProgress
 
-    fun getLastLocation(): Location = lastLocation.get()
+    fun getLastLocation(): Location? = lastLocation.get()
 
     fun getRouteProgress(): RouteProgressWithTimestamp = routeProgress.get()
 
-    fun isRouteAvailable(): AtomicReference<RouteAvailable?> = routeSelected
+    fun isRouteAvailable(): RouteAvailable? = originalRoute.get()
+
+    fun clearOriginalRoute() {
+        originalRoute.set(null)
+    }
 
     override fun onRawLocationChanged(rawLocation: Location) {
         // Do nothing
@@ -200,13 +208,12 @@ internal class TelemetryLocationAndProgressDispatcher :
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
         when (routes.isEmpty()) {
             true -> {
-                routeSelected.set(null)
+                // Do nothing. When onFasterRoute event fires it may reset this value.
             }
             false -> {
                 val date = Date()
-                channelRouteSelected.offer(RouteAvailable(routes[0], date))
-                originalRoute = routes[0]
-                routeSelected.set(RouteAvailable(routes[0], date))
+                channelOffRouteEvent.offer(RouteAvailable(routes[0], date))
+                origianlRouteDeligate(routes)
             }
         }
     }

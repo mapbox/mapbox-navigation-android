@@ -80,12 +80,14 @@ fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
     } ?: 0
 
 fun obtainAbsoluteDistance(
-    currentLocation: Location,
+    currentLocation: Location?,
     finalPoint: Point
 ): Int {
-    val currentPoint = Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
-    return TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS)
-        .toInt()
+    currentLocation?.let {
+        val currentPoint = Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
+        return TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS)
+                .toInt()
+    } ?: return 0
 }
 
 fun obtainRouteDestination(route: DirectionsRoute?): Point =
