@@ -7,6 +7,8 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,5 +87,10 @@ class VoiceInstructionCache {
     if (voiceInstructionsToAnnounce % VOICE_INSTRUCTIONS_TO_CACHE_THRESHOLD == 0) {
       isVoiceInstructionsToCacheThresholdReached = true;
     }
+  }
+
+  @TestOnly
+  int getTotalVoiceInstructionNumber() {
+    return totalVoiceInstructions;
   }
 }

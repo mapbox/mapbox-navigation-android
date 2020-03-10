@@ -1,8 +1,12 @@
 package com.mapbox.navigation.ui;
 
+import android.location.Location;
+
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -14,7 +18,7 @@ public class NavigationViewModelProgressObserverTest {
   public void checksNavigationViewModelRouteProgressIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     NavigationViewModelProgressObserver theNavigationViewModelProgressObserver =
-            new NavigationViewModelProgressObserver(mockedNavigationViewModel);
+      new NavigationViewModelProgressObserver(mockedNavigationViewModel);
     RouteProgress theRouteProgress = mock(RouteProgress.class);
 
     theNavigationViewModelProgressObserver.onRouteProgressChanged(theRouteProgress);
@@ -22,15 +26,17 @@ public class NavigationViewModelProgressObserverTest {
     verify(mockedNavigationViewModel).updateRouteProgress(eq(theRouteProgress));
   }
 
-  /*@Test
+  @Test
+  @SuppressWarnings("unchecked assignment")
   public void checksNavigationViewModelLocationIsUpdatedWhenOnProgressChange() {
     NavigationViewModel mockedNavigationViewModel = mock(NavigationViewModel.class);
     NavigationViewModelProgressObserver theNavigationViewModelProgressChangeListener =
-            new NavigationViewModelProgressObserver(mockedNavigationViewModel);
+      new NavigationViewModelProgressObserver(mockedNavigationViewModel);
     Location theLocation = mock(Location.class);
+    List<? extends Location> keyPoints = mock(List.class);
 
-    theNavigationViewModelProgressChangeListener.onRawLocationChanged(theLocation);
+    theNavigationViewModelProgressChangeListener.onEnhancedLocationChanged(theLocation, keyPoints);
 
     verify(mockedNavigationViewModel).updateLocation(eq(theLocation));
-  }*/
+  }
 }
