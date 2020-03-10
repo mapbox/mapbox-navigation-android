@@ -31,6 +31,7 @@ internal class TelemetryLocationAndProgressDispatcher :
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var jobControl = ThreadController.getIOScopeAndRootJob()
     private val routeSelected = AtomicReference<RouteAvailable?>(null)
+    private var originalRoute: DirectionsRoute? = null
     private var accumulationJob: Job = Job()
     private val currentLocationBuffer = SynchronizedItemBuffer<Location>()
     private val locationEventBuffer = SynchronizedItemBuffer<ItemAccumulationEventDescriptor<Location>>()
@@ -167,6 +168,8 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     fun getCopyOfCurrentLocationBuffer() = currentLocationBuffer.getCopy()
 
+    fun getOriginalRoute() = originalRoute
+
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         val data = RouteProgressWithTimestamp(Time.SystemImpl.millis(), routeProgress)
         this.routeProgress.set(data)
@@ -200,6 +203,7 @@ internal class TelemetryLocationAndProgressDispatcher :
             false -> {
                 val date = Date()
                 channelRouteSelected.offer(RouteAvailable(routes[0], date))
+                originalRoute = routes[0]
                 routeSelected.set(RouteAvailable(routes[0], date))
             }
         }
