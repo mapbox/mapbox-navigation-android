@@ -18,6 +18,13 @@ public interface NavigationContract {
 
     boolean isSummaryBottomSheetHidden();
 
+    void setWayNameActive(boolean isActive);
+
+    void setWayNameVisibility(boolean isVisible);
+
+    String retrieveWayNameText();
+
+    @Deprecated
     void updateWayNameVisibility(boolean isVisible);
 
     void updateWayNameView(@NonNull String wayName);

@@ -10,11 +10,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-class MapWaynameProgressChangeListener implements RouteProgressObserver, LocationObserver {
+class MapWayNameChangeObserver implements RouteProgressObserver, LocationObserver {
 
   private final MapWayName mapWayName;
 
-  MapWaynameProgressChangeListener(MapWayName mapWayName) {
+  MapWayNameChangeObserver(MapWayName mapWayName) {
     this.mapWayName = mapWayName;
   }
 
