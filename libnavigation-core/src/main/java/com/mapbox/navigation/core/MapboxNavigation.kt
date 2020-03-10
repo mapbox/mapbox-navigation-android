@@ -61,9 +61,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
-        "You need to provide an token access in order to use the default OffboardRouter."
+    "You need to provide an token access in order to use the default OffboardRouter."
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
-        "You need to provide an token access in order to use the default OnboardRouter."
+    "You need to provide an token access in order to use the default OnboardRouter."
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required"
 
 /**
@@ -120,13 +120,13 @@ constructor(
     private val context: Context,
     private val accessToken: String?,
     private val navigationOptions: NavigationOptions = defaultNavigationOptions(
-            context,
-            accessToken
+        context,
+        accessToken
     ),
     val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
+        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+        .build()
 ) {
 
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
@@ -141,60 +141,60 @@ constructor(
 
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
-            "com.mapbox.navigation.trip.notification.MapboxTripNotification"
+        "com.mapbox.navigation.trip.notification.MapboxTripNotification"
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {
         ThreadController.init()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
-                NavigationModuleProvider.createModule(
-                        MapboxNavigationModuleType.HybridRouter,
-                        ::paramsProvider
-                )
+            NavigationModuleProvider.createModule(
+                MapboxNavigationModuleType.HybridRouter,
+                ::paramsProvider
+            )
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = NavigationModuleProvider.createModule(
-                MapboxNavigationModuleType.TripNotification,
-                ::paramsProvider
+            MapboxNavigationModuleType.TripNotification,
+            ::paramsProvider
         )
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
-                    notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
-                        isAccessible = true
-                    }
+                notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
+                    isAccessible = true
+                }
         }
         tripService = NavigationComponentProvider.createTripService(
-                context.applicationContext,
-                notification
+            context.applicationContext,
+            notification
         )
         tripSession = NavigationComponentProvider.createTripSession(
-                tripService,
-                locationEngine,
-                locationEngineRequest,
-                navigationOptions.navigatorPollingDelay
+            tripService,
+            locationEngine,
+            locationEngineRequest,
+            navigationOptions.navigatorPollingDelay
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
 
         fasterRouteTimer = NavigationComponentProvider
-                .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
-                    requestFasterRoute()
-                }
+            .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
+                requestFasterRoute()
+            }
         ifNonNull(accessToken) { token ->
             MapboxMetricsReporter.init(
-                    context,
-                    accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
-                    obtainUserAgent(navigationOptions.isFromNavigationUi)
+                context,
+                accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
+                obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
             MapboxNavigationTelemetry.initialize(
-                    context.applicationContext,
-                    token,
-                    this,
-                    MapboxMetricsReporter,
-                    locationEngine.javaClass.name,
-                    ThreadController.getMainScopeAndRootJob(),
-                    navigationOptions
+                context.applicationContext,
+                token,
+                this,
+                MapboxMetricsReporter,
+                locationEngine.javaClass.name,
+                ThreadController.getMainScopeAndRootJob(),
+                navigationOptions
             )
         }
     }
@@ -319,7 +319,7 @@ constructor(
      * API used to retrieve the ssmlannouncement for voice instruction.
      */
     fun retrieveSsmlAnnouncementInstruction(index: Int): String? =
-            MapboxNativeNavigatorImpl.getVoiceInstruction(index)?.ssmlAnnouncement
+        MapboxNativeNavigatorImpl.getVoiceInstruction(index)?.ssmlAnnouncement
 
     /**
      * Registers [LocationObserver]. The updates are available whenever the trip session is started.
@@ -463,8 +463,8 @@ constructor(
 
     private fun requestFasterRoute() {
         ifNonNull(
-                directionsSession.getRouteOptions(),
-                tripSession.getEnhancedLocation()
+            directionsSession.getRouteOptions(),
+            tripSession.getEnhancedLocation()
         ) { options, enhancedLocation ->
             val optionsRebuilt = buildAdjustedRouteOptions(options, enhancedLocation)
             directionsSession.requestFasterRoute(optionsRebuilt, fasterRouteRequestCallback)
@@ -493,13 +493,13 @@ constructor(
 
     private fun reRoute() {
         ifNonNull(
-                directionsSession.getRouteOptions(),
-                tripSession.getRawLocation()
+            directionsSession.getRouteOptions(),
+            tripSession.getRawLocation()
         ) { options, location ->
             val optionsRebuilt = buildAdjustedRouteOptions(options, location)
             directionsSession.requestRoutes(
-                    optionsRebuilt,
-                    null
+                optionsRebuilt,
+                null
             )
         }
     }
@@ -512,15 +512,15 @@ constructor(
         val coordinates = routeOptions.coordinates()
         tripSession.getRouteProgress()?.currentLegProgress()?.legIndex()?.let { index ->
             optionsBuilder.coordinates(
-                    coordinates.drop(index + 1).toMutableList().apply {
-                        add(0, Point.fromLngLat(location.longitude, location.latitude))
-                    }
+                coordinates.drop(index + 1).toMutableList().apply {
+                    add(0, Point.fromLngLat(location.longitude, location.latitude))
+                }
             )
 
             val bearings = mutableListOf<List<Double>?>()
 
             val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
-                    ?: DEFAULT_REROUTE_BEARING_TOLERANCE
+                ?: DEFAULT_REROUTE_BEARING_TOLERANCE
             val currentAngle = location.bearing.toDouble()
 
             bearings.add(listOf(currentAngle, originTolerance))
@@ -567,34 +567,34 @@ constructor(
     private fun paramsProvider(type: MapboxNavigationModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
             MapboxNavigationModuleType.HybridRouter -> arrayOf(
-                    Router::class.java to NavigationModuleProvider.createModule(
-                            MapboxNavigationModuleType.OnboardRouter,
-                            ::paramsProvider
-                    ),
-                    Router::class.java to NavigationModuleProvider.createModule(
-                            MapboxNavigationModuleType.OffboardRouter,
-                            ::paramsProvider
-                    ),
-                    NetworkStatusService::class.java to NetworkStatusService(context.applicationContext)
+                Router::class.java to NavigationModuleProvider.createModule(
+                    MapboxNavigationModuleType.OnboardRouter,
+                    ::paramsProvider
+                ),
+                Router::class.java to NavigationModuleProvider.createModule(
+                    MapboxNavigationModuleType.OffboardRouter,
+                    ::paramsProvider
+                ),
+                NetworkStatusService::class.java to NetworkStatusService(context.applicationContext)
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
-                    String::class.java to (accessToken
-                            ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
-                    Context::class.java to context,
-                    SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
+                String::class.java to (accessToken
+                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
+                Context::class.java to context,
+                SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxNavigationModuleType.OnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
-                        MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                        MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
-                                ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER))
+                    MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
+                    MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER))
                 )
             }
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripNotification -> arrayOf(
-                    Context::class.java to context.applicationContext,
-                    NavigationOptions::class.java to navigationOptions
+                Context::class.java to context.applicationContext,
+                NavigationOptions::class.java to navigationOptions
             )
             MapboxNavigationModuleType.TripService -> throw NotImplementedError() // going to be removed when next base version
             MapboxNavigationModuleType.TripSession -> throw NotImplementedError() // going to be removed when next base version
@@ -616,10 +616,10 @@ constructor(
             screenshot: String?
         ) {
             MapboxNavigationTelemetry.postUserFeedback(
-                    feedbackType,
-                    description,
-                    feedbackSource,
-                    screenshot
+                feedbackType,
+                description,
+                feedbackSource,
+                screenshot
             )
         }
 
@@ -631,42 +631,42 @@ constructor(
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
             val builder = NavigationOptions.Builder()
-                    .timeFormatType(NONE_SPECIFIED)
-                    .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
-                    .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
-                    .fasterRouteDetectorInterval(DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
-                    .distanceFormatter(
-                            MapboxDistanceFormatter(
-                                    context.applicationContext,
-                                    null,
-                                    UNDEFINED,
-                                    ROUNDING_INCREMENT_FIFTY
-                            )
+                .timeFormatType(NONE_SPECIFIED)
+                .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
+                .fasterRouteDetectorInterval(DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
+                .distanceFormatter(
+                    MapboxDistanceFormatter(
+                        context.applicationContext,
+                        null,
+                        UNDEFINED,
+                        ROUNDING_INCREMENT_FIFTY
                     )
+                )
 
             // TODO provide a production routing tiles endpoint
             val tilesUri = URI("")
             val tilesVersion = ""
             val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
                 File(
-                        context.filesDir,
-                        "Offline/${tilesUri.host}/$tilesVersion"
+                    context.filesDir,
+                    "Offline/${tilesUri.host}/$tilesVersion"
                 ).absolutePath
             } else ""
 
             builder.onboardRouterConfig(
-                    MapboxOnboardRouterConfig(
-                            tilesDir,
-                            null,
-                            null,
-                            2,
-                            Endpoint(
-                                    tilesUri.toString(),
-                                    tilesVersion,
-                                    accessToken ?: "",
-                                    "MapboxNavigationNative"
-                            )
+                MapboxOnboardRouterConfig(
+                    tilesDir,
+                    null,
+                    null,
+                    2,
+                    Endpoint(
+                        tilesUri.toString(),
+                        tilesVersion,
+                        accessToken ?: "",
+                        "MapboxNavigationNative"
                     )
+                )
             )
 
             return builder.build()

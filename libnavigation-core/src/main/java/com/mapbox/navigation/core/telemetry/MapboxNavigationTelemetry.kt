@@ -125,7 +125,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 TripSessionState.STARTED -> {
                     telemetryThreadControl.scope.launch {
                         postUserEventDelegate =
-                                postUserFeedbackEventAfterInit // Telemetry is initialized and the user selected a route. Allow user feedback events to be posted
+                            postUserFeedbackEventAfterInit // Telemetry is initialized and the user selected a route. Allow user feedback events to be posted
                         handleSessionStart(callbackDispatcher.getFirstLocation().await())
                     }
                 }
@@ -145,6 +145,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         }
     }
 
+    // TODO Removing Faster Route temporarily as legacy isn't sending these events at the moment
     /**
      * Callback to observe faster route events
      */
@@ -170,6 +171,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             )
         }
     }
+
     /**
      * This method generates an off-route telemetry event. Part of the code is suspendable
      * because it waits for a new route to be offered by the SDK in response to a reroute
@@ -544,7 +546,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation.registerOffRouteObserver(rerouteObserver)
         mapboxNavigation.registerRouteProgressObserver(callbackDispatcher)
         mapboxNavigation.registerTripSessionStateObserver(sessionStateObserver)
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
+        // TODO Removing Faster Route temporarily as legacy isn't sending these events at the moment
+        // mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
         mapboxNavigation.registerLocationObserver(callbackDispatcher)
         mapboxNavigation.registerRoutesObserver(callbackDispatcher)
     }
@@ -553,7 +556,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation.unregisterOffRouteObserver(rerouteObserver)
         mapboxNavigation.unregisterRouteProgressObserver(callbackDispatcher)
         mapboxNavigation.unregisterTripSessionStateObserver(sessionStateObserver)
-        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
+        // TODO Removing Faster Route temporarily as legacy isn't sending these events at the moment
+        // mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
         mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
         mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
     }
@@ -616,8 +620,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     callbackDispatcher.getLastLocation(),
                     obtainRouteDestination(directionsRoute)
                 ),
-                durationRemaining = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()?.toInt()
-                    ?: 0,
+                durationRemaining = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()?.toInt() ?: 0,
                 rerouteCount = rerouteCount ?: 0,
                 applicationState = TelemetryUtils.obtainApplicationState(context),
                 batteryPluggedIn = TelemetryUtils.isPluggedIn(context),

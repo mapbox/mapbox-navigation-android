@@ -85,8 +85,7 @@ fun obtainAbsoluteDistance(
 ): Int {
     currentLocation?.let {
         val currentPoint = Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
-        return TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS)
-                .toInt()
+        return TurfMeasurement.distance(currentPoint, finalPoint, TurfConstants.UNIT_METERS).toInt()
     } ?: return 0
 }
 
