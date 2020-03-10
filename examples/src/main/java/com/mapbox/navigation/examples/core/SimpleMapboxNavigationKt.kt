@@ -11,9 +11,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -95,8 +92,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var speechPlayer: NavigationSpeechPlayer
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
 
-    private val liveLocationData = MutableLiveData<Location>()
-
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,13 +130,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 .build()
 
         mapboxNavigation = getMapboxNavigation(newOptions)
-        mapboxNavigation.toggleHistory(true)
-        Timber.i("history_debug toggleHistory true ${mapboxNavigation.retrieveHistory()}")
-
-        liveLocationData.observe(this, Observer {
-            Timber.i("history_debug update location ${it.longitude}, ${it.latitude}")
-            mapboxNavigation.updateLocation(it)
-        })
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -414,9 +402,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
         mapboxNavigation.stopTripSession()
-
-        Timber.i("history_debug retrieveHistory ${mapboxNavigation.retrieveHistory()}")
-
         mapboxNavigation.onDestroy()
 
         restartSessionEventChannel.cancel()
@@ -441,7 +426,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
                 activityRef.get()?.locationComponent?.forceLocationUpdate(it)
-                activityRef.get()?.liveLocationData?.value = it
             }
         }
 
