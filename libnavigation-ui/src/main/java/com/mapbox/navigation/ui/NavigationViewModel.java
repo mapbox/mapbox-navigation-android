@@ -21,11 +21,11 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
-import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
@@ -48,6 +48,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import okhttp3.Cache;
 
@@ -248,6 +249,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.unregisterLocationObserver(navigationProgressObserver);
     navigation.unregisterOffRouteObserver(offRouteObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
+    navigation.unregisterRoutesObserver(routesObserver);
     navigation.stopTripSession();
   }
 
@@ -406,6 +408,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerLocationObserver(navigationProgressObserver);
     navigation.registerOffRouteObserver(offRouteObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
+    navigation.registerRoutesObserver(routesObserver);
     // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
   }
 
@@ -443,7 +446,14 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };*/
 
-  private Router.Callback routeEngineCallback = new NavigationViewRouteEngineListener(this);
+  private RoutesObserver routesObserver = new RoutesObserver() {
+    @Override
+    public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
+      if (routes.size() > 0) {
+        updateRoute(routes.get(0));
+      }
+    }
+  };
 
   @SuppressLint("MissingPermission")
   private void startNavigation(DirectionsRoute route) {
