@@ -587,6 +587,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
         val directionsRoute = callbackDispatcher.getLastDirectionsRoute().get()?.route ?: route
         val location = callbackDispatcher.getLastLocation()
+        val origianlDistance = callbackDispatcher.getOriginalRoute()?.distance()
+        val completedDistance = origianlDistance?.toLong() ?: 0 - dynamicValues.distanceRemaining.get()
         val metadata =
             TelemetryMetadata(
                 created = creationDate.toString(),
@@ -604,7 +606,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 estimatedDistance = directionsRoute?.distance()?.toInt() ?: 0, // TODO:OZ verify
                 estimatedDuration = directionsRoute?.duration()?.toInt() ?: 0, // TODO:OZ verify
                 stepCount = obtainStepCount(directionsRoute),
-                distanceCompleted = 0, // TODO:OZ verify
+                distanceCompleted = completedDistance.toInt(),
                 distanceRemaining = dynamicValues.distanceRemaining.get().toInt(),
                 absoluteDistanceToDestination = obtainAbsoluteDistance(
                     callbackDispatcher.getLastLocation(),
