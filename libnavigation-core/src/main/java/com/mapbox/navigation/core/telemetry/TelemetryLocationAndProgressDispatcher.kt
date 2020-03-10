@@ -13,6 +13,7 @@ import com.mapbox.navigation.utils.time.Time
 import java.util.Collections
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -42,6 +43,9 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
     private val originalRoutePostInit = { routes: List<DirectionsRoute> -> Unit }
     private var origianlRouteDeligate: (List<DirectionsRoute>) -> Unit = originalRoutePreInit
+    private var firstLocation = CompletableDeferred<Location>()
+    private var firstLocationValue: Location? = null
+
     /**
      * This class provides thread-safe access to a mutable list of locations
      */
@@ -203,7 +207,22 @@ internal class TelemetryLocationAndProgressDispatcher :
         channelLocationReceived_1.offer(enhancedLocation)
         channelLocationReceived_2.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
+        when (firstLocationValue) {
+            null -> {
+                firstLocationValue = enhancedLocation
+                firstLocationValue?.let { location ->
+                    firstLocation.complete(location)
+                }
+            }
+            else -> {
+                firstLocationValue?.let { location ->
+                    firstLocation.complete(location)
+                }
+            }
+        }
     }
+
+    fun getFirstLocation() = firstLocation
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
         when (routes.isEmpty()) {
