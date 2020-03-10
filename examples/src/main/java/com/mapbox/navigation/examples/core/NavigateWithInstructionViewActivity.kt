@@ -231,8 +231,8 @@ class NavigateWithInstructionViewActivity : AppCompatActivity(), OnMapReadyCallb
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            return routes
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            // do nothing
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {

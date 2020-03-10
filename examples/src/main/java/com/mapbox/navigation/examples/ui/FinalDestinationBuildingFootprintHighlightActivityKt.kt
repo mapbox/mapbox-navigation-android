@@ -276,9 +276,8 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
             Timber.d("route request success %s", routes.toString())
-            return routes
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
