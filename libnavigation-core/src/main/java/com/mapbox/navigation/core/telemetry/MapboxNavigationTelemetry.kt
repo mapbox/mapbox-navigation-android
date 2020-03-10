@@ -128,8 +128,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 TripSessionState.STOPPED -> {
                     postUserEventDelegate =
                         postUserEventBeforeInit // The navigation session is over, disallow posting user feedback events
-                    handleSessionCanceled()
-                    handleSessionStop()
+                    when (dynamicValues.routeArrived.get()) {
+                        true -> {
+                            handleSessionStop()
+                        }
+                        false -> {
+                            handleSessionCanceled()
+                        }
+                    }
                 }
             }
         }
@@ -466,7 +472,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
                 startTimestamp = Date().toString()
             }
-            telemetryEventGate(telemetryDeparture(directionsRoute)) // TODO:OZ send this data only after RouteProgress. Get Lat/Lng from RouteProgress
+            telemetryEventGate(telemetryDeparture(directionsRoute))
             monitorSession()
         }
     }
