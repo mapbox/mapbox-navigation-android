@@ -375,7 +375,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         )
                     )
                     telemetryEventGate(cancelEvent)
-                    callbackDispatcher.cancelAccumulationJob()
+                    callbackDispatcher.cancelCollectionAndPostFinalEvents()
                 }
                 false -> {
                     val cancelEvent = TelemetryCancel(
@@ -385,7 +385,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         )
                     )
                     telemetryEventGate(cancelEvent)
-                    callbackDispatcher.cancelAccumulationJob()
+                    callbackDispatcher.cancelCollectionAndPostFinalEvents()
                 }
             }
         }

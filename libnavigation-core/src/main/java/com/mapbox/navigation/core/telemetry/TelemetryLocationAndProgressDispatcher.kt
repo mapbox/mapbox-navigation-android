@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 
 internal class TelemetryLocationAndProgressDispatcher :
     RouteProgressObserver, LocationObserver, RoutesObserver {
@@ -93,7 +95,7 @@ internal class TelemetryLocationAndProgressDispatcher :
          * with a new location object. On the second pass, execute the stored lambda if the buffer
          * size is equal to or greater then a given value.
          */
-        jobControl.scope.monitorChannelWithException(channelLocationReceived_2, { location ->
+        accumulationJob = jobControl.scope.monitorChannelWithException(channelLocationReceived_2, { location ->
             // Update each event buffer with a new location
             locationEventBuffer.applyToEach { item ->
                 item.postEventBuffer.addFirst(location)
@@ -112,6 +114,16 @@ internal class TelemetryLocationAndProgressDispatcher :
                 }
             }
         })
+        jobControl.scope.launch {
+            select<Unit> {
+                accumulationJob.onJoin {
+                    locationEventBuffer.applyToEach { item ->
+                        item.onBufferFull(item.preEventBuffer, item.postEventBuffer)
+                        false
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -144,7 +156,7 @@ internal class TelemetryLocationAndProgressDispatcher :
      * This method cancels all jobs that accumulate telemetry data. The side effect of this call is to call Telemetry.addEvent(), which may cause events to be sent
      * to the back-end server
      */
-    fun cancelAccumulationJob() = accumulationJob.cancel()
+    fun cancelCollectionAndPostFinalEvents() = accumulationJob.cancel()
 
     /**
      * This channel becomes signaled if a navigation route is selected
