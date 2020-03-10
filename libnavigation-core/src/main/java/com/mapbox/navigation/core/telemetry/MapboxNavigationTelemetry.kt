@@ -176,10 +176,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         val prevRoute = callbackDispatcher.getRouteProgress()
         telemetryThreadControl.scope.launch {
             val newRoute = callbackDispatcher.getDirectionsRouteChannel()
-                    .receive() // Suspend until we get a value
+                .receive() // Suspend until we get a value
             dynamicValues.distanceRemaining.set(newRoute.route.distance()?.toLong() ?: -1)
             var timeSinceLastEvent =
-                    (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
+                (Time.SystemImpl.millis() - dynamicValues.timeOfRerouteEvent.get()).toInt()
             if (timeSinceLastEvent < ONE_SECOND) {
                 timeSinceLastEvent = 0
             }
@@ -189,16 +189,16 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     if (nullableLegList[0].steps()?.isNotEmpty() == true) {
                         nullableLegList[0].steps()?.let { legsList ->
                             populateTelemetryStep(
-                                    legsList[0],
-                                    prevRoute.routeProgress.currentLegProgress()
+                                legsList[0],
+                                prevRoute.routeProgress.currentLegProgress()
                             )
                         }
                     }
                 }
             }
             callbackDispatcher.addLocationEventDescriptor(ItemAccumulationEventDescriptor(
-                    ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
-                    ArrayDeque()
+                ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
+                ArrayDeque()
             ) { preEventBuffer, postEventBuffer ->
                 telemetryEventGate(
                     TelemetryReroute(
@@ -209,9 +209,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         locationsBefore = preEventBuffer.toTypedArray(),
                         locationsAfter = postEventBuffer.toTypedArray(),
                         metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
-                                Date(),
-                                rerouteCount = rerouteCount,
-                                locationEngineName = locationEngineName
+                            Date(),
+                            rerouteCount = rerouteCount,
+                            locationEngineName = locationEngineName
                         )),
                         feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                         secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
@@ -336,8 +336,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     ) {
         val lastProgress = callbackDispatcher.getRouteProgress()
         callbackDispatcher.addLocationEventDescriptor(ItemAccumulationEventDescriptor(
-                ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
-                ArrayDeque()
+            ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
+            ArrayDeque()
         ) { preEventBuffer, postEventBuffer ->
             val feedbackEvent = TelemetryUserFeedback(
                 feedbackSource = feedbackSource,
@@ -352,8 +352,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     populateTelemetryStep(routeLegProgress)
                 },
                 metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
-                        Date(),
-                        locationEngineName = locationEngineName
+                    Date(),
+                    locationEngineName = locationEngineName
                 ))
             )
             Log.i(TAG, "Calling addEvent")
@@ -486,7 +486,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         while (coroutineContext.isActive && continueRunning) {
             try {
                 val routeData = callbackDispatcher.getRouteProgressChannel().receive()
-                Log.d(TAG, "PGS ${routeData.routeProgress.currentState()}")
                 when (routeData.routeProgress.currentState()) {
                     RouteProgressState.ROUTE_ARRIVED -> {
                         dynamicValues.routeCanceled.set(false)
@@ -494,13 +493,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             TelemetryArrival(
                                 arrivalTimestamp = Date().toString(),
                                 metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
-                                        Date(),
-                                        locationEngineName = locationEngineName
+                                    Date(),
+                                    locationEngineName = locationEngineName
                                 )).apply {
                                     lat = callbackDispatcher.getLastLocation().latitude.toFloat()
                                     lng = callbackDispatcher.getLastLocation().longitude.toFloat()
                                     distanceCompleted =
-                                            routeData.routeProgress.distanceTraveled().toInt() // TODO: Log this data to see what is returned from the SDK
+                                        routeData.routeProgress.distanceTraveled().toInt() // TODO: Log this data to see what is returned from the SDK
                                     dynamicValues.routeArrived.set(true)
                                 }
                             )
@@ -525,7 +524,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     private fun telemetryDeparture(directionsRoute: DirectionsRoute): MetricEvent {
         return TelemetryDepartureEvent(
-                populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
+            populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
                 Date(),
                 locationEngineName = locationEngineName
             )).apply {
@@ -575,6 +574,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         }
         return metaData
     }
+
     private fun populateEventMetadataAndUpdateState(
         creationDate: Date,
         route: DirectionsRoute? = null,
@@ -613,7 +613,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     obtainRouteDestination(directionsRoute)
                 ),
                 durationRemaining = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.currentStepProgress()?.durationRemaining()?.toInt()
-                        ?: 0,
+                    ?: 0,
                 rerouteCount = rerouteCount ?: 0,
                 applicationState = TelemetryUtils.obtainApplicationState(context),
                 batteryPluggedIn = TelemetryUtils.isPluggedIn(context),

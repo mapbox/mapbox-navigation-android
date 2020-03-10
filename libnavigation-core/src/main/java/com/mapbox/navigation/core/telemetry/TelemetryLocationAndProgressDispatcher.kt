@@ -23,9 +23,9 @@ internal class TelemetryLocationAndProgressDispatcher :
     RouteProgressObserver, LocationObserver, RoutesObserver {
     private var lastLocation: AtomicReference<Location> = AtomicReference(Location("Default"))
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
-            AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
+        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
     private val channelRouteSelected = Channel<RouteAvailable>(Channel.CONFLATED)
-    private val channelLocationRecieved_1 = Channel<Location>(Channel.CONFLATED)
+    private val channelLocationReceived_1 = Channel<Location>(Channel.CONFLATED)
     private val channelLocationReceived_2 = Channel<Location>(Channel.CONFLATED)
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
@@ -35,6 +35,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     private var accumulationJob: Job = Job()
     private val currentLocationBuffer = SynchronizedItemBuffer<Location>()
     private val locationEventBuffer = SynchronizedItemBuffer<ItemAccumulationEventDescriptor<Location>>()
+
     /**
      * This class provides thread-safe access to a mutable list of locations
      */
@@ -87,14 +88,14 @@ internal class TelemetryLocationAndProgressDispatcher :
 
     init {
         // Unconditionally update the contents of the pre-event buffer
-        jobControl.scope.monitorChannelWithException(channelLocationRecieved_1, { location ->
+        jobControl.scope.monitorChannelWithException(channelLocationReceived_1, { location ->
             accumulateLocationAsync(location, currentLocationBuffer)
         })
 
         /**
          * Process the location event buffer twice. The first time, update each of it's elements
          * with a new location object. On the second pass, execute the stored lambda if the buffer
-         * size is equal to or greater then a given value.
+         * size is equal to or greater than a given value.
          */
         accumulationJob = jobControl.scope.monitorChannelWithException(channelLocationReceived_2, { location ->
             // Update each event buffer with a new location
@@ -153,6 +154,7 @@ internal class TelemetryLocationAndProgressDispatcher :
         eventDescriptor.preEventBuffer.addAll(currentLocationBuffer.getCopy())
         locationEventBuffer.addItem(eventDescriptor)
     }
+
     /**
      * This method cancels all jobs that accumulate telemetry data. The side effect of this call is to call Telemetry.addEvent(), which may cause events to be sent
      * to the back-end server
@@ -190,7 +192,7 @@ internal class TelemetryLocationAndProgressDispatcher :
     }
 
     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
-        channelLocationRecieved_1.offer(enhancedLocation)
+        channelLocationReceived_1.offer(enhancedLocation)
         channelLocationReceived_2.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
     }
