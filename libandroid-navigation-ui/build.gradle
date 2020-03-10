@@ -8,7 +8,7 @@ android {
   buildToolsVersion androidVersions.buildToolsVersion
 
   defaultConfig {
-    minSdkVersion androidVersions.minSdkVersion
+    minSdkVersion androidVersions.legacyMinSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables.useSupportLibrary = true
