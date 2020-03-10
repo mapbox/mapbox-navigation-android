@@ -50,7 +50,5 @@ public interface NavigationContract {
     boolean isRecenterButtonVisible();
 
     void updateCameraRouteOverview();
-
-    void updatePuckState(RouteProgress routeProgress);
   }
 }

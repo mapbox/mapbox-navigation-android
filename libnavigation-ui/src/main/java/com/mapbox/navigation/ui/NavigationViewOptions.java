@@ -17,6 +17,7 @@ import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
 import com.mapbox.navigation.ui.listeners.RouteListener;
 import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
+import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 
 @AutoValue
@@ -145,6 +146,14 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      * @return this builder
      */
     public abstract Builder camera(Camera camera);
+
+    /**
+     * Add a puck drawable supplier to customize the look of the puck when navigating.
+     *
+     * @param puckDrawableSupplier
+     * @return
+     */
+    public abstract Builder puckDrawableSupplier(PuckDrawableSupplier puckDrawableSupplier);
 
     public abstract NavigationViewOptions build();
   }

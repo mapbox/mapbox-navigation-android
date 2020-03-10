@@ -62,7 +62,7 @@
   <color name="md_grey_800">#424242</color>
   <color name="md_grey_900">#212121</color>
 
-  <!-- Puck Colors -->
+  <!-- Default Puck -->
   <color name="jungleAccentOrange">#FF9900</color>
   <color name="rawLocationUncertainGray">#858585</color>
 </resources>
