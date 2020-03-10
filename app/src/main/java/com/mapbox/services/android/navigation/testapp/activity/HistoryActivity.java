@@ -4,7 +4,9 @@ package com.mapbox.services.android.navigation.testapp.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.mapbox.services.android.navigation.v5.navigation.EnhancedLocationListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
