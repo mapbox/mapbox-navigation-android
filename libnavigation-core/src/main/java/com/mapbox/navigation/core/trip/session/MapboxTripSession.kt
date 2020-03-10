@@ -217,6 +217,10 @@ class MapboxTripSession(
         voiceInstructionsObservers.clear()
     }
 
+    override fun updateLocation(location: Location) {
+        navigator.updateLocation(location)
+    }
+
     override fun updateSensorEvent(sensorEvent: SensorEvent) {
         navigator.updateSensorEvent(sensorEvent)
     }

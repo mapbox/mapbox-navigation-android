@@ -565,6 +565,10 @@ constructor(
         }
     }
 
+    fun updateLocation(rawLocation: Location) {
+        tripSession.updateLocation(rawLocation)
+    }
+
     fun updateSensorEvent(sensorEvent: SensorEvent) {
         tripSession.updateSensorEvent(sensorEvent)
     }

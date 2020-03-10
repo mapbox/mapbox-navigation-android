@@ -46,5 +46,7 @@ internal interface TripSession {
     fun registerVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterAllVoiceInstructionsObservers()
+
+    fun updateLocation(location: Location)
     fun updateSensorEvent(sensorEvent: SensorEvent)
 }
