@@ -130,6 +130,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 .build()
 
         mapboxNavigation = getMapboxNavigation(newOptions)
+        mapboxNavigation.toggleHistory(true)
+        Timber.i("history_debug toggleHistory true ${mapboxNavigation.retrieveHistory()}")
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -402,6 +404,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
         mapboxNavigation.stopTripSession()
+
+        Timber.i("history_debug retrieveHistory ${mapboxNavigation.retrieveHistory()}")
+
         mapboxNavigation.onDestroy()
 
         restartSessionEventChannel.cancel()
