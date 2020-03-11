@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.hardware.SensorEvent
 import android.location.Location
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -34,6 +35,7 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
 import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -279,6 +281,7 @@ constructor(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
+        Log.d(TAG, "onDestroy")
         ThreadController.cancelAllNonUICoroutines()
         ThreadController.cancelAllUICoroutines()
         directionsSession.shutDownSession()
