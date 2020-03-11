@@ -38,11 +38,11 @@ internal class TelemetryLocationAndProgressDispatcher :
     private val originalRoutePreInit = { routes: List<DirectionsRoute> ->
         if (originalRoute.get() == null) {
             originalRoute.set(RouteAvailable(routes[0], Date()))
-            origianlRouteDelegate = originalRoutePostInit
+            originalRouteDeligate = originalRoutePostInit
         }
     }
     private val originalRoutePostInit = { routes: List<DirectionsRoute> -> Unit }
-    private var origianlRouteDelegate: (List<DirectionsRoute>) -> Unit = originalRoutePreInit
+    private var originalRouteDeligate: (List<DirectionsRoute>) -> Unit = originalRoutePreInit
     private var firstLocation = CompletableDeferred<Location>()
     private var firstLocationValue: Location? = null
 
