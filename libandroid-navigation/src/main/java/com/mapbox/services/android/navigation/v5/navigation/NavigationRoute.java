@@ -631,10 +631,6 @@ public final class NavigationRoute {
         directionsBuilder.profile(options.profile());
       }
 
-      if (options.alternatives() != null) {
-        directionsBuilder.alternatives(options.alternatives());
-      }
-
       if (!TextUtils.isEmpty(options.voiceUnits())) {
         directionsBuilder.voiceUnits(options.voiceUnits());
       }
@@ -676,6 +672,20 @@ public final class NavigationRoute {
       WalkingOptions walkingOptions = options.walkingOptions();
       if (walkingOptions != null) {
         directionsBuilder.walkingOptions(walkingOptions);
+      }
+
+      if (options.continueStraight() != null) {
+        directionsBuilder.continueStraight(options.continueStraight());
+      }
+
+      if (!TextUtils.isEmpty(options.exclude())) {
+        directionsBuilder.exclude(options.exclude());
+      }
+
+      String radiuses = options.radiuses();
+      if (!TextUtils.isEmpty(radiuses)) {
+        double[] splitRadiuses = parseRadiuses(radiuses);
+        directionsBuilder.radiuses(splitRadiuses);
       }
 
       return this;
@@ -731,6 +741,18 @@ public final class NavigationRoute {
         }
       }
       return waypoints;
+    }
+
+    @NonNull
+    private double[] parseRadiuses(String radiuses) {
+      String[] splitRadiuses = radiuses.split(SEMICOLON);
+      double[] radiusesArray = new double[splitRadiuses.length];
+      int index = 0;
+      for (String radiusIndex : splitRadiuses) {
+        double parsedRadius = Double.valueOf(radiusIndex);
+        radiusesArray[index++] = parsedRadius;
+      }
+      return radiusesArray;
     }
 
     private void assembleWaypoints() {
