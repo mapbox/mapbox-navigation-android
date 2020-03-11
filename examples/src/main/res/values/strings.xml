@@ -47,8 +47,13 @@
     <string name="title_basic_navigation_kotlin" translatable="false">Basic Mapbox Navigation Kotlin</string>
     <string name="description_basic_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
 
+    <string name="title_replay_navigation_kotlin" translatable="false">Replay Engine Navigation Kotlin</string>
+    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation with the replay engine in Kotlin code.</string>
+
     <string name="title_component_navigation">MapboxNavigation with UI components</string>
     <string name="description_component_navigation">MapboxNavigation with UI components</string>
+
+    <string name="msg_long_press_for_destination">Long press a point on the map to indicate a destination.</string>
 
     <string name="settings">Settings</string>
     <string name="simulate_route">Simulate Route</string>

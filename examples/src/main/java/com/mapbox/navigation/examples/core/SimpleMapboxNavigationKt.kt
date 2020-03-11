@@ -38,7 +38,6 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -274,7 +273,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
-            updatePuck(routeProgress)
             if (routeProgress.route() != null) {
                 navigationMapboxMap.onNewRouteProgress(routeProgress)
             }
@@ -468,17 +466,5 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
-    }
-
-    private fun updatePuck(routeProgress: RouteProgress) {
-        val drawableId = when (routeProgress.currentState()) {
-            RouteProgressState.ROUTE_INVALID -> R.drawable.logistics_user_puck_icon_uncertain_location
-            RouteProgressState.ROUTE_INITIALIZED -> R.drawable.logistics_user_puck_icon
-            RouteProgressState.LOCATION_TRACKING -> R.drawable.logistics_user_puck_icon
-            RouteProgressState.ROUTE_ARRIVED -> R.drawable.logistics_user_puck_icon_uncertain_location
-            RouteProgressState.LOCATION_STALE -> R.drawable.logistics_user_puck_icon
-            else -> R.drawable.logistics_user_puck_icon_uncertain_location
-        }
-        navigationMapboxMap.updateCurrentLocationDrawable(drawableId)
     }
 }

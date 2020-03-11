@@ -145,6 +145,14 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".core.ReplayEngineActivity"
+            android:label="@string/title_arrival_ui_building_extrusions_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />
