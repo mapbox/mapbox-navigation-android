@@ -6,7 +6,6 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import java.util.ArrayList
 
 internal class ReplayRouteLocationConverter(
     private var speed: Int,
@@ -29,7 +28,7 @@ internal class ReplayRouteLocationConverter(
         private const val ONE_KM_IN_METERS = 1000.0
         private const val ONE_HOUR_IN_SECONDS = 3600
         private const val REPLAY_ROUTE =
-            "com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine"
+            "com.mapbox.navigation.core.location.replay.ReplayRouteLocationEngine"
     }
 
     init {
@@ -52,6 +51,9 @@ internal class ReplayRouteLocationConverter(
 
     override fun setRoute(route: DirectionsRoute) {
         this.route = route
+        currentLeg = 0
+        currentStep = 0
+        time = 0
     }
 
     override fun initializeTime() {
