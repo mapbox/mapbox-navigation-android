@@ -563,6 +563,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         // mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
         mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
         mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
+        initializer = initializerDelegate
     }
 
     private fun validateAccessToken(accessToken: String?) {
