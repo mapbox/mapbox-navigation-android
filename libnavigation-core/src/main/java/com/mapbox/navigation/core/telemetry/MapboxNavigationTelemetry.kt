@@ -138,6 +138,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         }
                         false -> {
                             handleSessionCanceled()
+                            handleSessionStop()
                         }
                     }
                 }
