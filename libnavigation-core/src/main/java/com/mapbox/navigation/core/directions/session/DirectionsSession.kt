@@ -10,7 +10,7 @@ internal interface DirectionsSession {
 
     fun getRouteOptions(): RouteOptions?
 
-    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback)
+    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback? = null)
 
     /**
      * Requests a route using the provided [Router] implementation.

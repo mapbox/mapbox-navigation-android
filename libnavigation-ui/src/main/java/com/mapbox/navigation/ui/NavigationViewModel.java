@@ -110,8 +110,8 @@ public class NavigationViewModel extends AndroidViewModel {
   private boolean isChangingConfigurations;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
-  private NavigationViewModelProgressChangeListener navigationViewVm =
-    new NavigationViewModelProgressChangeListener(this);
+  private NavigationViewModelProgressObserver navigationProgressObserver =
+    new NavigationViewModelProgressObserver(this);
   private Router router;
 
   private NavigationViewOptions navigationViewOptions;
@@ -250,6 +250,7 @@ public class NavigationViewModel extends AndroidViewModel {
     this.navigationViewOptions = options;
     navigation.setRoutes(Arrays.asList(options.directionsRoute()));
     navigation.startTripSession();
+    voiceInstructionCache.initCache(options.directionsRoute());
   }
 
   void updateFeedbackScreenshot(String screenshot) {
@@ -271,8 +272,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void stopNavigation() {
-    navigation.unregisterRouteProgressObserver(navigationViewVm);
-    navigation.unregisterLocationObserver(navigationViewVm);
+    navigation.unregisterRouteProgressObserver(navigationProgressObserver);
+    navigation.unregisterLocationObserver(navigationProgressObserver);
+    navigation.unregisterOffRouteObserver(offRouteObserver);
     navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.stopTripSession();
@@ -476,9 +478,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void addNavigationListeners() {
-    navigation.registerRouteProgressObserver(navigationViewVm);
-    navigation.registerLocationObserver(navigationViewVm);
-    navigation.registerOffRouteObserver(offRouteListener);
+    navigation.registerRouteProgressObserver(navigationProgressObserver);
+    navigation.registerLocationObserver(navigationProgressObserver);
+    navigation.registerOffRouteObserver(offRouteObserver);
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
@@ -487,11 +489,14 @@ public class NavigationViewModel extends AndroidViewModel {
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
     @Override
     public void onNewVoiceInstructions(@NotNull VoiceInstructions voiceInstructions) {
+      voiceInstructionCache.cache();
+      voiceInstructionsToAnnounce++;
+      voiceInstructionCache.update(voiceInstructionsToAnnounce);
       speechPlayer.play(retrieveAnnouncementFromSpeechEvent(voiceInstructions));
     }
   };
 
-  private OffRouteObserver offRouteListener = new OffRouteObserver() {
+  private OffRouteObserver offRouteObserver = new OffRouteObserver() {
     @Override
     public void onOffRouteStateChanged(boolean offRoute) {
       if (offRoute) {
@@ -535,7 +540,7 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.setRoutes(Arrays.asList(route));
       navigation.startTripSession();
       voiceInstructionsToAnnounce = 0;
-      voiceInstructionCache.preCache(route);
+      voiceInstructionCache.initCache(route);
     }
   }
 

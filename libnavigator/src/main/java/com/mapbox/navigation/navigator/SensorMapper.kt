@@ -18,11 +18,10 @@ object SensorMapper {
             Sensor.TYPE_GRAVITY,
             Sensor.TYPE_PRESSURE
         )
-        if (Build.VERSION.SDK_INT >= 18) {
-            supportedSensors.add(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED)
-            supportedSensors.add(Sensor.TYPE_GYROSCOPE_UNCALIBRATED)
-        }
-        if (Build.VERSION.SDK_INT >= 26) {
+        supportedSensors.add(Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED)
+        supportedSensors.add(Sensor.TYPE_GYROSCOPE_UNCALIBRATED)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             supportedSensors.add(Sensor.TYPE_ACCELEROMETER_UNCALIBRATED)
         }
         return supportedSensors
@@ -34,7 +33,8 @@ object SensorMapper {
             sensorType,
             Date(),
             sensorEvent.timestamp,
-            sensorEvent.values.toList())
+            sensorEvent.values.toList()
+        )
     }
 
     fun toSensorType(sensor: Sensor): SensorType? {
@@ -48,8 +48,10 @@ object SensorMapper {
             Sensor.TYPE_GRAVITY -> SensorType.GRAVITY
             Sensor.TYPE_PRESSURE -> SensorType.PRESSURE
             else -> {
-                Log.e("UnsupportedSensorEvent",
-                    "This type of sensor event is not supported: ${sensor.name}")
+                Log.e(
+                    "UnsupportedSensorEvent",
+                    "This type of sensor event is not supported: ${sensor.name}"
+                )
                 null
             }
         }

@@ -31,7 +31,6 @@ android {
 
 dependencies {
     api dependenciesList.mapboxCore
-    api dependenciesList.mapboxSdkGeoJSON
     api dependenciesList.mapboxSdkDirectionsModels
 
     implementation dependenciesList.supportAnnotation

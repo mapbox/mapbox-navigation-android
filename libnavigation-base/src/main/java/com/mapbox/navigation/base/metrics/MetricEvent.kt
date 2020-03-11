@@ -13,6 +13,7 @@ interface MetricEvent {
         NavigationMetrics.REROUTE,
         NavigationMetrics.FEEDBACK,
         NavigationMetrics.INITIAL_GPS,
+        NavigationMetrics.FASTER_ROUTE,
         NavigationMetrics.APP_USER_TURNSTILE
     )
     annotation class Metric
@@ -30,6 +31,7 @@ object NavigationMetrics {
     const val REROUTE = "navigation.reroute"
     const val FEEDBACK = "navigation.feedback"
     const val INITIAL_GPS = "initial_gps_event"
+    const val FASTER_ROUTE = "navigation.fasterRoute"
     const val APP_USER_TURNSTILE = "appUserTurnstile"
 }
 

@@ -33,15 +33,17 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
+import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.trip.notification.NotificationAction
@@ -55,6 +57,14 @@ import java.lang.reflect.Field
 import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
+
+private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
+private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
+    "You need to provide an token access in order to use the default OffboardRouter."
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
+    "You need to provide an token access in order to use the default OnboardRouter."
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required"
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -113,7 +123,7 @@ constructor(
         context,
         accessToken
     ),
-    locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
+    val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
@@ -130,6 +140,9 @@ constructor(
     private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
 
     private var notificationChannelField: Field? = null
+    private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
+        "com.mapbox.navigation.trip.notification.MapboxTripNotification"
+    private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {
         ThreadController.init()
@@ -141,14 +154,13 @@ constructor(
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
-
         val notification: TripNotification = NavigationModuleProvider.createModule(
             MapboxNavigationModuleType.TripNotification,
             ::paramsProvider
         )
-        if (notification.javaClass.name == "com.mapbox.navigation.trip.notification.MapboxTripNotification") {
+        if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
-                notification.javaClass.getDeclaredField("notificationActionButtonChannel").apply {
+                notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
                     isAccessible = true
                 }
         }
@@ -169,6 +181,22 @@ constructor(
             .createMapboxTimer(navigationOptions.fasterRouteDetectorInterval) {
                 requestFasterRoute()
             }
+        ifNonNull(accessToken) { token ->
+            MapboxMetricsReporter.init(
+                context,
+                accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
+                obtainUserAgent(navigationOptions.isFromNavigationUi)
+            )
+            MapboxNavigationTelemetry.initialize(
+                context.applicationContext,
+                token,
+                this,
+                MapboxMetricsReporter,
+                locationEngine.javaClass.name,
+                ThreadController.getMainScopeAndRootJob(),
+                navigationOptions
+            )
+        }
     }
 
     /**
@@ -204,61 +232,20 @@ constructor(
      * Requests a route using the provided [Router] implementation.
      * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
      *
-     * @param routeOptions params for the route request
-     * @see [registerRoutesObserver]
-     * @see [registerRouteProgressObserver]
-     */
-    fun requestRoutes(routeOptions: RouteOptions) {
-        directionsSession.requestRoutes(routeOptions, defaultRoutesRequestCallback)
-    }
-
-    private val defaultRoutesRequestCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            return routes
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-    }
-
-    private val fasterRouteRequestCallback = object : RoutesRequestCallback {
-        override fun onRoutesReady(routes: List<DirectionsRoute>): List<DirectionsRoute> {
-            tripSession.getRouteProgress()?.let { progress ->
-                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
-                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
-                }
-            }
-            return routes
-        }
-
-        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-
-        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
-        }
-    }
-
-    /**
-     * Requests a route using the provided [Router] implementation.
-     * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
+     *
+     * Use [MapboxNavigation.setRoutes] to supply a transformed list of routes, or a list from an external source, to be managed by the SDK.
      *
      * @param routeOptions params for the route request
      * @param routesRequestCallback listener that gets notified when request state changes
      * @see [registerRoutesObserver]
      * @see [registerRouteProgressObserver]
      */
-    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback) {
+    @JvmOverloads
+    fun requestRoutes(
+        routeOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback? = null
+    ) {
         directionsSession.requestRoutes(routeOptions, routesRequestCallback)
     }
 
@@ -269,6 +256,8 @@ constructor(
      *
      * If the list is not empty, the route at index 0 is going to be treated as the primary route
      * and used for route progress, off route events and map-matching calculations.
+     *
+     * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
      * @param routes a list of [DirectionsRoute]s
      */
@@ -300,6 +289,7 @@ constructor(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
+        MapboxNavigationTelemetry.unregisterListeners(this)
         fasterRouteObservers.clear()
         fasterRouteTimer.stop()
     }
@@ -481,6 +471,26 @@ constructor(
         }
     }
 
+    private val fasterRouteRequestCallback = object : RoutesRequestCallback {
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            tripSession.getRouteProgress()?.let { progress ->
+                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
+                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
+                }
+            }
+        }
+
+        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+
+        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+            // do nothing
+            // todo log in the future
+        }
+    }
+
     private fun reRoute() {
         ifNonNull(
             directionsSession.getRouteOptions(),
@@ -489,7 +499,7 @@ constructor(
             val optionsRebuilt = buildAdjustedRouteOptions(options, location)
             directionsSession.requestRoutes(
                 optionsRebuilt,
-                defaultRoutesRequestCallback // todo cache the original callback and reach out to the user before setting the route
+                null
             )
         }
     }
@@ -535,6 +545,14 @@ constructor(
         return optionsBuilder.build()
     }
 
+    private fun obtainUserAgent(isFromNavigationUi: Boolean): String {
+        return if (isFromNavigationUi) {
+            "$MAPBOX_NAVIGATION_UI_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
+        } else {
+            "$MAPBOX_NAVIGATION_USER_AGENT_BASE/${BuildConfig.MAPBOX_NAVIGATION_VERSION_NAME}"
+        }
+    }
+
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
         mainJobController.scope.monitorChannelWithException(channel, { notificationAction ->
             when (notificationAction) {
@@ -561,16 +579,16 @@ constructor(
             )
             MapboxNavigationModuleType.OffboardRouter -> arrayOf(
                 String::class.java to (accessToken
-                    ?: throw RuntimeException("You need to provide an access in order to use the default OffboardRouter.")),
+                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxNavigationModuleType.OnboardRouter -> {
-                check(accessToken != null) { "You need to provide an access token in order to use the default OnboardRouter." }
+                check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
-                        ?: throw RuntimeException("You need to provide a router configuration in order to use the default OnboardRouter."))
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER))
                 )
             }
             MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
@@ -590,6 +608,20 @@ constructor(
 
     companion object {
         private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
+        @JvmStatic
+        fun postUserFeedback(
+            @TelemetryUserFeedback.FeedbackType feedbackType: String,
+            description: String,
+            @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
+            screenshot: String?
+        ) {
+            MapboxNavigationTelemetry.postUserFeedback(
+                feedbackType,
+                description,
+                feedbackSource,
+                screenshot
+            )
+        }
 
         /**
          * Returns a pre-build set of [NavigationOptions] with smart defaults.

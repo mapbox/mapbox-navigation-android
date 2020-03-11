@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -32,7 +31,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
@@ -64,7 +62,6 @@ import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
 import com.mapbox.navigation.ui.utils.LocaleEx;
 import com.mapbox.navigation.utils.extensions.ContextEx;
 import com.squareup.picasso.Picasso;
-
 import timber.log.Timber;
 
 /**
@@ -210,8 +207,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       @Override
       public void onChanged(@Nullable BannerInstructionModel model) {
         if (model != null) {
-          updateManeuverView(model.retrievePrimaryManeuverType(), model.retrievePrimaryManeuverModifier(),
-            model.retrievePrimaryRoundaboutAngle(), model.retrieveDrivingSide());
+          updateManeuverView(
+              model.retrievePrimaryManeuverType(),
+              model.retrievePrimaryManeuverModifier(),
+              model.retrievePrimaryRoundaboutAngle(),
+              model.retrieveDrivingSide()
+          );
           updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
           updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
         }
@@ -307,12 +308,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void updateBannerInstructionsWith(BannerInstructions instructions) {
     if (instructions != null) {
       updateBannerInstructions(instructions.primary(),
-              instructions.secondary(), instructions.sub(), currentStep.drivingSide());
+          instructions.secondary(), instructions.sub(), currentStep.drivingSide());
     }
   }
 
   private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
-                                        BannerText subBanner, String currentDrivingSide) {
+      BannerText subBanner, String currentDrivingSide) {
     if (primaryBanner != null) {
       updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
       updateDataFromBannerText(primaryBanner, secondaryBanner);
@@ -329,10 +330,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (fragmentManager != null) {
       long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
       FeedbackBottomSheet.newInstance(this, duration)
-        .show(fragmentManager, FeedbackBottomSheet.TAG);
+          .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
-
 
   /**
    * Will slide the reroute view down from the top of the screen
@@ -523,9 +523,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void initializeBackground() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewBannerBackground);
+          R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewListBackground);
+          R.attr.navigationViewListBackground);
       // Instruction Layout landscape - banner background
       if (isLandscape()) {
         View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
@@ -551,7 +551,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
-      LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager.HORIZONTAL, false));
   }
 
   /**
@@ -671,9 +671,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newDistanceText(InstructionModel model) {
     return !upcomingDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
-      && !upcomingDistanceText.getText().toString()
-      .contentEquals(model.retrieveStepDistanceRemaining().toString());
+        && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
+        && !upcomingDistanceText.getText().toString()
+        .contentEquals(model.retrieveStepDistanceRemaining().toString());
   }
 
   /**
@@ -685,8 +685,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     upcomingDistanceText.setText(model.retrieveStepDistanceRemaining());
   }
 
-  private InstructionLoader createInstructionLoader(TextView textView, BannerText
-    bannerText) {
+  private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
     if (hasComponents(bannerText)) {
       return new InstructionLoader(textView, bannerText);
     } else {
@@ -706,7 +705,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newStep(RouteProgress routeProgress) {
     boolean newStep = currentStep == null
-      || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
+        || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
     currentStep = routeProgress.currentLegProgress().currentStepProgress().step();
     return newStep;
   }
@@ -742,8 +741,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
     return subText != null
-      && subText.type() != null
-      && !subText.type().contains(COMPONENT_TYPE_LANE);
+        && subText.type() != null
+        && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
   private void showSubLayout() {
@@ -841,9 +840,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void cancelDelayedTransition() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      clearAnimation();
-    }
+    clearAnimation();
   }
 
   private void updateDataFromInstruction(InstructionModel model) {
@@ -895,7 +892,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Updates new maneuver image if one is found.
    */
   private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
-                                  @Nullable Double roundaboutAngle, String drivingSide) {
+      @Nullable Double roundaboutAngle, String drivingSide) {
     upcomingManeuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (roundaboutAngle != null) {
       upcomingManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
