@@ -6,14 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-import com.mapbox.navigation.examples.core.NavigateWithInstructionViewActivity
-import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
-import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
-import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
-import com.mapbox.navigation.examples.core.TripServiceActivityKt
-import com.mapbox.navigation.examples.core.TripSessionActivityKt
+import com.mapbox.navigation.examples.core.*
 import kotlinx.android.synthetic.main.activity_core.*
 
 class CoreActivity : AppCompatActivity() {
@@ -77,6 +70,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_navigate_instruction_view),
                 getString(R.string.description_navigate_instruction_view),
                 NavigateWithInstructionViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_basic_navigation_kotlin),
+                getString(R.string.description_basic_navigation_kotlin),
+                BasicNavigationActivity::class.java
             )
         )
     }
