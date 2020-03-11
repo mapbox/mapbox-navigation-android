@@ -138,7 +138,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            if [ "${CIRCLE_BRANCH}" == "pg-release-0.42.6-snapshot" ]; then
             make publish ;
             fi
       - store_artifacts:
