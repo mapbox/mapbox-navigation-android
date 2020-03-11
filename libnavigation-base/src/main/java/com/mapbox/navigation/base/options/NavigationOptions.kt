@@ -7,13 +7,11 @@ import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.TimeFormatType
 
 const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
-const val DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL = 2 * 60 * 1000L // 2 minutes
 
 data class NavigationOptions constructor(
     @RoundingIncrement val roundingIncrement: Int,
     @TimeFormatType val timeFormatType: Int,
     val navigatorPollingDelay: Long,
-    val fasterRouteDetectorInterval: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
     val isFromNavigationUi: Boolean = false
@@ -26,7 +24,6 @@ data class NavigationOptions constructor(
         roundingIncrement,
         timeFormatType,
         navigatorPollingDelay,
-        fasterRouteDetectorInterval,
         distanceFormatter,
         onboardRouterConfig
     )
@@ -35,7 +32,6 @@ data class NavigationOptions constructor(
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
         private var timeFormatType: Int = NONE_SPECIFIED,
         private var navigatorPollingDelay: Long = DEFAULT_NAVIGATOR_POLLING_DELAY,
-        private var fasterRouteDetectorInterval: Long = DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL,
         private var distanceFormatter: DistanceFormatter? = null,
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null,
         private var isFromNavigationUi: Boolean = false
@@ -49,9 +45,6 @@ data class NavigationOptions constructor(
 
         fun navigatorPollingDelay(pollingDelay: Long) =
             apply { navigatorPollingDelay = pollingDelay }
-
-        fun fasterRouteDetectorInterval(interval: Long) =
-            apply { fasterRouteDetectorInterval = interval }
 
         fun distanceFormatter(distanceFormatter: DistanceFormatter?) =
             apply { this.distanceFormatter = distanceFormatter }
@@ -67,7 +60,6 @@ data class NavigationOptions constructor(
                 roundingIncrement,
                 timeFormatType,
                 navigatorPollingDelay,
-                fasterRouteDetectorInterval,
                 distanceFormatter,
                 onboardRouterConfig,
                 isFromNavigationUi

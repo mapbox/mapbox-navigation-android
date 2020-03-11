@@ -1,94 +1,121 @@
 package com.mapbox.navigation.utils.timer
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Before
+import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.Called
+import io.mockk.coVerify
+import io.mockk.mockk
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
+import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class MapboxTimerTest {
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(Dispatchers.Default)
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
+    private val mapboxTimer = MapboxTimer()
+    private val mockLambda: () -> Unit = mockk(relaxed = true)
+
+    @Test
+    fun `should not call before interval`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
+
+        val job = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(4))
+
+        job.cancelAndJoin()
+        coVerify { mockLambda wasNot Called }
     }
 
     @Test
-    fun start() = runBlocking {
-        var counter = 0
-        val testLambda = { counter += 1 }
+    fun `should call after interval`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
 
-        MapboxTimer(100L, testLambda).start()
-        delay(220)
+        val job = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertEquals(2, counter)
+        job.cancelAndJoin()
+        coVerify(exactly = 1) { mockLambda.invoke() }
     }
 
     @Test
-    fun stop() = runBlocking {
-        var counter = 0
-        val testLambda = { counter += 1 }
+    fun `should call after multiple times`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
 
-        val timer = MapboxTimer(100L, testLambda)
-        timer.start()
-        delay(120L)
-        timer.stop()
-        delay(200L)
+        val job = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(26))
 
-        assertEquals(1, counter)
+        job.cancelAndJoin()
+        coVerify(exactly = 5) { mockLambda.invoke() }
     }
 
     @Test
-    fun stop_when_timerCanceled_lambdaNotCalled() = runBlockingTest {
-        var lambdaCalled = false
-        val testLambda = { lambdaCalled = true }
+    fun `should update interval dynamically`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(1)
 
-        val timer = MapboxTimer(100L, testLambda)
-        timer.start()
-        timer.stop()
-        advanceTimeBy(150)
+        val job = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(1))
 
-        assertFalse(lambdaCalled)
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(10)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(10))
+
+        job.cancelAndJoin()
+        coVerify(exactly = 2) { mockLambda.invoke() }
     }
 
     @Test
-    fun executeLambda_notCalled_when_startNotCalled() = runBlockingTest {
-        var lambdaCalled = false
-        val testLambda = { lambdaCalled = true }
+    fun `should stop when canceled`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
 
-        MapboxTimer(0L, testLambda)
-        advanceTimeBy(10)
+        val job = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertFalse(lambdaCalled)
+        mapboxTimer.stopJobs()
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(30))
+
+        job.cancelAndJoin()
+        coVerify(exactly = 1) { mockLambda.invoke() }
     }
 
     @Test
-    fun timerNotStartedUntilStartCalled() = runBlockingTest {
-        var counter = 0
-        val testLambda = { counter += 1 }
+    fun `should subscribe to jobs separately`() = coroutineRule.runBlockingTest {
+        val mockLambda1: () -> Unit = mockk(relaxed = true)
+        val mockLambda2: () -> Unit = mockk(relaxed = true)
+        mapboxTimer.restartAfterMillis = 5000
 
-        MapboxTimer(100L, testLambda)
-        advanceTimeBy(200L)
+        val firstJob = mapboxTimer.startTimer(mockLambda1)
+        coroutineRule.testDispatcher.advanceTimeBy(5001)
 
-        assertEquals(0, counter)
+        val secondJob = mapboxTimer.startTimer(mockLambda2)
+        coroutineRule.testDispatcher.advanceTimeBy(5001)
+
+        firstJob.cancelAndJoin()
+        secondJob.cancelAndJoin()
+        coVerify(exactly = 2) { mockLambda1.invoke() }
+        coVerify(exactly = 1) { mockLambda2.invoke() }
     }
 
     @Test
-    fun multipleStartCalls_doNotExecuteMultipleJobs() = runBlocking {
-        var counter = 0
-        val testLambda = { counter += 1 }
+    fun `should stop and restart normally`() = coroutineRule.runBlockingTest {
+        mapboxTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
 
-        val timer = MapboxTimer(100L, testLambda)
-        timer.start()
-        timer.start()
-        timer.start()
-        timer.start()
-        delay(150L)
+        // Should emit 1
+        val firstJob = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
 
-        assertEquals(1, counter)
+        // Should emit 0 because the jobs are stopped
+        mapboxTimer.stopJobs()
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(30))
+
+        // Should emit 1 after restart
+        val secondJob = mapboxTimer.startTimer(mockLambda)
+        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+
+        firstJob.cancelAndJoin()
+        secondJob.cancelAndJoin()
+        coVerify(exactly = 2) { mockLambda.invoke() }
     }
 }

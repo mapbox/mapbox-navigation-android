@@ -23,14 +23,11 @@ import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
-import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import com.mapbox.navigation.utils.timer.MapboxTimer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -66,12 +63,9 @@ class MapboxNavigationTest {
     private val onBoardRouterConfig: MapboxOnboardRouterConfig = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
-    private val fasterRouteObserver: FasterRouteObserver = mockk(relaxUnitFun = true)
-    private val mapboxTimer: MapboxTimer = mockk(relaxUnitFun = true)
     private val routes: List<DirectionsRoute> = listOf(mockk())
     private val routeProgress: RouteProgress = mockk(relaxed = true)
 
-    private lateinit var delayLambda: () -> Unit
     private lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
@@ -116,7 +110,6 @@ class MapboxNavigationTest {
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
 
         mockLocation()
-        mockMapboxTimer()
         mockTripService()
         mockTripSession()
         mockDirectionSession()
@@ -124,7 +117,6 @@ class MapboxNavigationTest {
         val navigationOptions = NavigationOptions
             .Builder()
             .distanceFormatter(distanceFormatter)
-            .fasterRouteDetectorInterval(1000L)
             .navigatorPollingDelay(1500L)
             .onboardRouterConfig(onBoardRouterConfig)
             .roundingIncrement(1)
@@ -210,45 +202,15 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun fasterRoute_timerStarted() {
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
-        verify { mapboxTimer.start() }
-    }
-
-    @Test
-    fun fasterRoute_timerStopped() {
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
-        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
-        verify { mapboxTimer.stop() }
-    }
-
-    @Test
     fun fasterRoute_noRouteOptions_noRequest() {
         every { directionsSession.getRouteOptions() } returns null
-        delayLambda()
         verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
     }
 
     @Test
     fun fasterRoute_noEnhancedLocation_noRequest() {
         every { tripSession.getEnhancedLocation() } returns null
-        delayLambda()
         verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_makeRequest() {
-        delayLambda()
-        verify(exactly = 1) { directionsSession.requestFasterRoute(any(), any()) }
-    }
-
-    @Test
-    fun fasterRoute_fasterRouteNotAvailable() {
-        mockkObject(FasterRouteDetector)
-        every { FasterRouteDetector.isRouteFaster(any(), any()) } returns false
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
-        delayLambda()
-        verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
     }
 
     @Test
@@ -352,14 +314,6 @@ class MapboxNavigationTest {
                 any()
             )
         } returns tripService
-    }
-
-    private fun mockMapboxTimer() {
-        val lambda = slot<() -> Unit>()
-        every { NavigationComponentProvider.createMapboxTimer(1000L, capture(lambda)) } answers {
-            delayLambda = lambda.captured
-            mapboxTimer
-        }
     }
 
     private fun mockLocation() {
