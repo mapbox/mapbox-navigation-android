@@ -337,9 +337,13 @@ public class NavigationViewModel extends AndroidViewModel {
     return shouldRecordScreenshot;
   }
 
-  LiveData<Location> retrieveLocationUdpates() { return locationUpdates; }
+  LiveData<Location> retrieveLocationUdpates() {
+    return locationUpdates;
+  }
 
-  LiveData<RouteProgress> retrieveRouteProgressUpdates() { return routeProgressUpdates; }
+  LiveData<RouteProgress> retrieveRouteProgressUpdates() {
+    return routeProgressUpdates;
+  }
 
   public LiveData<InstructionModel> retrieveInstructionModel() {
     return instructionModel;
@@ -443,7 +447,7 @@ public class NavigationViewModel extends AndroidViewModel {
     locationEngineConductor.initializeLocationEngine(getApplication(), locationEngine, shouldReplayRoute);
 
     final LocationEngine locationEngineToReturn = locationEngineConductor.obtainLocationEngine();
-    if(locationEngineToReturn instanceof ReplayRouteLocationEngine) {
+    if (locationEngineToReturn instanceof ReplayRouteLocationEngine) {
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
       ((ReplayRouteLocationEngine) locationEngineToReturn).assignLastLocation(lastLocation);
       ((ReplayRouteLocationEngine) locationEngineToReturn).assign(options.directionsRoute());
@@ -480,17 +484,21 @@ public class NavigationViewModel extends AndroidViewModel {
     public void onOffRouteStateChanged(boolean offRoute) {
       if (offRoute) {
         speechPlayer.onOffRoute();
-        locationEngineConductor.obtainLocationEngine().getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
-          @Override
-          public void onSuccess(LocationEngineResult result) {
-            handleOffRouteEvent(Point.fromLngLat(result.getLastLocation().getLongitude(), result.getLastLocation().getLatitude()));
-          }
+        locationEngineConductor.obtainLocationEngine().getLastLocation(
+          new LocationEngineCallback<LocationEngineResult>() {
+            @Override
+            public void onSuccess(LocationEngineResult result) {
+              handleOffRouteEvent(Point.fromLngLat(
+                result.getLastLocation().getLongitude(),
+                result.getLastLocation().getLatitude()
+              ));
+            }
 
-          @Override
-          public void onFailure(@NonNull Exception exception) {
-             // todo
-          }
-        });
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+               // todo
+            }
+          });
       }
       isOffRoute.setValue(offRoute);
     }
@@ -510,8 +518,6 @@ public class NavigationViewModel extends AndroidViewModel {
       updateRoute(directionsRoute);
     }
   };*/
-
-  //private Router.Callback routeEngineCallback = new NavigationViewRouteEngineListener(this);
 
   @SuppressLint("MissingPermission")
   private void startNavigation(DirectionsRoute route) {

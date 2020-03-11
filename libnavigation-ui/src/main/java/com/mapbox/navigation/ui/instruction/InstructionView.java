@@ -203,21 +203,22 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.retrieveBannerInstructionModel().observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
-      @Override
-      public void onChanged(@Nullable BannerInstructionModel model) {
-        if (model != null) {
-          updateManeuverView(
-              model.retrievePrimaryManeuverType(),
-              model.retrievePrimaryManeuverModifier(),
-              model.retrievePrimaryRoundaboutAngle(),
-              model.retrieveDrivingSide()
-          );
-          updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-          updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+    navigationViewModel.retrieveBannerInstructionModel().observe(lifecycleOwner,
+      new Observer<BannerInstructionModel>() {
+        @Override
+        public void onChanged(@Nullable BannerInstructionModel model) {
+          if (model != null) {
+            updateManeuverView(
+                model.retrievePrimaryManeuverType(),
+                model.retrievePrimaryManeuverModifier(),
+                model.retrievePrimaryRoundaboutAngle(),
+                model.retrieveDrivingSide()
+            );
+            updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
+            updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+          }
         }
-      }
-    });
+      });
     navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {

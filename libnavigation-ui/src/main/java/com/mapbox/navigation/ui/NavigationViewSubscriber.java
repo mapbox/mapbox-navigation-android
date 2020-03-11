@@ -58,7 +58,7 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveRouteProgressUpdates().observe(lifecycleOwner, new Observer<RouteProgress>() {
       @Override
       public void onChanged(RouteProgress routeProgress) {
-          if(routeProgress != null) {
+          if (routeProgress != null) {
             navigationPresenter.onRouteProgress(routeProgress);
           }
       }

@@ -396,17 +396,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   @Override
   public void updatePuckState(RouteProgress routeProgress) {
-    if(routeProgress == null || routeProgress.currentState() == null) {
+    if (routeProgress == null || routeProgress.currentState() == null) {
       return;
     }
 
     int puckDrawable;
     switch (routeProgress.currentState()) {
       case ROUTE_INVALID:
-          puckDrawable = R.drawable.user_puck_icon_uncertain_location;
+        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
         break;
       case ROUTE_INITIALIZED:
-          puckDrawable = R.drawable.user_puck_icon;
+        puckDrawable = R.drawable.user_puck_icon;
         break;
       case LOCATION_TRACKING:
         puckDrawable = R.drawable.user_puck_icon;
