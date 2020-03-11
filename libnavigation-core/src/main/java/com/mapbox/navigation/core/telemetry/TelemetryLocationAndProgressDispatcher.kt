@@ -232,7 +232,7 @@ internal class TelemetryLocationAndProgressDispatcher :
             false -> {
                 val date = Date()
                 channelOffRouteEvent.offer(RouteAvailable(routes[0], date))
-                origianlRouteDelegate(routes)
+                originalRouteDeligate(routes)
             }
         }
     }

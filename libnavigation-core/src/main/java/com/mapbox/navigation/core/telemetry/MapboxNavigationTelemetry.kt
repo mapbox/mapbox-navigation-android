@@ -217,7 +217,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
                             Date(),
                             rerouteCount = rerouteCount,
-                            locationEngineName = locationEngineName
+                            locationEngineName = locationEngineName,
+                            route = newRoute.route
                         )),
                         feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                         secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
@@ -553,6 +554,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     override fun unregisterListeners(mapboxNavigation: MapboxNavigation) {
+        callbackDispatcher.cancelCollectionAndPostFinalEvents()
         mapboxNavigation.unregisterOffRouteObserver(rerouteObserver)
         mapboxNavigation.unregisterRouteProgressObserver(callbackDispatcher)
         mapboxNavigation.unregisterTripSessionStateObserver(sessionStateObserver)
