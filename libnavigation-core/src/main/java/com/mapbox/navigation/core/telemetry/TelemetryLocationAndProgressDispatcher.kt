@@ -196,7 +196,8 @@ internal class TelemetryLocationAndProgressDispatcher :
     fun isRouteAvailable(): RouteAvailable? = originalRoute.get()
 
     fun clearOriginalRoute() {
-        originalRoute.set(null)
+//        originalRoute.set(null)
+        originalRouteDelegate = originalRoutePreInit
     }
 
     override fun onRawLocationChanged(rawLocation: Location) {
