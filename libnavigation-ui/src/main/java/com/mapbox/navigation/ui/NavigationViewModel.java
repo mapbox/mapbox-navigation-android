@@ -27,22 +27,15 @@ import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
-import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts;
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
-import com.mapbox.navigation.core.trip.session.TripSessionState;
-import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
-import com.mapbox.navigation.route.hybrid.MapboxHybridRouter;
-import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
-import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
@@ -57,7 +50,6 @@ import com.mapbox.navigation.ui.voice.SpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 import com.mapbox.navigation.utils.extensions.ContextEx;
-import com.mapbox.navigation.utils.network.NetworkStatusService;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -112,7 +104,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private MapOfflineManager mapOfflineManager;
   private NavigationViewModelProgressObserver navigationProgressObserver =
     new NavigationViewModelProgressObserver(this);
-  private Router router;
 
   private NavigationViewOptions navigationViewOptions;
 
@@ -120,7 +111,6 @@ public class NavigationViewModel extends AndroidViewModel {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
-    initializeRouter();
     this.routeUtils = new RouteUtils();
     this.connectivityController = new MapConnectivityController();
   }
@@ -367,17 +357,6 @@ public class NavigationViewModel extends AndroidViewModel {
     return summaryModel;
   }
 
-  private void initializeRouter() {
-    final Context context = getApplication().getApplicationContext();
-    final MapboxOffboardRouter offboardRouter = new MapboxOffboardRouter(
-      accessToken, context,
-      MapboxNavigationAccounts.getInstance(context)
-    );
-    final MapboxOnboardRouterConfig onboardRouterConfig = buildMapboxOnboardRouterConfig();
-    final MapboxOnboardRouter onboardRouter = new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, onboardRouterConfig);
-    router = new MapboxHybridRouter(onboardRouter, offboardRouter, new NetworkStatusService(context));
-  }
-
   private void initializeLocationEngine() {
     locationEngineConductor = new LocationEngineConductor();
   }
@@ -611,27 +590,24 @@ public class NavigationViewModel extends AndroidViewModel {
         .toBuilder()
         .coordinates(newCoordinates).build();
 
-      router.getRoute(
-        updatedOptions,
-        new Router.Callback() {
-          @Override
-          public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
-            navigation.setRoutes(routes);
-            route.setValue(routes.get(0));
-          }
-
-          @Override
-          public void onFailure(@NotNull Throwable throwable) {
-            Timber.e(throwable);
-            // todo
-          }
-
-          @Override
-          public void onCanceled() {
-            // todo
-          }
+      navigation.requestRoutes(updatedOptions, new RoutesRequestCallback() {
+        @Override
+        public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
+          navigation.setRoutes(routes);
+          route.setValue(routes.get(0));
         }
-      );
+
+        @Override
+        public void onRoutesRequestFailure(@NotNull Throwable throwable, @NotNull RouteOptions routeOptions) {
+          Timber.e(throwable);
+          // todo
+        }
+
+        @Override
+        public void onRoutesRequestCanceled(@NotNull RouteOptions routeOptions) {
+          // todo
+        }
+      });
     }
   }
 
