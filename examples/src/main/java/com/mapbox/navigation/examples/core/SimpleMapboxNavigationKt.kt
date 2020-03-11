@@ -9,6 +9,7 @@ import android.preference.PreferenceManager
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -43,6 +44,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -60,6 +62,7 @@ import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
@@ -96,7 +99,16 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simple_mapbox_navigation)
-
+        findViewById<Button>(R.id.btn_send_user_feadback)?.let { button ->
+            button.setOnClickListener {
+                MapboxNavigation.postUserFeedback(
+                    TelemetryUserFeedback.FEEDBACK_TYPE_GENERAL_ISSUE,
+                    "User feedback test at: ${Date().time}",
+                    TelemetryUserFeedback.FEEDBACK_SOURCE_UI,
+                    null
+                )
+            }
+        }
         initViews()
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
