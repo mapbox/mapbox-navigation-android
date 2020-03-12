@@ -42,7 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -108,20 +107,19 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     private lateinit var callbackDispatcher: TelemetryLocationAndProgressDispatcher
 
-    private fun telemetryEventGate(event: MetricEvent): CompletableDeferred<Boolean> {
-        val completion = CompletableDeferred<Boolean>()
-        when (callbackDispatcher.isRouteAvailable()) {
-            null -> {
-                Log.i(TAG, "Route not selected. Telemetry event not sent")
-                completion.complete(false)
-            }
-            else -> {
-                metricsReporter.addEvent(event)
-                completion.complete(true)
-            }
+    private fun telemetryEventGate(event: MetricEvent) =
+
+    when (callbackDispatcher.isRouteAvailable()) {
+        null -> {
+            Log.i(TAG, "Route not selected. Telemetry event not sent")
+            false
         }
-        return completion
+        else -> {
+            metricsReporter.addEvent(event)
+            true
+        }
     }
+
     // **********  EVENT OBSERVERS ***************
     /**
      * Callback that monitors session start/stop. Session stop is interpreted as both cancel and stop of the session
@@ -237,7 +235,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                     feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
                                     secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
                             )
-                    ).await()
+                    )
                     Log.d(TAG, "REROUTE event sent $result" +
                             "")
                 }
@@ -400,7 +398,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * This method posts a cancel event in response to onSessionEnd
      */
-    private suspend fun handleSessionCanceled() {
+    private fun handleSessionCanceled() {
         dynamicValues.routeCanceled.set(true) // Set cancel state unconditionally
         if (CURRENT_SESSION_CONTROL.compareAndSet(
                 CurrentSessionState.SESSION_START,
@@ -417,7 +415,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         ))
                     )
                     telemetryThreadControl.scope.launch {
-                        val result = telemetryEventGate(cancelEvent).await()
+                        val result = telemetryEventGate(cancelEvent)
                         Log.d(TAG, "ARRIVAL event sent $result")
                         callbackDispatcher.cancelCollectionAndPostFinalEvents()
                     }
@@ -429,7 +427,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             locationEngineName = locationEngineName
                         ))
                     )
-                    val result = telemetryEventGate(cancelEvent).await()
+                    val result = telemetryEventGate(cancelEvent)
                     Log.d(TAG, "CANCEL event sent $result")
                     callbackDispatcher.cancelCollectionAndPostFinalEvents()
                 }
@@ -517,7 +515,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 sessionIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
                 startTimestamp = Date().toString()
             }
-            val result = telemetryEventGate(telemetryDeparture(directionsRoute, callbackDispatcher.getFirstLocationAsync().await())).await()
+            val result = telemetryEventGate(telemetryDeparture(directionsRoute, callbackDispatcher.getFirstLocationAsync().await()))
             Log.d(TAG, "DEPARTURE event sent $result")
             monitorSession()
         }
@@ -549,7 +547,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                     dynamicValues.routeArrived.set(true)
                                 }
                             )
-                        ).await()
+                        )
                         Log.d(TAG, "ARRIVAL event sent $result")
                         callbackDispatcher.cancelCollectionAndPostFinalEvents()
                         continueRunning = false
