@@ -665,10 +665,6 @@ internal constructor(
                 directionsBuilder.profile(options.profile())
             }
 
-            if (options.alternatives() != null) {
-                directionsBuilder.alternatives(options.alternatives())
-            }
-
             if (!TextUtils.isEmpty(options.voiceUnits())) {
                 directionsBuilder.voiceUnits(options.voiceUnits())
             }
@@ -704,6 +700,20 @@ internal constructor(
             val walkingOptions = options.walkingOptions()
             if (walkingOptions != null) {
                 directionsBuilder.walkingOptions(walkingOptions)
+            }
+
+            if (options.continueStraight() != null) {
+                directionsBuilder.continueStraight(options.continueStraight())
+            }
+
+            if (!options.exclude().isNullOrEmpty()) {
+                directionsBuilder.exclude(options.exclude())
+            }
+
+            val radiuses = options.radiuses() ?: ""
+            if (radiuses.isNotEmpty()) {
+                val splitRadiuses = parseRadiuses(radiuses)
+                directionsBuilder.radiuses(splitRadiuses)
             }
 
             return this
@@ -763,6 +773,10 @@ internal constructor(
             }
             return waypoints
         }
+
+        private fun parseRadiuses(radiuses: String): List<Double?> =
+            radiuses.split(SEMICOLON.toRegex()).dropLastWhile { it.isEmpty() }
+                    .map { if (it.isEmpty()) null else it.toDouble() }
 
         private fun assembleWaypoints() {
             origin?.let { origin ->
