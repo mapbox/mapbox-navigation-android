@@ -18,8 +18,17 @@ import org.junit.runner.RunWith
 class TripServiceActivityKtTest :
     NotificationTestRule<TripServiceActivityKt>(TripServiceActivityKt::class.java) {
 
+    companion object {
+        /**
+         * The target app package.
+         */
+        private val TARGET_PACKAGE: String =
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().context.packageName
+    }
+
     @Test
     fun checkStartButtonAccessible() {
+        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             assertDisplayed(it)
             assertEnabled(it)
@@ -29,14 +38,17 @@ class TripServiceActivityKtTest :
 
     @Test
     fun checkNotificationViewContent() {
+        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertContains(it, "")
         }
 
+        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             clickOn(it)
         }
 
+        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertDisplayed(it)
             assertContains(it, "Time elapsed: + ")
@@ -45,10 +57,12 @@ class TripServiceActivityKtTest :
 
     @Test
     fun checkNotificationContent() {
+        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             clickOn(it)
         }
 
+        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertDisplayed(it)
             assertContains(it, "Time elapsed: + ")
@@ -56,6 +70,7 @@ class TripServiceActivityKtTest :
 
         uiDevice.run {
             openNotification()
+            awaitForView("notificationDistanceText")
             val notificationDistance =
                 By.res("com.mapbox.navigation.examples:id/notificationDistanceText")
             wait(Until.hasObject(notificationDistance), 1000)
@@ -64,5 +79,9 @@ class TripServiceActivityKtTest :
             assertEquals("100 m", message)
             pressBack()
         }
+    }
+
+    private inline fun awaitForView(resName: String, timeout: Long = 1000) {
+        uiDevice.wait(Until.hasObject(By.res(TARGET_PACKAGE, resName)), timeout)
     }
 }
