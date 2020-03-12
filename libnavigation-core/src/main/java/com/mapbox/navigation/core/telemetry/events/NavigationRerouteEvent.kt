@@ -1,10 +1,11 @@
-package com.mapbox.services.android.navigation.v5.internal.navigation.metrics
+package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
 import android.location.Location
-import com.mapbox.services.android.navigation.v5.internal.navigation.routeprogress.MetricsRouteProgress
-import com.mapbox.services.android.navigation.v5.navigation.metrics.NavigationMetrics
+import androidx.annotation.Keep
+import com.mapbox.navigation.base.metrics.NavigationMetrics
 
+@Keep
 @SuppressLint("ParcelCreator")
 internal class NavigationRerouteEvent(
     phoneState: PhoneState,
@@ -21,8 +22,8 @@ internal class NavigationRerouteEvent(
     val newGeometry: String = rerouteEvent.newRouteGeometry
     val step: NavigationStepData = NavigationStepData(metricsRouteProgress)
     var secondsSinceLastReroute: Int = 0
-    var locationsBefore: Array<Location>? = null
-    var locationsAfter: Array<Location>? = null
+    var locationsBefore: Array<Location>? = emptyArray()
+    var locationsAfter: Array<Location>? = emptyArray()
     var screenshot: String? = null
 
     override fun getEventName(): String = NavigationMetrics.REROUTE

@@ -111,18 +111,25 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
   }
 
   private boolean validLowFpsManeuver(RouteLegProgress routeLegProgress) {
-    final String maneuverModifier = routeLegProgress.currentStepProgress().step().maneuver().modifier();
-    return maneuverModifier != null
-            && (maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT)
-            || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
-            || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT));
+    if (routeLegProgress.currentStepProgress() != null
+        && routeLegProgress.currentStepProgress().step() != null) {
+      final String maneuverModifier = routeLegProgress.currentStepProgress().step().maneuver().modifier();
+      return maneuverModifier != null
+          && (maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT)
+          || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
+          || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT));
+    }
+    return false;
   }
 
   private boolean validLowFpsDuration(RouteLegProgress routeLegProgress) {
-    final double expectedStepDuration = routeLegProgress.currentStepProgress().step().duration();
-    final double durationUntilNextManeuver = routeLegProgress.currentStepProgress().durationRemaining();
-    final double durationSincePreviousManeuver = expectedStepDuration - durationUntilNextManeuver;
-    return durationUntilNextManeuver > VALID_DURATION_IN_SECONDS_UNTIL_NEXT_MANEUVER
-            && durationSincePreviousManeuver > VALID_DURATION_IN_SECONDS_SINCE_PREVIOUS_MANEUVER;
+    if (routeLegProgress.currentStepProgress() != null && routeLegProgress.currentStepProgress().step() != null) {
+      final double expectedStepDuration = routeLegProgress.currentStepProgress().step().duration();
+      final double durationUntilNextManeuver = routeLegProgress.currentStepProgress().durationRemaining();
+      final double durationSincePreviousManeuver = expectedStepDuration - durationUntilNextManeuver;
+      return durationUntilNextManeuver > VALID_DURATION_IN_SECONDS_UNTIL_NEXT_MANEUVER
+          && durationSincePreviousManeuver > VALID_DURATION_IN_SECONDS_SINCE_PREVIOUS_MANEUVER;
+    }
+    return false;
   }
 }

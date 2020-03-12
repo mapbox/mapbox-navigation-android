@@ -29,7 +29,8 @@ data class NavigationOptions constructor(
     val navigatorPollingDelay: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
-    val isFromNavigationUi: Boolean
+    val isFromNavigationUi: Boolean = false,
+    val isDebugLoggingEnabled: Boolean = false
 ) {
 
     /**
@@ -50,6 +51,7 @@ data class NavigationOptions constructor(
         private var distanceFormatter: DistanceFormatter? = null
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
         private var isFromNavigationUi: Boolean = false
+        private var isDebugLoggingEnabled: Boolean = false
 
         fun roundingIncrement(roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
@@ -69,6 +71,9 @@ data class NavigationOptions constructor(
         fun isFromNavigationUi(flag: Boolean) =
             apply { this.isFromNavigationUi = flag }
 
+        fun isDebugLoggingEnabled(flag: Boolean) =
+            apply { this.isDebugLoggingEnabled = flag }
+
         fun build(): NavigationOptions {
             return NavigationOptions(
                 roundingIncrement = roundingIncrement,
@@ -76,7 +81,8 @@ data class NavigationOptions constructor(
                 navigatorPollingDelay = navigatorPollingDelay,
                 distanceFormatter = distanceFormatter,
                 onboardRouterConfig = onboardRouterConfig,
-                isFromNavigationUi = isFromNavigationUi
+                isFromNavigationUi = isFromNavigationUi,
+                isDebugLoggingEnabled = isDebugLoggingEnabled
             )
         }
     }

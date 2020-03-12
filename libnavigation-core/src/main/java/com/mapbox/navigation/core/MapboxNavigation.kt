@@ -175,11 +175,13 @@ constructor(
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
         ifNonNull(accessToken) { token ->
+            Log.d("MAPBOX_TELEMETRY", "MapboxMetricsReporter.init from MapboxNavigation main")
             MapboxMetricsReporter.init(
                 context,
                 accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
                 obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
+            MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
             MapboxNavigationTelemetry.initialize(
                 context.applicationContext,
                 token,
@@ -187,7 +189,8 @@ constructor(
                 MapboxMetricsReporter,
                 locationEngine.javaClass.name,
                 ThreadController.getMainScopeAndRootJob(),
-                navigationOptions
+                navigationOptions,
+                obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
         }
 
@@ -276,8 +279,7 @@ constructor(
     fun onDestroy() {
         mainJobController.scope.launch {
             Log.d(TAG, "onDestroy")
-            MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation).join()
-            MapboxMetricsReporter.disable()
+            MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
             ThreadController.cancelAllNonUICoroutines()
             ThreadController.cancelAllUICoroutines()
             directionsSession.shutDownSession()

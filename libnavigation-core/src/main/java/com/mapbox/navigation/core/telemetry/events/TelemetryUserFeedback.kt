@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.telemetry.events
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Parcel
+import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
@@ -13,7 +14,7 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
  * Documentation is here [https://paper.dropbox.com/doc/Navigation-Telemetry-Events-V1--AuUz~~~rEVK7iNB3dQ4_tF97Ag-iid3ZImnt4dsW7Z6zC3Lc]
  */
 
-// Defaulted values are optional
+@Keep
 @SuppressLint("ParcelCreator")
 class TelemetryUserFeedback(
     @param:FeedbackSource @get:FeedbackSource val feedbackSource: String,

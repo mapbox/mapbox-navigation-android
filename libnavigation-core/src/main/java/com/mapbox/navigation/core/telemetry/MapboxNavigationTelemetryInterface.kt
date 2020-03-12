@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.telemetry
 
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
-import kotlinx.coroutines.Job
 
 interface MapboxNavigationTelemetryInterface {
     fun postUserFeedback(
@@ -12,5 +11,5 @@ interface MapboxNavigationTelemetryInterface {
         screenshot: String?
     )
 
-    fun unregisterListeners(mapboxNavigation: MapboxNavigation): Job
+    fun unregisterListeners(mapboxNavigation: MapboxNavigation)
 }
