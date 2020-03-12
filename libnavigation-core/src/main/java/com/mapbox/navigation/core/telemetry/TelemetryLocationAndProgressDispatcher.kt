@@ -172,11 +172,10 @@ internal class TelemetryLocationAndProgressDispatcher(val scope: CoroutineScope)
      * This method cancels all jobs that accumulate telemetry data. The side effect of this call is to call Telemetry.addEvent(), which may cause events to be sent
      * to the back-end server
      */
-    fun cancelCollectionAndPostFinalEvents() {
+    fun cancelCollectionAndPostFinalEvents() =
         ThreadController.getIOScopeAndRootJob().scope.launch {
             flushBuffers()
         }
-    }
 
     /**
      * This channel becomes signaled if a navigation route is selected
@@ -239,15 +238,23 @@ internal class TelemetryLocationAndProgressDispatcher(val scope: CoroutineScope)
         when (originalRouteDefferedValue) {
             null -> {
                 Log.d(TAG, "First time route set")
-                originalRouteDefferedValue = routes[0]
-                originalRouteDefferedValue?.let { route ->
-                    originalRouteDeffered.complete(route)
+                if (routes.isNotEmpty()) {
+                    originalRouteDefferedValue = routes[0]
+                    originalRouteDefferedValue?.let { route ->
+                        originalRouteDeffered.complete(route)
+                    }
+                } else {
+                    Log.d(TAG, "Empty route list received. Not setting route 2")
                 }
             }
             else -> {
-                Log.d(TAG, "Subsequent route set")
-                originalRouteDefferedValue?.let { route ->
-                    originalRouteDeffered.complete(route)
+                if (routes.isNotEmpty()) {
+                    Log.d(TAG, "Subsequent route set")
+                    originalRouteDefferedValue?.let { route ->
+                        originalRouteDeffered.complete(route)
+                    }
+                } else {
+                    Log.d(TAG, "Empty route list received. Not setting route 2")
                 }
             }
         }

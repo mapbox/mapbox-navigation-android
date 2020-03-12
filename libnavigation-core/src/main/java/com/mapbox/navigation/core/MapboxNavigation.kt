@@ -59,6 +59,7 @@ import java.lang.reflect.Field
 import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -281,20 +282,22 @@ constructor(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
-        Log.d(TAG, "onDestroy")
-        ThreadController.cancelAllNonUICoroutines()
-        ThreadController.cancelAllUICoroutines()
-        directionsSession.shutDownSession()
-        directionsSession.unregisterAllRoutesObservers()
-        tripSession.unregisterAllLocationObservers()
-        tripSession.unregisterAllRouteProgressObservers()
-        tripSession.unregisterAllOffRouteObservers()
-        tripSession.unregisterAllStateObservers()
-        tripSession.unregisterAllBannerInstructionsObservers()
-        tripSession.unregisterAllVoiceInstructionsObservers()
-        MapboxNavigationTelemetry.unregisterListeners(this)
-        fasterRouteObservers.clear()
-        fasterRouteTimer.stop()
+        mainJobController.scope.launch {
+            Log.d(TAG, "onDestroy")
+            MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation).join()
+            ThreadController.cancelAllNonUICoroutines()
+            ThreadController.cancelAllUICoroutines()
+            directionsSession.shutDownSession()
+            directionsSession.unregisterAllRoutesObservers()
+            tripSession.unregisterAllLocationObservers()
+            tripSession.unregisterAllRouteProgressObservers()
+            tripSession.unregisterAllOffRouteObservers()
+            tripSession.unregisterAllStateObservers()
+            tripSession.unregisterAllBannerInstructionsObservers()
+            tripSession.unregisterAllVoiceInstructionsObservers()
+            fasterRouteObservers.clear()
+            fasterRouteTimer.stop()
+        }
     }
 
     /**
