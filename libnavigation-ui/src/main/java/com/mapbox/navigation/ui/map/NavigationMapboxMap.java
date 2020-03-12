@@ -23,6 +23,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
@@ -361,6 +362,10 @@ public class NavigationMapboxMap {
    */
   public void drawRoutes(@NonNull List<? extends DirectionsRoute> routes) {
     mapRoute.addRoutes(routes);
+  }
+
+  public void onNewRouteProgress(RouteProgress routeProgress) {
+    mapRoute.onNewRouteProgress(routeProgress);
   }
 
   /**

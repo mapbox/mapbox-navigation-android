@@ -277,6 +277,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
             updatePuck(routeProgress)
+            navigationMapboxMap.onNewRouteProgress(routeProgress)
         }
     }
 
