@@ -144,7 +144,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                             Log.d(TAG, "you have arrived")
                         }
                         false -> {
-                            // Do nothing. Navigation sends an initial STOPPED event without a first sending a STARTED event. By design
+                            telemetryThreadControl.scope.launch {
+                                Log.d(TAG, "Session was canceled")
+                                handleSessionCanceled()
+                                handleSessionStop()
+                            }
                         }
                     }
                 }
