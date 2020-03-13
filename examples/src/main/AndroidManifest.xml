@@ -104,6 +104,14 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".ui.NavigationViewActivity"
+            android:label="@string/title_navigation_view"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity"/>
+        </activity>
+
         <activity android:name=".core.NavigateWithInstructionViewActivity"
             android:label="@string/title_navigate_instruction_view"
             android:screenOrientation="portrait">

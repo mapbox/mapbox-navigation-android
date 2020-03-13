@@ -72,7 +72,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
       @Override
       public void run() {
         show(getContext().getString(R.string.report_problem),
-                ALERT_VIEW_PROBLEM_DURATION, true);
+          ALERT_VIEW_PROBLEM_DURATION, true);
       }
     }, THREE_SECOND_DELAY_IN_MILLIS);
   }
@@ -88,7 +88,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
       FeedbackBottomSheet.newInstance(this, FEEDBACK_BOTTOM_SHEET_DURATION)
-              .show(fragmentManager, FeedbackBottomSheet.TAG);
+        .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
 
@@ -111,16 +111,12 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     if (navigationViewModel == null) {
       return;
     }
-    // navigationViewModel.updateFeedback(feedbackItem);// TODO Telemetry impl
+    navigationViewModel.updateFeedback(feedbackItem);
     showFeedbackSubmitted();
   }
 
   @Override
   public void onFeedbackDismissed() {
-    if (navigationViewModel == null) {
-      return;
-    }
-    // navigationViewModel.cancelFeedback(); // TODO Telemetry impl
   }
 
   @Override
@@ -130,7 +126,6 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
       @Override
       public void onClick(View view) {
         if (navigationViewModel != null && isShowingReportProblem()) {
-          // navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_REROUTE); // TODO Telemetry impl
           showFeedbackBottomSheet();
         }
         hide();

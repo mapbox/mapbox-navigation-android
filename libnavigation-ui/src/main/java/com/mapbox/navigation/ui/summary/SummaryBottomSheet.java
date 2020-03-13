@@ -91,7 +91,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.summaryModel.observe(lifecycleOwner, new Observer<SummaryModel>() {
+    navigationViewModel.retrieveSummaryModel().observe(lifecycleOwner, new Observer<SummaryModel>() {
       @Override
       public void onChanged(@Nullable SummaryModel summaryModel) {
         if (summaryModel != null && !isRerouting) {
@@ -101,7 +101,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.isOffRoute.observe(lifecycleOwner, new Observer<Boolean>() {
+    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
         if (isOffRoute != null) {
@@ -124,8 +124,8 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void unsubscribe() {
     if (navigationViewModel != null) {
-      navigationViewModel.summaryModel.removeObservers(lifecycleOwner);
-      navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveSummaryModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
     }
   }
 

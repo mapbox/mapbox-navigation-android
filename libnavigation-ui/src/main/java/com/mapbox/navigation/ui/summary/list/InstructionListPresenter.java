@@ -59,11 +59,11 @@ class InstructionListPresenter {
 
   private boolean shouldUpdate(DistanceFormatter distanceFormatter) {
     return distanceFormatter != null
-            && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
+        && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
   }
 
   private void updateListView(@NonNull InstructionListView listView, BannerInstructions bannerInstructions,
-                              SpannableString distanceText) {
+      SpannableString distanceText) {
     listView.updatePrimaryText(bannerInstructions.primary().text());
     updateSecondaryInstruction(listView, bannerInstructions);
     updateManeuverView(listView, bannerInstructions);
@@ -71,7 +71,7 @@ class InstructionListPresenter {
   }
 
   private void updateSecondaryInstruction(@NonNull InstructionListView listView,
-                                          BannerInstructions bannerInstructions) {
+      BannerInstructions bannerInstructions) {
     boolean hasSecondaryInstructions = bannerInstructions.secondary() != null;
     adjustListViewForSecondaryInstructions(listView, hasSecondaryInstructions);
     if (hasSecondaryInstructions) {
@@ -115,7 +115,8 @@ class InstructionListPresenter {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
       currentLeg = routeProgress.currentLegProgress().routeLeg();
-      if (routeProgress.currentLegProgress().currentStepProgress().step() != null) {
+      if (routeProgress.currentLegProgress().currentStepProgress() != null
+          && routeProgress.currentLegProgress().currentStepProgress().step() != null) {
         drivingSide = routeProgress.currentLegProgress().currentStepProgress().step().drivingSide();
       }
       if (currentLeg != null) {
@@ -142,7 +143,7 @@ class InstructionListPresenter {
     LegStep currentStep = legProgress.currentStepProgress().step();
     double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
     BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
-            currentStep, stepDistanceRemaining
+        currentStep, stepDistanceRemaining
     );
     if (!instructions.contains(currentBannerInstructions)) {
       return false;
@@ -166,7 +167,7 @@ class InstructionListPresenter {
    * Given the current step / current step distance remaining, this function will
    * find the current instructions to be shown.
    *
-   * @param currentStep           holding the current banner instructions
+   * @param currentStep holding the current banner instructions
    * @param stepDistanceRemaining to determine progress along the currentStep
    * @return the current banner instructions based on the current distance along the step
    * @since 0.13.0

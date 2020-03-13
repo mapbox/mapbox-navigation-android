@@ -3,14 +3,15 @@ package com.mapbox.navigation.ui;
 import android.location.Location;
 
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 class NavigationViewSubscriber implements LifecycleObserver {
 
@@ -19,7 +20,7 @@ class NavigationViewSubscriber implements LifecycleObserver {
   private final NavigationPresenter navigationPresenter;
 
   NavigationViewSubscriber(final LifecycleOwner owner, final NavigationViewModel navigationViewModel,
-                           final NavigationPresenter navigationPresenter) {
+      final NavigationPresenter navigationPresenter) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
@@ -50,6 +51,15 @@ class NavigationViewSubscriber implements LifecycleObserver {
       public void onChanged(@Nullable Location location) {
         if (location != null) {
           navigationPresenter.onNavigationLocationUpdate(location);
+        }
+      }
+    });
+
+    navigationViewModel.retrieveRouteProgressUpdates().observe(lifecycleOwner, new Observer<RouteProgress>() {
+      @Override
+      public void onChanged(RouteProgress routeProgress) {
+        if (routeProgress != null) {
+          navigationPresenter.onRouteProgress(routeProgress);
         }
       }
     });
