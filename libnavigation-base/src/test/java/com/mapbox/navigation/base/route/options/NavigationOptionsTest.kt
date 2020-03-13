@@ -2,7 +2,6 @@ package com.mapbox.navigation.base.route.options
 
 import android.text.SpannableString
 import com.mapbox.navigation.base.formatter.DistanceFormatter
-import com.mapbox.navigation.base.options.DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -25,14 +24,12 @@ class NavigationOptionsTest {
         assertEquals(options.navigatorPollingDelay, DEFAULT_NAVIGATOR_POLLING_DELAY)
         assertEquals(options.distanceFormatter, null)
         assertEquals(options.onboardRouterConfig, null)
-        assertEquals(options.fasterRouteDetectorInterval, DEFAULT_FASTER_ROUTE_DETECTOR_INTERVAL)
     }
 
     @Test
     fun whenBuilderBuildCalledThenProperNavigationOptionsCreated() {
         val timeFormat = TWELVE_HOURS
         val roundingIncrement = ROUNDING_INCREMENT_TEN
-        val fasterRouteInterval = 120000L
         val pollingDelay = 1020L
         val distanceFormatter = object : DistanceFormatter {
             override fun formatDistance(distance: Double): SpannableString {
@@ -47,7 +44,6 @@ class NavigationOptionsTest {
             .navigatorPollingDelay(pollingDelay)
             .distanceFormatter(distanceFormatter)
             .onboardRouterConfig(routerConfig)
-            .fasterRouteDetectorInterval(fasterRouteInterval)
             .build()
 
         assertEquals(options.roundingIncrement, roundingIncrement)
@@ -55,7 +51,6 @@ class NavigationOptionsTest {
         assertEquals(options.navigatorPollingDelay, pollingDelay)
         assertEquals(options.distanceFormatter, distanceFormatter)
         assertEquals(options.onboardRouterConfig, routerConfig)
-        assertEquals(options.fasterRouteDetectorInterval, fasterRouteInterval)
     }
 
     @Test
@@ -63,7 +58,6 @@ class NavigationOptionsTest {
         val timeFormat = TWELVE_HOURS
         val roundingIncrement = ROUNDING_INCREMENT_TEN
         val pollingDelay = 1020L
-        val fasterRouteInterval = 120000L
         val distanceFormatter = object : DistanceFormatter {
             override fun formatDistance(distance: Double): SpannableString {
                 throw NotImplementedError()
@@ -77,17 +71,14 @@ class NavigationOptionsTest {
             .navigatorPollingDelay(pollingDelay)
             .distanceFormatter(distanceFormatter)
             .onboardRouterConfig(routerConfig)
-            .fasterRouteDetectorInterval(fasterRouteInterval)
             .build()
 
         val builder = options.toBuilder()
         val newTimeFormat = TWENTY_FOUR_HOURS
         val newPollingDelay = 900L
-        val newFasterRouteInterval = 60000L
         options = builder
             .timeFormatType(newTimeFormat)
             .navigatorPollingDelay(newPollingDelay)
-            .fasterRouteDetectorInterval(newFasterRouteInterval)
             .build()
 
         assertEquals(options.roundingIncrement, roundingIncrement)
@@ -95,6 +86,5 @@ class NavigationOptionsTest {
         assertEquals(options.navigatorPollingDelay, newPollingDelay)
         assertEquals(options.distanceFormatter, distanceFormatter)
         assertEquals(options.onboardRouterConfig, routerConfig)
-        assertEquals(options.fasterRouteDetectorInterval, newFasterRouteInterval)
     }
 }
