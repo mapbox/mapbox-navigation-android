@@ -8,6 +8,9 @@ const val ROUNDING_INCREMENT_TWENTY_FIVE = 25
 const val ROUNDING_INCREMENT_FIFTY = 50
 const val ROUNDING_INCREMENT_ONE_HUNDRED = 100
 
+/**
+ * Defines the increment displayed on the instruction view
+ */
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(
     ROUNDING_INCREMENT_FIVE,
