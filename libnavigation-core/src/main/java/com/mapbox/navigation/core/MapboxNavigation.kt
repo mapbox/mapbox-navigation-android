@@ -428,12 +428,12 @@ constructor(
         tripSession.unregisterStateObserver(tripSessionStateObserver)
     }
 
-    fun registerFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
+    fun attachFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
         fasterRouteController.attach(fasterRouteObserver)
     }
 
-    fun unregisterFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
-        fasterRouteController.detach(fasterRouteObserver)
+    fun detachFasterRouteObserver() {
+        fasterRouteController.stop()
     }
 
     private fun createInternalRoutesObserver() = object : RoutesObserver {

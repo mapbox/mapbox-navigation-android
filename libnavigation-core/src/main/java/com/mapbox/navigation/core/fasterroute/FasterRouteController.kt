@@ -7,35 +7,26 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.timer.MapboxTimer
-import java.util.concurrent.CopyOnWriteArrayList
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession
 ) {
     private val fasterRouteTimer = MapboxTimer()
-    private val fasterRouteObservers = CopyOnWriteArrayList<FasterRouteObserver>()
+    private var fasterRouteObserver: FasterRouteObserver? = null
 
     fun attach(fasterRouteObserver: FasterRouteObserver) {
-        if (fasterRouteObservers.isEmpty()) {
+        val previousFasterRouteObserver = this.fasterRouteObserver
+        this.fasterRouteObserver = fasterRouteObserver
+        if (previousFasterRouteObserver == null) {
             fasterRouteTimer.startTimer {
                 requestFasterRoute()
             }
         }
-        fasterRouteObservers.add(fasterRouteObserver)
-    }
-
-    fun detach(fasterRouteObserver: FasterRouteObserver) {
-        fasterRouteObservers.remove(fasterRouteObserver)
-        if (fasterRouteObservers.isEmpty()) {
-            fasterRouteTimer.stopJobs()
-        }
     }
 
     fun stop() {
-        if (!fasterRouteObservers.isEmpty()) {
-            fasterRouteObservers.clear()
-        }
+        this.fasterRouteObserver = null
         fasterRouteTimer.stopJobs()
     }
 
@@ -54,7 +45,7 @@ internal class FasterRouteController(
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             tripSession.getRouteProgress()?.let { progress ->
                 if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
-                    fasterRouteObservers.forEach { it.onFasterRouteAvailable(routes[0]) }
+                    fasterRouteObserver?.onFasterRouteAvailable(routes[0])
                 }
             }
         }

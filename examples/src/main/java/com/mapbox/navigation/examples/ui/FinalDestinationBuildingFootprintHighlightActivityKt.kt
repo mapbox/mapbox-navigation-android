@@ -329,7 +329,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.attachFasterRouteObserver(fasterRouteObserver)
     }
 
     override fun onStop() {
@@ -340,7 +340,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
         if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
