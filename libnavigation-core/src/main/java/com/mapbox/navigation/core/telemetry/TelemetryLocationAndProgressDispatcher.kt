@@ -22,7 +22,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 
-internal class TelemetryLocationAndProgressDispatcher(val scope: CoroutineScope) :
+internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     RouteProgressObserver, LocationObserver, RoutesObserver {
     private var lastLocation: AtomicReference<Location?> = AtomicReference(null)
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
@@ -32,7 +32,7 @@ internal class TelemetryLocationAndProgressDispatcher(val scope: CoroutineScope)
     private val channelLocationReceived_2 = Channel<Location>(Channel.CONFLATED)
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
-    private lateinit var jobControl: CoroutineScope
+    private var jobControl: CoroutineScope = scope
     private var originalRoute = AtomicReference<RouteAvailable?>(null)
     private var accumulationJob: Job = Job()
     private val currentLocationBuffer = SynchronizedItemBuffer<Location>()
@@ -102,7 +102,6 @@ internal class TelemetryLocationAndProgressDispatcher(val scope: CoroutineScope)
     }
 
     init {
-        jobControl = scope
         // Unconditionally update the contents of the pre-event buffer
         jobControl.monitorChannelWithException(channelLocationReceived_1, { location ->
             accumulateLocationAsync(location, currentLocationBuffer)

@@ -136,14 +136,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     }
                 }
                 TripSessionState.STOPPED -> {
+                    Log.d(TAG, "TripSessionState.STOPPED")
                     postUserEventDelegate =
                         postUserEventBeforeInit // The navigation session is over, disallow posting user feedback events
                     when (dynamicValues.routeArrived.get()) {
                         true -> {
+                            Log.d(TAG, "TripSessionState.STOPPED true")
                             handleSessionStop()
                             Log.d(TAG, "you have arrived")
                         }
                         false -> {
+                            Log.d(TAG, "TripSessionState.STOPPED false")
                             telemetryThreadControl.scope.launch {
                                 Log.d(TAG, "Session was canceled")
                                 handleSessionCanceled()
@@ -549,6 +552,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                                     lng = callbackDispatcher.getLastLocation()?.longitude?.toFloat() ?: currentLocation.get()?.longitude?.toFloat() ?: 0f
                                     distanceCompleted =
                                         routeData.routeProgress.distanceTraveled().toInt() // TODO: Log this data to see what is returned from the SDK
+                                    Log.i(TAG, "ROUTE_ARRIVED received")
                                     dynamicValues.routeArrived.set(true)
                                 }
                             )
@@ -560,12 +564,14 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     RouteProgressState.LOCATION_TRACKING -> {
                         dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
                         dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
+                        Log.i(TAG, "LOCATION_TRACKING received")
                     }
                     else -> {
                         // Do nothing
                     }
                 }
             } catch (e: Exception) {
+                Log.i(TAG, "monitorSession ${e.localizedMessage}")
                 e.ifChannelException {
                     continueRunning = false
                 }
