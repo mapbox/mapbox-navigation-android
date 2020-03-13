@@ -330,6 +330,7 @@ class MapboxNavigationTest {
         every { directionsSession.requestFasterRoute(any(), any()) } answers {
             fasterRouteRequestCallback.onRoutesReady(routes)
         }
+        every { directionsSession.getAdjustedRouteOptions(any(), any(), any()) } returns routeOptions
     }
 
     private fun mockTripSession() {
