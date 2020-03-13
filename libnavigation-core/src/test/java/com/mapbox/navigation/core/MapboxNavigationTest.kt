@@ -20,6 +20,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
+import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -56,6 +57,7 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk(relaxUnitFun = true)
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
+    private val adjustedRouteOptionsProvider: AdjustedRouteOptionsProvider = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
@@ -330,6 +332,7 @@ class MapboxNavigationTest {
         every { directionsSession.requestFasterRoute(any(), any()) } answers {
             fasterRouteRequestCallback.onRoutesReady(routes)
         }
+        every { adjustedRouteOptionsProvider.getRouteOptions(any()) } returns routeOptions
     }
 
     private fun mockTripSession() {

@@ -332,7 +332,7 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.registerFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.attachFasterRouteObserver(fasterRouteObserver)
     }
 
     override fun onStop() {
@@ -343,7 +343,7 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
         if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
