@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.location.Location;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
@@ -19,6 +20,7 @@ import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
@@ -180,16 +182,28 @@ public class NavigationViewModel extends AndroidViewModel {
   @SuppressLint("MissingPermission")
   void initialize(NavigationViewOptions options) {
     initializeLanguage(options);
-    initializeDistanceFormatter(options);
-    NavigationOptions navigationOptions = options.navigationOptions();
-    navigationOptions = navigationOptions.toBuilder()
-        .distanceFormatter(distanceFormatter)
-        .isFromNavigationUi(true)
-        .build();
-    initializeTimeFormat(navigationOptions);
+    NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
+      .toBuilder()
+      .isFromNavigationUi(true);
+
+    if (options.navigationOptions().getDistanceFormatter() == null) {
+      this.distanceFormatter = buildDistanceFormatter(options);
+      updatedOptionsBuilder.distanceFormatter(distanceFormatter);
+    } else {
+      this.distanceFormatter = options.navigationOptions().getDistanceFormatter();
+    }
+
+    if (options.navigationOptions().getOnboardRouterConfig() == null) {
+      MapboxOnboardRouterConfig routerConfig =
+        MapboxNavigation.defaultNavigationOptions(getApplication(), accessToken).getOnboardRouterConfig();
+      updatedOptionsBuilder.onboardRouterConfig(routerConfig);
+    }
+
+    NavigationOptions updatedOptions = updatedOptionsBuilder.build();
+    initializeTimeFormat(updatedOptions);
     if (!isRunning()) {
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
-      initializeNavigation(getApplication(), navigationOptions, locationEngine);
+      initializeNavigation(getApplication(), updatedOptions, locationEngine);
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
@@ -342,10 +356,10 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigationOptions.getRoundingIncrement();
   }
 
-  private void initializeDistanceFormatter(NavigationViewOptions options) {
+  private DistanceFormatter buildDistanceFormatter(NavigationViewOptions options) {
     String unitType = initializeUnitType(options);
     int roundingIncrement = initializeRoundingIncrement(options);
-    distanceFormatter = new MapboxDistanceFormatter(getApplication(), language, unitType, roundingIncrement);
+    return new MapboxDistanceFormatter(getApplication(), language, unitType, roundingIncrement);
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {
