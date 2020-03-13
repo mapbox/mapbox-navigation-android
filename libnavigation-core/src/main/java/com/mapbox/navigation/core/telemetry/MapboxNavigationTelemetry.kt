@@ -29,7 +29,6 @@ import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
-import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.thread.JobControl
@@ -109,16 +108,16 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     private fun telemetryEventGate(event: MetricEvent) =
 
-    when (callbackDispatcher.isRouteAvailable()) {
-        null -> {
-            Log.i(TAG, "Route not selected. Telemetry event not sent")
-            false
+        when (callbackDispatcher.isRouteAvailable()) {
+            null -> {
+                Log.i(TAG, "Route not selected. Telemetry event not sent")
+                false
+            }
+            else -> {
+                metricsReporter.addEvent(event)
+                true
+            }
         }
-        else -> {
-            metricsReporter.addEvent(event)
-            true
-        }
-    }
 
     // **********  EVENT OBSERVERS ***************
     /**
@@ -222,25 +221,24 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             ) { preEventBuffer, postEventBuffer ->
                 telemetryThreadControl.scope.launch {
                     val result = telemetryEventGate(
-                            TelemetryReroute(
-                                    newDistanceRemaining = newRoute.route.distance()?.toInt() ?: -1,
-                                    newDurationRemaining = newRoute.route.duration()?.toInt() ?: -1,
-                                    newGeometry = obtainGeometry(newRoute.route),
-                                    step = telemetryStep,
-                                    locationsBefore = preEventBuffer.toTypedArray(),
-                                    locationsAfter = postEventBuffer.toTypedArray(),
-                                    metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
-                                            Date(),
-                                            rerouteCount = rerouteCount,
-                                            locationEngineName = locationEngineName,
-                                            route = newRoute.route
-                                    )),
-                                    feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
-                                    secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
-                            )
+                        TelemetryReroute(
+                            newDistanceRemaining = newRoute.route.distance()?.toInt() ?: -1,
+                            newDurationRemaining = newRoute.route.duration()?.toInt() ?: -1,
+                            newGeometry = obtainGeometry(newRoute.route),
+                            step = telemetryStep,
+                            locationsBefore = preEventBuffer.toTypedArray(),
+                            locationsAfter = postEventBuffer.toTypedArray(),
+                            metadata = populateMetadataWithInitialValues(populateEventMetadataAndUpdateState(
+                                Date(),
+                                rerouteCount = rerouteCount,
+                                locationEngineName = locationEngineName,
+                                route = newRoute.route
+                            )),
+                            feedbackId = TelemetryUtils.obtainUniversalUniqueIdentifier(),
+                            secondsSinceLastReroute = timeSinceLastEvent / ONE_SECOND
+                        )
                     )
-                    Log.d(TAG, "REROUTE event sent $result" +
-                            "")
+                    Log.d(TAG, "REROUTE event sent $result")
                 }
             })
         }
@@ -311,10 +309,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     // Calling initialize multiple times does no harm. This call is a no-op.
     private var postInitializePredicate: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions) -> Boolean =
-            { _, _, _, _, _, _, _ ->
-                Log.i(TAG, "Allready initialized")
-                false
-            }
+        { _, _, _, _, _, _, _ ->
+            Log.i(TAG, "Allready initialized")
+            false
+        }
 
     private var initializer =
         preInitializePredicate // The initialize dispatcher that points to either pre or post initialization lambda
@@ -350,6 +348,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             }
         }
     }
+
     /**
      * This method sends a user feedback event to the back-end servers. The method will suspend because the helper method it calls is itself suspendable
      * The method may suspend until it collects 40 location events. The worst case scenario is a 40 location suspension, 20 is best case
@@ -467,8 +466,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             Log.d(TAG, "The wait is over")
             // Expected session == SESSION_END
             CURRENT_SESSION_CONTROL.compareAndSet(
-                    CurrentSessionState.SESSION_END,
-                    CurrentSessionState.SESSION_START
+                CurrentSessionState.SESSION_END,
+                CurrentSessionState.SESSION_START
             ).let { previousSessionState ->
                 when (previousSessionState) {
                     true -> {
@@ -606,18 +605,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
 
     override fun unregisterListeners(mapboxNavigation: MapboxNavigation) =
         telemetryThreadControl.scope.launch {
-        callbackDispatcher.cancelCollectionAndPostFinalEvents().join()
-        mapboxNavigation.unregisterOffRouteObserver(rerouteObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(callbackDispatcher)
-        mapboxNavigation.unregisterTripSessionStateObserver(sessionStateObserver)
-        // TODO Removing Faster Route temporarily as legacy isn't sending these events at the moment
-        // mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
-        mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
-        mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
-        Log.d(TAG, "resetting Telemetry initialization")
-        initializer = preInitializePredicate
-        MapboxMetricsReporter.disable()
-    }
+            callbackDispatcher.cancelCollectionAndPostFinalEvents().join()
+            mapboxNavigation.unregisterOffRouteObserver(rerouteObserver)
+            mapboxNavigation.unregisterRouteProgressObserver(callbackDispatcher)
+            mapboxNavigation.unregisterTripSessionStateObserver(sessionStateObserver)
+            // TODO Removing Faster Route temporarily as legacy isn't sending these events at the moment
+            // mapboxNavigation.unregisterFasterRouteObserver(fasterRouteObserver)
+            mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
+            mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
+            Log.d(TAG, "resetting Telemetry initialization")
+            initializer = preInitializePredicate
+        }
 
     private fun validateAccessToken(accessToken: String?) {
         if (accessToken.isNullOrEmpty() ||

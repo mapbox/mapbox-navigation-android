@@ -107,6 +107,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
             processLocationBuffer(location)
         })
     }
+
     /**
      * Process the location event buffer twice. The first time, update each of it's elements
      * with a new location object. On the second pass, execute the stored lambda if the buffer
@@ -131,6 +132,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
             }
         }
     }
+
     fun flushBuffers() {
         Log.d(TAG, "flushing buffers before ${currentLocationBuffer.size()}")
         locationEventBuffer.applyToEach { item ->
@@ -138,6 +140,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
             false
         }
     }
+
     /**
      * This method accumulates locations. The number of locations is limited by [MapboxNavigationTelemetry.LOCATION_BUFFER_MAX_SIZE].
      * Once this limit is reached, an item is removed before another is added. The method returns true if the queue reaches capacity,
