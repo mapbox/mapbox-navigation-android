@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.UNDEFINED
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -129,6 +130,7 @@ constructor(
 
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
+    private val adjustedRouteOptionsProvider: AdjustedRouteOptionsProvider
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession = NavigationSession(context)
@@ -190,7 +192,8 @@ constructor(
             )
         }
 
-        fasterRouteController = FasterRouteController(directionsSession, tripSession)
+        adjustedRouteOptionsProvider = AdjustedRouteOptionsProvider(directionsSession, tripSession)
+        fasterRouteController = FasterRouteController(adjustedRouteOptionsProvider, directionsSession, tripSession)
     }
 
     /**
@@ -455,12 +458,9 @@ constructor(
     }
 
     private fun reRoute() {
-        ifNonNull(
-            directionsSession.getRouteOptions(),
-            tripSession.getRawLocation()
-        ) { options, location ->
-            val routeProgress = tripSession.getRouteProgress() ?: return
-            val optionsRebuilt = directionsSession.getAdjustedRouteOptions(options, routeProgress, location)
+        ifNonNull(tripSession.getRawLocation()) { location ->
+            val optionsRebuilt = adjustedRouteOptionsProvider.getRouteOptions(location)
+                ?: return
             directionsSession.requestRoutes(
                 optionsRebuilt,
                 null
