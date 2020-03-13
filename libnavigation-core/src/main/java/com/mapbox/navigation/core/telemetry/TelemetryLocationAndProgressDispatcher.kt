@@ -28,8 +28,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
         AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().build()))
     private val channelOffRouteEvent = Channel<RouteAvailable>(Channel.CONFLATED)
-    private val channelLocationReceived_1 = Channel<Location>(Channel.CONFLATED)
-    private val channelLocationReceived_2 = Channel<Location>(Channel.CONFLATED)
+    private val channelLocationReceived = Channel<Location>(Channel.CONFLATED)
     private val channelOnRouteProgress =
         Channel<RouteProgressWithTimestamp>(Channel.CONFLATED) // we want just the last notification
     private var jobControl: CoroutineScope = scope
@@ -103,36 +102,35 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
 
     init {
         // Unconditionally update the contents of the pre-event buffer
-        jobControl.monitorChannelWithException(channelLocationReceived_1, { location ->
+        accumulationJob = jobControl.monitorChannelWithException(channelLocationReceived, { location ->
             accumulateLocationAsync(location, currentLocationBuffer)
+            processLocationBuffer(location)
         })
-
-        /**
-         * Process the location event buffer twice. The first time, update each of it's elements
-         * with a new location object. On the second pass, execute the stored lambda if the buffer
-         * size is equal to or greater than a given value.
-         */
-        accumulationJob = jobControl.monitorChannelWithException(channelLocationReceived_2, { location ->
-            // Update each event buffer with a new location
-            locationEventBuffer.applyToEach { item ->
-                item.postEventBuffer.addFirst(location)
-                true
-            }
-            locationEventBuffer.applyToEach { item ->
-                when (item.postEventBuffer.size >= LOCATION_BUFFER_MAX_SIZE) {
-                    true -> {
-                        item.onBufferFull(item.preEventBuffer, item.postEventBuffer)
-                        false
-                    }
-                    else -> {
-                        // Do nothing.
-                        true
-                    }
+    }
+    /**
+     * Process the location event buffer twice. The first time, update each of it's elements
+     * with a new location object. On the second pass, execute the stored lambda if the buffer
+     * size is equal to or greater than a given value.
+     */
+    private fun processLocationBuffer(location: Location) {
+        // Update each event buffer with a new location
+        locationEventBuffer.applyToEach { item ->
+            item.postEventBuffer.addFirst(location)
+            true
+        }
+        locationEventBuffer.applyToEach { item ->
+            when (item.postEventBuffer.size >= LOCATION_BUFFER_MAX_SIZE) {
+                true -> {
+                    item.onBufferFull(item.preEventBuffer, item.postEventBuffer)
+                    false
+                }
+                else -> {
+                    // Do nothing.
+                    true
                 }
             }
-        }, onCancellation = { Log.d(TAG, "channelLocationReceived_2 canceled") })
+        }
     }
-
     fun flushBuffers() {
         Log.d(TAG, "flushing buffers before ${currentLocationBuffer.size()}")
         locationEventBuffer.applyToEach { item ->
@@ -211,8 +209,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     }
 
     override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
-        channelLocationReceived_1.offer(enhancedLocation)
-        channelLocationReceived_2.offer(enhancedLocation)
+        channelLocationReceived.offer(enhancedLocation)
         lastLocation.set(enhancedLocation)
         when (firstLocationValue) {
             null -> {
