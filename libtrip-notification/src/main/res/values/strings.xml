@@ -1,6 +1,8 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">End Navigation</string>
+    <string name="stop_session">Stop session</string>
+    <string name="free_drive_notification_text">Free Drive session</string>
     <string name="channel_name">Navigation Notifications</string>
     <string name="notification_arrival_time_format">Arrive at %s</string>
     <string name="kilometers">km</string>

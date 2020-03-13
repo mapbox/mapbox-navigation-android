@@ -10,7 +10,8 @@ import com.schibsted.spain.barista.assertion.BaristaEnabledAssertions.assertEnab
 import com.schibsted.spain.barista.assertion.BaristaVisibilityAssertions.assertContains
 import com.schibsted.spain.barista.assertion.BaristaVisibilityAssertions.assertDisplayed
 import com.schibsted.spain.barista.interaction.BaristaClickInteractions.clickOn
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -70,13 +71,15 @@ class TripServiceActivityKtTest :
 
         uiDevice.run {
             openNotification()
-            awaitForView("notificationDistanceText")
-            val notificationDistance =
-                By.res("com.mapbox.navigation.examples:id/notificationDistanceText")
-            wait(Until.hasObject(notificationDistance), 1000)
-            val message = findObject(notificationDistance).text
+            awaitForView("etaContent")
+            awaitForView("freeDriveText")
+            val etaContent = By.res("com.mapbox.navigation.examples:id/etaContent")
+            val freeDriveText = By.res("com.mapbox.navigation.examples:id/freeDriveText")
+            wait(Until.hasObject(etaContent), 1000)
+            wait(Until.hasObject(freeDriveText), 1000)
 
-            assertEquals("100 m", message)
+            assertFalse(hasObject(etaContent))
+            assertTrue(hasObject(freeDriveText))
             pressBack()
         }
     }

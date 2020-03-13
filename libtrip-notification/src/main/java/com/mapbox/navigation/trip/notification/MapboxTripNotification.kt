@@ -16,6 +16,8 @@ import android.os.Build
 import android.text.SpannableString
 import android.text.TextUtils
 import android.text.format.DateFormat
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -233,18 +235,71 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateNotificationViews(routeProgress: RouteProgress) {
-        updateInstructionText(routeProgress.bannerInstructions())
-        updateDistanceText(routeProgress)
-        generateArrivalTime(routeProgress)?.let { formattedTime ->
-            updateViewsWithArrival(formattedTime)
-        }
-        routeProgress.bannerInstructions()?.let { bannerInstructions ->
-            if (updateManeuverState(bannerInstructions)) {
-                updateManeuverImage(
-                    routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
-                        ?: STEP_MANEUVER_MODIFIER_RIGHT
-                )
+        routeProgress.route()?.let {
+            setFreeDriveMode(false)
+            updateInstructionText(routeProgress.bannerInstructions())
+            updateDistanceText(routeProgress)
+            generateArrivalTime(routeProgress)?.let { formattedTime ->
+                updateViewsWithArrival(formattedTime)
             }
+            routeProgress.bannerInstructions()?.let { bannerInstructions ->
+                if (isManeuverStateChanged(bannerInstructions)) {
+                    updateManeuverImage(
+                            routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
+                                    ?: STEP_MANEUVER_MODIFIER_RIGHT
+                    )
+                }
+            }
+        } ?: setFreeDriveMode(true)
+    }
+
+    private fun setFreeDriveMode(isFreeDriveMode: Boolean) {
+        updateEtaContentVisibility(isFreeDriveMode)
+        updateFreeDriveTextVisibility(isFreeDriveMode)
+        updateManeuverImageResource(isFreeDriveMode)
+        updateEndNavigationBtnText(isFreeDriveMode)
+        updateCurrentManeuverToDefault(isFreeDriveMode)
+    }
+
+    private fun updateEtaContentVisibility(isFreeDriveMode: Boolean) {
+        collapsedNotificationRemoteViews?.setViewVisibility(
+                R.id.etaContent,
+                if (isFreeDriveMode) GONE else VISIBLE
+        )
+        expandedNotificationRemoteViews?.setViewVisibility(
+                R.id.etaContent,
+                if (isFreeDriveMode) GONE else VISIBLE
+        )
+    }
+
+    private fun updateFreeDriveTextVisibility(isFreeDriveMode: Boolean) {
+        collapsedNotificationRemoteViews?.setViewVisibility(
+                R.id.freeDriveText,
+                if (isFreeDriveMode) VISIBLE else GONE
+        )
+        expandedNotificationRemoteViews?.setViewVisibility(
+                R.id.freeDriveText,
+                if (isFreeDriveMode) VISIBLE else GONE
+        )
+    }
+
+    private fun updateEndNavigationBtnText(isFreeDriveMode: Boolean) {
+        expandedNotificationRemoteViews?.setTextViewText(
+                R.id.endNavigationBtnText,
+                applicationContext.getString(if (isFreeDriveMode) R.string.stop_session else R.string.end_navigation)
+        )
+    }
+
+    private fun updateManeuverImageResource(isFreeDriveMode: Boolean) {
+        if (isFreeDriveMode) {
+            collapsedNotificationRemoteViews?.setImageViewResource(
+                    R.id.maneuverImage,
+                    R.drawable.ic_navigation
+            )
+            expandedNotificationRemoteViews?.setImageViewResource(
+                    R.id.maneuverImage,
+                    R.drawable.ic_navigation
+            )
         }
     }
 
@@ -253,10 +308,12 @@ class MapboxTripNotification constructor(
             val primaryText = bannerIns.primary().text()
             if (currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText) {
                 collapsedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationInstructionText, primaryText
+                    R.id.notificationInstructionText,
+                        primaryText
                 )
                 expandedNotificationRemoteViews?.setTextViewText(
-                    R.id.notificationInstructionText, primaryText
+                    R.id.notificationInstructionText,
+                        primaryText
                 )
                 currentInstructionText = primaryText
             }
@@ -305,6 +362,14 @@ class MapboxTripNotification constructor(
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
     }
 
+    private fun updateCurrentManeuverToDefault(isFreeDriveMode: Boolean) {
+        if (isFreeDriveMode) {
+            currentManeuverType = null
+            currentManeuverModifier = null
+            currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
+        }
+    }
+
     private fun newDistanceText(routeProgress: RouteProgress) =
         ifNonNull(
             distanceFormatter,
@@ -333,22 +398,27 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun updateManeuverState(bannerInstruction: BannerInstructions): Boolean {
+    private fun isManeuverStateChanged(bannerInstruction: BannerInstructions): Boolean {
         val previousManeuverType = currentManeuverType
         val previousManeuverModifier = currentManeuverModifier
         val previousRoundaboutAngle = currentRoundaboutAngle
 
-        currentManeuverType = bannerInstruction.primary().type()
-        currentManeuverModifier = bannerInstruction.primary().modifier()
-
-        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType))
-            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
-        else
-            DEFAULT_ROUNDABOUT_ANGLE
+        updateManeuverState(bannerInstruction)
 
         return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
             !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
             currentRoundaboutAngle != previousRoundaboutAngle
+    }
+
+    private fun updateManeuverState(bannerInstruction: BannerInstructions) {
+        currentManeuverType = bannerInstruction.primary().type()
+        currentManeuverModifier = bannerInstruction.primary().modifier()
+
+        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType)) {
+            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
+        } else {
+            DEFAULT_ROUNDABOUT_ANGLE
+        }
     }
 
     private fun getManeuverBitmap(
