@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import android.support.annotation.Keep;
 import com.mapbox.android.telemetry.Event;
 
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+@Keep
 @SuppressLint("ParcelCreator")
 @SuppressWarnings("ParcelableCreator")
 class NavigationPerformanceEvent extends Event implements Parcelable {

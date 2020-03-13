@@ -2,11 +2,13 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.content.Context;
 
+import android.support.annotation.Keep;
 import com.mapbox.android.telemetry.TelemetryUtils;
 
 /**
  * Class that will hold the current states of the device phone.
  */
+@Keep
 public class PhoneState {
   private final int volumeLevel;
   private final int batteryLevel;

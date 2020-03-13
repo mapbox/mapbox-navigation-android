@@ -2,6 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.os.Build;
 import android.os.Parcel;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import com.mapbox.android.telemetry.Event;
@@ -10,6 +11,7 @@ import com.mapbox.services.android.navigation.BuildConfig;
 /**
  * Base Event class for navigation events, contains common properties.
  */
+@Keep
 abstract class NavigationEvent extends Event {
   private static final String OPERATING_SYSTEM = "Android - " + Build.VERSION.RELEASE;
   private final String operatingSystem = OPERATING_SYSTEM;

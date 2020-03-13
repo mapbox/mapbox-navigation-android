@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.location.Location;
+import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -15,6 +16,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgr
 import java.util.Date;
 import java.util.List;
 
+@Keep
 @AutoValue
 public abstract class SessionState {
 

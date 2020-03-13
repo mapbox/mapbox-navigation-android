@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
@@ -7,6 +8,7 @@ import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgr
 /**
  * Class that contains step meta data
  */
+@Keep
 class NavigationStepData {
   private final String upcomingInstruction;
   private final String upcomingType;

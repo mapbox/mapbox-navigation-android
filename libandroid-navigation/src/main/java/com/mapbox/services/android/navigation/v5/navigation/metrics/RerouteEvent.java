@@ -1,9 +1,11 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import com.mapbox.android.telemetry.TelemetryUtils;
 
+@Keep
 public class RerouteEvent implements TelemetryEvent {
 
   private SessionState rerouteSessionState;

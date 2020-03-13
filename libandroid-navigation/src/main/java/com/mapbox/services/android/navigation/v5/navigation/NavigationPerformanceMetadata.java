@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.Keep;
 import com.google.auto.value.AutoValue;
 
+@Keep
 @AutoValue
 abstract class NavigationPerformanceMetadata {
   abstract String version();

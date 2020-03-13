@@ -1,7 +1,9 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.Keep;
 
+@Keep
 @SuppressLint("ParcelCreator")
 class NavigationArriveEvent extends NavigationEvent {
   private static final String NAVIGATION_ARRIVE = "navigation.arrive";

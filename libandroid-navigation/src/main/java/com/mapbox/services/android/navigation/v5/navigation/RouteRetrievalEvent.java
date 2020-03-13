@@ -2,7 +2,9 @@ package com.mapbox.services.android.navigation.v5.navigation;
 
 import android.annotation.SuppressLint;
 import android.os.Parcelable;
+import android.support.annotation.Keep;
 
+@Keep
 @SuppressLint("ParcelCreator")
 @SuppressWarnings("ParcelableCreator")
 class RouteRetrievalEvent extends NavigationPerformanceEvent implements Parcelable {
