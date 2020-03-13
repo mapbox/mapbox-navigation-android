@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 
 internal interface DirectionsSession {
@@ -21,6 +22,8 @@ internal interface DirectionsSession {
      * @param routesRequestCallback listener that gets notified when request state changes
      */
     fun requestFasterRoute(adjustedRouteOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback)
+
+    fun requestRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback)
 
     fun cancel()
 

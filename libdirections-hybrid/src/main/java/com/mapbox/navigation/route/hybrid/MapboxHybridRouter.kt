@@ -4,6 +4,7 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModule
 import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.network.NetworkStatusService
 import com.mapbox.navigation.utils.thread.ThreadController
@@ -57,7 +58,8 @@ class MapboxHybridRouter(
      * Private interface used with handler classes here to call the correct router
      */
     private interface RouterDispatchInterface {
-        fun execute(routeOptions: RouteOptions, clientCallback: Router.Callback)
+        fun getRoute(routeOptions: RouteOptions, clientCallback: Router.Callback)
+        fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback)
     }
 
     private class RouterHandler(
@@ -100,11 +102,15 @@ class MapboxHybridRouter(
         /**
          * This method is equivalent to calling .getRoute() with the additional parameter capture
          */
-        override fun execute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
+        override fun getRoute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
             reserveRouterCalled = false
             options = routeOptions
             callback = clientCallback
             mainRouter.getRoute(routeOptions, this)
+        }
+
+        override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+            mainRouter.getRouteRefresh(route, legIndex, callback)
         }
     }
 
@@ -112,7 +118,11 @@ class MapboxHybridRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        routeDispatchHandler.get().execute(routeOptions, callback)
+        routeDispatchHandler.get().getRoute(routeOptions, callback)
+    }
+
+    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+        routeDispatchHandler.get().getRouteRefresh(route, legIndex, callback)
     }
 
     override fun cancel() {

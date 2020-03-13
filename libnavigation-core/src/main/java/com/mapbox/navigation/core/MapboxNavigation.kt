@@ -33,6 +33,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.module.NavigationModuleProvider
+import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
 import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
@@ -136,6 +137,7 @@ constructor(
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteController: FasterRouteController
+    private val routeRefreshController: RouteRefreshController
 
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
@@ -192,6 +194,8 @@ constructor(
         }
 
         fasterRouteController = FasterRouteController(directionsSession, tripSession)
+        routeRefreshController = RouteRefreshController(directionsSession, tripSession)
+        routeRefreshController.start()
     }
 
     /**
@@ -289,6 +293,7 @@ constructor(
             tripSession.unregisterAllBannerInstructionsObservers()
             tripSession.unregisterAllVoiceInstructionsObservers()
             fasterRouteController.stop()
+            routeRefreshController.stop()
         }
     }
 

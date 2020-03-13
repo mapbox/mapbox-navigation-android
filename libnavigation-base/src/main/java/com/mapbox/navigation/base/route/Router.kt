@@ -25,6 +25,19 @@ interface Router {
     fun cancel()
 
     /**
+     * Refresh the traffic annotations for a given [DirectionsRoute]
+     *
+     * @param route DirectionsRoute the direction route to refresh
+     * @param legIndex Int the index of the current leg in the route
+     * @param callback Callback that gets notified with the results of the request
+     */
+    fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    )
+
+    /**
      * Callback for Router fetching
      */
     interface Callback {

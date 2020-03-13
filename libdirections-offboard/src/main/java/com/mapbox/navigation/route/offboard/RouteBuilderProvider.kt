@@ -27,7 +27,6 @@ internal object RouteBuilderProvider {
             .accessToken(accessToken)
             .voiceInstructions(true)
             .bannerInstructions(true)
-            .enableRefresh(false)
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
             .interceptor {
                 val httpUrl = it.request().url()
