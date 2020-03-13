@@ -261,18 +261,6 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  void updateRoute(DirectionsRoute route) {
-    this.route.setValue(route);
-    if (!isChangingConfigurations) {
-      routeJunctionModel.setValue(null);
-      startNavigation(route);
-      updateReplayEngine(route);
-      sendEventOnRerouteAlong(route);
-      isOffRoute.setValue(false);
-    }
-    resetConfigurationFlag();
-  }
-
   void updateRouteProgress(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
     sendEventArrival(routeProgress);
@@ -450,7 +438,7 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
       if (routes.size() > 0) {
-        updateRoute(routes.get(0));
+        route.setValue(routes.get(0));
       }
     }
   };
