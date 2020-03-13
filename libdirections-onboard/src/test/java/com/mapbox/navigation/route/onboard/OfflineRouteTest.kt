@@ -103,7 +103,7 @@ class OfflineRouteTest {
         return RouteUrl(
             accessToken = "pk.XXX",
             profile = RouteUrl.PROFILE_CYCLING,
-            orgin = Point.fromLngLat(1.0, 2.0),
+            origin = Point.fromLngLat(1.0, 2.0),
             waypoints = listOf(Point.fromLngLat(3.0, 2.0)),
             destination = Point.fromLngLat(1.0, 5.0)
         )

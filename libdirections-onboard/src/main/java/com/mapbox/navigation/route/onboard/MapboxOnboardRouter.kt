@@ -71,7 +71,6 @@ class MapboxOnboardRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-
         val origin = routeOptions.coordinates().first()
         val destination = routeOptions.coordinates().last()
         val waypoints = routeOptions.coordinates().drop(1).dropLast(1)
@@ -81,16 +80,30 @@ class MapboxOnboardRouter(
                 accessToken = routeOptions.accessToken(),
                 user = routeOptions.user(),
                 profile = routeOptions.profile(),
-                orgin = origin,
+                origin = origin,
                 waypoints = waypoints,
                 destination = destination,
                 steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
                 voiceInstruction = routeOptions.voiceInstructions()
                     ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
+                voiceUnits = routeOptions.voiceUnits(),
                 bannerInstruction = routeOptions.bannerInstructions()
                     ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
                 roundaboutExits = routeOptions.roundaboutExits()
-                    ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE
+                    ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE,
+                alternatives = routeOptions.alternatives() ?: RouteUrl.ALTERNATIVES_DEFAULT_VALUE,
+                continueStraight = routeOptions.continueStraight(),
+                exclude = routeOptions.exclude(),
+                language = routeOptions.language(),
+                bearings = routeOptions.bearings(),
+                waypointNames = routeOptions.waypointNames(),
+                waypointTargets = routeOptions.waypointTargets(),
+                waypointIndices = routeOptions.waypointIndices(),
+                approaches = routeOptions.approaches(),
+                radiuses = routeOptions.radiuses(),
+                walkingSpeed = routeOptions.walkingOptions()?.walkingSpeed(),
+                walkwayBias = routeOptions.walkingOptions()?.walkwayBias(),
+                alleyBias = routeOptions.walkingOptions()?.alleyBias()
             )
         ).build()
 
