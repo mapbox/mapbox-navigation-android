@@ -32,6 +32,9 @@ import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlin.math.roundToLong
 
+/**
+ * Default implementation of [MapboxNativeNavigator] interface.
+ */
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Order matters! https://kotlinlang.org/docs/reference/classes.html#constructors
@@ -149,6 +152,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
         navigator.getVoiceInstruction(index)
 
+    /**
+     * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
+     */
     private fun NavigationStatus.getRouteProgress(): RouteProgress {
         val upcomingStepIndex = stepIndex + ONE_INDEX
 
