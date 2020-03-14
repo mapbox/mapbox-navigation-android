@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.summary;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -30,6 +31,8 @@ import com.mapbox.navigation.utils.extensions.ContextEx;
 
 import java.text.DecimalFormat;
 
+import static com.mapbox.navigation.base.typedef.TimeFormatTypeKt.NONE_SPECIFIED;
+
 /**
  * A view with {@link com.google.android.material.bottomsheet.BottomSheetBehavior}
  * that displays route summary information during navigation.
@@ -47,8 +50,9 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
   private boolean isRerouting;
+  @SuppressLint("WrongConstant")
   @TimeFormatType
-  private int timeFormatType;
+  private int timeFormatType = NONE_SPECIFIED;
   private DistanceFormatter distanceFormatter;
   private NavigationViewModel navigationViewModel;
   private LifecycleOwner lifecycleOwner;
@@ -139,6 +143,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
+      @SuppressLint("WrongConstant")
       SummaryModel model = new SummaryModel(getContext(), distanceFormatter, routeProgress, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
@@ -173,6 +178,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    *
    * @param type to use
    */
+  @SuppressLint("WrongConstant")
   public void setTimeFormat(@TimeFormatType int type) {
     this.timeFormatType = type;
   }

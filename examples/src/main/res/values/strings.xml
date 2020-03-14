@@ -53,6 +53,9 @@
     <string name="title_faster_route" translatable="false">FasterRouteActivity</string>
     <string name="description_faster_route" translatable="false">Demonstrate how to use MapboxNavigation to listen for faster route</string>
 
+    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
+    <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet, Recenter button with core SDK.</string>
+
     <string name="title_instruction_view" translatable="false">InstructionView</string>
     <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with core SDK.</string>
 
