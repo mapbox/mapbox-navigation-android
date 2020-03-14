@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
+import com.mapbox.navigation.examples.core.InstructionViewActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
 import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
@@ -83,6 +84,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_basic_navigation_kotlin),
                 getString(R.string.description_basic_navigation_kotlin),
                 BasicNavigationActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_instruction_view),
+                getString(R.string.description_instruction_view),
+                InstructionViewActivity::class.java
             )
         )
     }

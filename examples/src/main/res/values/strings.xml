@@ -44,6 +44,9 @@
     <string name="title_guidance_view" translatable="false">GuidanceViewActivity</string>
     <string name="description_guidance_view" translatable="false">Demonstrate the use of guidance view to show images at proper junctions</string>
 
+    <string name="title_instruction_view" translatable="false">InstructionView</string>
+    <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with core SDK.</string>
+
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
     <string name="description_component_navigation" translatable="false">MapboxNavigation with UI components</string>
 
