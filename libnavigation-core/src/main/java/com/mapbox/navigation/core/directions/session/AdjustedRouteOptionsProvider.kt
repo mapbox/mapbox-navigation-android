@@ -6,12 +6,11 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.TripSession
 
-internal class AdjustedRouteOptionsProvider(
-    private val directionsSession: DirectionsSession,
-    private val tripSession: TripSession
-) {
+internal object AdjustedRouteOptionsProvider {
 
-    fun getRouteOptions(location: Location): RouteOptions? {
+    private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
+
+    fun getRouteOptions(directionsSession: DirectionsSession, tripSession: TripSession, location: Location): RouteOptions? {
         val routeOptions: RouteOptions = directionsSession.getRouteOptions() ?: return null
         val routeProgress: RouteProgress = tripSession.getRouteProgress() ?: return null
 
@@ -102,9 +101,5 @@ internal class AdjustedRouteOptionsProvider(
         }
 
         return optionsBuilder.build()
-    }
-
-    companion object {
-        private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
     }
 }

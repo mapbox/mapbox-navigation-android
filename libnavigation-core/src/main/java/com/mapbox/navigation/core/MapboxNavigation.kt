@@ -130,7 +130,6 @@ constructor(
 
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
-    private val adjustedRouteOptionsProvider: AdjustedRouteOptionsProvider
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession = NavigationSession(context)
@@ -192,8 +191,7 @@ constructor(
             )
         }
 
-        adjustedRouteOptionsProvider = AdjustedRouteOptionsProvider(directionsSession, tripSession)
-        fasterRouteController = FasterRouteController(adjustedRouteOptionsProvider, directionsSession, tripSession)
+        fasterRouteController = FasterRouteController(directionsSession, tripSession)
     }
 
     /**
@@ -458,8 +456,8 @@ constructor(
     }
 
     private fun reRoute() {
-        ifNonNull(tripSession.getRawLocation()) { location ->
-            val optionsRebuilt = adjustedRouteOptionsProvider.getRouteOptions(location)
+        ifNonNull(tripSession.getEnhancedLocation()) { location ->
+            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, location)
                 ?: return
             directionsSession.requestRoutes(
                 optionsRebuilt,
