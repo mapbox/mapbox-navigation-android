@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.mapbox.navigation.examples">
 
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -141,7 +140,15 @@
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CoreActivity"/>
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity android:name=".core.InstructionViewActivity"
+            android:label="@string/title_instruction_view"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
         </activity>
 
         <meta-data
