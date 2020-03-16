@@ -24,38 +24,38 @@ workflows:
       - release-core-1_0:
           filters:
             tags:
-              only: /^release-core-*/
+              only: /^release-core-.*/
             branches:
               ignore: /.*/
       - release-ui-1_0:
           filters:
             tags:
-              only: /^release-ui-*/
+              only: /^release-ui-.*/
             branches:
               ignore: /.*/
       - release-core-1_0-qa:
           filters:
             tags:
-              only: /^qa-release-core-*/
+              only: /^qa-release-core-.*/
             branches:
               ignore: /.*/
       - release-ui-1_0-qa:
           filters:
             tags:
-              only: /^qa-release-ui-*/
+              only: /^qa-release-ui-.*/
             branches:
               ignore: /.*/
       - release-core-1_0-prod:
           filters:
             tags:
-              only: /^prod-release-core-*/
+              only: /^prod-release-core-.*/
             branches:
               ignore: /.*/
 
       - release-ui-1_0-prod:
           filters:
             tags:
-              only: /^prod-release-ui-*/
+              only: /^prod-release-ui-.*/
             branches:
               ignore: /.*/
       - ui-tests-1_0
