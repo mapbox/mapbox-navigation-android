@@ -83,7 +83,7 @@ android {
 }
 
 dependencies {
-    implementation project(':libnavigation-core')
+    // Mapbox Navigation SDK
     implementation project(':libnavigation-metrics')
     implementation project(':libdirections-offboard')
     implementation project(':libdirections-onboard')
@@ -91,6 +91,9 @@ dependencies {
     implementation project(':libnavigation-util')
     implementation project(':liblogger')
     implementation project(':libnavigator')
+    implementation project(':libnavigation-ui')
+    implementation dependenciesList.mapboxAnnotationPlugin
+    implementation dependenciesList.mapboxSdkTurf
 
     androidTestImplementation project(':libtesting-ui')
 
@@ -103,11 +106,6 @@ dependencies {
 
     //Coroutines
     implementation dependenciesList.coroutinesAndroid
-
-    // Mapbox Navigation SDK
-    implementation project(':libnavigation-ui')
-    implementation dependenciesList.mapboxAnnotationPlugin
-    implementation dependenciesList.mapboxSdkTurf
 
     // Support libraries
     implementation dependenciesList.androidXCore

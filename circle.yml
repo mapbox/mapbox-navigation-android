@@ -11,27 +11,51 @@ workflows:
             branches:
               only:
                 - master
-      - release-1_0-snapshot:
+      - release-core-1_0-snapshot:
           filters:
             branches:
               only:
                 - master
-      - release-1_0:
+#      - release-ui-1_0-snapshot:
+#          filters:
+#            branches:
+#              only:
+#                - master
+      - release-core-1_0:
           filters:
             tags:
-              only: /^release-1.0-.*/
+              only: /^release-core-*/
             branches:
               ignore: /.*/
-      - release-1_0-qa:
+      - release-ui-1_0:
           filters:
             tags:
-              only: /^qa-release-1.0-.*/
+              only: /^release-ui-*/
             branches:
               ignore: /.*/
-      - release-1_0-prod:
+      - release-core-1_0-qa:
           filters:
             tags:
-              only: /^prod-release-1.0-.*/
+              only: /^qa-release-core-*/
+            branches:
+              ignore: /.*/
+      - release-ui-1_0-qa:
+          filters:
+            tags:
+              only: /^qa-release-ui-*/
+            branches:
+              ignore: /.*/
+      - release-core-1_0-prod:
+          filters:
+            tags:
+              only: /^prod-release-core-*/
+            branches:
+              ignore: /.*/
+
+      - release-ui-1_0-prod:
+          filters:
+            tags:
+              only: /^prod-release-ui-*/
             branches:
               ignore: /.*/
       - ui-tests-1_0
@@ -164,23 +188,35 @@ commands:
       - store_test_results:
           path: << parameters.module_target >>/build/test-results
 
-  build-debug-1_0:
+  build-core-debug-1_0:
     steps:
       - run:
           name: Build Navigation SDK 1.0 (debug)
-          command: make 1.0-build-debug
+          command: make 1.0-build-core-debug
 
-  build-release-1_0:
+  build-ui-debug-1_0:
+    steps:
+      - run:
+          name: Build Navigation UI SDK 1.0 (debug)
+          command: make 1.0-build-ui-debug
+
+  build-release-core-1_0:
     steps:
       - run:
           name: Build Navigation SDK 1.0 (release)
-          command: make 1.0-build-release
+          command: make 1.0-build-core-release
 
-  unit-tests-1_0:
+  build-release-ui-1_0:
+    steps:
+      - run:
+          name: Build Navigation UI SDK 1.0 (release)
+          command: make 1.0-build-ui-release
+
+  unit-tests-core-1_0:
     steps:
       - run:
           name: Run Navigation SDK 1.0 Unit Tests
-          command: make 1.0-unit-tests
+          command: make 1.0-core-unit-tests
       - store-results:
           module_target: "libdirections-hybrid"
       - store-results:
@@ -201,6 +237,14 @@ commands:
           module_target: "libnavigator"
       - store-results:
           module_target: "libtrip-notification"
+
+  unit-tests-ui-1_0:
+    steps:
+      - run:
+          name: Run Navigation UI SDK 1.0 Unit Tests
+          command: make 1.0-ui-unit-tests
+      - store-results:
+          module_target: "libnavigation-ui"
 
   run-firebase-instrumentation:
     parameters:
@@ -249,15 +293,18 @@ commands:
       repository:
         description: artifactory or bintray
         type: string
+      artifact-type:
+        description: core or ui
+        type: string
     steps:
       - deploy:
           name: Publish Navigation SDK 1.0 to << parameters.repository >>
           command: |
             version=$(cat gradle/artifact-settings.gradle | grep "versionName")
             if [[ $version != *"SNAPSHOT"* ]]; then
-              make 1.0-publish-to-<< parameters.repository >>
+              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
             else
-              make 1.0-publish-to-<< parameters.repository >>
+              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
             fi
 
   generate-documentation:
@@ -343,8 +390,10 @@ jobs:
       - checkout
       - restore-gradle-cache-1_0
       - static-code-analysis-kotlin
-      - build-debug-1_0
-      - unit-tests-1_0
+      - build-core-debug-1_0
+      - build-ui-debug-1_0
+      - unit-tests-core-1_0
+      - unit-tests-ui-1_0
 
   ui-tests-1_0:
     docker:
@@ -405,13 +454,13 @@ jobs:
           command: |
             ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt "${CIRCLE_SHA1}"
 
-  release-1_0-snapshot:
+  release-core-1_0-snapshot:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     steps:
       - checkout
-      - build-release-1_0
+      - build-release-core-1_0
       - generate-documentation
       #     Uncomment when API' docs will be ready
       #     - run:
@@ -419,9 +468,10 @@ jobs:
       #         command: sh scripts/dokka-validate.sh
       - publish-artifacts:
           repository: "artifactory"
+          artifact-type: "core"
       - track-performance
 
-  release-1_0:
+  release-core-1_0:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
@@ -429,7 +479,7 @@ jobs:
       BINTRAY_REPO: mapbox
     steps:
       - checkout
-      - build-release-1_0
+      - build-release-core-1_0
       - generate-documentation
 #     Uncomment when API' docs will be ready
 #     - run:
@@ -437,8 +487,9 @@ jobs:
 #         command: sh scripts/dokka-validate.sh
       - publish-artifacts:
           repository: "bintray"
+          artifact-type: "core"
 
-  release-1_0-qa:
+  release-core-1_0-qa:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
@@ -446,7 +497,7 @@ jobs:
       BINTRAY_REPO: mapbox_private
     steps:
       - checkout
-      - build-release-1_0
+      - build-release-core-1_0
       - generate-documentation
       #     Uncomment when API' docs will be ready
       #     - run:
@@ -454,8 +505,9 @@ jobs:
       #         command: sh scripts/dokka-validate.sh
       - publish-artifacts:
           repository: "bintray"
+          artifact-type: "core"
 
-  release-1_0-prod:
+  release-core-1_0-prod:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
@@ -463,7 +515,7 @@ jobs:
       BINTRAY_REPO: mapbox_collab
     steps:
       - checkout
-      - build-release-1_0
+      - build-release-core-1_0
       - generate-documentation
       #     Uncomment when API' docs will be ready
       #     - run:
@@ -471,6 +523,78 @@ jobs:
       #         command: sh scripts/dokka-validate.sh
       - publish-artifacts:
           repository: "bintray"
+          artifact-type: "core"
+
+  release-ui-1_0-snapshot:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    steps:
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "artifactory"
+          artifact-type: "ui"
+      - track-performance
+
+  release-ui-1_0:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox
+    steps:
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
+
+  release-ui-1_0-qa:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_private
+    steps:
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
+
+  release-ui-1_0-prod:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_collab
+    steps:
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
 # ------------------------------------------------------------------------------
   publish:
     docker:

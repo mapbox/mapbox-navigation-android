@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
@@ -94,10 +95,6 @@ dependencies {
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
 }
-
-apply from: 'javadoc.gradle'
-apply from: "${rootDir}/gradle/mvn-push-android.gradle"
-apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
-apply from: "${rootDir}/gradle/dependencies-graph.gradle"
-apply from: "${rootDir}/gradle/dependency-updates.gradle"
+apply from: "${rootDir}/gradle/checkstyle.gradle"
+apply from: "${rootDir}/gradle/bintray-publish.gradle"

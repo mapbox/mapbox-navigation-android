@@ -30,6 +30,7 @@ javadoc-dokka:
 	./gradlew :libnavigation-metrics:dokka
 	./gradlew :libtrip-notification:dokka
 	./gradlew :libnavigation-core:dokka
+	./gradlew :libnavigation-ui:dokka
 
 publish:
 	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
@@ -78,8 +79,8 @@ navigation-fixtures:
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-77.034013,38.899994;-77.033757,38.903311?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
 		-o libandroid-navigation/src/test/resources/directions_v5_no_voice.json
 
-.PHONY: 1.0-build-debug
-1.0-build-debug:
+.PHONY: 1.0-build-core-debug
+1.0-build-core-debug:
 	./gradlew :libdirections-offboard:assembleDebug
 	./gradlew :libdirections-hybrid:assembleDebug
 	./gradlew :libdirections-onboard:assembleDebug
@@ -90,8 +91,8 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:assembleDebug
 	./gradlew :libnavigation-core:assembleDebug
 
-.PHONY: 1.0-build-release
-1.0-build-release:
+.PHONY: 1.0-build-core-release
+1.0-build-core-release:
 	./gradlew :libdirections-offboard:assembleRelease
 	./gradlew :libdirections-hybrid:assembleRelease
 	./gradlew :libdirections-onboard:assembleRelease
@@ -102,8 +103,8 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:assembleRelease
 	./gradlew :libnavigation-core:assembleRelease
 
-.PHONY: 1.0-unit-tests
-1.0-unit-tests:
+.PHONY: 1.0-core-unit-tests
+1.0-core-unit-tests:
 	./gradlew :libdirections-hybrid:test
 	./gradlew :libdirections-offboard:test
 	./gradlew :libdirections-onboard:test
@@ -115,8 +116,8 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:test
 	./gradlew :libnavigation-core:test
 
-.PHONY: 1.0-publish-to-bintray
-1.0-publish-to-bintray:
+.PHONY: 1.0-core-publish-to-bintray
+1.0-core-publish-to-bintray:
 	./gradlew :libdirections-offboard:bintrayUpload
 	./gradlew :libdirections-hybrid:bintrayUpload
 	./gradlew :libdirections-onboard:bintrayUpload
@@ -127,8 +128,8 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:bintrayUpload
 	./gradlew :libnavigation-core:bintrayUpload
 
-.PHONY: 1.0-publish-to-artifactory
-1.0-publish-to-artifactory:
+.PHONY: 1.0-core-publish-to-artifactory
+1.0-core-publish-to-artifactory:
 	./gradlew :libdirections-offboard:artifactoryPublish
 	./gradlew :libdirections-hybrid:artifactoryPublish
 	./gradlew :libdirections-onboard:artifactoryPublish
@@ -138,3 +139,23 @@ navigation-fixtures:
 	./gradlew :libnavigator:artifactoryPublish
 	./gradlew :libtrip-notification:artifactoryPublish
 	./gradlew :libnavigation-core:artifactoryPublish
+
+.PHONY: 1.0-build-ui-debug
+1.0-build-ui-debug:
+	./gradlew :libnavigation-ui:assembleDebug
+
+.PHONY: 1.0-build-ui-release
+1.0-build-ui-release:
+	./gradlew :libnavigation-ui:assembleRelease
+
+.PHONY: 1.0-ui-unit-tests
+1.0-ui-unit-tests:
+	./gradlew :libnavigation-ui:test
+
+.PHONY: 1.0-ui-publish-to-bintray
+1.0-ui-publish-to-bintray:
+	./gradlew :libnavigation-ui:bintrayUpload
+
+.PHONY: 1.0-ui-publish-to-artifactory
+1.0-ui-publish-to-artifactory:
+	./gradlew :libnavigation-ui:artifactoryPublish
