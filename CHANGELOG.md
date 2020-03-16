@@ -2,6 +2,13 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.42.6 - March 16, 2020
+
+* Fix missing event telemetry when Proguard is enabled [#2587](https://github.com/mapbox/mapbox-navigation-android/pull/2587)
+* fix textAllCaps conflicting with material design [#2585](https://github.com/mapbox/mapbox-navigation-android/pull/2585)
+* Add missing RouteOptions to DirectionsBuilder [#2573](https://github.com/mapbox/mapbox-navigation-android/pull/2573)
+* Fix libandroid-navigation and libandroid-navigation-ui Javadoc task [#2534](https://github.com/mapbox/mapbox-navigation-android/pull/2534)
+
 ### v0.42.5 - February 11, 2020
 
 * Backport #2315 to base-v0.42.1 [#2318](https://github.com/mapbox/mapbox-navigation-android/pull/2318)
