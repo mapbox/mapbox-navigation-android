@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.routeprogress;
 
+import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -9,6 +10,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.geojson.Point;
 
+@Keep
 public class MetricsRouteProgress {
 
   private int directionsRouteDistance;

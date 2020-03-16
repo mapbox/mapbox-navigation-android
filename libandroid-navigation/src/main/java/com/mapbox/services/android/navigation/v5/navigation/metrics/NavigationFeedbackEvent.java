@@ -2,10 +2,12 @@ package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
 import android.annotation.SuppressLint;
 import android.location.Location;
+import android.support.annotation.Keep;
 import android.support.annotation.NonNull;
 
 import com.mapbox.services.android.navigation.v5.routeprogress.MetricsRouteProgress;
 
+@Keep
 @SuppressLint("ParcelCreator")
 class NavigationFeedbackEvent extends NavigationEvent {
   private static final String NAVIGATION_FEEDBACK = "navigation.feedback";

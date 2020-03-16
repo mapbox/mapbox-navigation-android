@@ -1,5 +1,8 @@
 package com.mapbox.services.android.navigation.v5.navigation;
 
+import android.support.annotation.Keep;
+
+@Keep
 abstract class Counter<N extends Number> {
   protected final String name;
   protected final N value;

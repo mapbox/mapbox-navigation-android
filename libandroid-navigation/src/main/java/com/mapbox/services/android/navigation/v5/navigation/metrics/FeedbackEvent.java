@@ -1,5 +1,6 @@
 package com.mapbox.services.android.navigation.v5.navigation.metrics;
 
+import android.support.annotation.Keep;
 import android.support.annotation.StringDef;
 
 import com.mapbox.android.telemetry.TelemetryUtils;
@@ -7,6 +8,7 @@ import com.mapbox.android.telemetry.TelemetryUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@Keep
 public class FeedbackEvent implements TelemetryEvent {
 
   @Retention(RetentionPolicy.SOURCE)
