@@ -119,6 +119,7 @@ class NavigationOptionsTest {
             .isFromNavigationUi(true)
             .build()
 
+        assert(optionsLhs == optionsRhs)
         assertEquals(optionsLhs, optionsRhs)
     }
 
@@ -136,6 +137,7 @@ class NavigationOptionsTest {
             .isFromNavigationUi(false)
             .build()
 
+        assert(optionsLhs != optionsRhs)
         assertNotEquals(optionsLhs, optionsRhs)
     }
 }
