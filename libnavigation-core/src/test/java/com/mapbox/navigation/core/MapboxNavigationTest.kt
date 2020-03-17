@@ -57,7 +57,6 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk(relaxUnitFun = true)
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
-    private val adjustedRouteOptionsProvider: AdjustedRouteOptionsProvider = mockk(relaxUnitFun = true)
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
@@ -225,6 +224,38 @@ class MapboxNavigationTest {
         verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
     }
 
+    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
+    @Ignore
+    @Test
+    fun getEnhancedLocation_reRoute() {
+        val offRouteObserverSlot = slot<OffRouteObserver>()
+        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+
+        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
+
+        verify(exactly = 1) { tripSession.getEnhancedLocation() }
+        verify(exactly = 0) { tripSession.getRawLocation() }
+    }
+
+    @Test
+    fun enhanced_location_used_for_reroute() {
+        val offRouteObserverSlot = slot<OffRouteObserver>()
+        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+        mockkObject(AdjustedRouteOptionsProvider)
+        val mockedLocation = Location("mock")
+        every { tripSession.getEnhancedLocation() } returns mockedLocation
+
+        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
+
+        verify(exactly = 1) { AdjustedRouteOptionsProvider.getRouteOptions(eq(directionsSession), eq(tripSession), eq(mockedLocation)) }
+
+        // TODO This should be removed when getEnhancedLocation_reRoute is fixed - duplicating temporarily here so it's tested
+        verify(exactly = 1) { tripSession.getEnhancedLocation() }
+        verify(exactly = 0) { tripSession.getRawLocation() }
+
+        unmockkObject(AdjustedRouteOptionsProvider)
+    }
+
     // TODO Fix test not working because of MapboxNavigationTelemetry#unregisterListeners initializer = initializerDelegate
     @Ignore
     @Test
@@ -332,7 +363,6 @@ class MapboxNavigationTest {
         every { directionsSession.requestFasterRoute(any(), any()) } answers {
             fasterRouteRequestCallback.onRoutesReady(routes)
         }
-        every { adjustedRouteOptionsProvider.getRouteOptions(any()) } returns routeOptions
     }
 
     private fun mockTripSession() {

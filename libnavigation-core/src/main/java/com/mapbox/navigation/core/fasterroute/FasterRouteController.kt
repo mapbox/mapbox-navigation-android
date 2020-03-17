@@ -10,7 +10,6 @@ import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.timer.MapboxTimer
 
 internal class FasterRouteController(
-    private val adjustedRouteObjectsProvider: AdjustedRouteOptionsProvider,
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession
 ) {
@@ -34,7 +33,7 @@ internal class FasterRouteController(
 
     private fun requestFasterRoute() {
         ifNonNull(tripSession.getEnhancedLocation()) { enhancedLocation ->
-            val optionsRebuilt = adjustedRouteObjectsProvider.getRouteOptions(enhancedLocation)
+            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, enhancedLocation)
                 ?: return
             directionsSession.requestFasterRoute(optionsRebuilt, fasterRouteRequestCallback)
         }
