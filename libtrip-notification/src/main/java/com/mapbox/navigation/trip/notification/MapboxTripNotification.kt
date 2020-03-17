@@ -236,7 +236,6 @@ class MapboxTripNotification constructor(
 
     private fun updateNotificationViews(routeProgress: RouteProgress) {
         routeProgress.route()?.let {
-            setFreeDriveMode(false)
             updateInstructionText(routeProgress.bannerInstructions())
             updateDistanceText(routeProgress)
             generateArrivalTime(routeProgress)?.let { formattedTime ->
@@ -245,11 +244,12 @@ class MapboxTripNotification constructor(
             routeProgress.bannerInstructions()?.let { bannerInstructions ->
                 if (isManeuverStateChanged(bannerInstructions)) {
                     updateManeuverImage(
-                            routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
-                                    ?: STEP_MANEUVER_MODIFIER_RIGHT
+                        routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
+                            ?: STEP_MANEUVER_MODIFIER_RIGHT
                     )
                 }
             }
+            setFreeDriveMode(false)
         } ?: setFreeDriveMode(true)
     }
 
@@ -263,42 +263,42 @@ class MapboxTripNotification constructor(
 
     private fun updateEtaContentVisibility(isFreeDriveMode: Boolean) {
         collapsedNotificationRemoteViews?.setViewVisibility(
-                R.id.etaContent,
-                if (isFreeDriveMode) GONE else VISIBLE
+            R.id.etaContent,
+            if (isFreeDriveMode) GONE else VISIBLE
         )
         expandedNotificationRemoteViews?.setViewVisibility(
-                R.id.etaContent,
-                if (isFreeDriveMode) GONE else VISIBLE
+            R.id.etaContent,
+            if (isFreeDriveMode) GONE else VISIBLE
         )
     }
 
     private fun updateFreeDriveTextVisibility(isFreeDriveMode: Boolean) {
         collapsedNotificationRemoteViews?.setViewVisibility(
-                R.id.freeDriveText,
-                if (isFreeDriveMode) VISIBLE else GONE
+            R.id.freeDriveText,
+            if (isFreeDriveMode) VISIBLE else GONE
         )
         expandedNotificationRemoteViews?.setViewVisibility(
-                R.id.freeDriveText,
-                if (isFreeDriveMode) VISIBLE else GONE
+            R.id.freeDriveText,
+            if (isFreeDriveMode) VISIBLE else GONE
         )
     }
 
     private fun updateEndNavigationBtnText(isFreeDriveMode: Boolean) {
         expandedNotificationRemoteViews?.setTextViewText(
-                R.id.endNavigationBtnText,
-                applicationContext.getString(if (isFreeDriveMode) R.string.stop_session else R.string.end_navigation)
+            R.id.endNavigationBtnText,
+            applicationContext.getString(if (isFreeDriveMode) R.string.stop_session else R.string.end_navigation)
         )
     }
 
     private fun updateManeuverImageResource(isFreeDriveMode: Boolean) {
         if (isFreeDriveMode) {
             collapsedNotificationRemoteViews?.setImageViewResource(
-                    R.id.maneuverImage,
-                    R.drawable.ic_navigation
+                R.id.maneuverImage,
+                R.drawable.ic_navigation
             )
             expandedNotificationRemoteViews?.setImageViewResource(
-                    R.id.maneuverImage,
-                    R.drawable.ic_navigation
+                R.id.maneuverImage,
+                R.drawable.ic_navigation
             )
         }
     }
@@ -309,11 +309,11 @@ class MapboxTripNotification constructor(
             if (currentInstructionText.isNullOrEmpty() || currentInstructionText != primaryText) {
                 collapsedNotificationRemoteViews?.setTextViewText(
                     R.id.notificationInstructionText,
-                        primaryText
+                    primaryText
                 )
                 expandedNotificationRemoteViews?.setTextViewText(
                     R.id.notificationInstructionText,
-                        primaryText
+                    primaryText
                 )
                 currentInstructionText = primaryText
             }

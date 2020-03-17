@@ -35,6 +35,8 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
+private const val STOP_SESSION = "Stop session"
+private const val END_NAVIGATION = "End Navigation"
 private const val FORMAT_STRING = "%s 454545 ETA"
 private const val MANEUVER_TYPE = "MANEUVER TYPE"
 private const val MANEUVER_MODIFIER = "MANEUVER MODIFIER"
@@ -105,6 +107,8 @@ class MapboxTripNotificationTest {
         every { mockedContext.packageManager } returns (mockedPackageManager)
         every { mockedContext.packageName } returns ("com.mapbox.navigation.trip.notification")
         every { mockedContext.getString(any()) } returns FORMAT_STRING
+        every { mockedContext.getString(R.string.stop_session) } returns STOP_SESSION
+        every { mockedContext.getString(R.string.end_navigation) } returns END_NAVIGATION
         val notificationManager = mockk<NotificationManager>(relaxed = true)
         every { mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns (notificationManager)
         every { DateFormat.is24HourFormat(mockedContext) } returns (false)
@@ -181,6 +185,8 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { bannerText.text() }
         verify(exactly = 1) { collapsedViews.setTextViewText(any(), primaryText()) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
+        verify(exactly = 1) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
+        verify(exactly = 0) { expandedViews.setTextViewText(any(), STOP_SESSION) }
         assertEquals(notification.currentManeuverType, MANEUVER_TYPE)
         assertEquals(notification.currentManeuverModifier, MANEUVER_MODIFIER)
     }
@@ -324,6 +330,19 @@ class MapboxTripNotificationTest {
         verify(exactly = 1) { expandedViews.setTextViewText(any(), primaryText()) }
         assertNull(notification.currentManeuverType)
         assertNull(notification.currentManeuverModifier)
+    }
+
+    @Test
+    fun whenFreeDrive() {
+        val routeProgress = mockk<RouteProgress>(relaxed = true)
+        every { routeProgress.route() } returns null
+        mockUpdateNotificationAndroidInteractions()
+
+        notification.onTripSessionStarted()
+        notification.updateNotification(routeProgress)
+
+        verify(exactly = 0) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
+        verify(exactly = 1) { expandedViews.setTextViewText(any(), STOP_SESSION) }
     }
 
     private fun mockUpdateNotificationAndroidInteractions() {
