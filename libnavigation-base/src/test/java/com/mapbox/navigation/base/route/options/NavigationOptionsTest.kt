@@ -125,17 +125,15 @@ class NavigationOptionsTest {
     @Test
     fun shouldBuildNonEqualOptions() {
         val optionsLhs = NavigationOptions.Builder()
-            .isFromNavigationUi(false)
             .navigatorPollingDelay(123435)
             .timeFormatType(TWENTY_FOUR_HOURS)
             .isFromNavigationUi(true)
             .build()
 
         val optionsRhs = NavigationOptions.Builder()
-            .isFromNavigationUi(true)
             .navigatorPollingDelay(123435)
             .timeFormatType(TWENTY_FOUR_HOURS)
-            .isFromNavigationUi(true)
+            .isFromNavigationUi(false)
             .build()
 
         assertNotEquals(optionsLhs, optionsRhs)
