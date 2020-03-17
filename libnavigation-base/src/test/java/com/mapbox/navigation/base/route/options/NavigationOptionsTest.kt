@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.typedef.TWELVE_HOURS
 import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NavigationOptionsTest {
@@ -119,7 +120,7 @@ class NavigationOptionsTest {
             .isFromNavigationUi(true)
             .build()
 
-        assert(optionsLhs == optionsRhs)
+        assertTrue(optionsLhs == optionsRhs)
         assertEquals(optionsLhs, optionsRhs)
     }
 
@@ -137,7 +138,7 @@ class NavigationOptionsTest {
             .isFromNavigationUi(false)
             .build()
 
-        assert(optionsLhs != optionsRhs)
+        assertTrue(optionsLhs != optionsRhs)
         assertNotEquals(optionsLhs, optionsRhs)
     }
 }
