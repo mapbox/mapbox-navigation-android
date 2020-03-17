@@ -128,9 +128,16 @@
                 android:value=".UIActivity"/>
         </activity>
 
-
         <activity android:name=".ui.ArrivalUiBuildingExtrusionLayerActivityKt"
             android:label="@string/title_arrival_ui_building_extrusions_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity"/>
+        </activity>
+
+        <activity android:name=".core.GuidanceViewActivity"
+            android:label="@string/title_guidance_view"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

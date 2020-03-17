@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
+import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.NavigateWithInstructionViewActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
@@ -77,6 +78,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_navigate_instruction_view),
                 getString(R.string.description_navigate_instruction_view),
                 NavigateWithInstructionViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_guidance_view),
+                getString(R.string.description_guidance_view),
+                GuidanceViewActivity::class.java
             )
         )
     }
