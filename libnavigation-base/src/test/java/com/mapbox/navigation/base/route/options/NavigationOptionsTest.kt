@@ -11,6 +11,7 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_TEN
 import com.mapbox.navigation.base.typedef.TWELVE_HOURS
 import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class NavigationOptionsTest {
@@ -103,7 +104,7 @@ class NavigationOptionsTest {
     }
 
     @Test
-    fun shouldDoDeepCompareOfOptions() {
+    fun shouldBuildEqualOptions() {
         val optionsLhs = NavigationOptions.Builder()
             .isFromNavigationUi(false)
             .navigatorPollingDelay(123435)
@@ -119,5 +120,24 @@ class NavigationOptionsTest {
             .build()
 
         assertEquals(optionsLhs, optionsRhs)
+    }
+
+    @Test
+    fun shouldBuildNonEqualOptions() {
+        val optionsLhs = NavigationOptions.Builder()
+            .isFromNavigationUi(false)
+            .navigatorPollingDelay(123435)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .isFromNavigationUi(true)
+            .build()
+
+        val optionsRhs = NavigationOptions.Builder()
+            .isFromNavigationUi(true)
+            .navigatorPollingDelay(123435)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .isFromNavigationUi(true)
+            .build()
+
+        assertNotEquals(optionsLhs, optionsRhs)
     }
 }
