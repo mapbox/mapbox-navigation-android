@@ -29,28 +29,27 @@ data class NavigationOptions constructor(
     val navigatorPollingDelay: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
-    val isFromNavigationUi: Boolean = false
+    val isFromNavigationUi: Boolean
 ) {
 
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder() = Builder(
-        roundingIncrement,
-        timeFormatType,
-        navigatorPollingDelay,
-        distanceFormatter,
-        onboardRouterConfig
-    )
+    fun toBuilder() = Builder()
+        .roundingIncrement(roundingIncrement)
+        .timeFormatType(timeFormatType)
+        .navigatorPollingDelay(navigatorPollingDelay)
+        .distanceFormatter(distanceFormatter)
+        .onboardRouterConfig(onboardRouterConfig)
+        .isFromNavigationUi(isFromNavigationUi)
 
-    data class Builder(
-        private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY,
-        private var timeFormatType: Int = NONE_SPECIFIED,
-        private var navigatorPollingDelay: Long = DEFAULT_NAVIGATOR_POLLING_DELAY,
-        private var distanceFormatter: DistanceFormatter? = null,
-        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null,
+    class Builder {
+        private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY
+        private var timeFormatType: Int = NONE_SPECIFIED
+        private var navigatorPollingDelay: Long = DEFAULT_NAVIGATOR_POLLING_DELAY
+        private var distanceFormatter: DistanceFormatter? = null
+        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
         private var isFromNavigationUi: Boolean = false
-    ) {
 
         fun roundingIncrement(roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
@@ -72,12 +71,12 @@ data class NavigationOptions constructor(
 
         fun build(): NavigationOptions {
             return NavigationOptions(
-                roundingIncrement,
-                timeFormatType,
-                navigatorPollingDelay,
-                distanceFormatter,
-                onboardRouterConfig,
-                isFromNavigationUi
+                roundingIncrement = roundingIncrement,
+                timeFormatType = timeFormatType,
+                navigatorPollingDelay = navigatorPollingDelay,
+                distanceFormatter = distanceFormatter,
+                onboardRouterConfig = onboardRouterConfig,
+                isFromNavigationUi = isFromNavigationUi
             )
         }
     }

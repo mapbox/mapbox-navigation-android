@@ -78,8 +78,8 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxTripNotification = MapboxTripNotification(
             applicationContext,
-            NavigationOptions.Builder(
-                distanceFormatter = MapboxDistanceFormatter(
+            NavigationOptions.Builder()
+                .distanceFormatter(MapboxDistanceFormatter(
                     applicationContext,
                     "en",
                     METRIC,
