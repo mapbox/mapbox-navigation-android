@@ -529,6 +529,15 @@ constructor(
         tripSession.updateSensorEvent(sensorEvent)
     }
 
+    /**
+     * Updates the configuration to enable or disable the extended kalman filter (EKF).
+     *
+     * @param useEKF the new value for EKF
+     */
+    fun useExtendedKalmanFilter(useEKF: Boolean) {
+        tripSession.useExtendedKalmanFilter(useEKF)
+    }
+
     companion object {
 
         @JvmStatic

@@ -47,4 +47,6 @@ internal interface TripSession {
     fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver)
     fun unregisterAllVoiceInstructionsObservers()
     fun updateSensorEvent(sensorEvent: SensorEvent)
+
+    fun useExtendedKalmanFilter(useEKF: Boolean)
 }
