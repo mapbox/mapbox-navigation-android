@@ -141,4 +141,14 @@ class NavigationOptionsTest {
         assertTrue(optionsLhs != optionsRhs)
         assertNotEquals(optionsLhs, optionsRhs)
     }
+
+    @Test
+    fun pepe() {
+        val pepe = NavigationOptions.Builder()
+            .navigatorPollingDelay(123435)
+        val juan = NavigationOptions.Builder()
+            .navigatorPollingDelay(123435)
+
+        assertEquals(pepe, juan)
+    }
 }
