@@ -87,4 +87,37 @@ class NavigationOptionsTest {
         assertEquals(options.distanceFormatter, distanceFormatter)
         assertEquals(options.onboardRouterConfig, routerConfig)
     }
+
+    @Test
+    fun fromBuilderToBuilderShouldBeEqual() {
+        val options = NavigationOptions.Builder()
+            .isFromNavigationUi(false)
+            .navigatorPollingDelay(123435)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .isFromNavigationUi(true)
+            .build()
+
+        val other = options.toBuilder().build()
+
+        assertEquals(options, other)
+    }
+
+    @Test
+    fun shouldDoDeepCompareOfOptions() {
+        val optionsLhs = NavigationOptions.Builder()
+            .isFromNavigationUi(false)
+            .navigatorPollingDelay(123435)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .isFromNavigationUi(true)
+            .build()
+
+        val optionsRhs = NavigationOptions.Builder()
+            .isFromNavigationUi(false)
+            .navigatorPollingDelay(123435)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .isFromNavigationUi(true)
+            .build()
+
+        assertEquals(optionsLhs, optionsRhs)
+    }
 }
