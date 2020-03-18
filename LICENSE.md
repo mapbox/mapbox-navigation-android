@@ -772,6 +772,18 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Annotations (Artifact that provides Mapbox module and plugin annotations).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Common (Artifact that provides Mapbox module and plugin contracts).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the OkHttp.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -797,41 +809,6 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
 URL: [https://kotlinlang.org/](https://kotlinlang.org/)
 License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-
-
-
-### Logger SDK module  
----------------------------------------
-Mapbox Navigation uses portions of the JetBrains Java Annotations (A set of annotations used for code inspection support and code documentation.).
-URL: [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/license/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib (Kotlin Standard Library for JVM).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-common (Kotlin Common Standard Library).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the org.jetbrains.kotlin:kotlin-stdlib-jdk7 (Kotlin Standard Library JDK 7 extension).
-URL: [https://kotlinlang.org/](https://kotlinlang.org/)
-License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-===========================================================================
-
-Mapbox Navigation uses portions of the Timber (No-nonsense injectable logging.).
-URL: [https://github.com/JakeWharton/timber](https://github.com/JakeWharton/timber)
-License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
@@ -928,6 +905,12 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
 ===========================================================================
 
 Mapbox Navigation uses portions of the Mapbox Annotations (Artifact that provides Mapbox module and plugin annotations).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Common (Artifact that provides Mapbox module and plugin contracts).
 URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 

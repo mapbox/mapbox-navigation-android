@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.hybrid
 
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModule
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference
  * MapboxHybridRouter combines onboard and offboard Routers.
  * Fetch route based on internet-connection state.
  */
-@MapboxNavigationModule(MapboxNavigationModuleType.HybridRouter, skipConfiguration = true)
+@MapboxModule(MapboxModuleType.NavigationRouter)
 class MapboxHybridRouter(
     private val onboardRouter: Router,
     private val offboardRouter: Router,

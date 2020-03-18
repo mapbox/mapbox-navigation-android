@@ -9,9 +9,10 @@ import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
@@ -33,7 +34,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
@@ -147,20 +147,18 @@ constructor(
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {
+
         ThreadController.init()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
-            NavigationModuleProvider.createModule(
-                MapboxNavigationModuleType.HybridRouter,
-                ::paramsProvider
-            )
+            MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
-        val notification: TripNotification = NavigationModuleProvider.createModule(
-            MapboxNavigationModuleType.TripNotification,
-            ::paramsProvider
-        )
+        val notification: TripNotification = MapboxModuleProvider.createModule(
+                MapboxModuleType.NavigationTripNotification,
+                ::paramsProvider
+            )
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
                 notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
@@ -500,26 +498,26 @@ constructor(
     /**
      * Provides parameters for Mapbox default modules, recursively if a module depends on other Mapbox modules.
      */
-    private fun paramsProvider(type: MapboxNavigationModuleType): Array<Pair<Class<*>?, Any?>> {
+    private fun paramsProvider(type: MapboxModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
-            MapboxNavigationModuleType.HybridRouter -> arrayOf(
-                Router::class.java to NavigationModuleProvider.createModule(
-                    MapboxNavigationModuleType.OnboardRouter,
+            MapboxModuleType.NavigationRouter -> arrayOf(
+                Router::class.java to MapboxModuleProvider.createModule(
+                    MapboxModuleType.NavigationOnboardRouter,
                     ::paramsProvider
                 ),
-                Router::class.java to NavigationModuleProvider.createModule(
-                    MapboxNavigationModuleType.OffboardRouter,
+                Router::class.java to MapboxModuleProvider.createModule(
+                    MapboxModuleType.NavigationOffboardRouter,
                     ::paramsProvider
                 ),
                 NetworkStatusService::class.java to NetworkStatusService(context.applicationContext)
             )
-            MapboxNavigationModuleType.OffboardRouter -> arrayOf(
+            MapboxModuleType.NavigationOffboardRouter -> arrayOf(
                 String::class.java to (accessToken
                     ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
                 Context::class.java to context,
                 SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
-            MapboxNavigationModuleType.OnboardRouter -> {
+            MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
@@ -527,14 +525,13 @@ constructor(
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER))
                 )
             }
-            MapboxNavigationModuleType.DirectionsSession -> throw NotImplementedError() // going to be removed when next base version
-            MapboxNavigationModuleType.TripNotification -> arrayOf(
+            MapboxModuleType.NavigationTripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
                 NavigationOptions::class.java to navigationOptions
             )
-            MapboxNavigationModuleType.TripService -> throw NotImplementedError() // going to be removed when next base version
-            MapboxNavigationModuleType.TripSession -> throw NotImplementedError() // going to be removed when next base version
-            MapboxNavigationModuleType.Logger -> arrayOf()
+            MapboxModuleType.CommonLogger -> arrayOf()
+            MapboxModuleType.CommonLibraryLoader -> throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.CommonHttpClient -> throw IllegalArgumentException("not supported: $type")
         }
     }
 

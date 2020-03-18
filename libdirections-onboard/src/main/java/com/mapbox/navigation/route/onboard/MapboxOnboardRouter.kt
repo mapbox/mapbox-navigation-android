@@ -2,8 +2,8 @@ package com.mapbox.navigation.route.onboard
 
 import android.util.Log
 import com.google.gson.Gson
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModule
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
  * It uses offline storage path to store and retrieve data, setup endpoint,
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  */
-@MapboxNavigationModule(MapboxNavigationModuleType.OnboardRouter, skipConfiguration = true)
+@MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
     private val navigatorNative: MapboxNativeNavigator,
     config: MapboxOnboardRouterConfig

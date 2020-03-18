@@ -19,8 +19,9 @@ ext {
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.3.1',
       mapboxSearchSdk           : '0.1.0-SNAPSHOT',
-      mapboxAnnotations         : '0.0.1-alpha.2',
-      mapboxAnnotationsProcessor: '0.0.1-alpha.2',
+      mapboxAnnotations         : '0.0.1-alpha.3',
+      mapboxAnnotationsProcessor: '0.0.1-alpha.3',
+      mapboxCommon              : '0.0.1-alpha.3',
       supportAnnotationsVersion : '1.1.0',
       autoValue                 : '1.5.4',
       autoValueParcel           : '0.2.5',
@@ -74,6 +75,7 @@ ext {
       mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxAnnotations}",
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxAnnotationsProcessor}",
+      mapboxCommon              : "com.mapbox.base:common:${version.mapboxCommon}",
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
