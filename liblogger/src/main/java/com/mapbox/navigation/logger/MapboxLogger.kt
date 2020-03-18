@@ -1,7 +1,7 @@
 package com.mapbox.navigation.logger
 
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModule
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.base.logger.model.Tag
@@ -13,7 +13,7 @@ import timber.log.Timber
  * Default implementation of [Logger] interface
  */
 
-@MapboxNavigationModule(MapboxNavigationModuleType.Logger, skipConfiguration = true)
+@MapboxModule(MapboxModuleType.CommonLogger)
 object MapboxLogger : Logger {
 
     /**

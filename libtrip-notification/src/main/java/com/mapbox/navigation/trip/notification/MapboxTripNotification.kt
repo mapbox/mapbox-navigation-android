@@ -22,8 +22,8 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
-import com.mapbox.annotation.navigation.module.MapboxNavigationModule
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModule
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -58,7 +58,7 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
  * @param navigationOptions is [NavigationOptions] used here to format
  * distance and time
  */
-@MapboxNavigationModule(MapboxNavigationModuleType.TripNotification, skipConfiguration = true)
+@MapboxModule(MapboxModuleType.NavigationTripNotification)
 class MapboxTripNotification constructor(
     private val applicationContext: Context,
     private val navigationOptions: NavigationOptions

@@ -10,9 +10,10 @@ import androidx.work.testing.WorkManagerTestInitHelper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
-import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
+import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -24,7 +25,6 @@ import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvide
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -90,11 +90,11 @@ class MapboxNavigationTest {
     fun setUp() {
         val config = Configuration.Builder().build()
         WorkManagerTestInitHelper.initializeTestWorkManager(context, config)
-        mockkObject(NavigationModuleProvider)
+        mockkObject(MapboxModuleProvider)
         val hybridRouter: Router = mockk(relaxUnitFun = true)
         every {
-            NavigationModuleProvider.createModule<Router>(
-                MapboxNavigationModuleType.HybridRouter,
+            MapboxModuleProvider.createModule<Router>(
+                MapboxModuleType.NavigationRouter,
                 any()
             )
         } returns hybridRouter
@@ -450,7 +450,7 @@ class MapboxNavigationTest {
 
     @After
     fun tearDown() {
-        unmockkObject(NavigationModuleProvider)
+        unmockkObject(MapboxModuleProvider)
         unmockkObject(NavigationComponentProvider)
 
         ThreadController.cancelAllNonUICoroutines()
