@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigationExpandedNotificationLayout"
     style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="8dp"
+    tools:background="@color/mapboxNotificationBlue">
 
     <include layout="@layout/collapsed_navigation_notification_layout" />
 
@@ -26,8 +28,7 @@
             android:layout_gravity="center"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:src="@drawable/ic_close"
-            android:tint="@android:color/white" />
+            android:src="@drawable/ic_close" />
 
         <TextView
             android:layout_width="match_parent"

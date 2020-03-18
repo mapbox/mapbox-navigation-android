@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigationCollapsedNotificationLayout"
-    style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
-    android:layout_height="64dp">
+    android:layout_height="64dp"
+    tools:background="@color/mapboxNotificationBlue">
 
     <ImageView
         android:id="@+id/maneuverImage"
@@ -14,6 +14,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:cropToPadding="true"
@@ -22,6 +23,7 @@
 
     <TextView
         android:id="@+id/notificationDistanceText"
+        style="@style/NotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/maneuverImage"
@@ -47,6 +49,7 @@
 
     <TextView
         android:id="@+id/notificationArrivalText"
+        style="@style/NotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/notificationDistanceText"
@@ -61,6 +64,7 @@
 
     <TextView
         android:id="@+id/notificationInstructionText"
+        style="@style/NotificationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/maneuverImage"

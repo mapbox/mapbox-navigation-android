@@ -196,19 +196,14 @@ class MapboxTripNotificationTest {
         val routeProgress = mockk<RouteProgress>(relaxed = true)
         val distance = 30f
         val duration = 112L
+        val distanceText = distanceSpannable.toString()
         mockLegProgress(routeProgress, distance, duration)
-        val distanceSlot1 = slot<SpannableString>()
-        val distanceSlot2 = slot<SpannableString>()
-        every { collapsedViews.setTextViewText(any(), capture(distanceSlot1)) } just Runs
-        every { expandedViews.setTextViewText(any(), capture(distanceSlot2)) } just Runs
         mockUpdateNotificationAndroidInteractions()
 
         notification.updateNotification(routeProgress)
 
-        verify(exactly = 1) { collapsedViews.setTextViewText(any(), distanceSpannable) }
-        verify(exactly = 1) { expandedViews.setTextViewText(any(), distanceSpannable) }
-        assertEquals(distanceSpannable, distanceSlot1.captured)
-        assertEquals(distanceSpannable, distanceSlot2.captured)
+        verify(exactly = 1) { collapsedViews.setTextViewText(any(), distanceText) }
+        verify(exactly = 1) { expandedViews.setTextViewText(any(), distanceText) }
     }
 
     @Test

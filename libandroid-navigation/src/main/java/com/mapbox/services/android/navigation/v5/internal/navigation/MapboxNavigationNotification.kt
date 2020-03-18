@@ -294,11 +294,11 @@ internal class MapboxNavigationNotification : NavigationNotification {
             }
             collapsedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
             expandedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
         }
     }
