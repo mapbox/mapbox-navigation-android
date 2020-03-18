@@ -38,6 +38,9 @@
     <string name="title_arrival_ui_building_extrusions_kotlin" translatable="false">Arrival UI Building Extrusions Kotlin</string>
     <string name="description_arrival_ui_building_extrusions_kotlin" translatable="false">Show building extrusions once the device is close enough to the final destination. Example\'s in Kotlin.</string>
 
+    <string name="title_replay_navigation_kotlin" translatable="false">ReplayEngineActivity</string>
+    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation with the replay engine in Kotlin code.</string>
+
     <string name="title_reroute_view" translatable="false">RerouteActivity</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
 
@@ -76,7 +79,8 @@
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation" translatable="false">Start Navigation</string>
-
+    <string name="offline_region_download_title">Download offline region</string>
+    <string name="msg_long_press_for_destination">Long press a point on the map to indicate a destination.</string>
     <string name="offline_category_title" translatable="false">Offline</string>
     <string name="offline_enabled_title" translatable="false">Offline routing enabled</string>
     <string name="offline_version_title" translatable="false">Choose offline version</string>
