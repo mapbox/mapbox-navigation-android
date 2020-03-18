@@ -17,7 +17,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
@@ -55,8 +55,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
-    private var destination: LatLng? = null
-    private var directionsRoute: DirectionsRoute? = null
+    private var locationComponent: LocationComponent? = null
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +93,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
             }
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
-            destination = latLng
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
                         RouteOptions.builder().applyDefaultParams()
@@ -108,6 +106,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
             }
             true
         }
+        locationComponent = mapboxMap.locationComponent
     }
 
     @SuppressLint("RestrictedApi")
@@ -177,7 +176,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
                 navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
                 navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
-                directionsRoute = mapboxNavigation?.getRoutes()!![0]
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
@@ -271,15 +269,11 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
             enhancedLocation: Location,
             keyPoints: List<Location>
         ) {
-            mapView.getMapAsync { mapboxMap ->
-                if (keyPoints.isNotEmpty()) {
-                    mapboxMap.locationComponent.forceLocationUpdate(keyPoints, true)
-                } else {
-                    mapboxMap.locationComponent.forceLocationUpdate(enhancedLocation)
-                }
+            if (keyPoints.isNotEmpty()) {
+                locationComponent?.forceLocationUpdate(keyPoints, true)
+            } else {
+                locationComponent?.forceLocationUpdate(enhancedLocation)
             }
-            Timber.d("enhanced location %s", enhancedLocation)
-            Timber.d("enhanced keyPoints %s", keyPoints)
         }
     }
 
