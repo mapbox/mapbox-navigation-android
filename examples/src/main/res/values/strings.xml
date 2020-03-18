@@ -32,16 +32,13 @@
     <string name="title_navigation_view" translatable="false">Navigation View</string>
     <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn</string>
 
-    <string name="title_navigate_instruction_view" translatable="false">Navigate with InstructionView</string>
-    <string name="description_navigate_instruction_view" translatable="false">Shows how to integrate InstructionView with core SDK.</string>
-
     <string name="title_final_destination_building_highlight_kotlin" translatable="false">Final Destination Building Highlight UI Kotlin</string>
     <string name="description_final_destination_building_highlight_kotlin" translatable="false">Show how the final destination building footprint can be highlighted when the device has arrived. Example\'s in Kotlin.</string>
 
     <string name="title_arrival_ui_building_extrusions_kotlin" translatable="false">Arrival UI Building Extrusions Kotlin</string>
     <string name="description_arrival_ui_building_extrusions_kotlin" translatable="false">Show building extrusions once the device is close enough to the final destination. Example\'s in Kotlin.</string>
 
-    <string name="title_guidance_view" translatable="false">Guidance View</string>
+    <string name="title_guidance_view" translatable="false">GuidanceViewActivity</string>
     <string name="description_guidance_view" translatable="false">Demonstrate the use of guidance view to show images at proper junctions</string>
 
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
