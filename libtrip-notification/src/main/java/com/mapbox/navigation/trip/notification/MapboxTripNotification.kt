@@ -128,6 +128,19 @@ class MapboxTripNotification constructor(
         currentInstructionText = null
         currentDistanceText = null
 
+        collapsedNotificationRemoteViews?.apply {
+            setTextViewText(R.id.notificationDistanceText, "")
+            setTextViewText(R.id.notificationArrivalText, "")
+            setTextViewText(R.id.notificationInstructionText, "")
+        }
+
+        expandedNotificationRemoteViews?.apply {
+            setTextViewText(R.id.notificationDistanceText, "")
+            setTextViewText(R.id.notificationArrivalText, "")
+            setTextViewText(R.id.notificationInstructionText, "")
+            setTextViewText(R.id.endNavigationBtnText, "")
+        }
+
         unregisterReceiver()
         try {
             notificationActionButtonChannel.cancel()
@@ -256,6 +269,7 @@ class MapboxTripNotification constructor(
 
     private fun setFreeDriveMode(isFreeDriveMode: Boolean) {
         updateEtaContentVisibility(isFreeDriveMode)
+        updateInstructionTextVisibility(isFreeDriveMode)
         updateFreeDriveTextVisibility(isFreeDriveMode)
         updateManeuverImageResource(isFreeDriveMode)
         updateEndNavigationBtnText(isFreeDriveMode)
@@ -269,6 +283,17 @@ class MapboxTripNotification constructor(
         )
         expandedNotificationRemoteViews?.setViewVisibility(
             R.id.etaContent,
+            if (isFreeDriveMode) GONE else VISIBLE
+        )
+    }
+
+    private fun updateInstructionTextVisibility(isFreeDriveMode: Boolean) {
+        collapsedNotificationRemoteViews?.setViewVisibility(
+            R.id.notificationInstructionText,
+            if (isFreeDriveMode) GONE else VISIBLE
+        )
+        expandedNotificationRemoteViews?.setViewVisibility(
+            R.id.notificationInstructionText,
             if (isFreeDriveMode) GONE else VISIBLE
         )
     }
@@ -333,11 +358,11 @@ class MapboxTripNotification constructor(
             }
             collapsedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
             expandedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
         }
     }
