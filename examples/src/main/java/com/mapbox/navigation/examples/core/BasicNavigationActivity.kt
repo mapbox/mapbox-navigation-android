@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,7 @@ import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
@@ -50,7 +52,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
     }
 
     private var permissionsManager: PermissionsManager? = null
-    private var locationEngine: LocationEngine? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
@@ -71,7 +72,8 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
                 Utils.getMapboxAccessToken(this),
-                mapboxNavigationOptions
+                mapboxNavigationOptions,
+                locationEngine = getLocationEngine()
         ).also {
             it.registerRouteProgressObserver(routeProgressObserver)
         }
@@ -81,7 +83,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            locationEngine = LocationEngineProvider.getBestLocationEngine(this)
             initLocationComponent(style, mapboxMap)
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
                 it.addProgressChangeListener(mapboxNavigation!!)
@@ -115,7 +116,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
                 mapboxMap.locationComponent.let { locationComponent ->
                     val locationComponentActivationOptions =
                             LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                                    // .useDefaultLocationEngine(true)
                                     .build()
 
                     locationComponent.activateLocationComponent(locationComponentActivationOptions)
@@ -140,19 +140,21 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
                         .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
                         .build()
 
-        locationEngine?.requestLocationUpdates(
+        mapboxNavigation?.locationEngine?.requestLocationUpdates(
                 requestLocationUpdateRequest,
                 locationListenerCallback,
                 mainLooper
         )
-        locationEngine?.getLastLocation(locationListenerCallback)
+        mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
+                if (shouldSimulateRoute()) {
+                    (mapboxNavigation?.locationEngine as ReplayRouteLocationEngine).assign(routes[0])
+                }
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
@@ -255,7 +257,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
             }
 
     private fun stopLocationUpdates() {
-        locationEngine?.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 
     private val locationObserver = object : LocationObserver {
@@ -279,6 +281,23 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback, Permiss
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             // do something with the route progress
             Timber.i("route progress: ${routeProgress.currentState()}")
+        }
+    }
+
+    // Used to determine if the ReplayRouteLocationEngine should be used to simulate the routing.
+    // This is used for testing purposes.
+    private fun shouldSimulateRoute(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+                .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
+    // for testing else a real location engine is used.
+    private fun getLocationEngine(): LocationEngine {
+        return if (shouldSimulateRoute()) {
+            ReplayRouteLocationEngine()
+        } else {
+            LocationEngineProvider.getBestLocationEngine(this)
         }
     }
 }
