@@ -27,8 +27,9 @@ import com.mapbox.annotation.navigation.module.MapboxNavigationModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.notification.NotificationAction
+import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
 import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
 import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS

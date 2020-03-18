@@ -4,10 +4,6 @@
     <string name="end_navigation">Finalizar navegação</string>
     <string name="channel_name">Notificações de navegação</string>
     <string name="notification_arrival_time_format">Chegar às %s</string>
-    <string name="kilometers">KM</string>
-    <string name="meters">M</string>
-    <string name="miles">MI</string>
-    <string name="feet">FT</string>
     <string name="eta_format">%s estimado</string>
 
     <!-- Time formatting -->

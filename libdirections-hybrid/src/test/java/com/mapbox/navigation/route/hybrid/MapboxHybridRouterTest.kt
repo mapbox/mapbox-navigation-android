@@ -10,8 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.network.NetworkStatusService
 import io.mockk.every
@@ -36,8 +34,8 @@ class MapboxHybridRouterTest {
     var rule = MainCoroutineRule()
 
     private lateinit var hybridRouter: MapboxHybridRouter
-    private val onboardRouter: MapboxOnboardRouter = mockk(relaxUnitFun = true)
-    private val offboardRouter: MapboxOffboardRouter = mockk(relaxUnitFun = true)
+    private val onboardRouter: Router = mockk(relaxUnitFun = true)
+    private val offboardRouter: Router = mockk(relaxUnitFun = true)
     private val context: Context = mockk(relaxUnitFun = true)
     private val connectivityManager: ConnectivityManager = mockk(relaxUnitFun = true)
     private val intent: Intent = mockk(relaxUnitFun = true)

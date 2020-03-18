@@ -19,8 +19,9 @@ import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.notification.NotificationAction
+import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.UNDEFINED
@@ -46,7 +47,6 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.trip.notification.NotificationAction
 import com.mapbox.navigation.utils.network.NetworkStatusService
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
@@ -457,7 +457,11 @@ constructor(
 
     private fun reRoute() {
         ifNonNull(tripSession.getEnhancedLocation()) { location ->
-            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, location)
+            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(
+                directionsSession,
+                tripSession,
+                location
+            )
                 ?: return
             directionsSession.requestRoutes(
                 optionsRebuilt,
