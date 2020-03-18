@@ -34,6 +34,7 @@ import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -42,6 +43,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
@@ -224,8 +226,31 @@ public class NavigationMapboxMap {
    * @param location to update the icon and query the map
    */
   public void updateLocation(Location location) {
-    locationComponent.forceLocationUpdate(location);
-    updateMapWayNameWithLocation(location);
+    List<Location> locations = new ArrayList<>(1);
+    locations.add(location);
+    updateLocation(locations);
+  }
+
+  /**
+   * This method can be used to provide the list of locations where the last one is the target
+   * and the rest are intermediate points used as the animation path.
+   * The puck and the camera will be animated between each of the points linearly until reaching the target.
+   *
+   * If the timestamp of the last location in the list is in the future by more than
+   * {@link com.mapbox.navigation.ui.legacy.NavigationConstants#MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE},
+   * the "lookahead animation" will be executed,
+   * which aims to position the puck at the desired location without a typical animation delay.
+   *
+   * @param locations the path to update the location icon
+   */
+  public void updateLocation(@NonNull List<Location> locations) {
+    if (locations.size() > 0) {
+      Location targetLocation = locations.get(0);
+      long minimalRequiredLookAheadTimestamp = System.currentTimeMillis() + MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
+      boolean lookahead = targetLocation.getTime() > minimalRequiredLookAheadTimestamp;
+      locationComponent.forceLocationUpdate(locations, lookahead);
+      updateMapWayNameWithLocation(targetLocation);
+    }
   }
 
   /**
