@@ -1,6 +1,4 @@
-package com.mapbox.navigation.trip.notification
-
-import com.mapbox.navigation.base.trip.TripNotification
+package com.mapbox.navigation.base.trip.notification
 
 /**
  * Defines set of actions available for [TripNotification]

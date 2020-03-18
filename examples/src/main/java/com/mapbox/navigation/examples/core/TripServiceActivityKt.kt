@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
@@ -20,7 +21,6 @@ import com.mapbox.navigation.core.MapboxDistanceFormatter
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
-import com.mapbox.navigation.trip.notification.NotificationAction
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
@@ -79,13 +79,14 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapboxTripNotification = MapboxTripNotification(
             applicationContext,
             NavigationOptions.Builder()
-                .distanceFormatter(MapboxDistanceFormatter(
-                    applicationContext,
-                    "en",
-                    METRIC,
-                    ROUNDING_INCREMENT_FIFTY
-                )
-            ).timeFormatType(TWENTY_FOUR_HOURS).build()
+                .distanceFormatter(
+                    MapboxDistanceFormatter(
+                        applicationContext,
+                        "en",
+                        METRIC,
+                        ROUNDING_INCREMENT_FIFTY
+                    )
+                ).timeFormatType(TWENTY_FOUR_HOURS).build()
         )
 
         // If you want to use Mapbox provided Service do this

@@ -4,10 +4,6 @@
     <string name="end_navigation">Kết thúc Điều hướng</string>
     <string name="channel_name">Thông báo Điều hướng</string>
     <string name="notification_arrival_time_format">Đến nơi %s</string>
-    <string name="kilometers">km</string>
-    <string name="meters">m</string>
-    <string name="miles">dặm</string>
-    <string name="feet">foot</string>
     <string name="eta_format">Đến %s</string>
 
     <!-- Time formatting -->

@@ -4,7 +4,7 @@ import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.trip.TripNotification
+import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
 import com.mapbox.navigation.core.trip.service.MapboxTripService

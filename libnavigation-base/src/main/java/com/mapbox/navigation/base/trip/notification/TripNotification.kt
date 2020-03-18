@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.trip
+package com.mapbox.navigation.base.trip.notification
 
 import android.app.Notification
 import com.mapbox.navigation.base.trip.model.RouteProgress

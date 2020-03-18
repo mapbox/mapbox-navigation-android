@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kilometers">کیلومتر</string>
+    <string name="meters">متر</string>
+    <string name="miles">مایل</string>
+    <string name="feet">قدم</string>
+</resources>

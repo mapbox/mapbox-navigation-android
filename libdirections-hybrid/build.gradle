@@ -30,8 +30,8 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     api project(':libnavigation-base')
-    implementation project(":libdirections-onboard")
-    implementation project(":libdirections-offboard")
+    runtimeOnly project(":libdirections-onboard")
+    runtimeOnly project(":libdirections-offboard")
     implementation project(":libnavigation-util")
 
     //ktlint

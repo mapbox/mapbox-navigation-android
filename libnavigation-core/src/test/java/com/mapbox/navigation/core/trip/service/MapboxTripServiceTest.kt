@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.trip.service
 
 import android.app.Notification
-import com.mapbox.navigation.base.trip.TripNotification
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.notification.TripNotification
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
