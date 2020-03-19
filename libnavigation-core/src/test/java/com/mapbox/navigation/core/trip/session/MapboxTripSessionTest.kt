@@ -136,6 +136,16 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun stopSessionDoesNotClearUpRoute() {
+        tripSession.route = route
+        tripSession.start()
+
+        tripSession.stop()
+
+        assertEquals(route, tripSession.route)
+    }
+
+    @Test
     fun locationObserverSuccess() = coroutineRule.runBlockingTest {
         tripSession.start()
         val observer: LocationObserver = mockk(relaxUnitFun = true)
