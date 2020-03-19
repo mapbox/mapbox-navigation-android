@@ -75,6 +75,8 @@
     <string name="offline_enabled_title" translatable="false">Offline routing enabled</string>
     <string name="offline_version_title" translatable="false">Choose offline version</string>
     <string name="general_category_title" translatable="false">General</string>
-    <string name="send_user_feeedback" translatable="false">Send User Feedback</string>
+    <string name="send_user_feedback" translatable="false">Send User Feedback</string>
+    <string name="simple_mapbox_navigation_clear_routes" translatable="false">CLEAR ROUTES</string>
+    <string name="simple_mapbox_navigation_add_original_route" translatable="false">ADD ORIGINAL ROUTE</string>
 
 </resources>

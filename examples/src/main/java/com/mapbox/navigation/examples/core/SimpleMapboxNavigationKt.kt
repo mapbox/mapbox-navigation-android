@@ -86,6 +86,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
     private var fasterRoute: DirectionsRoute? = null
+    private lateinit var originalRoute: DirectionsRoute
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
@@ -98,7 +99,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_simple_mapbox_navigation)
-        findViewById<Button>(R.id.btn_send_user_feadback)?.let { button ->
+        findViewById<Button>(R.id.btn_send_user_feedback)?.let { button ->
             button.setOnClickListener {
                 MapboxNavigation.postUserFeedback(
                     TelemetryUserFeedback.FEEDBACK_TYPE_GENERAL_ISSUE,
@@ -106,6 +107,26 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     TelemetryUserFeedback.FEEDBACK_SOURCE_UI,
                     null
                 )
+            }
+        }
+        findViewById<Button>(R.id.btn_add_original_route)?.let { button ->
+            button.setOnClickListener {
+                if (::originalRoute.isInitialized) {
+                    val routes = mapboxNavigation.getRoutes()
+                    if (routes.isNotEmpty()) {
+                        mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
+                            removeAt(0)
+                            add(0, originalRoute)
+                        })
+                    } else {
+                        mapboxNavigation.setRoutes(listOf(originalRoute))
+                    }
+                }
+            }
+        }
+        findViewById<Button>(R.id.btn_clear_routes)?.let { button ->
+            button.setOnClickListener {
+                mapboxNavigation.setRoutes(emptyList())
             }
         }
         initViews()
@@ -321,8 +342,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            originalRoute = routes[0]
             Timber.d("route request success %s", routes.toString())
-            replayRouteLocationEngine.assign(routes[0])
+            replayRouteLocationEngine.assign(originalRoute)
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
