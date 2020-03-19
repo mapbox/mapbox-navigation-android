@@ -15,6 +15,7 @@ import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
 import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
 import com.mapbox.navigation.examples.core.ReRouteActivity
+import com.mapbox.navigation.examples.core.ReplayActivity
 import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
 import com.mapbox.navigation.examples.core.TripServiceActivityKt
 import com.mapbox.navigation.examples.core.TripSessionActivityKt
@@ -91,6 +92,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_basic_navigation_kotlin),
                 getString(R.string.description_basic_navigation_kotlin),
                 BasicNavigationActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_replay_navigation_kotlin),
+                getString(R.string.description_replay_navigation_kotlin),
+                ReplayActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_faster_route),
