@@ -4,15 +4,12 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -42,7 +39,7 @@ import kotlinx.android.synthetic.main.activity_reroute_layout.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import timber.log.Timber
 
-class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListener {
+class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         const val MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state"
@@ -50,7 +47,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
         const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
     }
 
-    private var permissionsManager: PermissionsManager? = null
     private var locationEngine: LocationEngine? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
@@ -111,26 +107,18 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
 
     @SuppressLint("RestrictedApi")
     fun initLocationComponent(loadedMapStyle: Style, mapboxMap: MapboxMap) {
-        when (PermissionsManager.areLocationPermissionsGranted(this)) {
-            true -> {
-                mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-                mapboxMap.locationComponent.let { locationComponent ->
-                    val locationComponentActivationOptions =
-                            LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                                    .build()
+        mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+        mapboxMap.locationComponent.let { locationComponent ->
+            val locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                    .build()
 
-                    locationComponent.activateLocationComponent(locationComponentActivationOptions)
-                    locationComponent.isLocationComponentEnabled = true
-                    locationComponent.cameraMode = CameraMode.TRACKING
-                    locationComponent.renderMode = RenderMode.COMPASS
+            locationComponent.activateLocationComponent(locationComponentActivationOptions)
+            locationComponent.isLocationComponentEnabled = true
+            locationComponent.cameraMode = CameraMode.TRACKING
+            locationComponent.renderMode = RenderMode.COMPASS
 
-                    initLocationEngine()
-                }
-            }
-            false -> {
-                permissionsManager =
-                        PermissionsManager(this).also { it.requestLocationPermissions(this) }
-            }
+            initLocationEngine()
         }
     }
 
@@ -228,21 +216,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsList
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         mapInstanceState = savedInstanceState?.getParcelable(MAP_INSTANCE_STATE_KEY)
-    }
-
-    override fun onPermissionResult(granted: Boolean) {
-        when (granted) {
-            true -> {
-                // todo
-            }
-            false -> {
-                // todo
-            }
-        }
-    }
-
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-        Toast.makeText(this, "todo needs doing", Toast.LENGTH_LONG).show()
     }
 
     private val locationListenerCallback: LocationEngineCallback<LocationEngineResult> =
