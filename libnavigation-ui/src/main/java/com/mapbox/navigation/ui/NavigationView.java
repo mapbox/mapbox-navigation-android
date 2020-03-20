@@ -34,7 +34,6 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
@@ -47,6 +46,7 @@ import com.mapbox.navigation.ui.instruction.NavigationAlertView;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
+import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 import com.mapbox.navigation.ui.utils.LocaleEx;
 import com.mapbox.navigation.utils.extensions.ContextEx;
@@ -434,36 +434,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
-  @Override
-  public void updatePuckState(RouteProgress routeProgress) {
-    if (routeProgress == null || routeProgress.currentState() == null) {
-      return;
-    }
-
-    int puckDrawable;
-    switch (routeProgress.currentState()) {
-      case ROUTE_INVALID:
-        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
-        break;
-      case ROUTE_INITIALIZED:
-        puckDrawable = R.drawable.user_puck_icon;
-        break;
-      case LOCATION_TRACKING:
-        puckDrawable = R.drawable.user_puck_icon;
-        break;
-      case ROUTE_ARRIVED:
-        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
-        break;
-      case LOCATION_STALE:
-        puckDrawable = R.drawable.user_puck_icon;
-        break;
-      default:
-        puckDrawable = R.drawable.user_puck_icon_uncertain_location;
-        break;
-    }
-    navigationMap.updateCurrentLocationDrawable(puckDrawable);
-  }
-
   /**
    * Should be called when this view is completely initialized.
    *
@@ -711,14 +681,21 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private void initializeNavigation(NavigationViewOptions options) {
     establish(options);
     navigationViewModel.initialize(options);
-    initializeNavigationListeners(options, navigationViewModel);
-    setupNavigationMapboxMap(options);
+
+    if (options.puckDrawableSupplier() == null) {
+      navigationMap.setPuckDrawableSupplier(new DefaultMapboxPuckDrawableSupplier());
+    } else {
+      navigationMap.setPuckDrawableSupplier(options.puckDrawableSupplier());
+    }
 
     if (options.camera() == null) {
       navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
     } else {
       navigationMap.setCamera(options.camera());
     }
+
+    initializeNavigationListeners(options, navigationViewModel);
+    setupNavigationMapboxMap(options);
 
     if (!isSubscribed) {
       initializeClickListeners();
