@@ -1,25 +1,23 @@
 package com.mapbox.navigation.core
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import com.mapbox.navigation.base.extensions.getUnitTypeForLocale
+import com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.typedef.IMPERIAL
-import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.VoiceUnit
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
-import com.mapbox.turf.TurfConstants.UNIT_FEET
-import com.mapbox.turf.TurfConstants.UNIT_KILOMETERS
-import com.mapbox.turf.TurfConstants.UNIT_METERS
-import com.mapbox.turf.TurfConstants.UNIT_MILES
+import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Creates an instance of DistanceFormatter, which can format distances in meters
@@ -28,48 +26,59 @@ import java.util.Locale
  *
  * This constructor will infer device language and unit type using the device locale.
  *
- * @param language for which language
- * @param unitType to use, or UNDEFINED to use default for locale country
  * @param context from which to get localized strings from
+ * @param locale the locale to use for localization of distance resources
+ * @param unitType to use, or UNDEFINED to use default for locale country
  * @param roundingIncrement increment by which to round small distances
  */
-class MapboxDistanceFormatter(
+class MapboxDistanceFormatter private constructor(
     private val context: Context,
-    language: String?,
+    private val locale: Locale,
     @VoiceUnit unitType: String,
     @RoundingIncrement private val roundingIncrement: Int
 ) : DistanceFormatter {
 
-    private val unitStrings = hashMapOf<String, String>(
-        UNIT_KILOMETERS to context.getString(R.string.kilometers),
-        UNIT_METERS to context.getString(R.string.meters),
-        UNIT_MILES to context.getString(R.string.miles),
-        UNIT_FEET to context.getString(R.string.feet)
-    )
-    private val largeUnit = when (IMPERIAL == unitType) {
-        true -> UNIT_MILES
-        false -> UNIT_KILOMETERS
+    private val smallUnit = when (unitType) {
+        IMPERIAL -> TurfConstants.UNIT_FEET
+        else -> TurfConstants.UNIT_METERS
     }
-    private val smallUnit = when (IMPERIAL == unitType) {
-        true -> UNIT_FEET
-        false -> UNIT_METERS
-    }
-    private val language: String
-    @VoiceUnit
-    private val unitType: String
-    private val numberFormat: NumberFormat
 
-    init {
-        val locale = when (language == null) {
-            true -> context.inferDeviceLocale()
-            false -> Locale(language)
+    private val largeUnit = when (unitType) {
+        IMPERIAL -> TurfConstants.UNIT_MILES
+        else -> TurfConstants.UNIT_KILOMETERS
+    }
+
+    companion object {
+        private const val smallDistanceUpperThresholdInMeters = 400.0
+        private const val mediumDistanceUpperThresholdInMeters = 10000.0
+        @JvmStatic
+        fun builder(context: Context): Builder = Builder(context)
+    }
+
+    class Builder(private val context: Context) {
+        private var unitType: String? = null
+        private var locale: Locale? = null
+        private var roundingIncrement = 0
+
+        fun withUnitType(@VoiceUnit unitType: String) =
+            apply { this.unitType = unitType }
+
+        fun withRoundingIncrement(@RoundingIncrement roundingIncrement: Int) =
+            apply { this.roundingIncrement = roundingIncrement }
+
+        fun withLocale(locale: Locale) =
+            apply { this.locale = locale }
+
+        fun build(): MapboxDistanceFormatter {
+            val localeToUse: Locale = locale ?: context.inferDeviceLocale()
+            val unitTypeToUse: String = unitType ?: localeToUse.getUnitTypeForLocale()
+
+            return MapboxDistanceFormatter(
+                context,
+                localeToUse,
+                unitTypeToUse,
+                roundingIncrement)
         }
-        this.language = locale.language
-        this.unitType = when (IMPERIAL != unitType && METRIC != unitType) {
-            true -> context.inferDeviceLocale().getUnitTypeForLocale()
-            false -> unitType
-        }
-        numberFormat = NumberFormat.getNumberInstance(locale)
     }
 
     /**
@@ -80,51 +89,42 @@ class MapboxDistanceFormatter(
      * relative size of .65 times the size of the number
      */
     override fun formatDistance(distance: Double): SpannableString {
-        val distanceSmallUnit =
-            TurfConversion.convertLength(distance, UNIT_METERS, smallUnit)
-        val distanceLargeUnit =
-            TurfConversion.convertLength(distance, UNIT_METERS, largeUnit)
-
-        return when {
-            // If the distance is greater than 10 miles/kilometers, then round to nearest mile/kilometer
-            distanceLargeUnit > LARGE_UNIT_THRESHOLD -> {
-                getDistanceString(roundToDecimalPlace(distanceLargeUnit, 0), largeUnit)
+        val distanceAndSuffix = when (distance) {
+            in 0.0..smallDistanceUpperThresholdInMeters -> {
+                formatDistanceAndSuffixForSmallUnit(distance)
             }
-            // If the distance is less than 401 feet/meters, round by fifty feet/meters
-            distanceSmallUnit < SMALL_UNIT_THRESHOLD -> {
-                getDistanceString(roundToClosestIncrement(distanceSmallUnit), smallUnit)
+            in smallDistanceUpperThresholdInMeters..mediumDistanceUpperThresholdInMeters -> {
+                formatDistanceAndSuffixForLargeUnit(distance, 1)
             }
-            // If the distance is between 401 feet/meters and 10 miles/kilometers, then round to one decimal place
             else -> {
-                getDistanceString(roundToDecimalPlace(distanceLargeUnit, 1), largeUnit)
+                formatDistanceAndSuffixForLargeUnit(distance, 0)
             }
         }
+        return getSpannableDistanceString(distanceAndSuffix)
     }
 
-    /**
-     * Returns number rounded to closest specified rounding increment, unless the number is less than
-     * the rounding increment, then the rounding increment is returned
-     *
-     * @param distance to round to closest specified rounding increment
-     * @return number rounded to closest rounding increment, or rounding increment if distance is less
-     */
-    private fun roundToClosestIncrement(distance: Double): String {
-        val roundedNumber = Math.round(distance).toInt() / roundingIncrement * roundingIncrement
-
-        return (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber).toString()
+    private fun formatDistanceAndSuffixForSmallUnit(distance: Double): Pair<String, String> {
+        val distanceUnit = TurfConversion.convertLength(
+            distance,
+            TurfConstants.UNIT_METERS,
+            smallUnit
+        )
+        val resources = context.resourcesWithLocale(locale)
+        val unitStringSuffix = getUnitString(resources, smallUnit)
+        val roundedNumber = distanceUnit.roundToInt() / roundingIncrement * roundingIncrement
+        val roundedValue = (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber).toString()
+        return Pair(roundedValue, unitStringSuffix)
     }
 
-    /**
-     * Rounds given number to the given decimal place
-     *
-     * @param distance to round
-     * @param decimalPlace number of decimal places to round
-     * @return distance rounded to given decimal places
-     */
-    private fun roundToDecimalPlace(distance: Double, decimalPlace: Int): String {
-        numberFormat.maximumFractionDigits = decimalPlace
-
-        return numberFormat.format(distance)
+    private fun formatDistanceAndSuffixForLargeUnit(distance: Double, maxFractionDigits: Int): Pair<String, String> {
+        val resources = context.resourcesWithLocale(locale)
+        val unitStringSuffix = getUnitString(resources, largeUnit)
+        val distanceUnit =
+            TurfConversion.convertLength(distance, TurfConstants.UNIT_METERS, largeUnit)
+        val roundedValue = NumberFormat.getNumberInstance(locale).also {
+            it.maximumFractionDigits = maxFractionDigits
+        }.format(distanceUnit)
+        return Pair(roundedValue, unitStringSuffix)
     }
 
     /**
@@ -135,25 +135,35 @@ class MapboxDistanceFormatter(
      * @param unit string from TurfConstants. This will be converted to the abbreviated form.
      * @return String with bolded distance and shrunken units
      */
-    private fun getDistanceString(distance: String, unit: String): SpannableString {
-        val spannableString = SpannableString("$distance ${unitStrings[unit]}")
+    internal fun getSpannableDistanceString(distanceAndSuffix: Pair<String, String>): SpannableString {
+        val spannableString = SpannableString("${distanceAndSuffix.first} ${distanceAndSuffix.second}")
 
         spannableString.setSpan(
             StyleSpan(Typeface.BOLD),
             0,
-            distance.length,
+            distanceAndSuffix.first.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         spannableString.setSpan(
-            RelativeSizeSpan(0.65f), distance.length + 1,
+            RelativeSizeSpan(0.65f), distanceAndSuffix.first.length + 1,
             spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
 
         return spannableString
     }
 
-    companion object {
-        private const val LARGE_UNIT_THRESHOLD = 10
-        private const val SMALL_UNIT_THRESHOLD = 401
+    private fun getUnitString(resources: Resources, @TurfConstants.TurfUnitCriteria unit: String) = when (unit) {
+        TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.kilometers)
+        TurfConstants.UNIT_METERS -> resources.getString(R.string.meters)
+        TurfConstants.UNIT_MILES -> resources.getString(R.string.miles)
+        TurfConstants.UNIT_FEET -> resources.getString(R.string.feet)
+        else -> ""
+    }
+
+    private fun Context.resourcesWithLocale(locale: Locale?): Resources {
+        val config = this.resources.configuration.also {
+            it.setLocale(locale)
+        }
+        return this.createConfigurationContext(config).resources
     }
 }

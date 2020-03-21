@@ -56,7 +56,8 @@ ext {
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
       barista                   : '3.2.0',
-      workTesting               : '2.2.0'
+      workTesting               : '2.2.0',
+      androidxTestCore          : '1.2.0'
   ]
   dependenciesList = [
       // mapbox
@@ -142,6 +143,7 @@ ext {
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
+      androidxTestCore          : "androidx.test:core:${version.androidxTestCore}",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",

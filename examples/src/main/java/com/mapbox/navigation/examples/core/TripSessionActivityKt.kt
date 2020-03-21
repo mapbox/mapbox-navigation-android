@@ -12,6 +12,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
@@ -89,19 +90,21 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
+        val formatter = MapboxDistanceFormatter.builder(this)
+            .withUnitType(METRIC)
+            .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+            .withLocale(this.inferDeviceLocale())
+            .build()
+
         tripSession = MapboxTripSession(
             MapboxTripService(
                 applicationContext,
                 MapboxTripNotification(
                     applicationContext,
                     NavigationOptions.Builder()
-                        .distanceFormatter(MapboxDistanceFormatter(
-                            applicationContext,
-                            "en",
-                            METRIC,
-                            ROUNDING_INCREMENT_FIFTY
-                        )
-                    ).timeFormatType(TWENTY_FOUR_HOURS).build()
+                        .distanceFormatter(formatter)
+                        .timeFormatType(TWENTY_FOUR_HOURS)
+                        .build()
                 )
             ),
             LocationEngineProvider.getBestLocationEngine(applicationContext),

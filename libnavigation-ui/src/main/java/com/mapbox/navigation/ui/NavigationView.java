@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.navigation.base.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
@@ -48,8 +49,11 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
-import com.mapbox.navigation.ui.utils.LocaleEx;
-import com.mapbox.navigation.utils.extensions.ContextEx;
+
+import java.util.Locale;
+
+import static com.mapbox.navigation.base.extensions.LocaleEx.getLocaleDirectionsRoute;
+import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
 
 /**
  * View that creates the drop-in UI.
@@ -720,13 +724,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     establishTimeFormat(options);
   }
 
-  private void establishDistanceFormatter(NavigationViewOptions options) {
-    String unitType = establishUnitType(options);
-    String language = establishLanguage(options);
-    int roundingIncrement = establishRoundingIncrement(options);
-    DistanceFormatter distanceFormatter =
-        new MapboxDistanceFormatter(getContext(), language, unitType, roundingIncrement);
-
+  private void establishDistanceFormatter(final NavigationViewOptions options) {
+    final String unitType = establishUnitType(options);
+    final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
+    final int roundingIncrement = establishRoundingIncrement(options);
+    final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder(getContext())
+            .withRoundingIncrement(roundingIncrement)
+            .withUnitType(unitType)
+            .withLocale(language)
+            .build();
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }
@@ -736,15 +742,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     return navigationOptions.getRoundingIncrement();
   }
 
-  private String establishLanguage(NavigationViewOptions options) {
-    String voiceLanguage = options.directionsRoute().voiceLanguage();
-    return voiceLanguage != null ? voiceLanguage : ContextEx.inferDeviceLanguage(getContext());
-  }
-
   private String establishUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    return voiceUnits != null ? voiceUnits : LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
+    return voiceUnits != null ? voiceUnits : getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {
