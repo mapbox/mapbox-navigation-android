@@ -38,6 +38,9 @@ import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.*
 import timber.log.Timber
 
+/**
+ * To ensure proper functioning of this example make sure your Location is turned on.
+ */
 class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
@@ -59,15 +62,15 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-                this,
-                Utils.getMapboxAccessToken(this)
+            this,
+            Utils.getMapboxAccessToken(this)
         )
 
         mapboxNavigation = MapboxNavigation(
-                applicationContext,
-                Utils.getMapboxAccessToken(this),
-                mapboxNavigationOptions,
-                locationEngine = replayRouteLocationEngine
+            applicationContext,
+            Utils.getMapboxAccessToken(this),
+            mapboxNavigationOptions,
+            locationEngine = replayRouteLocationEngine
         )
         initListeners()
         mapView.getMapAsync(this)
@@ -87,13 +90,13 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
-                        RouteOptions.builder().applyDefaultParams()
-                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                                .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                                .alternatives(true)
-                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                                .build(),
-                        routesReqCallback
+                    RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .build(),
+                    routesReqCallback
                 )
             }
             true
@@ -121,15 +124,15 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     fun initLocationEngine() {
         val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                        .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                        .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                        .build()
+            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
+                .build()
 
         locationEngine?.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
+            requestLocationUpdateRequest,
+            locationListenerCallback,
+            mainLooper
         )
         locationEngine?.getLastLocation(locationListenerCallback)
     }
@@ -172,7 +175,8 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStart()
         mapView.onStart()
         mapboxNavigation?.registerLocationObserver(locationObserver)
-        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_SHORT)
+            .show()
     }
 
     public override fun onResume() {
@@ -205,15 +209,15 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val locationListenerCallback: LocationEngineCallback<LocationEngineResult> =
-            object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult) {
-                    // todo
-                }
-
-                override fun onFailure(exception: Exception) {
-                    Timber.i(exception)
-                }
+        object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult) {
+                // todo
             }
+
+            override fun onFailure(exception: Exception) {
+                Timber.i(exception)
+            }
+        }
 
     private fun stopLocationUpdates() {
         locationEngine?.removeLocationUpdates(locationListenerCallback)

@@ -8,6 +8,8 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -64,6 +66,9 @@ import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
 import okhttp3.Cache
 import timber.log.Timber
 
+/**
+ * To ensure proper functioning of this example make sure your Location is turned on.
+ */
 class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener {
 
@@ -291,6 +296,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         startNavigation.visibility = VISIBLE
         startNavigation.isEnabled = false
         instructionView.visibility = GONE
+        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
         feedbackButton = instructionView.retrieveFeedbackButton().apply {
             hide()
             addOnClickListener {
