@@ -121,22 +121,6 @@ object NavigationConstants {
      */
     internal const val NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG = 1500
 
-    /**
-     * Default off route threshold in meters
-     */
-    internal const val NAVIGATION_OFF_ROUTE_THRESHOLD = 50.0f
-
-    /**
-     * Default off route threshold in meters when near an intersection which is more prone
-     * to inaccurate gps fixes
-     */
-    internal const val NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION = 25.0f
-
-    /**
-     * Default radius in meters for off route detection near intersection
-     */
-    internal const val NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION = 40.0f
-
     internal const val ROUTE_REFRESH_INTERVAL = 5 * 60 * 1000L
 
     /**

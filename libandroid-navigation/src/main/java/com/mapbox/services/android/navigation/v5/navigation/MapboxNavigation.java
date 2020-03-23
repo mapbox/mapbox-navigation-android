@@ -1077,9 +1077,6 @@ public class MapboxNavigation implements ServiceConnection {
   private Navigator configureNavigator() {
     Navigator navigator = new Navigator();
     NavigatorConfig navigatorConfig = navigator.getConfig();
-    navigatorConfig.setOffRouteThreshold(options.getOffRouteThreshold());
-    navigatorConfig.setOffRouteThresholdWhenNearIntersection(options.getOffRouteThresholdWhenNearIntersection());
-    navigatorConfig.setIntersectionRadiusForOffRouteDetection(options.getIntersectionRadiusForOffRouteDetection());
     navigator.setConfig(navigatorConfig);
     return navigator;
   }
