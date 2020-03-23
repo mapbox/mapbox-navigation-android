@@ -79,6 +79,22 @@ navigation-fixtures:
 	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-77.034013,38.899994;-77.033757,38.903311?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
 		-o libandroid-navigation/src/test/resources/directions_v5_no_voice.json
 
+.PHONY: 1.0-core-publish-local
+1.0-core-publish-local:
+	./gradlew :libdirections-offboard:publishToMavenLocal
+	./gradlew :libdirections-hybrid:publishToMavenLocal
+	./gradlew :libdirections-onboard:publishToMavenLocal
+	./gradlew :libnavigation-base:publishToMavenLocal
+	./gradlew :libnavigation-metrics:publishToMavenLocal
+	./gradlew :libnavigation-util:publishToMavenLocal
+	./gradlew :libnavigator:publishToMavenLocal
+	./gradlew :libtrip-notification:publishToMavenLocal
+	./gradlew :libnavigation-core:publishToMavenLocal
+
+.PHONY: 1.0-ui-publish-local
+1.0-ui-publish-local:
+	./gradlew :libnavigation-ui:publishToMavenLocal
+
 .PHONY: 1.0-build-core-debug
 1.0-build-core-debug:
 	./gradlew :libdirections-offboard:assembleDebug
