@@ -15,3 +15,5 @@ include ':app',
         ':libnavigation-ui',
         ':libtesting-ui',
         ':libtesting-utils'
+include ':NavNative'
+project(':NavNative').projectDir = new File("../mapbox-navigation-native/platform/android")
