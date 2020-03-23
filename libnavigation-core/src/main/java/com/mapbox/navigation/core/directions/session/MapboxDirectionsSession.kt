@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.directions.session
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -31,6 +32,10 @@ class MapboxDirectionsSession(
 
     override fun cancel() {
         router.cancel()
+    }
+
+    override fun requestRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+        router.getRouteRefresh(route, legIndex, callback)
     }
 
     override fun requestRoutes(

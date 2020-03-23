@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
@@ -112,6 +113,10 @@ class MapboxOnboardRouter(
 
     override fun cancel() {
         mainJobControl.job.cancelChildren()
+    }
+
+    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+        // Does nothing
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {
