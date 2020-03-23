@@ -283,7 +283,6 @@ class MapboxNavigationTest {
     }
 
     // TODO Fix test not working because of MapboxNavigationTelemetry#unregisterListeners initializer = initializerDelegate
-    @Ignore
     @Test
     fun reRoute_called_with_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
@@ -363,6 +362,8 @@ class MapboxNavigationTest {
         every { directionsSession.requestFasterRoute(any(), any()) } answers {
             fasterRouteRequestCallback.onRoutesReady(routes)
         }
+        // TODO Needed for telemetry - Free Drive (empty list) for now
+        every { directionsSession.routes } returns emptyList()
     }
 
     private fun mockTripSession() {

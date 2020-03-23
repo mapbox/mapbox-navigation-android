@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
 dokka {
@@ -21,7 +22,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-consumer.pro'
+        consumerProguardFiles 'consumer-rules.pro'
         buildConfigField('String',
                 "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
         )
@@ -52,7 +53,9 @@ dependencies {
 
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation dependenciesList.commonsIO
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/download-schema.gradle"

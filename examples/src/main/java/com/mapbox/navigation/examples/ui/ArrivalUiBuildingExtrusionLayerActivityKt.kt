@@ -89,35 +89,35 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
         val options =
-                MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
+            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
 
         val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
         val tilesVersion = "2020_02_02-03_00_00"
 
         val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
-                ?.host(tilesUri.host)
-                ?.version(tilesVersion)
-                ?.build()
+            ?.host(tilesUri.host)
+            ?.version(tilesVersion)
+            ?.build()
 
         val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
-                ?.tilePath(
-                        File(
-                                filesDir,
-                                "Offline/${tilesUri.host}/$tilesVersion"
-                        ).absolutePath
-                )
-                ?.endpoint(endpoint)
-                ?.build()
+            ?.tilePath(
+                File(
+                    filesDir,
+                    "Offline/${tilesUri.host}/$tilesVersion"
+                ).absolutePath
+            )
+            ?.endpoint(endpoint)
+            ?.build()
 
         val newOptions =
-                options.toBuilder()
-                        .onboardRouterConfig(onboardRouterConfig)
-                        .build()
+            options.toBuilder()
+                .onboardRouterConfig(onboardRouterConfig)
+                .build()
 
         mapboxNavigation = MapboxNavigation(
-                applicationContext,
-                Utils.getMapboxAccessToken(this),
-                navigationOptions = newOptions
+            applicationContext,
+            Utils.getMapboxAccessToken(this),
+            navigationOptions = newOptions
         )
     }
 
@@ -128,20 +128,20 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
         mapboxMap.addOnMapLongClickListener { click ->
             locationComponent?.lastKnownLocation?.let { location ->
                 mapboxNavigation.requestRoutes(
-                        RouteOptions.builder().applyDefaultParams()
-                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                                .coordinates(location.toPoint(), null, click.toPoint())
-                                .alternatives(true)
-                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                                .build(),
-                        routesReqCallback
+                    RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(location.toPoint(), null, click.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .build(),
+                    routesReqCallback
                 )
 
                 symbolManager?.deleteAll()
                 symbolManager?.create(
-                        SymbolOptions()
-                                .withIconImage("marker")
-                                .withGeometry(click.toPoint())
+                    SymbolOptions()
+                        .withIconImage("marker")
+                        .withGeometry(click.toPoint())
                 )
 
                 // Show and move the destination building highlighted footprint
@@ -153,9 +153,9 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
-                        LocationComponentActivationOptions.builder(this@ArrivalUiBuildingExtrusionLayerActivityKt, style)
-                                .useDefaultLocationEngine(false)
-                                .build()
+                    LocationComponentActivationOptions.builder(this@ArrivalUiBuildingExtrusionLayerActivityKt, style)
+                        .useDefaultLocationEngine(false)
+                        .build()
                 )
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
@@ -219,14 +219,14 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
 
     private fun startLocationUpdates() {
         val request = LocationEngineRequest.Builder(1000L)
-                .setFastestInterval(500L)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .build()
+            .setFastestInterval(500L)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
         try {
             localLocationEngine.requestLocationUpdates(
-                    request,
-                    locationEngineCallback,
-                    Looper.getMainLooper()
+                request,
+                locationEngineCallback,
+                Looper.getMainLooper()
             )
             localLocationEngine.getLastLocation(locationEngineCallback)
         } catch (exception: SecurityException) {
@@ -249,26 +249,26 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
             navigationMapRoute?.addRoutes(routes)
             if (routes.isEmpty()) {
                 Toast.makeText(this@ArrivalUiBuildingExtrusionLayerActivityKt, "Empty routes", Toast.LENGTH_SHORT)
-                        .show()
+                    .show()
             }
             Timber.d("route changed %s", routes.toString())
         }
     }
 
     private val fasterRouteSelectionTimer: CountDownTimer =
-            object : CountDownTimer(startTimeInMillis, countdownInterval) {
-                override fun onTick(millisUntilFinished: Long) {
-                    Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
-                    fasterRouteAcceptProgress.progress =
-                            (maxProgress - millisUntilFinished / countdownInterval).toInt()
-                }
-
-                override fun onFinish() {
-                    Timber.d("FASTER_ROUTE: finished")
-                    this@ArrivalUiBuildingExtrusionLayerActivityKt.fasterRoute = null
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                }
+        object : CountDownTimer(startTimeInMillis, countdownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
+                fasterRouteAcceptProgress.progress =
+                    (maxProgress - millisUntilFinished / countdownInterval).toInt()
             }
+
+            override fun onFinish() {
+                Timber.d("FASTER_ROUTE: finished")
+                this@ArrivalUiBuildingExtrusionLayerActivityKt.fasterRoute = null
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+        }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
@@ -373,7 +373,7 @@ class ArrivalUiBuildingExtrusionLayerActivityKt : AppCompatActivity(), OnMapRead
     }
 
     private class MyLocationEngineCallback(activity: ArrivalUiBuildingExtrusionLayerActivityKt) :
-            LocationEngineCallback<LocationEngineResult> {
+        LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
