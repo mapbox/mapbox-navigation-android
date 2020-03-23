@@ -9,12 +9,12 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk              : '9.1.0-alpha.1',
+      mapboxMapSdk              : '9.1.0-beta.1',
       mapboxSdkServices         : '5.1.0-SNAPSHOT',
       mapboxSdkDirectionsModels : '5.1.0-SNAPSHOT',
-      mapboxEvents              : '4.7.3',
-      mapboxCore                : '1.4.1',
-      mapboxNavigator           : '9.2.1',
+      mapboxEvents              : '4.7.4',
+      mapboxCore                : '1.4.2',
+      mapboxNavigator           : '10.0.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.3.1',
