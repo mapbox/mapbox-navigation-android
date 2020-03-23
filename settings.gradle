@@ -22,3 +22,5 @@ include ':app',
         ':libnavui-summary',
         ':libnavui-util',
         ':libnavui-voice'
+include ':NavNative'
+project(':NavNative').projectDir = new File("../mapbox-navigation-native/platform/android")
