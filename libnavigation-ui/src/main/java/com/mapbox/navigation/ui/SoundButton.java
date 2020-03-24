@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.animation.AccelerateInterpolator;
@@ -11,6 +13,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,6 +31,9 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   private boolean isMuted;
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
+  private int primaryColor;
+  private int secondaryColor;
+
   public SoundButton(Context context) {
     this(context, null);
   }
@@ -38,6 +44,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
 
   public SoundButton(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    initAttributes(attrs);
     initialize(context);
   }
 
@@ -91,7 +98,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
-    setupColors();
+    applyAttributes();
     initializeAnimation();
   }
 
@@ -140,13 +147,13 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     fadeInSlowOut.addAnimation(fadeOut);
   }
 
-  private void setupColors() {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewPrimary);
-      DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
-    }
+  private void applyAttributes() {
+    Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
+    DrawableCompat.setTint(soundChipBackground, primaryColor);
+    soundChipText.setTextColor(secondaryColor);
+
+    soundFab.setBackgroundTintList(ColorStateList.valueOf(primaryColor));
+    soundFab.setColorFilter(secondaryColor);
   }
 
   /**
@@ -206,6 +213,18 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   private void bind() {
     soundFab = findViewById(R.id.soundFab);
     soundChipText = findViewById(R.id.soundText);
+  }
+
+  private void initAttributes(AttributeSet attributeSet) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.SoundButton);
+    primaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.SoundButton_soundButtonPrimaryColor,
+        R.color.mapbox_sound_button_primary));
+    secondaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.SoundButton_soundButtonSecondaryColor,
+        R.color.mapbox_sound_button_secondary));
+
+    typedArray.recycle();
   }
 
   private void initialize(Context context) {

@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.utils;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.util.Base64;
@@ -44,5 +46,9 @@ public class ViewUtils {
       return bitmap;
     }
     return null;
+  }
+
+  public static boolean isLandscape(Context context) {
+    return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
   }
 }

@@ -75,4 +75,51 @@
     <attr name="maneuverViewPrimaryColor" format="color"/>
     <attr name="maneuverViewSecondaryColor" format="color"/>
   </declare-styleable>
+
+  <declare-styleable name="InstructionView">
+    <attr name="instructionViewPrimaryBackgroundColor" format="reference|color"/>
+    <attr name="instructionViewSecondaryBackgroundColor" format="reference|color"/>
+    <attr name="instructionListViewBackgroundColor" format="reference|color"/>
+    <attr name="instructionViewPrimaryTextColor" format="reference|color"/>
+    <attr name="instructionViewSecondaryTextColor" format="reference|color"/>
+    <attr name="instructionManeuverViewPrimaryColor" format="reference|color"/>
+    <attr name="instructionManeuverViewSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="SoundButton">
+    <attr name="soundButtonPrimaryColor" format="reference|color"/>
+    <attr name="soundButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="FeedbackButton">
+    <attr name="feedbackButtonPrimaryColor" format="reference|color"/>
+    <attr name="feedbackButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="AlertView">
+    <attr name="alertViewBackgroundColor" format="reference|color"/>
+    <attr name="alertViewProgressBarBackgroundColor" format="reference|color"/>
+    <attr name="alertViewProgressBarColor" format="reference|color"/>
+    <attr name="alertViewTextColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="RecenterButton">
+    <attr name="recenterButtonPrimaryColor" format="reference|color"/>
+    <attr name="recenterButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="WayNameView">
+    <attr name="wayNameViewPrimaryColor" format="reference|color"/>
+    <attr name="wayNameViewSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="SummaryBottomSheet">
+    <attr name="summaryBottomSheetPrimaryColor" format="reference|color"/>
+    <attr name="summaryBottomSheetSecondaryColor" format="reference|color"/>
+    <attr name="summaryBottomSheetDividerColor" format="reference|color"/>
+    <attr name="summaryBottomSheetProgressBarColor" format="reference|color"/>
+    <attr name="summaryBottomSheetRouteOverviewDrawable" format="reference"/>
+    <attr name="summaryBottomSheetPrimaryTextColor" format="reference|color"/>
+    <attr name="summaryBottomSheetSecondaryTextColor" format="reference|color"/>
+  </declare-styleable>
 </resources>

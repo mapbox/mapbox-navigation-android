@@ -18,9 +18,11 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,9 +46,14 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
   private FeedbackAdapter feedbackAdapter;
   private RecyclerView feedbackItems;
   private ProgressBar feedbackProgressBar;
+  private TextView reportFeedback;
   private ObjectAnimator countdownAnimation;
   private long duration;
   private CountDownTimer timer = null;
+
+  private int primaryColor = 0;
+  private int secondaryColor = 0;
+  private int textColor = 0;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
@@ -57,10 +64,23 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     return feedbackBottomSheet;
   }
 
+  public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
+                                                long duration, int primaryColor, int secondaryColor, int textColor) {
+    FeedbackBottomSheet feedbackBottomSheet = new FeedbackBottomSheet();
+    feedbackBottomSheet.primaryColor = primaryColor;
+    feedbackBottomSheet.secondaryColor = secondaryColor;
+    feedbackBottomSheet.textColor = textColor;
+    feedbackBottomSheet.setFeedbackBottomSheetListener(feedbackBottomSheetListener);
+    feedbackBottomSheet.setDuration(duration);
+    feedbackBottomSheet.setRetainInstance(true);
+    return feedbackBottomSheet;
+  }
+
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setStyle(BottomSheetDialogFragment.STYLE_NO_FRAME, R.style.Theme_Design_BottomSheetDialog);
+    initViewColors(getContext());
   }
 
   @Override
@@ -74,7 +94,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     bind(view);
     initFeedbackRecyclerView();
     initCountDownAnimation();
-    initBackground(view);
+    setupViewColors(view);
   }
 
   @NonNull
@@ -155,14 +175,26 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     this.duration = duration;
   }
 
+  private void initViewColors(Context context) {
+    if (primaryColor == 0) {
+      primaryColor = ContextCompat.getColor(context, ThemeSwitcher.retrieveAttrResourceId(context,
+        R.attr.navigationViewPrimary, R.color.mapbox_feedback_bottom_sheet_primary));
+      secondaryColor = ContextCompat.getColor(context, ThemeSwitcher.retrieveAttrResourceId(context,
+        R.attr.navigationViewSecondary, R.color.mapbox_feedback_bottom_sheet_secondary));
+      textColor = ContextCompat.getColor(context, ThemeSwitcher.retrieveAttrResourceId(context,
+        R.attr.navigationViewPrimaryText, R.color.mapbox_feedback_bottom_sheet_text));
+    }
+  }
+
   private void bind(View bottomSheetView) {
     feedbackItems = bottomSheetView.findViewById(R.id.feedbackItems);
     feedbackProgressBar = bottomSheetView.findViewById(R.id.feedbackProgress);
+    reportFeedback = bottomSheetView.findViewById(R.id.reportFeedback);
   }
 
   private void initFeedbackRecyclerView() {
     Context context = getContext();
-    feedbackAdapter = new FeedbackAdapter(context);
+    feedbackAdapter = new FeedbackAdapter(context, textColor);
     feedbackItems.setAdapter(feedbackAdapter);
     feedbackItems.setOverScrollMode(RecyclerView.OVER_SCROLL_IF_CONTENT_SCROLLS);
     feedbackItems.addOnItemTouchListener(new FeedbackClickListener(context, this));
@@ -182,20 +214,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements Fe
     countdownAnimation.start();
   }
 
-  private void initBackground(View view) {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewPrimary);
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewSecondary);
-      // BottomSheet background
-      Drawable bottomSheetBackground = DrawableCompat.wrap(view.getBackground()).mutate();
-      DrawableCompat.setTint(bottomSheetBackground, navigationViewPrimaryColor);
-      // ProgressBar progress color
-      LayerDrawable progressBarBackground = (LayerDrawable) feedbackProgressBar.getProgressDrawable();
-      Drawable progressDrawable = progressBarBackground.getDrawable(1);
-      progressDrawable.setColorFilter(navigationViewSecondaryColor, PorterDuff.Mode.SRC_IN);
-    }
+  private void setupViewColors(View view) {
+    // BottomSheet background
+    Drawable bottomSheetBackground = DrawableCompat.wrap(view.getBackground()).mutate();
+    DrawableCompat.setTint(bottomSheetBackground, primaryColor);
+    // ProgressBar progress color
+    LayerDrawable progressBarBackground = (LayerDrawable) feedbackProgressBar.getProgressDrawable();
+    Drawable progressDrawable = progressBarBackground.getDrawable(1);
+    progressDrawable.setColorFilter(secondaryColor, PorterDuff.Mode.SRC_IN);
+
+    reportFeedback.setTextColor(textColor);
   }
 
   private void removeListener() {

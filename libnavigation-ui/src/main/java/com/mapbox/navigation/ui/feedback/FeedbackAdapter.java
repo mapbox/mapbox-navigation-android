@@ -10,6 +10,7 @@ import com.mapbox.libnavigation.ui.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
@@ -21,8 +22,9 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   private static final String EMPTY_FEEDBACK_DESCRIPTION = "";
   private List<FeedbackItem> feedbackItems = new ArrayList<>();
+  private int feedbackItemTextColor;
 
-  FeedbackAdapter(Context context) {
+  FeedbackAdapter(Context context, int feedbackItemTextColor) {
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_road_closure),
       R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, EMPTY_FEEDBACK_DESCRIPTION));
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_not_allowed),
@@ -31,13 +33,16 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
       R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, EMPTY_FEEDBACK_DESCRIPTION));
     feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_bad_route),
       R.drawable.ic_bad_route, FEEDBACK_TYPE_ROUTING_ERROR, EMPTY_FEEDBACK_DESCRIPTION));
+
+    this.feedbackItemTextColor = feedbackItemTextColor;
   }
 
   @Override
-  public FeedbackViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  @NonNull
+  public FeedbackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
       .inflate(R.layout.feedback_viewholder_layout, parent, false);
-    return new FeedbackViewHolder(view);
+    return new FeedbackViewHolder(view, feedbackItemTextColor);
   }
 
   @Override

@@ -15,6 +15,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   private final InstructionListPresenter presenter;
 
+  private int primaryTextColor;
+  private int secondaryTextColor;
+  private int maneuverViewPrimaryColor;
+  private int maneuverViewSecondaryColor;
+
   public InstructionListAdapter(DistanceFormatter distanceFormatter) {
     presenter = new InstructionListPresenter(distanceFormatter);
   }
@@ -23,8 +28,11 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   @Override
   public InstructionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.instruction_viewholder_layout, parent, false);
-    return new InstructionViewHolder(view);
+      .inflate(R.layout.instruction_viewholder_layout, parent, false);
+    InstructionViewHolder viewHolder = new InstructionViewHolder(view);
+    viewHolder.updateViewColors(
+      primaryTextColor, secondaryTextColor, maneuverViewPrimaryColor, maneuverViewSecondaryColor);
+    return viewHolder;
   }
 
   @Override
@@ -52,5 +60,13 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
 
   public void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
     presenter.updateDistanceFormatter(distanceFormatter);
+  }
+
+  public void setColors(int primaryTextColor, int secondaryTextColor,
+                        int maneuverPrimaryColor, int maneuverSecondaryColor) {
+    this.primaryTextColor = primaryTextColor;
+    this.secondaryTextColor = secondaryTextColor;
+    this.maneuverViewPrimaryColor = maneuverPrimaryColor;
+    this.maneuverViewSecondaryColor = maneuverSecondaryColor;
   }
 }

@@ -8,4 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="InstructionView">
+        <item name="instructionViewPrimaryBackgroundColor">@color/instruction_view_primary_background</item>
+        <item name="instructionViewSecondaryBackgroundColor">@color/instruction_view_secondary_background</item>
+        <item name="instructionListViewBackgroundColor">@color/instruction_list_view_background</item>
+        <item name="instructionViewPrimaryTextColor">@color/instruction_view_primary_text</item>
+        <item name="instructionViewSecondaryTextColor">@color/instruction_view_secondary_text</item>
+        <item name="instructionManeuverViewPrimaryColor">@color/instruction_maneuver_view_primary</item>
+        <item name="instructionManeuverViewSecondaryColor">@color/instruction_maneuver_view_secondary</item>
+    </style>
 </resources>

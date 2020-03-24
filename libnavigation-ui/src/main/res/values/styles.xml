@@ -20,7 +20,7 @@
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
-        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_secondary</item>
+        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_primary_text</item>
         <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text</item>
         <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider</item>
 
@@ -50,7 +50,7 @@
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent_dark</item>
-        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_secondary_dark</item>
+        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_primary_text_dark</item>
         <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text_dark</item>
         <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider_dark</item>
 
@@ -75,10 +75,64 @@
 
         <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
     </style>
-    
+
     <style name="NavigationLocationLayerStyle" parent="@style/mapbox_LocationComponent">
         <item name="mapbox_trackingAnimationDurationMultiplier">2.0</item>
         <item name="mapbox_trackingGesturesManagement">true</item>
+    </style>
+
+    <!-- Default InstructionView style -->
+    <style name="InstructionView">
+        <item name="instructionViewPrimaryBackgroundColor">?attr/navigationViewBannerBackground</item>
+        <item name="instructionViewSecondaryBackgroundColor">?attr/navigationViewSecondary</item>
+        <item name="instructionListViewBackgroundColor">?attr/navigationViewListBackground</item>
+        <item name="instructionViewPrimaryTextColor">?attr/navigationViewBannerPrimaryText</item>
+        <item name="instructionViewSecondaryTextColor">?attr/navigationViewBannerSecondaryText</item>
+        <item name="instructionManeuverViewPrimaryColor">?attr/navigationViewBannerManeuverPrimary</item>
+        <item name="instructionManeuverViewSecondaryColor">?attr/navigationViewBannerManeuverSecondary</item>
+    </style>
+
+    <!-- Default SoundButton style -->
+    <style name="SoundButton">
+        <item name="soundButtonPrimaryColor">?attr/navigationViewPrimary</item>
+        <item name="soundButtonSecondaryColor">?attr/navigationViewSecondary</item>
+    </style>
+
+    <!-- Default FeedbackButton style -->
+    <style name="FeedbackButton">
+        <item name="feedbackButtonPrimaryColor">?attr/navigationViewPrimary</item>
+        <item name="feedbackButtonSecondaryColor">?attr/navigationViewSecondary</item>
+    </style>
+
+    <!-- Default AlertView style -->
+    <style name="AlertView">
+        <item name="alertViewBackgroundColor">?attr/navigationViewBannerBackground</item>
+        <item name="alertViewProgressBarBackgroundColor">?attr/navigationViewProgressBackground</item>
+        <item name="alertViewProgressBarColor">?attr/navigationViewProgress</item>
+        <item name="alertViewTextColor">?attr/navigationViewBannerPrimaryText</item>
+    </style>
+
+    <!-- Default RecenterButton style -->
+    <style name="RecenterButton">
+        <item name="recenterButtonPrimaryColor">?attr/navigationViewPrimary</item>
+        <item name="recenterButtonSecondaryColor">?attr/navigationViewAccent</item>
+    </style>
+
+    <!-- Default WayNameView style -->
+    <style name="WayNameView">
+        <item name="wayNameViewPrimaryColor">?attr/navigationViewPrimary</item>
+        <item name="wayNameViewSecondaryColor">?attr/navigationViewAccent</item>
+    </style>
+
+    <!-- Default SummaryBottomSheet style -->
+    <style name="SummaryBottomSheet">
+        <item name="summaryBottomSheetPrimaryColor">?attr/navigationViewPrimary</item>
+        <item name="summaryBottomSheetSecondaryColor">?attr/navigationViewSecondary</item>
+        <item name="summaryBottomSheetDividerColor">?attr/navigationViewDivider</item>
+        <item name="summaryBottomSheetProgressBarColor">?attr/navigationViewAccent</item>
+        <item name="summaryBottomSheetRouteOverviewDrawable">?attr/navigationViewRouteOverviewDrawable</item>
+        <item name="summaryBottomSheetPrimaryTextColor">?attr/navigationViewPrimaryText</item>
+        <item name="summaryBottomSheetSecondaryTextColor">?attr/navigationViewSecondaryText</item>
     </style>
 
 </resources>

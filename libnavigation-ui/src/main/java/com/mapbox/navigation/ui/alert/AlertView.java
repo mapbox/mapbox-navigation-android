@@ -2,9 +2,11 @@ package com.mapbox.navigation.ui.alert;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -20,7 +22,6 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 import com.mapbox.libnavigation.ui.R;
-import com.mapbox.navigation.ui.ThemeSwitcher;
 
 /**
  * A custom View that can show a quick message to a user.
@@ -37,6 +38,11 @@ public class AlertView extends CardView {
   private Animation fadeOut;
   private Animation slideDownTop;
 
+  private int backgroundColor;
+  private int progressBarBackgroundColor;
+  private int progressBarColor;
+  private int textColor;
+
   public AlertView(Context context) {
     this(context, null);
   }
@@ -47,6 +53,7 @@ public class AlertView extends CardView {
 
   public AlertView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    initAttributes(attrs);
     init();
   }
 
@@ -54,8 +61,8 @@ public class AlertView extends CardView {
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+    applyAttributes();
     initAnimations();
-    initBackground();
   }
 
   /**
@@ -116,6 +123,24 @@ public class AlertView extends CardView {
     alertProgressBar = findViewById(R.id.alertProgressBar);
   }
 
+  private void initAttributes(AttributeSet attributeSet) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.AlertView);
+    backgroundColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewBackgroundColor,
+        R.color.mapbox_alert_view_background));
+    progressBarBackgroundColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarBackgroundColor,
+        R.color.mapbox_alert_view_progress_bar_background));
+    progressBarColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarColor,
+        R.color.mapbox_alert_view_progress_bar));
+    textColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewTextColor,
+        R.color.mapbox_alert_view_text));
+
+    typedArray.recycle();
+  }
+
   private void initAnimations() {
     fadeOut = new AlphaAnimation(1, 0);
     fadeOut.setInterpolator(new AccelerateInterpolator());
@@ -124,23 +149,21 @@ public class AlertView extends CardView {
     slideDownTop.setInterpolator(new OvershootInterpolator(2.0f));
   }
 
-  private void initBackground() {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int progressColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewProgress);
-      int progressBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewProgressBackground);
+  private void applyAttributes() {
+    CardView alertCardView = findViewById(R.id.alertCardView);
+    alertCardView.setCardBackgroundColor(backgroundColor);
+    alertText.setTextColor(textColor);
 
-      LayerDrawable progressBarDrawable = (LayerDrawable) alertProgressBar.getProgressDrawable();
-      // ProgressBar progress color
-      Drawable progressBackgroundDrawable = progressBarDrawable.getDrawable(0);
-      progressBackgroundDrawable.setColorFilter(progressBackgroundColor, PorterDuff.Mode.SRC_IN);
+    LayerDrawable progressBarDrawable = (LayerDrawable) alertProgressBar.getProgressDrawable();
+    // ProgressBar progress color
+    Drawable progressBackgroundDrawable = progressBarDrawable.getDrawable(0);
+    progressBackgroundDrawable.setColorFilter(progressBarBackgroundColor, PorterDuff.Mode.SRC_IN);
 
+    // ProgressBar background color
+    Drawable progressDrawable = progressBarDrawable.getDrawable(1);
+    progressDrawable.setColorFilter(progressBarColor, PorterDuff.Mode.SRC_IN);
 
-      // ProgressBar background color
-      Drawable progressDrawable = progressBarDrawable.getDrawable(1);
-      progressDrawable.setColorFilter(progressColor, PorterDuff.Mode.SRC_IN);
-
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
       // Hide the background
       getBackground().setAlpha(0);
     } else {
