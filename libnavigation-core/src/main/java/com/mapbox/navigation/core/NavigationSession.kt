@@ -6,9 +6,12 @@ import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import java.util.concurrent.CopyOnWriteArrayList
 
 internal class NavigationSession(private val context: Context) : RoutesObserver,
     TripSessionStateObserver {
+
+    private val stateObservers = CopyOnWriteArrayList<NavigationSessionStateObserver>()
 
     private var state = State.IDLE
         set(value) {
@@ -18,7 +21,7 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
             val previousValue = state
             field = value
 
-            // todo expose state observers for the rest of the lib to hook into?
+            stateObservers.forEach { it.onNavigationSessionStateChanged(value) }
 
             when {
                 previousValue == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
@@ -54,6 +57,19 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
         }
     }
 
+    internal fun registerNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        stateObservers.add(navigationSessionStateObserver)
+        navigationSessionStateObserver.onNavigationSessionStateChanged(state)
+    }
+
+    internal fun unregisterNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        stateObservers.remove(navigationSessionStateObserver)
+    }
+
+    internal fun unregisterAllNavigationSessionStateObservers() {
+        stateObservers.clear()
+    }
+
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
         hasRoutes = routes.isNotEmpty()
     }
@@ -65,7 +81,7 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
         }
     }
 
-    private enum class State {
+    internal enum class State {
         IDLE,
         FREE_DRIVE,
         ACTIVE_GUIDANCE

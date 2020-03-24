@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.trip.session.TripSessionState
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -19,6 +20,7 @@ class NavigationSessionTest {
     private lateinit var routes: MutableList<DirectionsRoute>
     private val route: DirectionsRoute = mockk()
     private lateinit var navigationSession: NavigationSession
+    private val stateObserver: NavigationSessionStateObserver = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
@@ -138,5 +140,108 @@ class NavigationSessionTest {
         navigationSession.onRoutesChanged(emptyList())
         navigationSession.onRoutesChanged(routes)
         verify(exactly = 2) { accounts.navigationStarted() }
+    }
+
+    @Test
+    fun stateObserverImmediateIdle() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+    }
+
+    @Test
+    fun stateObserverImmediateActiveGuidance() {
+        routes.add(route)
+        navigationSession.onRoutesChanged(routes)
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+    }
+
+    @Test
+    fun stateObserverImmediateActiveFreeDrive() {
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+    }
+
+    @Test
+    fun stateObserverIdle() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 2) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+    }
+
+    @Test
+    fun stateObserverActiveGuidance() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        routes.add(route)
+        navigationSession.onRoutesChanged(routes)
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+    }
+
+    @Test
+    fun stateObserverFreeDrive() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+    }
+
+    @Test
+    fun stateObserverUnregisterIdle() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+        clearMocks(stateObserver)
+        navigationSession.unregisterNavigationSessionStateObserver(stateObserver)
+
+        navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
+
+        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+    }
+
+    @Test
+    fun stateObserverUnregisterActiveGuidance() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+        clearMocks(stateObserver)
+        navigationSession.unregisterNavigationSessionStateObserver(stateObserver)
+
+        routes.add(route)
+        navigationSession.onRoutesChanged(routes)
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+    }
+
+    @Test
+    fun stateObserverUnregisterFreeDrive() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+        clearMocks(stateObserver)
+        navigationSession.unregisterNavigationSessionStateObserver(stateObserver)
+
+        navigationSession.onSessionStateChanged(TripSessionState.STARTED)
+
+        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+    }
+
+    @Test
+    fun unregisterAllStateObservers() {
+        navigationSession.registerNavigationSessionStateObserver(stateObserver)
+        clearMocks(stateObserver)
+        navigationSession.unregisterNavigationSessionStateObserver(stateObserver)
+
+        navigationSession.unregisterAllNavigationSessionStateObservers()
+
+        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(any()) }
     }
 }
