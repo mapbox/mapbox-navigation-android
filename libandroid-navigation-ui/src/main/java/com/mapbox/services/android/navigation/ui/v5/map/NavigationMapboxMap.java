@@ -7,7 +7,6 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 
-import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
@@ -64,9 +63,9 @@ public class NavigationMapboxMap {
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
   private static final double NAVIGATION_INITIAL_MAP_ZOOM = 17d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
-          = new CopyOnWriteArrayList<>();
+    = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
-          = new MapWayNameChangedListener(onWayNameChangedListeners);
+    = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -86,8 +85,8 @@ public class NavigationMapboxMap {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView           for map size and Context
-   * @param mapboxMap         for APIs to interact with the map
+   * @param mapView   for map size and Context
+   * @param mapboxMap for APIs to interact with the map
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap) {
@@ -637,27 +636,15 @@ public class NavigationMapboxMap {
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     Style style = map.getStyle();
-    int locationLayerStyleRes = findLayerStyleRes(context);
+    int locationLayerStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
+      R.attr.navigationViewLocationLayerStyle, R.style.NavigationLocationLayerStyle);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
-            .locationComponentOptions(options)
-            .useDefaultLocationEngine(false)
-            .build();
+      .locationComponentOptions(options)
+      .useDefaultLocationEngine(false)
+      .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
-  }
-
-  private int findLayerStyleRes(Context context) {
-    int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
-            R.attr.navigationViewLocationLayerStyle);
-    if (!isValid(locationLayerStyleRes)) {
-      locationLayerStyleRes = R.style.NavigationLocationLayerStyle;
-    }
-    return locationLayerStyleRes;
-  }
-
-  private boolean isValid(@AnyRes int resId) {
-    return resId != -1 && (resId & 0xff000000) != 0 && (resId & 0x00ff0000) != 0;
   }
 
   private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
@@ -679,7 +666,8 @@ public class NavigationMapboxMap {
 
   private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
-    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
+    int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
+      R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute);
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
   }
 

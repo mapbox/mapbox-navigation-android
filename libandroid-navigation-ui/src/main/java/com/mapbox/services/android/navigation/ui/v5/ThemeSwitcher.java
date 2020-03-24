@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
+import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
@@ -48,6 +49,14 @@ public class ThemeSwitcher {
   public static Bitmap retrieveThemeMapMarker(Context context) {
     TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
     int markerResId = destinationMarkerResId.resourceId;
+    if (!isValid(markerResId)) {
+      if (isNightModeEnabled(context)) {
+        markerResId = R.drawable.map_marker_dark;
+      } else {
+        markerResId = R.drawable.map_marker_light;
+      }
+    }
+
     Drawable markerDrawable = ContextCompat.getDrawable(context, markerResId);
     return BitmapUtils.getBitmapFromDrawable(markerDrawable);
   }
@@ -61,11 +70,18 @@ public class ThemeSwitcher {
   public static Drawable retrieveThemeOverviewDrawable(Context context) {
     TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewRouteOverviewDrawable);
     int overviewResId = destinationMarkerResId.resourceId;
+    if (!isValid(overviewResId)) {
+      if (isNightModeEnabled(context)) {
+        overviewResId = R.drawable.ic_route_preview_dark;
+      } else {
+        overviewResId = R.drawable.ic_route_preview;
+      }
+    }
     return AppCompatResources.getDrawable(context, overviewResId);
   }
 
   /**
-   * Looks are current theme and retrieves the style
+   * Looks at current theme and retrieves the style
    * for the given resId set in the theme.
    *
    * @param context    to retrieve the resolved attribute
@@ -75,6 +91,23 @@ public class ThemeSwitcher {
   public static int retrieveNavigationViewStyle(Context context, int styleResId) {
     TypedValue outValue = resolveAttributeFromId(context, styleResId);
     return outValue.resourceId;
+  }
+
+  /**
+   * Looks at current theme and retrieves the resource
+   * for the given attrId set in the theme.
+   *
+   * @param context to retrieve the resolved attribute
+   * @param attrId  for the given attribute Id
+   * @return resolved resource Id
+   */
+  public static int retrieveAttrResourceId(Context context, int attrId, int defaultResId) {
+    TypedValue outValue = resolveAttributeFromId(context, attrId);
+    if (isValid(outValue.resourceId)) {
+      return outValue.resourceId;
+    } else {
+      return defaultResId;
+    }
   }
 
   /**
@@ -139,5 +172,9 @@ public class ThemeSwitcher {
   private static int retrieveThemeResIdFromPreferences(Context context, String key) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     return preferences.getInt(key, 0);
+  }
+
+  private static boolean isValid(@AnyRes int resId) {
+    return resId != -1 && (resId & 0xff000000) != 0 && (resId & 0x00ff0000) != 0;
   }
 }

@@ -7,6 +7,10 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.libnavigation.ui.R;
@@ -27,9 +31,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
-import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer;
 import com.mapbox.navigation.ui.arrival.DestinationBuildingFootprintLayer;
+import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.puck.NavigationPuckPresenter;
 import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
@@ -39,11 +43,6 @@ import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import androidx.annotation.AnyRes;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
@@ -71,9 +70,9 @@ public class NavigationMapboxMap {
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
   private static final double NAVIGATION_INITIAL_MAP_ZOOM = 17d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
-          = new CopyOnWriteArrayList<>();
+    = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
-          = new MapWayNameChangedListener(onWayNameChangedListeners);
+    = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -708,27 +707,15 @@ public class NavigationMapboxMap {
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     Style style = map.getStyle();
-    int locationLayerStyleRes = findLayerStyleRes(context);
+    int locationLayerStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
+      R.attr.navigationViewLocationLayerStyle, R.style.NavigationLocationLayerStyle);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
-            .locationComponentOptions(options)
-            .useDefaultLocationEngine(false)
-            .build();
+      .locationComponentOptions(options)
+      .useDefaultLocationEngine(false)
+      .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
-  }
-
-  private int findLayerStyleRes(Context context) {
-    int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
-            R.attr.navigationViewLocationLayerStyle);
-    if (!isValid(locationLayerStyleRes)) {
-      locationLayerStyleRes = R.style.NavigationLocationLayerStyle;
-    }
-    return locationLayerStyleRes;
-  }
-
-  private boolean isValid(@AnyRes int resId) {
-    return resId != -1 && (resId & 0xff000000) != 0 && (resId & 0x00ff0000) != 0;
   }
 
   private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
@@ -750,7 +737,8 @@ public class NavigationMapboxMap {
 
   private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
-    int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
+    int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
+      R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute);
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
   }
 
