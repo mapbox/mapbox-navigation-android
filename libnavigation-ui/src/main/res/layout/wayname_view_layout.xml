@@ -17,7 +17,6 @@
         android:paddingLeft="@dimen/wayname_padding"
         android:paddingRight="@dimen/wayname_padding"
         android:paddingBottom="@dimen/wayname_padding_bottom"
-        android:textColor="?attr/navigationViewAccent"
         android:textStyle="bold"
         tools:text="Wayname Text"/>
 

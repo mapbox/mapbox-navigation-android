@@ -16,7 +16,6 @@
         android:ellipsize="end"
         android:includeFontPadding="false"
         android:maxLines="1"
-        android:textColor="?attr/navigationViewPrimaryText"
         android:textSize="26sp"
         app:autoSizeMaxTextSize="26sp"
         app:autoSizeMinTextSize="20sp"
@@ -36,7 +35,6 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondaryText"
             android:textSize="18sp"
             tools:text="17 miles"/>
 
@@ -49,7 +47,6 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="1"
-            android:textColor="?attr/navigationViewSecondaryText"
             android:textSize="18sp"
             tools:text="10:38am"/>
 

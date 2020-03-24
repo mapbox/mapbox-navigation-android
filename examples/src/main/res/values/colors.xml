@@ -6,4 +6,14 @@
     <color name="ic_launcher_background">#2D4E73</color>
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- Instruction View -->
+    <color name="instruction_view_primary_background">@android:color/holo_blue_light</color>
+    <color name="instruction_view_secondary_background">@android:color/holo_blue_bright</color>
+    <color name="instruction_list_view_background">@android:color/holo_blue_dark</color>
+    <color name="instruction_view_primary_text">@android:color/holo_orange_light</color>
+    <color name="instruction_view_secondary_text">@android:color/holo_orange_dark</color>
+    <color name="instruction_maneuver_view_primary">@color/mapbox_navigation_view_color_banner_maneuver_primary</color>
+    <color name="instruction_maneuver_view_secondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary</color>
+
 </resources>

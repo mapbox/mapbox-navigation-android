@@ -1,13 +1,17 @@
 package com.mapbox.navigation.ui;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.mapbox.libnavigation.ui.R;
 
@@ -27,6 +31,12 @@ public class RecenterButton extends CardView implements NavigationButton {
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
   private Animation slideUpBottom;
 
+  private ImageView recenterIcon;
+  private TextView recenterText;
+
+  private int primaryColor;
+  private int secondaryColor;
+
   public RecenterButton(Context context) {
     this(context, null);
   }
@@ -37,6 +47,7 @@ public class RecenterButton extends CardView implements NavigationButton {
 
   public RecenterButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    initAttributes(attrs);
     init();
   }
 
@@ -92,6 +103,8 @@ public class RecenterButton extends CardView implements NavigationButton {
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
+    bind();
+    applyAttributes();
     initAnimation();
   }
 
@@ -115,6 +128,30 @@ public class RecenterButton extends CardView implements NavigationButton {
     multiOnClickListener.clearListeners();
     multiOnClickListener = null;
     setOnClickListener(null);
+  }
+
+  private void initAttributes(AttributeSet attributeSet) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.RecenterButton);
+    primaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.RecenterButton_recenterButtonPrimaryColor,
+        R.color.mapbox_recenter_button_primary));
+    secondaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.RecenterButton_recenterButtonSecondaryColor,
+        R.color.mapbox_recenter_button_secondary));
+
+    typedArray.recycle();
+  }
+
+  private void bind() {
+    recenterIcon = findViewById(R.id.recenterIcon);
+    recenterText = findViewById(R.id.recenterText);
+  }
+
+  private void applyAttributes() {
+    CardView recenterBtnCardView = findViewById(R.id.recenterBtnCardView);
+    recenterBtnCardView.setCardBackgroundColor(primaryColor);
+    recenterIcon.setColorFilter(secondaryColor);
+    recenterText.setTextColor(secondaryColor);
   }
 
   /**

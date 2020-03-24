@@ -8,18 +8,17 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.libnavigation.ui.R;
-import com.mapbox.navigation.ui.ThemeSwitcher;
 
 class FeedbackViewHolder extends RecyclerView.ViewHolder {
 
   private ImageView feedbackImage;
   private TextView feedbackText;
 
-  FeedbackViewHolder(View itemView) {
+  FeedbackViewHolder(View itemView, int textColor) {
     super(itemView);
     feedbackImage = itemView.findViewById(R.id.feedbackImage);
     feedbackText = itemView.findViewById(R.id.feedbackText);
-    initTextColor(feedbackText);
+    feedbackText.setTextColor(textColor);
   }
 
   void setFeedbackImage(int feedbackImageId) {
@@ -30,12 +29,4 @@ class FeedbackViewHolder extends RecyclerView.ViewHolder {
     this.feedbackText.setText(feedbackText);
   }
 
-  private void initTextColor(TextView feedbackText) {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewSecondaryColor = ThemeSwitcher.retrieveThemeColor(feedbackText.getContext(),
-        R.attr.navigationViewSecondary);
-      // Text color
-      feedbackText.setTextColor(navigationViewSecondaryColor);
-    }
-  }
 }

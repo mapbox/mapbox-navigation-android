@@ -15,8 +15,6 @@
         android:layout_marginRight="16dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="@dimen/fab_feedback_margin_top"
-        android:tint="?attr/navigationViewSecondary"
-        app:backgroundTint="?attr/navigationViewPrimary"
         app:borderWidth="0dp"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"

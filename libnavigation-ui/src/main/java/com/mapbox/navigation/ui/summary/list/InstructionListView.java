@@ -21,4 +21,7 @@ interface InstructionListView {
   void updateSecondaryVisibility(int visibility);
 
   void updateBannerVerticalBias(float bias);
+
+  void updateViewColors(int primaryTextColor, int secondaryTextColor,
+                        int maneuverPrimaryColor, int maneuverSecondaryColor);
 }

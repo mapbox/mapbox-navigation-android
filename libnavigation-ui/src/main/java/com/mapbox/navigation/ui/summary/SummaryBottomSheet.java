@@ -2,14 +2,22 @@ package com.mapbox.navigation.ui.summary;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -26,7 +34,7 @@ import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.NavigationViewModel;
-import com.mapbox.navigation.ui.ThemeSwitcher;
+import com.mapbox.navigation.ui.utils.ViewUtils;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -50,6 +58,15 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   private TextView timeRemainingText;
   private TextView arrivalTimeText;
   private ProgressBar rerouteProgressBar;
+
+  private int primaryBackgroundColor;
+  private int secondaryBackgroundColor;
+  private int dividerColor;
+  private int progressBarBackgroundColor;
+  private int primaryTextColor;
+  private int secondaryTextColor;
+  private int routeOverviewDrawable;
+
   private boolean isRerouting;
   @SuppressLint("WrongConstant")
   @TimeFormatType
@@ -68,6 +85,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    initAttributes(attrs);
     initialize();
   }
 
@@ -80,6 +98,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
+    applyAttributes();
   }
 
   /**
@@ -195,6 +214,29 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     }
   }
 
+  private void initAttributes(AttributeSet attributeSet) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.SummaryBottomSheet);
+    primaryBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetPrimaryColor, R.color.mapbox_summary_bottom_sheet_primary));
+    secondaryBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetSecondaryColor, R.color.mapbox_summary_bottom_sheet_secondary));
+    dividerColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetDividerColor, R.color.mapbox_summary_bottom_sheet_divider));
+    progressBarBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetProgressBarColor,
+      R.color.mapbox_summary_bottom_sheet_progress_bar));
+    primaryTextColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetPrimaryTextColor,
+      R.color.mapbox_summary_bottom_sheet_primary_text));
+    secondaryTextColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetSecondaryTextColor,
+      R.color.mapbox_summary_bottom_sheet_secondary_text));
+    routeOverviewDrawable = typedArray.getResourceId(
+      R.styleable.SummaryBottomSheet_summaryBottomSheetRouteOverviewDrawable, R.drawable.ic_route_preview);
+
+    typedArray.recycle();
+  }
+
   /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
@@ -221,12 +263,38 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     timeRemainingText = findViewById(R.id.timeRemainingText);
     arrivalTimeText = findViewById(R.id.arrivalTimeText);
     rerouteProgressBar = findViewById(R.id.rerouteProgressBar);
-    updateRouteOverviewImage();
   }
 
-  private void updateRouteOverviewImage() {
+  private void applyAttributes() {
+    findViewById(R.id.summaryPeekLayout).setBackgroundColor(primaryBackgroundColor);
+    timeRemainingText.setTextColor(primaryTextColor);
+    distanceRemainingText.setTextColor(secondaryTextColor);
+    arrivalTimeText.setTextColor(secondaryTextColor);
+
     ImageButton routeOverviewBtn = findViewById(R.id.routeOverviewBtn);
-    routeOverviewBtn.setImageDrawable(ThemeSwitcher.retrieveThemeOverviewDrawable(getContext()));
+    routeOverviewBtn.setImageDrawable(AppCompatResources.getDrawable(getContext(), routeOverviewDrawable));
+    Drawable routeOverviewBtnDrawable = DrawableCompat.wrap(routeOverviewBtn.getDrawable()).mutate();
+    DrawableCompat.setTint(routeOverviewBtnDrawable, secondaryBackgroundColor);
+
+    AppCompatImageButton cancelBtn = findViewById(R.id.cancelBtn);
+    Drawable cancelBtnDrawable = DrawableCompat.wrap(cancelBtn.getDrawable()).mutate();
+    DrawableCompat.setTint(cancelBtnDrawable, secondaryBackgroundColor);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      rerouteProgressBar.getIndeterminateDrawable().setTint(progressBarBackgroundColor);
+    }
+
+    if (ViewUtils.isLandscape(getContext())) {
+      ImageView dividerImgViewFirst = findViewById(R.id.dividerImgViewFirst);
+      Drawable dividerImgViewFirstDrawable = DrawableCompat.wrap(dividerImgViewFirst.getDrawable()).mutate();
+      DrawableCompat.setTint(dividerImgViewFirstDrawable, secondaryBackgroundColor);
+
+      ImageView dividerImgViewSecond = findViewById(R.id.dividerImgViewSecond);
+      Drawable dividerImgViewSecondDrawable = DrawableCompat.wrap(dividerImgViewSecond.getDrawable()).mutate();
+      DrawableCompat.setTint(dividerImgViewSecondDrawable, secondaryBackgroundColor);
+    } else {
+      findViewById(R.id.divider).setBackgroundColor(dividerColor);
+    }
   }
 
   /**

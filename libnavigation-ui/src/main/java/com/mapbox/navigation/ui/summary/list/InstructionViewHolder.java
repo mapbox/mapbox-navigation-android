@@ -73,6 +73,16 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
     adjustBannerVerticalBias(percentBias);
   }
 
+  @Override
+  public void updateViewColors(int primaryTextColor, int secondaryTextColor,
+                               int maneuverPrimaryColor, int maneuverSecondaryColor) {
+    primaryText.setTextColor(primaryTextColor);
+    secondaryText.setTextColor(secondaryTextColor);
+    distanceText.setTextColor(secondaryTextColor);
+    maneuverView.setPrimaryColor(maneuverPrimaryColor);
+    maneuverView.setSecondaryColor(maneuverSecondaryColor);
+  }
+
   private void adjustBannerVerticalBias(float percentBias) {
     int orientation = itemView.getResources().getConfiguration().orientation;
     if (orientation == Configuration.ORIENTATION_PORTRAIT) {

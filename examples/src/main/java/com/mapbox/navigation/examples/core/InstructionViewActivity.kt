@@ -53,6 +53,7 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
+import com.mapbox.navigation.ui.instruction.NavigationAlertView
 import com.mapbox.navigation.ui.legacy.NavigationConstants
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.utils.ViewUtils
@@ -84,6 +85,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     private var locationComponent: LocationComponent? = null
     private var feedbackButton: NavigationButton? = null
     private var instructionSoundButton: NavigationButton? = null
+    private var alertView: NavigationAlertView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.d("onCreate savedInstanceState=%s", savedInstanceState)
@@ -194,6 +196,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
             mapboxMap?.snapshot { snapshot ->
+                alertView?.showFeedbackSubmitted()
                 MapboxNavigation.postUserFeedback(
                     TelemetryUtils.obtainUniversalUniqueIdentifier(),
                     feedback.feedbackType, feedback.description, encodeSnapshot(snapshot)
@@ -311,6 +314,10 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                     speechPlayer.isMuted = soundButton.toggleMute()
                 }
             }
+        }
+
+        alertView = instructionView.retrieveAlertView().apply {
+            hide()
         }
     }
 
