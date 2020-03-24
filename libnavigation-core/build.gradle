@@ -54,6 +54,9 @@ dependencies {
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
     testImplementation dependenciesList.commonsIO
+
+    testImplementation project(':libdirections-hybrid')
+    testImplementation project(':libtrip-notification')
 }
 
 apply from: "${rootDir}/gradle/jacoco.gradle"
