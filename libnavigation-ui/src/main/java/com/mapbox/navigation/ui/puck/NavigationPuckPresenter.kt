@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -56,12 +57,12 @@ class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupp
     }
 
     private fun updateCurrentLocationDrawable(@DrawableRes gpsDrawable: Int) {
+        val cameraUpdateWithPadding = CameraUpdateFactory.paddingTo(mapboxMap.cameraPosition.padding)
         val options: LocationComponentOptions = mapboxMap.locationComponent.locationComponentOptions
         if (options.gpsDrawable() != gpsDrawable) {
-            val newOptions = options.toBuilder()
-                    .gpsDrawable(gpsDrawable)
-                    .build()
+            val newOptions = options.toBuilder().gpsDrawable(gpsDrawable).build()
             mapboxMap.locationComponent.applyStyle(newOptions)
+            mapboxMap.moveCamera(cameraUpdateWithPadding)
         }
     }
 }
