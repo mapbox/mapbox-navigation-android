@@ -120,6 +120,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     } else {
                         mapboxNavigation.setRoutes(listOf(originalRoute))
                     }
+                    replayRouteLocationEngine.assign(originalRoute)
                 }
             }
         }
@@ -209,6 +210,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     remove(route)
                     add(0, route)
                 })
+                replayRouteLocationEngine.assign(route)
             }
         }
 
@@ -341,6 +343,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             originalRoute = routes[0]
+            navigationMapboxMap.drawRoutes(routes)
             Timber.d("route request success %s", routes.toString())
             replayRouteLocationEngine.assign(originalRoute)
         }

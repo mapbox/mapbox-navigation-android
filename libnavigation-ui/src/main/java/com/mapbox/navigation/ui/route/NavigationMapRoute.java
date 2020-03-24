@@ -19,6 +19,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.ui.utils.CompareUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +209,14 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @since 0.8.0
    */
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
-    routeLine.draw(directionsRoutes);
+    if (directionsRoutes.isEmpty()) {
+      routeLine.draw(directionsRoutes);
+    } else if (!CompareUtils.INSTANCE.areEqualContentsIgnoreOrder(
+            routeLine.retrieveDirectionsRoutes(),
+            directionsRoutes)
+    ) {
+      routeLine.draw(directionsRoutes);
+    }
   }
 
   /**

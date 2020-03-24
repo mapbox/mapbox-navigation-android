@@ -7,14 +7,17 @@ import com.mapbox.navigation.core.MapboxNavigation;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationMapRouteTest {
 
@@ -233,6 +236,30 @@ public class NavigationMapRouteTest {
     theNavigationMapRoute.addRoutes(routes);
 
     verify(mockedMapRouteLine).draw(eq(routes));
+  }
+
+  @Test
+  public void addRoutesDrawNotCalled() {
+    DirectionsRoute mockRoute = mock(DirectionsRoute.class);
+    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
+    MapView mockedMapView = mock(MapView.class);
+    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
+    int mockedStyleRes = 0;
+    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
+    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
+            mock(MapView.OnDidFinishLoadingStyleListener.class);
+    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
+    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
+    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
+    List<DirectionsRoute> routes = Collections.singletonList(mockRoute);
+    NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
+            mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
+            mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mockRoute));
+
+    theNavigationMapRoute.addRoutes(routes);
+
+    verify(mockedMapRouteLine, never()).draw(eq(routes));
   }
 
   @Test
