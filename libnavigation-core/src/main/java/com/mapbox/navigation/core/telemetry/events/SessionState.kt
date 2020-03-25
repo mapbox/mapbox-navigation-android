@@ -1,13 +1,11 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.location.Location
-import androidx.annotation.Keep
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.telemetry.obtainGeometry
 import com.mapbox.navigation.core.telemetry.obtainStepCount
 import java.util.Date
 
-@Keep
 data class SessionState(
     var secondsSinceLastReroute: Int = -1,
     var eventRouteProgress: MetricsRouteProgress = MetricsRouteProgress(null),

@@ -2,10 +2,8 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
 import android.location.Location
-import androidx.annotation.Keep
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
-@Keep
 @SuppressLint("ParcelCreator")
 internal class NavigationFeedbackEvent(
     phoneState: PhoneState,

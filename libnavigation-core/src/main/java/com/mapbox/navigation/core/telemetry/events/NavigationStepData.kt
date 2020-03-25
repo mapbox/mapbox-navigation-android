@@ -1,11 +1,8 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import androidx.annotation.Keep
-
 /**
  * Class that contains step meta data
  */
-@Keep
 internal class NavigationStepData(metricsRouteProgress: MetricsRouteProgress) {
     val upcomingInstruction: String? = metricsRouteProgress.upcomingStepInstruction // Schema minLength 1
     val upcomingModifier: String? = metricsRouteProgress.upcomingStepModifier

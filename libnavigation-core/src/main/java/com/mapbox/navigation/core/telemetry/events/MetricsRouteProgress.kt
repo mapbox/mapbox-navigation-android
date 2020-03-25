@@ -1,13 +1,11 @@
 package com.mapbox.navigation.core.telemetry.events
 
-import androidx.annotation.Keep
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.extensions.ifNonNull
 
-@Keep
 class MetricsRouteProgress(routeProgress: RouteProgress?) {
 
     companion object {
