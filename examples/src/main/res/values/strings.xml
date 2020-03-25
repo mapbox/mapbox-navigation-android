@@ -65,6 +65,9 @@
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
     <string name="description_component_navigation" translatable="false">MapboxNavigation with UI components</string>
 
+    <string name="title_debug_navigation_kotlin" translatable="false">Debug Mapbox Navigation Kotlin</string>
+    <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update</string>
+
     <string name="settings" translatable="false">Settings</string>
     <string name="simulate_route" translatable="false">Simulate Route</string>
     <string name="language" translatable="false">Language</string>
