@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.voice;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.navigation.ui.ConnectivityStatusProvider;
@@ -121,7 +122,9 @@ public class VoiceInstructionLoader {
   }
 
   private void cacheInstruction(String instruction) {
-    requestInstruction(instruction, SSML_TEXT_TYPE, new InstructionCacheCallback(this));
+    if (!TextUtils.isEmpty(instruction)) {
+      requestInstruction(instruction, SSML_TEXT_TYPE, new InstructionCacheCallback(this));
+    }
   }
 
   private Interceptor provideOfflineCacheInterceptor() {
