@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.utils
 
-object CompareUtils {
+internal object CompareUtils {
+
+    @JvmStatic
     fun <T> areEqualContentsIgnoreOrder(first: Collection<T>, second: Collection<T>): Boolean {
         if (first !== second) {
             if (first.size != second.size) return false
