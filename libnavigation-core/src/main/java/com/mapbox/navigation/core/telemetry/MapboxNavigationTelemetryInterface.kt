@@ -1,13 +1,13 @@
 package com.mapbox.navigation.core.telemetry
 
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
 interface MapboxNavigationTelemetryInterface {
     fun postUserFeedback(
-        @TelemetryUserFeedback.FeedbackType feedbackType: String,
+        @FeedbackEvent.FeedbackType feedbackType: String,
         description: String,
-        @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
+        @FeedbackEvent.FeedbackSource feedbackSource: String,
         screenshot: String?
     )
 

@@ -43,7 +43,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
-import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -101,9 +101,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         findViewById<Button>(R.id.btn_send_user_feedback)?.let { button ->
             button.setOnClickListener {
                 MapboxNavigation.postUserFeedback(
-                    TelemetryUserFeedback.FEEDBACK_TYPE_GENERAL_ISSUE,
+                    FeedbackEvent.FEEDBACK_TYPE_GENERAL_ISSUE,
                     "User feedback test at: ${Date().time}",
-                    TelemetryUserFeedback.FEEDBACK_SOURCE_UI,
+                    FeedbackEvent.FEEDBACK_SOURCE_UI,
                     null
                 )
             }

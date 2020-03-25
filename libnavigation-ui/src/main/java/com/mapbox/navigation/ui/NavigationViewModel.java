@@ -53,7 +53,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback.FEEDBACK_SOURCE_UI;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_SOURCE_UI;
 
 public class NavigationViewModel extends AndroidViewModel {
 

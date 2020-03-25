@@ -36,7 +36,7 @@ import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
-import com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -551,9 +551,9 @@ constructor(
 
         @JvmStatic
         fun postUserFeedback(
-            @TelemetryUserFeedback.FeedbackType feedbackType: String,
+            @FeedbackEvent.FeedbackType feedbackType: String,
             description: String,
-            @TelemetryUserFeedback.FeedbackSource feedbackSource: String,
+            @FeedbackEvent.FeedbackSource feedbackSource: String,
             screenshot: String?
         ) {
             MapboxNavigationTelemetry.postUserFeedback(
