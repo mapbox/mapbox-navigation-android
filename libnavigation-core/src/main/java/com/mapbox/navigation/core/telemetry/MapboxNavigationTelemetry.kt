@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
@@ -306,6 +307,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             weakMapboxNavigation = WeakReference(mapboxNavigation)
             registerForNotification(mapboxNavigation)
             monitorOffRouteEvents()
+            monitorFreedriveTransition()
             populateOriginalRouteConditionally()
             this.context = context
             localUserAgent = userAgent
@@ -376,6 +378,42 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     callbackDispatcher.flushBuffers()
                 }
             }
+        }
+    }
+    private fun freeDriveNotificationTest(msg: String, returnValue: Boolean, navigationState: NavigationSession.State) =
+        when (navigationState) {
+            NavigationSession.State.IDLE -> {
+                Log.d(TAG, msg + "Current NavigationState =  IDLE")
+                returnValue
+            }
+            NavigationSession.State.ACTIVE_GUIDANCE -> {
+                Log.d(TAG, msg + "Current NavigationState = ACTIVE-GUIDANCE")
+                returnValue
+            }
+            NavigationSession.State.FREE_DRIVE -> {
+                Log.d(TAG, msg + "Current NavigationState = FREE_DRIVE")
+                returnValue
+            }
+        }
+
+    private fun monitorFreedriveTransition() {
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_1 -- ", true, navigationState)
+        }
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_2 -- ", true, navigationState)
+        }
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_3 -- ", true, navigationState)
+        }
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_4 -- ", false, navigationState)
+        }
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_5 -- ", true, navigationState)
+        }
+        weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
+            freeDriveNotificationTest("Coroutine_6 -- ", false, navigationState)
         }
     }
 

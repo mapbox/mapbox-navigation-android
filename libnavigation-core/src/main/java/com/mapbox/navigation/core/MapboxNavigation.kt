@@ -230,6 +230,7 @@ constructor(
      */
     fun getTripSessionState() = tripSession.getState()
 
+    internal fun getNavigationSession() = navigationSession
     /**
      * Requests a route using the provided [Router] implementation.
      * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
