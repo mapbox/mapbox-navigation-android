@@ -211,7 +211,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
     if (directionsRoutes.isEmpty()) {
       routeLine.draw(directionsRoutes);
-    } else if (!CompareUtils.INSTANCE.areEqualContentsIgnoreOrder(
+    } else if (!CompareUtils.areEqualContentsIgnoreOrder(
             routeLine.retrieveDirectionsRoutes(),
             directionsRoutes)
     ) {
