@@ -12,10 +12,10 @@ import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import static com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.navigation.core.telemetry.events.TelemetryUserFeedback.FEEDBACK_TYPE_ROUTING_ERROR;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
 
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 

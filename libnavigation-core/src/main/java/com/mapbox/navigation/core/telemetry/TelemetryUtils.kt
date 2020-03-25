@@ -6,11 +6,8 @@ import android.media.AudioManager
 import android.provider.Settings
 import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.base.trip.model.RouteLegProgress
-import com.mapbox.navigation.core.telemetry.events.TelemetryStep
 import com.mapbox.navigation.utils.audio.AudioTypeChain
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.turf.TurfConstants
@@ -22,44 +19,6 @@ private const val PRECISION_5 = 5
 private const val PERCENT_NORMALIZER = 100.0
 private const val SCREEN_BRIGHTNESS_MAX = 255.0
 private const val BRIGHTNESS_EXCEPTION_VALUE = -1
-
-fun populateTelemetryStep(legProgress: RouteLegProgress): TelemetryStep {
-    return TelemetryStep(
-        legProgress.upcomingStep()?.maneuver()?.instruction() ?: "",
-        legProgress.upcomingStep()?.maneuver()?.type() ?: "",
-        legProgress.upcomingStep()?.maneuver()?.type() ?: "",
-        legProgress.upcomingStep()?.name() ?: "",
-
-        legProgress.currentStepProgress()?.step()?.maneuver()?.instruction() ?: "",
-        legProgress.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-        legProgress.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-        legProgress.currentStepProgress()?.step()?.name() ?: "",
-
-        legProgress.currentStepProgress()?.distanceTraveled()?.toInt() ?: 0,
-        legProgress.currentStepProgress()?.durationRemaining()?.toInt() ?: 0,
-        legProgress.upcomingStep()?.distance()?.toInt() ?: 0,
-        legProgress.upcomingStep()?.duration()?.toInt() ?: 0
-    )
-}
-
-fun populateTelemetryStep(legProgress: LegStep, prevLeg: RouteLegProgress?): TelemetryStep {
-    return TelemetryStep(
-        legProgress.maneuver().instruction() ?: "",
-        legProgress.maneuver().type() ?: "",
-        legProgress.maneuver().type() ?: "",
-        legProgress.name() ?: "",
-
-        prevLeg?.currentStepProgress()?.step()?.maneuver()?.instruction() ?: "",
-        prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-        prevLeg?.currentStepProgress()?.step()?.maneuver()?.type() ?: "",
-        prevLeg?.currentStepProgress()?.step()?.name() ?: "",
-
-        prevLeg?.currentStepProgress()?.distanceTraveled()?.toInt() ?: 0,
-        prevLeg?.currentStepProgress()?.durationRemaining()?.toInt() ?: 0,
-        legProgress.distance().toInt(),
-        legProgress.duration().toInt()
-    )
-}
 
 fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
     ifNonNull(directionsRoute, directionsRoute?.geometry()) { _, geometry ->
@@ -114,18 +73,6 @@ fun obtainScreenBrightness(context: Context): Int =
 
 fun obtainAudioType(context: Context): String =
     AudioTypeChain().setup().obtainAudioType(context)
-
-fun getRouteGeometry(newDirectionsRoute: DirectionsRoute): String {
-    val geometryPositions = PolylineUtils.decode(
-        newDirectionsRoute.geometry() ?: "",
-        PRECISION_6
-    )
-    PolylineUtils.encode(geometryPositions, PRECISION_5)
-    return PolylineUtils.encode(
-        geometryPositions,
-        PRECISION_5
-    )
-}
 
 private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =
     floor(PERCENT_NORMALIZER * screenBrightness / SCREEN_BRIGHTNESS_MAX).toInt()
