@@ -24,38 +24,38 @@ workflows:
       - release-core-1_0:
           filters:
             tags:
-              only: /^release-core-.*/
+              only: /^release_core_*/
             branches:
               ignore: /.*/
       - release-ui-1_0:
           filters:
             tags:
-              only: /^release-ui-.*-core-.*/
+              only: /^release_ui_*_core_*/
             branches:
               ignore: /.*/
       - release-core-1_0-qa:
           filters:
             tags:
-              only: /^qa-release-core-.*/
+              only: /^qa_release_core_*/
             branches:
               ignore: /.*/
       - release-ui-1_0-qa:
           filters:
             tags:
-              only: /^qa-release-ui-.*-core-.*/
+              only: /^qa_release_ui_*_core_*/
             branches:
               ignore: /.*/
       - release-core-1_0-prod:
           filters:
             tags:
-              only: /^prod-release-core-.*/
+              only: /^prod_release_core_*/
             branches:
               ignore: /.*/
 
       - release-ui-1_0-prod:
           filters:
             tags:
-              only: /^prod-release-ui-.*-core-.*/
+              only: /^prod_release_ui_*_core_*/
             branches:
               ignore: /.*/
       - ui-tests-1_0
@@ -252,11 +252,11 @@ commands:
           name: Generate Core version name
           command: |
             if [[ -n "$CIRCLE_TAG" ]]; then
-              if [[ $CIRCLE_TAG == release-core-.* ]]; then
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 3`
-              elif [[ $CIRCLE_TAG == qa-release-core-.*
-                        || $CIRCLE_TAG == prod-release-core-.* ]]; then
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 4`
+              if [[ $CIRCLE_TAG == release_core_* ]]; then
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
+              elif [[ $CIRCLE_TAG == qa_release_core_*
+                        || $CIRCLE_TAG == prod_release_core_* ]]; then
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
               else
                 echo "Exiting the job as this is not a release TAG"
                 exit 1
@@ -270,13 +270,13 @@ commands:
           name: Generate UI version name
           command: |
             if [[ -n "$CIRCLE_TAG" ]]; then
-              if [[ $CIRCLE_TAG == release-ui-.*-core-.* ]]; then
-                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 3`
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 5`
-              elif [[ $CIRCLE_TAG == qa-release-ui-.*-core-.*
-                        || $CIRCLE_TAG == prod-release-ui-.*-core-.* ]]; then
-                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 4`
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '-' -f 6`
+              if [[ $CIRCLE_TAG == release_ui_*_core_* ]]; then
+                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 5`
+              elif [[ $CIRCLE_TAG == qa_release_ui_*_core_*
+                        || $CIRCLE_TAG == prod_release_ui_*_core_* ]]; then
+                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 6`
               else
                 echo "Exiting the job as this is not a release TAG"
                 exit 1
