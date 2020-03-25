@@ -307,7 +307,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             weakMapboxNavigation = WeakReference(mapboxNavigation)
             registerForNotification(mapboxNavigation)
             monitorOffRouteEvents()
-            monitorFreedriveTransition()
+            registerForFreeDriveNotification()
             populateOriginalRouteConditionally()
             this.context = context
             localUserAgent = userAgent
@@ -396,7 +396,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             }
         }
 
-    private fun monitorFreedriveTransition() {
+    private fun registerForFreeDriveNotification() {
         weakMapboxNavigation.get()?.getNavigationSession()?.getNavigatoinSessionState { navigationState ->
             freeDriveNotificationTest("Coroutine_1 -- ", true, navigationState)
         }

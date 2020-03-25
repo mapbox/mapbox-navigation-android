@@ -153,7 +153,7 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
             }
         }
     }
-    internal fun getNavigatoinSessionState(predicate: (State) -> Boolean) {
+    internal fun getNavigatoinSessionState(predicate: suspend (State) -> Boolean) {
         callbackList.addItem { predicate(state) }
     }
     internal fun registerNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
