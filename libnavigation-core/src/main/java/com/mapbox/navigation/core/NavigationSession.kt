@@ -1,14 +1,12 @@
 package com.mapbox.navigation.core
 
-import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import java.util.concurrent.CopyOnWriteArrayList
 
-internal class NavigationSession(private val context: Context) : RoutesObserver,
+internal class NavigationSession : RoutesObserver,
     TripSessionStateObserver {
 
     private val stateObservers = CopyOnWriteArrayList<NavigationSessionStateObserver>()
@@ -18,19 +16,9 @@ internal class NavigationSession(private val context: Context) : RoutesObserver,
             if (field == value) {
                 return
             }
-            val previousValue = state
             field = value
 
             stateObservers.forEach { it.onNavigationSessionStateChanged(value) }
-
-            when {
-                previousValue == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
-                    context.applicationContext
-                ).navigationStopped()
-                value == State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
-                    context.applicationContext
-                ).navigationStarted()
-            }
         }
 
     private var hasRoutes = false
