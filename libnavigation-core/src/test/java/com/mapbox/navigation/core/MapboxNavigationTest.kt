@@ -28,7 +28,9 @@ import com.mapbox.navigation.core.module.NavigationModuleProvider
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.extensions.inferDeviceLocale
+import com.mapbox.navigation.utils.thread.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -44,12 +46,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 class MapboxNavigationTest {
+
+    @get:Rule
+    var coroutineRule = MainCoroutineRule()
 
     private val accessToken = "pk.1234"
     private val context: Context = mockk(relaxed = true)
@@ -139,8 +144,6 @@ class MapboxNavigationTest {
         assertNotNull(mapboxNavigation)
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun onDestroy_unregisters_DirectionSession_observers() {
         mapboxNavigation.onDestroy()
@@ -148,8 +151,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { directionsSession.unregisterAllRoutesObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun onDestroy_unregisters_TripSession_location_observers() {
         mapboxNavigation.onDestroy()
@@ -157,8 +158,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterAllLocationObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun onDestroy_unregisters_TripSession_routeProgress_observers() {
         mapboxNavigation.onDestroy()
@@ -166,8 +165,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterAllRouteProgressObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun onDestroy_unregisters_TripSession_offRoute_observers() {
         mapboxNavigation.onDestroy()
@@ -175,8 +172,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterAllOffRouteObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun onDestroy_unregisters_TripSession_state_observers() {
         mapboxNavigation.onDestroy()
@@ -184,8 +179,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterAllStateObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun unregisterAllBannerInstructionsObservers() {
         mapboxNavigation.onDestroy()
@@ -193,8 +186,6 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterAllBannerInstructionsObservers() }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun unregisterAllVoiceInstructionsObservers() {
         mapboxNavigation.onDestroy()
@@ -224,14 +215,14 @@ class MapboxNavigationTest {
         verify(exactly = 1) { directionsSession.requestRoutes(any(), any()) }
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry calling functions are now suspendable
-    @Ignore
     @Test
     fun getEnhancedLocation_reRoute() {
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+        val observers = mutableListOf<OffRouteObserver>()
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(capture(observers)) }
 
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
+        observers.forEach {
+            it.onOffRouteStateChanged(true)
+        }
 
         verify(exactly = 1) { tripSession.getEnhancedLocation() }
         verify(exactly = 0) { tripSession.getRawLocation() }
@@ -239,25 +230,21 @@ class MapboxNavigationTest {
 
     @Test
     fun enhanced_location_used_for_reroute() {
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+        val observers = mutableListOf<OffRouteObserver>()
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(capture(observers)) }
         mockkObject(AdjustedRouteOptionsProvider)
         val mockedLocation = Location("mock")
         every { tripSession.getEnhancedLocation() } returns mockedLocation
 
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
+        observers.forEach {
+            it.onOffRouteStateChanged(true)
+        }
 
         verify(exactly = 1) { AdjustedRouteOptionsProvider.getRouteOptions(eq(directionsSession), eq(tripSession), eq(mockedLocation)) }
-
-        // TODO This should be removed when getEnhancedLocation_reRoute is fixed - duplicating temporarily here so it's tested
-        verify(exactly = 1) { tripSession.getEnhancedLocation() }
-        verify(exactly = 0) { tripSession.getRawLocation() }
 
         unmockkObject(AdjustedRouteOptionsProvider)
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry#unregisterListeners initializer = initializerDelegate
-    @Ignore
     @Test
     fun reRoute_called_with_null_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinates()
@@ -282,16 +269,17 @@ class MapboxNavigationTest {
         assertEquals(expectedBearings, actualBearings)
     }
 
-    // TODO Fix test not working because of MapboxNavigationTelemetry#unregisterListeners initializer = initializerDelegate
     @Test
     fun reRoute_called_with_bearings() {
         val routeOptions = provideRouteOptionsWithCoordinatesAndBearings()
         every { directionsSession.getRouteOptions() } returns routeOptions
 
-        val offRouteObserverSlot = slot<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(offRouteObserverSlot)) }
+        val observers = mutableListOf<OffRouteObserver>()
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(capture(observers)) }
 
-        offRouteObserverSlot.captured.onOffRouteStateChanged(true)
+        observers.forEach {
+            it.onOffRouteStateChanged(true)
+        }
 
         val optionsSlot = slot<RouteOptions>()
         verify(exactly = 1) { directionsSession.requestRoutes(capture(optionsSlot), any()) }
@@ -421,5 +409,8 @@ class MapboxNavigationTest {
     fun tearDown() {
         unmockkObject(NavigationModuleProvider)
         unmockkObject(NavigationComponentProvider)
+
+        ThreadController.cancelAllNonUICoroutines()
+        ThreadController.cancelAllUICoroutines()
     }
 }
