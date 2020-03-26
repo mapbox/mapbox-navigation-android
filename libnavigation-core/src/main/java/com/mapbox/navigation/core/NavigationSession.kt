@@ -11,10 +11,16 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.utils.thread.ThreadController
 import java.lang.Exception
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.withContext
 
 private data class SessionStateDescriptor(var job: Job?, val predicate: suspend (NavigationSession.State) -> Boolean)
 private typealias SessionStatePredicate = suspend (NavigationSession.State) -> Boolean
