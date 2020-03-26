@@ -35,4 +35,6 @@ internal object NavigationComponentProvider {
         locationEngineRequest,
         navigatorPollingDelay
     )
+
+    fun createNavigationSession(): NavigationSession = NavigationSession()
 }

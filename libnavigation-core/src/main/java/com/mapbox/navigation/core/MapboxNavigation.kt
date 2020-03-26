@@ -134,7 +134,7 @@ constructor(
     private val directionsSession: DirectionsSession
     private val tripService: TripService
     private val tripSession: TripSession
-    private val navigationSession = NavigationSession()
+    private val navigationSession: NavigationSession
     private val navigationAccountsSession = NavigationAccountsSession(context)
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
@@ -148,6 +148,7 @@ constructor(
 
     init {
         ThreadController.init()
+        navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             NavigationModuleProvider.createModule(
                 MapboxNavigationModuleType.HybridRouter,
@@ -472,8 +473,7 @@ constructor(
                 directionsSession,
                 tripSession,
                 location
-            )
-                ?: return
+            ) ?: return
             directionsSession.requestRoutes(
                 optionsRebuilt,
                 null
