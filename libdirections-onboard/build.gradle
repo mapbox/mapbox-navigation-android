@@ -53,3 +53,4 @@ dependencies {
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
