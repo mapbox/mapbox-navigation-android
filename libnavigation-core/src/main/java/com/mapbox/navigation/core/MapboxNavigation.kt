@@ -26,6 +26,7 @@ import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.UNDEFINED
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -133,7 +134,8 @@ constructor(
     private val directionsSession: DirectionsSession
     private val tripService: TripService
     private val tripSession: TripSession
-    private val navigationSession = NavigationSession(context)
+    private val navigationSession = NavigationSession()
+    private val navigationAccountsSession = NavigationAccountsSession(context)
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteController: FasterRouteController
@@ -176,6 +178,7 @@ constructor(
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
+        navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
         ifNonNull(accessToken) { token ->
             Log.d("MAPBOX_TELEMETRY", "MapboxMetricsReporter.init from MapboxNavigation main")
             MapboxMetricsReporter.init(
@@ -294,6 +297,7 @@ constructor(
             tripSession.unregisterAllStateObservers()
             tripSession.unregisterAllBannerInstructionsObservers()
             tripSession.unregisterAllVoiceInstructionsObservers()
+            navigationSession.unregisterAllNavigationSessionStateObservers()
             fasterRouteController.stop()
             routeRefreshController.stop()
         }
