@@ -17,7 +17,7 @@ class RouteProgress private constructor(
     private val inTunnel: Boolean = false,
     private val distanceRemaining: Float = 0f,
     private val distanceTraveled: Float = 0f,
-    private val durationRemaining: Long = 0L,
+    private val durationRemaining: Double = 0.0,
     private val fractionTraveled: Float = 0f,
     private val remainingWaypoints: Int = 0,
     private val builder: Builder
@@ -41,11 +41,11 @@ class RouteProgress private constructor(
     fun distanceTraveled(): Float = distanceTraveled
 
     /**
-     * Provides the duration remaining in milliseconds till the user reaches the end of the route.
+     * Provides the duration remaining in seconds till the user reaches the end of the route.
      *
-     * @return `long` value representing the duration remaining till end of route, in milliseconds
+     * @return Double value representing the duration remaining till end of route, in seconds
      */
-    fun durationRemaining(): Long = durationRemaining
+    fun durationRemaining(): Double = durationRemaining
 
     /**
      * Get the fraction traveled along the current route, this is a float value between 0 and 1 and
@@ -141,7 +141,7 @@ class RouteProgress private constructor(
         private var inTunnel: Boolean = false,
         private var distanceRemaining: Float = 0f,
         private var distanceTraveled: Float = 0f,
-        private var durationRemaining: Long = 0L,
+        private var durationRemaining: Double = 0.0,
         private var fractionTraveled: Float = 0f,
         private var remainingWaypoints: Int = 0
     ) {
@@ -175,7 +175,7 @@ class RouteProgress private constructor(
         fun distanceTraveled(distanceTraveled: Float) =
             apply { this.distanceTraveled = distanceTraveled }
 
-        fun durationRemaining(durationRemaining: Long) =
+        fun durationRemaining(durationRemaining: Double) =
             apply { this.durationRemaining = durationRemaining }
 
         fun fractionTraveled(fractionTraveled: Float) =

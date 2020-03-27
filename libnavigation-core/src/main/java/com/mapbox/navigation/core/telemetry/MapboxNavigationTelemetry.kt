@@ -63,7 +63,7 @@ private data class DynamicallyUpdatedRouteValues(
     val timeSinceLastReroute: AtomicInteger = AtomicInteger(0),
     var sessionId: String = TelemetryUtils.obtainUniversalUniqueIdentifier(),
     val distanceCompleted: AtomicReference<Float> = AtomicReference(0f),
-    val durationRemaining: AtomicLong = AtomicLong(0),
+    val durationRemaining: AtomicInteger = AtomicInteger(0),
     val tripIdentifier: AtomicReference<String> = AtomicReference(TelemetryUtils.obtainUniversalUniqueIdentifier()),
     var sessionStartTime: Date = Date(),
     var sessionArrivalTime: AtomicReference<Date?> = AtomicReference(null),
@@ -272,7 +272,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         secondsSinceLastReroute = dynamicValues.timeSinceLastReroute.get() / ONE_SECOND
                         distanceRemaining = dynamicValues.distanceRemaining.get().toInt()
                         distanceCompleted = dynamicValues.distanceCompleted.get().toInt()
-                        durationRemaining = dynamicValues.durationRemaining.get().toInt()
+                        durationRemaining = dynamicValues.durationRemaining.get()
                     }
                     populateNavigationEvent(navigationRerouteEvent)
                     val result = telemetryEventGate(
@@ -544,7 +544,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 val routeData = callbackDispatcher.getRouteProgressChannel().receive()
                 dynamicValues.distanceCompleted.set(dynamicValues.distanceCompleted.get() + routeData.routeProgress.distanceTraveled())
                 dynamicValues.distanceRemaining.set(routeData.routeProgress.distanceRemaining().toLong())
-                dynamicValues.durationRemaining.set(routeData.routeProgress.durationRemaining())
+                dynamicValues.durationRemaining.set(routeData.routeProgress.durationRemaining().toInt())
                 when (routeData.routeProgress.currentState()) {
                     RouteProgressState.ROUTE_ARRIVED -> {
                         when (dynamicValues.sessionStarted.get()) {

@@ -178,11 +178,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 )
 
                 var routeDistanceRemaining = remainingLegDistance
-                var routeDurationRemaining = remainingLegDuration
+                var routeDurationRemaining = remainingLegDuration.toDouble() * 1e-4
                 if (legs.size >= TWO_LEGS) {
                     for (i in legIndex + ONE_INDEX until legs.size) {
                         routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
-                        routeDurationRemaining += legs[i].duration()?.toLong() ?: 0L
+                        routeDurationRemaining += legs[i].duration() ?: 0.0
                     }
                 }
                 routeProgressBuilder.distanceRemaining(routeDistanceRemaining)
