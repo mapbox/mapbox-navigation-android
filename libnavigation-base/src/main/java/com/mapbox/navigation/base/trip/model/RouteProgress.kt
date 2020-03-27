@@ -41,10 +41,9 @@ class RouteProgress private constructor(
     fun distanceTraveled(): Float = distanceTraveled
 
     /**
-     * Provides the duration remaining in seconds till the user reaches the end of the route.
+     * Provides the duration remaining in milliseconds till the user reaches the end of the route.
      *
-     * @return `long` value representing the duration remaining till end of route, in unit
-     * seconds
+     * @return `long` value representing the duration remaining till end of route, in milliseconds
      */
     fun durationRemaining(): Long = durationRemaining
 
