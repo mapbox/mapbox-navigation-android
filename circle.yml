@@ -119,7 +119,7 @@ commands:
       - run:
           name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
           command: |
-            ./gradlew testDebugUnitTestCoverage
+            ./gradlew jacocoTestDebugUnitTestReport
             pip install --user codecov && /root/.local/bin/codecov
       - store-results:
           module_target: "libandroid-navigation"

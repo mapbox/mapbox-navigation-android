@@ -1,38 +1,9 @@
-apply plugin: 'jacoco'
+apply plugin: 'jacoco-android'
 
-project.afterEvaluate {
-  // Grab all build types and product flavors
-  def buildTypes = android.buildTypes.collect { type -> type.name }
+jacoco {
+  toolVersion = "0.8.3"
+}
 
-  buildTypes.each { buildTypeName ->
-    def sourceName, sourcePath
-    sourceName = sourcePath = "${buildTypeName}"
-    def testTaskName = "test${sourceName.capitalize()}UnitTest"
-    def coverageTaskName = "${testTaskName}Coverage"
-
-    // Create coverage task of form 'testFlavorTypeUnitTestCoverage' depending on 'testFlavorTypeUnitTest'
-    task "${coverageTaskName}"(type: JacocoReport, dependsOn: "$testTaskName") {
-      group = 'Reporting'
-      description = "Generate Jacoco coverage reports for the ${sourceName.capitalize()} build."
-
-      classDirectories = fileTree(
-              dir: "${project.buildDir}/intermediates/javac/${sourcePath}",
-              excludes: ['**/R.class',
-                         '**/R$*.class',
-                         '**/BuildConfig.*',
-                         '**/Manifest*.*'])
-
-      sourceDirectories = files(["src/main/java",
-                                 "src/$buildTypeName/java"])
-
-      executionData = files("${project.buildDir}/jacoco/${testTaskName}.exec")
-
-      reports {
-        xml.enabled = true
-        html.enabled = true
-        html.destination file("${buildDir}/jacocoHtml")
-      }
-    }
-    build.dependsOn "${coverageTaskName}"
-  }
+tasks.withType(Test) {
+  jacoco.includeNoLocationClasses = true
 }
