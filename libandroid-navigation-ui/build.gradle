@@ -31,9 +31,6 @@ android {
     unitTests.includeAndroidResources = true
     unitTests.all {
       maxHeapSize = "1024m"
-      jacoco {
-        includeNoLocationClasses = true
-      }
     }
   }
 
