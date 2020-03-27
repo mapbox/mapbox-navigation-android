@@ -1,12 +1,10 @@
-package com.mapbox.navigation.metrics.internal
+package com.mapbox.navigation.metrics.internal.event
 
-import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.AppUserTurnstile
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
-@Keep
 class NavigationAppUserTurnstileEvent(
     val event: AppUserTurnstile
 ) : MetricEvent {

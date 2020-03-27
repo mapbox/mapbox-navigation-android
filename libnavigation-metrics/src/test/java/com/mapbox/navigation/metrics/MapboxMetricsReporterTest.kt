@@ -6,7 +6,7 @@ import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.MapboxTelemetry
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
-import com.mapbox.navigation.metrics.internal.utils.extensions.toTelemetryEvent
+import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController

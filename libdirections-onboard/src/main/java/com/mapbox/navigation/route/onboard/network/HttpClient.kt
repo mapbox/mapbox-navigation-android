@@ -1,9 +1,8 @@
 package com.mapbox.navigation.route.onboard.network
 
-import androidx.annotation.Keep
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigator.BuildConfig
+import com.mapbox.navigation.route.onboard.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
@@ -18,7 +17,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
 
-@Keep
+// Note, not using now, but need as a default client for NavNative. Could be pass to NN via configuration (* fun configureRouter() * )
 internal class HttpClient(
     internal val userAgent: String = USER_AGENT,
     private val acceptGzipEncoding: Boolean = false,

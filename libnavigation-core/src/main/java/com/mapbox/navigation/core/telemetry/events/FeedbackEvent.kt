@@ -1,14 +1,12 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
-import androidx.annotation.Keep
 import androidx.annotation.StringDef
 
 /**
  * Documentation is here [https://paper.dropbox.com/doc/Navigation-Telemetry-Events-V1--AuUz~~~rEVK7iNB3dQ4_tF97Ag-iid3ZImnt4dsW7Z6zC3Lc]
  */
 
-@Keep
 @SuppressLint("ParcelCreator")
 class FeedbackEvent {
     companion object {

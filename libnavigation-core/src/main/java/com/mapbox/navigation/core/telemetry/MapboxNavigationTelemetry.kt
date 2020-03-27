@@ -30,7 +30,7 @@ import com.mapbox.navigation.core.telemetry.events.SessionState
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
-import com.mapbox.navigation.metrics.internal.NavigationAppUserTurnstileEvent
+import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.exceptions.NavigationException
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ifChannelException

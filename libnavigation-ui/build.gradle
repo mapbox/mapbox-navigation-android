@@ -14,9 +14,8 @@ android {
     minSdkVersion androidVersions.minSdkVersion
     targetSdkVersion androidVersions.targetSdkVersion
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     vectorDrawables.useSupportLibrary = true
-
-    consumerProguardFiles 'proguard-consumer.pro'
   }
 
   configurations {

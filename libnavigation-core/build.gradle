@@ -22,10 +22,15 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'consumer-rules.pro'
-        buildConfigField('String',
-                "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
-        )
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro",
+                // following consumer's rules cannot be included via modules directly because
+                // they're used as `runtimeOnly` and aren't compiled along with `core` module
+                "${rootDir}/libdirections-hybrid/proguard-project.pro",
+                "${rootDir}/libdirections-onboard/proguard-project.pro",
+                "${rootDir}/libdirections-offboard/proguard-project.pro",
+                "${rootDir}/libtrip-notification/proguard-project.pro"
+
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
     }
 
     testOptions {

@@ -1,9 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.location.Location
-import androidx.annotation.Keep
 
-@Keep
 class MetricsLocation(private val _location: Location?) {
 
     companion object {

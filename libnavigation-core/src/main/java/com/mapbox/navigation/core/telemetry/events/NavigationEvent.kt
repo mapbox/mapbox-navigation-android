@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.os.Build
 import android.os.Parcel
-import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.mapbox.android.telemetry.Event
 import com.mapbox.android.telemetry.TelemetryUtils
@@ -12,7 +11,6 @@ import com.mapbox.navigation.core.BuildConfig
 /**
  * Base Event class for navigation events, contains common properties.
  */
-@Keep
 internal abstract class NavigationEvent(
     phoneState: PhoneState
 ) : Event(), MetricEvent {
