@@ -34,6 +34,11 @@ data class SessionState(
     var percentInPortrait: Int = 100
 ) {
 
+    // TODO:OZ Clean up never used functions below
+    //  We should also review SessionState properties as some of them are set but never used
+    //  E.g. percentInForeground and percentInPortrait set twice
+    //  see MapboxNavigationTelemetry#populateSessionState and MapboxNavigationTelemetry#populateNavigationEvent
+    //  and never referenced in RerouteEvent / NavigationRerouteEvent
     /*
     * Original route values
     */

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.location.Location
 import android.util.Log
@@ -104,7 +105,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     internal const val LOCATION_BUFFER_MAX_SIZE = 20
     private const val ONE_SECOND = 1000
     private const val MOCK_PROVIDER =
-            "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
+        "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
 
     internal const val TAG = "MAPBOX_TELEMETRY"
     private const val EVENT_VERSION = 7
@@ -115,6 +116,19 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private lateinit var navigationOptions: NavigationOptions
     private lateinit var localUserAgent: String
     private var weakMapboxNavigation = WeakReference<MapboxNavigation>(null)
+    private var lifecycleMonitor: ApplicationLifecycleMonitor? = null
+    private var appInstance: Application? = null
+        set(value) {
+            // Don't set it multiple times to the same value, it will cause multiple registration calls.
+            if (field == value) {
+                return
+            }
+            field = value
+            ifNonNull(value) { app ->
+                Log.d(TAG, "Lifecycle monitor created")
+                lifecycleMonitor = ApplicationLifecycleMonitor(app)
+            }
+        }
 
     /**
      * This class holds all mutable state of the Telemetry object
@@ -143,7 +157,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             }
         }
 
-    // **********  EVENT OBSERVERS ***************
+// **********  EVENT OBSERVERS ***************
 
     private fun populateOriginalRouteConditionally() {
         ifNonNull(weakMapboxNavigation.get()) { mapboxNavigation ->
@@ -333,6 +347,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         preInitializePredicate // The initialize dispatcher that points to either pre or post initialization lambda
 
     private var sessionEndPredicate = { }
+
+    fun setApplicationInstance(app: Application) {
+        appInstance = app
+    }
+
     /**
      * This method must be called before using the Telemetry object
      */
@@ -623,9 +642,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             startTimestamp = dynamicValues.sessionStartTime
             arrivalTimestamp = dynamicValues.sessionArrivalTime.get()
             locationEngineName = locationEngineNameExternal
-            // TODO:OZ these values cannot be set until we register for Application.ActivityLifecycleCallbacks
-            percentInForeground = 100
-            percentInPortrait = 100
+            percentInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
+            percentInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
         }
     }
 
@@ -646,8 +664,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         navigationEvent.lng = location?.longitude ?: 0.0
         navigationEvent.simulation = locationEngineNameExternal == MOCK_PROVIDER
         navigationEvent.absoluteDistanceToDestination = obtainAbsoluteDistance(callbackDispatcher.getLastLocation(), obtainRouteDestination(directionsRoute))
-// TODO:OZ to set this value ActivityLifecycleCallbacks must be used.        navigationEvent.percentTimeInPortrait
-// TODO:OZ to set this value ActivityLifecycleCallbacks must be used.        navigationEvent.percentTimeInForeground
+        navigationEvent.percentTimeInPortrait = lifecycleMonitor?.obtainPortraitPercentage() ?: 100
+        navigationEvent.percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
         navigationEvent.distanceCompleted = dynamicValues.distanceCompleted.get().toInt()
         navigationEvent.distanceRemaining = dynamicValues.distanceRemaining.get().toInt()
         navigationEvent.durationRemaining = dynamicValues.durationRemaining.get().toInt()

@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import kotlinx.coroutines.cancelChildren
@@ -18,6 +19,7 @@ class NavigationNotificationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        MapboxNavigationTelemetry.setApplicationInstance(application)
         startForegroundNotification()
         return START_STICKY
     }
