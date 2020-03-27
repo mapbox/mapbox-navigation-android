@@ -16,6 +16,8 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.NavigationSession
+import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
@@ -69,7 +71,8 @@ private data class DynamicallyUpdatedRouteValues(
     var sessionArrivalTime: AtomicReference<Date?> = AtomicReference(null),
     var sdkId: String = "none",
     val sessionStarted: AtomicBoolean = AtomicBoolean(false),
-    val originalRoute: AtomicReference<DirectionsRoute?> = AtomicReference(null)
+    val originalRoute: AtomicReference<DirectionsRoute?> = AtomicReference(null),
+    val isActiveGuidance: AtomicBoolean = AtomicBoolean(true) // Default is IDLE, which is treated same as FREE_DRIVE
 ) {
     fun reset() {
         distanceRemaining.set(0)
@@ -84,6 +87,7 @@ private data class DynamicallyUpdatedRouteValues(
         tripIdentifier.set(TelemetryUtils.obtainUniversalUniqueIdentifier())
         sessionArrivalTime.set(null)
         sessionStarted.set(false)
+        isActiveGuidance.set(true)
     }
 }
 
@@ -144,11 +148,40 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private var locationEngineNameExternal: String = LocationEngine::javaClass.name
 
     private lateinit var callbackDispatcher: TelemetryLocationAndProgressDispatcher
+    private val navigationSessionObserver = object : NavigationSessionStateObserver {
+        override fun onNavigationSessionStateChanged(navigationSession: NavigationSession.State) {
+            when (navigationSession) {
+                NavigationSession.State.FREE_DRIVE -> {
+                    dynamicValues.isActiveGuidance.set(false)
+                    Log.d(TAG, "Navigation state is $navigationSession")
+                    switchToFreeDriveBehavior()
+                }
+                NavigationSession.State.ACTIVE_GUIDANCE -> {
+                    dynamicValues.isActiveGuidance.set(true)
+                    Log.d(TAG, "Navigation state is $navigationSession")
+                    switchToGuidedNavigationBehavior()
+                }
+                NavigationSession.State.IDLE -> {
+                    // Do nothing. What matters is the previous state.
+                }
+            }
+            Log.d(TAG, "Current session state is: $navigationSession")
+        }
+    }
+
+    private fun switchToFreeDriveBehavior() {
+        postUserEventDelegate = postUserEventBeforeInit
+    }
+
+    private fun switchToGuidedNavigationBehavior() {
+        postUserEventDelegate = postUserFeedbackEventAfterInit
+    }
 
     private fun telemetryEventGate(event: MetricEvent) =
         when (isTelemetryAvailable()) {
             false -> {
-                Log.i(TAG, "Route not selected. Telemetry event not sent")
+                Log.i(TAG, "Route not selected. Telemetry event not sent. Caused by:Navigation " +
+                    "State: ${dynamicValues.isActiveGuidance.get()} Route exists: ${dynamicValues.originalRoute.get() != null}")
                 false
             }
             true -> {
@@ -211,7 +244,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * it is a free guided session otherwise
      */
     private fun isTelemetryAvailable(): Boolean {
-        return dynamicValues.originalRoute.get() != null
+        return dynamicValues.originalRoute.get() != null && dynamicValues.isActiveGuidance.get()
     }
 
     /**
@@ -312,6 +345,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         { context, token, mapboxNavigation, metricsReporter, name, jobControl, options, userAgent ->
             telemetryThreadControl = jobControl
             weakMapboxNavigation = WeakReference(mapboxNavigation)
+            weakMapboxNavigation.get()?.registerNavigationSessionObserver(navigationSessionObserver)
             registerForNotification(mapboxNavigation)
             monitorOffRouteEvents()
             populateOriginalRouteConditionally()
@@ -602,6 +636,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation.unregisterLocationObserver(callbackDispatcher)
         mapboxNavigation.unregisterRoutesObserver(callbackDispatcher)
         mapboxNavigation.unregisterOffRouteObserver(callbackDispatcher)
+        mapboxNavigation.unregisterNavigationSessionObserver(navigationSessionObserver)
         Log.d(TAG, "resetting Telemetry initialization")
         MapboxMetricsReporter.disable() // Disable telemetry unconditionally
         initializer = preInitializePredicate
