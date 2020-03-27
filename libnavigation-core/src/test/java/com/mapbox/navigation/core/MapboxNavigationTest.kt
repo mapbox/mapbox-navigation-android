@@ -71,6 +71,7 @@ class MapboxNavigationTest {
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
     private val routes: List<DirectionsRoute> = listOf(mockk())
     private val routeProgress: RouteProgress = mockk(relaxed = true)
+    private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
@@ -119,6 +120,7 @@ class MapboxNavigationTest {
         mockTripService()
         mockTripSession()
         mockDirectionSession()
+        mockNavigationSession()
 
         val navigationOptions = NavigationOptions
             .Builder()
@@ -142,6 +144,34 @@ class MapboxNavigationTest {
     @Test
     fun sanity() {
         assertNotNull(mapboxNavigation)
+    }
+
+    @Test
+    fun init_registerRoutesObservers_internalRoutesObserver_navigationSession_and_TelemetryLocationAndProgressDispatcher() {
+        verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun init_registerOffRouteObserver_internalOffRouteObserver() {
+        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun init_registerStateObserver_navigationSession() {
+        verify(exactly = 1) { tripSession.registerStateObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun init_registerNavigationSessionStateObserver() {
+        verify(exactly = 1) { navigationSession.registerNavigationSessionStateObserver(any()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -191,6 +221,13 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { tripSession.unregisterAllVoiceInstructionsObservers() }
+    }
+
+    @Test
+    fun unregisterAllNavigationSessionStateObservers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { navigationSession.unregisterAllNavigationSessionStateObservers() }
     }
 
     @Test
@@ -327,6 +364,12 @@ class MapboxNavigationTest {
         verify { tripSession.route = null }
     }
 
+    private fun mockLocation() {
+        every { location.longitude } returns -122.789876
+        every { location.latitude } returns 37.657483
+        every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
+    }
+
     private fun mockTripService() {
         every {
             NavigationComponentProvider.createTripService(
@@ -334,24 +377,6 @@ class MapboxNavigationTest {
                 any()
             )
         } returns tripService
-    }
-
-    private fun mockLocation() {
-        every { location.longitude } returns -122.789876
-        every { location.latitude } returns 37.657483
-        every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
-    }
-
-    private fun mockDirectionSession() {
-        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
-            directionsSession
-        }
-        every { directionsSession.getRouteOptions() } returns routeOptions
-        every { directionsSession.requestFasterRoute(any(), any()) } answers {
-            fasterRouteRequestCallback.onRoutesReady(routes)
-        }
-        // TODO Needed for telemetry - Free Drive (empty list) for now
-        every { directionsSession.routes } returns emptyList()
     }
 
     private fun mockTripSession() {
@@ -366,6 +391,24 @@ class MapboxNavigationTest {
         every { tripSession.getEnhancedLocation() } returns location
         every { tripSession.getRouteProgress() } returns routeProgress
         every { tripSession.getRawLocation() } returns location
+    }
+
+    private fun mockDirectionSession() {
+        every { NavigationComponentProvider.createDirectionsSession(any()) } answers {
+            directionsSession
+        }
+        every { directionsSession.getRouteOptions() } returns routeOptions
+        every { directionsSession.requestFasterRoute(any(), any()) } answers {
+            fasterRouteRequestCallback.onRoutesReady(routes)
+        }
+        // TODO Needed for telemetry - Free Drive (empty list) for now
+        every { directionsSession.routes } returns emptyList()
+    }
+
+    private fun mockNavigationSession() {
+        every { NavigationComponentProvider.createNavigationSession() } answers {
+            navigationSession
+        }
     }
 
     private fun provideDefaultRouteOptionsBuilder() =
