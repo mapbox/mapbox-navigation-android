@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.puck
 
 import com.mapbox.libnavigation.ui.R
+import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -36,6 +37,7 @@ class NavigationPuckPresenterTest {
         every { locationComponentOptions.toBuilder() } returns builder
         every { builder.gpsDrawable(capture(drawableSlot)) } returns builder
         every { builder.build() } returns locationComponentOptions
+        every { mapboxMap.cameraPosition } returns CameraPosition.DEFAULT
         presenter.addProgressChangeListener(mapboxNavigation)
         verify { mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot)) }
 
