@@ -112,6 +112,7 @@ class MapboxTripNotification constructor(
     override fun getNotificationId(): Int = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
+        buildRemoteViews()
         updateNotificationViews(routeProgress)
         notification = navigationNotificationProvider.buildNotification(getNotificationBuilder())
         notificationManager.notify(NOTIFICATION_ID, notification)
