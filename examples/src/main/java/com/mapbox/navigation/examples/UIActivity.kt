@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionLayerActivityKt
+import com.mapbox.navigation.examples.ui.CustomPuckActivity
 import com.mapbox.navigation.examples.ui.FinalDestinationBuildingFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
@@ -48,6 +49,11 @@ class UIActivity : AppCompatActivity() {
                     getString(R.string.title_arrival_ui_building_extrusions_kotlin),
                     getString(R.string.description_arrival_ui_building_extrusions_kotlin),
                     ArrivalUiBuildingExtrusionLayerActivityKt::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_custom_puck_example),
+                getString(R.string.description_custom_puck_example),
+                CustomPuckActivity::class.java
             )
         )
     }
