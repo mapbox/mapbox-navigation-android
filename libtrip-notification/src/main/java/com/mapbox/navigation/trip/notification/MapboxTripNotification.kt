@@ -112,6 +112,10 @@ class MapboxTripNotification constructor(
     override fun getNotificationId(): Int = NOTIFICATION_ID
 
     override fun updateNotification(routeProgress: RouteProgress) {
+        // RemoteView has an internal mActions, which stores every change and cannot be cleared.
+        // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
+        // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
+        buildRemoteViews()
         updateNotificationViews(routeProgress)
         notification = navigationNotificationProvider.buildNotification(getNotificationBuilder())
         notificationManager.notify(NOTIFICATION_ID, notification)
