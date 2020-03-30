@@ -13,8 +13,7 @@ internal object FasterRouteDetector {
 
     fun isRouteFaster(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
         val newRouteDuration = newRoute.duration() ?: return false
-        val newRouteDurationMs = newRouteDuration * 1000.0
-        val weightedDurationMs = routeProgress.durationRemaining() * PERCENTAGE_THRESHOLD
-        return newRouteDurationMs < weightedDurationMs
+        val weightedDuration = routeProgress.durationRemaining() * PERCENTAGE_THRESHOLD
+        return newRouteDuration < weightedDuration
     }
 }
