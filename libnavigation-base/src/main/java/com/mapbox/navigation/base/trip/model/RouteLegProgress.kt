@@ -8,7 +8,7 @@ class RouteLegProgress private constructor(
     private val routeLeg: RouteLeg? = null,
     private val distanceTraveled: Float = 0f,
     private val distanceRemaining: Float = 0f,
-    private val durationRemaining: Long = 0L,
+    private val durationRemaining: Double = 0.0,
     private val fractionTraveled: Float = 0f,
     private val currentStepProgress: RouteStepProgress? = null,
     private val upcomingStep: LegStep? = null,
@@ -40,18 +40,18 @@ class RouteLegProgress private constructor(
     fun distanceTraveled(): Float = distanceTraveled
 
     /**
-     * Provides the duration remaining in seconds till the user reaches the end of the route.
+     * Provides the distance remaining in meters till the user reaches the end of the leg.
      *
-     * @return long value representing the duration remaining till end of route, in unit seconds
+     * @return distance remaining till end of leg, in unit meters.
      */
     fun distanceRemaining(): Float = distanceRemaining
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
      *
-     * @return long value representing the duration remaining till end of step, in unit seconds.
+     * @return duration remaining till end of leg, in unit seconds.
      */
-    fun durationRemaining(): Long = durationRemaining
+    fun durationRemaining(): Double = durationRemaining
 
     /**
      * Get the fraction traveled along the current leg, this is a float value between 0 and 1 and
@@ -85,7 +85,7 @@ class RouteLegProgress private constructor(
         private var routeLeg: RouteLeg? = null,
         private var distanceTraveled: Float = 0f,
         private var distanceRemaining: Float = 0f,
-        private var durationRemaining: Long = 0L,
+        private var durationRemaining: Double = 0.0,
         private var fractionTraveled: Float = 0f,
         private var currentStepProgress: RouteStepProgress? = null,
         private var upcomingStep: LegStep? = null
@@ -101,7 +101,7 @@ class RouteLegProgress private constructor(
         fun distanceRemaining(distanceRemaining: Float) =
             apply { this.distanceRemaining = distanceRemaining }
 
-        fun durationRemaining(durationRemaining: Long) =
+        fun durationRemaining(durationRemaining: Double) =
             apply { this.durationRemaining = durationRemaining }
 
         fun fractionTraveled(fractionTraveled: Float) =
