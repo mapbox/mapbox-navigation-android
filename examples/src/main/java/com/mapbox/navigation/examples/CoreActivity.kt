@@ -6,20 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-import com.mapbox.navigation.examples.core.BasicNavigationActivity
-import com.mapbox.navigation.examples.core.FasterRouteActivity
-import com.mapbox.navigation.examples.core.GuidanceViewActivity
-import com.mapbox.navigation.examples.core.InstructionViewActivity
-import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
-import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
-import com.mapbox.navigation.examples.core.ReRouteActivity
-import com.mapbox.navigation.examples.core.ReplayActivity
-import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
-import com.mapbox.navigation.examples.core.SummaryBottomSheetActivity
-import com.mapbox.navigation.examples.core.TripServiceActivityKt
-import com.mapbox.navigation.examples.core.TripSessionActivityKt
+import com.mapbox.navigation.examples.core.*
 import kotlinx.android.synthetic.main.activity_core.*
 
 class CoreActivity : AppCompatActivity() {
@@ -113,7 +100,12 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_summary_bottom_sheet),
                 getString(R.string.description_summary_bottom_sheet),
                 SummaryBottomSheetActivity::class.java
-            )
+            ),
+                SampleItem(
+                        getString(R.string.title_test_waypoints),
+                        getString(R.string.description_test_waypoints),
+                        TestWaypointsActivity::class.java
+                )
         )
     }
 }
