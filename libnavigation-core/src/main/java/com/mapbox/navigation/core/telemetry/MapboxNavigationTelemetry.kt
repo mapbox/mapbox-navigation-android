@@ -196,17 +196,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         Log.d(TAG, "TripSessionState.STOPPED")
         postUserEventDelegate =
             postUserEventBeforeInit // The navigation session is over, disallow posting user feedback events
-        when (dynamicValues.routeArrived.get()) {
-            true -> {
-                Log.d(TAG, "calling processCancellationAfterArrival()")
-                callbackDispatcher.flushBuffers()
-                dynamicValues.reset()
-            }
-            false -> {
+        when (dynamicValues.routeArrived.get()) { // Cancellation events will be sent after an arrival event.
+            true, false -> {
                 telemetryThreadControl.scope.launch {
-                    Log.d(TAG, "calling processCancellation()")
+                    Log.d(TAG, "calling processCancellationAfterArrival()")
                     processCancellation()
-                    dynamicValues.sessionStarted.set(false)
                 }
             }
         }
@@ -448,6 +442,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private suspend fun handleSessionCanceled(): CompletableDeferred<Boolean> {
         val retVal = CompletableDeferred<Boolean>()
         val cancelEvent = NavigationCancelEvent(PhoneState(context))
+        ifNonNull(dynamicValues.sessionArrivalTime.get()) {
+            cancelEvent.arrivalTimestamp = TelemetryUtils.generateCreateDateFormatted(it)
+        }
         populateNavigationEvent(cancelEvent)
         val result = telemetryEventGate(cancelEvent)
         Log.d(TAG, "CANCEL event sent $result")

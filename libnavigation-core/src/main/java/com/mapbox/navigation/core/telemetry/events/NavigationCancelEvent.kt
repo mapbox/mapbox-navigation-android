@@ -11,7 +11,7 @@ internal class NavigationCancelEvent(
      * Don't remove any fields, cause they are should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
-    var arrivalTimestamp: String? = null // Schema null if the user cancelled without arriving (can't happen)
+    var arrivalTimestamp: String? = null
     var rating: Int = 0
     var comment: String = ""
 
