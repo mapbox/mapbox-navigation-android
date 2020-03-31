@@ -37,7 +37,7 @@ import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.instruction.ImageCreator;

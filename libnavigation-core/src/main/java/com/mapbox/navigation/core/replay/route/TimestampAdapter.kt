@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.location.replay
+package com.mapbox.navigation.core.replay.route
 
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader

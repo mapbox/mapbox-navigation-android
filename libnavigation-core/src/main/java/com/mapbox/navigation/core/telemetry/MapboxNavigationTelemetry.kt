@@ -105,7 +105,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     internal const val LOCATION_BUFFER_MAX_SIZE = 20
     private const val ONE_SECOND = 1000
     private const val MOCK_PROVIDER =
-        "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
+        "com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine"
 
     internal const val TAG = "MAPBOX_TELEMETRY"
     private const val EVENT_VERSION = 7

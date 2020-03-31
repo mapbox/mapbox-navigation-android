@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.location.replay
+package com.mapbox.navigation.core.replay.route
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -27,8 +27,8 @@ internal class ReplayRouteLocationConverter(
         private const val ONE_SECOND_IN_MILLISECONDS = 1000
         private const val ONE_KM_IN_METERS = 1000.0
         private const val ONE_HOUR_IN_SECONDS = 3600
-        private const val REPLAY_ROUTE =
-            "com.mapbox.navigation.core.location.replay.ReplayRouteLocationEngine"
+        private const val LOCATION_PROVIDER_REPLAY_ROUTE =
+            "com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine"
     }
 
     init {
@@ -138,7 +138,7 @@ internal class ReplayRouteLocationConverter(
     }
 
     private fun createMockLocationFrom(point: Point): Location {
-        val mockedLocation = Location(REPLAY_ROUTE)
+        val mockedLocation = Location(LOCATION_PROVIDER_REPLAY_ROUTE)
         mockedLocation.latitude = point.latitude()
         mockedLocation.longitude = point.longitude()
         val speedInMetersPerSec = (speed * ONE_KM_IN_METERS / ONE_HOUR_IN_SECONDS).toFloat()
