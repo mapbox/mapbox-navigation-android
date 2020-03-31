@@ -119,26 +119,43 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                     it.restoreFrom(state)
                 }
             }
+            gotoPredefinedLocation(mapboxMap)
         }
-        mapboxMap.addOnMapLongClickListener { latLng ->
-            //mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
-            mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(waypoints[0].latitude(), waypoints[0].longitude())))
-            mapboxNavigation?.registerBannerInstructionsObserver(bannerInstructionObserver)
-            mapboxNavigation?.registerVoiceInstructionsObserver(voiceInstructionsObserver)
-                mapboxNavigation?.requestRoutes(
-                        RouteOptions.builder().applyDefaultParams()
-                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                                .coordinates(waypoints.first(), waypoints.subList(1, waypoints.lastIndex), waypoints.last())
-                                .alternatives(true)
-                                .waypointNamesList(names)
-                                .profile(DirectionsCriteria.PROFILE_DRIVING)
-                                .build(),
-                        routesReqCallback
-                )
-            //}
-            true
-        }
+//        mapboxMap.addOnMapLongClickListener { latLng ->
+//            //mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
+//            mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(waypoints[0].latitude(), waypoints[0].longitude())))
+//            mapboxNavigation?.registerBannerInstructionsObserver(bannerInstructionObserver)
+//            mapboxNavigation?.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+//                mapboxNavigation?.requestRoutes(
+//                        RouteOptions.builder().applyDefaultParams()
+//                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
+//                                .coordinates(waypoints.first(), waypoints.subList(1, waypoints.lastIndex), waypoints.last())
+//                                .alternatives(true)
+//                                .waypointNamesList(names)
+//                                .profile(DirectionsCriteria.PROFILE_DRIVING)
+//                                .build(),
+//                        routesReqCallback
+//                )
+//            //}
+//            true
+//        }
         locationComponent = mapboxMap.locationComponent
+    }
+
+    fun gotoPredefinedLocation(mapboxMap: MapboxMap) {
+        mapboxMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(waypoints[0].latitude(), waypoints[0].longitude())))
+        mapboxNavigation?.registerBannerInstructionsObserver(bannerInstructionObserver)
+        mapboxNavigation?.registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        mapboxNavigation?.requestRoutes(
+                RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(waypoints.first(), waypoints.subList(1, waypoints.lastIndex), waypoints.last())
+                        .alternatives(true)
+                        .waypointNamesList(names)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING)
+                        .build(),
+                routesReqCallback
+        )
     }
 
     @SuppressLint("RestrictedApi")
