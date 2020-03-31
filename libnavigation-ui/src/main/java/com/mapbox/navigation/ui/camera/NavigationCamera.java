@@ -134,7 +134,6 @@ public class NavigationCamera implements LifecycleObserver {
     this.locationComponent.addOnCameraTrackingChangedListener(cameraTrackingChangedListener);
     this.camera = new DynamicCamera(mapboxMap);
     updateCameraTrackingMode(trackingCameraMode);
-    this.camera = new DynamicCamera(mapboxMap);
   }
 
   /**
