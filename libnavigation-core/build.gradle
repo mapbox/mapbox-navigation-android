@@ -11,6 +11,7 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavigation-core'
+        reportUndocumented = true
     }
 }
 
