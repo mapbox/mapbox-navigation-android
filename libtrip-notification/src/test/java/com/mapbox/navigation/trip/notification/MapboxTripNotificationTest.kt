@@ -195,7 +195,7 @@ class MapboxTripNotificationTest {
     fun whenUpdateNotificationCalledThenDistanceTextIsSetToRemoteViews() {
         val routeProgress = mockk<RouteProgress>(relaxed = true)
         val distance = 30f
-        val duration = 112L
+        val duration = 112.4
         val distanceText = distanceSpannable.toString()
         mockLegProgress(routeProgress, distance, duration)
         mockUpdateNotificationAndroidInteractions()
@@ -210,7 +210,7 @@ class MapboxTripNotificationTest {
     fun whenUpdateNotificationCalledThenArrivalTimeIsSetToRemoteViews() {
         val routeProgress = mockk<RouteProgress>(relaxed = true)
         val distance = 30f
-        val duration = 112L
+        val duration = 112.4
         mockLegProgress(routeProgress, distance, duration)
         mockUpdateNotificationAndroidInteractions()
         val suffix = "this is nice formatting"
@@ -374,7 +374,7 @@ class MapboxTripNotificationTest {
     private fun mockLegProgress(
         routeProgress: RouteProgress,
         distance: Float,
-        duration: Long
+        duration: Double
     ): RouteLegProgress {
         val currentLegProgress = mockk<RouteLegProgress>(relaxed = true)
         every { routeProgress.currentLegProgress() } returns currentLegProgress

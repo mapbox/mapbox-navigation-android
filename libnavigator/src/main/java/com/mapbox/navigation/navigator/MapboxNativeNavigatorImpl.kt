@@ -30,7 +30,6 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
-import kotlin.math.roundToLong
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -178,7 +177,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 )
 
                 var routeDistanceRemaining = remainingLegDistance
-                var routeDurationRemaining = remainingLegDuration.toDouble() * 1e-4
+                var routeDurationRemaining = remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
                 if (legs.size >= TWO_LEGS) {
                     for (i in legIndex + ONE_INDEX until legs.size) {
                         routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
@@ -257,11 +256,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         }
 
         stepProgressBuilder.distanceRemaining(remainingStepDistance)
-        stepProgressBuilder.durationRemaining((remainingStepDuration / ONE_SECOND_IN_MILLISECONDS).roundToLong())
+        stepProgressBuilder.durationRemaining(remainingStepDuration / ONE_SECOND_IN_MILLISECONDS)
 
         legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
         legProgressBuilder.distanceRemaining(remainingLegDistance)
-        legProgressBuilder.durationRemaining((remainingLegDuration / ONE_SECOND_IN_MILLISECONDS).roundToLong())
+        legProgressBuilder.durationRemaining(remainingLegDuration / ONE_SECOND_IN_MILLISECONDS)
 
         routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
 

@@ -10,7 +10,7 @@ class RouteStepProgress private constructor(
     private val distanceRemaining: Float = 0f,
     private val distanceTraveled: Float = 0f,
     private val fractionTraveled: Float = 0f,
-    private val durationRemaining: Long = 0L,
+    private val durationRemaining: Double = 0.0,
     private val guidanceViewURL: String? = null,
     private val builder: Builder
 ) {
@@ -65,9 +65,9 @@ class RouteStepProgress private constructor(
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
      *
-     * @return `long` value representing the duration remaining till end of step, in unit seconds.
+     * @return duration remaining till end of step, in unit seconds.
      */
-    fun durationRemaining(): Long = durationRemaining
+    fun durationRemaining(): Double = durationRemaining
 
     /**
      * Provides the duration remaining in seconds till the user reaches the end of the current step.
@@ -85,7 +85,7 @@ class RouteStepProgress private constructor(
         private var distanceRemaining: Float = 0f,
         private var distanceTraveled: Float = 0f,
         private var fractionTraveled: Float = 0f,
-        private var durationRemaining: Long = 0L,
+        private var durationRemaining: Double = 0.0,
         private var guidanceViewURL: String? = null
     ) {
 
@@ -106,7 +106,7 @@ class RouteStepProgress private constructor(
         fun fractionTraveled(fractionTraveled: Float) =
             apply { this.fractionTraveled = fractionTraveled }
 
-        fun durationRemaining(durationRemaining: Long) =
+        fun durationRemaining(durationRemaining: Double) =
             apply { this.durationRemaining = durationRemaining }
 
         fun guidanceViewURL(guidanceURL: String?) =
