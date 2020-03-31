@@ -67,11 +67,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     override fun getStatus(date: Date): TripStatus {
         val status = navigator.getStatus(date)
-//
-//        if(status.bannerInstruction != null) {
-//            status.bannerInstruction
-//        }
-
         return TripStatus(
             status.location.toLocation(),
             status.key_points.map { it.toLocation() },
