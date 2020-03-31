@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.core.location.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
 
 import org.junit.Test;
 

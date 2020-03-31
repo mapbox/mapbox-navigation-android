@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.location
+package com.mapbox.navigation.core.replay.route
 
 import android.app.PendingIntent
 import android.location.Location
@@ -13,10 +13,6 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.logger.Logger
 import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigation.core.location.replay.ReplayLocationConverter
-import com.mapbox.navigation.core.location.replay.ReplayLocationDispatcher
-import com.mapbox.navigation.core.location.replay.ReplayRouteLocationConverter
-import com.mapbox.navigation.core.location.replay.ReplayRouteLocationListener
 import java.util.ArrayList
 
 class ReplayRouteLocationEngine(
@@ -57,7 +53,7 @@ class ReplayRouteLocationEngine(
         private const val DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS =
             "Delay must be greater than 0 seconds."
         private const val REPLAY_ROUTE =
-            "com.mapbox.navigation.core.location.ReplayRouteLocationEngine"
+            "com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine"
     }
 
     fun assign(route: DirectionsRoute) {
