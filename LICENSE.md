@@ -1168,6 +1168,11 @@ License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENS
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the support.
+License: [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 
 
 
