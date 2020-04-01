@@ -5,6 +5,7 @@ import android.text.format.DateUtils
 import com.mapbox.android.accounts.navigation.sku.v1.MauSku
 import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
+import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import java.lang.IllegalStateException
 
@@ -74,7 +75,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         skuGenerator?.onNavigationStart()
     }
 
-    internal fun obtainSkuToken(): String = skuToken
+    internal fun obtainSkuId(): String = MapboxAccounts.SKU_ID_NAVIGATION_MAUS
 
     private fun buildResourceUrlWithSku(
         resourceUrl: String,

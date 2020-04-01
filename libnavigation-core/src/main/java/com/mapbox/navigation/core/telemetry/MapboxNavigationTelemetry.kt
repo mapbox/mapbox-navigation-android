@@ -489,7 +489,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 it.setSkuId(
                     MapboxNavigationAccounts.getInstance(
                         context
-                    ).obtainSkuToken()
+                    ).obtainSkuId()
                 )
             }
         val event = NavigationAppUserTurnstileEvent(appUserTurnstileEvent)
