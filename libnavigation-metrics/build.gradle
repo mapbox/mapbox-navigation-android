@@ -9,6 +9,7 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavigation-metrics'
+        reportUndocumented = true
     }
 }
 

@@ -9,6 +9,7 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavigator'
+        reportUndocumented = true
     }
 }
 

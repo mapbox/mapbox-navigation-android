@@ -8,7 +8,7 @@ import com.mapbox.navigator.NavigatorSensorData
 import com.mapbox.navigator.SensorType
 import java.util.Date
 
-object SensorMapper {
+internal object SensorMapper {
 
     fun getSupportedSensorTypes(): Set<Int> {
         val supportedSensors = mutableSetOf(
