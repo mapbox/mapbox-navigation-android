@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mapbox.services.android.navigation.ui.v5.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -62,7 +61,6 @@ public class NavigationMapboxMap {
   private static final String TRAFFIC_LAYER_ID = "traffic";
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
-  private static final double NAVIGATION_INITIAL_MAP_ZOOM = 17d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
           = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
@@ -633,7 +631,6 @@ public class NavigationMapboxMap {
   @SuppressLint("MissingPermission")
   private void initializeLocationComponent(MapView mapView, MapboxMap map) {
     locationComponent = map.getLocationComponent();
-    map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     Style style = map.getStyle();
