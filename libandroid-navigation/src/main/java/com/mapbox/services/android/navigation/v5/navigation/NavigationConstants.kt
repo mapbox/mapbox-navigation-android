@@ -124,11 +124,6 @@ object NavigationConstants {
     internal const val ROUTE_REFRESH_INTERVAL = 5 * 60 * 1000L
 
     /**
-     * Defines the minimum zoom level of the displayed map.
-     */
-    const val NAVIGATION_MINIMUM_MAP_ZOOM = 7.0
-
-    /**
      * Maximum duration of the zoom/tilt adjustment animation while tracking.
      */
     const val NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L

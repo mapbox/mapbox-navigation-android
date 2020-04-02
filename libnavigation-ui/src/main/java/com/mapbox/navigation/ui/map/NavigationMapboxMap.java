@@ -46,7 +46,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
 /**
@@ -69,7 +68,6 @@ public class NavigationMapboxMap {
   private static final String TRAFFIC_LAYER_ID = "traffic";
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
-  private static final double NAVIGATION_INITIAL_MAP_ZOOM = 17d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
           = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
@@ -704,7 +702,6 @@ public class NavigationMapboxMap {
   @SuppressLint("MissingPermission")
   private void initializeLocationComponent(MapView mapView, MapboxMap map) {
     locationComponent = map.getLocationComponent();
-    map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     Style style = map.getStyle();
