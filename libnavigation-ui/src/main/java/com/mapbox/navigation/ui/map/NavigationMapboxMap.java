@@ -7,7 +7,6 @@ import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -19,6 +18,7 @@ import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -29,6 +29,7 @@ import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
 import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer;
@@ -40,9 +41,13 @@ import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import timber.log.Timber;
 
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
@@ -88,6 +93,8 @@ public class NavigationMapboxMap {
   private LocationFpsDelegate locationFpsDelegate;
   private BuildingExtrusionLayer buildingExtrusionLayer;
   private DestinationBuildingFootprintLayer destinationBuildingFootprintLayer;
+  @Nullable
+  private MapboxNavigation navigation;
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}
@@ -114,16 +121,19 @@ public class NavigationMapboxMap {
                              @Nullable String routeBelowLayerId) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
-    initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
-    initializeCamera(mapboxMap, locationComponent);
-    initializeLocationFpsDelegate(mapboxMap, locationComponent);
     initializeArrivalExperience(mapboxMap, mapView);
+    initializeCamera(mapboxMap);
+    initializeLocationComponent();
   }
 
+  private void initializeLocationComponent() {
+    setupLocationComponent(mapView, mapboxMap);
+    initializeLocationFpsDelegate(mapboxMap, locationComponent);
+  }
 
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapLayerInteractor layerInteractor) {
@@ -323,12 +333,14 @@ public class NavigationMapboxMap {
    * @param navigation to add the progress listeners
    */
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
+    this.navigation = navigation;
     initializeWayName(mapboxMap, mapPaddingAdjustor);
     initializeFpsDelegate(mapView);
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
     mapWayName.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
+    navigation.registerLocationObserver(locationObserver);
 
     if (navigationPuckPresenter != null) {
       navigationPuckPresenter.addProgressChangeListener(navigation);
@@ -555,6 +567,10 @@ public class NavigationMapboxMap {
     handleFpsOnStop();
     locationFpsDelegate.onStop();
 
+    if (navigation != null) {
+      navigation.unregisterLocationObserver(locationObserver);
+    }
+
     if (navigationPuckPresenter != null) {
       navigationPuckPresenter.onStop();
     }
@@ -699,7 +715,7 @@ public class NavigationMapboxMap {
   }
 
   @SuppressLint("MissingPermission")
-  private void initializeLocationComponent(MapView mapView, MapboxMap map) {
+  private void setupLocationComponent(MapView mapView, MapboxMap map) {
     locationComponent = map.getLocationComponent();
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
@@ -713,6 +729,8 @@ public class NavigationMapboxMap {
       .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
+    locationComponent.setCameraMode(CameraMode.TRACKING);
+    locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
   private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
@@ -739,8 +757,8 @@ public class NavigationMapboxMap {
     mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
   }
 
-  private void initializeCamera(MapboxMap map, LocationComponent locationComponent) {
-    mapCamera = new NavigationCamera(map, locationComponent);
+  private void initializeCamera(MapboxMap map) {
+    mapCamera = new NavigationCamera(map);
   }
 
   private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
@@ -868,23 +886,30 @@ public class NavigationMapboxMap {
     }
   }
 
+  private LocationObserver locationObserver = new LocationObserver() {
+    @Override
+    public void onRawLocationChanged(@NotNull Location rawLocation) {
+      Timber.d("raw location %s", rawLocation.toString());
+    }
+
+    @Override
+    public void onEnhancedLocationChanged(
+            @NotNull Location enhancedLocation,
+            @NotNull List<? extends Location> keyPoints
+    ) {
+      if (keyPoints.isEmpty()) {
+        updateLocation(enhancedLocation);
+      } else {
+        updateLocation((List<Location>) keyPoints);
+      }
+    }
+  };
+
   public void setCamera(Camera camera) {
     mapCamera.setCamera(camera);
   }
 
   public void setPuckDrawableSupplier(PuckDrawableSupplier supplier) {
     this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
-  }
-
-  public void updateCurrentLocationDrawable(@DrawableRes int gpsDrawable) {
-    if (mapboxMap != null) {
-      LocationComponentOptions options = mapboxMap.getLocationComponent().getLocationComponentOptions();
-      if (options.gpsDrawable() != gpsDrawable) {
-        LocationComponentOptions newOptions = options.toBuilder()
-          .gpsDrawable(gpsDrawable)
-          .build();
-        mapboxMap.getLocationComponent().applyStyle(newOptions);
-      }
-    }
   }
 }

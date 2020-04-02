@@ -110,8 +110,10 @@ class MapRouteArrow {
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
     boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
             || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
-    boolean invalidCurrentStepPoints =
-      routeProgress.currentLegProgress().currentStepProgress().stepPoints().size() < TWO_POINTS;
+    boolean invalidCurrentStepPoints = routeProgress.currentLegProgress() == null
+            || routeProgress.currentLegProgress().currentStepProgress() == null
+            || routeProgress.currentLegProgress().currentStepProgress().stepPoints() == null
+            || routeProgress.currentLegProgress().currentStepProgress().stepPoints().size() < TWO_POINTS;
     if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
       updateVisibilityTo(false);
       return;

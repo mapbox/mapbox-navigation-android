@@ -65,6 +65,9 @@
     <string name="title_basic_navigation_kotlin" translatable="false">BasicNavigationActivity</string>
     <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from source to destination using Mapbox Navigation.</string>
 
+    <string name="title_free_drive_kotlin" translatable="false">FreeDriveNavigationActivity</string>
+    <string name="description_free_drive_kotlin" translatable="false">Demonstrates how to navigate in a free drive scenario using Mapbox Navigation.</string>
+
     <string name="title_guidance_view" translatable="false">GuidanceViewActivity</string>
     <string name="description_guidance_view" translatable="false">Demonstrate the use of guidance view to show images at proper junctions</string>
 

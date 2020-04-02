@@ -36,7 +36,7 @@ public class NavigationCameraTest extends BaseTest {
     LocationComponent locationComponent = mock(LocationComponent.class);
     NavigationCamera camera = buildCamera(locationComponent);
 
-    verify(locationComponent, times(1)).setCameraMode(eq(CameraMode.TRACKING_GPS),
+    verify(locationComponent, times(0)).setCameraMode(eq(CameraMode.TRACKING_GPS),
       any(OnLocationCameraTransitionListener.class));
     verify(locationComponent, times(0)).setCameraMode(eq(CameraMode.NONE),
       any(OnLocationCameraTransitionListener.class));
@@ -46,7 +46,7 @@ public class NavigationCameraTest extends BaseTest {
       any(OnLocationCameraTransitionListener.class));
 
     camera.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
-    verify(locationComponent, times(2)).setCameraMode(eq(CameraMode.TRACKING_GPS),
+    verify(locationComponent, times(1)).setCameraMode(eq(CameraMode.TRACKING_GPS),
       any(OnLocationCameraTransitionListener.class));
 
     assertTrue(camera.isTrackingEnabled());
@@ -57,13 +57,13 @@ public class NavigationCameraTest extends BaseTest {
     LocationComponent locationComponent = mock(LocationComponent.class);
     NavigationCamera camera = buildCamera(locationComponent);
 
-    verify(locationComponent, times(1)).setCameraMode(eq(CameraMode.TRACKING_GPS),
+    verify(locationComponent, times(0)).setCameraMode(eq(CameraMode.TRACKING_GPS),
       any(OnLocationCameraTransitionListener.class));
     verify(locationComponent, times(0)).setCameraMode(eq(CameraMode.NONE),
       any(OnLocationCameraTransitionListener.class));
 
     camera.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
-    verify(locationComponent, times(2)).setCameraMode(eq(CameraMode.TRACKING_GPS),
+    verify(locationComponent, times(1)).setCameraMode(eq(CameraMode.TRACKING_GPS),
       any(OnLocationCameraTransitionListener.class));
 
     camera.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE);
