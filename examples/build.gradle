@@ -89,9 +89,10 @@ dependencies {
     implementation project(':libdirections-onboard')
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
-    implementation project(':liblogger')
     implementation project(':libnavigator')
     implementation project(':libnavigation-ui')
+    implementation dependenciesList.mapboxCommon
+    implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxSdkTurf
 
