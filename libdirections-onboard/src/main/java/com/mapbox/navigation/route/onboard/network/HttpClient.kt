@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.onboard.network
 
-import com.mapbox.navigation.base.logger.Logger
-import com.mapbox.navigation.base.logger.model.Message
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.route.onboard.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface

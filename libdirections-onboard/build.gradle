@@ -29,6 +29,7 @@ android {
 dependencies {
     compileOnly dependenciesList.mapboxAnnotations
     kapt dependenciesList.mapboxAnnotationsProcessor
+    implementation dependenciesList.mapboxCommon
 
     api project(':libnavigation-base')
     implementation project(':libnavigator')

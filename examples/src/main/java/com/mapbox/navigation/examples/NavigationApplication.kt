@@ -3,11 +3,11 @@ package com.mapbox.navigation.examples
 import android.os.StrictMode
 import android.text.TextUtils
 import androidx.multidex.MultiDexApplication
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.DelegatesExt
-import com.mapbox.navigation.logger.MapboxLogger
 import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 

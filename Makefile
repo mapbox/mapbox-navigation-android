@@ -124,7 +124,6 @@ navigation-fixtures:
 	./gradlew :libdirections-hybrid:test
 	./gradlew :libdirections-offboard:test
 	./gradlew :libdirections-onboard:test
-	./gradlew :liblogger:test
 	./gradlew :libnavigation-base:test
 	./gradlew :libnavigation-metrics:test
 	./gradlew :libnavigation-util:test

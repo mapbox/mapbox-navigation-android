@@ -10,13 +10,13 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.mapbox.base.common.logger.model.Message;
+import com.mapbox.common.logger.MapboxLogger;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.navigation.base.logger.model.Message;
 import com.mapbox.navigation.examples.R;
-import com.mapbox.navigation.logger.MapboxLogger;
 
 import java.util.Random;
 
