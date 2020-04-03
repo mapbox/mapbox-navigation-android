@@ -291,7 +291,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void addProgressChangeListener(MapboxNavigation navigation) {
     this.navigation = navigation;
-    navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
+    navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
   }
 
 
