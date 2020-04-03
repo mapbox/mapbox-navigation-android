@@ -27,6 +27,7 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.location.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.trip.session.*
@@ -83,6 +84,7 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationEngine = getLocationEngine()
         ).also {
             it.registerRouteProgressObserver(routeProgressObserver)
+            it.registerRoutesObserver(routeObserver)
         }
 
         initListeners()
@@ -90,14 +92,15 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     val waypoints = listOf(
-            Point.fromLngLat(-77.038294672966, 38.91854721860871),
-            Point.fromLngLat(-77.03662633895874, 38.91920249133305),
-            Point.fromLngLat(-77.03660779663086, 38.9182091456012),
-            Point.fromLngLat(-77.03660052546692, 38.91565476415369),
-            Point.fromLngLat(-77.03664779663086, 38.91398518410977),
-            Point.fromLngLat(-77.03661561012268, 38.913726395687185),
-            Point.fromLngLat(-77.03665852546692, 38.91345925826118),
-            Point.fromLngLat(-77.03665852546692, 38.91270792885979)
+            Point.fromLngLat(-122.5243002, 37.9753461),
+            Point.fromLngLat(-122.5282836, 37.9751463),
+            Point.fromLngLat(-122.5283157, 37.9742329),
+            Point.fromLngLat(-122.5319528, 37.9720847),
+            Point.fromLngLat(-122.5298285, 37.9709683),
+            //Point.fromLngLat(-122.5319528, 37.9720847),
+            //Point.fromLngLat(-77.03661561012268, 38.913726395687185),
+            //Point.fromLngLat(-77.03665852546692, 38.91345925826118),
+            Point.fromLngLat(-122.5298285, 37.9709683)
     )
     val names = listOf(
             "animal", // origin
@@ -105,9 +108,9 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
             "bear",
             "cat",
             "dog",
-            "elephant",
-            "frog",
-            "goat" // destination
+            "elephant"
+            //"frog",
+            //"goat" // destination
     )
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -253,6 +256,7 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         mapboxNavigation?.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
         mapboxNavigation?.unregisterBannerInstructionsObserver(bannerInstructionObserver)
+        mapboxNavigation?.unregisterRoutesObserver(routeObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
@@ -317,9 +321,8 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     // Used to determine if the ReplayRouteLocationEngine should be used to simulate the routing.
     // This is used for testing purposes.
     private fun shouldSimulateRoute(): Boolean {
-        return true
-//        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
-//                .getBoolean(this.getString(R.string.simulate_route_key), false)
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+                .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 
     // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
@@ -355,4 +358,11 @@ class TestWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 
+    private val routeObserver = object : RoutesObserver {
+        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
+            if (routes.isNotEmpty()) {
+                navigationMapboxMap?.drawRoute(routes[0])
+            }
+        }
+    }
 }
