@@ -20,7 +20,7 @@ interface Router {
     )
 
     /**
-     * Interrupt route-fetching request, if any is in progress.
+     * Interrupts a route-fetching request if one is in progress.
      */
     fun cancel()
 

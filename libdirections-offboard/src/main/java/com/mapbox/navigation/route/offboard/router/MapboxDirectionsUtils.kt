@@ -8,6 +8,13 @@ import java.util.Locale
 
 private val EVENT_LISTENER = NavigationRouteEventListener()
 
+/**
+ * Apply [RouteOptions] to [MapboxDirections.Builder]
+ *
+ * @receiver MapboxDirections.Builder
+ * @param options RouteOptions
+ * @return MapboxDirections.Builder
+ */
 fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirections.Builder {
     check(options.coordinates().size >= 2) { "At least 2 coordinates should be provided." }
 

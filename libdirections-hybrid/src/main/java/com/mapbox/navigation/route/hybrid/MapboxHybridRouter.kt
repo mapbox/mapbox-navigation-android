@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * MapboxHybridRouter combines onboard and offboard Routers.
  * Fetch route based on internet-connection state.
+ *
+ * @param onboardRouter Router
+ * @param offboardRouter Router
  */
 @MapboxModule(MapboxModuleType.NavigationRouter)
 class MapboxHybridRouter(
@@ -114,6 +117,12 @@ class MapboxHybridRouter(
         }
     }
 
+    /**
+     * Fetch route based on [RouteOptions]
+     *
+     * @param routeOptions RouteOptions
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRoute(
         routeOptions: RouteOptions,
         callback: Router.Callback
@@ -121,10 +130,20 @@ class MapboxHybridRouter(
         routeDispatchHandler.get().getRoute(routeOptions, callback)
     }
 
+    /**
+     * Refresh the traffic annotations for a given [DirectionsRoute]
+     *
+     * @param route DirectionsRoute the direction route to refresh
+     * @param legIndex Int the index of the current leg in the route
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
         routeDispatchHandler.get().getRouteRefresh(route, legIndex, callback)
     }
 
+    /**
+     * Interrupts a route-fetching request if one is in progress.
+     */
     override fun cancel() {
         onboardRouter.cancel()
         offboardRouter.cancel()

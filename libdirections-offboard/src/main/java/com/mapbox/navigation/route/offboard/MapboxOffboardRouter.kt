@@ -25,6 +25,7 @@ import retrofit2.Response
  *
  * @param accessToken mapboxAccessToken token
  * @param context application Context
+ * @param skuTokenProvider SkuTokenProvider
  */
 @MapboxModule(MapboxModuleType.NavigationOffboardRouter)
 class MapboxOffboardRouter(
@@ -34,12 +35,18 @@ class MapboxOffboardRouter(
 ) : Router {
 
     companion object {
-        const val ERROR_FETCHING_ROUTE = "Error fetching route"
+        private const val ERROR_FETCHING_ROUTE = "Error fetching route"
     }
 
     private var mapboxDirections: MapboxDirections? = null
     private var mapboxDirectionsRefresh: MapboxDirectionsRefresh? = null
 
+    /**
+     * Fetch route based on [RouteOptions]
+     *
+     * @param routeOptions RouteOptions
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRoute(
         routeOptions: RouteOptions,
         callback: Router.Callback
@@ -72,6 +79,9 @@ class MapboxOffboardRouter(
         })
     }
 
+    /**
+     * Interrupts a route-fetching request if one is in progress.
+     */
     override fun cancel() {
         mapboxDirections?.cancelCall()
         mapboxDirections = null
@@ -80,6 +90,13 @@ class MapboxOffboardRouter(
         mapboxDirectionsRefresh = null
     }
 
+    /**
+     * Refresh the traffic annotations for a given [DirectionsRoute]
+     *
+     * @param route DirectionsRoute the direction route to refresh
+     * @param legIndex Int the index of the current leg in the route
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
         try {
             val refreshBuilder = MapboxDirectionsRefresh.builder()
