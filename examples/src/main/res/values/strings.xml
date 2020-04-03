@@ -35,6 +35,9 @@
     <string name="title_custom_puck_example" translatable="false">Custom Puck Example</string>
     <string name="description_custom_puck_example" translatable="false">Shows how to use NavigationView with a custom puck</string>
 
+    <string name="title_custom_camera_example" translatable="false">Custom Camera Example</string>
+    <string name="description_custom_camera_example" translatable="false">Shows how to use NavigationView with a custom camera tilt and zoom</string>
+
     <string name="title_final_destination_building_highlight_kotlin" translatable="false">Final Destination Building Highlight UI Kotlin</string>
     <string name="description_final_destination_building_highlight_kotlin" translatable="false">Show how the final destination building footprint can be highlighted when the device has arrived. Example\'s in Kotlin.</string>
 
