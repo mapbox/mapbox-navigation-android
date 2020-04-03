@@ -429,7 +429,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   public void onNewRouteProgress(RouteProgress routeProgress) {
     if (mapRouteProgressChangeListener != null) {
-      mapRouteProgressChangeListener.onProgressChange(routeProgress);
+      mapRouteProgressChangeListener.onRouteProgressChanged(routeProgress);
     }
   }
 }
