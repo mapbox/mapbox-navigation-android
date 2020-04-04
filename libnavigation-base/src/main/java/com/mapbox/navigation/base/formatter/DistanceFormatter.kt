@@ -2,6 +2,9 @@ package com.mapbox.navigation.base.formatter
 
 import android.text.SpannableString
 
+/**
+ * Format distances contract
+ */
 interface DistanceFormatter {
 
     /**

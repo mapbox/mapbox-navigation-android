@@ -6,6 +6,15 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 
+/**
+ * This class contains all progress information at any given time during a navigation session. This
+ * progress includes information for the current route, leg and step the user is traversing along.
+ * With every new valid location update, a new route progress will be generated using the latest
+ * information.
+ *
+ * The latest route progress object can be obtained through either the [RouteProgressObserver].
+ * Note that the route progress object's immutable.
+ */
 class RouteProgress private constructor(
     private val route: DirectionsRoute? = null,
     private val routeGeometryWithBuffer: Geometry? = null,
@@ -90,7 +99,7 @@ class RouteProgress private constructor(
      * Returns whether or not the location updates are
      * considered in a tunnel along the route.
      *
-     * @return true if in a tunnel, false otherwise
+     * @return *true* if in a tunnel, *false* otherwise
      */
     fun inTunnel() = inTunnel
 
@@ -120,7 +129,6 @@ class RouteProgress private constructor(
      * Returns the current [DirectionsRoute] geometry with a buffer
      * that encompasses visible tile surface are while navigating.
      *
-     *
      * This [Geometry] is ideal for offline downloads of map or routing tile
      * data.
      *
@@ -128,8 +136,35 @@ class RouteProgress private constructor(
      */
     fun routeGeometryWithBuffer() = routeGeometryWithBuffer
 
+    /**
+     * Get a builder to customize a subset of current options.
+     */
     fun toBuilder() = builder
 
+    /**
+     * Builder for [RouteProgress]
+     *
+     * @param directionsRoute [DirectionsRoute] currently is used for the navigation session
+     * @param routeGeometryWithBuffer Current [DirectionsRoute] geometry with a buffer
+     * that encompasses visible tile surface are while navigating.
+     *
+     * This [Geometry] is ideal for offline downloads of map or routing tile
+     * data.
+     *
+     * @param bannerInstructions Current banner instruction.
+     * @param voiceInstructions Current voice instruction.
+     * @param currentState The current state of progress along the route.  Provides route and location
+     * tracking information.
+     * @param currentLegProgress [RouteLegProgress] object with information about the particular
+     * leg the user is currently on.
+     * @param upcomingStepPoints The list of points that represent the upcoming step step geometry.
+     * @param inTunnel *true* if in a tunnel, *false* otherwise
+     * @param distanceRemaining The distance remaining in meters till the user reaches the end of the route
+     * @param distanceTraveled Total distance traveled in meters along route
+     * @param durationRemaining The duration remaining in seconds till the user reaches the end of the route
+     * @param fractionTraveled Float
+     * @param remainingWaypoints Number of waypoints remaining on the current route
+     */
     data class Builder(
         private var directionsRoute: DirectionsRoute? = null,
         private var routeGeometryWithBuffer: Geometry? = null,
@@ -146,44 +181,121 @@ class RouteProgress private constructor(
         private var remainingWaypoints: Int = 0
     ) {
 
+        /**
+         * [DirectionsRoute] currently is used for the navigation session
+         *
+         * @return Builder
+         */
         fun route(route: DirectionsRoute) =
             apply { this.directionsRoute = route }
 
+        /**
+         * Current [DirectionsRoute] geometry with a buffer
+         * that encompasses visible tile surface are while navigating.
+         *
+         * This [Geometry] is ideal for offline downloads of map or routing tile
+         * data.
+         *
+         * @return Builder
+         */
         fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) =
             apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
 
+        /**
+         * Current banner instruction.
+         *
+         * @return Builder
+         */
         fun bannerInstructions(bannerInstructions: BannerInstructions?) =
             apply { this.bannerInstructions = bannerInstructions }
 
+        /**
+         * Current voice instruction.
+         *
+         * @return Builder
+         */
         fun voiceInstructions(voiceInstructions: VoiceInstructions?) =
             apply { this.voiceInstructions = voiceInstructions }
 
+        /**
+         * The current state of progress along the route.  Provides route and location tracking
+         * information.
+         *
+         * @return Builder
+         */
         fun currentState(currentState: RouteProgressState) =
             apply { this.currentState = currentState }
 
+        /**
+         * [RouteLegProgress] object with information about the particular leg the user is
+         * currently on.
+         *
+         * @return Builder
+         */
         fun currentLegProgress(legProgress: RouteLegProgress) =
             apply { this.currentLegProgress = legProgress }
 
+        /**
+         * The list of points that represent the upcoming step step geometry.
+         *
+         * @return Builder
+         */
         fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
             apply { this.upcomingStepPoints = upcomingStepPoints }
 
+        /**
+         * *true* if in a tunnel, *false* otherwise
+         *
+         * @return Builder
+         */
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
 
+        /**
+         * The distance remaining in meters till the user reaches the end of the route.
+         *
+         * @return Builder
+         */
         fun distanceRemaining(distanceRemaining: Float) =
             apply { this.distanceRemaining = distanceRemaining }
 
+        /**
+         * Total distance traveled in meters along route.
+         *
+         * @return Builder
+         */
         fun distanceTraveled(distanceTraveled: Float) =
             apply { this.distanceTraveled = distanceTraveled }
 
+        /**
+         * The duration remaining in seconds till the user reaches the end of the route
+         *
+         * @return Builder
+         */
         fun durationRemaining(durationRemaining: Double) =
             apply { this.durationRemaining = durationRemaining }
 
+        /**
+         * The fraction traveled along the current route, this is a float value between 0 and 1 and
+         * isn't guaranteed to reach 1 before the user reaches the end of the route.
+         *
+         * @return Builder
+         */
         fun fractionTraveled(fractionTraveled: Float) =
             apply { this.fractionTraveled = fractionTraveled }
 
+        /**
+         * Number of waypoints remaining on the current route
+         *
+         * @return Builder
+         */
         fun remainingWaypoints(remainingWaypoints: Int) =
             apply { this.remainingWaypoints = remainingWaypoints }
 
+        /**
+         * Build new instance of [RouteProgress]
+         *
+         * @return RouteProgress
+         */
         fun build(): RouteProgress {
             return RouteProgress(
                 directionsRoute,

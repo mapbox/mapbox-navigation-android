@@ -6,6 +6,9 @@ import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.TimeFormatType
 
+/**
+ * Default navigation pooling delay
+ */
 const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
 
 /**
@@ -22,6 +25,8 @@ const val DEFAULT_NAVIGATOR_POLLING_DELAY = 1500L
  * @param fasterRouteDetectorInterval defines time interval in milliseconds for detection is faster route available
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
  * @param onboardRouterConfig [MapboxOnboardRouterConfig] defines configuration for the default on-board router
+ * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
+ * @param isDebugLoggingEnabled Boolean
  */
 data class NavigationOptions constructor(
     @RoundingIncrement val roundingIncrement: Int,
@@ -44,6 +49,9 @@ data class NavigationOptions constructor(
         .onboardRouterConfig(onboardRouterConfig)
         .isFromNavigationUi(isFromNavigationUi)
 
+    /**
+     * Build a new [NavigationOptions]
+     */
     class Builder {
         private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY
         private var timeFormatType: Int = NONE_SPECIFIED
@@ -53,27 +61,52 @@ data class NavigationOptions constructor(
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
 
+        /**
+         * Defines the increment displayed on the instruction view
+         */
         fun roundingIncrement(roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
 
+        /**
+         * Defines time format for calculation remaining trip time
+         */
         fun timeFormatType(type: Int) =
             apply { this.timeFormatType = type }
 
+        /**
+         * Defines approximate location engine interval lag in milliseconds
+         */
         fun navigatorPollingDelay(pollingDelay: Long) =
             apply { navigatorPollingDelay = pollingDelay }
 
+        /**
+         *  Defines format distances showing in notification during navigation
+         */
         fun distanceFormatter(distanceFormatter: DistanceFormatter?) =
             apply { this.distanceFormatter = distanceFormatter }
 
+        /**
+         * Defines configuration for the default on-board router
+         */
         fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig?) =
             apply { this.onboardRouterConfig = onboardRouterConfig }
 
+        /**
+         * Defines if builder instance creating from Navigation UI
+         */
         fun isFromNavigationUi(flag: Boolean) =
             apply { this.isFromNavigationUi = flag }
 
+        /**
+         * Defines if debug logging enable
+         */
         fun isDebugLoggingEnabled(flag: Boolean) =
             apply { this.isDebugLoggingEnabled = flag }
 
+        /**
+         * Build new instance of [NavigationOptions]
+         * @return NavigationOptions
+         */
         fun build(): NavigationOptions {
             return NavigationOptions(
                 roundingIncrement = roundingIncrement,

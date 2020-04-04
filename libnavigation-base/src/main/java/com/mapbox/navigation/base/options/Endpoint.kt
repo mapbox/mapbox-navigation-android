@@ -22,6 +22,14 @@ data class Endpoint(
         host, version, token, userAgent
     )
 
+    /**
+     * Build a new [Endpoint]
+     *
+     * @param host Tile endpoint
+     * @param version Version of Tiles
+     * @param token Token for tiles retrieving (in most cases mapbox accessToken)
+     * @param userAgent HttpClient UserAgent
+     */
     data class Builder(
         private var host: String,
         private var version: String,

@@ -30,6 +30,12 @@ data class MapboxOnboardRouterConfig(
 
     /**
      * Builder for [MapboxOnboardRouterConfig].
+     *
+     * @param tilePath Path where tiles will be stored to / Path where tiles will be fetched from
+     * @param inMemoryTileCache Max size of tiles cache (optional)
+     * @param mapMatchingSpatialCache Max size of cache for map matching (optional)
+     * @param threadsCount Max count of native threads (optional)
+     * @param endpoint Endpoint config (optional)
      */
     data class Builder(
         private var tilePath: String,
@@ -44,9 +50,15 @@ data class MapboxOnboardRouterConfig(
         fun tilePath(tilePath: String) =
             apply { this.tilePath = tilePath }
 
+        /**
+         * Map size of tiles cache
+         */
         fun inMemoryTileCache(inMemoryTileCache: Int?) =
             apply { this.inMemoryTileCache = inMemoryTileCache }
 
+        /**
+         * Max size of cache for map matching
+         */
         fun mapMatchingSpatialCache(mapMatchingSpatialCache: Int?) =
             apply { this.mapMatchingSpatialCache = mapMatchingSpatialCache }
 
