@@ -25,6 +25,8 @@ import androidx.core.util.Pair
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
+import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -55,8 +57,10 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
  * Default implementation of [TripNotification] interface
  *
  * @param applicationContext is [Context]
- * @param navigationOptions is [NavigationOptions] used here to format
- * distance and time
+ * @param navigationOptions is [NavigationOptions] used here to format distance and time
+ *
+ * @property currentManeuverType This indicates the type of current maneuver. The same [BannerText.type] of primary [BannerInstructions]
+ * @property currentManeuverModifier This indicates the mode of the maneuver. The same [BannerText.modifier] of primary [BannerInstructions]
  */
 @MapboxModule(MapboxModuleType.NavigationTripNotification)
 class MapboxTripNotification constructor(
@@ -65,9 +69,13 @@ class MapboxTripNotification constructor(
 ) : TripNotification {
 
     companion object {
+        /**
+         * Broadcast of [MapboxTripNotification] actions
+         */
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
     }
 
+    @StepManeuverType
     var currentManeuverType: String? = null
         private set
     var currentManeuverModifier: String? = null
@@ -101,6 +109,13 @@ class MapboxTripNotification constructor(
         createNotificationChannel()
     }
 
+    /**
+     * Provides a custom [Notification] to launch
+     * with the [TripSession], specifically
+     * [android.app.Service.startForeground].
+     *
+     * @return a custom notification
+     */
     override fun getNotification(): Notification {
         if (!::notification.isInitialized) {
             this.notification =
@@ -109,8 +124,23 @@ class MapboxTripNotification constructor(
         return this.notification
     }
 
+    /**
+     * An integer id that will be used to start this notification from [TripSession] with
+     * [android.app.Service.startForeground].
+     *
+     * @return an int id specific to the notification
+     */
     override fun getNotificationId(): Int = NOTIFICATION_ID
 
+    /**
+     * If enabled, this method will be called every time a
+     * new [RouteProgress] is generated.
+     *
+     * This method can serve as a cue to update a [Notification]
+     * with a specific notification id.
+     *
+     * @param routeProgress with the latest progress data
+     */
     override fun updateNotification(routeProgress: RouteProgress) {
         // RemoteView has an internal mActions, which stores every change and cannot be cleared.
         // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
@@ -121,11 +151,21 @@ class MapboxTripNotification constructor(
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
+    /**
+     * Called when TripSession starts via [TripSession.start]
+     *
+     * This callback may be used to perform post start initialization
+     */
     override fun onTripSessionStarted() {
         registerReceiver()
         notificationActionButtonChannel = Channel(1)
     }
 
+    /**
+     * Called when TripSession spos via [TripSession.stop]
+     *
+     * This callback may be used to clean up any listeners or receivers, preventing leaks.
+     */
     override fun onTripSessionStopped() {
         currentManeuverType = null
         currentManeuverModifier = null
@@ -525,7 +565,7 @@ class MapboxTripNotification constructor(
         }
     }
 
-    inner class NotificationActionReceiver : BroadcastReceiver() {
+    private inner class NotificationActionReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             onEndNavigationBtnClick()
         }
