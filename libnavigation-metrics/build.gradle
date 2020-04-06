@@ -10,6 +10,11 @@ dokka {
     configuration {
         moduleName = 'libnavigation-metrics'
         reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.metrics.internal"
+            suppress = true
+        }
     }
 }
 

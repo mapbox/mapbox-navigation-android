@@ -72,6 +72,9 @@ object MapboxMetricsReporter : MetricsReporter {
         ioJobController.job.cancelChildren()
     }
 
+    /**
+     * Adds an event to the metrics reporter when this event occurs.
+     */
     override fun addEvent(metricEvent: MetricEvent) {
         metricEvent.toTelemetryEvent()?.let {
             mapboxTelemetry.push(it)
@@ -82,10 +85,16 @@ object MapboxMetricsReporter : MetricsReporter {
         }
     }
 
+    /**
+     * Adds an observer that will be triggered when a metric event is handled
+     */
     override fun setMetricsObserver(metricsObserver: MetricsObserver) {
         this.metricsObserver = metricsObserver
     }
 
+    /**
+     * Remove metrics observer
+     */
     override fun removeObserver() {
         this.metricsObserver = null
     }
