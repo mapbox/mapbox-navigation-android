@@ -19,6 +19,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
+import com.mapbox.navigation.base.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -39,12 +40,10 @@ import com.mapbox.navigation.ui.instruction.InstructionModel;
 import com.mapbox.navigation.ui.junction.RouteJunctionModel;
 import com.mapbox.navigation.ui.legacy.RouteUtils;
 import com.mapbox.navigation.ui.summary.SummaryModel;
-import com.mapbox.navigation.ui.utils.LocaleEx;
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
-import com.mapbox.navigation.utils.extensions.ContextEx;
 import okhttp3.Cache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
@@ -52,7 +51,10 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
+import static com.mapbox.navigation.base.extensions.LocaleEx.getLocaleDirectionsRoute;
+import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
 import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_SOURCE_UI;
 
 public class NavigationViewModel extends AndroidViewModel {
@@ -340,7 +342,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private String initializeUnitType(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    String unitType = LocaleEx.getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
+    String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
     if (routeOptions != null) {
       unitType = routeOptions.voiceUnits();
     }
@@ -356,10 +358,15 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigationOptions.getRoundingIncrement();
   }
 
-  private DistanceFormatter buildDistanceFormatter(NavigationViewOptions options) {
-    String unitType = initializeUnitType(options);
-    int roundingIncrement = initializeRoundingIncrement(options);
-    return new MapboxDistanceFormatter(getApplication(), language, unitType, roundingIncrement);
+  private DistanceFormatter buildDistanceFormatter(final NavigationViewOptions options) {
+    final String unitType = initializeUnitType(options);
+    final int roundingIncrement = initializeRoundingIncrement(options);
+    final Locale locale = getLocaleDirectionsRoute(options.directionsRoute(), getApplication());
+    return new MapboxDistanceFormatter.Builder(getApplication())
+            .withUnitType(unitType)
+            .withRoundingIncrement(roundingIncrement)
+            .withLocale(locale)
+            .build();
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {

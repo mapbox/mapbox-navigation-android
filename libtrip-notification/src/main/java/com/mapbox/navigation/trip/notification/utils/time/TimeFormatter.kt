@@ -13,6 +13,7 @@ import com.mapbox.navigation.utils.span.SpanItem
 import com.mapbox.navigation.utils.span.TextSpanItem
 import java.util.ArrayList
 import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object TimeFormatter {
@@ -32,7 +33,7 @@ object TimeFormatter {
     }
 
     @JvmStatic
-    fun formatTimeRemaining(context: Context, routeDuration: Double): SpannableStringBuilder {
+    fun formatTimeRemaining(context: Context, routeDuration: Double, locale: Locale?): SpannableStringBuilder {
         var seconds = routeDuration.toLong()
 
         if (seconds < 0) {
@@ -47,11 +48,11 @@ object TimeFormatter {
             TimeUnit.SECONDS.toMinutes(seconds + TimeUnit.MINUTES.toSeconds(1) / 2) // round it to next minute if seconds is more or equal than 30
 
         val textSpanItems = ArrayList<SpanItem>()
-        val resources = context.resources
+        val resources = context.resourcesWithLocale(locale)
         formatDays(resources, days, textSpanItems)
-        formatHours(context, hours, textSpanItems)
-        formatMinutes(context, minutes, textSpanItems)
-        formatNoData(context, days, hours, minutes, textSpanItems)
+        formatHours(resources, hours, textSpanItems)
+        formatMinutes(resources, minutes, textSpanItems)
+        formatNoData(resources, days, hours, minutes, textSpanItems)
         return textSpanItems.combineSpan()
     }
 
@@ -65,37 +66,44 @@ object TimeFormatter {
         }
     }
 
-    private fun formatHours(context: Context, hours: Long, textSpanItems: MutableList<SpanItem>) {
+    private fun formatHours(resources: Resources, hours: Long, textSpanItems: MutableList<SpanItem>) {
         if (hours != 0L) {
-            val hourString = String.format(TIME_STRING_FORMAT, context.getString(R.string.hr))
+            val hourString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.hr))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), hours.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), hourString))
         }
     }
 
     private fun formatMinutes(
-        context: Context,
+        resources: Resources,
         minutes: Long,
         textSpanItems: MutableList<SpanItem>
     ) {
         if (minutes != 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, context.getString(R.string.min))
+            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), minutes.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
     }
 
     private fun formatNoData(
-        context: Context,
+        resources: Resources,
         days: Long,
         hours: Long,
         minutes: Long,
         textSpanItems: MutableList<SpanItem>
     ) {
         if (days == 0L && hours == 0L && minutes == 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, context.getString(R.string.min))
+            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), 1.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
+    }
+
+    private fun Context.resourcesWithLocale(locale: Locale?): Resources {
+        val config = this.resources.configuration.also {
+            it.setLocale(locale)
+        }
+        return this.createConfigurationContext(config).resources
     }
 }

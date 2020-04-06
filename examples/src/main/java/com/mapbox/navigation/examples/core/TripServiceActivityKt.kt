@@ -9,6 +9,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -76,17 +77,18 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
+        val formatter = MapboxDistanceFormatter.builder(this)
+            .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+            .withUnitType(METRIC)
+            .withLocale(this.inferDeviceLocale())
+            .build()
+
         mapboxTripNotification = MapboxTripNotification(
             applicationContext,
             NavigationOptions.Builder()
-                .distanceFormatter(
-                    MapboxDistanceFormatter(
-                        applicationContext,
-                        "en",
-                        METRIC,
-                        ROUNDING_INCREMENT_FIFTY
-                    )
-                ).timeFormatType(TWENTY_FOUR_HOURS).build()
+                .distanceFormatter(formatter)
+                .timeFormatType(TWENTY_FOUR_HOURS)
+                .build()
         )
 
         // If you want to use Mapbox provided Service do this

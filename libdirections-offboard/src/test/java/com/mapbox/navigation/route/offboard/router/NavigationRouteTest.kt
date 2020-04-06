@@ -7,9 +7,9 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
-import com.mapbox.navigation.utils.extensions.inferDeviceLocale
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -29,7 +29,7 @@ class NavigationRouteTest {
         @BeforeClass
         @JvmStatic
         fun init() {
-            mockkStatic("com.mapbox.navigation.utils.extensions.ContextEx")
+            mockkStatic("com.mapbox.navigation.base.extensions.ContextEx")
         }
 
         const val ACESS_TOKEN = "pk.XXX"
