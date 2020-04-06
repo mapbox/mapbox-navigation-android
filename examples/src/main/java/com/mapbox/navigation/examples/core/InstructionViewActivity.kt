@@ -296,7 +296,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         startNavigation.visibility = VISIBLE
         startNavigation.isEnabled = false
         instructionView.visibility = GONE
-        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
+        Snackbar.make(container, R.string.msg_long_press_map_for_destination, LENGTH_LONG).show()
         feedbackButton = instructionView.retrieveFeedbackButton().apply {
             hide()
             addOnClickListener {

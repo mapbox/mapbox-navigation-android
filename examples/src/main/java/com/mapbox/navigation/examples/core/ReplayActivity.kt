@@ -175,7 +175,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStart()
         mapView.onStart()
         mapboxNavigation?.registerLocationObserver(locationObserver)
-        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_SHORT)
+        Snackbar.make(container, R.string.msg_long_press_map_for_destination, Snackbar.LENGTH_SHORT)
             .show()
     }
 

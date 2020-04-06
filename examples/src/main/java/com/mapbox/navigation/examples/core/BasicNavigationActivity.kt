@@ -81,7 +81,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         )
 
         initListeners()
-        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_LONG)
+        Snackbar.make(container, R.string.msg_long_press_map_for_destination, Snackbar.LENGTH_LONG)
             .show()
     }
 
@@ -110,6 +110,11 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             true
         }
         locationComponent = mapboxMap.locationComponent
+        Snackbar.make(
+                findViewById(R.id.container),
+                getString(R.string.msg_long_press_map_for_destination),
+                Snackbar.LENGTH_SHORT
+        ).show()
     }
 
     @SuppressLint("RestrictedApi")

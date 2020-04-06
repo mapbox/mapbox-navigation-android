@@ -10,7 +10,7 @@ import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -248,7 +248,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
+        Snackbar.make(container, R.string.msg_long_press_map_for_destination, LENGTH_SHORT).show()
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFasterRoute)
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = MAX_PROGRESS.toInt()

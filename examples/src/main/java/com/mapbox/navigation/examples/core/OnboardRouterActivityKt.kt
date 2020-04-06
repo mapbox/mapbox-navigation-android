@@ -81,11 +81,7 @@ class OnboardRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             Style.MAPBOX_STREETS
         ) {
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
-            Snackbar.make(
-                findViewById(R.id.container),
-                "Tap map to place waypoint",
-                Snackbar.LENGTH_LONG
-            ).show()
+            Snackbar.make(findViewById(R.id.container), getString(R.string.msg_tap_map_for_destination), Snackbar.LENGTH_SHORT).show()
             newOrigin()
         }
     }

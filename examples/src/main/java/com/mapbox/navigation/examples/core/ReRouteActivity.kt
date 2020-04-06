@@ -217,7 +217,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
+        Snackbar.make(container, R.string.msg_long_press_map_for_destination, LENGTH_LONG).show()
         startNavigation.setOnClickListener {
             if (mapboxNavigation.getRoutes().isNotEmpty()) {
                 navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)

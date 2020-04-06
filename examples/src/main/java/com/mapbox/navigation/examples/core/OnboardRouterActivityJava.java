@@ -105,7 +105,9 @@ public class OnboardRouterActivityJava extends AppCompatActivity implements OnMa
     this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       navigationMapRoute = new NavigationMapRoute(mapView, mapboxMap);
-      Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", Snackbar.LENGTH_LONG).show();
+      Snackbar.make(findViewById(R.id.container),
+          getString(R.string.msg_tap_map_for_destination),
+          Snackbar.LENGTH_SHORT).show();
       newOrigin();
     });
   }

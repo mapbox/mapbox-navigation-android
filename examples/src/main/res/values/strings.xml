@@ -95,8 +95,9 @@
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation" translatable="false">Start Navigation</string>
     <string name="play_history" translatable="false">Play history</string>
-    <string name="offline_region_download_title">Download offline region</string>
-    <string name="msg_long_press_for_destination">Long press a point on the map to indicate a destination.</string>
+    <string name="offline_region_download_title" translatable="false">Download offline region</string>
+    <string name="msg_long_press_map_for_destination" translatable="false">Long press on the map to indicate a destination.</string>
+    <string name="msg_tap_map_for_destination" translatable="false">Tap on the map to indicate a destination.</string>
     <string name="offline_category_title" translatable="false">Offline</string>
     <string name="offline_enabled_title" translatable="false">Offline routing enabled</string>
     <string name="offline_version_title" translatable="false">Choose offline version</string>

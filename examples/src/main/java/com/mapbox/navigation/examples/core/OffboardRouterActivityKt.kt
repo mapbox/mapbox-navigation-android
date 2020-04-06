@@ -95,6 +95,11 @@ class OffboardRouterActivityKt : AppCompatActivity(),
                 Snackbar.LENGTH_LONG
             ).show()
             newOrigin()
+            Snackbar.make(
+                    findViewById(R.id.container),
+                    getString(R.string.msg_tap_map_for_destination),
+                    Snackbar.LENGTH_SHORT
+            ).show()
         }
     }
 

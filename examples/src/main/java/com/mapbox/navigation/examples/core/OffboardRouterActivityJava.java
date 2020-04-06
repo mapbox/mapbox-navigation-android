@@ -90,7 +90,8 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
     this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       navigationMapRoute = new NavigationMapRoute(mapView, mapboxMap);
-      Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", Snackbar.LENGTH_LONG).show();
+      Snackbar.make(findViewById(R.id.container),
+          "Tap map to place waypoint", Snackbar.LENGTH_LONG).show();
       newOrigin();
     });
   }
@@ -106,7 +107,9 @@ public class OffboardRouterActivityJava extends AppCompatActivity implements
       mapboxMap.addMarker(new MarkerOptions().position(point));
       findRoute();
     } else {
-      Toast.makeText(this, "Only 2 waypoints supported for this example", Toast.LENGTH_LONG).show();
+      Toast.makeText(this,
+          "Only 2 waypoints supported for this example",
+          Toast.LENGTH_LONG).show();
       clearMap();
     }
     return false;
