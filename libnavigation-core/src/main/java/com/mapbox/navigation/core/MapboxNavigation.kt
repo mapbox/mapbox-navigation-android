@@ -447,6 +447,20 @@ constructor(
         fasterRouteController.stop()
     }
 
+    /**
+     * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available
+     */
+    internal fun registerNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
+    /**
+     * Unregisters a [NavigationSessionStateObserver]. Not publicly available
+     */
+    internal fun unregisterNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+        navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
+    }
+
     private fun createInternalRoutesObserver() = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
