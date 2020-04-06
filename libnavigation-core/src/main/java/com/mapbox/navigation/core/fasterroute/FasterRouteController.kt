@@ -14,6 +14,7 @@ internal class FasterRouteController(
     private val tripSession: TripSession
 ) {
     private val fasterRouteTimer = MapboxTimer()
+    private val fasterRouteDetector = FasterRouteDetector()
     private var fasterRouteObserver: FasterRouteObserver? = null
 
     fun attach(fasterRouteObserver: FasterRouteObserver) {
@@ -32,6 +33,10 @@ internal class FasterRouteController(
     }
 
     private fun requestFasterRoute() {
+        if (directionsSession.routes.isEmpty()) {
+            return
+        }
+
         ifNonNull(tripSession.getEnhancedLocation()) { enhancedLocation ->
             val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, enhancedLocation)
                 ?: return
@@ -41,8 +46,11 @@ internal class FasterRouteController(
 
     private val fasterRouteRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            if (directionsSession.routes.isEmpty()) {
+                return
+            }
             tripSession.getRouteProgress()?.let { progress ->
-                if (FasterRouteDetector.isRouteFaster(routes[0], progress)) {
+                if (fasterRouteDetector.isRouteFaster(routes[0], progress)) {
                     fasterRouteObserver?.onFasterRouteAvailable(routes[0])
                 }
             }
