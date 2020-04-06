@@ -199,6 +199,14 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".ui.CustomCameraActivity"
+            android:label="@string/title_custom_camera_example"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity" />
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
  * The [MapboxNavigation] uses
  * a [SimpleCamera] by default. If you would like to customize the camera properties, create a
  * concrete implementation of this class or subclass [SimpleCamera] and update
- * [MapboxNavigation.setCameraEngine].
+ * [MapboxNavigation.setCamera] or [NavigationViewOptions.builder().camera]
  *
  */
 abstract class Camera {
