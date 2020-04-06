@@ -28,6 +28,8 @@ import kotlinx.coroutines.withContext
  *
  * It uses offline storage path to store and retrieve data, setup endpoint,
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
+ *
+ * @param navigatorNative Native Navigator
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
@@ -68,6 +70,12 @@ class MapboxOnboardRouter(
         }
     }
 
+    /**
+     * Fetch route based on [RouteOptions]
+     *
+     * @param routeOptions
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRoute(
         routeOptions: RouteOptions,
         callback: Router.Callback
@@ -111,10 +119,20 @@ class MapboxOnboardRouter(
         retrieveRoute(offlineRouter.buildUrl(), callback)
     }
 
+    /**
+     * Interrupts a route-fetching request if one is in progress.
+     */
     override fun cancel() {
         mainJobControl.job.cancelChildren()
     }
 
+    /**
+     * Refresh the traffic annotations for a given [DirectionsRoute]
+     *
+     * @param route DirectionsRoute the direction route to refresh
+     * @param legIndex Int the index of the current leg in the route
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
         // Does nothing
     }
