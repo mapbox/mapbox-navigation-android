@@ -61,7 +61,7 @@ interface MapboxNativeNavigator {
      * is earlier than a previous call, the last status will be returned,
      * the function does not support re-winding time.
      */
-    fun getStatus(date: Date): TripStatus
+    suspend fun getStatus(date: Date): TripStatus
 
     // Routing
 
@@ -77,7 +77,7 @@ interface MapboxNativeNavigator {
      * @return a [NavigationStatus] route state if no errors occurred.
      * Otherwise, it returns a invalid route state.
      */
-    fun setRoute(
+    suspend fun setRoute(
         route: DirectionsRoute?,
         routeIndex: Int = INDEX_FIRST_ROUTE,
         legIndex: Int = INDEX_FIRST_LEG

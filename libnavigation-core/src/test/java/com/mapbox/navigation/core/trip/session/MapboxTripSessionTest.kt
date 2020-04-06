@@ -18,6 +18,8 @@ import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigator.NavigationStatus
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -87,9 +89,9 @@ class MapboxTripSessionTest {
             navigator
         )
 
-        every { navigator.getStatus(any()) } returns tripStatus
+        coEvery { navigator.getStatus(any()) } returns tripStatus
         every { navigator.updateLocation(any()) } returns false
-        every { navigator.setRoute(any()) } returns navigationStatus
+        coEvery { navigator.setRoute(any()) } returns navigationStatus
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false
@@ -353,14 +355,14 @@ class MapboxTripSessionTest {
     fun setRoute() {
         tripSession.route = route
 
-        verify { navigator.setRoute(route) }
+        coVerify { navigator.setRoute(route) }
     }
 
     @Test
     fun setRoute_nullable() {
         tripSession.route = null
 
-        verify { navigator.setRoute(null) }
+        coVerify { navigator.setRoute(null) }
     }
 
     @Test
