@@ -8,6 +8,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -203,5 +206,15 @@ class MapboxDistanceFormatterTest {
             .formatDistance(19312.1)
 
         assertEquals("12 mérföld", result.toString())
+    }
+
+    @Test
+    fun builderUsesApplicationContext() {
+        val mockContext = mockk<Context>()
+        every { mockContext.applicationContext } returns ctx
+
+        MapboxDistanceFormatter.Builder(mockContext).build()
+
+        verify(exactly = 2) { mockContext.applicationContext }
     }
 }

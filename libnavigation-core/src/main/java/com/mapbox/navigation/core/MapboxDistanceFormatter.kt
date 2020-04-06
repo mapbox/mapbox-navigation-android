@@ -70,11 +70,11 @@ class MapboxDistanceFormatter private constructor(
             apply { this.locale = locale }
 
         fun build(): MapboxDistanceFormatter {
-            val localeToUse: Locale = locale ?: context.inferDeviceLocale()
+            val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
             val unitTypeToUse: String = unitType ?: localeToUse.getUnitTypeForLocale()
 
             return MapboxDistanceFormatter(
-                context,
+                context.applicationContext,
                 localeToUse,
                 unitTypeToUse,
                 roundingIncrement)
