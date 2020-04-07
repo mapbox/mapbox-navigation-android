@@ -92,6 +92,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
+  private boolean arrivedAtFinalDestination = false;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
   private NavigationViewModelProgressObserver navigationProgressObserver =
@@ -261,7 +262,8 @@ public class NavigationViewModel extends AndroidViewModel {
     this.routeProgress = routeProgress;
     sendEventArrival(routeProgress);
     if (routeUtils.deviceCloseEnoughToFinalDestination(routeProgress,
-        navigationViewOptions.maxMetersToTriggerDestinationArrival())) {
+        navigationViewOptions.maxMetersToTriggerDestinationArrival())
+        && !arrivedAtFinalDestination) {
       sendEventFinalDestinationArrival();
     }
     instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
@@ -544,6 +546,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private void sendEventFinalDestinationArrival() {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFinalDestinationArrival();
+      arrivedAtFinalDestination = true;
     }
   }
 

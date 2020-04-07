@@ -127,7 +127,7 @@
                 android:value=".UIActivity"/>
         </activity>
 
-        <activity android:name=".ui.FinalDestinationBuildingFootprintHighlightActivityKt"
+        <activity android:name=".ui.ArrivalUiFootprintHighlightActivityKt"
             android:label="@string/title_final_destination_building_highlight_kotlin"
             android:screenOrientation="portrait">
             <meta-data
@@ -135,7 +135,7 @@
                 android:value=".UIActivity"/>
         </activity>
 
-        <activity android:name=".ui.ArrivalUiBuildingExtrusionLayerActivityKt"
+        <activity android:name=".ui.ArrivalUiBuildingExtrusionActivityKt"
             android:label="@string/title_arrival_ui_building_extrusions_kotlin"
             android:screenOrientation="portrait">
             <meta-data
