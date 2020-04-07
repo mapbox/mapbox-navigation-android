@@ -18,7 +18,7 @@ import com.mapbox.navigation.ui.camera.SimpleCamera
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_navigation_view.*
+import kotlinx.android.synthetic.main.activity_navigation_view.navigationView
 
 /**
  * This activity shows how to create a custom class that extends [Camera] and then passing
