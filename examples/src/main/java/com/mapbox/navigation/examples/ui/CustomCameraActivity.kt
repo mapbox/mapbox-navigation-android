@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
@@ -89,7 +88,7 @@ class CustomCameraActivity : AppCompatActivity(), OnNavigationReadyCallback, Nav
 
     override fun onNavigationReady(isRunning: Boolean) {
         if (!isRunning && !::navigationMapboxMap.isInitialized) {
-            ifNonNull(navigationView.retrieveNavigationMapboxMap()) { navMapboxMap ->
+            navigationView.retrieveNavigationMapboxMap()?.let { navMapboxMap ->
                 this.navigationMapboxMap = navMapboxMap
                 this.navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.NORMAL)
                 this.mapboxMap = navMapboxMap.retrieveMap()
