@@ -5,13 +5,15 @@ import android.graphics.PointF
 import androidx.annotation.ColorInt
 
 /**
- * Maneuver icon drawer
+ * Maneuver icon drawer. Used along with maneuver type and modifier. Used by [ManeuverIconHelper]
+ * as a general interface to drawing junction views
  */
 interface ManeuverIconDrawer {
+
     /**
-     * Draw Maneuver icon
+     * Draws the maneuver icon
      *
-     * @param canvas where Maneuver will be drawn
+     * @param canvas where the maneuver icon will be drawn
      * @param primaryColor primary color
      * @param secondaryColor secondary color
      * @param size PointF

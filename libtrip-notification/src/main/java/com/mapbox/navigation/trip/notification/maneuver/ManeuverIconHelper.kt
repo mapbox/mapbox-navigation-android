@@ -105,12 +105,12 @@ const val STEP_MANEUVER_MODIFIER_LEFT = "left"
 const val STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left"
 
 /**
- * Helping class for creating maneuvers draw on [Canvas]
+ * A helping class for creating maneuvers that are draw on the [Canvas]
  */
 object ManeuverIconHelper {
 
     /**
-     * Default *roundabout* angel
+     * Default *roundabout* angle
      */
     const val DEFAULT_ROUNDABOUT_ANGLE = 180f
 
@@ -118,7 +118,7 @@ object ManeuverIconHelper {
     private const val BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f
 
     /**
-     * Map of Maneuver type+modifier and Maneuver`s drawer
+     * Map of the maneuver type+modifier and the maneuver's [ManeuverIconDrawer]
      */
     @JvmField
     val MANEUVER_ICON_DRAWER_MAP: Map<Pair<String, String>, ManeuverIconDrawer> =
@@ -415,7 +415,7 @@ object ManeuverIconHelper {
         }
 
     /**
-     * Set of Modifiers that should be flipped
+     * Set of modifiers that should be flipped
      */
     @JvmField
     val SHOULD_FLIP_MODIFIERS: Set<String> = object : HashSet<String>() {
@@ -428,7 +428,7 @@ object ManeuverIconHelper {
     }
 
     /**
-     * Set of roundabout Modifiers
+     * Set of roundabout modifiers
      */
     @JvmField
     val ROUNDABOUT_MANEUVER_TYPES: Set<String> = object : HashSet<String>() {
@@ -442,7 +442,7 @@ object ManeuverIconHelper {
     }
 
     /**
-     * Set of Maneuver types without Modifiers
+     * Set of maneuver types without modifiers
      */
     @JvmField
     val MANEUVER_TYPES_WITH_NULL_MODIFIERS: Set<String> = object : HashSet<String>() {
@@ -458,7 +458,7 @@ object ManeuverIconHelper {
     }
 
     /**
-     * Define if Maneuver's Icon should be flipped
+     * Returns whether the maneuver's icon should be flipped
      */
     @JvmStatic
     fun isManeuverIconNeedFlip(
@@ -486,7 +486,7 @@ object ManeuverIconHelper {
     }
 
     /**
-     * Provides Roundabout's angel according to angels limits
+     * Provides the roundabout's angle according to angle limits
      */
     @JvmStatic
     fun adjustRoundaboutAngle(roundaboutAngle: Float): Float =

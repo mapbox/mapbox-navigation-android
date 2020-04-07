@@ -56,7 +56,7 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 /**
  * Default implementation of [TripNotification] interface
  *
- * @param applicationContext is [Context]
+ * @param applicationContext the application's [Context]
  * @param navigationOptions is [NavigationOptions] used here to format distance and time
  *
  * @property currentManeuverType This indicates the type of current maneuver. The same [BannerText.type] of primary [BannerInstructions]
@@ -154,7 +154,7 @@ class MapboxTripNotification constructor(
     /**
      * Called when TripSession starts via [TripSession.start]
      *
-     * This callback may be used to perform post start initialization
+     * This callback may be used to perform any actions after the trip session is initialized.
      */
     override fun onTripSessionStarted() {
         registerReceiver()
@@ -259,7 +259,7 @@ class MapboxTripNotification constructor(
     /**
      * Creates [PendingIntent] for opening application when notification view is clicked
      *
-     * @param applicationContext is [Context]
+     * @param applicationContext the application's [Context]
      * @return [PendingIntent] to opening application
      */
     private fun createPendingOpenIntent(applicationContext: Context): PendingIntent? {
@@ -273,7 +273,7 @@ class MapboxTripNotification constructor(
      * Creates [PendingIntent] for stopping [TripSession] when
      * proper button is clicked in the notification view
      *
-     * @param applicationContext is [Context]
+     * @param applicationContext the application's [Context]
      * @return [PendingIntent] for stopping [TripSession]
      */
     private fun createPendingCloseIntent(applicationContext: Context): PendingIntent? {
