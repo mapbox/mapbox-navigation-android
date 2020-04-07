@@ -894,7 +894,6 @@ public class NavigationMapboxMap {
       if (options.gpsDrawable() != gpsDrawable) {
         LocationComponentOptions newOptions = options.toBuilder()
           .gpsDrawable(gpsDrawable)
-          .padding(mapboxMap.getPadding())
           .build();
         mapboxMap.getLocationComponent().applyStyle(newOptions);
       }

@@ -372,36 +372,6 @@ public class NavigationMapboxMapTest {
   }
 
   @Test
-  public void updateCurrentLocationDrawable_setsPadding() {
-    Style style = mock(Style.class);
-    String urlV7 = "mapbox://mapbox.mapbox-streets-v7";
-    List<Source> sources = buildMockSourcesWith(urlV7);
-    MapboxMap mapboxMap = mock(MapboxMap.class);
-    MapLayerInteractor layerInteractor = mock(MapLayerInteractor.class);
-    MapPaddingAdjustor adjustor = mock(MapPaddingAdjustor.class);
-    LocationComponent locationComponent = mock(LocationComponent.class);
-    LocationComponentOptions existingOptions = mock(LocationComponentOptions.class);
-    LocationComponentOptions newOptions = mock(LocationComponentOptions.class);
-    LocationComponentOptions.Builder builder = mock(LocationComponentOptions.Builder.class);
-    int[] mapboxPadding = new int[0];
-    when(mapboxMap.getStyle()).thenReturn(style);
-    when(style.getSources()).thenReturn(sources);
-    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(mapboxMap,layerInteractor, adjustor);
-    when(mapboxMap.getLocationComponent()).thenReturn(locationComponent);
-    when(mapboxMap.getPadding()).thenReturn(mapboxPadding);
-    when(locationComponent.getLocationComponentOptions()).thenReturn(existingOptions);
-    when(builder.gpsDrawable(7)).thenReturn(builder);
-    when(builder.padding(any(int[].class))).thenReturn(builder);
-    when(existingOptions.toBuilder()).thenReturn(builder);
-    when(existingOptions.gpsDrawable()).thenReturn(0);
-    when(builder.build()).thenReturn(newOptions);
-
-    theNavigationMap.updateCurrentLocationDrawable(7);
-
-    verify(builder).padding(mapboxPadding);
-  }
-
-  @Test
   public void updateCurrentLocationDrawable_appliesStyle() {
     Style style = mock(Style.class);
     String urlV7 = "mapbox://mapbox.mapbox-streets-v7";
