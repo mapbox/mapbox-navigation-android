@@ -19,11 +19,11 @@ import com.mapbox.navigation.navigator.TripStatus
 import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.thread.JobControl
 import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.timer.MapboxTimer
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -37,10 +37,7 @@ class MapboxTripSession(
     threadController: ThreadController = ThreadController
 ) : TripSession {
 
-    companion object {
-        private const val STATUS_POLLING_INTERVAL = 1000L
-    }
-
+    private val STATUS_POLLING_INTERVAL = 1000L
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
@@ -60,9 +57,6 @@ class MapboxTripSession(
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
-
-    private var lastLocationUpdateTimeMillis: Long = 0
-    private val statusUpdateTimer = MapboxTimer().apply { restartAfterMillis = TimeUnit.SECONDS.toMillis(1) }
 
     private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
@@ -253,27 +247,27 @@ class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
-        locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         ioJobController.scope.launch {
-            navigator.updateLocation(rawLocation)
-            lastLocationUpdateTimeMillis = Date().time
-            statusUpdateTimer.stopJobs()
-        }
-        fireOffStatusPolling()
-        statusUpdateTimer.startTimer {
-            if (Date().time - lastLocationUpdateTimeMillis >= STATUS_POLLING_INTERVAL) {
-                fireOffStatusPolling()
+            rawLocation.let {
+                navigator.updateLocation(it)
             }
+        }
+        locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
+        if (this.rawLocation == null) {
+            fireOffStatusPolling()
         }
         this.rawLocation = rawLocation
     }
 
     private fun fireOffStatusPolling() {
         mainJobController.scope.launch {
-            val status = navigatorPolling()
-            updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
-            updateRouteProgress(status.routeProgress)
-            isOffRoute = status.offRoute
+            while (isActive) {
+                val status = navigatorPolling()
+                updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
+                updateRouteProgress(status.routeProgress)
+                isOffRoute = status.offRoute
+                delay(STATUS_POLLING_INTERVAL)
+            }
         }
     }
 
