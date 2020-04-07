@@ -4,7 +4,7 @@ import androidx.annotation.StringDef
 import com.google.gson.Gson
 
 /**
- * Events that might happen into SDK and send via Telemerty
+ * An interface with types of metrics events that the SDK would send via Telemetry
  */
 interface MetricEvent {
 

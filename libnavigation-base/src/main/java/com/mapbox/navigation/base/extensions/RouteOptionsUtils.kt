@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.route.internal.RouteUrl
 
 /**
- * Apply default [RouteOptions] params
+ * Applies default [RouteOptions] parameters to the RouteOptions builder
  *
  * @receiver RouteOptions.Builder
  * @return RouteOptions.Builder
@@ -21,7 +21,7 @@ fun RouteOptions.Builder.applyDefaultParams(): RouteOptions.Builder = also {
 }
 
 /**
- * Points to visit in order.
+ * Takes a list of [Point]s and correctly adds them as waypoints in the correct order.
  *
  * @receiver RouteOptions.Builder
  * @param origin Point

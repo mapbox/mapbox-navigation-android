@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * in the directions route, much of this information will be identical to the parent
  * [RouteProgress].
  *
- * The latest route leg progress object can be obtained through either the [RouteProgressObserver].
+ * The latest route leg progress object can be obtained through the [RouteProgressObserver].
  * Note that the route leg progress object's immutable.
  */
 class RouteLegProgress private constructor(
@@ -48,14 +48,14 @@ class RouteLegProgress private constructor(
     fun distanceTraveled(): Float = distanceTraveled
 
     /**
-     * Provides the distance remaining in meters till the user reaches the end of the leg.
+     * Provides the distance remaining in meters until the user reaches the end of the leg.
      *
      * @return distance remaining till end of leg, in unit meters.
      */
     fun distanceRemaining(): Float = distanceRemaining
 
     /**
-     * Provides the duration remaining in seconds till the user reaches the end of the current step.
+     * Provides the duration remaining in seconds until the user reaches the end of the current step.
      *
      * @return duration remaining till end of leg, in unit seconds.
      */
@@ -99,8 +99,8 @@ class RouteLegProgress private constructor(
      * distance between the two points.
      * @param routeLeg [RouteLeg] geometry
      * @param distanceTraveled Total distance traveled in meters along current leg
-     * @param distanceRemaining The distance remaining in meters till the user reaches the end of the leg
-     * @param durationRemaining The duration remaining in seconds till the user reaches the end of the current step
+     * @param distanceRemaining The distance remaining in meters until the user reaches the end of the leg
+     * @param durationRemaining The duration remaining in seconds until the user reaches the end of the current step
      * @param fractionTraveled The fraction traveled along the current leg, this is a float value between 0 and 1 and
      * isn't guaranteed to reach 1 before the user reaches the next waypoint
      * @param currentStepProgress [RouteStepProgress] object with information about the particular step the user
@@ -144,7 +144,7 @@ class RouteLegProgress private constructor(
             apply { this.distanceTraveled = distanceTraveled }
 
         /**
-         * The distance remaining in meters till the user reaches the end of the leg
+         * The distance remaining in meters until the user reaches the end of the leg
          *
          * @return Builder
          */
@@ -152,7 +152,7 @@ class RouteLegProgress private constructor(
             apply { this.distanceRemaining = distanceRemaining }
 
         /**
-         * The duration remaining in seconds till the user reaches the end of the current step
+         * The duration remaining in seconds until the user reaches the end of the current step
          *
          * @return Builder
          */
@@ -160,7 +160,7 @@ class RouteLegProgress private constructor(
             apply { this.durationRemaining = durationRemaining }
 
         /**
-         * the fraction traveled along the current leg, this is a float value between 0 and 1 and
+         * The fraction traveled along the current leg, this is a float value between 0 and 1 and
          * isn't guaranteed to reach 1 before the user reaches the next waypoint
          *
          * @return Builder

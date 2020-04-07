@@ -6,7 +6,7 @@ package com.mapbox.navigation.base.trip.notification
 enum class NotificationAction {
 
     /**
-     * Navigation has been ended via Notification bar
+     * Navigation has ended via a selection in the notification bar
      */
     END_NAVIGATION
 }

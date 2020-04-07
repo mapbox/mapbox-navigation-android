@@ -6,7 +6,7 @@ import com.mapbox.geojson.Point
 /**
  * This is a progress object specific to the current step the user is on.
  *
- * The latest route step progress object can be obtained through either the [RouteProgressObserver].
+ * The latest route step progress object can be obtained through the [RouteProgressObserver].
  * Note that the route step progress object's immutable.
  */
 class RouteStepProgress private constructor(
@@ -76,7 +76,7 @@ class RouteStepProgress private constructor(
     fun durationRemaining(): Double = durationRemaining
 
     /**
-     * Provides the duration remaining in seconds till the user reaches the end of the current step.
+     * Provides guidance image URL
      *
      * @return `long` value representing the duration remaining till end of step, in unit seconds.
      */
@@ -92,13 +92,13 @@ class RouteStepProgress private constructor(
      *
      * @param stepIndex Index representing the current step the user is on
      * @param step Returns the current step the user is traversing along
-     * @param stepPoints A list of points that represent the current step step geometry
+     * @param stepPoints A list of points that represent the current step geometry
      * @param distanceRemaining Total distance in meters from user to end of step
      * @param distanceTraveled Distance user has traveled along current step in unit meters
      * @param fractionTraveled The fraction traveled along the current step, this is a float value between 0 and 1 and
      * isn't guaranteed to reach 1 before the user reaches the next step (if another step exist in route)
-     * @param durationRemaining The duration remaining in seconds till the user reaches the end of the current step
-     * @param guidanceViewURL String?
+     * @param durationRemaining The duration remaining in seconds until the user reaches the end of the current step
+     * @param guidanceViewURL Guidance image URL
      */
     data class Builder(
         private var stepIndex: Int = 0,
@@ -127,7 +127,7 @@ class RouteStepProgress private constructor(
         fun step(step: LegStep) = apply { this.step = step }
 
         /**
-         * A list of points that represent the current step step geometry
+         * A list of points that represent the current step geometry
          *
          * @return Builder
          */
@@ -151,7 +151,7 @@ class RouteStepProgress private constructor(
             apply { this.distanceTraveled = distanceTraveled }
 
         /**
-         * The fraction traveled along the current step, this is a float value between 0 and 1 and
+         * The fraction traveled along the current step. This is a float value between 0 and 1 and
          * isn't guaranteed to reach 1 before the user reaches the next step (if another step exist in route)
          *
          * @return Builder
@@ -160,7 +160,7 @@ class RouteStepProgress private constructor(
             apply { this.fractionTraveled = fractionTraveled }
 
         /**
-         * The duration remaining in seconds till the user reaches the end of the current step
+         * The duration remaining in seconds until the user reaches the end of the current step
          *
          * @return Builder
          */
@@ -168,7 +168,7 @@ class RouteStepProgress private constructor(
             apply { this.durationRemaining = durationRemaining }
 
         /**
-         * The duration remaining in seconds till the user reaches the end of the current step
+         * Guidance image URL
          *
          * @return Builder
          */

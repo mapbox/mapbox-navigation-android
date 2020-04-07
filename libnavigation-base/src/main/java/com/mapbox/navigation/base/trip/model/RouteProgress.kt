@@ -8,11 +8,11 @@ import com.mapbox.geojson.Point
 
 /**
  * This class contains all progress information at any given time during a navigation session. This
- * progress includes information for the current route, leg and step the user is traversing along.
+ * progress includes information for the current route, leg, and step that the user is traveling along.
  * With every new valid location update, a new route progress will be generated using the latest
  * information.
  *
- * The latest route progress object can be obtained through either the [RouteProgressObserver].
+ * The latest route progress object can be obtained through the [RouteProgressObserver].
  * Note that the route progress object's immutable.
  */
 class RouteProgress private constructor(
@@ -50,7 +50,7 @@ class RouteProgress private constructor(
     fun distanceTraveled(): Float = distanceTraveled
 
     /**
-     * Provides the duration remaining in seconds till the user reaches the end of the route.
+     * Provides the duration remaining in seconds until the user reaches the end of the route.
      *
      * @return Double value representing the duration remaining till end of route, in seconds
      */
@@ -66,7 +66,7 @@ class RouteProgress private constructor(
     private fun fractionTraveled(): Float? = fractionTraveled
 
     /**
-     * Provides the distance remaining in meters till the user reaches the end of the route.
+     * Provides the distance remaining in meters until the user reaches the end of the route.
      *
      * @return `long` value representing the distance remaining till end of route, in unit meters
      */
@@ -157,11 +157,11 @@ class RouteProgress private constructor(
      * tracking information.
      * @param currentLegProgress [RouteLegProgress] object with information about the particular
      * leg the user is currently on.
-     * @param upcomingStepPoints The list of points that represent the upcoming step step geometry.
+     * @param upcomingStepPoints The list of points that represent the upcoming step geometry.
      * @param inTunnel *true* if in a tunnel, *false* otherwise
-     * @param distanceRemaining The distance remaining in meters till the user reaches the end of the route
+     * @param distanceRemaining The distance remaining in meters until the user reaches the end of the route
      * @param distanceTraveled Total distance traveled in meters along route
-     * @param durationRemaining The duration remaining in seconds till the user reaches the end of the route
+     * @param durationRemaining The duration remaining in seconds until the user reaches the end of the route
      * @param fractionTraveled Float
      * @param remainingWaypoints Number of waypoints remaining on the current route
      */
@@ -236,7 +236,7 @@ class RouteProgress private constructor(
             apply { this.currentLegProgress = legProgress }
 
         /**
-         * The list of points that represent the upcoming step step geometry.
+         * The list of points that represent the upcoming step geometry.
          *
          * @return Builder
          */
@@ -251,7 +251,7 @@ class RouteProgress private constructor(
         fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
 
         /**
-         * The distance remaining in meters till the user reaches the end of the route.
+         * The distance remaining in meters until the user reaches the end of the route.
          *
          * @return Builder
          */
@@ -259,7 +259,7 @@ class RouteProgress private constructor(
             apply { this.distanceRemaining = distanceRemaining }
 
         /**
-         * Total distance traveled in meters along route.
+         * Total distance traveled in meters along the route.
          *
          * @return Builder
          */
@@ -267,7 +267,7 @@ class RouteProgress private constructor(
             apply { this.distanceTraveled = distanceTraveled }
 
         /**
-         * The duration remaining in seconds till the user reaches the end of the route
+         * The duration remaining in seconds until the user reaches the end of the route
          *
          * @return Builder
          */
@@ -275,7 +275,7 @@ class RouteProgress private constructor(
             apply { this.durationRemaining = durationRemaining }
 
         /**
-         * The fraction traveled along the current route, this is a float value between 0 and 1 and
+         * The fraction traveled along the current route. This is a float value between 0 and 1 and
          * isn't guaranteed to reach 1 before the user reaches the end of the route.
          *
          * @return Builder

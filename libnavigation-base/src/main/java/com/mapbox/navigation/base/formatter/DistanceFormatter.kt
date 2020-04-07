@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.formatter
 import android.text.SpannableString
 
 /**
- * Format distances contract
+ * An interface, which provides correctly formatted distances.
  */
 interface DistanceFormatter {
 

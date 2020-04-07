@@ -92,19 +92,19 @@ data class NavigationOptions constructor(
             apply { this.onboardRouterConfig = onboardRouterConfig }
 
         /**
-         * Defines if builder instance creating from Navigation UI
+         * Defines if the builder instance is created from the Navigation UI
          */
         fun isFromNavigationUi(flag: Boolean) =
             apply { this.isFromNavigationUi = flag }
 
         /**
-         * Defines if debug logging enable
+         * Defines if debug logging is enabled
          */
         fun isDebugLoggingEnabled(flag: Boolean) =
             apply { this.isDebugLoggingEnabled = flag }
 
         /**
-         * Build new instance of [NavigationOptions]
+         * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
         fun build(): NavigationOptions {

@@ -7,13 +7,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
  */
 interface RouteRefreshCallback {
     /**
-     * Called on route has been refreshed
+     * Called when the [DirectionsRoute] has been refreshed
      * @param directionsRoute DirectionsRoute
      */
     fun onRefresh(directionsRoute: DirectionsRoute)
 
     /**
-     * Called when an error has occurred fetching route
+     * Called when an error has occurred while fetching the route
      * @param error RouteRefreshError
      */
     fun onError(error: RouteRefreshError)

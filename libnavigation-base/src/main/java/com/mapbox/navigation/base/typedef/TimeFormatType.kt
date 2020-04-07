@@ -3,7 +3,7 @@ package com.mapbox.navigation.base.typedef
 import androidx.annotation.IntDef
 
 /**
- * Time format: defined by device's settings
+ * Time format: defined by the device's settings
  *
  * Used at [TimeFormatType]
  */

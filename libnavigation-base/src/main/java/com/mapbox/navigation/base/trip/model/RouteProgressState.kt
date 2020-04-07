@@ -34,7 +34,7 @@ enum class RouteProgressState {
     LOCATION_TRACKING,
 
     /**
-     * A lack of [android.location.Location] updates from the phone has caused lack of confidence in the
+     * A lack of [android.location.Location] updates has caused a lack of confidence in the
      * progress updates being sent.
      */
     LOCATION_STALE,
@@ -42,7 +42,7 @@ enum class RouteProgressState {
     /**
      * State when we start following a route.
      *
-     * After a certain number of tracking points we gain confidence and switch to tracking state.
+     * After a certain number of tracking points, we gain confidence and switch to tracking state.
      * We do map-matching rather than route line snapping during this state.
      */
     ROUTE_UNCERTAIN
