@@ -48,7 +48,7 @@ workflows:
       - release-core-1_0-prod:
           filters:
             tags:
-              only: /^prod_release_core_*/
+              only: /^prod_release_core_.*/
             branches:
               ignore: /.*/
 
