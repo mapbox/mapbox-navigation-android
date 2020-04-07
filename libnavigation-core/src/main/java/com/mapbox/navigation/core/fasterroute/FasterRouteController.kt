@@ -2,11 +2,11 @@ package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import com.mapbox.navigation.utils.timer.MapboxTimer
 
 internal class FasterRouteController(

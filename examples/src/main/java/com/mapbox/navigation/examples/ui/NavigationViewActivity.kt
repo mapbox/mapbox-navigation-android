@@ -6,7 +6,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
@@ -16,6 +15,7 @@ import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import kotlinx.android.synthetic.main.activity_navigation_view.*
 
 class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,

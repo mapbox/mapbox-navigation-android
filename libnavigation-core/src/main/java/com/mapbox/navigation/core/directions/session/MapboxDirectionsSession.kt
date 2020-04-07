@@ -2,9 +2,9 @@ package com.mapbox.navigation.core.directions.session
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.extensions.ifNonNull
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.utils.extensions.ifNonNull
 import java.util.concurrent.CopyOnWriteArrayList
 
 // todo make internal
