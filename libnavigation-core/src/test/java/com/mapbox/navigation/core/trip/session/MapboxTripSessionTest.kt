@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
 import android.os.Looper
+import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -90,7 +91,7 @@ class MapboxTripSessionTest {
         )
 
         coEvery { navigator.getStatus(any()) } returns tripStatus
-        every { navigator.updateLocation(any()) } returns false
+        coEvery { navigator.updateLocation(any(), any()) } returns false
         coEvery { navigator.setRoute(any()) } returns navigationStatus
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
@@ -190,7 +191,30 @@ class MapboxTripSessionTest {
     fun locationPush() = coroutineRule.runBlockingTest {
         tripSession.start()
         updateLocationAndJoin()
-        verify { navigator.updateLocation(location) }
+        coVerify { navigator.updateLocation(location, any()) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun getStatusImmediatelyAfterUpdateLocation() = coroutineRule.runBlockingTest {
+        tripSession.start()
+
+        updateLocationAndJoin()
+
+        coVerify { navigator.getStatus(any()) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun noLocationUpdateLongerThanASecondUnconditionallyGetStatus() = coroutineRule.runBlockingTest {
+        tripSession.start()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        SystemClock.setCurrentTimeMillis(1100)
+        advanceTimeBy(1100)
+        updateLocationAndJoin()
+
+        coVerify(exactly = 3) { navigator.getStatus(any()) }
         tripSession.stop()
     }
 
