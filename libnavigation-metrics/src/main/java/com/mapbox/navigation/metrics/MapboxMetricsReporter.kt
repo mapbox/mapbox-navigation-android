@@ -86,14 +86,14 @@ object MapboxMetricsReporter : MetricsReporter {
     }
 
     /**
-     * Adds an observer that will be triggered when a metric event is handled
+     * Adds a [MetricsObserver] that will be triggered when a metric event is handled.
      */
     override fun setMetricsObserver(metricsObserver: MetricsObserver) {
         this.metricsObserver = metricsObserver
     }
 
     /**
-     * Remove metrics observer
+     * Remove the [MetricsObserver].
      */
     override fun removeObserver() {
         this.metricsObserver = null
