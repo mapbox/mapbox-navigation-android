@@ -13,8 +13,7 @@ interface ReplayEventBase {
 
 data class ReplayEventGetStatus(
     @SerializedName("event_timestamp")
-    override val eventTimestamp: Double,
-    val timestamp: Double
+    override val eventTimestamp: Double
 ) : ReplayEventBase
 
 data class ReplayEventUpdateLocation(
