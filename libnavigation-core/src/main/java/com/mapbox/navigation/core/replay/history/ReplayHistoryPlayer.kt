@@ -4,7 +4,9 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.navigation.utils.thread.ThreadController
+import java.util.Collections.singletonList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
@@ -19,7 +21,7 @@ typealias ReplayEventsListener = (ReplayEvents) -> Unit
  * This class is similar to a music player. It will include controls like play, pause, seek.
  */
 class ReplayHistoryPlayer(
-    replayEvents: ReplayEvents
+    private val replayEvents: ReplayEvents
 ) {
     private val replayEventLookup = ReplayEventLookup(replayEvents)
 
@@ -57,6 +59,22 @@ class ReplayHistoryPlayer(
             }
 
             Log.i("ReplayHistory", "Simulator ended")
+        }
+    }
+
+    /**
+     * When initializing or testing an app, it is needed and useful to decide a code location
+     * to play the first location from GPS. When it is early, you may crash. When it
+     * is late, you may start in null island - LatLng(0,0).
+     * Use this function to play the first location received from your [LocationEngine].
+     */
+    fun playFirstLocation() {
+        val firstUpdateLocation = replayEvents.events.firstOrNull { replayEvent ->
+            replayEvent is ReplayEventUpdateLocation
+        }
+        firstUpdateLocation?.let { replayEvent ->
+            val replayEvents = ReplayEvents(singletonList(replayEvent))
+            replayEventsListeners.forEach { it(replayEvents) }
         }
     }
 
