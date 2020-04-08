@@ -30,6 +30,8 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -51,6 +53,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private val navigator: Navigator = Navigator()
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
+    private val mutex = Mutex()
 
     // Route following
 
@@ -64,29 +67,33 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         } ?: false
     }
 
-    override fun getStatus(date: Date): TripStatus {
-        val status = navigator.getStatus(date)
-        return TripStatus(
-            status.location.toLocation(),
-            status.key_points.map { it.toLocation() },
-            status.getRouteProgress(),
-            status.routeState == RouteState.OFFROUTE
-        )
+    override suspend fun getStatus(date: Date): TripStatus {
+        mutex.withLock {
+            val status = navigator.getStatus(date)
+            return TripStatus(
+                status.location.toLocation(),
+                status.key_points.map { it.toLocation() },
+                status.getRouteProgress(),
+                status.routeState == RouteState.OFFROUTE
+            )
+        }
     }
 
     // Routing
 
-    override fun setRoute(
+    override suspend fun setRoute(
         route: DirectionsRoute?,
         routeIndex: Int,
         legIndex: Int
     ): NavigationStatus {
-        this.route = route
-        val result = navigator.setRoute(route?.toJson() ?: "{}", routeIndex, legIndex)
-        navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
-            routeBufferGeoJson = GeometryGeoJson.fromJson(it)
+        mutex.withLock {
+            this.route = route
+            val result = navigator.setRoute(route?.toJson() ?: "{}", routeIndex, legIndex)
+            navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
+                routeBufferGeoJson = GeometryGeoJson.fromJson(it)
+            }
+            return result
         }
-        return result
     }
 
     override fun updateAnnotations(
