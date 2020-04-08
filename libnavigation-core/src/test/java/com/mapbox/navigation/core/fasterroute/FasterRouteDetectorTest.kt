@@ -4,18 +4,13 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.unmockkObject
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 
 class FasterRouteDetectorTest {
 
-    @Before
-    fun setup() {
-        unmockkObject(FasterRouteDetector)
-    }
+    private val fasterRouteDetector = FasterRouteDetector()
 
     @Test
     fun shouldDetectWhenRouteIsFaster() {
@@ -24,7 +19,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns 797.447
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
         assertTrue(isFasterRoute)
     }
@@ -36,7 +31,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns 450.501
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
         assertFalse(isFasterRoute)
     }
@@ -48,7 +43,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns 727.228
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
         assertFalse(isFasterRoute)
     }
@@ -60,7 +55,7 @@ class FasterRouteDetectorTest {
         val routeProgress: RouteProgress = mockk()
         every { routeProgress.durationRemaining() } returns 695.811
 
-        val isFasterRoute = FasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
         assertFalse(isFasterRoute)
     }

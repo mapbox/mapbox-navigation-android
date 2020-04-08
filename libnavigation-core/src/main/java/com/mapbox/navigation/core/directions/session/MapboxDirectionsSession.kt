@@ -65,15 +65,6 @@ class MapboxDirectionsSession(
         adjustedRouteOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback
     ) {
-        // TODO What happens if NavigationSession.State transitions from Active Guidance
-        //  to Free Drive and Faster Route is enabled? We're not cleaning up RouteOptions when
-        //  cleaning up routes here and this call can be done because the only thing that we're
-        //  checking is the route options and the route progress but not if there's a route or not
-        //  See AdjustedRouteOptionsProvider#getRouteOptions
-        if (routes.isEmpty()) {
-            routesRequestCallback.onRoutesRequestCanceled(adjustedRouteOptions)
-            return
-        }
         router.getRoute(adjustedRouteOptions, object : Router.Callback {
             override fun onResponse(routes: List<DirectionsRoute>) {
                 routesRequestCallback.onRoutesReady(routes)
