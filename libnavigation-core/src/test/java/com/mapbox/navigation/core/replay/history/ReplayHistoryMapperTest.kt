@@ -56,6 +56,14 @@ class ReplayHistoryMapperTest {
         assertEquals(historyEvents.events.size, 4)
     }
 
+    @Test
+    fun `old versions of history are missing event_timestamp`() {
+        val historyString = """{"events":[{"type":"getStatus","timestamp":1551460823.922}],"version":"5.0.0","history_version":"1.0.0"}"""
+        val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper())
+        val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
+        assertEquals(historyEvents.events.size, 1)
+    }
+
     private data class ExampleEndTransitEvent(
         @SerializedName("event_timestamp")
         override val eventTimestamp: Double,

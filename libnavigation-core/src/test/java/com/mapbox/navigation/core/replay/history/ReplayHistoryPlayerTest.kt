@@ -39,7 +39,7 @@ class ReplayHistoryPlayerTest {
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
         val replayHistoryData = ReplayEvents(
             listOf(
-                ReplayEventGetStatus(1580777612.853, 1580777612.853),
+                ReplayEventGetStatus(1580777612.853),
                 ReplayEventUpdateLocation(1580777612.89,
                     ReplayEventLocation(
                         lat = 49.2492411,
