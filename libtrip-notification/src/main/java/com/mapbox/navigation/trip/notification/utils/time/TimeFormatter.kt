@@ -16,10 +16,22 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+/**
+ * Default Time Formatter
+ */
 object TimeFormatter {
 
     private const val TIME_STRING_FORMAT = " %s "
 
+    /**
+     * Format time
+     *
+     * @param time Calendar
+     * @param routeDuration duration in seconds
+     * @param type [TimeFormatType]
+     * @param isDeviceTwentyFourHourFormat *true* if 24-hour format, *false* otherwise
+     * @return String
+     */
     @JvmStatic
     fun formatTime(
         time: Calendar,
@@ -32,6 +44,13 @@ object TimeFormatter {
         return chain.setup(isDeviceTwentyFourHourFormat).obtainTimeFormatted(type, time)
     }
 
+    /**
+     * Format remaining time
+     *
+     * @param context Context
+     * @param routeDuration route duration in seconds
+     * @return SpannableStringBuilder
+     */
     @JvmStatic
     fun formatTimeRemaining(context: Context, routeDuration: Double, locale: Locale?): SpannableStringBuilder {
         var seconds = routeDuration.toLong()

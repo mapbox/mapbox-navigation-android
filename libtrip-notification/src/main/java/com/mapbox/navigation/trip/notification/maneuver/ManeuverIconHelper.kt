@@ -5,40 +5,121 @@ import android.graphics.PointF
 import androidx.core.util.Pair
 
 // Step Maneuver Types
+/**
+ * Step maneuver type *turn*
+ */
 const val STEP_MANEUVER_TYPE_TURN = "turn"
+/**
+ * Step maneuver type *new name*
+ */
 const val STEP_MANEUVER_TYPE_NEW_NAME = "new name"
+/**
+ * Step maneuver type *depart*
+ */
 const val STEP_MANEUVER_TYPE_DEPART = "depart"
+/**
+ * Step maneuver type *arrive*
+ */
 const val STEP_MANEUVER_TYPE_ARRIVE = "arrive"
+/**
+ * Step maneuver type *merge*
+ */
 const val STEP_MANEUVER_TYPE_MERGE = "merge"
+/**
+ * Step maneuver type *on ramp*
+ */
 const val STEP_MANEUVER_TYPE_ON_RAMP = "on ramp"
+/**
+ * Step maneuver type *off ramp*
+ */
 const val STEP_MANEUVER_TYPE_OFF_RAMP = "off ramp"
+/**
+ * Step maneuver type *fork*
+ */
 const val STEP_MANEUVER_TYPE_FORK = "fork"
+/**
+ * Step maneuver type *end of road*
+ */
 const val STEP_MANEUVER_TYPE_END_OF_ROAD = "end of road"
+/**
+ * Step maneuver type *continue*
+ */
 const val STEP_MANEUVER_TYPE_CONTINUE = "continue"
+/**
+ * Step maneuver type *roundabout*
+ */
 const val STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout"
+/**
+ * Step maneuver type *rotary*
+ */
 const val STEP_MANEUVER_TYPE_ROTARY = "rotary"
+/**
+ * Step maneuver type *roundabout turn*
+ */
 const val STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn"
+/**
+ * Step maneuver type *notification*
+ */
 const val STEP_MANEUVER_TYPE_NOTIFICATION = "notification"
+/**
+ * Step maneuver type *exit roundabout*
+ */
 const val STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT = "exit roundabout"
+/**
+ * Step maneuver type *exit rotary*
+ */
 const val STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary"
 
 // Step Maneuver Modifiers
+/**
+ * Step maneuver modifier *u turn*
+ */
 const val STEP_MANEUVER_MODIFIER_UTURN = "uturn"
+/**
+ * Step maneuver modifier *sharp right*
+ */
 const val STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right"
+/**
+ * Step maneuver modifier *right*
+ */
 const val STEP_MANEUVER_MODIFIER_RIGHT = "right"
+/**
+ * Step maneuver modifier *slight right*
+ */
 const val STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT = "slight right"
+/**
+ * Step maneuver modifier *straight*
+ */
 const val STEP_MANEUVER_MODIFIER_STRAIGHT = "straight"
+/**
+ * Step maneuver modifier *slight left*
+ */
 const val STEP_MANEUVER_MODIFIER_SLIGHT_LEFT = "slight left"
+/**
+ * Step maneuver modifier *left*
+ */
 const val STEP_MANEUVER_MODIFIER_LEFT = "left"
+/**
+ * Step maneuver modifier *sharp left*
+ */
 const val STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left"
 
+/**
+ * A helping class for creating maneuvers that are draw on the [Canvas]
+ */
 object ManeuverIconHelper {
 
+    /**
+     * Default *roundabout* angle
+     */
     const val DEFAULT_ROUNDABOUT_ANGLE = 180f
 
     private const val TOP_ROUNDABOUT_ANGLE_LIMIT = 300f
     private const val BOTTOM_ROUNDABOUT_ANGLE_LIMIT = 60f
 
+    /**
+     * Map of the maneuver type+modifier and the maneuver's [ManeuverIconDrawer]
+     */
     @JvmField
     val MANEUVER_ICON_DRAWER_MAP: Map<Pair<String, String>, ManeuverIconDrawer> =
         object : HashMap<Pair<String, String>, ManeuverIconDrawer>() {
@@ -333,6 +414,9 @@ object ManeuverIconHelper {
             }
         }
 
+    /**
+     * Set of modifiers that should be flipped
+     */
     @JvmField
     val SHOULD_FLIP_MODIFIERS: Set<String> = object : HashSet<String>() {
         init {
@@ -343,6 +427,9 @@ object ManeuverIconHelper {
         }
     }
 
+    /**
+     * Set of roundabout modifiers
+     */
     @JvmField
     val ROUNDABOUT_MANEUVER_TYPES: Set<String> = object : HashSet<String>() {
         init {
@@ -354,6 +441,9 @@ object ManeuverIconHelper {
         }
     }
 
+    /**
+     * Set of maneuver types without modifiers
+     */
     @JvmField
     val MANEUVER_TYPES_WITH_NULL_MODIFIERS: Set<String> = object : HashSet<String>() {
         init {
@@ -367,6 +457,9 @@ object ManeuverIconHelper {
         }
     }
 
+    /**
+     * Returns whether the maneuver's icon should be flipped
+     */
     @JvmStatic
     fun isManeuverIconNeedFlip(
         maneuverType: String?,
@@ -392,6 +485,9 @@ object ManeuverIconHelper {
         }
     }
 
+    /**
+     * Provides the roundabout's angle according to angle limits
+     */
     @JvmStatic
     fun adjustRoundaboutAngle(roundaboutAngle: Float): Float =
         when {

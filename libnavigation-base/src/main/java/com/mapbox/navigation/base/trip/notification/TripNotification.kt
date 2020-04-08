@@ -31,7 +31,6 @@ interface TripNotification {
      * If enabled, this method will be called every time a
      * new [RouteProgress] is generated.
      *
-     *
      * This method can serve as a cue to update a [Notification]
      * with a specific notification id.
      *
@@ -42,14 +41,12 @@ interface TripNotification {
     /**
      * Callback for when trip session is started via [TripSession.start].
      *
-     *
      * This callback may be used to perform post start initialization
      */
     fun onTripSessionStarted()
 
     /**
      * Callback for when trip session is stopped via [TripSession.stop].
-     *
      *
      * This callback may be used to clean up any listeners or receivers, preventing leaks.
      */
