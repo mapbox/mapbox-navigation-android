@@ -1,6 +1,7 @@
 package com.mapbox.navigation.base.trip.model
 
 import android.app.Notification
+import com.mapbox.navigation.base.trip.notification.TripNotification
 
 /**
  * Defines data needed for displaying notification and passed to [TripNotification]

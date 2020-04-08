@@ -3,9 +3,9 @@ package com.mapbox.navigation.base.options
 /**
  * Defines endpoint's properties to retrieve tiles
  *
- * @param host Tiles endpoint
- * @param version Version of tiles
- * @param token Token for tiles retrieving (in most cases mapbox accessToken)
+ * @param host tiles endpoint
+ * @param version version of tiles
+ * @param token the token for retrieving tiles. In most cases, this will be a Mapbox accessToken.
  * @param userAgent HttpClient UserAgent
  */
 data class Endpoint(
@@ -22,6 +22,14 @@ data class Endpoint(
         host, version, token, userAgent
     )
 
+    /**
+     * Build a new [Endpoint]
+     *
+     * @param host tile endpoint
+     * @param version version of tiles
+     * @param token the token for retrieving tiles. In most cases, this will be a Mapbox accessToken.
+     * @param userAgent HttpClient UserAgent
+     */
     data class Builder(
         private var host: String,
         private var version: String,

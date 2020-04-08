@@ -12,7 +12,7 @@ dokka {
         reportUndocumented = true
 
         perPackageOption {
-            prefix = "route.internal"
+            prefix = "com.mapbox.navigation.base.route.internal"
             suppress = true
         }
     }
