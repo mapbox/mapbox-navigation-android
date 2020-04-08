@@ -385,6 +385,9 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
+                    if (::navigationMapboxMap.isInitialized) {
+                        navigationMapboxMap.removeRoute()
+                    }
                     startLocationUpdates()
                     mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
                     mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
