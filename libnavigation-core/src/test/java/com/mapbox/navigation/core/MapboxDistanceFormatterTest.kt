@@ -8,6 +8,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
+import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIVE
+import com.mapbox.navigation.base.typedef.UNDEFINED
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -216,5 +218,53 @@ class MapboxDistanceFormatterTest {
         MapboxDistanceFormatter.Builder(mockContext).build()
 
         verify(exactly = 2) { mockContext.applicationContext }
+    }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatDistanceBelowZeroDistance() {
+        val result = MapboxDistanceFormatter.Builder(ctx)
+                .withUnitType(IMPERIAL)
+                .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .build()
+                .formatDistance(-0.1)
+
+        assertEquals("50 ft", result.toString())
+    }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatDistanceBelowZeroDistanceRoundingIncrementFive() {
+        val result = MapboxDistanceFormatter.Builder(ctx)
+                .withUnitType(IMPERIAL)
+                .withRoundingIncrement(ROUNDING_INCREMENT_FIVE)
+                .build()
+                .formatDistance(-0.1)
+
+        assertEquals("5 ft", result.toString())
+    }
+
+    @Config(qualifiers = "en-rUS")
+    @Test
+    fun formatDistanceUnitTypeUndefinedImperial() {
+        val result = MapboxDistanceFormatter.Builder(ctx)
+                .withUnitType(UNDEFINED)
+                .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .build()
+                .formatDistance(19312.1)
+
+        assertEquals("12 mi", result.toString())
+    }
+
+    @Config(qualifiers = "jp-rJP")
+    @Test
+    fun formatDistanceUnitTypeUndefinedMetric() {
+        val result = MapboxDistanceFormatter.Builder(ctx)
+                .withUnitType(UNDEFINED)
+                .withRoundingIncrement(ROUNDING_INCREMENT_FIVE)
+                .build()
+                .formatDistance(19312.1)
+
+        assertEquals("19 km", result.toString())
     }
 }

@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.RoundingIncrement
+import com.mapbox.navigation.base.typedef.UNDEFINED
 import com.mapbox.navigation.base.typedef.VoiceUnit
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
@@ -71,7 +72,11 @@ class MapboxDistanceFormatter private constructor(
 
         fun build(): MapboxDistanceFormatter {
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
-            val unitTypeToUse: String = unitType ?: localeToUse.getUnitTypeForLocale()
+            val unitTypeToUse: String = when (unitType) {
+                null -> localeToUse.getUnitTypeForLocale()
+                UNDEFINED -> localeToUse.getUnitTypeForLocale()
+                else -> unitType!!
+            }
 
             return MapboxDistanceFormatter(
                 context.applicationContext,
@@ -90,6 +95,9 @@ class MapboxDistanceFormatter private constructor(
      */
     override fun formatDistance(distance: Double): SpannableString {
         val distanceAndSuffix = when (distance) {
+            !in 0.0..Double.MAX_VALUE -> {
+                formatDistanceAndSuffixForSmallUnit(0.0)
+            }
             in 0.0..smallDistanceUpperThresholdInMeters -> {
                 formatDistanceAndSuffixForSmallUnit(distance)
             }
