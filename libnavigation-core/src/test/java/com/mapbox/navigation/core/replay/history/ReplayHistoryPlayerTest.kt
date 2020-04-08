@@ -4,11 +4,13 @@ import android.os.SystemClock
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkObject
+import io.mockk.verify
 import java.util.concurrent.TimeUnit
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
@@ -167,6 +169,52 @@ class ReplayHistoryPlayerTest {
 
         replayHistoryPlayer.play(lifecycleOwner)
         replayHistoryPlayer.finish()
+    }
+
+    @Test
+    fun `playFirstLocation should ignore events before the first location`() {
+        val replayHistoryData = ReplayEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventUpdateLocation(1580777612.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = 1580777612.892,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131))
+            )
+        )
+        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+
+        replayHistoryPlayer.playFirstLocation()
+
+        val replayUpdates = mutableListOf<ReplayEvents>()
+        verify { mockLambda(capture(replayUpdates)) }
+        val events = replayUpdates.flatMap { it.events }
+        assertEquals(events.size, 1)
+        assertEquals(events[0].eventTimestamp, 1580777612.89)
+    }
+
+    @Test
+    fun `playFirstLocation should handle history events without locations`() {
+        val replayHistoryData = ReplayEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventGetStatus(1580777613.452),
+                ReplayEventGetStatus(1580777614.085)
+            )
+        )
+        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+
+        replayHistoryPlayer.playFirstLocation()
+
+        verify { mockLambda(any()) wasNot Called }
     }
 
     /**
