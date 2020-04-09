@@ -143,6 +143,13 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".core.ReplayHistoryActivity"
+            android:label="@string/title_replay_navigation_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
         <activity android:name=".core.BasicNavigationActivity"
             android:label="@string/title_basic_navigation_kotlin"
             android:screenOrientation="portrait">

@@ -47,6 +47,9 @@
     <string name="title_replay_navigation_kotlin" translatable="false">ReplayEngineActivity</string>
     <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation with the replay engine in Kotlin code.</string>
 
+    <string name="title_replay_history_kotlin" translatable="false">ReplayHistoryActivity</string>
+    <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
+
     <string name="title_reroute_view" translatable="false">RerouteActivity</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
 
@@ -91,6 +94,7 @@
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation" translatable="false">Start Navigation</string>
+    <string name="play_history" translatable="false">Play history</string>
     <string name="offline_region_download_title">Download offline region</string>
     <string name="msg_long_press_for_destination">Long press a point on the map to indicate a destination.</string>
     <string name="offline_category_title" translatable="false">Offline</string>
