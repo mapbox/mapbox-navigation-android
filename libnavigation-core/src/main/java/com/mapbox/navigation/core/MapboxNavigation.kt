@@ -290,6 +290,7 @@ constructor(
             ThreadController.cancelAllUICoroutines()
             directionsSession.shutDownSession()
             directionsSession.unregisterAllRoutesObservers()
+            tripSession.stop()
             tripSession.unregisterAllLocationObservers()
             tripSession.unregisterAllRouteProgressObservers()
             tripSession.unregisterAllOffRouteObservers()
