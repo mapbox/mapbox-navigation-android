@@ -39,10 +39,12 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_guidance_view.*
 
+/**
+ * Warning: This activity is for code demonstration. The guidance view api
+ * is currently only supported by staging access_tokens, ask Mapbox for one.
+ */
 class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private val ROUTE_REQ_BASE_URL = "https://api-valhalla-route-staging.tilestream.net"
-    private val ROUTE_REQ_ACCESS_TOKEN = "pk.eyJ1IjoiZHJpdmVyYXBwLXN0YWdpbmctanVuZ2xlIiwiYSI6ImNrNWhzb2pyNjByYWkzbW93MjlraTg2dTMifQ.Hh5f4fOuRSgEazHlgEKxVg"
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
     private val origin: Point = Point.fromLngLat(139.7772481, 35.6818019)
     private val destination: Point = Point.fromLngLat(139.7756523, 35.6789722)
@@ -172,8 +174,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
             // specific access token for route request.
             mapboxNavigation.requestRoutes(
                 RouteOptions.builder().applyDefaultParams()
-                    .baseUrl(ROUTE_REQ_BASE_URL)
-                    .accessToken(ROUTE_REQ_ACCESS_TOKEN)
+                    .accessToken(Utils.getMapboxAccessToken(this))
                     .coordinates(origin, null, destination)
                     .alternatives(true)
                     .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
