@@ -10,7 +10,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -129,10 +128,11 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val options = MapboxNavigation.defaultNavigationOptions(this, Mapbox.getAccessToken())
+        val accessToken = Utils.getMapboxAccessToken(this)
+        val options = MapboxNavigation.defaultNavigationOptions(this, accessToken)
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
+            accessToken,
             navigationOptions = options,
             locationEngine = replayRouteLocationEngine
         ).also {
