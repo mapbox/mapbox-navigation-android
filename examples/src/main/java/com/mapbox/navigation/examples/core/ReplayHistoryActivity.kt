@@ -56,6 +56,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     private var navigationContext: ReplayNavigationContext? = null
 
+    // This is needed to update the location component with enhanced location while navigating
+    // TODO replace with a recommended way to deal with the issue
+    private var isNavigating = false
+
     // You choose your loading mechanism. Use Coroutines, ViewModels, RxJava, Threads, etc..
     private var loadNavigationJob: Job? = null
 
@@ -179,6 +183,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun ReplayNavigationContext.startNavigation() {
+        isNavigating = true
+
         if (mapboxNavigation.getRoutes().isNotEmpty()) {
             navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
             navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
@@ -275,6 +281,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private val locationListenerCallback: LocationEngineCallback<LocationEngineResult> =
         object : LocationEngineCallback<LocationEngineResult> {
             override fun onSuccess(result: LocationEngineResult) {
+                if (isNavigating) return
+
                 result.lastLocation?.let {
                     navigationContext?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
                 }
@@ -294,6 +302,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
             enhancedLocation: Location,
             keyPoints: List<Location>
         ) {
+            if (!isNavigating) return
+
             if (keyPoints.isNotEmpty()) {
                 navigationContext?.mapboxMap?.locationComponent?.forceLocationUpdate(keyPoints, true)
             } else {
