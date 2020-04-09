@@ -57,12 +57,12 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled = false
-            manifestPlaceholders = [enableCrashReporting:"false"]
+            manifestPlaceholders = [enableCrashReporting: "false"]
         }
         release {
             minifyEnabled true
             signingConfig signingConfigs.release
-            manifestPlaceholders = [enableCrashReporting:"true"]
+            manifestPlaceholders = [enableCrashReporting: "true"]
         }
     }
 
@@ -83,12 +83,20 @@ android {
 }
 
 dependencies {
+    // Mapbox Navigation SDK
+    implementation project(':libnavigation-metrics')
     implementation project(':libdirections-offboard')
     implementation project(':libdirections-onboard')
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
-    implementation project(':liblogger')
     implementation project(':libnavigator')
+    implementation project(':libnavigation-ui')
+    implementation dependenciesList.mapboxCommon
+    implementation dependenciesList.mapboxLogger
+    implementation dependenciesList.mapboxAnnotationPlugin
+    implementation dependenciesList.mapboxSdkTurf
+
+    androidTestImplementation project(':libtesting-ui')
 
     //ktlint
     ktlint dependenciesList.ktlint
@@ -100,24 +108,13 @@ dependencies {
     //Coroutines
     implementation dependenciesList.coroutinesAndroid
 
-    // Mapbox Navigation SDK
-    implementation project(':libandroid-navigation-ui')
-    implementation dependenciesList.mapboxMapSdk
-    implementation dependenciesList.mapboxSearchSdk
-    implementation dependenciesList.mapboxCrashMonitor
-
     // Support libraries
-    implementation dependenciesList.supportAppcompatV7
+    implementation dependenciesList.androidXCore
     implementation dependenciesList.supportDesign
-    implementation dependenciesList.supportRecyclerView
+    implementation dependenciesList.supportAppcompatV7
     implementation dependenciesList.supportConstraintLayout
-    implementation dependenciesList.supportCardView
-    implementation dependenciesList.lifecycleExtensions
 
     implementation dependenciesList.gmsLocation
-
-    implementation dependenciesList.firebaseCore
-    implementation dependenciesList.crashlytics
 
     implementation dependenciesList.multidex
 
@@ -132,18 +129,6 @@ dependencies {
     debugImplementation dependenciesList.leakCanaryDebug
     releaseImplementation dependenciesList.leakCanaryRelease
     androidTestImplementation dependenciesList.leakCanaryTest
-
-    // Unit Testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockito
-    testImplementation dependenciesList.mockk
-
-    // Instrumentation testing
-    androidTestImplementation dependenciesList.testRules
-    androidTestImplementation(dependenciesList.testEspressoCore, {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    androidTestImplementation dependenciesList.testEspressoContrib
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"

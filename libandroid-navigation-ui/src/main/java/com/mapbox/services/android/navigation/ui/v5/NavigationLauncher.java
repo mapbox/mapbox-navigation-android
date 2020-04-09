@@ -106,7 +106,7 @@ public class NavigationLauncher {
     }
   }
 
-  private static void storeInitialMapPosition(NavigationLauncherOptions options, Intent navigationActivity) {
+  private static void  storeInitialMapPosition(NavigationLauncherOptions options, Intent navigationActivity) {
     if (options.initialMapCameraPosition() != null) {
       navigationActivity.putExtra(
         NavigationConstants.NAVIGATION_VIEW_INITIAL_MAP_POSITION, options.initialMapCameraPosition()

@@ -52,8 +52,8 @@ class VoiceInstructionMilestone(builder: Builder) : Milestone(builder) {
 
     private fun updateCurrentAnnouncement(routeProgress: RouteProgress): Boolean =
         routeProgress.voiceInstruction()?.let {
-            announcement = it.announcement
-            ssmlAnnouncement = it.ssmlAnnouncement
+            announcement = it.announcement() ?: EMPTY_STRING
+            ssmlAnnouncement = it.ssmlAnnouncement() ?: EMPTY_STRING
             true
         } ?: false
 

@@ -1,0 +1,8 @@
+dependencies {
+    testImplementation dependenciesList.androidxTestJunit
+    testImplementation dependenciesList.junit
+    testImplementation dependenciesList.coroutinesTestAndroid
+    testImplementation dependenciesList.mockk
+    testImplementation dependenciesList.robolectric
+    testImplementation dependenciesList.workTesting
+}

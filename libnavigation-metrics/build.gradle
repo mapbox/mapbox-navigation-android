@@ -1,6 +1,22 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libnavigation-metrics'
+        reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.metrics.internal"
+            suppress = true
+        }
+    }
+}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -10,11 +26,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-consumer.pro'
-
-        buildConfigField('String',
-                "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
-        )
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 }
 
@@ -29,10 +41,11 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
-    // Unit testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockk
+    testImplementation project(':libtesting-utils')
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"

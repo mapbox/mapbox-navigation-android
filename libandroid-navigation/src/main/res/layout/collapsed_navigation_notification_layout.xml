@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigationCollapsedNotificationLayout"
-    style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
-    android:layout_height="64dp">
+    android:layout_height="64dp"
+    tools:background="@color/mapboxNotificationBlue">
 
     <ImageView
         android:id="@+id/maneuverImage"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/notification_maneuver_image_view_width"
+        android:layout_height="@dimen/notification_maneuver_image_view_height"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:src="@drawable/ic_maneuver_arrive"
-        android:tint="@android:color/white"/>
+        android:cropToPadding="true"
+        android:padding="8dp"
+        android:tint="@android:color/white" />
 
     <TextView
         android:id="@+id/notificationDistanceText"
+        style="@style/NotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/maneuverImage"
@@ -30,7 +32,7 @@
         android:layout_toRightOf="@id/maneuverImage"
         android:lines="1"
         android:textColor="@android:color/white"
-        tools:text="250 ft"/>
+        tools:text="250 ft" />
 
     <ImageView
         android:id="@+id/dot"
@@ -43,10 +45,11 @@
         android:layout_toEndOf="@id/notificationDistanceText"
         android:layout_toRightOf="@id/notificationDistanceText"
         android:src="@drawable/ic_circle"
-        android:tint="@android:color/white"/>
+        android:tint="@android:color/white" />
 
     <TextView
         android:id="@+id/notificationArrivalText"
+        style="@style/NotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/notificationDistanceText"
@@ -57,10 +60,11 @@
         android:layout_toRightOf="@+id/dot"
         android:lines="1"
         android:textColor="@android:color/white"
-        tools:text="11:13 AM ETA"/>
+        tools:text="11:13 AM ETA" />
 
     <TextView
         android:id="@+id/notificationInstructionText"
+        style="@style/NotificationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/maneuverImage"
@@ -70,6 +74,6 @@
         android:ellipsize="end"
         android:lines="1"
         android:textColor="@android:color/white"
-        tools:text="Sherman Ave NW"/>
+        tools:text="Sherman Ave NW" />
 
 </RelativeLayout>

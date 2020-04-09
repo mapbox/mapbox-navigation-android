@@ -1,19 +1,385 @@
-version: 2
+version: 2.1
 
 workflows:
   version: 2
   default:
     jobs:
       - build
-      - build-1.0
-      - release
-      - release-1.0
+      - build-1_0
+      - release:
+          filters:
+            branches:
+              only:
+                - master
+      - release-core-1_0-snapshot:
+          filters:
+            branches:
+              only:
+                - master
+#      - release-ui-1_0-snapshot:
+#          filters:
+#            branches:
+#              only:
+#                - master
+      - release-core-1_0:
+          filters:
+            tags:
+              only: /^release_core_.*/
+            branches:
+              ignore: /.*/
+      - release-ui-1_0:
+          filters:
+            tags:
+              only: /^release_ui_.*_core_.*/
+            branches:
+              ignore: /.*/
+      - release-core-1_0-qa:
+          filters:
+            tags:
+              only: /^qa_release_core_.*/
+            branches:
+              ignore: /.*/
+      - release-ui-1_0-qa:
+          filters:
+            tags:
+              only: /^qa_release_ui_.*_core_.*/
+            branches:
+              ignore: /.*/
+      - release-core-1_0-prod:
+          filters:
+            tags:
+              only: /^prod_release_core_.*/
+            branches:
+              ignore: /.*/
+
+      - release-ui-1_0-prod:
+          filters:
+            tags:
+              only: /^prod_release_ui_.*_core_.*/
+            branches:
+              ignore: /.*/
+      - ui-tests-1_0
       - publish:
           filters:
             tags:
               only: /^testapp-.*/
             branches:
               ignore: /.*/
+
+commands:
+  restore-gradle-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - jars-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "libandroid-navigation/build.gradle" }}-{{ checksum  "libandroid-navigation-ui/build.gradle" }}
+            - jars-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "libandroid-navigation/build.gradle" }}-{{ checksum  "libandroid-navigation-ui/build.gradle" }}
+
+  restore-gradle-cache-1_0:
+    steps:
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavigation-ui/build.gradle" }}
+            - deps-
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "examples/build.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-core/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}-{{ checksum  "libtesting-ui/build.gradle" }}-{{ checksum  "libtesting-utils/build.gradle" }}-{{ checksum  "libnavigation-ui/build.gradle" }}
+
+  validate-license:
+    steps:
+      - run:
+          name: Generate and Validate License
+          command: |
+            make license-verification
+
+  static-code-analysis-java:
+    steps:
+      - run:
+          name: Check Java code style
+          command: make checkstyle
+
+  static-code-analysis-kotlin:
+    steps:
+      - run:
+          name: Check Kotlin code style
+          command: ./gradlew ktlint
+
+  unit-tests-jacoco-codecov:
+    steps:
+      - run:
+          name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
+          command: |
+            ./gradlew jacocoTestDebugUnitTestReport
+            pip install --user codecov && /root/.local/bin/codecov
+      - store-results:
+          module_target: "libandroid-navigation"
+      - store-results:
+          module_target: "libandroid-navigation-ui"
+
+  build-module:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Build << parameters.module_target >> APK in << parameters.variant >> mode
+          command: |
+            echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/<< parameters.module_target >>/src/main/res/values/developer-config.xml
+            ./gradlew accessToken
+            ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
+
+  build-instrumentation-test:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+    steps:
+      - run:
+          name: Build Instrumentation Test APK
+          command: |
+            ./gradlew << parameters.module_target >>:assembleAndroidTest
+
+  login-google-cloud-platform:
+    steps:
+      - run:
+          name: Log in to Google Cloud Platform
+          shell: /bin/bash -euo pipefail
+          command: |
+            echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
+            gcloud auth activate-service-account --key-file secret.json --project mapbox-navigation-android
+            rm secret.json
+
+  update-transifex:
+    steps:
+      - run:
+          name: Update Transifex
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "${DEPLOY_BRANCH}" ]; then
+              pip install transifex-client
+              echo $'[https://www.transifex.com]\nhostname = https://www.transifex.com\nusername = '"${TRANSIFEX_USER}"$'\npassword = '"${TRANSIFEX_API_TOKEN}"$'\ntoken = '""$'\n' > ~/.transifexrc
+              tx push -s
+            else
+              echo "Skipping push to Transifex"
+            fi
+
+  store-results:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+    steps:
+      - store_artifacts:
+          path: << parameters.module_target >>/build/reports
+          destination: << parameters.module_target >>/reports
+      - store_test_results:
+          path: << parameters.module_target >>/build/test-results
+
+  build-core-debug-1_0:
+    steps:
+      - run:
+          name: Build Navigation SDK 1.0 (debug)
+          command: make 1.0-build-core-debug
+
+  build-ui-debug-1_0:
+    steps:
+      - run:
+          name: Build Navigation UI SDK 1.0 (debug)
+          command: make 1.0-build-ui-debug
+
+  build-release-core-1_0:
+    steps:
+      - run:
+          name: Build Navigation SDK 1.0 (release)
+          command: make 1.0-build-core-release
+
+  build-release-ui-1_0:
+    steps:
+      - run:
+          name: Build Navigation UI SDK 1.0 (release)
+          command: make 1.0-build-ui-release
+
+  unit-tests-core-1_0:
+    steps:
+      - run:
+          name: Run Navigation SDK 1.0 Unit Tests
+          command: make 1.0-core-unit-tests
+      - store-results:
+          module_target: "libdirections-hybrid"
+      - store-results:
+          module_target: "libdirections-offboard"
+      - store-results:
+          module_target: "libdirections-onboard"
+      - store-results:
+          module_target: "libnavigation-base"
+      - store-results:
+          module_target: "libnavigation-core"
+      - store-results:
+          module_target: "libnavigation-metrics"
+      - store-results:
+          module_target: "libnavigation-util"
+      - store-results:
+          module_target: "libnavigator"
+      - store-results:
+          module_target: "libtrip-notification"
+
+  unit-tests-ui-1_0:
+    steps:
+      - run:
+          name: Run Navigation UI SDK 1.0 Unit Tests
+          command: make 1.0-ui-unit-tests
+      - store-results:
+          module_target: "libnavigation-ui"
+
+  generate-core-version-name:
+    steps:
+      - run:
+          name: Generate Core version name
+          command: |
+            if [[ -n "$CIRCLE_TAG" ]]; then
+              if [[ $CIRCLE_TAG == release_core_* ]]; then
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
+              elif [[ $CIRCLE_TAG == qa_release_core_*
+                        || $CIRCLE_TAG == prod_release_core_* ]]; then
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
+              else
+                echo "Exiting the job as this is not a release TAG"
+                exit 1
+              fi
+              echo "export POM_CORE_VERSION_NAME=$POM_CORE_VERSION_NAME" >> $BASH_ENV
+            fi
+
+  generate-ui-version-name:
+    steps:
+      - run:
+          name: Generate UI version name
+          command: |
+            if [[ -n "$CIRCLE_TAG" ]]; then
+              if [[ $CIRCLE_TAG == release_ui_*_core_* ]]; then
+                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 5`
+              elif [[ $CIRCLE_TAG == qa_release_ui_*_core_*
+                        || $CIRCLE_TAG == prod_release_ui_*_core_* ]]; then
+                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
+                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 6`
+              else
+                echo "Exiting the job as this is not a release TAG"
+                exit 1
+              fi
+              echo "export POM_UI_VERSION_NAME=$POM_UI_VERSION_NAME" >> $BASH_ENV
+              echo "export POM_CORE_VERSION_NAME=$POM_CORE_VERSION_NAME" >> $BASH_ENV
+            fi
+
+  run-firebase-instrumentation:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run instrumentation tests on Firebase
+          no_output_timeout: 1200
+          shell: /bin/bash -euo pipefail
+          command: |
+            gcloud firebase test android run --type instrumentation \
+              --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
+              --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
+              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+              --device model=athene,version=23,locale=fr,orientation=landscape \
+              --device model=sailfish,version=26,locale=es,orientation=portrait \
+              --device model=walleye,version=28,locale=de,orientation=landscape \
+              --timeout 5m
+
+  generate-maven-credentials:
+    steps:
+      - run:
+          name: Generate Maven credentials
+          shell: /bin/bash -euo pipefail
+          command: |
+            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg secring.gpg
+            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
+            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
+            signing.keyId=$SIGNING_KEYID
+            signing.password=$SIGNING_PASSWORD
+            signing.secretKeyRingFile=../secring.gpg" >> gradle.properties
+
+  publish-maven:
+    steps:
+      - deploy:
+          name: Publish Navigation SDK To Maven Central
+          command: make publish
+
+  publish-artifacts:
+    parameters:
+      repository:
+        description: artifactory or bintray
+        type: string
+      artifact-type:
+        description: core or ui
+        type: string
+    steps:
+      - deploy:
+          name: Publish Navigation SDK 1.0 to << parameters.repository >>
+          command: |
+            version=$(cat gradle/artifact-settings.gradle | grep "versionName")
+            if [[ $version != *"SNAPSHOT"* ]]; then
+              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
+            else
+              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
+            fi
+
+  generate-documentation:
+    steps:
+      - run:
+          name: Generate documentation
+          command: make javadoc-dokka
+
+  track-performance:
+    steps:
+      - run:
+          name: Track performance of the Navigation 1.0
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+               curl -u ${MOBILE_METRICS_TOKEN}: \
+                 -d build_parameters[CIRCLE_JOB]=android-navigation-benchmark \
+                 -d build_parameters[BENCHMARK_COMMIT]= ${CIRCLE_SHA1} \
+                 https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+      - run:
+          name: Trigger android binary size check
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-binary-size https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+      - run:
+          name: Trigger code coverage check
+          command: |
+            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
+              if [[ $CIRCLE_BRANCH == master ]]; then
+                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-code-coverage https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
+              fi
+            fi
+
 jobs:
   build:
     working_directory: ~/code
@@ -26,64 +392,33 @@ jobs:
       GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-            - jars-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
-      - run:
-          name: Generate and Validate License
-          command: |
-            make nitpick
-      - run:
-          name: Check Java code style
-          command: make checkstyle
-      - run:
-          name: Check Kotlin code style
-          command: ./gradlew ktlint
-      - run:
-          name: Run unit-test, generate Jacoco test report and Post code coverage report to Codecov.io
-          command: |
-            ./gradlew testDebugUnitTestCoverage
-            pip install --user codecov && /root/.local/bin/codecov
-      - run:
-          name: Build release to test ProGuard rules
-          command: ./gradlew app:assembleRelease
-      - run:
-          name: Build Test Application APK
-          command: |
-            ./gradlew accessToken
-            ./gradlew app:assembleDebug
-      - run:
-          name: Build Instrumentation Test APK
-          command: |
-            ./gradlew app:assembleAndroidTest
-      - run:
-          name: Log in to Google Cloud Platform
-          shell: /bin/bash -euo pipefail
-          command: |
-            echo "${GCLOUD_SERVICE_ACCOUNT_JSON}" > secret.json
-            gcloud auth activate-service-account --key-file secret.json --project mapbox-navigation-android
-            rm secret.json
-      - run:
-          name: Run instrumentation tests on Firebase
-          no_output_timeout: 1200
-          shell: /bin/bash -euo pipefail
-          command: |
-            gcloud firebase test android run --type instrumentation \
-              --app app/build/outputs/apk/debug/app-debug.apk \
-              --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
-              --device model=athene,version=23,locale=fr,orientation=landscape \
-              --device model=sailfish,version=26,locale=es,orientation=portrait \
-              --device model=walleye,version=28,locale=de,orientation=landscape \
-              --timeout 5m
+      - restore-gradle-cache
+      - validate-license
+      - static-code-analysis-java
+      - static-code-analysis-kotlin
+      - unit-tests-jacoco-codecov
+      - build-module:
+          module_target: "app"
+          variant: "Release"
+      - build-module:
+          module_target: "app"
+          variant: "Debug"
+      - build-instrumentation-test:
+          module_target: "app"
+      - login-google-cloud-platform
+#      - run:
+#          name: Run instrumentation tests on Firebase
+#          no_output_timeout: 1200
+#          shell: /bin/bash -euo pipefail
+#          command: |
+#            gcloud firebase test android run --type instrumentation \
+#              --app app/build/outputs/apk/debug/app-debug.apk \
+#              --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+#              --device model=hammerhead,version=21,locale=en,orientation=portrait  \
+#              --device model=athene,version=23,locale=fr,orientation=landscape \
+#              --device model=sailfish,version=26,locale=es,orientation=portrait \
+#              --device model=walleye,version=28,locale=de,orientation=landscape \
+#              --timeout 5m
 #      - run:
 #          name: Run robo test on Firebase
 #          no_output_timeout: 1200
@@ -96,54 +431,45 @@ jobs:
 #              --locales en \
 #              --orientations portrait \
 #              --timeout 5m
-      - run:
-          name: Update Transifex
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "${DEPLOY_BRANCH}" ]; then
-              pip install transifex-client
-              echo $'[https://www.transifex.com]\nhostname = https://www.transifex.com\nusername = '"${TRANSIFEX_USER}"$'\npassword = '"${TRANSIFEX_API_TOKEN}"$'\ntoken = '""$'\n' > ~/.transifexrc
-              tx push -s
-            else
-              echo "Skipping push to Transifex"
-            fi
-      - store_artifacts:
-          path: app/build/reports
-          destination: reports
-      - store_test_results:
-          path: app/build/test-results
+      - update-transifex
+      - store-results:
+          module_target: "app"
 
-  build-1.0:
+  build-1_0:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}
-            - deps-
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: deps-{{ checksum "build.gradle" }}-{{ checksum  "gradle/dependencies.gradle" }}-{{ checksum  "libdirections-hybrid/build.gradle" }}-{{ checksum  "libdirections-offboard/build.gradle" }}-{{ checksum  "libdirections-onboard/build.gradle" }}-{{ checksum  "liblogger/build.gradle" }}-{{ checksum  "libnavigation-base/build.gradle" }}-{{ checksum  "libnavigation-metrics/build.gradle" }}-{{ checksum  "libnavigation-util/build.gradle" }}-{{ checksum  "libnavigator/build.gradle" }}-{{ checksum  "libtrip-notification/build.gradle" }}
-      - run:
-          name: Check Kotlin code style
-          command: ./gradlew ktlint
-      - run:
-          name: Build Navigation SDK 1.0 (debug)
-          command: make 1.0-build-debug
-      - run:
-          name: Run unit-test
-          command: make 1.0-unit-tests
+      - restore-gradle-cache-1_0
+      - static-code-analysis-kotlin
+      - build-core-debug-1_0
+      - build-ui-debug-1_0
+      - unit-tests-core-1_0
+      - unit-tests-ui-1_0
+
+  ui-tests-1_0:
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+    steps:
+      - checkout
+      - restore-gradle-cache-1_0
+      - build-module:
+          module_target: "examples"
+          variant: "Debug"
+      - build-instrumentation-test:
+          module_target: "examples"
+      - login-google-cloud-platform
+      - run-firebase-instrumentation:
+          module_target: "examples"
+          variant: "debug"
 
 # ------------------------------------------------------------------------------
   release:
-    branch:
-      only:
-      - master
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     working_directory: ~/code
@@ -152,32 +478,19 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
     steps:
       - checkout
-      - run:
-          name: Generate and Validate License
-          command: |
-            make nitpick
-      - run:
-          name: Generate Maven credentials
-          shell: /bin/bash -euo pipefail
-          command: |
-            aws s3 cp s3://mapbox/android/signing-credentials/secring.gpg secring.gpg
-            echo "NEXUS_USERNAME=$PUBLISH_NEXUS_USERNAME
-            NEXUS_PASSWORD=$PUBLISH_NEXUS_PASSWORD
-            signing.keyId=$SIGNING_KEYID
-            signing.password=$SIGNING_PASSWORD
-            signing.secretKeyRingFile=../secring.gpg" >> gradle.properties
-      - run:
-          name: Build Navigation SDK
-          command: make build-release
-      - deploy:
-          name: Publish Navigation SDK To Maven Central
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            make publish ;
-            fi
-      - store_artifacts:
-          path: app/build/reports
-          destination: reports
+      - validate-license
+      - generate-maven-credentials
+      - build-module:
+          module_target: "libandroid-navigation"
+          variant: "Release"
+      - build-module:
+          module_target: "libandroid-navigation-ui"
+          variant: "Release"
+      - publish-maven
+      - store-results:
+          module_target: "libandroid-navigation"
+      - store-results:
+          module_target: "libandroid-navigation-ui"
       - restore_cache: # special step to restore the dependency cache
           keys:
             - dependency-cache-{{ checksum "package.json" }}
@@ -194,34 +507,153 @@ jobs:
           command: |
             ./scripts/check_binary_size.sh ./scripts/paths_file.txt ./scripts/labels_file.txt 'mapbox-navigation-android' 'android' ./scripts/sdks_file.txt "${CIRCLE_SHA1}"
 
-  release-1.0:
+  release-core-1_0-snapshot:
     working_directory: ~/code
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     steps:
       - checkout
-      - run:
-          name: Build Navigation SDK 1.0 (release)
-          command: make 1.0-build-release
-      - run:
-          name: Generate Bintray credentials
-          command: |
-            if [ -n "${BINTRAY_USER}" ]; then
-              echo "BINTRAY_USER=$BINTRAY_USER
-              BINTRAY_API_KEY=$BINTRAY_API_KEY
-              GPG_PASSPHRASE=$GPG_PASSPHRASE"
-            fi
-      - deploy:
-          name: Publish Navigation SDK 1.0 to Bintray
-          command: |
-            if [[ $CIRCLE_BRANCH == master ]]; then
-              version=$(cat gradle/artifact-settings.gradle | grep "versionName")
-              if [[ $version != *"SNAPSHOT"* ]]; then
-                make 1.0-publish-to-bintray
-              else
-                make 1.0-publish-to-artifactory
-              fi
-            fi
+      - build-release-core-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "artifactory"
+          artifact-type: "core"
+      - track-performance
+
+  release-core-1_0:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox
+    steps:
+      - generate-core-version-name
+      - checkout
+      - build-release-core-1_0
+      - generate-documentation
+#     Uncomment when API' docs will be ready
+#     - run:
+#         name: Check public documentation
+#         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "core"
+
+  release-core-1_0-qa:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_private
+    steps:
+      - generate-core-version-name
+      - checkout
+      - build-release-core-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "core"
+
+  release-core-1_0-prod:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_collab
+    steps:
+      - generate-core-version-name
+      - checkout
+      - build-release-core-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "core"
+
+  release-ui-1_0-snapshot:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    steps:
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "artifactory"
+          artifact-type: "ui"
+      - track-performance
+
+  release-ui-1_0:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox
+    steps:
+      - generate-ui-version-name
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
+
+  release-ui-1_0-qa:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_private
+    steps:
+      - generate-ui-version-name
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
+
+  release-ui-1_0-prod:
+    working_directory: ~/code
+    docker:
+      - image: mbgl/61abee1674:android-ndk-r18
+    environment:
+      BINTRAY_REPO: mapbox_collab
+    steps:
+      - generate-ui-version-name
+      - checkout
+      - build-release-ui-1_0
+      - generate-documentation
+      #     Uncomment when API' docs will be ready
+      #     - run:
+      #         name: Check public documentation
+      #         command: sh scripts/dokka-validate.sh
+      - publish-artifacts:
+          repository: "bintray"
+          artifact-type: "ui"
 # ------------------------------------------------------------------------------
   publish:
     docker:

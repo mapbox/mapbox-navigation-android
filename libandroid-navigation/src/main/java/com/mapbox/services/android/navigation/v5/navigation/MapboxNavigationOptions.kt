@@ -2,10 +2,7 @@ package com.mapbox.services.android.navigation.v5.navigation
 
 import androidx.annotation.ColorRes
 import com.mapbox.services.android.navigation.R
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_OFF_ROUTE_THRESHOLD
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.ROUTE_REFRESH_INTERVAL
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
@@ -26,9 +23,6 @@ data class MapboxNavigationOptions(
     val timeFormatType: Int,
     val navigationLocationEngineIntervalLagInMilliseconds: Int,
     val defaultNotificationColorId: Int,
-    val offRouteThreshold: Float,
-    val offRouteThresholdWhenNearIntersection: Float,
-    val intersectionRadiusForOffRouteDetection: Float,
     var builder: Builder
 
 ) {
@@ -87,11 +81,6 @@ data class MapboxNavigationOptions(
         var navigationLocationEngineIntervalLagInMilliseconds =
             NAVIGATION_LOCATION_ENGINE_INTERVAL_LAG
         var defaultNotificationColorId = R.color.mapboxNotificationBlue
-        var offRouteThreshold = NAVIGATION_OFF_ROUTE_THRESHOLD
-        var offRouteThresholdWhenNearIntersection =
-            NAVIGATION_OFF_ROUTE_THRESHOLD_WHEN_NEAR_INTERSECTION
-        var intersectionRadiusForOffRouteDetection =
-            NAVIGATION_INTERSECTION_RADIUS_FOR_OFF_ROUTE_DETECTION
 
         fun defaultMilestonesEnabled(defaultMilestonesEnabled: Boolean) =
             apply { this.defaultMilestonesEnabled = defaultMilestonesEnabled }
@@ -149,34 +138,6 @@ data class MapboxNavigationOptions(
         fun defaultNotificationColorId(@ColorRes defaultNotificationColorId: Int) =
             apply { this.defaultNotificationColorId = defaultNotificationColorId }
 
-        /**
-         * This sets the off route threshold in meters. If not specified, the threshold is 50 meters.
-         *
-         * @param thresholdInMeters off route threshold in meters to be used
-         * @return this builder for chaining options together
-         */
-        fun offRouteThreshold(thresholdInMeters: Float) =
-            apply { this.offRouteThreshold = thresholdInMeters }
-
-        /**
-         * This sets the off route threshold in meters when near an intersection which is more prone
-         * to inaccurate gps fixes. If not specified, the threshold is 25 meters.
-         *
-         * @param thresholdInMeters off route threshold in meters when near an intersection to be used
-         * @return this builder for chaining options together
-         */
-        fun offRouteThresholdWhenNearIntersection(thresholdInMeters: Float) =
-            apply { this.offRouteThresholdWhenNearIntersection = thresholdInMeters }
-
-        /**
-         * This sets the radius in meters for off route detection near intersection. If not specified, the radius is 40 meters.
-         *
-         * @param radiusInMeters radius in meters for off route detection near intersection to be used
-         * @return this builder for chaining options together
-         */
-        fun intersectionRadiusForOffRouteDetection(radiusInMeters: Float) =
-            apply { this.intersectionRadiusForOffRouteDetection = radiusInMeters }
-
         fun build(): MapboxNavigationOptions {
             return MapboxNavigationOptions(
                 defaultMilestonesEnabled,
@@ -191,9 +152,6 @@ data class MapboxNavigationOptions(
                 timeFormatType,
                 navigationLocationEngineIntervalLagInMilliseconds,
                 defaultNotificationColorId,
-                offRouteThreshold,
-                offRouteThresholdWhenNearIntersection,
-                intersectionRadiusForOffRouteDetection,
                 this
             )
         }

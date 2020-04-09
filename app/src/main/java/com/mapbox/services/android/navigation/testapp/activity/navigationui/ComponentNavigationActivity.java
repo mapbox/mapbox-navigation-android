@@ -27,6 +27,7 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -47,7 +48,6 @@ import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCameraUpdat
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
 import com.mapbox.services.android.navigation.ui.v5.map.NavigationMapboxMap;
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
@@ -392,8 +392,9 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
 
   private void playAnnouncement(Milestone milestone) {
     if (milestone instanceof VoiceInstructionMilestone) {
-      SpeechAnnouncement announcement = SpeechAnnouncement.builder()
-        .voiceInstructionMilestone((VoiceInstructionMilestone) milestone)
+      VoiceInstructions announcement = VoiceInstructions.builder()
+              .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
+              .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
         .build();
       speechPlayer.play(announcement);
     }

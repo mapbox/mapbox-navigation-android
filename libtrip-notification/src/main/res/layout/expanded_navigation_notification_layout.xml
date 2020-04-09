@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/navigationExpandedNotificationLayout"
     style="@android:style/TextAppearance.StatusBar.EventContent"
     android:layout_width="match_parent"
@@ -9,7 +8,7 @@
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <include layout="@layout/collapsed_navigation_notification_layout"/>
+    <include layout="@layout/collapsed_navigation_notification_layout" />
 
     <LinearLayout
         android:id="@+id/endNavigationBtn"
@@ -27,16 +26,16 @@
             android:layout_gravity="center"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:src="@drawable/ic_close"
-            android:tint="@android:color/white"/>
+            android:src="@drawable/ic_close" />
 
         <TextView
+            android:id="@+id/endNavigationBtnText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:text="@string/end_navigation"
             android:textAllCaps="true"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

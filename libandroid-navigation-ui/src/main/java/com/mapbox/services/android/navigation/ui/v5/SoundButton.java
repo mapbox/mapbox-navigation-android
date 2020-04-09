@@ -108,7 +108,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
 
   /**
    * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is off.
+   * {@link Drawable} to denote sound is off.
    */
   void soundFabOff() {
     soundFab.setImageResource(R.drawable.ic_sound_off);
@@ -153,7 +153,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    * <p>
    * Shows chip with "Muted" text.
    * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is off.
+   * {@link Drawable} to denote sound is off.
    * <p>
    * Sets private state variable to true (muted)
    *
@@ -172,7 +172,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    * <p>
    * Shows chip with "Unmuted" text.
    * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is on.
+   * {@link Drawable} to denote sound is on.
    * <p>
    * Sets private state variable to false (unmuted)
    *
@@ -213,7 +213,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
 
   /**
    * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is on.
+   * {@link Drawable} to denote sound is on.
    */
   private void soundFabOn() {
     soundFab.setImageResource(R.drawable.ic_sound_on);

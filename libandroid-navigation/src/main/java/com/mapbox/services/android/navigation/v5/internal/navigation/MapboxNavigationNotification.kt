@@ -8,6 +8,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.PointF
 import android.os.Build
 import android.text.SpannableString
 import android.text.TextUtils
@@ -15,12 +19,21 @@ import android.text.format.DateFormat
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.util.Pair
 import com.mapbox.api.directions.v5.DirectionsCriteria.IMPERIAL
-import com.mapbox.api.directions.v5.models.LegStep
-import com.mapbox.navigator.BannerInstruction
+import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.services.android.navigation.R
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
+import com.mapbox.services.android.navigation.v5.internal.navigation.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_NOTIFICATION_ID
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE
 import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter
@@ -36,8 +49,11 @@ import java.util.Calendar
  */
 internal class MapboxNavigationNotification : NavigationNotification {
 
-    private val END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION"
-    private val SET_BACKGROUND_COLOR = "setBackgroundColor"
+    var currentManeuverType: String? = null
+        private set
+    var currentManeuverModifier: String? = null
+        private set
+    private var currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
 
     private var notificationManager: NotificationManager? = null
     private lateinit var notification: Notification
@@ -47,7 +63,6 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private var currentDistanceText: SpannableString? = null
     private var distanceFormatter: DistanceFormatter? = null
     private var instructionText: String? = null
-    private var currentManeuverId: Int = 0
     private var isTwentyFourHourFormat: Boolean = false
     private var etaFormat: String = ""
     private val applicationContext: Context
@@ -79,7 +94,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     override fun getNotification() = notification
 
     override fun getNotificationId(): Int {
-        return NavigationConstants.NAVIGATION_NOTIFICATION_ID
+        return NAVIGATION_NOTIFICATION_ID
     }
 
     override fun updateNotification(routeProgress: RouteProgress) {
@@ -92,7 +107,10 @@ internal class MapboxNavigationNotification : NavigationNotification {
     }
 
     // Package private (no modifier) for testing purposes
-    fun generateArrivalTime(routeProgress: RouteProgress, time: Calendar): String? =
+    fun generateArrivalTime(
+        routeProgress: RouteProgress,
+        time: Calendar = Calendar.getInstance()
+    ): String? =
         ifNonNull(
             mapboxNavigation,
             routeProgress.currentLegProgress()
@@ -110,25 +128,23 @@ internal class MapboxNavigationNotification : NavigationNotification {
         buildRemoteViews()
         updateInstructionText(routeProgress.bannerInstruction())
         updateDistanceText(routeProgress)
-        val time = Calendar.getInstance()
-
-        generateArrivalTime(routeProgress, time)?.let { formattedTime ->
+        generateArrivalTime(routeProgress)?.let { formattedTime ->
             updateViewsWithArrival(formattedTime)
-            routeProgress.currentLegProgress()?.upComingStep()?.let { step ->
-                routeProgress.currentLegProgress()?.upComingStep()
-                updateManeuverImage(step)
-            } ?: routeProgress.currentLegProgress()?.currentStep()
+        }
+
+        routeProgress.bannerInstruction()?.let { bannerInstructions ->
+            if (updateManeuverState(bannerInstructions)) {
+                updateManeuverImage(
+                    routeProgress.currentLegProgress?.currentStep?.drivingSide()
+                        ?: STEP_MANEUVER_MODIFIER_RIGHT
+                )
+            }
         }
     }
 
     // Package private (no modifier) for testing purposes
     fun retrieveInstructionText(): String? {
         return instructionText
-    }
-
-    // Package private (no modifier) for testing purposes
-    fun retrieveCurrentManeuverId(): Int {
-        return currentManeuverId
     }
 
     private fun initialize(applicationContext: Context, mapboxNavigation: MapboxNavigation) {
@@ -173,7 +189,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
     private fun createNotificationChannel(applicationContext: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
-                NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL,
+                NAVIGATION_NOTIFICATION_CHANNEL,
                 applicationContext.getString(R.string.channel_name),
                 NotificationManager.IMPORTANCE_LOW
             )
@@ -183,7 +199,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun buildNotification(applicationContext: Context): Notification {
         val channelId =
-            NavigationConstants.NAVIGATION_NOTIFICATION_CHANNEL
+            NAVIGATION_NOTIFICATION_CHANNEL
         val builder = NotificationCompat.Builder(applicationContext, channelId)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -239,21 +255,21 @@ internal class MapboxNavigationNotification : NavigationNotification {
 
     private fun rebuildNotification() {
         notification = buildNotification(applicationContext)
-        notificationManager?.notify(NavigationConstants.NAVIGATION_NOTIFICATION_ID, notification)
+        notificationManager?.notify(NAVIGATION_NOTIFICATION_ID, notification)
     }
 
     private fun unregisterReceiver(applicationContext: Context?) {
         applicationContext?.unregisterReceiver(endNavigationBtnReceiver)
-        notificationManager?.cancel(NavigationConstants.NAVIGATION_NOTIFICATION_ID)
+        notificationManager?.cancel(NAVIGATION_NOTIFICATION_ID)
     }
 
-    private fun updateInstructionText(bannerInstruction: BannerInstruction?) {
+    private fun updateInstructionText(bannerInstruction: BannerInstructions?) {
         if (bannerInstruction != null && (instructionText == null || newInstructionText(
                 bannerInstruction
             ))
         ) {
-            updateViewsWithInstruction(bannerInstruction.primary.text)
-            instructionText = bannerInstruction.primary.text
+            updateViewsWithInstruction(bannerInstruction.primary().text())
+            instructionText = bannerInstruction.primary().text()
         }
     }
 
@@ -262,8 +278,8 @@ internal class MapboxNavigationNotification : NavigationNotification {
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationInstructionText, text)
     }
 
-    private fun newInstructionText(bannerInstruction: BannerInstruction): Boolean {
-        return instructionText != bannerInstruction.primary.text
+    private fun newInstructionText(bannerInstruction: BannerInstructions): Boolean {
+        return instructionText != bannerInstruction.primary().text()
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
@@ -278,11 +294,11 @@ internal class MapboxNavigationNotification : NavigationNotification {
             }
             collapsedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
             expandedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
-                currentDistanceText
+                currentDistanceText.toString()
             )
         }
     }
@@ -298,7 +314,7 @@ internal class MapboxNavigationNotification : NavigationNotification {
             val str = item?.let {
                 distanceFormatter.formatDistance(it)
             }
-            if (str == null) {
+            if (str != null) {
                 val formattedDistance = str.toString()
                 currentDistanceText.toString() != formattedDistance
             } else
@@ -310,110 +326,90 @@ internal class MapboxNavigationNotification : NavigationNotification {
         expandedNotificationRemoteViews?.setTextViewText(R.id.notificationArrivalText, time)
     }
 
-    private fun updateManeuverImage(step: LegStep) {
-        val maneuverResource = getManeuverResource(step)
-        if (currentManeuverId != maneuverResource) {
-            currentManeuverId = maneuverResource
-            collapsedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
-            )
-            expandedNotificationRemoteViews?.setImageViewResource(
-                R.id.maneuverImage,
-                maneuverResource
-            )
+    private fun updateManeuverImage(drivingSide: String) {
+        getManeuverBitmap(
+            currentManeuverType ?: "",
+            currentManeuverModifier, drivingSide, currentRoundaboutAngle
+        ).let { bitmap ->
+            collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
+            expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
         }
     }
 
-    private fun getManeuverResource(step: LegStep): Int {
-        val maneuver = step.maneuver()
-        val maneuverType = maneuver.type()
-        val maneuverModifier = maneuver.modifier()
-        if (!TextUtils.isEmpty(maneuverModifier)) {
-            val drivingSide = step.drivingSide()
-            return if (isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-                    maneuverType,
-                    maneuverModifier,
-                    drivingSide
-                )
-            ) {
-                obtainManeuverResourceFrom(maneuverType + maneuverModifier + drivingSide)
-            } else obtainManeuverResourceFrom(maneuverType + maneuverModifier)
-        }
-        return obtainManeuverResourceFrom(maneuverType)
+    private fun updateManeuverState(bannerInstruction: BannerInstructions): Boolean {
+        val previousManeuverType = currentManeuverType
+        val previousManeuverModifier = currentManeuverModifier
+        val previousRoundaboutAngle = currentRoundaboutAngle
+
+        currentManeuverType = bannerInstruction.primary().type()
+        currentManeuverModifier = bannerInstruction.primary().modifier()
+        currentRoundaboutAngle = if (ROUNDABOUT_MANEUVER_TYPES.contains(currentManeuverType))
+            adjustRoundaboutAngle(bannerInstruction.primary().degrees()?.toFloat() ?: 0f)
+        else
+            DEFAULT_ROUNDABOUT_ANGLE
+
+        return !TextUtils.equals(currentManeuverType, previousManeuverType) ||
+            !TextUtils.equals(currentManeuverModifier, previousManeuverModifier) ||
+            currentRoundaboutAngle != previousRoundaboutAngle
     }
 
-    private fun obtainManeuverResourceFrom(maneuver: String?): Int {
-        when (maneuver) {
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN -> return R.drawable.ic_maneuver_turn_180
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_180_left_driving_side
-
-            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_arrive_left
-            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_arrive_right
-            NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE -> return R.drawable.ic_maneuver_arrive
-
-            NavigationConstants.STEP_MANEUVER_TYPE_DEPART + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_depart_left
-            NavigationConstants.STEP_MANEUVER_TYPE_DEPART + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_depart_right
-            NavigationConstants.STEP_MANEUVER_TYPE_DEPART -> return R.drawable.ic_maneuver_depart
-
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_turn_75
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_turn_45
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_turn_30
-
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_turn_75_left
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_turn_45_left
-            NavigationConstants.STEP_MANEUVER_TYPE_TURN + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ON_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_turn_30_left
-
-            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_merge_left
-            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_merge_right
-
-            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_off_ramp_left
-            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_off_ramp_slight_left
-
-            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_off_ramp_right
-            NavigationConstants.STEP_MANEUVER_TYPE_OFF_RAMP + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_off_ramp_slight_right
-
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_fork_left
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_fork_slight_left
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_fork_right
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_fork_slight_right
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_fork_straight
-            NavigationConstants.STEP_MANEUVER_TYPE_FORK -> return R.drawable.ic_maneuver_fork
-
-            NavigationConstants.STEP_MANEUVER_TYPE_END_OF_ROAD + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_end_of_road_left
-            NavigationConstants.STEP_MANEUVER_TYPE_END_OF_ROAD + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_end_of_road_right
-
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT -> return R.drawable.ic_maneuver_roundabout_right
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT -> return R.drawable.ic_maneuver_roundabout_sharp_right
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT -> return R.drawable.ic_maneuver_roundabout_slight_right
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_roundabout_straight
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY -> return R.drawable.ic_maneuver_roundabout
-
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_left_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_left_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_left_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_right_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SHARP_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_sharp_right_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_slight_right_left_driving_side
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT, NavigationConstants.STEP_MANEUVER_TYPE_ROTARY + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT + NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT -> return R.drawable.ic_maneuver_roundabout_straight_left_driving_side
-
-            NavigationConstants.STEP_MANEUVER_TYPE_MERGE + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NOTIFICATION + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_CONTINUE + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT, NavigationConstants.STEP_MANEUVER_TYPE_NEW_NAME + NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT -> return R.drawable.ic_maneuver_turn_0
-            else -> return R.drawable.ic_maneuver_turn_0
-        }
-    }
-
-    private fun isLeftDrivingSideAndRoundaboutOrRotaryOrUturn(
-        maneuverType: String?,
+    fun getManeuverBitmap(
+        maneuverType: String,
         maneuverModifier: String?,
-        drivingSide: String?
-    ): Boolean {
-        return NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT == drivingSide && (
-            NavigationConstants.STEP_MANEUVER_TYPE_ROUNDABOUT == maneuverType ||
-                NavigationConstants.STEP_MANEUVER_TYPE_ROTARY == maneuverType || NavigationConstants.STEP_MANEUVER_MODIFIER_UTURN == maneuverModifier
+        drivingSide: String,
+        roundaboutAngle: Float
+    ): Bitmap {
+        val maneuver = when {
+            MANEUVER_TYPES_WITH_NULL_MODIFIERS.contains(maneuverType) -> Pair(maneuverType, null)
+            !STEP_MANEUVER_TYPE_ARRIVE.contentEquals(maneuverType) && maneuverModifier != null -> Pair(
+                null,
+                maneuverModifier
             )
+            else -> Pair(maneuverType, maneuverModifier)
+        }
+
+        val width =
+            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_width)
+        val height =
+            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_height)
+
+        val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val maneuverCanvas = Canvas(maneuverImage)
+
+        MANEUVER_ICON_DRAWER_MAP[maneuver]?.drawManeuverIcon(
+            maneuverCanvas,
+            ContextCompat.getColor(
+                applicationContext,
+                R.color.mapbox_navigation_view_color_banner_maneuver_primary
+            ),
+            ContextCompat.getColor(
+                applicationContext,
+                R.color.mapbox_navigation_view_color_banner_maneuver_secondary
+            ),
+            PointF(width.toFloat(), height.toFloat()),
+            roundaboutAngle
+        )
+
+        maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
+
+        return if (isManeuverIconNeedFlip(
+                currentManeuverType,
+                currentManeuverModifier,
+                drivingSide
+            )
+        ) {
+            Bitmap.createBitmap(
+                maneuverImage,
+                0,
+                0,
+                width,
+                height,
+                Matrix().apply { preScale(-1f, 1f) },
+                false
+            )
+        } else {
+            maneuverImage
+        }
     }
 
     private fun onEndNavigationBtnClick() {
@@ -424,5 +420,10 @@ internal class MapboxNavigationNotification : NavigationNotification {
             else -> {
             }
         }
+    }
+
+    companion object {
+        private const val END_NAVIGATION_ACTION = "com.mapbox.intent.action.END_NAVIGATION"
+        private const val SET_BACKGROUND_COLOR = "setBackgroundColor"
     }
 }

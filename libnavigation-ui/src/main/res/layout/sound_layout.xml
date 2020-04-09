@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/soundText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sound_chip_background"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp"
+        android:paddingEnd="12dp"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:text="@string/muted"
+        android:textColor="?attr/navigationViewSecondary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/soundFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:tint="?attr/navigationViewSecondary"
+        app:backgroundTint="?attr/navigationViewPrimary"
+        app:borderWidth="0dp"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/soundText"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_sound_on"/>
+
+</merge>

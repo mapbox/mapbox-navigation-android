@@ -7,7 +7,7 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
 
 /**
- * Used with {@link NavigationSpeechPlayer#play(SpeechAnnouncement)}.
+ * Used with {@link NavigationSpeechPlayer#play(com.mapbox.api.directions.v5.models.VoiceInstructions)}.
  * <p>
  * Given either an <tt>ssmlAnnouncement</tt> or <tt>announcement</tt>, the {@link NavigationSpeechPlayer}
  * will first attempt to speak the SSML if {@link MapboxSpeechPlayer} supports the given language.
@@ -45,7 +45,7 @@ public abstract class SpeechAnnouncement {
    * <p>
    * Please note, the usage of this method creates a new instance of {@link SpeechAnnouncement}.
    *
-   * @return a {@link SpeechAnnouncement.Builder} with the same values set to match the ones defined
+   * @return a {@link Builder} with the same values set to match the ones defined
    * in this {@link SpeechAnnouncement}
    * @since 0.16.0
    */

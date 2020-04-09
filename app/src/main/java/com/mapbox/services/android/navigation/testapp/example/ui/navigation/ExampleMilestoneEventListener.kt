@@ -1,8 +1,8 @@
 package com.mapbox.services.android.navigation.testapp.example.ui.navigation
 
 import androidx.lifecycle.MutableLiveData
+import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement
 import com.mapbox.services.android.navigation.v5.milestone.Milestone
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone
@@ -25,8 +25,9 @@ class ExampleMilestoneEventListener(
     }
 
     private fun play(milestone: VoiceInstructionMilestone) {
-        val announcement = SpeechAnnouncement.builder()
-            .voiceInstructionMilestone(milestone)
+        val announcement = VoiceInstructions.builder()
+            .announcement(milestone.announcement)
+            .ssmlAnnouncement(milestone.ssmlAnnouncement)
             .build()
         speechPlayer.play(announcement)
     }

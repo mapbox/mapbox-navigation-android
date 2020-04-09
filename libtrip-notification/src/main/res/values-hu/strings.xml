@@ -1,12 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Navigáció vége</string>
     <string name="channel_name">Navigációs értesítések</string>
     <string name="notification_arrival_time_format">Érkezés: %s</string>
-    <string name="kilometers">km</string>
-    <string name="meters">m</string>
-    <string name="miles">mérföld</string>
-    <string name="feet">láb</string>
     <string name="eta_format">%s érkezés</string>
 
     <!-- Time formatting -->

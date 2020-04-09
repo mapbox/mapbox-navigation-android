@@ -13,6 +13,15 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="@string/nav_native_history_collect_key"
+            android:title="@string/nav_native_history_collect"/>
+
+        <Preference
+            android:key="@string/nav_native_history_retrieve_key"
+            android:title="Save Nav Native history"/>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="@string/simulate_route_key"
             android:title="@string/simulate_route"/>
 
@@ -46,15 +55,6 @@
             android:defaultValue="false"
             android:key="@string/offline_enabled"
             android:title="@string/offline_enabled_title"/>
-
-        <Preference
-            android:key="@string/offline_region_download"
-            android:title="@string/offline_region_download_title">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetClass="com.mapbox.navigation.examples.activity.OfflineRegionDownloadActivity"
-                android:targetPackage="com.mapbox.navigation.examples"/>
-        </Preference>
 
         <ListPreference
             android:enabled="false"

@@ -4,17 +4,19 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.mapbox.base.common.logger.model.Message;
+import com.mapbox.common.logger.MapboxLogger;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.navigation.base.logger.model.Message;
-import com.mapbox.navigation.logger.MapboxLogger;
+import com.mapbox.navigation.examples.R;
 
 import java.util.Random;
 
@@ -69,5 +71,10 @@ public class Utils {
     LatLng latLng = new LatLng(randomLat, randomLon);
     MapboxLogger.INSTANCE.d(new Message("getRandomLatLng: " + latLng.toString()));
     return latLng;
+  }
+
+  public static boolean shouldSimulateRoute(Context applicationContext) {
+    return PreferenceManager.getDefaultSharedPreferences(applicationContext)
+      .getBoolean(applicationContext.getString(R.string.simulate_route_key), false);
   }
 }

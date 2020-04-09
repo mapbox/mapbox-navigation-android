@@ -1,7 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5.route;
 
 class RouteConstants {
-  static final String MAPBOX_LOCATION_ID = "mapbox-location";
   static final String CONGESTION_KEY = "congestion";
   static final String ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   static final String ROUTE_LAYER_ID = "mapbox-navigation-route-layer";

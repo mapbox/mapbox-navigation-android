@@ -66,7 +66,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * After the layout inflates, binds all necessary views,
-   * create a {@link RecyclerView} for the list of directions,
+   * create a {@link androidx.recyclerview.widget.RecyclerView} for the list of directions,
    * and a new {@link DecimalFormat} for formatting distance remaining.
    */
   @Override
@@ -116,7 +116,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   /**
    * Unsubscribes {@link NavigationViewModel} {@link androidx.lifecycle.LiveData} objects
-   * previously added in {@link SummaryBottomSheet#subscribe(NavigationViewModel)}
+   * previously added in {@link SummaryBottomSheet#subscribe(LifecycleOwner, NavigationViewModel)}
    * by removing the observers of the {@link LifecycleOwner} when parent view is destroyed
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

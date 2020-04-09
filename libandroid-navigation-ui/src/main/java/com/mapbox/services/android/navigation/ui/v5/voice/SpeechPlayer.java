@@ -1,5 +1,7 @@
 package com.mapbox.services.android.navigation.ui.v5.voice;
 
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
+
 /**
  * Defines a contract for speech players
  * used in {@link com.mapbox.services.android.navigation.ui.v5.NavigationView}.
@@ -15,7 +17,7 @@ public interface SpeechPlayer {
    * @param speechAnnouncement with voice speechAnnouncement data.
    * @since 0.15.1
    */
-  void play(SpeechAnnouncement speechAnnouncement);
+  void play(VoiceInstructions speechAnnouncement);
 
   /**
    * @return true if currently muted, false if not

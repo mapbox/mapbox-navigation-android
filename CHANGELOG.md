@@ -2,11 +2,29 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v1.0.0-beta.1 - January 24, 2020
+
 ### v0.43.0 -
 
 * Fix Javadoc Kotlin issues [#2103](https://github.com/mapbox/mapbox-navigation-android/pull/2103)
 * Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
 * Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
+
+### v0.42.6 - March 16, 2020
+
+* Fix missing event telemetry when Proguard is enabled [#2587](https://github.com/mapbox/mapbox-navigation-android/pull/2587)
+* fix textAllCaps conflicting with material design [#2585](https://github.com/mapbox/mapbox-navigation-android/pull/2585)
+* Add missing RouteOptions to DirectionsBuilder [#2573](https://github.com/mapbox/mapbox-navigation-android/pull/2573)
+* Fix libandroid-navigation and libandroid-navigation-ui Javadoc task [#2534](https://github.com/mapbox/mapbox-navigation-android/pull/2534)
+
+### v0.42.5 - February 11, 2020
+
+* Backport #2315 to base-v0.42.1 [#2318](https://github.com/mapbox/mapbox-navigation-android/pull/2318)
+* Ensure to use valid MapRouteArrow and MapRouteLine Layer references during style change [#2315](https://github.com/mapbox/mapbox-navigation-android/pull/2315)
+* Cherry pick #2307 (master) into base-v0.42.1 [#2308](https://github.com/mapbox/mapbox-navigation-android/pull/2308)
+* Bump mapbox-navigation-native version to 7.0.0 in base-v0.42.1 branch [#2294](https://github.com/mapbox/mapbox-navigation-android/pull/2294)
+* Cherry pick #2287 (master) into base-v0.42.1 [#2292](https://github.com/mapbox/mapbox-navigation-android/pull/2292)
+
 
 ### v0.42.4 - November 25, 2019
 

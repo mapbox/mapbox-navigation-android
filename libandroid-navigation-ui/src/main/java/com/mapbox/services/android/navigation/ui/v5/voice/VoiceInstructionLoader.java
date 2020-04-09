@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.services.android.navigation.ui.v5.ConnectivityStatusProvider;
-import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,12 +94,10 @@ public class VoiceInstructionLoader {
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
     if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
-      mapboxSpeechBuilder
-        .instruction(instruction)
-        .interceptor(new SkuInterceptor(context));
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
-        .textType(textType)
-        .build();
+          .instruction(instruction)
+          .textType(textType)
+          .build();
       mapboxSpeech.enqueueCall(callback);
     }
   }

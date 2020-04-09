@@ -4,7 +4,6 @@ import android.content.Context
 import com.mapbox.api.routetiles.v1.MapboxRouteTiles
 import com.mapbox.core.exceptions.ServicesException
 import com.mapbox.geojson.BoundingBox
-import com.mapbox.services.android.navigation.v5.internal.accounts.SkuInterceptor
 import okhttp3.ResponseBody
 import retrofit2.Callback
 
@@ -43,7 +42,7 @@ class OfflineTiles private constructor(
      * therefore a builder must include a version, access token, and a [BoundingBox].
      */
     class Builder internal constructor(context: Context) {
-        private var mapboxRouteTilesBuilder: MapboxRouteTiles.Builder = MapboxRouteTiles.builder().interceptor(SkuInterceptor(context))
+        private var mapboxRouteTilesBuilder: MapboxRouteTiles.Builder = MapboxRouteTiles.builder()
         private lateinit var _version: String
 
         // internal constructor for tests

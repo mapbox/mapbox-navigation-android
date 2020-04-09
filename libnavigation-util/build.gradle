@@ -1,7 +1,21 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.dokka'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libnavigation-utils'
+
+        perPackageOption {
+            prefix = "utils"
+            suppress = true
+        }
+    }
+}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -11,21 +25,21 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-consumer.pro'
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 
 }
 
 dependencies {
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
     //ktlint
     ktlint dependenciesList.ktlint
 
-    // Unit testing
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockito // deprecated
-    testImplementation dependenciesList.mockk
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation project(':libtesting-utils')
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"

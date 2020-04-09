@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mapbox.services.android.navigation.ui.v5.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationConstants.NAVIGATION_MINIMUM_MAP_ZOOM;
 
 /**
  * Wrapper class for {@link MapboxMap}.
@@ -63,9 +62,9 @@ public class NavigationMapboxMap {
   private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
-    = new CopyOnWriteArrayList<>();
+          = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
-    = new MapWayNameChangedListener(onWayNameChangedListeners);
+          = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
   private MapView mapView;
   private MapboxMap mapboxMap;
@@ -82,23 +81,39 @@ public class NavigationMapboxMap {
   private LocationFpsDelegate locationFpsDelegate;
 
   /**
-   * Constructor that can be used once {@link com.mapbox.mapboxsdk.maps.OnMapReadyCallback}
+   * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView   for map size and Context
-   * @param mapboxMap for APIs to interact with the map
+   * @param mapView           for map size and Context
+   * @param mapboxMap         for APIs to interact with the map
    */
-  public NavigationMapboxMap(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap) {
+    this(mapView, mapboxMap, null);
+  }
+
+  /**
+   * Constructor that can be used once {@link OnMapReadyCallback}
+   * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+   *
+   * @param mapView           for map size and Context
+   * @param mapboxMap         for APIs to interact with the map
+   * @param routeBelowLayerId optionally pass in a layer id to place the route line below
+   */
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap,
+                             @Nullable String routeBelowLayerId) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     initializeLocationComponent(mapView, mapboxMap);
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
-    initializeRoute(mapView, mapboxMap);
+    initializeRoute(mapView, mapboxMap, routeBelowLayerId);
     initializeCamera(mapboxMap, locationComponent);
     initializeLocationFpsDelegate(mapboxMap, locationComponent);
   }
+
 
   // Package private (no modifier) for testing purposes
   NavigationMapboxMap(MapLayerInteractor layerInteractor) {
@@ -369,7 +384,16 @@ public class NavigationMapboxMap {
    * if no route is drawn.
    */
   public void removeRoute() {
-    mapRoute.removeRoute();
+    mapRoute.updateRouteVisibilityTo(false);
+    mapRoute.updateRouteArrowVisibilityTo(false);
+  }
+
+  /**
+   * Will show the drawn route displayed on the map.
+   */
+  public void showRoute() {
+    mapRoute.updateRouteVisibilityTo(true);
+    mapRoute.updateRouteArrowVisibilityTo(true);
   }
 
   /**
@@ -380,6 +404,10 @@ public class NavigationMapboxMap {
    */
   public NavigationCamera retrieveCamera() {
     return mapCamera;
+  }
+
+  public NavigationMapRoute retrieveMapRoute() {
+    return mapRoute;
   }
 
   /**
@@ -603,23 +631,22 @@ public class NavigationMapboxMap {
   @SuppressLint("MissingPermission")
   private void initializeLocationComponent(MapView mapView, MapboxMap map) {
     locationComponent = map.getLocationComponent();
-    map.setMinZoomPreference(NAVIGATION_MINIMUM_MAP_ZOOM);
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
     Style style = map.getStyle();
     int locationLayerStyleRes = findLayerStyleRes(context);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
-      .locationComponentOptions(options)
-      .useDefaultLocationEngine(false)
-      .build();
+            .locationComponentOptions(options)
+            .useDefaultLocationEngine(false)
+            .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
   }
 
   private int findLayerStyleRes(Context context) {
     int locationLayerStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context,
-      R.attr.navigationViewLocationLayerStyle);
+            R.attr.navigationViewLocationLayerStyle);
     if (!isValid(locationLayerStyleRes)) {
       locationLayerStyleRes = R.style.NavigationLocationLayerStyle;
     }
@@ -647,10 +674,10 @@ public class NavigationMapboxMap {
     layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
-  private void initializeRoute(MapView mapView, MapboxMap map) {
+  private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveNavigationViewStyle(context, R.attr.navigationViewRouteStyle);
-    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes);
+    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
   }
 
   private void initializeCamera(MapboxMap map, LocationComponent locationComponent) {

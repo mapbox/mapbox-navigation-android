@@ -1,14 +1,18 @@
 <resources>
-    <string name="app_name">Mapbox 1.0 Navigation SDK for Android</string>
+    <string name="app_name" translatable="false">Mapbox 1.0 Navigation SDK for Android</string>
 
-    <string name="title_mock_navigation">Mock Navigation</string>
-    <string name="description_mock_navigation">Mock a navigation session using a mock location engine.</string>
+    <!-- MainActivity -->
+    <string name="navigation_core_sdk_title" translatable="false">Navigation Core SDK</string>
+    <string name="navigation_core_sdk_description" translatable="false">Hosts examples to demonstrate the use of the Core SDK</string>
 
-    <string name="title_offboard_router_kotlin">Offboard Router Kotlin</string>
-    <string name="description_offboard_router_kotlin">Shows routes using offboard routing api in Kotlin code.</string>
+    <string name="navigation_ui_sdk_title" translatable="false">Navigation UI SDK</string>
+    <string name="navigation_ui_sdk_description" translatable="false">Hosts examples to demonstrate the use of the UI SDK</string>
 
-    <string name="title_offboard_router_java">Offboard Router Java</string>
-    <string name="description_offboard_router_java">Shows routes using offboard routing api in Java code.</string>
+    <string name="title_offboard_router_kotlin" translatable="false">Offboard Router Kotlin</string>
+    <string name="description_offboard_router_kotlin" translatable="false">Shows routes using offboard routing api in Kotlin code.</string>
+
+    <string name="title_offboard_router_java" translatable="false">Offboard Router Java</string>
+    <string name="description_offboard_router_java" translatable="false">Shows routes using offboard routing api in Java code.</string>
 
     <string name="title_onboard_router_kotlin" translatable="false">Onboard Router Kotlin</string>
     <string name="description_onboard_router_kotlin" translatable="false">Shows routes using onboard routing api in Kotlin code.</string>
@@ -16,36 +20,89 @@
     <string name="title_onboard_router_java" translatable="false">Onboard Router Java</string>
     <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
 
-    <string name="title_trip_service_kotlin">Trip Service Kotlin</string>
-    <string name="description_trip_service_kotlin">Shows how to use the Service to push notifications in Kotlin code.</string>
+    <string name="title_trip_service_kotlin" translatable="false">Trip Service Kotlin</string>
+    <string name="description_trip_service_kotlin" translatable="false">Shows how to use the Service to push notifications in Kotlin code.</string>
 
-    <string name="title_trip_service_java">Trip Service Java</string>
-    <string name="description_trip_service_java">Shows how to use the Service to push notifications in Java code.</string>
+    <string name="title_trip_session_kotlin" translatable="false">Trip Session Kotlin</string>
+    <string name="description_trip_session_kotlin" translatable="false">Shows how to use the Session API in Kotlin code.</string>
 
-    <string name="title_component_navigation">MapboxNavigation with UI components</string>
-    <string name="description_component_navigation">MapboxNavigation with UI components</string>
+    <string name="title_simple_navigation_kotlin" translatable="false">Simple Mapbox Navigation Kotlin</string>
+    <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
 
-    <string name="settings">Settings</string>
-    <string name="simulate_route">Simulate Route</string>
-    <string name="language">Language</string>
-    <string name="unit_type">Unit Type</string>
-    <string name="route_profile">Route Profile</string>
+    <string name="title_navigation_view" translatable="false">Navigation View</string>
+    <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn</string>
 
+    <string name="title_custom_puck_example" translatable="false">Custom Puck Example</string>
+    <string name="description_custom_puck_example" translatable="false">Shows how to use NavigationView with a custom puck</string>
+
+    <string name="title_custom_camera_example" translatable="false">Custom Camera Example</string>
+    <string name="description_custom_camera_example" translatable="false">Shows how to use NavigationView with a custom camera tilt and zoom</string>
+
+    <string name="title_final_destination_building_highlight_kotlin" translatable="false">Final Destination Building Highlight UI Kotlin</string>
+    <string name="description_final_destination_building_highlight_kotlin" translatable="false">Show how the final destination building footprint can be highlighted when the device has arrived. Example\'s in Kotlin.</string>
+
+    <string name="title_arrival_ui_building_extrusions_kotlin" translatable="false">Arrival UI Building Extrusions Kotlin</string>
+    <string name="description_arrival_ui_building_extrusions_kotlin" translatable="false">Show building extrusions once the device is close enough to the final destination. Example\'s in Kotlin.</string>
+
+    <string name="title_replay_navigation_kotlin" translatable="false">ReplayEngineActivity</string>
+    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation with the replay engine in Kotlin code.</string>
+
+    <string name="title_replay_history_kotlin" translatable="false">ReplayHistoryActivity</string>
+    <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
+
+    <string name="title_reroute_view" translatable="false">RerouteActivity</string>
+    <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
+
+    <string name="title_basic_navigation_kotlin" translatable="false">BasicNavigationActivity</string>
+    <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from source to destination using Mapbox Navigation.</string>
+
+    <string name="title_guidance_view" translatable="false">GuidanceViewActivity</string>
+    <string name="description_guidance_view" translatable="false">Demonstrate the use of guidance view to show images at proper junctions</string>
+
+    <string name="title_faster_route" translatable="false">FasterRouteActivity</string>
+    <string name="description_faster_route" translatable="false">Demonstrate how to use MapboxNavigation to listen for faster route</string>
+
+    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
+    <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet, Recenter button with core SDK.</string>
+
+    <string name="title_instruction_view" translatable="false">InstructionView</string>
+    <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with core SDK.</string>
+
+    <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
+    <string name="description_component_navigation" translatable="false">MapboxNavigation with UI components</string>
+
+    <string name="title_debug_navigation_kotlin" translatable="false">Debug Mapbox Navigation Kotlin</string>
+    <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update</string>
+
+    <string name="settings" translatable="false">Settings</string>
+    <string name="simulate_route" translatable="false">Simulate Route</string>
+    <string name="language" translatable="false">Language</string>
+    <string name="unit_type" translatable="false">Unit Type</string>
+    <string name="route_profile" translatable="false">Route Profile</string>
     <string name="unit_type_key" translatable="false">unit_type</string>
     <string name="simulate_route_key" translatable="false">simulate_route</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
-    <string name="default_route_profile">driving-traffic</string>
+    <string name="default_route_profile" translatable="false">driving-traffic</string>
     <string name="git_hash_key" translatable="false">git_hash</string>
+    <string name="nav_native_history_retrieve_key" translatable="false">nav_native_history_retrieve</string>
+    <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
+    <string name="nav_native_history_collect" translatable="false">Collect Nav Native history</string>
     <string name="offline_version_key" translatable="false">offline_preference_key</string>
     <string name="offline_region_download" translatable="false">offline_region_download</string>
     <string name="offline_enabled" translatable="false">offline_region_download</string>
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
-
-    <string name="offline_enabled_title">Offline routing enabled</string>
-    <string name="offline_category_title">Offline</string>
+    <string name="start_navigation" translatable="false">Start Navigation</string>
+    <string name="play_history" translatable="false">Play history</string>
     <string name="offline_region_download_title">Download offline region</string>
-    <string name="offline_version_title">Choose offline version</string>
-    <string name="general_category_title">General</string>
+    <string name="msg_long_press_for_destination">Long press a point on the map to indicate a destination.</string>
+    <string name="offline_category_title" translatable="false">Offline</string>
+    <string name="offline_enabled_title" translatable="false">Offline routing enabled</string>
+    <string name="offline_version_title" translatable="false">Choose offline version</string>
+    <string name="general_category_title" translatable="false">General</string>
+    <string name="send_user_feedback" translatable="false">Send User Feedback</string>
+    <string name="simple_mapbox_navigation_clear_routes" translatable="false">CLEAR ROUTES</string>
+    <string name="simple_mapbox_navigation_add_original_route" translatable="false">ADD ORIGINAL ROUTE</string>
+
 </resources>

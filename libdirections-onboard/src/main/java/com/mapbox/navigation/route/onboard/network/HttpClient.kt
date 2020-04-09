@@ -1,20 +1,23 @@
 package com.mapbox.navigation.route.onboard.network
 
-import androidx.annotation.Keep
-import com.mapbox.navigation.base.logger.Logger
-import com.mapbox.navigation.base.logger.model.Message
-import com.mapbox.navigator.BuildConfig
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.route.onboard.BuildConfig
 import com.mapbox.navigator.HttpCode
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.HttpResponse
 import java.io.ByteArrayOutputStream
+import java.io.IOException
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.buffer
 import okio.sink
 
-@Keep
+// Note, not using now, but need as a default client for NavNative. Could be pass to NN via configuration (* fun configureRouter() * )
 internal class HttpClient(
     internal val userAgent: String = USER_AGENT,
     private val acceptGzipEncoding: Boolean = false,
@@ -55,30 +58,40 @@ internal class HttpClient(
         return acceptGzipEncoding
     }
 
-    override fun get(url: String): HttpResponse {
-        val requestBuilder = Request.Builder()
-            .addHeader(HEADER_USER_AGENT, userAgent)
-            .url(url)
+    override fun get(url: String, nativeResponse: HttpResponse) {
+        val requestBuilder = try {
+            Request.Builder()
+                .addHeader(HEADER_USER_AGENT, userAgent)
+                .url(url)
+        } catch (e: IllegalArgumentException) {
+            nativeResponse.run(ByteArray(0), HttpCode.FAILURE)
+            return
+        }
 
         if (acceptGzipEncoding) {
             requestBuilder.addHeader(HEADER_ENCODING, GZIP)
         }
 
-        client.newCall(requestBuilder.build()).execute().use { response ->
-            val outputStream = ByteArrayOutputStream()
-            val result = if (response.isSuccessful) HttpCode.SUCCESS else HttpCode.FAILURE
-
-            response.body()?.let { body ->
-                val sink = outputStream.sink().buffer()
-                sink.writeAll(body.source())
-                sink.close()
+        client.newCall(requestBuilder.build()).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                nativeResponse.run(ByteArray(0), HttpCode.FAILURE)
             }
 
-            // FIXME core should receive Array, not List. It is List now because of bindgen
-            val bytes = outputStream.toByteArray().toList()
-            outputStream.close()
+            override fun onResponse(call: Call, response: Response) {
+                val outputStream = ByteArrayOutputStream()
+                val result = if (response.isSuccessful) HttpCode.SUCCESS else HttpCode.FAILURE
 
-            return HttpResponse(bytes, result)
-        }
+                response.body()?.let { body ->
+                    val sink = outputStream.sink().buffer()
+                    sink.writeAll(body.source())
+                    sink.close()
+                }
+
+                val bytes = outputStream.toByteArray()
+                outputStream.close()
+
+                nativeResponse.run(bytes, result)
+            }
+        })
     }
 }

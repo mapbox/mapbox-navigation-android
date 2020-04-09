@@ -9,8 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.R;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewModel;
 import com.mapbox.services.android.navigation.ui.v5.alert.AlertView;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheet;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackBottomSheetListener;
@@ -95,7 +95,8 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
    * <p>
    * Note this will only happen automatically in the context of
    * the {@link com.mapbox.services.android.navigation.ui.v5.NavigationView} or a {@link NavigationViewModel}
-   * has been added to the instruction view with {@link InstructionView#subscribe(NavigationViewModel)}.
+   * has been added to the instruction view with
+   * {@link InstructionView#subscribe(androidx.lifecycle.LifecycleOwner, NavigationViewModel)}.
    *
    * @param isEnabled true to show during off-route events, false to hide
    */

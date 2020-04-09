@@ -24,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -37,7 +38,6 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructions
 import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
@@ -186,8 +186,8 @@ public class EmbeddedNavigationActivity extends AppCompatActivity implements OnN
   }
 
   @Override
-  public SpeechAnnouncement willVoice(SpeechAnnouncement announcement) {
-    return SpeechAnnouncement.builder().announcement("All announcements will be the same.").build();
+  public VoiceInstructions willVoice(VoiceInstructions announcement) {
+    return VoiceInstructions.builder().announcement("All announcements will be the same.").build();
   }
 
   @Override

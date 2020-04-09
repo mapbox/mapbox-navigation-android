@@ -21,6 +21,10 @@ class MapRouteProgressChangeListener implements ProgressChangeListener {
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    onProgressChange(routeProgress);
+  }
+
+  public void onProgressChange(RouteProgress routeProgress) {
     if (!isVisible) {
       return;
     }

@@ -1,7 +1,18 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libdirections-hybrid'
+        reportUndocumented = true
+    }
+}
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -11,7 +22,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles 'proguard-consumer.pro'
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
     }
 }
 
@@ -20,17 +31,19 @@ dependencies {
     kapt dependenciesList.mapboxAnnotationsProcessor
 
     api project(':libnavigation-base')
-    implementation project(":libdirections-onboard")
-    implementation project(":libdirections-offboard")
+    runtimeOnly project(":libdirections-onboard")
+    runtimeOnly project(":libdirections-offboard")
     implementation project(":libnavigation-util")
 
     //ktlint
     ktlint dependenciesList.ktlint
 
     implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
 
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.junit
+    testImplementation project(':libtesting-utils')
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"

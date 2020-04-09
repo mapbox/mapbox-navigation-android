@@ -2,7 +2,7 @@ package com.mapbox.navigation.route.onboard
 
 import android.net.Uri
 import androidx.annotation.FloatRange
-import com.mapbox.navigation.base.route.RouteUrl
+import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.utils.extensions.ifNonNull
 
 /**

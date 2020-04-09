@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.ui.v5.feedback.FeedbackItem;
 import com.mapbox.services.android.navigation.ui.v5.listeners.BannerInstructionsListener;
@@ -12,7 +13,6 @@ import com.mapbox.services.android.navigation.ui.v5.listeners.InstructionListLis
 import com.mapbox.services.android.navigation.ui.v5.listeners.NavigationListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.RouteListener;
 import com.mapbox.services.android.navigation.ui.v5.listeners.SpeechAnnouncementListener;
-import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
@@ -399,9 +399,9 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onNewVoiceAnnouncement_instructionListenerIsCalled() {
-    SpeechAnnouncement originalAnnouncement = mock(SpeechAnnouncement.class);
+    VoiceInstructions originalAnnouncement = mock(VoiceInstructions.class);
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+    VoiceInstructions newAnnouncement = VoiceInstructions.builder()
       .announcement("New announcement").build();
     when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
@@ -413,29 +413,29 @@ public class NavigationViewEventDispatcherTest {
 
   @Test
   public void onNewVoiceAnnouncement_announcementToBeVoicedIsReturned() {
-    SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
+    VoiceInstructions originalAnnouncement = VoiceInstructions.builder().announcement("announcement").build();
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+    VoiceInstructions newAnnouncement = VoiceInstructions.builder()
       .announcement("New announcement").build();
     when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
 
-    SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
+    VoiceInstructions modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
 
     assertEquals("New announcement", modifiedAnnouncement.announcement());
   }
 
   @Test
   public void onNewVoiceAnnouncement_ssmlAnnouncementToBeVoicedIsReturned() {
-    SpeechAnnouncement originalAnnouncement = SpeechAnnouncement.builder().announcement("announcement").build();
+    VoiceInstructions originalAnnouncement = VoiceInstructions.builder().announcement("announcement").build();
     SpeechAnnouncementListener speechAnnouncementListener = mock(SpeechAnnouncementListener.class);
-    SpeechAnnouncement newAnnouncement = SpeechAnnouncement.builder()
+    VoiceInstructions newAnnouncement = VoiceInstructions.builder()
       .announcement("New announcement")
       .ssmlAnnouncement("New SSML announcement").build();
     when(speechAnnouncementListener.willVoice(originalAnnouncement)).thenReturn(newAnnouncement);
     NavigationViewEventDispatcher eventDispatcher = buildViewEventDispatcher(speechAnnouncementListener);
 
-    SpeechAnnouncement modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
+    VoiceInstructions modifiedAnnouncement = eventDispatcher.onAnnouncement(originalAnnouncement);
 
     assertEquals("New SSML announcement", modifiedAnnouncement.ssmlAnnouncement());
   }

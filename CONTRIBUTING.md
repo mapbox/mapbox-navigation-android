@@ -12,6 +12,8 @@ If you want to contribute code:
 
 4. Mapbox uses checkstyle to enforce good Java code standards, Make sure to read the [wiki entry](https://github.com/mapbox/mapbox-navigation-android/wiki/Setting-up-Mapbox-checkstyle) and setup. CI will fail if your PR contains any mistakes.
 
+5. If you are contributing to legacy **Java** code please follow proper coding style [codestyle](./docs/codestyle-setup.md)
+
 ## Adding or updating a localization
 
 The Mapbox Navigation SDK for Android features several translations contributed through [Transifex](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/). If your language already has a translation, feel free to complete or proofread it. Otherwise, please [request your language](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/) so you can start translating. Note that we’re primarily interested in languages that Android supports as system languages.

@@ -320,6 +320,39 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
+   * Set the auto-query state to provide the default way names value
+   * with {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
+   *
+   * @param isActive true if auto-query is enabled, false otherwise.
+   */
+  @Override
+  public void setWayNameActive(boolean isActive) {
+    if (navigationMap != null) {
+      navigationMap.updateWaynameQueryMap(isActive);
+    }
+  }
+
+  /**
+   * Set the visibility state of the way name view.
+   *
+   * @param isVisible true if visible, false otherwise.
+   */
+  @Override
+  public void setWayNameVisibility(boolean isVisible) {
+    wayNameView.updateVisibility(isVisible);
+  }
+
+  /**
+   * Provides the current text of the way name view.
+   *
+   * @return the current text of the way name view
+   */
+  @Override
+  public String retrieveWayNameText() {
+    return wayNameView.retrieveWayNameText();
+  }
+
+  /**
    * Updates the visibility of the way name view that is show below
    * the navigation icon.
    * <p>
@@ -328,8 +361,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
    *
    * @param isVisible true to show, false to hide
+   *
+   * @deprecated This method sets the auto-query, by calling
+   * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}, and updates
+   * the visibility of the way name view at the same time. We recommend to use {@link #setWayNameActive(boolean)}
+   * to enable auto-query or {@link #setWayNameVisibility(boolean)} to update the
+   * way name view visibility. Remember to check whether the way name view text is empty or not before
+   * set the auto-query. {@link #retrieveWayNameText()} could get the way name view text.
    */
   @Override
+  @Deprecated
   public void updateWayNameVisibility(boolean isVisible) {
     wayNameView.updateVisibility(isVisible);
     if (navigationMap != null) {
@@ -345,7 +386,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
-   * Used when starting this {@link android.app.Activity}
+   * Used when starting this {@link Activity}
    * for the first time.
    * <p>
    * Zooms to the beginning of the {@link DirectionsRoute}.
@@ -558,7 +599,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (initialMapCameraPosition != null) {
       map.setCameraPosition(initialMapCameraPosition);
     }
-    navigationMap = new NavigationMapboxMap(mapView, map);
+    navigationMap = new NavigationMapboxMap(mapView, map, null);
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);

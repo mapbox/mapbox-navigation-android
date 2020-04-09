@@ -3,14 +3,11 @@ package com.mapbox.navigation.examples
 import android.os.StrictMode
 import android.text.TextUtils
 import androidx.multidex.MultiDexApplication
-import com.mapbox.android.search.MapboxSearch
-import com.mapbox.android.search.MapboxSearchOptions
-import com.mapbox.crashmonitor.CrashMonitor
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.navigation.base.logger.model.Message
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.DelegatesExt
-import com.mapbox.navigation.logger.MapboxLogger
 import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 
@@ -29,7 +26,6 @@ class NavigationApplication : MultiDexApplication() {
         setupStrictMode()
         setupCanary()
         setupMapbox()
-        setupCrashMonitor()
     }
 
     private fun setupTimber() {
@@ -70,19 +66,6 @@ class NavigationApplication : MultiDexApplication() {
             MapboxLogger.w(Message("Mapbox access token isn't set!"))
         }
 
-        val cachingMode = MapboxSearchOptions().setCachingEnabled(true)
-        MapboxSearch.getInstance(applicationContext, mapboxAccessToken, cachingMode)
         Mapbox.getInstance(applicationContext, mapboxAccessToken)
-    }
-
-    private fun setupCrashMonitor() {
-        val crashMonitor = CrashMonitor { crashDetails ->
-            throw Exception(crashDetails)
-        }
-        try {
-            crashMonitor.monitor(applicationInfo.dataDir)
-        } catch (e: Exception) {
-            MapboxLogger.e(Message("Couldn't monitor for crashes: ${e.message}"))
-        }
     }
 }

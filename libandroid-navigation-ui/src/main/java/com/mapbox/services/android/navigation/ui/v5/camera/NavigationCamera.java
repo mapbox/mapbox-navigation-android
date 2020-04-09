@@ -71,13 +71,13 @@ public class NavigationCamera implements LifecycleObserver {
   public static final int NAVIGATION_TRACKING_MODE_NONE = 2;
   private static final int ONE_POINT = 1;
   private final CopyOnWriteArrayList<OnTrackingModeTransitionListener> onTrackingModeTransitionListeners
-    = new CopyOnWriteArrayList<>();
+          = new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<OnTrackingModeChangedListener> onTrackingModeChangedListeners
-    = new CopyOnWriteArrayList<>();
+          = new CopyOnWriteArrayList<>();
   private final OnLocationCameraTransitionListener cameraTransitionListener
-    = new NavigationCameraTransitionListener(this);
+          = new NavigationCameraTransitionListener(this);
   private final OnCameraTrackingChangedListener cameraTrackingChangedListener
-    = new NavigationCameraTrackingChangedListener(this);
+          = new NavigationCameraTrackingChangedListener(this);
   private MapboxMap mapboxMap;
   private LocationComponent locationComponent;
   private MapboxNavigation navigation;
@@ -449,7 +449,7 @@ public class NavigationCamera implements LifecycleObserver {
     CameraUpdate resetUpdate = buildResetCameraUpdate();
     final CameraUpdate overviewUpdate = buildOverviewCameraUpdate(padding, routePoints);
     mapboxMap.animateCamera(resetUpdate, 150,
-      new CameraOverviewCancelableCallback(overviewUpdate, mapboxMap)
+            new CameraOverviewCancelableCallback(overviewUpdate, mapboxMap)
     );
   }
 
@@ -463,7 +463,7 @@ public class NavigationCamera implements LifecycleObserver {
   private CameraUpdate buildOverviewCameraUpdate(int[] padding, List<Point> routePoints) {
     final LatLngBounds routeBounds = convertRoutePointsToLatLngBounds(routePoints);
     return CameraUpdateFactory.newLatLngBounds(
-      routeBounds, padding[0], padding[1], padding[2], padding[3]
+            routeBounds, padding[0], padding[1], padding[2], padding[3]
     );
   }
 
@@ -473,8 +473,8 @@ public class NavigationCamera implements LifecycleObserver {
       latLngs.add(new LatLng(routePoint.latitude(), routePoint.longitude()));
     }
     return new LatLngBounds.Builder()
-      .includes(latLngs)
-      .build();
+            .includes(latLngs)
+            .build();
   }
 
   private void setCameraMode(@TrackingMode int trackingCameraMode) {
@@ -540,23 +540,23 @@ public class NavigationCamera implements LifecycleObserver {
   private long getZoomAnimationDuration(double zoom) {
     double zoomDiff = Math.abs(mapboxMap.getCameraPosition().zoom - zoom);
     return (long) MathUtils.clamp(
-      500 * zoomDiff,
-      NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION,
-      NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
+            500 * zoomDiff,
+            NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION,
+            NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
   }
 
   private long getTiltAnimationDuration(double tilt) {
     double tiltDiff = Math.abs(mapboxMap.getCameraPosition().tilt - tilt);
     return (long) MathUtils.clamp(
-      500 * tiltDiff,
-      NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION,
-      NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
+            500 * tiltDiff,
+            NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION,
+            NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION);
   }
 
   @Retention(RetentionPolicy.SOURCE)
-  @IntDef( {NAVIGATION_TRACKING_MODE_GPS,
-    NAVIGATION_TRACKING_MODE_NORTH,
-    NAVIGATION_TRACKING_MODE_NONE
+  @IntDef({NAVIGATION_TRACKING_MODE_GPS,
+          NAVIGATION_TRACKING_MODE_NORTH,
+          NAVIGATION_TRACKING_MODE_NONE
   })
   public @interface TrackingMode {
   }

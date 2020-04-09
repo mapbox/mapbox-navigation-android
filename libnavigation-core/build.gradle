@@ -1,0 +1,72 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+dokka {
+    outputDirectory = "$buildDir/javadoc"
+    outputFormat = 'javadoc'
+    configuration {
+        moduleName = 'libnavigation-core'
+        reportUndocumented = true
+    }
+}
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+    buildToolsVersion androidVersions.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro",
+                // following consumer's rules cannot be included via modules directly because
+                // they're used as `runtimeOnly` and aren't compiled along with `core` module
+                "${rootDir}/libdirections-hybrid/proguard-project.pro",
+                "${rootDir}/libdirections-onboard/proguard-project.pro",
+                "${rootDir}/libdirections-offboard/proguard-project.pro",
+                "${rootDir}/libtrip-notification/proguard-project.pro"
+
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    implementation dependenciesList.mapboxAnnotations
+    api dependenciesList.mapboxCommon
+
+    api project(':libnavigation-base')
+    implementation project(':libnavigation-util')
+    implementation project(':libnavigator')
+    runtimeOnly project(':libdirections-hybrid')
+    runtimeOnly project(':libtrip-notification')
+    implementation project(':libnavigation-metrics')
+    implementation dependenciesList.mapboxAndroidAccounts
+    implementation dependenciesList.mapboxSdkTurf
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.coroutinesAndroid
+
+    testImplementation project(':libtesting-utils')
+    apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+    testImplementation dependenciesList.commonsIO
+
+    testImplementation project(':libdirections-hybrid')
+    testImplementation project(':libtrip-notification')
+}
+
+apply from: "${rootDir}/gradle/jacoco.gradle"
+apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/download-schema.gradle"
