@@ -1,0 +1,248 @@
+package com.mapbox.navigation.examples.core
+
+import android.content.Context
+import android.os.Bundle
+import android.os.Environment
+import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
+import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
+import com.mapbox.navigation.base.extensions.applyDefaultParams
+import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.route.hybrid.MapboxHybridRouter
+import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
+import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
+import com.mapbox.navigation.ui.route.NavigationMapRoute
+import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.network.NetworkStatusService
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfMeasurement
+import java.io.File
+import kotlinx.android.synthetic.main.activity_mock_navigation.mapView
+import kotlinx.android.synthetic.main.activity_mock_navigation.newLocationFab
+import timber.log.Timber
+
+abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
+    MapboxMap.OnMapClickListener {
+
+    private val router: Router by lazy { setupRouter() }
+    private var route: DirectionsRoute? = null
+    private var origin: Point? = null
+    private var destination: Point? = null
+    private var waypoint: Point? = null
+    private var mapboxMap: MapboxMap? = null
+    private var navigationMapRoute: NavigationMapRoute? = null
+    private var symbolManager: SymbolManager? = null
+
+    abstract fun setupRouter(): Router
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_mock_navigation)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+        newLocationFab?.setOnClickListener { newOrigin() }
+    }
+
+    private fun newOrigin() {
+        clearMap()
+        val latLng = Utils.getRandomLatLng(doubleArrayOf(-77.1825, 38.7825, -76.9790, 39.0157))
+        origin = Point.fromLngLat(latLng.longitude, latLng.latitude)
+        mapboxMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
+    }
+
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        this.mapboxMap = mapboxMap
+        mapboxMap.addOnMapClickListener(this)
+        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+            style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
+            navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
+            symbolManager = SymbolManager(mapView, mapboxMap, style)
+            Snackbar.make(
+                findViewById(R.id.container),
+                "Tap map to place waypoint",
+                Snackbar.LENGTH_LONG
+            ).show()
+            newOrigin()
+        }
+    }
+
+    private fun clearMap() {
+        symbolManager?.deleteAll()
+        route = null
+        destination = null
+        waypoint = null
+        navigationMapRoute?.run {
+            updateRouteVisibilityTo(false)
+            updateRouteArrowVisibilityTo(false)
+        }
+    }
+
+    private fun findRoute() {
+        ifNonNull(origin, destination) { origin, destination ->
+            router.cancel()
+
+            if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
+
+                val optionsBuilder =
+                    RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(this))
+                        .coordinates(origin, listOf(waypoint), destination)
+                        .annotations(
+                            "${DirectionsCriteria.ANNOTATION_CONGESTION},${DirectionsCriteria.ANNOTATION_DISTANCE},${DirectionsCriteria.ANNOTATION_DURATION}"
+                        )
+
+                router.getRoute(optionsBuilder.build(), object : Router.Callback {
+                    override fun onResponse(routes: List<DirectionsRoute>) {
+                        if (routes.isNotEmpty()) {
+                            navigationMapRoute?.addRoute(routes[0])
+                        }
+                    }
+
+                    override fun onFailure(throwable: Throwable) {
+                        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
+                    }
+
+                    override fun onCanceled() {
+                        Timber.e("onRoutesRequestCanceled")
+                    }
+                })
+            }
+        }
+    }
+
+    override fun onMapClick(point: LatLng): Boolean {
+        when {
+            destination == null -> {
+                destination = Point.fromLngLat(point.longitude, point.latitude).also {
+                    addMarker(it)
+                }
+                findRoute()
+            }
+            waypoint == null -> {
+                waypoint = Point.fromLngLat(point.longitude, point.latitude).also {
+                    addMarker(it)
+                }
+                findRoute()
+            }
+            else -> {
+                Toast.makeText(
+                        this,
+                        "Only 2 waypoints supported for this example",
+                        Toast.LENGTH_LONG
+                    )
+                    .show()
+                clearMap()
+            }
+        }
+        return false
+    }
+
+    private fun addMarker(point: Point) {
+        symbolManager?.create(
+            SymbolOptions()
+                .withIconImage(MARKER_ROUTE)
+                .withGeometry(point)
+        )
+    }
+
+    /*
+     * Activity lifecycle methods
+     */
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        router.cancel()
+        mapboxMap?.removeOnMapClickListener(this)
+        mapView.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
+    }
+
+    private fun Style.addImage(imageName: String, @DrawableRes drawableRes: Int) {
+        ContextCompat.getDrawable(this@BaseRouterActivityKt, drawableRes)?.let {
+            addImage(imageName, it)
+        }
+    }
+
+    companion object {
+        private const val MARKER_ROUTE = "marker.route"
+
+        fun setupOffboardRouter(context: Context): Router {
+            return MapboxOffboardRouter(
+                Utils.getMapboxAccessToken(context),
+                context,
+                MapboxNavigationAccounts.getInstance(context)
+            )
+        }
+
+        fun setupOnboardRouter(): Router {
+            val file = File(
+                Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
+                "2019_04_13-00_00_11"
+            )
+            val fileTiles = File(file, "tiles")
+            val config = MapboxOnboardRouterConfig(
+                fileTiles.absolutePath,
+                null,
+                null,
+                null,
+                null // working with pre-fetched tiles only
+            )
+            return MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
+        }
+
+        fun setupHybridRouter(context: Context): Router {
+            return MapboxHybridRouter(
+                setupOnboardRouter(),
+                setupOffboardRouter(context),
+                NetworkStatusService(context)
+            )
+        }
+    }
+}

@@ -87,6 +87,7 @@ dependencies {
     implementation project(':libnavigation-metrics')
     implementation project(':libdirections-offboard')
     implementation project(':libdirections-onboard')
+    implementation project(':libdirections-hybrid')
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')

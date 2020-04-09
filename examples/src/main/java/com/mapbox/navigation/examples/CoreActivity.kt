@@ -10,6 +10,8 @@ import com.mapbox.navigation.examples.core.BasicNavigationActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
+import com.mapbox.navigation.examples.core.HybridRouterActivityJava
+import com.mapbox.navigation.examples.core.HybridRouterActivityKt
 import com.mapbox.navigation.examples.core.InstructionViewActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
@@ -70,6 +72,16 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_onboard_router_kotlin),
                 getString(R.string.description_onboard_router_kotlin),
                 OnboardRouterActivityKt::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_hybrid_router_java),
+                getString(R.string.description_hybrid_router_java),
+                HybridRouterActivityJava::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_hybrid_router_kotlin),
+                getString(R.string.description_hybrid_router_kotlin),
+                HybridRouterActivityKt::class.java
             ),
             SampleItem(
                 getString(R.string.title_trip_service_kotlin),
