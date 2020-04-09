@@ -235,6 +235,9 @@ class MapRouteLine {
   }
 
   void draw(DirectionsRoute directionsRoute) {
+    if (directionsRoute == null) {
+      return;
+    }
     List<DirectionsRoute> route = new ArrayList<>();
     route.add(directionsRoute);
     draw(route);

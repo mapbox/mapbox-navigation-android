@@ -304,13 +304,17 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapboxMap.drawRoutes(routes)
-            if (routes.isEmpty()) {
-                Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
-                    initDynamicCamera(routes[0])
+            when (routes.isNotEmpty()) {
+                true -> {
+                    navigationMapboxMap.drawRoutes(routes)
+                    if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+                        initDynamicCamera(routes[0])
+                    }
+                }
+                false -> {
+                    navigationMapboxMap.removeRoute()
+                    Toast.makeText(this@SimpleMapboxNavigationKt, "Empty routes", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
             Timber.d("route changed %s", routes.toString())

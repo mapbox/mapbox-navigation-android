@@ -99,19 +99,22 @@ class MapRouteArrow {
     Context context = mapView.getContext();
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
     arrowColor = typedArray.getColor(R.styleable.NavigationMapRoute_upcomingManeuverArrowColor,
-            ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_color));
+        ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_color));
     arrowBorderColor = typedArray.getColor(R.styleable.NavigationMapRoute_upcomingManeuverArrowBorderColor,
-            ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_border_color));
+        ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_border_color));
     typedArray.recycle();
 
     initialize(aboveLayer);
   }
 
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
+    if (routeProgress.route() == null) {
+      return;
+    }
     boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
-            || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
+        || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
     boolean invalidCurrentStepPoints =
-      routeProgress.currentLegProgress().currentStepProgress().stepPoints().size() < TWO_POINTS;
+        routeProgress.currentLegProgress().currentStepProgress().stepPoints().size() < TWO_POINTS;
     if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
       updateVisibilityTo(false);
       return;
@@ -139,17 +142,20 @@ class MapRouteArrow {
   }
 
   private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {
+    if (routeProgress.route() == null) {
+      return null;
+    }
     List<Point> reversedCurrent =
-      new ArrayList<>(routeProgress.currentLegProgress().currentStepProgress().stepPoints());
+        new ArrayList<>(routeProgress.currentLegProgress().currentStepProgress().stepPoints());
     Collections.reverse(reversedCurrent);
 
     LineString arrowLineCurrent = LineString.fromLngLats(reversedCurrent);
     LineString arrowLineUpcoming = LineString.fromLngLats(routeProgress.upcomingStepPoints());
 
     LineString arrowCurrentSliced =
-      TurfMisc.lineSliceAlong(arrowLineCurrent, 0, THIRTY, TurfConstants.UNIT_METERS);
+        TurfMisc.lineSliceAlong(arrowLineCurrent, 0, THIRTY, TurfConstants.UNIT_METERS);
     LineString arrowUpcomingSliced =
-      TurfMisc.lineSliceAlong(arrowLineUpcoming, 0, THIRTY, TurfConstants.UNIT_METERS);
+        TurfMisc.lineSliceAlong(arrowLineUpcoming, 0, THIRTY, TurfConstants.UNIT_METERS);
 
     Collections.reverse(arrowCurrentSliced.coordinates());
 
@@ -195,18 +201,18 @@ class MapRouteArrow {
 
   private void initializeArrowShaft() {
     arrowShaftGeoJsonSource = new GeoJsonSource(
-            ARROW_SHAFT_SOURCE_ID,
-            FeatureCollection.fromFeatures(new Feature[]{}),
-            new GeoJsonOptions().withMaxZoom(16)
+        ARROW_SHAFT_SOURCE_ID,
+        FeatureCollection.fromFeatures(new Feature[] {}),
+        new GeoJsonOptions().withMaxZoom(16)
     );
     mapboxMap.getStyle().addSource(arrowShaftGeoJsonSource);
   }
 
   private void initializeArrowHead() {
     arrowHeadGeoJsonSource = new GeoJsonSource(
-            ARROW_HEAD_SOURCE_ID,
-            FeatureCollection.fromFeatures(new Feature[]{}),
-            new GeoJsonOptions().withMaxZoom(16)
+        ARROW_HEAD_SOURCE_ID,
+        FeatureCollection.fromFeatures(new Feature[] {}),
+        new GeoJsonOptions().withMaxZoom(16)
     );
     mapboxMap.getStyle().addSource(arrowHeadGeoJsonSource);
   }
@@ -241,23 +247,23 @@ class MapRouteArrow {
       mapboxMap.getStyle().removeLayer(shaftLayer);
     }
     return new LineLayer(ARROW_SHAFT_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
-            PropertyFactory.lineColor(color(arrowColor)),
-            PropertyFactory.lineWidth(
-                    interpolate(linear(), zoom(),
-                            stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_SCALE),
-                            stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_SCALE)
-                    )
-            ),
-            PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-            PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-            PropertyFactory.visibility(NONE),
-            PropertyFactory.lineOpacity(
-                    step(zoom(), OPAQUE,
-                            stop(
-                                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-                            )
-                    )
+        PropertyFactory.lineColor(color(arrowColor)),
+        PropertyFactory.lineWidth(
+            interpolate(linear(), zoom(),
+                stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_SCALE),
+                stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_SCALE)
             )
+        ),
+        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+        PropertyFactory.visibility(NONE),
+        PropertyFactory.lineOpacity(
+            step(zoom(), OPAQUE,
+                stop(
+                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
+                )
+            )
+        )
     );
   }
 
@@ -267,23 +273,23 @@ class MapRouteArrow {
       mapboxMap.getStyle().removeLayer(shaftCasingLayer);
     }
     return new LineLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
-            PropertyFactory.lineColor(color(arrowBorderColor)),
-            PropertyFactory.lineWidth(
-                    interpolate(linear(), zoom(),
-                            stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_CASING_SCALE),
-                            stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
-                    )
-            ),
-            PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-            PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-            PropertyFactory.visibility(NONE),
-            PropertyFactory.lineOpacity(
-                    step(zoom(), OPAQUE,
-                            stop(
-                                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-                            )
-                    )
+        PropertyFactory.lineColor(color(arrowBorderColor)),
+        PropertyFactory.lineWidth(
+            interpolate(linear(), zoom(),
+                stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_CASING_SCALE),
+                stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
             )
+        ),
+        PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+        PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+        PropertyFactory.visibility(NONE),
+        PropertyFactory.lineOpacity(
+            step(zoom(), OPAQUE,
+                stop(
+                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
+                )
+            )
+        )
     );
   }
 
@@ -293,27 +299,27 @@ class MapRouteArrow {
       mapboxMap.getStyle().removeLayer(headLayer);
     }
     return new SymbolLayer(ARROW_HEAD_LAYER_ID, ARROW_HEAD_SOURCE_ID)
-            .withProperties(
-                    PropertyFactory.iconImage(ARROW_HEAD_ICON),
-                    iconAllowOverlap(true),
-                    iconIgnorePlacement(true),
-                    PropertyFactory.iconSize(interpolate(linear(), zoom(),
-                            stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_SCALE),
-                            stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_SCALE)
-                            )
-                    ),
-                    PropertyFactory.iconOffset(ARROW_HEAD_OFFSET),
-                    PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
-                    PropertyFactory.iconRotate(get(ARROW_BEARING)),
-                    PropertyFactory.visibility(NONE),
-                    PropertyFactory.iconOpacity(
-                            step(zoom(), OPAQUE,
-                                    stop(
-                                            ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-                                    )
-                            )
+        .withProperties(
+            PropertyFactory.iconImage(ARROW_HEAD_ICON),
+            iconAllowOverlap(true),
+            iconIgnorePlacement(true),
+            PropertyFactory.iconSize(interpolate(linear(), zoom(),
+                stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_SCALE),
+                stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_SCALE)
+                )
+            ),
+            PropertyFactory.iconOffset(ARROW_HEAD_OFFSET),
+            PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
+            PropertyFactory.iconRotate(get(ARROW_BEARING)),
+            PropertyFactory.visibility(NONE),
+            PropertyFactory.iconOpacity(
+                step(zoom(), OPAQUE,
+                    stop(
+                        ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
                     )
-            );
+                )
+            )
+        );
   }
 
   private SymbolLayer createArrowHeadCasingLayer() {
@@ -322,30 +328,30 @@ class MapRouteArrow {
       mapboxMap.getStyle().removeLayer(headCasingLayer);
     }
     return new SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID).withProperties(
-            PropertyFactory.iconImage(ARROW_HEAD_ICON_CASING),
-            iconAllowOverlap(true),
-            iconIgnorePlacement(true),
-            PropertyFactory.iconSize(interpolate(
-                    linear(), zoom(),
-                    stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_CASING_SCALE),
-                    stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
-            )),
-            PropertyFactory.iconOffset(ARROW_HEAD_CASING_OFFSET),
-            PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
-            PropertyFactory.iconRotate(get(ARROW_BEARING)),
-            PropertyFactory.visibility(NONE),
-            PropertyFactory.iconOpacity(
-                    step(zoom(), OPAQUE,
-                            stop(
-                                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-                            )
-                    )
+        PropertyFactory.iconImage(ARROW_HEAD_ICON_CASING),
+        iconAllowOverlap(true),
+        iconIgnorePlacement(true),
+        PropertyFactory.iconSize(interpolate(
+            linear(), zoom(),
+            stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_CASING_SCALE),
+            stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
+        )),
+        PropertyFactory.iconOffset(ARROW_HEAD_CASING_OFFSET),
+        PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
+        PropertyFactory.iconRotate(get(ARROW_BEARING)),
+        PropertyFactory.visibility(NONE),
+        PropertyFactory.iconOpacity(
+            step(zoom(), OPAQUE,
+                stop(
+                    ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
+                )
             )
+        )
     );
   }
 
   private void createArrowLayerList(LineLayer shaftLayer, LineLayer shaftCasingLayer, SymbolLayer headLayer,
-                                    SymbolLayer headCasingLayer) {
+      SymbolLayer headCasingLayer) {
     arrowLayerIds = new ArrayList<>();
     arrowLayerIds.add(shaftCasingLayer.getId());
     arrowLayerIds.add(shaftLayer.getId());
