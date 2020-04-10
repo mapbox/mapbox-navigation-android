@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.telemetry
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
-interface MapboxNavigationTelemetryInterface {
+internal interface MapboxNavigationTelemetryInterface {
     fun postUserFeedback(
         @FeedbackEvent.FeedbackType feedbackType: String,
         description: String,

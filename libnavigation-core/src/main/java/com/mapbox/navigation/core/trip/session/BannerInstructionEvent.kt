@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.extensions.ifNonNull
 
-class BannerInstructionEvent {
+internal class BannerInstructionEvent {
 
     var bannerInstructions: BannerInstructions? = null
         private set

@@ -11,6 +11,9 @@ import java.util.Date
 
 private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 
+/**
+ * Location Engine for replaying route history.
+ */
 class ReplayHistoryLocationEngine(
     replayHistoryPlayer: ReplayHistoryPlayer
 ) : LocationEngine {
@@ -21,6 +24,9 @@ class ReplayHistoryLocationEngine(
     private val myId: Int
 
     companion object {
+        /**
+         * Counter of created instances
+         */
         var instances = 0
             get() { return field++ }
     }
@@ -32,14 +38,28 @@ class ReplayHistoryLocationEngine(
         }
     }
 
+    /**
+     * Requests location updates with a callback on the specified Looper thread.
+     */
     override fun requestLocationUpdates(request: LocationEngineRequest, callback: EngineCallback, looper: Looper?) {
         registeredCallbacks.add(callback)
     }
 
+    /**
+     * Removes location updates for the given location engine callback.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     */
     override fun removeLocationUpdates(callback: EngineCallback) {
         registeredCallbacks.remove(callback)
     }
 
+    /**
+     * Returns the most recent location currently available.
+     *
+     * If a location is not available, which should happen very rarely, null will be returned.
+     */
     override fun getLastLocation(callback: EngineCallback) {
         if (lastLocationEngineResult != null) {
             callback.onSuccess(lastLocationEngineResult)
@@ -48,10 +68,19 @@ class ReplayHistoryLocationEngine(
         }
     }
 
+    /**
+     * Requests location updates with callback on the specified PendingIntent.
+     */
     override fun requestLocationUpdates(request: LocationEngineRequest, pendingIntent: PendingIntent?) {
         throw UnsupportedOperationException("$myId requestLocationUpdates with intents is unsupported")
     }
 
+    /**
+     * Removes location updates for the given pending intent.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     */
     override fun removeLocationUpdates(pendingIntent: PendingIntent?) {
         throw UnsupportedOperationException("$myId removeLocationUpdates with intents is unsupported")
     }

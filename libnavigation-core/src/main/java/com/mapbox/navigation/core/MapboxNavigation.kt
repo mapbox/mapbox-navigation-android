@@ -440,10 +440,18 @@ constructor(
         tripSession.unregisterStateObserver(tripSessionStateObserver)
     }
 
+    /**
+     * Start observing faster routes for a trip session via [FasterRouteObserver]
+     *
+     * @param fasterRouteObserver FasterRouteObserver
+     */
     fun attachFasterRouteObserver(fasterRouteObserver: FasterRouteObserver) {
         fasterRouteController.attach(fasterRouteObserver)
     }
 
+    /**
+     * Stop observing the possibility of faster routes.
+     */
     fun detachFasterRouteObserver() {
         fasterRouteController.stop()
     }
@@ -570,6 +578,14 @@ constructor(
 
     companion object {
 
+        /**
+         * Send user feedback about an issue or problem with the Navigation SDK
+         *
+         * @param feedbackType one of [FeedbackEvent.FeedbackType]
+         * @param description description message
+         * @param feedbackSource one of [FeedbackEvent.FeedbackSource]
+         * @param screenshot encoded screenshot (optional)
+         */
         @JvmStatic
         fun postUserFeedback(
             @FeedbackEvent.FeedbackType feedbackType: String,

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.trip.service
 
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -13,6 +14,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 // todo make internal
+/**
+ * Default [TripService] implementation
+ *
+ * @param tripNotification provide contract to communicate with notification
+ * @param initializeLambda called when [TripService] has started
+ * @param terminateLambda called when [TripService] has stopped
+ */
 class MapboxTripService(
     private val tripNotification: TripNotification,
     private val initializeLambda: () -> Unit,
@@ -44,6 +52,12 @@ class MapboxTripService(
             applicationContext.stopService(intent)
         })
 
+    /**
+     * Create [MapboxTripService] with Mapbox's [Service]
+     *
+     * @param applicationContext Context
+     * @param tripNotification provide contract to communicate with notification
+     */
     constructor(applicationContext: Context, tripNotification: TripNotification) :
         this(
             applicationContext,
@@ -62,6 +76,9 @@ class MapboxTripService(
         )
     }
 
+    /**
+     * Start MapboxTripService
+     */
     override fun startService() {
         when (serviceStarted.compareAndSet(false, true)) {
             true -> {
@@ -82,6 +99,9 @@ class MapboxTripService(
         }
     }
 
+    /**
+     * Stop MapboxTripSerice
+     */
     override fun stopService() {
         when (serviceStarted.compareAndSet(true, false)) {
             true -> {
@@ -95,9 +115,15 @@ class MapboxTripService(
         }
     }
 
+    /**
+     * Update the trip's information in the notification bar
+     */
     override fun updateNotification(routeProgress: RouteProgress) {
         tripNotification.updateNotification(routeProgress)
     }
 
+    /**
+     * Return *true* if service is started
+     */
     override fun hasServiceStarted() = serviceStarted.get()
 }

@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.utils.extensions.ifNonNull
 
-class VoiceInstructionEvent {
+internal class VoiceInstructionEvent {
 
     var voiceInstructions: VoiceInstructions = VoiceInstructions.builder().build()
         private set
