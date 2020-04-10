@@ -87,6 +87,22 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity
+            android:name=".core.HybridRouterActivityKt"
+            android:label="@string/title_hybrid_router_kotlin">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
+        <activity
+            android:name=".core.HybridRouterActivityJava"
+            android:label="@string/title_hybrid_router_java">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
         <activity android:name=".core.TripServiceActivityKt"
             android:label="@string/title_trip_service_kotlin"
             android:screenOrientation="portrait">
