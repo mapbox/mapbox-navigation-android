@@ -14,7 +14,6 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 
 fun <T> CoroutineScope.monitorChannelWithException(
     channel: ReceiveChannel<T>,
@@ -26,11 +25,7 @@ fun <T> CoroutineScope.monitorChannelWithException(
     return launch {
         while (isActive && isChannelValid) {
             try {
-                select<Unit> {
-                    channel.onReceive { channelData ->
-                        predicate(channelData)
-                    }
-                }
+                predicate(channel.receive())
             } catch (e: Exception) {
                 e.ifChannelException {
                     isChannelValid = false
