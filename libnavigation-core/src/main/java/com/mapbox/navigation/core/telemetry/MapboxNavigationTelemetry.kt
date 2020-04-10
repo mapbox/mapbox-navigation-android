@@ -137,13 +137,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * This class holds all mutable state of the Telemetry object
      */
-    private val dynamicValues = DynamicallyUpdatedRouteValues(
-        AtomicLong(0),
-        AtomicInteger(0),
-        AtomicInteger(0),
-        AtomicBoolean(false),
-        AtomicLong(0)
-    )
+    private val dynamicValues = DynamicallyUpdatedRouteValues()
 
     private var locationEngineNameExternal: String = LocationEngine::javaClass.name
 
