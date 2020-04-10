@@ -1,15 +1,15 @@
-package com.mapbox.navigation.examples.core
+package com.mapbox.navigation.examples.ui
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.location.Location
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+import androidx.appcompat.widget.AppCompatImageButton
+import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -36,7 +37,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
-import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Companion.FEEDBACK_SOURCE_UI
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -44,6 +45,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.core.InstructionViewActivity
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
@@ -56,6 +58,8 @@ import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.instruction.NavigationAlertView
 import com.mapbox.navigation.ui.legacy.NavigationConstants
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import com.mapbox.navigation.ui.map.OnWayNameChangedListener
+import com.mapbox.navigation.ui.summary.SummaryBottomSheet
 import com.mapbox.navigation.ui.utils.ViewUtils
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
@@ -63,34 +67,37 @@ import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
-import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
+import kotlinx.android.synthetic.main.activity_custom_ui_component_style.*
 import okhttp3.Cache
 import timber.log.Timber
 
 /**
  * To ensure proper functioning of this example make sure your Location is turned on.
  */
-class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
-    FeedbackBottomSheetListener {
-
+class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
+    FeedbackBottomSheetListener, OnWayNameChangedListener {
     private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }
+    private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var locationEngine: LocationEngine
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var speechPlayer: NavigationSpeechPlayer
     private lateinit var destination: LatLng
+    private lateinit var summaryBehavior: BottomSheetBehavior<SummaryBottomSheet>
+    private lateinit var routeOverviewButton: ImageButton
+    private lateinit var cancelBtn: AppCompatImageButton
+    private lateinit var feedbackButton: NavigationButton
+    private lateinit var instructionSoundButton: NavigationButton
+    private lateinit var alertView: NavigationAlertView
 
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
-    private var feedbackButton: NavigationButton? = null
-    private var instructionSoundButton: NavigationButton? = null
-    private var alertView: NavigationAlertView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.d("onCreate savedInstanceState=%s", savedInstanceState)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_instruction_view_layout)
+        setContentView(R.layout.activity_custom_ui_component_style)
         initViews()
 
         mapView.onCreate(savedInstanceState)
@@ -98,7 +105,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
         locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         initNavigation()
-        initListeners()
         initializeSpeechPlayer()
     }
 
@@ -178,16 +184,18 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@InstructionViewActivity, style)
-                        .build()
+                    LocationComponentActivationOptions.builder(
+                        this@CustomUIComponentStyleActivity, style
+                    ).build()
                 )
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.addProgressChangeListener(mapboxNavigation)
-                it.setCamera(DynamicCamera(mapboxMap))
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).apply {
+                addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
+                addProgressChangeListener(mapboxNavigation)
+                setCamera(DynamicCamera(mapboxMap))
             }
         }
     }
@@ -196,11 +204,11 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
             mapboxMap?.snapshot { snapshot ->
-                alertView?.showFeedbackSubmitted()
+                alertView.showFeedbackSubmitted()
                 MapboxNavigation.postUserFeedback(
                     feedback.feedbackType,
                     feedback.description,
-                    FEEDBACK_SOURCE_UI,
+                    FeedbackEvent.FEEDBACK_SOURCE_UI,
                     encodeSnapshot(snapshot)
                 )
             }
@@ -211,47 +219,128 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         // do nothing
     }
 
-    private fun initNavigation() {
-        val accessToken = Utils.getMapboxAccessToken(this)
-        mapboxNavigation = if (Utils.shouldSimulateRoute(applicationContext)) {
-            Timber.d("initNavigation simulate route")
-            MapboxNavigation(
-                applicationContext,
-                accessToken,
-                MapboxNavigation.defaultNavigationOptions(this, accessToken),
-                replayRouteLocationEngine
-            )
+    override fun onWayNameChanged(wayName: String) {
+        if (summaryBottomSheet.visibility == View.VISIBLE) {
+            wayNameView.updateWayNameText(wayName)
+            showWayNameView()
         } else {
-            Timber.d("initNavigation location engine")
-            MapboxNavigation(
-                applicationContext,
-                accessToken,
-                MapboxNavigation.defaultNavigationOptions(this, accessToken)
-            )
+            hideWayNameView()
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun initListeners() {
-        startNavigation.setOnClickListener {
-            Timber.d("start navigation")
-            if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                if (Utils.shouldSimulateRoute(applicationContext)) {
+    private fun initViews() {
+        startNavigation.apply {
+            visibility = View.VISIBLE
+            isEnabled = false
+            setOnClickListener {
+                Timber.d("start navigation")
+                if (mapboxNavigation.getRoutes().isNotEmpty()) {
                     replayRouteLocationEngine.assign(mapboxNavigation.getRoutes()[0])
+
+                    navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
+                    navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                    navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+
+                    mapboxNavigation.startTripSession()
                 }
+            }
+        }
 
-                navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-                navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-                navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+        summaryBottomSheet.visibility = View.GONE
+        summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet).apply {
+            isHideable = false
+            setBottomSheetCallback(bottomSheetCallback)
+        }
 
-                mapboxNavigation.startTripSession()
+        routeOverviewButton = findViewById(R.id.routeOverviewBtn)
+        routeOverviewButton.setOnClickListener {
+            navigationMapboxMap.showRouteOverview(routeOverviewPadding)
+            recenterBtn.show()
+        }
+
+        cancelBtn = findViewById(R.id.cancelBtn)
+        cancelBtn.setOnClickListener {
+            mapboxNavigation.stopTripSession()
+        }
+
+        recenterBtn.apply {
+            hide()
+            addOnClickListener {
+                recenterBtn.hide()
+                navigationMapboxMap.resetPadding()
+                navigationMapboxMap.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            }
+        }
+
+        wayNameView.apply {
+            setVisible(false)
+        }
+
+        feedbackButton = instructionView.retrieveFeedbackButton().apply {
+            hide()
+            addOnClickListener {
+                showFeedbackBottomSheet()
+            }
+        }
+        instructionSoundButton = instructionView.retrieveSoundButton().apply {
+            hide()
+            addOnClickListener {
+                val soundButton = instructionSoundButton
+                if (soundButton is SoundButton) {
+                    speechPlayer.isMuted = soundButton.toggleMute()
+                }
+            }
+        }
+
+        alertView = instructionView.retrieveAlertView().apply {
+            hide()
+        }
+    }
+
+    private fun updateViews(tripSessionState: TripSessionState) {
+        when (tripSessionState) {
+            TripSessionState.STARTED -> {
+                startNavigation.visibility = View.GONE
+
+                summaryBottomSheet.visibility = View.VISIBLE
+                recenterBtn.hide()
+
+                instructionView.visibility = View.VISIBLE
+                feedbackButton.show()
+                instructionSoundButton.show()
+            }
+            TripSessionState.STOPPED -> {
+                startNavigation.visibility = View.VISIBLE
+                startNavigation.isEnabled = false
+
+                summaryBottomSheet.visibility = View.GONE
+                recenterBtn.hide()
+                hideWayNameView()
+
+                instructionView.visibility = View.GONE
+                feedbackButton.hide()
+                instructionSoundButton.hide()
             }
         }
     }
 
+    private fun initNavigation() {
+        val accessToken = Utils.getMapboxAccessToken(this)
+        mapboxNavigation = MapboxNavigation(
+            applicationContext,
+            accessToken,
+            MapboxNavigation.defaultNavigationOptions(this, accessToken),
+            replayRouteLocationEngine
+        )
+    }
+
     private fun initializeSpeechPlayer() {
         val cache =
-            Cache(File(application.cacheDir, VOICE_INSTRUCTION_CACHE), 10 * 1024 * 1024)
+            Cache(
+                File(application.cacheDir, InstructionViewActivity.VOICE_INSTRUCTION_CACHE),
+                10 * 1024 * 1024
+            )
         val voiceInstructionLoader =
             VoiceInstructionLoader(application, Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
@@ -281,64 +370,53 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         supportFragmentManager?.let {
             FeedbackBottomSheet.newInstance(
                 this,
-                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
+                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION,
+                ContextCompat.getColor(applicationContext, R.color.navigation_primary_background),
+                ContextCompat.getColor(applicationContext, R.color.navigation_secondary_background),
+                ContextCompat.getColor(applicationContext, R.color.navigation_primary_text)
             )
                 .show(it, FeedbackBottomSheet.TAG)
         }
     }
 
     private fun encodeSnapshot(snapshot: Bitmap): String {
-        screenshotView.visibility = VISIBLE
+        screenshotView.visibility = View.VISIBLE
         screenshotView.setImageBitmap(snapshot)
         mapView.visibility = View.INVISIBLE
         val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
         screenshotView.visibility = View.INVISIBLE
-        mapView.visibility = VISIBLE
+        mapView.visibility = View.VISIBLE
         return encodedSnapshot
     }
 
-    private fun initViews() {
-        startNavigation.visibility = VISIBLE
-        startNavigation.isEnabled = false
-        instructionView.visibility = GONE
-        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
-        feedbackButton = instructionView.retrieveFeedbackButton().apply {
-            hide()
-            addOnClickListener {
-                showFeedbackBottomSheet()
-            }
-        }
-        instructionSoundButton = instructionView.retrieveSoundButton().apply {
-            hide()
-            addOnClickListener {
-                val soundButton = instructionSoundButton
-                if (soundButton is SoundButton) {
-                    speechPlayer.isMuted = soundButton.toggleMute()
-                }
-            }
-        }
-
-        alertView = instructionView.retrieveAlertView().apply {
-            hide()
-        }
+    private fun showWayNameView() {
+        wayNameView.updateVisibility(!wayNameView.retrieveWayNameText().isNullOrEmpty())
     }
 
-    private fun updateViews(tripSessionState: TripSessionState) {
-        when (tripSessionState) {
-            TripSessionState.STARTED -> {
-                startNavigation.visibility = GONE
-                instructionView.visibility = VISIBLE
-                feedbackButton?.show()
-                instructionSoundButton?.show()
-            }
-            TripSessionState.STOPPED -> {
-                startNavigation.visibility = VISIBLE
-                startNavigation.isEnabled = false
-                instructionView.visibility = GONE
-                feedbackButton?.hide()
-                instructionSoundButton?.hide()
-            }
-        }
+    private fun hideWayNameView() {
+        wayNameView.updateVisibility(false)
+    }
+
+    private fun buildRouteOverviewPadding(): IntArray {
+        val leftRightPadding =
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
+                .toInt()
+        val paddingBuffer =
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
+                .toInt()
+        val instructionHeight =
+            (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
+        val summaryHeight =
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
+                .toInt()
+        return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
+    }
+
+    private fun isLocationTracking(cameraMode: Int): Boolean {
+        return cameraMode == CameraMode.TRACKING ||
+            cameraMode == CameraMode.TRACKING_COMPASS ||
+            cameraMode == CameraMode.TRACKING_GPS ||
+            cameraMode == CameraMode.TRACKING_GPS_NORTH
     }
 
     // Callbacks and Observers
@@ -347,7 +425,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap.drawRoute(routes[0])
-                startNavigation.visibility = VISIBLE
+                startNavigation.visibility = View.VISIBLE
                 startNavigation.isEnabled = true
             } else {
                 startNavigation.isEnabled = false
@@ -363,8 +441,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
     private val locationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
             Timber.d("raw location %s", rawLocation.toString())
@@ -375,6 +451,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             keyPoints: List<Location>
         ) {
             if (keyPoints.isNotEmpty()) {
+                navigationMapboxMap.updateLocation(keyPoints)
                 locationComponent?.forceLocationUpdate(keyPoints, true)
             } else {
                 locationComponent?.forceLocationUpdate(enhancedLocation)
@@ -388,16 +465,26 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
                     stopLocationUpdates()
+
+                    navigationMapboxMap.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap.updateWaynameQueryMap(true)
                     mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
                     mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionObserver)
                     mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
-                    if (::navigationMapboxMap.isInitialized) {
+                    startLocationUpdates()
+
+                    if (mapboxNavigation.getRoutes().isNotEmpty()) {
                         navigationMapboxMap.removeRoute()
                     }
-                    startLocationUpdates()
+
+                    if (::navigationMapboxMap.isInitialized) {
+                        navigationMapboxMap.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                        navigationMapboxMap.updateWaynameQueryMap(false)
+                    }
+
                     mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
                     mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
                     mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
@@ -409,6 +496,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             instructionView.updateDistanceWith(routeProgress)
+            summaryBottomSheet.update(routeProgress)
         }
     }
 
@@ -424,7 +512,38 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private class MyLocationEngineCallback(activity: InstructionViewActivity) :
+    private val cameraTrackingChangedListener = object : OnCameraTrackingChangedListener {
+        override fun onCameraTrackingChanged(currentMode: Int) {
+            if (isLocationTracking(currentMode)) {
+                summaryBehavior.isHideable = false
+                summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                showWayNameView()
+            }
+        }
+
+        override fun onCameraTrackingDismissed() {
+            if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+                summaryBehavior.isHideable = true
+                summaryBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                hideWayNameView()
+            }
+        }
+    }
+
+    private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                recenterBtn.show()
+            }
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+        }
+    }
+
+    private val locationListenerCallback = MyLocationEngineCallback(this)
+
+    private class MyLocationEngineCallback(activity: CustomUIComponentStyleActivity) :
         LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
@@ -439,9 +558,5 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         override fun onFailure(exception: Exception) {
             Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
         }
-    }
-
-    companion object {
-        const val VOICE_INSTRUCTION_CACHE = "voice-instruction-cache"
     }
 }

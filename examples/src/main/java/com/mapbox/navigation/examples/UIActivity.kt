@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionLayerActivityKt
 import com.mapbox.navigation.examples.ui.CustomCameraActivity
 import com.mapbox.navigation.examples.ui.CustomPuckActivity
+import com.mapbox.navigation.examples.ui.CustomUIComponentStyleActivity
 import com.mapbox.navigation.examples.ui.FinalDestinationBuildingFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
@@ -57,9 +58,14 @@ class UIActivity : AppCompatActivity() {
                 CustomPuckActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_custom_camera_example),
-                    getString(R.string.description_custom_camera_example),
-                    CustomCameraActivity::class.java
+                getString(R.string.title_custom_camera_example),
+                getString(R.string.description_custom_camera_example),
+                CustomCameraActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_custom_ui_component_style),
+                getString(R.string.description_custom_ui_component_style),
+                CustomUIComponentStyleActivity::class.java
             )
         )
     }
