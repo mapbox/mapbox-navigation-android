@@ -7,13 +7,22 @@
     <color name="red">#FF0000</color>
     <color name="white">#FFFFFF</color>
 
-    <!-- Instruction View -->
-    <color name="instruction_view_primary_background">@android:color/holo_blue_light</color>
-    <color name="instruction_view_secondary_background">@android:color/holo_blue_bright</color>
-    <color name="instruction_list_view_background">@android:color/holo_blue_dark</color>
-    <color name="instruction_view_primary_text">@android:color/holo_orange_light</color>
-    <color name="instruction_view_secondary_text">@android:color/holo_orange_dark</color>
-    <color name="instruction_maneuver_view_primary">@color/mapbox_navigation_view_color_banner_maneuver_primary</color>
-    <color name="instruction_maneuver_view_secondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary</color>
+    <!-- Custom Navigation View Colors -->
+    <color name="navigation_primary_background">#FEFFFF</color>
+    <color name="navigation_secondary_background">#4164FB</color>
+    <color name="navigation_primary_text">#4164FB</color>
+    <color name="navigation_secondary_text">#000000</color>
+    <color name="navigation_accent">#4164FB</color>
+    <color name="navigation_divider">#263D56</color>
+    <color name="navigation_progress_bar_background">#FEFFFF</color>
+    <color name="navigation_progress_bar">#4164FB</color>
 
+    <color name="navigation_instruction_view_primary_background">#FEFFFF</color>
+    <color name="navigation_instruction_view_secondary_background">#4164FB</color>
+    <color name="navigation_instruction_list_view_background">#FEFFFF</color>
+    <color name="navigation_instruction_view_primary_text">#263D56</color>
+    <color name="navigation_instruction_view_secondary_text">#929EAB</color>
+
+    <color name="navigation_maneuver_view_primary">#4164FB</color>
+    <color name="navigation_maneuver_view_secondary">@android:color/holo_blue_light</color>
 </resources>
