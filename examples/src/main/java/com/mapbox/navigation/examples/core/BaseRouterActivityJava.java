@@ -5,16 +5,22 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.base.common.logger.model.Message;
+import com.mapbox.base.common.logger.model.Tag;
+import com.mapbox.common.logger.LogEntry;
+import com.mapbox.common.logger.LoggerObserver;
+import com.mapbox.common.logger.MapboxLogger;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -24,11 +30,13 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.navigation.base.metrics.MetricsObserver;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts;
 import com.mapbox.navigation.examples.R;
 import com.mapbox.navigation.examples.utils.Utils;
+import com.mapbox.navigation.metrics.MapboxMetricsReporter;
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
 import com.mapbox.navigation.route.hybrid.MapboxHybridRouter;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
@@ -37,24 +45,23 @@ import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.utils.network.NetworkStatusService;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
-
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
+import static com.mapbox.mapboxsdk.log.Logger.DEBUG;
+import static com.mapbox.mapboxsdk.log.Logger.ERROR;
+import static com.mapbox.mapboxsdk.log.Logger.INFO;
+import static com.mapbox.mapboxsdk.log.Logger.VERBOSE;
+import static com.mapbox.mapboxsdk.log.Logger.WARN;
 import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
 import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.coordinates;
+import static com.mapbox.navigation.base.route.internal.RouteUrl.PROFILE_DRIVING_TRAFFIC;
 
 public abstract class BaseRouterActivityJava extends AppCompatActivity
-    implements OnMapReadyCallback,
-    MapboxMap.OnMapClickListener {
+    implements OnMapReadyCallback, MapboxMap.OnMapClickListener, MetricsObserver, LoggerObserver {
 
   public static final String MARKER_ROUTE = "marker.route";
 
@@ -81,18 +88,17 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
     return new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config);
   }
 
-  public static Router setupHybridRouter(Context context) {
+  public static Router setupHybridRouter(Context applicationContext) {
     return new MapboxHybridRouter(
         setupOnboardRouter(),
-        setupOffboardRouter(context),
-        new NetworkStatusService(context)
+        setupOffboardRouter(applicationContext),
+        new NetworkStatusService(applicationContext)
     );
   }
 
   private Router router;
   private MapboxMap mapboxMap;
 
-  private DirectionsRoute route;
   private NavigationMapRoute navigationMapRoute;
   private Point origin;
   private Point destination;
@@ -109,6 +115,10 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mock_navigation);
     ButterKnife.bind(this);
+
+    MapboxLogger.INSTANCE.setLogLevel(VERBOSE);
+    MapboxLogger.INSTANCE.setObserver(this);
+    MapboxMetricsReporter.INSTANCE.setMetricsObserver(this);
 
     router = setupRouter();
 
@@ -134,7 +144,9 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     this.mapboxMap.addOnMapClickListener(this);
+    MapboxLogger.INSTANCE.d(new Message("Map is ready"));
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      MapboxLogger.INSTANCE.d(new Message("Style setting finished"));
       Drawable image = ContextCompat.getDrawable(this, R.drawable.mapbox_marker_icon_default);
       style.addImage(MARKER_ROUTE, image);
       navigationMapRoute = new NavigationMapRoute(mapView, mapboxMap);
@@ -147,7 +159,6 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
 
   private void clearMap() {
     symbolManager.deleteAll();
-    route = null;
     destination = null;
     waypoint = null;
     navigationMapRoute.updateRouteVisibilityTo(false);
@@ -160,6 +171,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       if (TurfMeasurement.distance(origin, destination, TurfConstants.UNIT_METERS) > 50) {
         RouteOptions.Builder optionsBuilder = applyDefaultParams(RouteOptions.builder())
             .accessToken(Utils.getMapboxAccessToken(this))
+            .profile(PROFILE_DRIVING_TRAFFIC)
             .annotations(
                 DirectionsCriteria.ANNOTATION_CONGESTION + ","
                     + DirectionsCriteria.ANNOTATION_DISTANCE
@@ -174,6 +186,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
         router.getRoute(optionsBuilder.build(), new Router.Callback() {
           @Override
           public void onResponse(@NotNull List<? extends DirectionsRoute> routes) {
+            MapboxLogger.INSTANCE.d(new Message("Router.Callback#onResponse"));
             if (!routes.isEmpty()) {
               navigationMapRoute.addRoute(routes.get(0));
             }
@@ -181,12 +194,12 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
 
           @Override
           public void onFailure(@NotNull Throwable throwable) {
-            Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()");
+            MapboxLogger.INSTANCE.e(new Message("Router.Callback#onFailure"), throwable);
           }
 
           @Override
           public void onCanceled() {
-            Timber.e("onRoutesRequestCanceled");
+            MapboxLogger.INSTANCE.d(new Message("Router.Callback#onCanceled"));
           }
         });
       }
@@ -269,5 +282,38 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+  }
+
+  @Override
+  public void onMetricUpdated(@NotNull String metricName, @NotNull String jsonStringData) {
+    MapboxLogger.INSTANCE.d(new Tag("METRICS_LOG"), new Message(metricName));
+    MapboxLogger.INSTANCE.d(new Tag("METRICS_LOG"), new Message(jsonStringData));
+  }
+
+  @Override
+  public void log(int level, @NotNull LogEntry entry) {
+    if (entry.getTag() != null) {
+      Timber.tag(entry.getTag());
+    }
+
+    switch (level) {
+      case VERBOSE:
+        Timber.v(entry.getThrowable(), entry.getMessage());
+        break;
+      case DEBUG:
+        Timber.d(entry.getThrowable(), entry.getMessage());
+        break;
+      case INFO:
+        Timber.i(entry.getThrowable(), entry.getMessage());
+        break;
+      case WARN:
+        Timber.w(entry.getThrowable(), entry.getMessage());
+        break;
+      case ERROR:
+        Timber.e(entry.getThrowable(), entry.getMessage());
+        break;
+      default:
+        break;
+    }
   }
 }

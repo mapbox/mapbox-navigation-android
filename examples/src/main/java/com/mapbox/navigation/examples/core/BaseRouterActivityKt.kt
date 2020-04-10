@@ -11,6 +11,16 @@ import com.google.android.material.snackbar.Snackbar
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.common.logger.DEBUG
+import com.mapbox.common.logger.ERROR
+import com.mapbox.common.logger.INFO
+import com.mapbox.common.logger.LogEntry
+import com.mapbox.common.logger.LoggerObserver
+import com.mapbox.common.logger.MapboxLogger
+import com.mapbox.common.logger.VERBOSE
+import com.mapbox.common.logger.WARN
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -21,11 +31,14 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.base.route.internal.RouteUrl.Companion.PROFILE_DRIVING_TRAFFIC
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.route.hybrid.MapboxHybridRouter
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
@@ -40,11 +53,14 @@ import kotlinx.android.synthetic.main.activity_mock_navigation.mapView
 import kotlinx.android.synthetic.main.activity_mock_navigation.newLocationFab
 import timber.log.Timber
 
-abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
-    MapboxMap.OnMapClickListener {
+abstract class BaseRouterActivityKt :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    MapboxMap.OnMapClickListener,
+    MetricsObserver,
+    LoggerObserver {
 
     private val router: Router by lazy { setupRouter() }
-    private var route: DirectionsRoute? = null
     private var origin: Point? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
@@ -57,6 +73,11 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mock_navigation)
+
+        MapboxLogger.logLevel = VERBOSE
+        MapboxLogger.setObserver(this)
+        MapboxMetricsReporter.setMetricsObserver(this)
+
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
         newLocationFab?.setOnClickListener { newOrigin() }
@@ -72,7 +93,9 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.addOnMapClickListener(this)
+        MapboxLogger.d(Message("Map is ready"))
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+            MapboxLogger.d(Message("Style setting finished"))
             style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             symbolManager = SymbolManager(mapView, mapboxMap, style)
@@ -87,7 +110,6 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
 
     private fun clearMap() {
         symbolManager?.deleteAll()
-        route = null
         destination = null
         waypoint = null
         navigationMapRoute?.run {
@@ -106,23 +128,25 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
                     RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(this))
                         .coordinates(origin, listOf(waypoint), destination)
+                        .profile(PROFILE_DRIVING_TRAFFIC)
                         .annotations(
                             "${DirectionsCriteria.ANNOTATION_CONGESTION},${DirectionsCriteria.ANNOTATION_DISTANCE},${DirectionsCriteria.ANNOTATION_DURATION}"
                         )
 
                 router.getRoute(optionsBuilder.build(), object : Router.Callback {
                     override fun onResponse(routes: List<DirectionsRoute>) {
+                        MapboxLogger.d(Message("Router.Callback#onResponse"))
                         if (routes.isNotEmpty()) {
                             navigationMapRoute?.addRoute(routes[0])
                         }
                     }
 
                     override fun onFailure(throwable: Throwable) {
-                        Timber.e(throwable, "onRoutesRequestFailure: navigation.getRoute()")
+                        MapboxLogger.e(Message("Router.Callback#onFailure"), throwable)
                     }
 
                     override fun onCanceled() {
-                        Timber.e("onRoutesRequestCanceled")
+                        MapboxLogger.d(Message("Router.Callback#onCanceled"))
                     }
                 })
             }
@@ -210,6 +234,26 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    override fun onMetricUpdated(metricName: String, jsonStringData: String) {
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(metricName))
+        MapboxLogger.d(Tag("METRICS_LOG"), Message(jsonStringData))
+    }
+
+    override fun log(level: Int, entry: LogEntry) {
+        if (entry.tag != null) {
+            Timber.tag(entry.tag)
+        }
+        when (level) {
+            VERBOSE -> Timber.v(entry.throwable, entry.message)
+            DEBUG -> Timber.d(entry.throwable, entry.message)
+            INFO -> Timber.i(entry.throwable, entry.message)
+            WARN -> Timber.w(entry.throwable, entry.message)
+            ERROR -> Timber.e(entry.throwable, entry.message)
+            else -> {
+            }
+        }
+    }
+
     companion object {
         private const val MARKER_ROUTE = "marker.route"
 
@@ -237,11 +281,11 @@ abstract class BaseRouterActivityKt : AppCompatActivity(), OnMapReadyCallback,
             return MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
         }
 
-        fun setupHybridRouter(context: Context): Router {
+        fun setupHybridRouter(applicationContext: Context): Router {
             return MapboxHybridRouter(
                 setupOnboardRouter(),
-                setupOffboardRouter(context),
-                NetworkStatusService(context)
+                setupOffboardRouter(applicationContext),
+                NetworkStatusService(applicationContext)
             )
         }
     }
