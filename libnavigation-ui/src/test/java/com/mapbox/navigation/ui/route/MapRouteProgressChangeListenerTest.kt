@@ -108,4 +108,27 @@ class MapRouteProgressChangeListenerTest {
         assertEquals(drawDirections.size, 1)
         assertEquals(drawDirections[0].geometry(), "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB")
     }
+
+    @Test
+    fun `should draw new routes when other values change`() {
+        every { routeLine.retrievePrimaryRouteIndex() } returns 0
+        every { routeLine.retrieveDirectionsRoutes() } returns listOf(
+            mockk {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+                every { distance() } returns 110.0
+            }
+        )
+        val routeProgress: RouteProgress = mockk {
+            every { route() } returns mockk {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+                every { distance() } returns 100.0
+            }
+        }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
+        assertEquals(drawDirections.size, 1)
+        assertEquals(drawDirections[0].distance(), 100.0)
+    }
 }

@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.route
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
@@ -21,16 +22,20 @@ internal class MapRouteProgressChangeListener(
     }
 
     private fun onProgressChange(routeProgress: RouteProgress) {
-        val currentRoute = routeProgress.route()
         val directionsRoutes = routeLine.retrieveDirectionsRoutes()
         val primaryRouteIndex = routeLine.retrievePrimaryRouteIndex()
+        val directionsRoute = directionsRoutes.getOrNull(primaryRouteIndex)
 
-        val currentRouteGeometry = currentRoute?.geometry()
-        val directionsGeometry = directionsRoutes.getOrNull(primaryRouteIndex)?.geometry()
-        val hasGeometry = !(currentRouteGeometry.isNullOrEmpty() || directionsGeometry.isNullOrEmpty())
-        if (hasGeometry && currentRouteGeometry != directionsGeometry) {
+        updateRoute(directionsRoute, routeProgress)
+        routeArrow.addUpcomingManeuverArrow(routeProgress)
+    }
+
+    private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
+        val currentRoute = routeProgress.route()
+        val hasGeometry = !(directionsRoute?.geometry().isNullOrEmpty() ||
+            currentRoute?.geometry().isNullOrEmpty())
+        if (hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute)
         }
-        routeArrow.addUpcomingManeuverArrow(routeProgress)
     }
 }
