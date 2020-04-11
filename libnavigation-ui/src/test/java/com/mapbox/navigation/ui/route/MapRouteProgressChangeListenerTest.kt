@@ -40,7 +40,7 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should not draw route without directions`() {
+    fun `should not draw route without geometry`() {
         val newRoute: DirectionsRoute = mockk {
             every { geometry() } returns null
         }
@@ -56,7 +56,31 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should update maneuver arrow when visible`() {
+    fun `should not draw route without directions route`() {
+        val routeProgress: RouteProgress = mockk {
+            every { route() } returns null
+        }
+
+        progressChangeListener.updateVisibility(true)
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
+        verify(exactly = 0) { routeLine.draw(any<List<DirectionsRoute>>()) }
+    }
+
+    @Test
+    fun `should not update maneuver arrow without directions route`() {
+        val routeProgress: RouteProgress = mockk {
+            every { route() } returns null
+        }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
+    }
+
+    @Test
+    fun `should not add maneuver arrow without geometry`() {
         val newRoute: DirectionsRoute = mockk {
             every { geometry() } returns null
         }
@@ -66,7 +90,7 @@ class MapRouteProgressChangeListenerTest {
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
+        verify(exactly = 0) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
     }
 
     @Test
@@ -86,6 +110,25 @@ class MapRouteProgressChangeListenerTest {
 
         verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
         verify(exactly = 0) { routeLine.draw(any<List<DirectionsRoute>>()) }
+    }
+
+    @Test
+    fun `should only add maneuver arrow with geometry`() {
+        every { routeLine.retrievePrimaryRouteIndex() } returns 0
+        every { routeLine.retrieveDirectionsRoutes() } returns listOf(
+                mockk {
+                    every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+                }
+        )
+        val routeProgress: RouteProgress = mockk {
+            every { route() } returns mockk {
+                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
+            }
+        }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 1) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
     }
 
     @Test
