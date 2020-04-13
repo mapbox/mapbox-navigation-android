@@ -55,7 +55,7 @@ ext {
       multidex                  : '2.0.0',
       json                      : '20180813',
       coroutinesAndroid         : '1.3.5',
-      okhttp                    : '3.12.0',
+      okhttp                    : '3.12.10',
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
       barista                   : '3.2.0',

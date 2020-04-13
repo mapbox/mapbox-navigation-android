@@ -602,6 +602,11 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the OkHttp Logging Interceptor.
+License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Okio.
 License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
