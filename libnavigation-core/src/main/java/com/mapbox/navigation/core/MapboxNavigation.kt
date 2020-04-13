@@ -288,7 +288,7 @@ constructor(
             MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
             ThreadController.cancelAllNonUICoroutines()
             ThreadController.cancelAllUICoroutines()
-            directionsSession.shutDownSession()
+            directionsSession.shutdownSession()
             directionsSession.unregisterAllRoutesObservers()
             tripSession.stop()
             tripSession.unregisterAllLocationObservers()

@@ -10,6 +10,7 @@ import com.mapbox.navigation.utils.network.NetworkStatusService
 import com.mapbox.navigation.utils.thread.ThreadController
 import com.mapbox.navigation.utils.thread.monitorChannelWithException
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.Job
 
 /**
  * MapboxHybridRouter combines onboard and offboard Routers.
@@ -32,6 +33,7 @@ class MapboxHybridRouter(
     private val onboardRouterHandler: RouterHandler by lazy {
         RouterHandler(mainRouter = onboardRouter, reserveRouter = offboardRouter)
     }
+    private val networkStatusJob: Job
 
     /**
      * routeDispatchHandler always references a router, (on-board or off-board).
@@ -45,7 +47,7 @@ class MapboxHybridRouter(
      * on that state we use either the off-board or on-board router.
      */
     init {
-        jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
+        networkStatusJob = jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
             when (networkStatus.isNetworkAvailable) {
                 true -> {
                     routeDispatchHandler.set(offboardRouterHandler)
@@ -147,5 +149,13 @@ class MapboxHybridRouter(
     override fun cancel() {
         onboardRouter.cancel()
         offboardRouter.cancel()
+    }
+
+    /**
+     * Release used resources.
+     */
+    override fun shutdown() {
+        cancel()
+        networkStatusJob.cancel()
     }
 }

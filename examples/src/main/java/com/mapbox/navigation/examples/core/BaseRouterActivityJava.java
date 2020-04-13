@@ -269,7 +269,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   protected void onDestroy() {
     super.onDestroy();
     if (router != null) {
-      router.cancel();
+      router.shutdown();
       router = null;
     }
     if (mapboxMap != null) {
