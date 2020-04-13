@@ -114,6 +114,14 @@ dependencies {
   // Logging
   implementation dependenciesList.timber
 
+  // Network
+  implementation(dependenciesList.okhttp) {
+    force = true
+  }
+  implementation(dependenciesList.okhttpInterceptor) {
+    force = true
+  }
+
   // Butter Knife
   implementation dependenciesList.butterKnife
   annotationProcessor dependenciesList.butterKnifeProcessor

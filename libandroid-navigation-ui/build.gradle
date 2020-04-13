@@ -73,6 +73,14 @@ dependencies {
   // Timber
   implementation dependenciesList.timber
 
+  // Network
+  implementation(dependenciesList.okhttp) {
+    force = true
+  }
+  implementation(dependenciesList.okhttpInterceptor) {
+    force = true
+  }
+
   // Mapbox Map SDK Javadoc
   javadocDeps dependenciesList.mapboxMapSdk
 

@@ -43,6 +43,14 @@ dependencies {
 
     implementation dependenciesList.mapboxSdkServices
 
+    // Network
+    implementation(dependenciesList.okhttp) {
+        force = true
+    }
+    implementation(dependenciesList.okhttpInterceptor) {
+        force = true
+    }
+
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
 

@@ -74,6 +74,14 @@ dependencies {
 
   implementation dependenciesList.timber
 
+  // Network
+  implementation(dependenciesList.okhttp) {
+    force = true
+  }
+  implementation(dependenciesList.okhttpInterceptor) {
+    force = true
+  }
+
   // Unit testing
   testImplementation dependenciesList.junit
   testImplementation dependenciesList.mockito
