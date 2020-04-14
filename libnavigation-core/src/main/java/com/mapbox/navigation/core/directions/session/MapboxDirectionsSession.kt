@@ -99,7 +99,7 @@ class MapboxDirectionsSession(
         routesObservers.clear()
     }
 
-    override fun shutDownSession() {
-        cancel()
+    override fun shutdownSession() {
+        router.shutdown()
     }
 }

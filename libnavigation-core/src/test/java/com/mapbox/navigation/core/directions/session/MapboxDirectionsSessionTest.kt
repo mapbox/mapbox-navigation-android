@@ -101,6 +101,12 @@ class MapboxDirectionsSessionTest {
     }
 
     @Test
+    fun shutDown() {
+        session.shutdownSession()
+        verify { router.shutdown() }
+    }
+
+    @Test
     fun routeSetter_set() {
         session.registerRoutesObserver(observer)
         session.routes = routes

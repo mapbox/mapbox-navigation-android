@@ -38,6 +38,11 @@ interface Router {
     )
 
     /**
+     * Release used resources.
+     */
+    fun shutdown()
+
+    /**
      * Callback for Router fetching
      */
     interface Callback {

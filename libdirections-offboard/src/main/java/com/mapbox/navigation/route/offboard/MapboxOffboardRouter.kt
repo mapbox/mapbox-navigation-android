@@ -91,6 +91,13 @@ class MapboxOffboardRouter(
     }
 
     /**
+     * Release used resources.
+     */
+    override fun shutdown() {
+        cancel()
+    }
+
+    /**
      * Refresh the traffic annotations for a given [DirectionsRoute]
      *
      * @param route DirectionsRoute the direction route to refresh
