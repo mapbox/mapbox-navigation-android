@@ -550,6 +550,11 @@ constructor(
         }
     }
 
+    /**
+     * Sends an event to improve navigation positioning. See SensorEventEmitter to register
+     *
+     * @param sensorEvent the Android sensor event, it will be ignored if it is not recognized
+     */
     fun updateSensorEvent(sensorEvent: SensorEvent) {
         tripSession.updateSensorEvent(sensorEvent)
     }
