@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class ReplayEvents(
     // Assumes chronological order, index 0 moves to events.size over time.
-    val events: List<ReplayEventBase>
+    val events: MutableList<ReplayEventBase>
 )
 
 interface ReplayEventBase {

@@ -56,8 +56,8 @@ class ReplayHistoryLocationEngine(
         throw UnsupportedOperationException("$myId removeLocationUpdates with intents is unsupported")
     }
 
-    private fun replayEvents(replayEvents: ReplayEvents) {
-        replayEvents.events.forEach { event ->
+    private fun replayEvents(replayEvents: List<ReplayEventBase>) {
+        replayEvents.forEach { event ->
             when (event) {
                 is ReplayEventUpdateLocation -> replayLocation(event)
             }

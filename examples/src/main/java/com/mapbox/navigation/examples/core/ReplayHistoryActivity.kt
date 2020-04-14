@@ -81,8 +81,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
             val deferredMapboxWithStyle = async { loadMapWithStyle() }
 
             // Load and replay history on IO dispatchers
-            val deferredReplayHistoryPlayer = async(Dispatchers.IO) { loadReplayHistory() }
-            val replayHistoryPlayer = deferredReplayHistoryPlayer.await()
+            val deferredEvents = async(Dispatchers.IO) { loadReplayHistory() }
+            val replayEvents = deferredEvents.await()
+            val replayHistoryPlayer = ReplayHistoryPlayer()
+                .pushEvents(replayEvents)
             if (!isActive) return@launch
 
             val locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
@@ -115,12 +117,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun loadReplayHistory(): ReplayHistoryPlayer = suspendCoroutine { cont ->
+    private suspend fun loadReplayHistory(): List<ReplayEventBase> = suspendCoroutine { cont ->
         val replayHistoryMapper = ReplayHistoryMapper(Gson(), ReplayCustomEventMapper())
-        val rideHistoryExample = loadHistoryJsonFromAssets(this, "replay-history-activity.json")
+        val rideHistoryExample = loadHistoryJsonFromAssets(this@ReplayHistoryActivity, "replay-history-activity.json")
         val replayEvents = replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayEvents)
-        cont.resume(replayHistoryPlayer)
+        cont.resume(replayEvents)
     }
 
     private fun createMapboxNavigation(locationEngine: LocationEngine): MapboxNavigation {
@@ -151,7 +152,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         }
 
         replayHistoryPlayer.observeReplayEvents {
-            it.events.forEach { event ->
+            it.forEach { event ->
                 when (event) {
                     is ReplayEventInitialRoute -> {
                         event.coordinates.lastOrNull()?.let { latLng ->

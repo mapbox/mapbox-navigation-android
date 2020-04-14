@@ -16,7 +16,6 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -33,14 +32,14 @@ class ReplayHistoryPlayerTest {
             every { currentState } returns Lifecycle.State.STARTED
         }
     }
-    private val mockLambda: (ReplayEvents) -> Unit = mockk(relaxed = true)
+    private val mockLambda: (List<ReplayEventBase>) -> Unit = mockk(relaxed = true)
 
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
-        val replayHistoryData = ReplayEvents(
-            listOf(
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventUpdateLocation(1580777612.89,
                     ReplayEventLocation(
@@ -51,29 +50,28 @@ class ReplayHistoryPlayerTest {
                         altitude = 212.4732666015625,
                         accuracyHorizontal = 4.288000106811523,
                         bearing = 243.31265258789063,
-                        speed = 0.5585000514984131))
-            )
-        )
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+                        speed = 0.5585000514984131)
+                )
+            ))
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        coAdvanceTimeSeconds(5)
+        advanceTimeSeconds(5)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
-        val replayUpdates = mutableListOf<ReplayEvents>()
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { mockLambda(capture(replayUpdates)) }
-        val events = replayUpdates.flatMap { it.events }
-        assertEquals(events.size, 2)
-        assertEquals(events[0].eventTimestamp, 1580777612.853)
-        assertEquals(events[1].eventTimestamp, 1580777612.89)
+        val events = replayUpdates.flatten()
+        assertEquals(2, events.size)
+        assertEquals(1580777612.853, events[0].eventTimestamp)
+        assertEquals(1580777612.89, events[1].eventTimestamp)
     }
 
     @Test
     fun `should play 2 of 3 locations that include time window`() = coroutineRule.runBlockingTest {
-        val replayHistoryData = ReplayEvents(
-            listOf(
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
                 ReplayEventUpdateLocation(1580777820.952,
                     ReplayEventLocation(
                         lat = 49.2450478,
@@ -104,23 +102,21 @@ class ReplayHistoryPlayerTest {
                         altitude = 221.253662109375,
                         accuracyHorizontal = 3.9000000953674318,
                         provider = "fused"))
-            )
-        )
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+            ))
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        coAdvanceTimeSeconds(3)
+        advanceTimeSeconds(3)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
         // Note that it only played 2 of the 3 locations
-        val replayUpdates = mutableListOf<ReplayEvents>()
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { mockLambda(capture(replayUpdates)) }
-        val events = replayUpdates.flatMap { it.events }
-        assertEquals(events.size, 2)
-        assertEquals(events[0].eventTimestamp, 1580777820.952)
-        assertEquals(events[1].eventTimestamp, 1580777822.959)
+        val events = replayUpdates.flatten()
+        assertEquals(2, events.size)
+        assertEquals(1580777820.952, events[0].eventTimestamp)
+        assertEquals(1580777822.959, events[1].eventTimestamp)
     }
 
     @Test
@@ -129,8 +125,8 @@ class ReplayHistoryPlayerTest {
             override val eventTimestamp: Double,
             val customValue: String
         ) : ReplayEventBase
-        val replayHistoryData = ReplayEvents(
-            listOf(
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
                 CustomReplayEvent(1580777612.853, "custom value"),
                 ReplayEventUpdateLocation(1580777613.89,
                     ReplayEventLocation(
@@ -142,30 +138,26 @@ class ReplayHistoryPlayerTest {
                         accuracyHorizontal = null,
                         bearing = null,
                         speed = null))
-            )
-        )
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+            ))
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        coAdvanceTimeSeconds(5)
+        advanceTimeSeconds(5)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
-        val replayUpdates = mutableListOf<ReplayEvents>()
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { mockLambda(capture(replayUpdates)) }
-        val events = replayUpdates.flatMap { it.events }
+        val events = replayUpdates.flatten()
         assertEquals(events.size, 2)
         assertTrue(events[0] is CustomReplayEvent)
-        assertEquals((events[0] as CustomReplayEvent).customValue, "custom value")
-        assertEquals(events[1].eventTimestamp, 1580777613.89)
+        assertEquals("custom value", (events[0] as CustomReplayEvent).customValue)
+        assertEquals(1580777613.89, events[1].eventTimestamp)
     }
 
     @Test(expected = Exception::class)
     fun `should crash if history data is empty`() {
-        val replayHistoryData = ReplayEvents(
-            listOf())
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+        val replayHistoryPlayer = ReplayHistoryPlayer()
 
         replayHistoryPlayer.play(lifecycleOwner)
         replayHistoryPlayer.finish()
@@ -173,8 +165,8 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `playFirstLocation should ignore events before the first location`() {
-        val replayHistoryData = ReplayEvents(
-            listOf(
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventUpdateLocation(1580777612.89,
                     ReplayEventLocation(
@@ -186,35 +178,116 @@ class ReplayHistoryPlayerTest {
                         accuracyHorizontal = 4.288000106811523,
                         bearing = 243.31265258789063,
                         speed = 0.5585000514984131))
-            )
-        )
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+            ))
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         replayHistoryPlayer.playFirstLocation()
 
-        val replayUpdates = mutableListOf<ReplayEvents>()
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         verify { mockLambda(capture(replayUpdates)) }
-        val events = replayUpdates.flatMap { it.events }
-        assertEquals(events.size, 1)
-        assertEquals(events[0].eventTimestamp, 1580777612.89)
+        val events = replayUpdates.flatten()
+        assertEquals(1, events.size)
+        assertEquals(1580777612.89, events[0].eventTimestamp)
     }
 
     @Test
     fun `playFirstLocation should handle history events without locations`() {
-        val replayHistoryData = ReplayEvents(
-            listOf(
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventGetStatus(1580777613.452),
                 ReplayEventGetStatus(1580777614.085)
-            )
-        )
-        val replayHistoryPlayer = ReplayHistoryPlayer(replayHistoryData)
+            ))
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         replayHistoryPlayer.playFirstLocation()
 
         verify { mockLambda(any()) wasNot Called }
+    }
+
+    @Test
+    fun `should seekTo an event`() = coroutineRule.runBlockingTest {
+        val seekToEvent = ReplayEventGetStatus(2.452)
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
+                ReplayEventGetStatus(1.853),
+                seekToEvent,
+                ReplayEventGetStatus(3.085)
+            ))
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+        replayHistoryPlayer.seekTo(seekToEvent)
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        advanceTimeSeconds(5)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
+        coVerify { mockLambda(capture(replayUpdates)) }
+        val events = replayUpdates.flatten()
+        assertEquals(events.size, 2)
+        assertEquals(2.452, events[0].eventTimestamp)
+        assertEquals(3.085, events[1].eventTimestamp)
+    }
+
+    @Test(expected = Exception::class)
+    fun `should crash when seekTo event is missing`() = coroutineRule.runBlockingTest {
+        val seekToEvent = ReplayEventGetStatus(2.452)
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
+                ReplayEventGetStatus(1.853),
+                ReplayEventGetStatus(3.085)
+            ))
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+        replayHistoryPlayer.seekTo(seekToEvent)
+    }
+
+    @Test
+    fun `should seekTo an event time`() = coroutineRule.runBlockingTest {
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
+                ReplayEventGetStatus(0.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(4.0)
+            ))
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+        replayHistoryPlayer.seekTo(1.0)
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        advanceTimeSeconds(5)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
+        coVerify { mockLambda(capture(replayUpdates)) }
+        val events = replayUpdates.flatten()
+        assertEquals(events.size, 2)
+        assertEquals(2.0, events[0].eventTimestamp)
+        assertEquals(4.0, events[1].eventTimestamp)
+    }
+
+    @Test
+    fun `should seekTo a time relative to total time`() = coroutineRule.runBlockingTest {
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
+                ReplayEventGetStatus(1580777611.853),
+                ReplayEventGetStatus(1580777613.452),
+                ReplayEventGetStatus(1580777614.085)
+            ))
+        replayHistoryPlayer.observeReplayEvents(mockLambda)
+        replayHistoryPlayer.seekTo(1.0)
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        advanceTimeSeconds(5)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        val replayUpdates = mutableListOf<List<ReplayEventBase>>()
+        coVerify { mockLambda(capture(replayUpdates)) }
+        val events = replayUpdates.flatten()
+        assertEquals(2, events.size)
+        assertEquals(1580777613.452, events[0].eventTimestamp)
+        assertEquals(1580777614.085, events[1].eventTimestamp)
     }
 
     /**
@@ -232,11 +305,10 @@ class ReplayHistoryPlayerTest {
         unmockkObject(SystemClock.elapsedRealtimeNanos())
     }
 
-    private suspend fun coAdvanceTimeSeconds(seconds: Int) {
+    private fun advanceTimeSeconds(seconds: Int) {
         val advanceSeconds = seconds.toLong()
         deviceElapsedTimeNanos += TimeUnit.SECONDS.toNanos(advanceSeconds)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(advanceSeconds))
-        delay(TimeUnit.SECONDS.toMillis(advanceSeconds))
     }
 }
