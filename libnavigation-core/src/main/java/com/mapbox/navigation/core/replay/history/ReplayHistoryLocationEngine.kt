@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import java.util.Date
 
 private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 
@@ -68,7 +69,7 @@ class ReplayHistoryLocationEngine(
         val location = Location(eventLocation.provider)
         location.longitude = eventLocation.lon
         location.latitude = eventLocation.lat
-        location.time = System.currentTimeMillis()
+        location.time = Date().time
         eventLocation.accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
         eventLocation.bearing?.toFloat()?.let { location.bearing = it }
         eventLocation.altitude?.let { location.altitude = it }

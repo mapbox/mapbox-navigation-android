@@ -57,8 +57,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     // Route following
 
-    override fun updateLocation(rawLocation: Location): Boolean =
-        navigator.updateLocation(rawLocation.toFixLocation(Date()))
+    override suspend fun updateLocation(rawLocation: Location, date: Date): Boolean {
+        mutex.withLock {
+            return navigator.updateLocation(rawLocation.toFixLocation(date))
+        }
+    }
 
     override fun updateSensorEvent(sensorEvent: SensorEvent): Boolean {
         val value = SensorMapper.toNavigatorSensorData(sensorEvent)

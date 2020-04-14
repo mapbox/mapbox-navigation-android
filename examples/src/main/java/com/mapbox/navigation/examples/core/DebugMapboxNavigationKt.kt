@@ -153,6 +153,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         val newOptions =
                 options.toBuilder()
                         .onboardRouterConfig(onboardRouterConfig)
+                        .navigatorPollingDelay(1000L)
                         .build()
 
         mapboxNavigation = getMapboxNavigation(newOptions)

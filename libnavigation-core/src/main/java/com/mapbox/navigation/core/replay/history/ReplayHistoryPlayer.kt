@@ -94,7 +94,7 @@ class ReplayHistoryPlayer(
 
     companion object {
         // The frequency that replay updates will be broad-casted
-        private const val replayUpdateSpeedMillis = 1000L
+        private const val replayUpdateSpeedMillis = 100L
 
         private const val MILLIS_PER_SECOND = 1e+4
         private const val NANOS_PER_SECOND = 1e-9

@@ -34,7 +34,7 @@ interface MapboxNativeNavigator {
      *
      * @return true if the raw location was usable false if not
      */
-    fun updateLocation(rawLocation: Location): Boolean
+    suspend fun updateLocation(rawLocation: Location, date: Date): Boolean
 
     /**
      * Passes in the current sensor data of the user.
