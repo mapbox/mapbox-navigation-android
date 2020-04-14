@@ -27,15 +27,15 @@ internal class MapRouteProgressChangeListener(
         val directionsRoute = directionsRoutes.getOrNull(primaryRouteIndex)
 
         updateRoute(directionsRoute, routeProgress)
-        routeArrow.addUpcomingManeuverArrow(routeProgress)
     }
 
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
         val currentRoute = routeProgress.route()
         val hasGeometry = !(directionsRoute?.geometry().isNullOrEmpty() ||
             currentRoute?.geometry().isNullOrEmpty())
-        if (hasGeometry && currentRoute != directionsRoute) {
+        if (currentRoute != null && hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute)
+            routeArrow.addUpcomingManeuverArrow(routeProgress)
         }
     }
 }
