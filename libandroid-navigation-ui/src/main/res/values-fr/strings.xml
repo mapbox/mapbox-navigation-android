@@ -12,6 +12,9 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Audible</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Donner votre avis</string>
+
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Instructions\nnon précises</string>
 
@@ -26,6 +29,12 @@
 
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Route\nfermée</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_submitted">Votre avis a bien été pris en compte</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="report_problem">Signaler un problème</string>
 
     <!-- Test app dialog text -->
     <string name="dropoff_dialog_text">Voulez vous être guidé vers la prochaine destination? </string>

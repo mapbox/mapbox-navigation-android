@@ -15,6 +15,7 @@
 
     <string name="title_navigation_launcher">Navigáció indító</string>
     <string name="title_end_navigation">Navigáció befejezése</string>
+    <string name="title_embedded_navigation">Beágyazott navigáció</string>
     <string name="settings">Beállítások</string>
     <string name="simulate_route">Útvonal szimulációja</string>
     <string name="language">Nyelv</string>

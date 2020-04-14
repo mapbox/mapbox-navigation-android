@@ -7,6 +7,11 @@
     <string name="meters">m</string>
     <string name="miles">mi</string>
     <string name="feet">ft</string>
+    <!-- Time formatting -->
+    <plurals name="numberOfDays">
+        <item quantity="one">jour</item>
+        <item quantity="other">jours</item>
+    </plurals>
     <!-- Hour -->
     <string name="hr">h</string>
     <!-- Minute -->
