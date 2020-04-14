@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,7 +27,7 @@ public class MapRouteClickListenerTest {
     HashMap<LineString, DirectionsRoute> anyLineStringDirectionsRouteMap =
       buildLineStringDirectionsRouteHashMap(anyRoute, anyRouteGeometry);
     MapRouteLine mockedMapRouteLine = buildMockMapRouteLine(true, anyLineStringDirectionsRouteMap);
-    when(mockedMapRouteLine.updatePrimaryRouteIndex(anyInt())).thenReturn(true);
+    when(mockedMapRouteLine.updatePrimaryRouteIndex(anyRoute)).thenReturn(true);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(anyDirectionsRoutes);
     MapRouteClickListener theMapRouteClickListener = new MapRouteClickListener(mockedMapRouteLine);
     OnRouteSelectionChangeListener mockedOnRouteSelectionChangeListener =

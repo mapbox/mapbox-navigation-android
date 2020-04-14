@@ -2,9 +2,12 @@ package com.mapbox.navigation.ui.route;
 
 class RouteConstants {
   static final String CONGESTION_KEY = "congestion";
-  static final String ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
-  static final String ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
-  static final String ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
+  static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
+  static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
+  static final String PRIMARY_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
+  static final String ALTERNATIVE_ROUTE_SOURCE_ID = "mapbox-navigation-alt-route-source";
+  static final String ALTERNATIVE_ROUTE_LAYER_ID = "mapbox-navigation-alt-route-layer";
+  static final String ALTERNATIVE_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-alt-route-shield-layer";
   static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   static final int TWO_POINTS = 2;

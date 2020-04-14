@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class MapRouteClickListener implements MapboxMap.OnMapClickListener {
 
@@ -33,7 +34,7 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     if (!isRouteVisible()) {
       return false;
     }
-    HashMap<LineString, DirectionsRoute> routeLineStrings = routeLine.retrieveRouteLineStrings();
+    Map<LineString, DirectionsRoute> routeLineStrings = routeLine.retrieveRouteLineStrings();
     if (invalidMapClick(routeLineStrings)) {
       return false;
     }
@@ -50,7 +51,7 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     this.alternativesVisible = alternativesVisible;
   }
 
-  private boolean invalidMapClick(HashMap<LineString, DirectionsRoute> routeLineStrings) {
+  private boolean invalidMapClick(Map<LineString, DirectionsRoute> routeLineStrings) {
     return routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible;
   }
 
@@ -58,10 +59,10 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     return routeLine.retrieveVisibility();
   }
 
-  private void findClickedRoute(@NonNull LatLng point, HashMap<LineString, DirectionsRoute> routeLineStrings,
+  private void findClickedRoute(@NonNull LatLng point, Map<LineString, DirectionsRoute> routeLineStrings,
                                 List<DirectionsRoute> directionsRoutes) {
 
-    HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
+    Map<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
     Point clickPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
 
     calculateClickDistances(routeDistancesAwayFromClick, clickPoint, routeLineStrings);
@@ -70,14 +71,14 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
 
     DirectionsRoute clickedRoute = routeDistancesAwayFromClick.get(distancesAwayFromClick.get(0));
     int newPrimaryRouteIndex = directionsRoutes.indexOf(clickedRoute);
-    if (routeLine.updatePrimaryRouteIndex(newPrimaryRouteIndex) && onRouteSelectionChangeListener != null) {
+    if (routeLine.updatePrimaryRouteIndex(clickedRoute) && onRouteSelectionChangeListener != null) {
       DirectionsRoute selectedRoute = directionsRoutes.get(newPrimaryRouteIndex);
       onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);
     }
   }
 
-  private void calculateClickDistances(HashMap<Double, DirectionsRoute> routeDistancesAwayFromClick,
-                                       Point clickPoint, HashMap<LineString, DirectionsRoute> routeLineStrings) {
+  private void calculateClickDistances(Map<Double, DirectionsRoute> routeDistancesAwayFromClick,
+                                       Point clickPoint, Map<LineString, DirectionsRoute> routeLineStrings) {
     for (LineString lineString : routeLineStrings.keySet()) {
       Point pointOnLine = findPointOnLine(clickPoint, lineString);
       if (pointOnLine == null) {
