@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.sensors
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigator.SensorType
 import io.mockk.every
 import io.mockk.mockk
@@ -27,8 +28,9 @@ class SensorMapperTest {
             23834291518140L,
             floatArrayOf(1.151f, 0.164f, 9.700f)
         )
+        val logger: Logger = mockk()
 
-        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent, logger)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.ACCELEROMETER)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834291518140L)
@@ -46,8 +48,9 @@ class SensorMapperTest {
             23834307804681,
             floatArrayOf(21.968f, -54.005f, -160.413f, 37.604f, -58.706f, -113.839f)
         )
+        val logger: Logger = mockk()
 
-        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent, logger)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.MAGNETOMETER)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834307804681)
@@ -68,8 +71,9 @@ class SensorMapperTest {
             23834956241370,
             floatArrayOf(976.028f)
         )
+        val logger: Logger = mockk()
 
-        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent, logger)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.PRESSURE)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834956241370)

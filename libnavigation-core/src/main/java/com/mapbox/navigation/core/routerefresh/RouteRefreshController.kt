@@ -1,8 +1,9 @@
 package com.mapbox.navigation.core.routerefresh
 
-import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -22,8 +23,10 @@ import kotlinx.coroutines.Job
  */
 internal class RouteRefreshController(
     private val directionsSession: DirectionsSession,
-    private val tripSession: TripSession
+    private val tripSession: TripSession,
+    private val logger: Logger
 ) {
+
     private val routerRefreshTimer = MapboxTimer()
 
     init {
@@ -57,7 +60,7 @@ internal class RouteRefreshController(
     private val routeRefreshCallback = object : RouteRefreshCallback {
 
         override fun onRefresh(directionsRoute: DirectionsRoute) {
-            Log.i("RouteRefresh", "Successful refresh")
+            logger.i(msg = Message("Successful refresh"))
             tripSession.route = directionsRoute
             val directionsSessionRoutes = directionsSession.routes.toMutableList()
             if (directionsSessionRoutes.isNotEmpty()) {
@@ -67,11 +70,10 @@ internal class RouteRefreshController(
         }
 
         override fun onError(error: RouteRefreshError) {
-            if (error.throwable != null) {
-                Log.e("RouteRefresh", error.message, error.throwable)
-            } else {
-                Log.e("RouteRefresh", error.message)
-            }
+            logger.i(
+                msg = Message("Route refresh error"),
+                tr = error.throwable
+            )
         }
     }
 }

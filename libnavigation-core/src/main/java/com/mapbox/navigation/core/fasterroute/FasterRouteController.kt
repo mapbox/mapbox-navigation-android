@@ -2,6 +2,8 @@ package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -11,8 +13,10 @@ import com.mapbox.navigation.utils.timer.MapboxTimer
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
-    private val tripSession: TripSession
+    private val tripSession: TripSession,
+    private val logger: Logger
 ) {
+
     private val fasterRouteTimer = MapboxTimer()
     private val fasterRouteDetector = FasterRouteDetector()
     private var fasterRouteObserver: FasterRouteObserver? = null
@@ -59,13 +63,14 @@ internal class FasterRouteController(
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
+            logger.i(
+                msg = Message("Faster route request failed"),
+                tr = throwable
+            )
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            // do nothing
-            // todo log in the future
+            logger.i(msg = Message("Faster route request canceled"))
         }
     }
 }

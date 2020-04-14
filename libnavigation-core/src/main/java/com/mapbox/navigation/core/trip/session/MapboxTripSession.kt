@@ -4,7 +4,6 @@ import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
 import android.os.SystemClock
-import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -12,6 +11,8 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -42,6 +43,8 @@ import kotlinx.coroutines.withContext
  * @param navigatorPredictionMillis millis for navigation status predictions
  * For more information see [MapboxNativeNavigator.getStatus]. Unit is milliseconds
  * @param navigator Native navigator
+ * @param threadController controller for main/io jobs
+ * @param logger interface for logging any events
  *
  * @property route should be set to start routing
  */
@@ -51,7 +54,8 @@ class MapboxTripSession(
     override val locationEngineRequest: LocationEngineRequest,
     private val navigatorPredictionMillis: Long,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
-    threadController: ThreadController = ThreadController
+    threadController: ThreadController = ThreadController,
+    private val logger: Logger
 ) : TripSession {
 
     companion object {
@@ -332,7 +336,7 @@ class MapboxTripSession(
      * Sensor event consumed by native
      */
     override fun updateSensorEvent(sensorEvent: SensorEvent) {
-        SensorMapper.toSensorData(sensorEvent)?.let { sensorData ->
+        SensorMapper.toSensorData(sensorEvent, logger)?.let { sensorData ->
             navigator.updateSensorData(sensorData)
         }
     }
@@ -358,7 +362,10 @@ class MapboxTripSession(
         }
 
         override fun onFailure(exception: Exception) {
-            Log.d("DEBUG", "location on failure", exception)
+            logger.d(
+                msg = Message("location on failure"),
+                tr = exception
+            )
             stopLocationUpdates()
         }
     }

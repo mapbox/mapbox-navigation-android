@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -92,7 +93,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         )
 
         // If you want to use Mapbox provided Service do this
-        mapboxTripService = MapboxTripService(applicationContext, mapboxTripNotification)
+        mapboxTripService = MapboxTripService(applicationContext, mapboxTripNotification, MapboxLogger)
 
         /*
         // else do this

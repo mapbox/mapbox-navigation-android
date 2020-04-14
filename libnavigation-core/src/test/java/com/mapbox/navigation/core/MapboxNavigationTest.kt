@@ -11,6 +11,7 @@ import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFE
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -70,6 +71,7 @@ class MapboxNavigationTest {
     private val routes: List<DirectionsRoute> = listOf(mockk())
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
@@ -94,6 +96,12 @@ class MapboxNavigationTest {
                 any()
             )
         } returns hybridRouter
+        every {
+            MapboxModuleProvider.createModule<Logger>(
+                MapboxModuleType.CommonLogger,
+                any()
+            )
+        } returns logger
 
         mockkObject(NavigationComponentProvider)
 
@@ -377,7 +385,8 @@ class MapboxNavigationTest {
         every {
             NavigationComponentProvider.createTripService(
                 applicationContext,
-                any()
+                any(),
+                logger
             )
         } returns tripService
     }
@@ -388,7 +397,8 @@ class MapboxNavigationTest {
                 tripService,
                 locationEngine,
                 locationEngineRequest,
-                any()
+                any(),
+                logger
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location

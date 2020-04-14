@@ -221,7 +221,7 @@ interface MapboxNativeNavigator {
      * happen during navigation that are specific to your application.
      *
      * @param eventType the event type in the events log for your custom event
-     * @param eventJson the json to attach to the "properties" key of the event
+     * @param eventJsonProperties the json to attach to the "properties" key of the event
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String)
 

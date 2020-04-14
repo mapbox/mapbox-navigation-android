@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -33,7 +34,8 @@ class FasterRouteControllerTest {
     }
     private val routesRequestCallbacks = slot<RoutesRequestCallback>()
 
-    private val fasterRouteController = FasterRouteController(directionsSession, tripSession)
+    private val logger: Logger = mockk()
+    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, logger)
 
     @Before
     fun setup() {

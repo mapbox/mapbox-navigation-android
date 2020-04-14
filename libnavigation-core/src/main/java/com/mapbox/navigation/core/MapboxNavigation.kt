@@ -4,7 +4,6 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.hardware.SensorEvent
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -12,6 +11,9 @@ import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
@@ -36,7 +38,6 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -135,6 +136,7 @@ constructor(
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
     private val navigationAccountsSession = NavigationAccountsSession(context)
+    private val logger: Logger
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteController: FasterRouteController
@@ -164,21 +166,27 @@ constructor(
                     isAccessible = true
                 }
         }
+        logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
-            notification
+            notification,
+            logger
         )
         tripSession = NavigationComponentProvider.createTripSession(
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigationOptions.navigatorPredictionMillis
+            navigationOptions.navigatorPredictionMillis,
+            logger
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
         navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
         ifNonNull(accessToken) { token ->
-            Log.d("MAPBOX_TELEMETRY", "MapboxMetricsReporter.init from MapboxNavigation main")
+            logger.d(
+                Tag(MapboxNavigationTelemetry.TAG),
+                Message("MapboxMetricsReporter.init from MapboxNavigation main")
+            )
             MapboxMetricsReporter.init(
                 context,
                 accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
@@ -197,8 +205,8 @@ constructor(
             )
         }
 
-        fasterRouteController = FasterRouteController(directionsSession, tripSession)
-        routeRefreshController = RouteRefreshController(directionsSession, tripSession)
+        fasterRouteController = FasterRouteController(directionsSession, tripSession, logger)
+        routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)
         routeRefreshController.start()
     }
 
@@ -282,7 +290,10 @@ constructor(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
-        Log.d(TAG, "onDestroy")
+        logger.d(
+            Tag(MapboxNavigationTelemetry.TAG),
+            Message("onDestroy")
+        )
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         directionsSession.shutdownSession()
         directionsSession.unregisterAllRoutesObservers()

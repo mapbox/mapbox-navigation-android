@@ -4,7 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.internal.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
@@ -20,14 +21,17 @@ import kotlinx.coroutines.channels.ReceiveChannel
  * @param tripNotification provide contract to communicate with notification
  * @param initializeLambda called when [TripService] has started
  * @param terminateLambda called when [TripService] has stopped
+ * @param logger interface for logging any events
  */
 class MapboxTripService(
     private val tripNotification: TripNotification,
     private val initializeLambda: () -> Unit,
-    private val terminateLambda: () -> Unit
+    private val terminateLambda: () -> Unit,
+    private val logger: Logger
 ) : TripService {
 
     companion object {
+
         private var notificationDataChannel = Channel<MapboxNotificationData>(1)
         internal fun getNotificationDataChannel(): ReceiveChannel<MapboxNotificationData> =
             notificationDataChannel
@@ -36,7 +40,8 @@ class MapboxTripService(
     private constructor(
         applicationContext: Context,
         tripNotification: TripNotification,
-        intent: Intent
+        intent: Intent,
+        logger: Logger
     ) : this(
         tripNotification, {
             try {
@@ -50,19 +55,26 @@ class MapboxTripService(
             }
         }, {
             applicationContext.stopService(intent)
-        })
+        },
+        logger
+    )
 
     /**
      * Create [MapboxTripService] with Mapbox's [Service]
      *
      * @param applicationContext Context
      * @param tripNotification provide contract to communicate with notification
+     * @param logger interface for logging any events
      */
-    constructor(applicationContext: Context, tripNotification: TripNotification) :
-        this(
+    constructor(
+        applicationContext: Context,
+        tripNotification: TripNotification,
+        logger: Logger
+    ) : this(
             applicationContext,
             tripNotification,
-            Intent(applicationContext, NavigationNotificationService::class.java)
+            Intent(applicationContext, NavigationNotificationService::class.java),
+            logger
         )
 
     private val serviceStarted = AtomicBoolean(false)
@@ -94,7 +106,7 @@ class MapboxTripService(
                 }
             }
             false -> {
-                Log.i("MapboxTripService", "service already started")
+                logger.i(msg = Message("service already started"))
             }
         }
     }
@@ -110,7 +122,7 @@ class MapboxTripService(
                 tripNotification.onTripSessionStopped()
             }
             false -> {
-                Log.i("MapboxTripService", "service is not started yet")
+                logger.i(msg = Message("Service is not started yet"))
             }
         }
     }

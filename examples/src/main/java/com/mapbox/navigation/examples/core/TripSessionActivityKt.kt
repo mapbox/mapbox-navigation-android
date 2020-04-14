@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
@@ -22,7 +23,6 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import kotlinx.android.synthetic.main.activity_trip_session.*
 import timber.log.Timber
@@ -105,7 +105,8 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                         .distanceFormatter(formatter)
                         .timeFormatType(TWENTY_FOUR_HOURS)
                         .build()
-                )
+                ),
+                MapboxLogger
             ),
             LocationEngineProvider.getBestLocationEngine(applicationContext),
             LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
@@ -113,7 +114,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .build(),
             NAVIGATOR_POLLING_DELAY,
-            MapboxNativeNavigatorImpl
+            logger = MapboxLogger
         )
     }
 
