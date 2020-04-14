@@ -12,6 +12,13 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Ton an</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Feedback geben</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Ineffiziente oder\n
+schlechte Route</string>
+
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Verwirrende
 Anweisung</string>

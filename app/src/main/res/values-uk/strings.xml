@@ -13,6 +13,7 @@
     <string name="title_navigation_route_ui">Навігація - Маршрут на мапі</string>
     <string name="description_navigation_route_ui">Показує маршрут поверх мапи</string>
 
+    <string name="title_navigation_launcher">Навігація</string>
     <string name="description_navigation_launcher">Інтерфейс для вводу місця призначення.</string>
 
     <string name="title_end_navigation">Завершити навігацію</string>

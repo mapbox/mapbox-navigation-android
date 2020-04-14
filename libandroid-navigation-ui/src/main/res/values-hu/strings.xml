@@ -12,6 +12,12 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Visszahangosítva</string>
 
+    <!-- Feedback -->
+    <string name="report_feedback">Visszajelzés küldése</string>
+
+    <!-- Feedback type for Bad Route -->
+    <string name="feedback_bad_route">Lassú vagy\ntéves útvonal</string>
+
     <!-- Feedback type for Confusing Instruction -->
     <string name="feedback_confusing_instruction">Megtévesztő\nutasítás</string>
 
