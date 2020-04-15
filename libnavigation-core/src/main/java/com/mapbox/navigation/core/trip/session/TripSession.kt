@@ -47,4 +47,8 @@ internal interface TripSession {
     fun updateSensorEvent(sensorEvent: SensorEvent)
     fun useExtendedKalmanFilter(useEKF: Boolean)
     fun updateLegIndex(legIndex: Int): NavigationStatus
+
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
+    fun unegisterEHorizonObserver(eHorizonObserver: EHorizonObserver)
+    fun unregisterAllEHorizonObservers()
 }
