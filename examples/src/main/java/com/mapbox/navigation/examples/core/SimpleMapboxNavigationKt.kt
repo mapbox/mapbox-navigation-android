@@ -272,6 +272,16 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
+            Timber.d("DEBUG eHorizon %s", routeProgress.eHorizon?.horizon()?.routes()?.get(0)?.toJson())
+            Timber.d("DEBUG eHorizon routeIndex %s", routeProgress.eHorizon?.routeIndex())
+            Timber.d("DEBUG eHorizon legIndex %s", routeProgress.eHorizon?.legIndex())
+            Timber.d("DEBUG eHorizon legDistanceRemaining %s", routeProgress.eHorizon?.legDistanceRemaining())
+            Timber.d("DEBUG eHorizon legDurationRemaining %s", routeProgress.eHorizon?.legDurationRemaining())
+            Timber.d("DEBUG eHorizon stepIndex %s", routeProgress.eHorizon?.stepIndex())
+            Timber.d("DEBUG eHorizon stepDistanceRemaining %s", routeProgress.eHorizon?.stepDistanceRemaining())
+            Timber.d("DEBUG eHorizon stepDurationRemaining %s", routeProgress.eHorizon?.stepDurationRemaining())
+            Timber.d("DEBUG eHorizon shapeIndex %s", routeProgress.eHorizon?.shapeIndex())
+            Timber.d("DEBUG eHorizon intersectionIndex %s", routeProgress.eHorizon?.intersectionIndex())
             if (routeProgress.route != null) {
                 navigationMapboxMap.onNewRouteProgress(routeProgress)
             }
@@ -341,10 +351,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
                     stopLocationUpdates()
+                    mapboxNavigation.toggleElectronicHorizon(true)
                     startNavigation.visibility = GONE
                 }
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
+                    mapboxNavigation.toggleElectronicHorizon(false)
                     startNavigation.visibility = VISIBLE
                     updateCameraOnNavigationStateChange(false)
                 }
