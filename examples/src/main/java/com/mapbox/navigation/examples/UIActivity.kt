@@ -6,11 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionLayerActivityKt
+import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionActivityKt
+import com.mapbox.navigation.examples.ui.ArrivalUiFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.CustomCameraActivity
 import com.mapbox.navigation.examples.ui.CustomPuckActivity
 import com.mapbox.navigation.examples.ui.CustomUIComponentStyleActivity
-import com.mapbox.navigation.examples.ui.FinalDestinationBuildingFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import kotlinx.android.synthetic.main.activity_ui.*
 
@@ -45,12 +45,12 @@ class UIActivity : AppCompatActivity() {
             SampleItem(
                     getString(R.string.title_final_destination_building_highlight_kotlin),
                     getString(R.string.description_final_destination_building_highlight_kotlin),
-                    FinalDestinationBuildingFootprintHighlightActivityKt::class.java
+                    ArrivalUiFootprintHighlightActivityKt::class.java
             ),
             SampleItem(
                     getString(R.string.title_arrival_ui_building_extrusions_kotlin),
                     getString(R.string.description_arrival_ui_building_extrusions_kotlin),
-                    ArrivalUiBuildingExtrusionLayerActivityKt::class.java
+                    ArrivalUiBuildingExtrusionActivityKt::class.java
             ),
             SampleItem(
                 getString(R.string.title_custom_puck_example),

@@ -4,9 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.FinalDestinationBuildingFootprintHighlightActivityKt">
+    tools:context=".ui.ArrivalUiFootprintHighlightActivityKt">
 
-    <include layout="@layout/content_simple_mapbox_navigation" />
+    <com.mapbox.navigation.ui.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/adjust_highlight_color_and_opacity"

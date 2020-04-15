@@ -22,7 +22,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
@@ -45,19 +44,19 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import com.mapbox.navigation.ui.arrival.DestinationBuildingFootprintLayer
+import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
-import kotlinx.android.synthetic.main.activity_final_destination_arrival_building_highlight.*
+import kotlinx.android.synthetic.main.activity_arrival_building_extrusion.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
 import timber.log.Timber
 
-class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity(), OnMapReadyCallback {
+class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
     private val startTimeInMillis = 5000L
     private val countdownInterval = 10L
@@ -72,17 +71,17 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
     private var fasterRoute: DirectionsRoute? = null
     private var colorList = listOf(Color.BLUE, Color.MAGENTA, Color.parseColor("#32a88f"))
     private var opacityList = listOf(.5f, .2f, .8f)
-    private var adjustFootprintHighlightStyleButtonIndex = 0
+    private var adjustExtrusionsStyleButtonIndex = 0
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    private lateinit var destinationBuildingFootprintLayer: DestinationBuildingFootprintLayer
+    private lateinit var buildingExtrusionLayer: BuildingExtrusionLayer
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_final_destination_arrival_building_highlight)
+        setContentView(R.layout.activity_arrival_building_extrusion)
 
         initViews()
         mapView.onCreate(savedInstanceState)
@@ -146,8 +145,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
                 )
 
                 // Show and move the destination building highlighted footprint
-                destinationBuildingFootprintLayer.updateVisibility(true)
-                destinationBuildingFootprintLayer.setDestinationBuildingLocation(LatLng(click.latitude, click.longitude))
+                buildingExtrusionLayer.updateVisibility(true)
             }
             false
         }
@@ -155,7 +153,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@FinalDestinationBuildingFootprintHighlightActivityKt, style)
+                    LocationComponentActivationOptions.builder(this@ArrivalUiBuildingExtrusionActivityKt, style)
                         .useDefaultLocationEngine(false)
                         .build()
                 )
@@ -175,8 +173,9 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
             // Initialize the Nav UI SDK's DestinationBuildingFootprintLayer class.
-            destinationBuildingFootprintLayer = DestinationBuildingFootprintLayer(mapboxMap, mapView)
-            adjust_highlight_color_and_opacity.show()
+            buildingExtrusionLayer = BuildingExtrusionLayer(mapboxMap, mapView)
+            adjust_building_extrusion_color_and_opacity_fab.show()
+            adjust_building_extrusion_visibility_fab.show()
         }
     }
 
@@ -185,13 +184,17 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         startNavigation.setOnClickListener {
             mapboxNavigation.startTripSession()
         }
-        adjust_highlight_color_and_opacity.setOnClickListener {
-            if (adjustFootprintHighlightStyleButtonIndex == opacityList.size) {
-                adjustFootprintHighlightStyleButtonIndex = 0
+        adjust_building_extrusion_visibility_fab.setOnClickListener {
+            buildingExtrusionLayer.updateVisibility(!buildingExtrusionLayer.visibility)
+        }
+
+        adjust_building_extrusion_color_and_opacity_fab.setOnClickListener {
+            if (adjustExtrusionsStyleButtonIndex == opacityList.size) {
+                adjustExtrusionsStyleButtonIndex = 0
             }
-            destinationBuildingFootprintLayer.opacity = opacityList[adjustFootprintHighlightStyleButtonIndex]
-            destinationBuildingFootprintLayer.color = colorList[adjustFootprintHighlightStyleButtonIndex]
-            adjustFootprintHighlightStyleButtonIndex++
+            buildingExtrusionLayer.opacity = opacityList[adjustExtrusionsStyleButtonIndex]
+            buildingExtrusionLayer.color = colorList[adjustExtrusionsStyleButtonIndex]
+            adjustExtrusionsStyleButtonIndex++
         }
     }
 
@@ -245,7 +248,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             navigationMapRoute?.addRoutes(routes)
             if (routes.isEmpty()) {
-                Toast.makeText(this@FinalDestinationBuildingFootprintHighlightActivityKt, "Empty routes", Toast.LENGTH_SHORT)
+                Toast.makeText(this@ArrivalUiBuildingExtrusionActivityKt, "Empty routes", Toast.LENGTH_SHORT)
                     .show()
             }
             Timber.d("route changed %s", routes.toString())
@@ -262,14 +265,14 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
 
             override fun onFinish() {
                 Timber.d("FASTER_ROUTE: finished")
-                this@FinalDestinationBuildingFootprintHighlightActivityKt.fasterRoute = null
+                this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = null
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            this@FinalDestinationBuildingFootprintHighlightActivityKt.fasterRoute = fasterRoute
+            this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = fasterRoute
             fasterRouteSelectionTimer.start()
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
@@ -369,7 +372,7 @@ class FinalDestinationBuildingFootprintHighlightActivityKt : AppCompatActivity()
         mapView.onSaveInstanceState(outState)
     }
 
-    private class MyLocationEngineCallback(activity: FinalDestinationBuildingFootprintHighlightActivityKt) :
+    private class MyLocationEngineCallback(activity: ArrivalUiBuildingExtrusionActivityKt) :
         LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
