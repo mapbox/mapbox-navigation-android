@@ -41,6 +41,7 @@ import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -303,6 +304,7 @@ class MapboxNavigation(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
+        tripSession.unregisterAllEHorizonObservers()
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
@@ -643,6 +645,36 @@ class MapboxNavigation(
      */
     fun useExtendedKalmanFilter(useEKF: Boolean) {
         tripSession.useExtendedKalmanFilter(useEKF)
+    }
+
+    /**
+     * Registers [EHorizonObserver]. The updates are available whenever the trip session is started.
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * For now, Electronic Horizon only works in Free Drive.
+     *
+     * @see [startTripSession]
+     */
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        tripSession.registerEHorizonObserver(eHorizonObserver)
+    }
+
+    /**
+     * Unregisters [EHorizonObserver]. The updates are available as long as there are observers registered.
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * For now, Electronic Horizon only works in Free Drive.
+     */
+    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        tripSession.unegisterEHorizonObserver(eHorizonObserver)
     }
 
     companion object {

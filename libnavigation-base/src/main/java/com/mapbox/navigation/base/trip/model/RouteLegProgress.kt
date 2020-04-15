@@ -113,7 +113,7 @@ data class RouteLegProgress(
          * @return Builder
          */
         fun upcomingStep(upcomingStep: LegStep) =
-                apply { this.upcomingStep = upcomingStep }
+            apply { this.upcomingStep = upcomingStep }
 
         /**
          * Build new instance of [RouteLegProgress]
