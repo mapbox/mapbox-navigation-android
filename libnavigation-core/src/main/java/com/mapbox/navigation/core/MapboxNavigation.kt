@@ -663,6 +663,22 @@ constructor(
         tripSession.useExtendedKalmanFilter(useEKF)
     }
 
+    /**
+     * Toggles Electronic Horizon on or off.
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * For now, Electronic Horizon only works in Free Drive.
+     *
+     * @param isEnabled set this to true to turn on Electronic Horizon and false to turn it off
+     */
+    fun toggleElectronicHorizon(isEnabled: Boolean) {
+        MapboxNativeNavigatorImpl.toggleElectronicHorizon(isEnabled)
+    }
+
     companion object {
 
         /**
@@ -681,7 +697,8 @@ constructor(
             @FeedbackEvent.Source feedbackSource: String,
             screenshot: String?,
             feedbackSubType: Array<String>? = emptyArray()
-        ) { MapboxNavigationTelemetry.postUserFeedback(
+        ) {
+            MapboxNavigationTelemetry.postUserFeedback(
                 feedbackType,
                 description,
                 feedbackSource,

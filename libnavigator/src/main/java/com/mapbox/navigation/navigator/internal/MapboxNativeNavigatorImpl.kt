@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
@@ -14,6 +15,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.trip.model.ElectronicHorizon
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -24,6 +26,7 @@ import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
+import com.mapbox.navigator.ElectronicHorizonOutput
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
@@ -136,7 +139,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     ): NavigationStatus {
         mutex.withLock {
             MapboxNativeNavigatorImpl.route = route
-            val result = navigator!!.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
+            val result = navigator!!.setRoute(route?.toJson()
+                ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
             navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
             }
@@ -196,6 +200,20 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun updateLegIndex(legIndex: Int): NavigationStatus =
         navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
+
+    // Free Drive
+
+    /**
+     * Toggles Electronic Horizon on or off.
+     *
+     * @param isEnabled set this to true to turn on Electronic Horizon and false to turn it off
+     */
+    override fun toggleElectronicHorizon(isEnabled: Boolean) {
+        when (isEnabled) {
+            true -> navigator!!.enableElectronicHorizon()
+            false -> navigator!!.disableElectronicHorizon()
+        }
+    }
 
     // Offline
 
@@ -323,6 +341,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val routeProgressBuilder = RouteProgress.Builder()
         val legProgressBuilder = RouteLegProgress.Builder()
         val stepProgressBuilder = RouteStepProgress.Builder()
+
+        val electronicHorizon = electronicHorizon.mapToElectronicHorizon()
+        routeProgressBuilder.eHorizon(electronicHorizon)
 
         ifNonNull(route?.legs()) { legs ->
             var currentLeg: RouteLeg? = null
@@ -493,6 +514,24 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             .distanceAlongGeometry(this.remainingStepDistance.toDouble())
             .ssmlAnnouncement(this.ssmlAnnouncement)
             .build()
+    }
+
+    private fun ElectronicHorizonOutput.mapToElectronicHorizon(): ElectronicHorizon {
+        val eHorizonBuilder = ElectronicHorizon.Builder()
+            .routeIndex(this.routeIndex)
+            .legIndex(this.legIndex)
+            .legDistanceRemaining(this.remainingLegDistance)
+            .legDurationRemaining(this.remainingLegDuration / ONE_SECOND_IN_MILLISECONDS)
+            .stepIndex(this.stepIndex)
+            .stepDistanceRemaining(this.remainingStepDistance)
+            .stepDurationRemaining(this.remainingStepDuration / ONE_SECOND_IN_MILLISECONDS)
+            .shapeIndex(this.shapeIndex)
+            .intersectionIndex(this.intersectionIndex)
+        this.horizon?.let {
+            val eHorizonRoute = DirectionsResponse.fromJson(it)
+            eHorizonBuilder.horizon(eHorizonRoute)
+        }
+        return eHorizonBuilder.build()
     }
 }
 

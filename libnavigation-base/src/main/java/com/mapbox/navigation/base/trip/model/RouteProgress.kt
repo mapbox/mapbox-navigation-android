@@ -18,6 +18,16 @@ import com.mapbox.geojson.Point
  * @param route [DirectionsRoute] the navigation session is currently using. When a reroute occurs and a new
  * directions route gets obtained, with the next location update this directions route should
  * reflect the new route.
+ *
+ * @param eHorizon [ElectronicHorizon] object with Electronic Horizon information
+ *
+ * Electronic Horizon is still **experimental**, which means that the design of the
+ * APIs has open issues which may (or may not) lead to their changes in the future.
+ * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+ * future or the semantics of their behavior may change in some way that may break some code.
+ *
+ * For now, Electronic Horizon only works in Free Drive.
+ *
  * @param routeGeometryWithBuffer [Geometry] of the current [DirectionsRoute] with a buffer
  * that encompasses visible tile surface are while navigating. This [Geometry] is ideal
  * for offline downloads of map or routing tile data.
@@ -39,6 +49,7 @@ import com.mapbox.geojson.Point
  */
 data class RouteProgress(
     val route: DirectionsRoute?,
+    val eHorizon: ElectronicHorizon?,
     val routeGeometryWithBuffer: Geometry?,
     val bannerInstructions: BannerInstructions?,
     val voiceInstructions: VoiceInstructions?,
@@ -57,6 +68,7 @@ data class RouteProgress(
      */
     class Builder {
         private var directionsRoute: DirectionsRoute? = null
+        private var electronicHorizon: ElectronicHorizon? = null
         private var routeGeometryWithBuffer: Geometry? = null
         private var bannerInstructions: BannerInstructions? = null
         private var voiceInstructions: VoiceInstructions? = null
@@ -77,6 +89,14 @@ data class RouteProgress(
          */
         fun route(route: DirectionsRoute) =
             apply { this.directionsRoute = route }
+
+        /**
+         * [ElectronicHorizon] object with Electronic Horizon information
+         *
+         * @return Builder
+         */
+        fun eHorizon(eHorizon: ElectronicHorizon) =
+            apply { this.electronicHorizon = eHorizon }
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -188,6 +208,7 @@ data class RouteProgress(
         fun build(): RouteProgress {
             return RouteProgress(
                 directionsRoute,
+                electronicHorizon,
                 routeGeometryWithBuffer,
                 bannerInstructions,
                 voiceInstructions,
