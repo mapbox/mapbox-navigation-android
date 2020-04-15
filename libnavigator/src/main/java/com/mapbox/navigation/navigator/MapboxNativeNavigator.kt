@@ -32,7 +32,7 @@ interface MapboxNativeNavigator {
      *
      * @param rawLocation The current raw [Location] of user.
      *
-     * @return true if the raw location was usable false if not
+     * @return true if the raw location was usable, false if not.
      */
     suspend fun updateLocation(rawLocation: Location, date: Date): Boolean
 
@@ -41,25 +41,23 @@ interface MapboxNativeNavigator {
      *
      * @param sensorEvent The current sensor data of user.
      *
-     * @return true if the sensor data was usable false if not
+     * @return true if the sensor data was usable, false if not.
      */
     fun updateSensorEvent(sensorEvent: SensorEvent): Boolean
 
     /**
-     * Gets the status as an offset in time from the last fix location provided. This
-     * allows the caller to get hallucinated statuses in the future along the route if
-     * for some reason (poor reception) they aren't able to get fix locations into the
-     * Navigator.
+     * Gets the status as an offset in time from the last fixed location. This
+     * allows the caller to get predicted statuses in the future along the route if
+     * the device is unable to get fixed locations. Poor reception would be one reason.
      *
-     * This method will use previous fixes to find snap the users location to the route
-     * and verify that the user is still on the route. Also, this method will determine
+     * This method uses previous fixes to snap the user's location to the route
+     * and verify that the user is still on the route. This method also determines
      * if an instruction needs to be called out for the user.
      *
-     * @param date point in time when you wish to receive the status for.
+     * @param date the point in time to receive the status for.
      *
-     * @return the last [TripStatus] as a result of fix location updates. If the timestamp
-     * is earlier than a previous call, the last status will be returned,
-     * the function does not support re-winding time.
+     * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
+     * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
     suspend fun getStatus(date: Date): TripStatus
 
@@ -145,14 +143,13 @@ interface MapboxNativeNavigator {
      *
      * @param request the uri used when hitting the http service
      *
-     * @return a [RouterResult] object with the json and a success/fail bool
+     * @return a [RouterResult] object with the json and a success/fail boolean
      */
     fun getElectronicHorizon(request: String): RouterResult
 
     // Offline
-
     /**
-     * Caches tiles around last set route
+     * Caches tiles around the last set route
      */
     fun cacheLastRoute()
 
@@ -172,7 +169,7 @@ interface MapboxNativeNavigator {
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
      *
      * @param url the directions-based uri used when hitting the http service
-     * @return a [RouterResult] object with the json and a success/fail bool
+     * @return a [RouterResult] object with the json and a success/fail boolean
      */
     fun getRoute(url: String): RouterResult
 
@@ -188,13 +185,13 @@ interface MapboxNativeNavigator {
 
     /**
      * Removes tiles wholly within the supplied bounding box. If the tile is not
-     * contained completely within the bounding box it will remain in the cache.
-     * After removing files from the cache any routers should be reconfigured
-     * to synchronize their in memory cache with the disk.
+     * contained completely within the bounding box, it will remain in the cache.
+     * After removing files from the cache, any routers should be reconfigured
+     * to synchronize their in-memory cache with the disk.
      *
      * @param tilePath The path to the tiles.
-     * @param southwest The lower left coord of the bbox.
-     * @param northeast The upper right coord of the bbox.
+     * @param southwest The lower left coord of the bounding box.
+     * @param northeast The upper right coord of the bounding box.
      *
      * @return the number of tiles removed
      */
@@ -203,26 +200,27 @@ interface MapboxNativeNavigator {
     // History traces
 
     /**
-     * Gets the history of state changing calls to the navigator this can be used to
+     * Gets the history of state-changing calls to the navigator. This can be used to
      * replay a sequence of events for the purpose of bug fixing.
      *
      * @return a json representing the series of events that happened since the last time
-     * history was toggled on
+     * the history was toggled on.
      */
     fun getHistory(): String
 
     /**
      * Toggles the recording of history on or off.
-     * Toggling will reset all history call [getHistory] first before toggling to retain a copy.
+     * Toggling will reset all history calls [getHistory] first before toggling to retain a copy.
      *
      * @param isEnabled set this to true to turn on history recording and false to turn it off
      */
     fun toggleHistory(isEnabled: Boolean)
 
     /**
-     * Adds a custom event to the navigators history. This can be useful to log things that
+     * Adds a custom event to the navigator's history. This can be useful to log things that
      * happen during navigation that are specific to your application.
-     * @param eventType the event type in the events log for your custom even
+     *
+     * @param eventType the event type in the events log for your custom event
      * @param eventJson the json to attach to the "properties" key of the event
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String)
