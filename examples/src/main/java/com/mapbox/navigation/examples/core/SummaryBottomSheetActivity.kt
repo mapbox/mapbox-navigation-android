@@ -10,6 +10,8 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -166,6 +168,9 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))
             }
+            Snackbar.make(findViewById(R.id.navigationLayout),
+                    R.string.msg_long_press_map_to_place_waypoint,
+                    LENGTH_SHORT).show()
         }
     }
 

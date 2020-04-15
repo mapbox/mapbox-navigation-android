@@ -7,6 +7,7 @@ import android.preference.PreferenceManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -81,7 +82,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         )
 
         initListeners()
-        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_LONG)
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
             .show()
     }
 

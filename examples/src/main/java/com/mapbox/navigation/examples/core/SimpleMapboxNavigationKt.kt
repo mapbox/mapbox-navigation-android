@@ -11,8 +11,10 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -213,7 +215,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 replayRouteLocationEngine.assign(route)
             }
         }
-
+        Snackbar.make(findViewById(R.id.container), getString(R.string.msg_long_press_map_to_place_waypoint),
+                LENGTH_SHORT).show()
         initializeSpeechPlayer()
     }
 

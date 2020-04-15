@@ -51,6 +51,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 
+import static com.google.android.material.snackbar.Snackbar.LENGTH_SHORT;
 import static com.mapbox.mapboxsdk.log.Logger.DEBUG;
 import static com.mapbox.mapboxsdk.log.Logger.ERROR;
 import static com.mapbox.mapboxsdk.log.Logger.INFO;
@@ -151,7 +152,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       style.addImage(MARKER_ROUTE, image);
       navigationMapRoute = new NavigationMapRoute(mapView, mapboxMap);
       symbolManager = new SymbolManager(mapView, mapboxMap, style);
-      Snackbar.make(findViewById(R.id.container), "Tap map to place waypoint", Snackbar.LENGTH_LONG)
+      Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint, LENGTH_SHORT)
           .show();
       newOrigin();
     });
@@ -217,7 +218,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       addMarker(waypoint);
       findRoute();
     } else {
-      Toast.makeText(this, "Only 2 waypoints supported for this example", Toast.LENGTH_LONG).show();
+      Toast.makeText(this, R.string.only_two_waypoints_supported, Toast.LENGTH_LONG).show();
       clearMap();
     }
     return false;
