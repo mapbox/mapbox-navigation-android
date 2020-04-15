@@ -13,12 +13,14 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.trip.model.ElectronicHorizon
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -90,6 +92,7 @@ class MapboxTripSession(
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
+    private val eHorizonObservers = CopyOnWriteArraySet<EHorizonObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
@@ -379,6 +382,36 @@ class MapboxTripSession(
         }
     }
 
+    /**
+     * Register [EHorizonObserver] to receive Electronic Horizon updates
+     */
+    override fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        if (eHorizonObservers.isEmpty()) {
+            navigator.toggleElectronicHorizon(true)
+        }
+        eHorizonObservers.add(eHorizonObserver)
+    }
+
+    /**
+     * Unregister [EHorizonObserver]
+     */
+    override fun unegisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        eHorizonObservers.remove(eHorizonObserver)
+        if (eHorizonObservers.isEmpty()) {
+            navigator.toggleElectronicHorizon(false)
+        }
+    }
+
+    /**
+     * Unregister all [EHorizonObserver]
+     *
+     * @see [registerEHorizonObserver]
+     */
+    override fun unregisterAllEHorizonObservers() {
+        eHorizonObservers.clear()
+        navigator.toggleElectronicHorizon(false)
+    }
+
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
@@ -433,6 +466,7 @@ class MapboxTripSession(
                 updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
                 updateRouteProgress(status.routeProgress)
                 isOffRoute = status.offRoute
+                updateEHorizon(status.eHorizon)
             }
         }
     }
@@ -484,5 +518,9 @@ class MapboxTripSession(
         if (voiceInstructionEvent.isOccurring(progress)) {
             action(voiceInstructionEvent.voiceInstructions)
         }
+    }
+
+    private fun updateEHorizon(eHorizon: ElectronicHorizon) {
+        eHorizonObservers.forEach { it.onElectronicHorizonUpdated(eHorizon) }
     }
 }

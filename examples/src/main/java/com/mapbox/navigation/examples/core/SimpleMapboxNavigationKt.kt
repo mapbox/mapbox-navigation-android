@@ -38,6 +38,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.ElectronicHorizon
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -47,6 +48,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -350,6 +352,21 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    private val eHorizonObserver = object : EHorizonObserver {
+        override fun onElectronicHorizonUpdated(eHorizon: ElectronicHorizon) {
+            Timber.d("DEBUG eHorizon %s", eHorizon.horizon()?.routes()?.get(0)?.toJson())
+            Timber.d("DEBUG eHorizon routeIndex %s", eHorizon.routeIndex())
+            Timber.d("DEBUG eHorizon legIndex %s", eHorizon.legIndex())
+            Timber.d("DEBUG eHorizon legDistanceRemaining %s", eHorizon.legDistanceRemaining())
+            Timber.d("DEBUG eHorizon legDurationRemaining %s", eHorizon.legDurationRemaining())
+            Timber.d("DEBUG eHorizon stepIndex %s", eHorizon.stepIndex())
+            Timber.d("DEBUG eHorizon stepDistanceRemaining %s", eHorizon.stepDistanceRemaining())
+            Timber.d("DEBUG eHorizon stepDurationRemaining %s", eHorizon.stepDurationRemaining())
+            Timber.d("DEBUG eHorizon shapeIndex %s", eHorizon.shapeIndex())
+            Timber.d("DEBUG eHorizon intersectionIndex %s", eHorizon.intersectionIndex())
+        }
+    }
+
     private fun updateCameraOnNavigationStateChange(
         navigationStarted: Boolean
     ) {
@@ -396,6 +413,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.attachFasterRouteObserver(fasterRouteObserver)
+        mapboxNavigation.registerEHorizonObserver(eHorizonObserver)
     }
 
     override fun onStop() {
@@ -406,6 +424,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.detachFasterRouteObserver()
+        mapboxNavigation.unregisterEHorizonObserver(eHorizonObserver)
         stopLocationUpdates()
 
         if (mapboxNavigation.getRoutes()
