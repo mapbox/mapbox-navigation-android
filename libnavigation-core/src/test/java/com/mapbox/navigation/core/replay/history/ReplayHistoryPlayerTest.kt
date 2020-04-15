@@ -56,7 +56,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(5)
+        advanceTimeMillis(5000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -106,7 +106,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(3)
+        advanceTimeMillis(3000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -117,6 +117,35 @@ class ReplayHistoryPlayerTest {
         assertEquals(2, events.size)
         assertEquals(1580777820.952, events[0].eventTimestamp)
         assertEquals(1580777822.959, events[1].eventTimestamp)
+    }
+
+    @Test
+    fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
+        val replayHistoryPlayer = ReplayHistoryPlayer()
+            .pushEvents(listOf(
+                ReplayEventGetStatus(1000.000),
+                ReplayEventGetStatus(1001.000),
+                ReplayEventGetStatus(1003.000)
+            ))
+        val timeCapture = mutableListOf<Long>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            if (replayEvents.isNotEmpty()) {
+                timeCapture.add(currentTime)
+                advanceTimeMillis(75)
+            }
+        }
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        for (i in 0..3000) {
+            advanceTimeMillis(1)
+        }
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        assertEquals(3, timeCapture.size)
+        assertEquals(0L, timeCapture[0])
+        assertEquals(1000L, timeCapture[1])
+        assertEquals(3000L, timeCapture[2])
     }
 
     @Test
@@ -142,7 +171,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.observeReplayEvents(mockLambda)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(5)
+        advanceTimeMillis(5000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -218,7 +247,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.seekTo(seekToEvent)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(5)
+        advanceTimeMillis(5000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -254,7 +283,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.seekTo(1.0)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(5)
+        advanceTimeMillis(5000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -278,7 +307,7 @@ class ReplayHistoryPlayerTest {
         replayHistoryPlayer.seekTo(1.0)
 
         val job = replayHistoryPlayer.play(lifecycleOwner)
-        advanceTimeSeconds(5)
+        advanceTimeMillis(5000)
         replayHistoryPlayer.finish()
         job.cancelAndJoin()
 
@@ -305,10 +334,9 @@ class ReplayHistoryPlayerTest {
         unmockkObject(SystemClock.elapsedRealtimeNanos())
     }
 
-    private fun advanceTimeSeconds(seconds: Int) {
-        val advanceSeconds = seconds.toLong()
-        deviceElapsedTimeNanos += TimeUnit.SECONDS.toNanos(advanceSeconds)
+    private fun advanceTimeMillis(advanceMillis: Long) {
+        deviceElapsedTimeNanos += TimeUnit.MILLISECONDS.toNanos(advanceMillis)
         every { SystemClock.elapsedRealtimeNanos() } returns deviceElapsedTimeNanos
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.SECONDS.toMillis(advanceSeconds))
+        coroutineRule.testDispatcher.advanceTimeBy(advanceMillis)
     }
 }

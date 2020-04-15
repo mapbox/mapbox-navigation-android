@@ -26,9 +26,7 @@ internal class ReplayEventLookup(
 
     fun movePivot(timeSeconds: Double): List<ReplayEventBase> {
         val simulatorTime = (timeSeconds - simulatorTimeOffset)
-
-        if (simulatorTime < 0.01) return emptyList()
-        check(simulatorTime >= 0) { "Rewind is not supported yet" }
+        check(simulatorTime >= 0) { "Simulator can only move forward in time" }
 
         val eventHappened = mutableListOf<ReplayEventBase>()
         for (i in pivotIndex until replayEvents.events.size) {
