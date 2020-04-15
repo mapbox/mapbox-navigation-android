@@ -41,8 +41,13 @@ android {
         versionCode gitVersionCode
         versionName gitVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
         vectorDrawables.useSupportLibrary = true
         buildConfigField "String", "GIT_HASH", "\"${getGitHash()}\""
+    }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
     }
 
     signingConfigs {
@@ -97,7 +102,10 @@ dependencies {
     implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxSdkTurf
 
+    // test
     androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestUtil dependenciesList.testOrchestrator
 
     //ktlint
     ktlint dependenciesList.ktlint

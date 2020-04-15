@@ -304,6 +304,7 @@ commands:
               --device model=athene,version=23,locale=fr,orientation=landscape \
               --device model=sailfish,version=26,locale=es,orientation=portrait \
               --device model=walleye,version=28,locale=de,orientation=landscape \
+              --use-orchestrator \
               --timeout 5m
 
   generate-maven-credentials:
