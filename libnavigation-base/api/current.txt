@@ -181,6 +181,37 @@ package com.mapbox.navigation.base.route {
 
 package com.mapbox.navigation.base.trip.model {
 
+  public final class ElectronicHorizon {
+    method public com.mapbox.api.directions.v5.models.DirectionsResponse? horizon();
+    method public int intersectionIndex();
+    method public float legDistanceRemaining();
+    method public double legDurationRemaining();
+    method public int legIndex();
+    method public int routeIndex();
+    method public int shapeIndex();
+    method public float stepDistanceRemaining();
+    method public double stepDurationRemaining();
+    method public int stepIndex();
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder toBuilder();
+  }
+
+  public static final class ElectronicHorizon.Builder {
+    ctor public ElectronicHorizon.Builder(com.mapbox.api.directions.v5.models.DirectionsResponse? horizon, int routeIndex, int legIndex, float legDistanceRemaining, double legDurationRemaining, int stepIndex, float stepDistanceRemaining, double stepDurationRemaining, int shapeIndex, int intersectionIndex);
+    ctor public ElectronicHorizon.Builder();
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon build();
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder copy(com.mapbox.api.directions.v5.models.DirectionsResponse? horizon, int routeIndex, int legIndex, float legDistanceRemaining, double legDurationRemaining, int stepIndex, float stepDistanceRemaining, double stepDurationRemaining, int shapeIndex, int intersectionIndex);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder horizon(com.mapbox.api.directions.v5.models.DirectionsResponse horizon);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder intersectionIndex(int intersectionIndex);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder legDistanceRemaining(float legDistanceRemaining);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder legDurationRemaining(double legDurationRemaining);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder legIndex(int legIndex);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder routeIndex(int routeIndex);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder shapeIndex(int shapeIndex);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder stepDistanceRemaining(float stepDistanceRemaining);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder stepDurationRemaining(double stepDurationRemaining);
+    method public com.mapbox.navigation.base.trip.model.ElectronicHorizon.Builder stepIndex(int stepIndex);
+  }
+
   public final class RouteLegProgress {
     ctor public RouteLegProgress(int legIndex, com.mapbox.api.directions.v5.models.RouteLeg? routeLeg, float distanceTraveled, float distanceRemaining, double durationRemaining, float fractionTraveled, com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress, com.mapbox.api.directions.v5.models.LegStep? upcomingStep);
     method public int component1();
