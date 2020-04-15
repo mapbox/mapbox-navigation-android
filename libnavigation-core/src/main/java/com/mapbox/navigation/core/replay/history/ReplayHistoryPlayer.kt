@@ -15,18 +15,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-typealias ReplayEventsListener = (ReplayEvents) -> Unit
+typealias ReplayEventsListener = (List<ReplayEventBase>) -> Unit
 
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
  */
-class ReplayHistoryPlayer(
-    private val replayEvents: ReplayEvents
-) {
+class ReplayHistoryPlayer {
+    private val replayEvents = ReplayEvents(mutableListOf())
     private val replayEventLookup = ReplayEventLookup(replayEvents)
 
     private val replayEventsListeners: MutableList<ReplayEventsListener> = mutableListOf()
     private val jobControl = ThreadController.getMainScopeAndRootJob()
+
+    /**
+     * Appends events to be replayed.
+     */
+    fun pushEvents(events: List<ReplayEventBase>): ReplayHistoryPlayer {
+        this.replayEvents.events.addAll(events)
+        return this
+    }
 
     /**
      * Events from the [ReplayEvents] will be published to your listener.
@@ -34,6 +41,17 @@ class ReplayHistoryPlayer(
      */
     fun observeReplayEvents(function: ReplayEventsListener) {
         replayEventsListeners.add(function)
+    }
+
+    /**
+     * The duration of the replay. This value will be between 0.0 and the total duration.
+     *
+     * @return the duration in seconds
+     */
+    fun replayDurationSeconds(): Double {
+        val firstEvent = replayEvents.events.first()
+        val lastEvent = replayEvents.events.last()
+        return lastEvent.eventTimestamp - firstEvent.eventTimestamp
     }
 
     /**
@@ -50,7 +68,7 @@ class ReplayHistoryPlayer(
             while (isActive && isSimulating(lifecycleOwner)) {
                 val loopStart = timeSeconds()
 
-                val recordUpdate = replayEventLookup.movePivot(timeSeconds())
+                val recordUpdate = replayEventLookup.movePivot(loopStart)
                 replayEventsListeners.forEach { it.invoke(recordUpdate) }
 
                 val loopElapsed = ((timeSeconds() - loopStart) * MILLIS_PER_SECOND).roundToInt()
@@ -73,9 +91,35 @@ class ReplayHistoryPlayer(
             replayEvent is ReplayEventUpdateLocation
         }
         firstUpdateLocation?.let { replayEvent ->
-            val replayEvents = ReplayEvents(singletonList(replayEvent))
+            val replayEvents = singletonList(replayEvent)
             replayEventsListeners.forEach { it(replayEvents) }
         }
+    }
+
+    /**
+     * Seek to a time to play from.
+     *
+     * @param replayTime time in seconds between 0.0 to [replayDurationSeconds]
+     */
+    fun seekTo(replayTime: Double) {
+        val offsetTime = replayTime + replayEvents.events.first().eventTimestamp
+        val indexOfEvent = replayEvents.events
+            .indexOfFirst { offsetTime <= it.eventTimestamp }
+        check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${replayDurationSeconds()}: " }
+
+        replayEventLookup.seekTo(indexOfEvent)
+        replayEventLookup.initPivot(timeSeconds())
+    }
+
+    /**
+     * Seek to the event you want to play from.
+     */
+    fun seekTo(replayEvent: ReplayEventBase) {
+        val indexOfEvent = replayEvents.events.indexOf(replayEvent)
+        check(indexOfEvent >= 0) { "You must first pushEvents and then seekTo an event" }
+
+        replayEventLookup.seekTo(indexOfEvent)
+        replayEventLookup.initPivot(timeSeconds())
     }
 
     /**

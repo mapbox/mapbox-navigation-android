@@ -7,7 +7,6 @@ package com.mapbox.navigation.core.replay.history
 internal class ReplayEventLookup(
     private val replayEvents: ReplayEvents
 ) {
-    private val numEvents = replayEvents.events.size
 
     // The pivot will move forward through the events with time.
     private var historyTimeOffset: Double = 0.0
@@ -20,13 +19,19 @@ internal class ReplayEventLookup(
         historyTimeOffset = replayEvents.events[pivotIndex].eventTimestamp
     }
 
-    fun movePivot(timeSeconds: Double): ReplayEvents {
+    fun seekTo(indexOfEvent: Int) {
+        historyTimeOffset = replayEvents.events[indexOfEvent].eventTimestamp
+        pivotIndex = indexOfEvent
+    }
+
+    fun movePivot(timeSeconds: Double): List<ReplayEventBase> {
         val simulatorTime = (timeSeconds - simulatorTimeOffset)
-        if (simulatorTime < 0.01) return ReplayEvents(emptyList())
+
+        if (simulatorTime < 0.01) return emptyList()
         check(simulatorTime >= 0) { "Rewind is not supported yet" }
 
         val eventHappened = mutableListOf<ReplayEventBase>()
-        for (i in pivotIndex until numEvents) {
+        for (i in pivotIndex until replayEvents.events.size) {
             val event = replayEvents.events[pivotIndex]
             val eventTime = event.eventTimestamp - historyTimeOffset
             if (eventTime <= simulatorTime) {
@@ -37,7 +42,7 @@ internal class ReplayEventLookup(
             }
         }
 
-        return ReplayEvents(eventHappened)
+        return eventHappened
     }
 
     fun isComplete(): Boolean {

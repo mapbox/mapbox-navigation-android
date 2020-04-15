@@ -19,7 +19,7 @@ class ReplayHistoryMapper(
     /**
      * Given raw json string return [ReplayEvents] that can be given to a [ReplayHistoryPlayer]
      */
-    fun mapToReplayEvents(historyData: String): ReplayEvents {
+    fun mapToReplayEvents(historyData: String): List<ReplayEventBase> {
         val exampleHistoryData = gson.fromJson(historyData, ReplayHistoryDTO::class.java)
         return mapToReplayEvents(exampleHistoryData)
     }
@@ -27,8 +27,8 @@ class ReplayHistoryMapper(
     /**
      * Given [ReplayHistoryDTO] return [ReplayEvents] that can be given to a [ReplayHistoryPlayer]
      */
-    fun mapToReplayEvents(historyDTO: ReplayHistoryDTO): ReplayEvents {
-        val eventList = historyDTO.events
+    fun mapToReplayEvents(historyDTO: ReplayHistoryDTO): List<ReplayEventBase> {
+        return historyDTO.events
             .mapIndexed { index, _ ->
                 val event = historyDTO.events[index] as LinkedTreeMap<*, *>
                 return@mapIndexed try {
@@ -40,7 +40,6 @@ class ReplayHistoryMapper(
                 }
             }
             .filterNotNull()
-        return ReplayEvents(eventList)
     }
 
     private fun mapToEvent(eventType: String, event: LinkedTreeMap<*, *>): ReplayEventBase? {

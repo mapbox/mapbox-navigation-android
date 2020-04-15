@@ -16,7 +16,7 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents.events.size, 2)
+        assertEquals(historyEvents.size, 2)
     }
 
     @Test
@@ -25,8 +25,8 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents.events[0].eventTimestamp, 1580744198.879556)
-        assertTrue(historyEvents.events[0] is ReplayEventGetStatus)
+        assertEquals(historyEvents[0].eventTimestamp, 1580744198.879556)
+        assertTrue(historyEvents[0] is ReplayEventGetStatus)
     }
 
     @Test
@@ -35,8 +35,8 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents.events[1].eventTimestamp, 1580744199.407049)
-        (historyEvents.events[1] as ReplayEventUpdateLocation).location.let {
+        assertEquals(historyEvents[1].eventTimestamp, 1580744199.407049)
+        (historyEvents[1] as ReplayEventUpdateLocation).location.let {
             assertEquals(it.lat, 50.1232182)
             assertEquals(it.lon, 8.6343946)
             assertEquals(it.time, 1580744199.406)
@@ -53,7 +53,7 @@ class ReplayHistoryMapperTest {
         val historyString = """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0},{"type":"getStatus","timestamp":1580744213.506,"event_timestamp":1580744212.006626,"delta_ms":0},{"type":"end_transit","properties":1580744212.223,"event_timestamp":1580744212.223644}],"version":"6.2.1","history_version":"1.0.0"}"""
         val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper())
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
-        assertEquals(historyEvents.events.size, 4)
+        assertEquals(historyEvents.size, 4)
     }
 
     @Test
@@ -61,7 +61,7 @@ class ReplayHistoryMapperTest {
         val historyString = """{"events":[{"type":"getStatus","timestamp":1551460823.922}],"version":"5.0.0","history_version":"1.0.0"}"""
         val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper())
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
-        assertEquals(historyEvents.events.size, 1)
+        assertEquals(historyEvents.size, 1)
     }
 
     private data class ExampleEndTransitEvent(
