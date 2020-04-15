@@ -133,6 +133,15 @@ interface MapboxNativeNavigator {
      */
     fun updateLegIndex(legIndex: Int): NavigationStatus
 
+    // Free Drive
+
+    /**
+     * Toggles Electronic Horizon on or off.
+     *
+     * @param isEnabled set this to true to turn on Electronic Horizon and false to turn it off
+     */
+    fun toggleElectronicHorizon(isEnabled: Boolean)
+
     // Offline
 
     /**

@@ -12,11 +12,12 @@ import com.mapbox.geojson.Point
  * With every new valid location update, a new route progress will be generated using the latest
  * information.
  *
- * The latest route progress object can be obtained through the [com.mapbox.navigation.base.trip.RouteProgressObserver].
+ * The latest route progress object can be obtained through the [com.mapbox.navigation.core.trip.session.RouteProgressObserver].
  * Note that the route progress object's immutable.
  */
 class RouteProgress private constructor(
     private val route: DirectionsRoute? = null,
+    private val eHorizon: ElectronicHorizon? = null,
     private val routeGeometryWithBuffer: Geometry? = null,
     private val bannerInstructions: BannerInstructions? = null,
     private val voiceInstructions: VoiceInstructions? = null,
@@ -40,6 +41,20 @@ class RouteProgress private constructor(
      * @return a [DirectionsRoute] currently being used for the navigation session
      */
     fun route() = route
+
+    /**
+     * Provides an [ElectronicHorizon].
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * For now, Electronic Horizon only works in Free Drive.
+     *
+     * @return a [ElectronicHorizon] object
+     */
+    fun eHorizon(): ElectronicHorizon? = eHorizon
 
     /**
      * Total distance traveled in meters along route.
@@ -145,6 +160,7 @@ class RouteProgress private constructor(
      * Builder for [RouteProgress]
      *
      * @param directionsRoute [DirectionsRoute] currently is used for the navigation session
+     * @param electronicHorizon [ElectronicHorizon] object with Electronic Horizon information
      * @param routeGeometryWithBuffer Current [DirectionsRoute] geometry with a buffer
      * that encompasses visible tile surface are while navigating.
      *
@@ -153,7 +169,7 @@ class RouteProgress private constructor(
      *
      * @param bannerInstructions Current banner instruction.
      * @param voiceInstructions Current voice instruction.
-     * @param currentState The current state of progress along the route.  Provides route and location
+     * @param currentState The current state of progress along the route. Provides route and location
      * tracking information.
      * @param currentLegProgress [RouteLegProgress] object with information about the particular
      * leg the user is currently on.
@@ -167,6 +183,7 @@ class RouteProgress private constructor(
      */
     data class Builder(
         private var directionsRoute: DirectionsRoute? = null,
+        private var electronicHorizon: ElectronicHorizon? = null,
         private var routeGeometryWithBuffer: Geometry? = null,
         private var bannerInstructions: BannerInstructions? = null,
         private var voiceInstructions: VoiceInstructions? = null,
@@ -188,6 +205,14 @@ class RouteProgress private constructor(
          */
         fun route(route: DirectionsRoute) =
             apply { this.directionsRoute = route }
+
+        /**
+         * [ElectronicHorizon] object with Electronic Horizon information
+         *
+         * @return Builder
+         */
+        fun eHorizon(eHorizon: ElectronicHorizon) =
+            apply { this.electronicHorizon = eHorizon }
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -299,6 +324,7 @@ class RouteProgress private constructor(
         fun build(): RouteProgress {
             return RouteProgress(
                 directionsRoute,
+                electronicHorizon,
                 routeGeometryWithBuffer,
                 bannerInstructions,
                 voiceInstructions,

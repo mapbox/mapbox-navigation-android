@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * in the directions route, much of this information will be identical to the parent
  * [RouteProgress].
  *
- * The latest route leg progress object can be obtained through the [com.mapbox.navigation.base.trip.RouteProgressObserver].
+ * The latest route leg progress object can be obtained through the [com.mapbox.navigation.core.trip.session.RouteProgressObserver].
  * Note that the route leg progress object's immutable.
  */
 class RouteLegProgress private constructor(
@@ -25,7 +25,7 @@ class RouteLegProgress private constructor(
 
     /**
      * Index representing the current leg the user is on. If the directions route currently in use
-     * contains more then two waypoints, the route is likely to have multiple legs representing the
+     * contains more than two waypoints, the route is likely to have multiple legs representing the
      * distance between the two points.
      *
      * @return an integer representing the current leg the user is on
@@ -55,7 +55,7 @@ class RouteLegProgress private constructor(
     fun distanceRemaining(): Float = distanceRemaining
 
     /**
-     * Provides the duration remaining in seconds until the user reaches the end of the current step.
+     * Provides the duration remaining in seconds until the user reaches the end of the current leg.
      *
      * @return duration remaining till end of leg, in unit seconds.
      */
