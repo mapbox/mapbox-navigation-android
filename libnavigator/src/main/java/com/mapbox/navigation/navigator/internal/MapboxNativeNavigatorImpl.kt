@@ -197,6 +197,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun updateLegIndex(legIndex: Int): NavigationStatus =
         navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
 
+    override fun toggleElectronicHorizon(isEnabled: Boolean) {
+        when (isEnabled) {
+            true -> navigator.enableElectronicHorizon()
+            false -> navigator.disableElectronicHorizon()
+        }
+    }
+
     // Offline
 
     /**
@@ -325,6 +332,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         val routeProgressBuilder = RouteProgress.Builder()
         val legProgressBuilder = RouteLegProgress.Builder()
         val stepProgressBuilder = RouteStepProgress.Builder()
+
+        val eHorizon = electronicHorizon
+        eHorizon.horizon?.let {
+            val eHorizonRoute = DirectionsRoute.fromJson(it)
+            routeProgressBuilder.eHorizon(eHorizonRoute)
+        }
 
         ifNonNull(route?.legs()) { legs ->
             var currentLeg: RouteLeg? = null

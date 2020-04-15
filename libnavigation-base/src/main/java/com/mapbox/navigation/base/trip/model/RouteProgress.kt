@@ -17,6 +17,7 @@ import com.mapbox.geojson.Point
  */
 class RouteProgress private constructor(
     private val route: DirectionsRoute? = null,
+    private val eHorizon: DirectionsRoute? = null,
     private val routeGeometryWithBuffer: Geometry? = null,
     private val bannerInstructions: BannerInstructions? = null,
     private val voiceInstructions: VoiceInstructions? = null,
@@ -40,6 +41,8 @@ class RouteProgress private constructor(
      * @return a [DirectionsRoute] currently being used for the navigation session
      */
     fun route() = route
+
+    fun eHorizon() = eHorizon
 
     /**
      * Total distance traveled in meters along route.
@@ -167,6 +170,7 @@ class RouteProgress private constructor(
      */
     data class Builder(
         private var directionsRoute: DirectionsRoute? = null,
+        private var electronicHorizon: DirectionsRoute? = null,
         private var routeGeometryWithBuffer: Geometry? = null,
         private var bannerInstructions: BannerInstructions? = null,
         private var voiceInstructions: VoiceInstructions? = null,
@@ -188,6 +192,9 @@ class RouteProgress private constructor(
          */
         fun route(route: DirectionsRoute) =
             apply { this.directionsRoute = route }
+
+        fun eHorizon(eHorizon: DirectionsRoute) =
+            apply { this.electronicHorizon = eHorizon }
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -299,6 +306,7 @@ class RouteProgress private constructor(
         fun build(): RouteProgress {
             return RouteProgress(
                 directionsRoute,
+                electronicHorizon,
                 routeGeometryWithBuffer,
                 bannerInstructions,
                 voiceInstructions,

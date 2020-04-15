@@ -133,6 +133,8 @@ interface MapboxNativeNavigator {
      */
     fun updateLegIndex(legIndex: Int): NavigationStatus
 
+    fun toggleElectronicHorizon(isEnabled: Boolean)
+
     // Offline
 
     /**
