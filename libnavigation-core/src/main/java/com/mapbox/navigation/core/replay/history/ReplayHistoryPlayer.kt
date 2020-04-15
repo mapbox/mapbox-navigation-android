@@ -7,8 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.navigation.utils.thread.ThreadController
 import java.util.Collections.singletonList
-import kotlin.math.abs
-import kotlin.math.roundToInt
+import kotlin.math.max
+import kotlin.math.roundToLong
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -71,8 +71,9 @@ class ReplayHistoryPlayer {
                 val recordUpdate = replayEventLookup.movePivot(loopStart)
                 replayEventsListeners.forEach { it.invoke(recordUpdate) }
 
-                val loopElapsed = ((timeSeconds() - loopStart) * MILLIS_PER_SECOND).roundToInt()
-                val delayMillis = abs(replayUpdateSpeedMillis - loopElapsed)
+                val loopElapsedSeconds = timeSeconds() - loopStart
+                val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
+                val delayMillis = max(0L, replayUpdateSpeedMillis - loopElapsedMillis)
                 delay(delayMillis)
             }
 
@@ -140,7 +141,7 @@ class ReplayHistoryPlayer {
         // The frequency that replay updates will be broad-casted
         private const val replayUpdateSpeedMillis = 100L
 
-        private const val MILLIS_PER_SECOND = 1e+4
+        private const val MILLIS_PER_SECOND = 1000
         private const val NANOS_PER_SECOND = 1e-9
         private fun timeSeconds(): Double = SystemClock.elapsedRealtimeNanos().toDouble() * NANOS_PER_SECOND
     }
