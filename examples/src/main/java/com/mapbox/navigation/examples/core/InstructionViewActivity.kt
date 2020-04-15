@@ -9,7 +9,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -301,7 +301,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         startNavigation.visibility = VISIBLE
         startNavigation.isEnabled = false
         instructionView.visibility = GONE
-        Snackbar.make(container, R.string.msg_long_press_for_destination, LENGTH_LONG).show()
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
         feedbackButton = instructionView.retrieveFeedbackButton().apply {
             hide()
             addOnClickListener {

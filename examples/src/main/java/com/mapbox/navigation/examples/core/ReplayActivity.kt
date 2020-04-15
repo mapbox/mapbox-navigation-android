@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -175,8 +176,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStart()
         mapView.onStart()
         mapboxNavigation?.registerLocationObserver(locationObserver)
-        Snackbar.make(container, R.string.msg_long_press_for_destination, Snackbar.LENGTH_SHORT)
-            .show()
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
     }
 
     public override fun onResume() {

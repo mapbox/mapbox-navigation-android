@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -99,11 +100,8 @@ abstract class BaseRouterActivityKt :
             style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             symbolManager = SymbolManager(mapView, mapboxMap, style)
-            Snackbar.make(
-                findViewById(R.id.container),
-                "Tap map to place waypoint",
-                Snackbar.LENGTH_LONG
-            ).show()
+            Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint,
+                LENGTH_SHORT).show()
             newOrigin()
         }
     }

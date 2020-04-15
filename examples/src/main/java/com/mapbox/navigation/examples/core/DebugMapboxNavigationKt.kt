@@ -11,6 +11,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -210,7 +212,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 })
             }
         }
-
+        Snackbar.make(findViewById(R.id.container), R.string.msg_long_press_map_to_place_waypoint,
+                LENGTH_SHORT).show()
         initializeSpeechPlayer()
     }
 
