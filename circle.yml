@@ -522,6 +522,7 @@ jobs:
     steps:
       - checkout
       - build-release-core-1_0
+      - check-public-documentation
       - generate-documentation
       - publish-artifacts:
           repository: "artifactory"
@@ -538,6 +539,7 @@ jobs:
       - generate-core-version-name
       - checkout
       - build-release-core-1_0
+      - check-public-documentation
       - generate-documentation
       - publish-artifacts:
           repository: "bintray"
@@ -553,6 +555,7 @@ jobs:
       - generate-core-version-name
       - checkout
       - build-release-core-1_0
+      - check-public-documentation
       - generate-documentation
       - publish-artifacts:
           repository: "bintray"
@@ -568,6 +571,7 @@ jobs:
       - generate-core-version-name
       - checkout
       - build-release-core-1_0
+      - check-public-documentation
       - generate-documentation
       - publish-artifacts:
           repository: "bintray"
