@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
@@ -12,7 +11,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -20,9 +18,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.location.LocationComponent
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -34,15 +29,13 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import com.mapbox.navigation.ui.camera.DynamicCamera
-import com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_GPS
+import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
@@ -64,10 +57,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var mapboxMap: MapboxMap? = null
     private var fasterRoute: DirectionsRoute? = null
-    private var locationComponent: LocationComponent? = null
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private var navigationMapboxMap: NavigationMapboxMap? = null
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
@@ -87,22 +79,6 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-        }
-
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
-            }
-        }
-    }
-
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         }
@@ -110,7 +86,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapboxMap.drawRoutes(routes)
+            navigationMapboxMap?.drawRoutes(routes)
         }
     }
 
@@ -161,17 +137,20 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        initListeners()
-        val mapboxNavigationOptions = MapboxNavigation
-            .defaultNavigationOptions(this, Mapbox.getAccessToken())
+        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
+                this,
+                Mapbox.getAccessToken()
+        )
+        mapboxNavigationOptions.onboardRouterConfig?.toBuilder()?.tilePath("")
+
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
-            navigationOptions = mapboxNavigationOptions,
-            locationEngine = LocationEngineProvider.getBestLocationEngine(this)
+            Utils.getMapboxAccessToken(this), mapboxNavigationOptions
         ).also {
             it.registerRoutesObserver(routesObserver)
         }
+
+        initListeners()
     }
 
     override fun onLowMemory() {
@@ -181,9 +160,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
         mapView.onStart()
+        navigationMapboxMap?.onStart()
+        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     override fun onResume() {
@@ -193,8 +172,8 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 
@@ -215,21 +194,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            locationComponent = mapboxMap.locationComponent.apply {
-                activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@FasterRouteActivity, style)
-                        .useDefaultLocationEngine(false)
-                        .build()
-                )
-                cameraMode = CameraMode.TRACKING
-                isLocationComponentEnabled = true
-            }
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.addProgressChangeListener(mapboxNavigation)
-                it.setCamera(DynamicCamera(mapboxMap))
-            }
+            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
         }
-        mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation.requestRoutes(
@@ -253,12 +220,14 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = MAX_PROGRESS.toInt()
         startNavigation.setOnClickListener {
+            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            navigationMapboxMap?.addProgressChangeListener(mapboxNavigation)
             if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-                navigationMapboxMap.updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_GPS)
-                navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+                navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
             }
             mapboxNavigation.startTripSession()
+            stopLocationUpdates()
         }
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
@@ -304,7 +273,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                activityRef.get()?.locationComponent?.forceLocationUpdate(it)
+                activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
             }
         }
 

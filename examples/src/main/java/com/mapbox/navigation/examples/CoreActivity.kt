@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
+import com.mapbox.navigation.examples.core.FreeDriveNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.HybridRouterActivityJava
 import com.mapbox.navigation.examples.core.HybridRouterActivityKt
@@ -107,6 +108,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_basic_navigation_kotlin),
                 getString(R.string.description_basic_navigation_kotlin),
                 BasicNavigationActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_free_drive_kotlin),
+                getString(R.string.description_free_drive_kotlin),
+                FreeDriveNavigationActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_replay_navigation_kotlin),
