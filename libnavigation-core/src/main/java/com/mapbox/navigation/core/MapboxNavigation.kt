@@ -14,7 +14,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_POLLING_DELAY
+import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -173,7 +173,7 @@ constructor(
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigationOptions.navigatorPollingDelay
+            navigationOptions.navigatorPredictionMillis
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
@@ -615,7 +615,7 @@ constructor(
             val builder = NavigationOptions.Builder()
                 .timeFormatType(NONE_SPECIFIED)
                 .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
-                .navigatorPollingDelay(DEFAULT_NAVIGATOR_POLLING_DELAY)
+                .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
 
             // TODO provide a production routing tiles endpoint

@@ -68,7 +68,7 @@ class MapboxTripSessionTest {
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
 
     private val routeProgress: RouteProgress = mockk()
-    private val navigatorPollingDelay = 1500L
+    private val navigatorPredictionMillis = 1500L
 
     private val parentJob = SupervisorJob()
     private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
@@ -86,7 +86,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator
         )
 
@@ -224,7 +224,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -244,7 +244,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -264,7 +264,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -284,7 +284,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -305,7 +305,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -325,7 +325,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -345,7 +345,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -468,7 +468,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -489,7 +489,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -535,7 +535,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
@@ -568,7 +568,7 @@ class MapboxTripSessionTest {
             tripService,
             locationEngine,
             locationEngineRequest,
-            navigatorPollingDelay,
+            navigatorPredictionMillis,
             navigator,
             ThreadController
         )
