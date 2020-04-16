@@ -71,7 +71,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         initListeners()
         mapView.getMapAsync(this)
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-            .show()
+                .show()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {

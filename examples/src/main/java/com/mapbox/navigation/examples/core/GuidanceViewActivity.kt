@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,9 +12,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.LocationComponent
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -24,20 +20,19 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
-import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_guidance_view.*
+import kotlinx.android.synthetic.main.activity_guidance_view.mapView
+import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
 
 /**
  * Warning: This activity is for code demonstration. The guidance view api
@@ -49,25 +44,57 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     private val origin: Point = Point.fromLngLat(139.7772481, 35.6818019)
     private val destination: Point = Point.fromLngLat(139.7756523, 35.6789722)
 
-    private var mapboxMap: MapboxMap? = null
-    private var locationComponent: LocationComponent? = null
-
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private var navigationMapboxMap: NavigationMapboxMap? = null
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
+    @SuppressLint("MissingPermission")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_guidance_view)
+        mapView.onCreate(savedInstanceState)
+        mapView.getMapAsync(this)
+
+        val options = MapboxNavigation.defaultNavigationOptions(
+                this,
+                Utils.getMapboxAccessToken(this)
+        )
+
+        mapboxNavigation = MapboxNavigation(
+                applicationContext,
+                Utils.getMapboxAccessToken(this),
+                options,
+                locationEngine = replayRouteLocationEngine
+        ).also {
+            it.registerRouteProgressObserver(routeProgressObserver)
+            it.registerBannerInstructionsObserver(bannerInstructionObserver)
         }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
+        initListeners()
+    }
+
+    override fun onMapReady(mapboxMap: MapboxMap) {
+        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+            val cameraPosition = CameraPosition.Builder()
+                    .target(LatLng(destination.latitude(), destination.longitude()))
+                    .zoom(16.5)
+                    .build()
+            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
+                it.addProgressChangeListener(mapboxNavigation)
             }
+
+            // Ideally we should use Mapbox.getAccessToken(), but to show GuidanceView we need a
+            // specific access token for route request.
+            mapboxNavigation.requestRoutes(
+                    RouteOptions.builder().applyDefaultParams()
+                            .accessToken(Utils.getMapboxAccessToken(this))
+                            .coordinates(origin, null, destination)
+                            .alternatives(true)
+                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                            .bannerInstructions(true)
+                            .build(),
+                    routesReqCallback
+            )
         }
     }
 
@@ -78,14 +105,9 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val routesObserver = object : RoutesObserver {
-        override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapboxMap.drawRoutes(routes)
-        }
-    }
-
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            navigationMapboxMap?.drawRoute(routes[0])
             replayRouteLocationEngine.assign(routes[0])
         }
 
@@ -122,82 +144,14 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     @SuppressLint("MissingPermission")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_guidance_view)
-
-        initViews()
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
-
-        val accessToken = Utils.getMapboxAccessToken(this)
-        val options = MapboxNavigation.defaultNavigationOptions(this, accessToken)
-        mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            accessToken,
-            navigationOptions = options,
-            locationEngine = replayRouteLocationEngine
-        ).also {
-            it.registerLocationObserver(locationObserver)
-            it.registerRouteProgressObserver(routeProgressObserver)
-            it.registerRoutesObserver(routesObserver)
-            it.registerTripSessionStateObserver(tripSessionStateObserver)
-            it.registerBannerInstructionsObserver(bannerInstructionObserver)
-        }
-    }
-
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            locationComponent = mapboxMap.locationComponent.apply {
-                activateLocationComponent(
-                    LocationComponentActivationOptions
-                        .builder(this@GuidanceViewActivity, style)
-                        .useDefaultLocationEngine(false)
-                        .build()
-                )
-                cameraMode = CameraMode.TRACKING
-                isLocationComponentEnabled = true
-            }
-
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.setCamera(DynamicCamera(mapboxMap))
-                it.addProgressChangeListener(mapboxNavigation)
-            }
-            val cameraPosition = CameraPosition.Builder()
-                .target(LatLng(destination.latitude(), destination.longitude()))
-                .zoom(16.5)
-                .build()
-            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-
-            // Ideally we should use Mapbox.getAccessToken(), but to show GuidanceView we need a
-            // specific access token for route request.
-            mapboxNavigation.requestRoutes(
-                RouteOptions.builder().applyDefaultParams()
-                    .accessToken(Utils.getMapboxAccessToken(this))
-                    .coordinates(origin, null, destination)
-                    .alternatives(true)
-                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                    .bannerInstructions(true)
-                    .build(),
-                routesReqCallback
-            )
-        }
-    }
-
-    private fun initDynamicCamera(route: DirectionsRoute) {
-        navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-        navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-        navigationMapboxMap.startCamera(route)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun initViews() {
+    private fun initListeners() {
         startNavigation.setOnClickListener {
+            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
             mapboxNavigation.startTripSession()
             mapboxNavigation.getRoutes().let { routes ->
                 if (routes.isNotEmpty()) {
-                    initDynamicCamera(routes[0])
+                    navigationMapboxMap?.startCamera(routes[0])
                 }
             }
         }
@@ -206,6 +160,13 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+        navigationMapboxMap?.onStart()
+        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     override fun onResume() {
@@ -220,6 +181,10 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
+        navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 
@@ -230,13 +195,8 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        mapView.onDestroy()
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRoutesObserver(routesObserver)
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
+        mapView.onDestroy()
     }
 }
