@@ -1,4 +1,4 @@
-package com.mapbox.navigation.navigator
+package com.mapbox.navigation.core.sensors
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -28,7 +28,7 @@ class SensorMapperTest {
             floatArrayOf(1.151f, 0.164f, 9.700f)
         )
 
-        val navigationSensorData = SensorMapper.toNavigatorSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.ACCELEROMETER)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834291518140L)
@@ -47,7 +47,7 @@ class SensorMapperTest {
             floatArrayOf(21.968f, -54.005f, -160.413f, 37.604f, -58.706f, -113.839f)
         )
 
-        val navigationSensorData = SensorMapper.toNavigatorSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.MAGNETOMETER)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834307804681)
@@ -69,7 +69,7 @@ class SensorMapperTest {
             floatArrayOf(976.028f)
         )
 
-        val navigationSensorData = SensorMapper.toNavigatorSensorData(sensorEvent)
+        val navigationSensorData = SensorMapper.toSensorData(sensorEvent)
         assertNotNull(navigationSensorData!!)
         assertEquals(navigationSensorData.sensorType, SensorType.PRESSURE)
         assertEquals(navigationSensorData.elapsedTimeNanos, 23834956241370)

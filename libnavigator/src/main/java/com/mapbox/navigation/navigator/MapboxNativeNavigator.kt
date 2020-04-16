@@ -1,6 +1,5 @@
 package com.mapbox.navigation.navigator
 
-import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
@@ -10,6 +9,7 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
+import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 
@@ -39,11 +39,11 @@ interface MapboxNativeNavigator {
     /**
      * Passes in the current sensor data of the user.
      *
-     * @param sensorEvent The current sensor data of user.
+     * @param sensorData The current sensor data of user.
      *
      * @return true if the sensor data was usable, false if not.
      */
-    fun updateSensorEvent(sensorEvent: SensorEvent): Boolean
+    fun updateSensorData(sensorData: SensorData): Boolean
 
     /**
      * Gets the status as an offset in time from the last fixed location. This

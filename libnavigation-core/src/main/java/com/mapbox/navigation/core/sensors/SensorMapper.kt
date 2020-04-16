@@ -1,10 +1,10 @@
-package com.mapbox.navigation.navigator
+package com.mapbox.navigation.core.sensors
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.os.Build
 import android.util.Log
-import com.mapbox.navigator.NavigatorSensorData
+import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.SensorType
 import java.util.Date
 
@@ -27,9 +27,10 @@ internal object SensorMapper {
         return supportedSensors
     }
 
-    fun toNavigatorSensorData(sensorEvent: SensorEvent): NavigatorSensorData? {
-        val sensorType = toSensorType(sensorEvent.sensor) ?: return null
-        return NavigatorSensorData(
+    fun toSensorData(sensorEvent: SensorEvent): SensorData? {
+        val sensorType = toSensorType(sensorEvent.sensor)
+            ?: return null
+        return SensorData(
             sensorType,
             Date(),
             sensorEvent.timestamp,

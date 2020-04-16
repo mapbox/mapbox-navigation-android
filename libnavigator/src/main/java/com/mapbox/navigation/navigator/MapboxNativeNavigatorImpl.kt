@@ -1,6 +1,5 @@
 package com.mapbox.navigation.navigator
 
-import android.hardware.SensorEvent
 import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -28,6 +27,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
+import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlinx.coroutines.sync.Mutex
@@ -73,15 +73,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     /**
      * Passes in the current sensor data of the user.
      *
-     * @param sensorEvent The current sensor data of user.
+     * @param sensorData The current sensor data of user.
      *
      * @return true if the sensor data was usable, false if not.
      */
-    override fun updateSensorEvent(sensorEvent: SensorEvent): Boolean {
-        val value = SensorMapper.toNavigatorSensorData(sensorEvent)
-        return ifNonNull(value) { navigatorSensorData ->
-            navigator.updateSensorData(navigatorSensorData)
-        } ?: false
+    override fun updateSensorData(sensorData: SensorData): Boolean {
+        return navigator.updateSensorData(sensorData)
     }
 
     /**

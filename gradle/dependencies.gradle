@@ -14,7 +14,7 @@ ext {
       mapboxSdkDirectionsModels : '5.1.0',
       mapboxEvents              : '5.0.0',
       mapboxCore                : '2.0.0',
-      mapboxNavigator           : '10.0.4',
+      mapboxNavigator           : 'ak-sensor-history-2-SNAPSHOT-1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.3.1',
