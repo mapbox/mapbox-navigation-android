@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -14,13 +15,14 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.extensions.applyDefaultParams
-import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
@@ -50,6 +52,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private val stopsController = StopsController()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,19 +88,25 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             initLocationEngine()
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
+            stopsController.add(latLng)
+
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
-                mapboxNavigation?.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
-                    routesReqCallback
-                )
+                requestRoute(originLocation)
             }
             true
         }
+    }
+
+    private fun requestRoute(originLocation: Location) {
+        mapboxNavigation?.requestRoutes(
+            RouteOptions.builder().applyDefaultParams()
+                .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                .coordinates(stopsController.coordinates(originLocation))
+                .alternatives(true)
+                .profile(DirectionsCriteria.PROFILE_DRIVING)
+                .build(),
+            routesReqCallback
+        )
     }
 
     fun initLocationEngine() {
@@ -206,5 +215,20 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun stopLocationUpdates() {
         mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+    }
+}
+
+private class StopsController {
+    private val stops = mutableListOf<Point>()
+
+    fun add(latLng: LatLng) {
+        stops.add(latLng.toPoint())
+    }
+
+    fun coordinates(originLocation: Location): List<Point> {
+        val coordinates = mutableListOf<Point>()
+        coordinates.add(originLocation.toPoint())
+        coordinates.addAll(stops)
+        return coordinates
     }
 }
