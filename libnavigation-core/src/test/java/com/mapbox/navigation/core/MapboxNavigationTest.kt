@@ -125,7 +125,7 @@ class MapboxNavigationTest {
         val navigationOptions = NavigationOptions
             .Builder()
             .distanceFormatter(distanceFormatter)
-            .navigatorPollingDelay(1500L)
+            .navigatorPredictionMillis(1500L)
             .onboardRouterConfig(onBoardRouterConfig)
             .roundingIncrement(1)
             .timeFormatType(NONE_SPECIFIED)
