@@ -14,6 +14,14 @@ import java.util.Locale
  * @return unit type for specified locale
  */
 object LocaleEx {
+
+    /**
+     * Returns the [VoiceUnit] type for the specified locale. Try to avoid using this unnecessarily because
+     * all methods consuming unit type are able to handle the [com.mapbox.navigation.base.typedef.UNDEFINED] type
+     *
+     * @receiver Locale for which to return the default unit type
+     * @return String [VoiceUnit]
+     */
     @JvmStatic
     @VoiceUnit
     fun Locale.getUnitTypeForLocale(): String =
@@ -25,6 +33,11 @@ object LocaleEx {
                 else ->
                     METRIC
             }
+
+    /**
+     * Provide [Locale] based on voice language of [DirectionsRoute] or default device's location if
+     * non-specified
+     */
     @JvmStatic
     fun getLocaleDirectionsRoute(directionsRoute: DirectionsRoute, context: Context): Locale {
         return if (directionsRoute.voiceLanguage() != null) {
