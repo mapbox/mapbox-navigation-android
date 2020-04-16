@@ -271,10 +271,12 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = fasterRoute
-            fasterRouteSelectionTimer.start()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
+            if (isAlternativeFaster) {
+                this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = fasterRoute
+                fasterRouteSelectionTimer.start()
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 
