@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -69,6 +70,8 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         initListeners()
         mapView.getMapAsync(this)
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+            .show()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -109,8 +112,9 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             locationListenerCallback,
             mainLooper
         )
-        // center the map at current location
-        mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+        // Center the map at current location. Using LocationEngineProvider because the
+        // replay engine won't have your last location.
+        LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
@@ -136,7 +140,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, Snackbar.LENGTH_LONG).show()
         startNavigation.setOnClickListener {
             navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
@@ -145,7 +148,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.startTripSession()
-            stopLocationUpdates()
             startNavigation.visibility = View.GONE
         }
     }
@@ -154,7 +156,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStart()
         mapView.onStart()
         navigationMapboxMap?.onStart()
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
     }
 
     public override fun onResume() {
@@ -189,7 +190,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
     private class MyLocationEngineCallback(activity: ReplayActivity) :
-            LocationEngineCallback<LocationEngineResult> {
+        LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
