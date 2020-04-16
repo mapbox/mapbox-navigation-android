@@ -15,7 +15,7 @@ import com.mapbox.navigation.core.telemetry.obtainVolumeLevel
 /**
  * Class that will hold the current states of the device phone.
  */
-data class PhoneState(val context: Context) {
+internal data class PhoneState(val context: Context) {
     val volumeLevel: Int = obtainVolumeLevel(context)
     val batteryLevel: Int = obtainBatteryLevel(context)
     val screenBrightness: Int = obtainScreenBrightness(context)

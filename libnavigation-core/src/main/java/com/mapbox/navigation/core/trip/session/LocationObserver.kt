@@ -2,7 +2,16 @@ package com.mapbox.navigation.core.trip.session
 
 import android.location.Location
 
+/**
+ * An interface which enables listening to location updates
+ */
 interface LocationObserver {
+
+    /**
+     * Invoked as soon as a new [Location] has been received.
+     *
+     * @param rawLocation un-snapped update
+     */
     fun onRawLocationChanged(rawLocation: Location)
 
     /**

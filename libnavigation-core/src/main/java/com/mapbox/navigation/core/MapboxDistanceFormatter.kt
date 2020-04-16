@@ -52,24 +52,54 @@ class MapboxDistanceFormatter private constructor(
     companion object {
         private const val smallDistanceUpperThresholdInMeters = 400.0
         private const val mediumDistanceUpperThresholdInMeters = 10000.0
+
+        /**
+         * A new instance of [MapboxDistanceFormatter.Builder]
+         *
+         * @param context is application's [Context]
+         * @return Builder
+         */
         @JvmStatic
         fun builder(context: Context): Builder = Builder(context)
     }
 
+    /**
+     * Builder of [MapboxDistanceFormatter]
+     * @param context is application's [Context]
+     */
     class Builder(private val context: Context) {
         private var unitType: String? = null
         private var locale: Locale? = null
         private var roundingIncrement = 0
 
+        /**
+         * Policy for the various units of measurement, UNDEFINED uses default for locale country
+         * @param unitType String
+         * @return Builder
+         */
         fun withUnitType(@VoiceUnit unitType: String) =
             apply { this.unitType = unitType }
 
+        /**
+         * Minimal value that distance might be stripped
+         *
+         * @see [RoundingIncrement]
+         * @return Builder
+         */
         fun withRoundingIncrement(@RoundingIncrement roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
 
+        /**
+         * Use a non-default [Locale]. By default, the [Locale] is used from applicationContext
+         *
+         * @return Builder
+         */
         fun withLocale(locale: Locale) =
             apply { this.locale = locale }
 
+        /**
+         * Build a new instance of [MapboxDistanceFormatter]
+         */
         fun build(): MapboxDistanceFormatter {
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
             val unitTypeToUse: String = when (unitType) {

@@ -10,6 +10,9 @@ import com.mapbox.navigation.base.accounts.SkuTokenProvider
 import java.lang.IllegalStateException
 
 // TODO: make the class internal
+/**
+ * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
+ */
 class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
 
     companion object {
@@ -20,6 +23,9 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         private var INSTANCE: MapboxNavigationAccounts? = null
         private var skuToken: String = ""
 
+        /**
+         * Provide singleton instance of [MapboxNavigationAccounts]
+         */
         @JvmStatic
         fun getInstance(context: Context): MapboxNavigationAccounts =
             INSTANCE
@@ -44,6 +50,9 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         }
     }
 
+    /**
+     * Returns a raw SKU token or a token attached to the URL query.
+     */
     @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->

@@ -8,6 +8,12 @@ import com.mapbox.navigation.utils.extensions.ifNonNull
 import java.util.concurrent.CopyOnWriteArrayList
 
 // todo make internal
+/**
+ * Default implementation of [DirectionsSession].
+ *
+ * @property router route fetcher. Usually Onboard, Offboard or Hybrid
+ * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
+ */
 class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
@@ -15,6 +21,12 @@ class MapboxDirectionsSession(
     private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
     private var routeOptions: RouteOptions? = null
 
+    /**
+     * Routes that were fetched from [Router] or set manually.
+     * On [routes] change notify registered [RoutesObserver]
+     *
+     * @see [registerRoutesObserver]
+     */
     override var routes: List<DirectionsRoute> = emptyList()
         set(value) {
             router.cancel()
@@ -28,16 +40,36 @@ class MapboxDirectionsSession(
             routesObservers.forEach { it.onRoutesChanged(value) }
         }
 
+    /**
+     * Provide route options for current [routes]
+     */
     override fun getRouteOptions(): RouteOptions? = routeOptions
 
+    /**
+     * Interrupts a route-fetching request if one is in progress.
+     */
     override fun cancel() {
         router.cancel()
     }
 
+    /**
+     * Refresh the traffic annotations for a given [DirectionsRoute]
+     *
+     * @param route DirectionsRoute the direction route to refresh
+     * @param legIndex Int the index of the current leg in the route
+     * @param callback Callback that gets notified with the results of the request
+     */
     override fun requestRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
         router.getRouteRefresh(route, legIndex, callback)
     }
 
+    /**
+     * Fetch route based on [RouteOptions]
+     *
+     * @param routeOptions RouteOptions
+     * @param routesRequestCallback Callback that gets notified with the results of the request(optional),
+     * see [registerRoutesObserver]
+     */
     override fun requestRoutes(
         routeOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback?
@@ -61,6 +93,14 @@ class MapboxDirectionsSession(
         })
     }
 
+    /**
+     * Requests a route using the provided [Router] implementation.
+     * Unlike [DirectionsSession.requestRoutes] it ignores the result and it's up to the
+     * consumer to take an action with the route.
+     *
+     * @param adjustedRouteOptions: RouteOptions with adjusted parameters
+     * @param routesRequestCallback Callback that gets notified when request state changes
+     */
     override fun requestFasterRoute(
         adjustedRouteOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback
@@ -84,6 +124,9 @@ class MapboxDirectionsSession(
         })
     }
 
+    /**
+     * Registers [RoutesObserver]. Updated on each change of [routes]
+     */
     override fun registerRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.add(routesObserver)
         if (routes.isNotEmpty()) {
@@ -91,14 +134,23 @@ class MapboxDirectionsSession(
         }
     }
 
+    /**
+     * Unregisters [RoutesObserver]
+     */
     override fun unregisterRoutesObserver(routesObserver: RoutesObserver) {
         routesObservers.remove(routesObserver)
     }
 
+    /**
+     * Unregisters all [RoutesObserver]
+     */
     override fun unregisterAllRoutesObservers() {
         routesObservers.clear()
     }
 
+    /**
+     * Interrupt route-fetcher request
+     */
     override fun shutdownSession() {
         router.shutdown()
     }

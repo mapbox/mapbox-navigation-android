@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.telemetry.events
 
 import android.location.Location
 
-class MetricsLocation(private val _location: Location?) {
+internal class MetricsLocation(private val _location: Location?) {
 
     companion object {
         internal const val PROVIDER = "MetricsLocation"

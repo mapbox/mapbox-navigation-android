@@ -15,6 +15,12 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import java.util.ArrayList
 
+/**
+ * Mock [LocationEngine] for replaying route movement through [DirectionsRoute]
+ *
+ * @param logger [Logger](optional)
+ * @param converter ReplayLocationConverter
+ */
 class ReplayRouteLocationEngine(
     val logger: Logger? = null,
     private val converter: ReplayLocationConverter
@@ -30,6 +36,9 @@ class ReplayRouteLocationEngine(
     private var route: DirectionsRoute? = null
     private var point: Point? = null
 
+    /**
+     * @param [Logger](optional)
+     */
     constructor(logger: Logger? = null) : this(
         logger,
         ReplayRouteLocationConverter(
@@ -56,31 +65,51 @@ class ReplayRouteLocationEngine(
             "com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine"
     }
 
+    /**
+     * Assign a new route. If [moveTo] was called before, stay invalid
+     */
     fun assign(route: DirectionsRoute) {
         this.route = route
         this.point = null
     }
 
+    /**
+     * Move current location to [Point]
+     */
     fun moveTo(point: Point) {
         this.point = point
         this.route = null
     }
 
+    /**
+     * Entry point of route or set location to custom map location
+     */
     fun assignLastLocation(currentPosition: Point) {
         lastLocation.longitude = currentPosition.longitude()
         lastLocation.latitude = currentPosition.latitude()
     }
 
+    /**
+     * @param customSpeedInKmPerHour speed km/h
+     */
     fun updateSpeed(customSpeedInKmPerHour: Int) {
         require(customSpeedInKmPerHour > 0) { SPEED_MUST_BE_GREATER_THAN_ZERO_KM_H }
         this.speed = customSpeedInKmPerHour
     }
 
+    /**
+     * Delay between each [Point]
+     *
+     * @param customDelayInSeconds delay in seconds, must be > 0
+     */
     fun updateDelay(customDelayInSeconds: Int) {
         require(customDelayInSeconds > 0) { DELAY_MUST_BE_GREATER_THAN_ZERO_SECONDS }
         this.delay = customDelayInSeconds
     }
 
+    /**
+     * Start mocked movement
+     */
     override fun run() {
         var nextMockedLocations = converter.toLocations()
         if (nextMockedLocations.isEmpty()) {
@@ -96,11 +125,19 @@ class ReplayRouteLocationEngine(
         scheduleNextDispatch()
     }
 
+    /**
+     * Returns the most recent location currently available.
+     *
+     * If a location is not available, which should happen very rarely, null will be returned.
+     */
     @Throws(SecurityException::class)
     override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) {
         callback.onSuccess(LocationEngineResult.create(lastLocation))
     }
 
+    /**
+     * Requests location updates with a callback on the specified Looper thread.
+     */
     @Throws(SecurityException::class)
     override fun requestLocationUpdates(
         request: LocationEngineRequest,
@@ -110,6 +147,9 @@ class ReplayRouteLocationEngine(
         beginReplayWith(callback)
     }
 
+    /**
+     * Requests location updates with callback on the specified PendingIntent.
+     */
     @Throws(SecurityException::class)
     override fun requestLocationUpdates(
         request: LocationEngineRequest,
@@ -117,11 +157,23 @@ class ReplayRouteLocationEngine(
     ) {
         logger?.e(msg = Message("ReplayEngine does not support PendingIntent."))
     }
-
+    /**
+     * Removes location updates for the given location engine callback.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     *
+     */
     override fun removeLocationUpdates(callback: LocationEngineCallback<LocationEngineResult>) {
         deactivate()
     }
 
+    /**
+     * Removes location updates for the given pending intent.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     */
     override fun removeLocationUpdates(pendingIntent: PendingIntent) {
         logger?.e(msg = Message("ReplayEngine does not support PendingIntent."))
     }

@@ -9,7 +9,9 @@ typealias CustomEventMapper = (String, LinkedTreeMap<*, *>) -> ReplayEventBase?
 /**
  * This class is responsible for creating [ReplayEvents] from history data.
  *
- * If you have added custom events to the replay history, include your own [CustomEventMapper]
+ * @param gson Gson
+ * @param customEventMapper if you have added custom events to the replay history, include your
+ * own [CustomEventMapper] (optional)
  */
 class ReplayHistoryMapper(
     private val gson: Gson = Gson(),

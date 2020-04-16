@@ -6,7 +6,7 @@ import com.mapbox.navigation.core.telemetry.obtainGeometry
 import com.mapbox.navigation.core.telemetry.obtainStepCount
 import java.util.Date
 
-data class SessionState(
+internal data class SessionState(
     var secondsSinceLastReroute: Int = -1,
     var eventRouteProgress: MetricsRouteProgress = MetricsRouteProgress(null),
     var eventLocation: Location = Location(MetricsLocation.PROVIDER).apply {
