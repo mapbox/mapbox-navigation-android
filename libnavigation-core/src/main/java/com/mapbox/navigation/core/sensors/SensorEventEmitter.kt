@@ -8,6 +8,8 @@ import android.hardware.SensorManager
 /**
  * This class makes it simple to register listeners to the [SensorManager]. Use [start] to
  * register and pass the [SensorEvent]s to MapboxNavigation.updateSensorEvent.
+ *
+ * @param sensorManager [SensorManager]
  */
 class SensorEventEmitter(
     private val sensorManager: SensorManager
@@ -41,10 +43,20 @@ class SensorEventEmitter(
         sensorManager.unregisterListener(this)
     }
 
+    /**
+     * Called when there is a new sensor event.  Note that "on changed"
+     * is somewhat of a misnomer, as this will also be called if we have a
+     * new reading from a sensor with the exact same sensor values (but a
+     * newer timestamp).
+     */
     override fun onSensorChanged(event: SensorEvent) {
         eventEmitter(event)
     }
 
+    /**
+     * Called when the accuracy of the registered sensor has changed.  Unlike
+     * onSensorChanged(), this is only called when this accuracy value changes.
+     */
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Haven't found a need for this
     }
