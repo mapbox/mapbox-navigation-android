@@ -21,6 +21,7 @@ internal class FasterRouteController(
         val previousFasterRouteObserver = this.fasterRouteObserver
         this.fasterRouteObserver = fasterRouteObserver
         if (previousFasterRouteObserver == null) {
+            fasterRouteTimer.restartAfterMillis = fasterRouteObserver.restartAfterMillis()
             fasterRouteTimer.startTimer {
                 requestFasterRoute()
             }
@@ -33,10 +34,13 @@ internal class FasterRouteController(
     }
 
     private fun requestFasterRoute() {
+        val restartAfterMillis = fasterRouteObserver?.restartAfterMillis()
+            ?: return
         if (directionsSession.routes.isEmpty()) {
             return
         }
 
+        fasterRouteTimer.restartAfterMillis = restartAfterMillis
         ifNonNull(tripSession.getEnhancedLocation()) { enhancedLocation ->
             val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, enhancedLocation)
                 ?: return
@@ -46,13 +50,11 @@ internal class FasterRouteController(
 
     private val fasterRouteRequestCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            if (directionsSession.routes.isEmpty()) {
-                return
-            }
+            val currentRoute = directionsSession.routes.firstOrNull()
+                ?: return
             tripSession.getRouteProgress()?.let { progress ->
-                if (fasterRouteDetector.isRouteFaster(routes[0], progress)) {
-                    fasterRouteObserver?.onFasterRouteAvailable(routes[0])
-                }
+                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], progress)
+                fasterRouteObserver?.onFasterRoute(currentRoute, routes[0], isAlternativeFaster)
             }
         }
 

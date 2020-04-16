@@ -45,6 +45,7 @@ import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_GPS
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.lang.ref.WeakReference
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
@@ -133,10 +134,15 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            this@FasterRouteActivity.fasterRoute = fasterRoute
-            fasterRouteSelectionTimer.start()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        // [Optional] Override the interval to check for faster routes.
+        override fun restartAfterMillis(): Long = TimeUnit.MINUTES.toMillis(1)
+
+        override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
+            if (isAlternativeFaster) {
+                this@FasterRouteActivity.fasterRoute = alternativeRoute
+                fasterRouteSelectionTimer.start()
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 

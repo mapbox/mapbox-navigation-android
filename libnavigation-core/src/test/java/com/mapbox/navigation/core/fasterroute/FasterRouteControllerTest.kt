@@ -28,7 +28,8 @@ class FasterRouteControllerTest {
     private val directionsSession: DirectionsSession = mockk()
     private val tripSession: TripSession = mockk()
     private val fasterRouteObserver: FasterRouteObserver = mockk {
-        every { onFasterRouteAvailable(any()) } returns Unit
+        every { restartAfterMillis() } returns TimeUnit.MINUTES.toMillis(1)
+        every { onFasterRoute(any(), any(), any()) } returns Unit
     }
     private val routesRequestCallbacks = slot<RoutesRequestCallback>()
 
@@ -88,12 +89,11 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should notify observer of a faster route`() = coroutineRule.runBlockingTest {
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 801.332
-            }
-        )
+        val currentRoute: DirectionsRoute = mockk {
+            every { routeIndex() } returns "0"
+            every { duration() } returns 801.332
+        }
+        every { directionsSession.routes } returns listOf(currentRoute)
         every { tripSession.getEnhancedLocation() } returns mockk {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
@@ -111,20 +111,19 @@ class FasterRouteControllerTest {
             })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
-        verify(exactly = 1) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
+        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes[0], true) }
 
         fasterRouteController.stop()
         coroutineRule.testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `should not notify observer if route is slower`() = coroutineRule.runBlockingTest {
-        every { directionsSession.routes } returns listOf(
-            mockk {
-                every { routeIndex() } returns "0"
-                every { duration() } returns 801.332
-            }
-        )
+    fun `should notify observer if current route is fastest`() = coroutineRule.runBlockingTest {
+        val currentRoute: DirectionsRoute = mockk {
+            every { routeIndex() } returns "0"
+            every { duration() } returns 801.332
+        }
+        every { directionsSession.routes } returns listOf(currentRoute)
         every { tripSession.getEnhancedLocation() } returns mockk {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
@@ -142,7 +141,7 @@ class FasterRouteControllerTest {
         })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
-        verify(exactly = 0) { fasterRouteObserver.onFasterRouteAvailable(routes[0]) }
+        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes[0], false) }
 
         fasterRouteController.stop()
         coroutineRule.testDispatcher.cleanupTestCoroutines()

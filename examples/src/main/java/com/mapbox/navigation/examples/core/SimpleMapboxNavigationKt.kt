@@ -336,10 +336,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRouteAvailable(fasterRoute: DirectionsRoute) {
-            this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
-            fasterRouteSelectionTimer.start()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
+            if (isAlternativeFaster) {
+                this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
+                fasterRouteSelectionTimer.start()
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
     }
 
