@@ -192,7 +192,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
     navigationViewModel.updateFeedback(feedbackItem);
-    alertView.showFeedbackSubmitted();
   }
 
   @Override

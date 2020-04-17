@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:keepScreenOn="true">
+
+    <include
+        android:id="@+id/topBanner"
+        layout="@layout/mapbox_feedback_bottom_sheet_top_banner"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mapbox_feedback_bottom_sheet_top_banner_height"
+        app:layout_constraintBottom_toTopOf="@id/guidanceIssueLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/guidanceIssueLayout"
+        style="@style/FeedbackBottomSheetIssueListLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBanner">
+
+        <TextView
+            style="@style/FeedbackBottomSheetIssueListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feedback_guidance_issue" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/guidanceIssueItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/mapbox_feedback_item_margin"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="@dimen/mapbox_feedback_item_margin" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navigationIssueLayout"
+        style="@style/FeedbackBottomSheetIssueListLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guidanceIssueLayout">
+
+        <TextView
+            style="@style/FeedbackBottomSheetIssueListTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/feedback_navigation_issue" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/navigationIssueItems"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/mapbox_feedback_item_margin"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="@dimen/mapbox_feedback_item_margin" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/feedbackProgress"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:max="5000"
+        android:progress="5000"
+        android:progressDrawable="@drawable/feedback_progress_drawable"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/navigationIssueLayout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

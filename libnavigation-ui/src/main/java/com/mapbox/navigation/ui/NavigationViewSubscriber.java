@@ -19,7 +19,7 @@ class NavigationViewSubscriber implements LifecycleObserver {
   private final NavigationPresenter navigationPresenter;
 
   NavigationViewSubscriber(final LifecycleOwner owner, final NavigationViewModel navigationViewModel,
-      final NavigationPresenter navigationPresenter) {
+                           final NavigationPresenter navigationPresenter) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
@@ -62,6 +62,15 @@ class NavigationViewSubscriber implements LifecycleObserver {
         }
       }
     });
+
+    navigationViewModel.retrieveIsFeedbackSentSuccess().observe(lifecycleOwner, new Observer<Boolean>() {
+      @Override
+      public void onChanged(Boolean isFeedbackSentSuccess) {
+        if (isFeedbackSentSuccess != null && isFeedbackSentSuccess) {
+          navigationPresenter.onFeedbackSent();
+        }
+      }
+    });
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -70,5 +79,6 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveDestination().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveIsFeedbackSentSuccess().removeObservers(lifecycleOwner);
   }
 }

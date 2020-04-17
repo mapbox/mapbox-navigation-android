@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
@@ -198,9 +197,11 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))
             }
-            Snackbar.make(findViewById(R.id.navigationLayout),
-                    R.string.msg_long_press_map_to_place_waypoint,
-                    Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(
+                findViewById(R.id.navigationLayout),
+                R.string.msg_long_press_map_to_place_waypoint,
+                Snackbar.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -371,13 +372,10 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun showFeedbackBottomSheet() {
-        supportFragmentManager?.let {
+        supportFragmentManager.let {
             FeedbackBottomSheet.newInstance(
                 this,
-                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION,
-                ContextCompat.getColor(applicationContext, R.color.navigation_primary_background),
-                ContextCompat.getColor(applicationContext, R.color.navigation_secondary_background),
-                ContextCompat.getColor(applicationContext, R.color.navigation_primary_text)
+                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
             )
                 .show(it, FeedbackBottomSheet.TAG)
         }

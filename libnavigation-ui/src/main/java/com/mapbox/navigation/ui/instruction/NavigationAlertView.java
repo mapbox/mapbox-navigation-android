@@ -112,7 +112,6 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
       return;
     }
     navigationViewModel.updateFeedback(feedbackItem);
-    showFeedbackSubmitted();
   }
 
   @Override

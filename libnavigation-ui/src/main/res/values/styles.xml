@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="NavigationMapRoute">
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
-        <item name="routeModerateCongestionColor">@color/mapbox_navigation_route_layer_congestion_yellow</item>
-        <item name="routeSevereCongestionColor">@color/mapbox_navigation_route_layer_congestion_red</item>
+        <item name="routeModerateCongestionColor">
+            @color/mapbox_navigation_route_layer_congestion_yellow
+        </item>
+        <item name="routeSevereCongestionColor">
+            @color/mapbox_navigation_route_layer_congestion_red
+        </item>
         <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
 
         <!-- Scales -->
         <item name="routeScale">1.0</item>
-        <item name="upcomingManeuverArrowColor">@color/mapbox_navigation_route_upcoming_maneuver_arrow_color</item>
-        <item name="upcomingManeuverArrowBorderColor">@color/mapbox_navigation_route_upcoming_maneuver_arrow_border_color</item>
+        <item name="upcomingManeuverArrowColor">
+            @color/mapbox_navigation_route_upcoming_maneuver_arrow_color
+        </item>
+        <item name="upcomingManeuverArrowBorderColor">
+            @color/mapbox_navigation_route_upcoming_maneuver_arrow_border_color
+        </item>
 
         <!-- Expression styling -->
         <item name="roundedLineCap">true</item>
@@ -20,20 +29,36 @@
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
-        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_primary_text</item>
-        <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text</item>
+        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_primary_text
+        </item>
+        <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text
+        </item>
         <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider</item>
 
-        <item name="navigationViewListBackground">@color/mapbox_navigation_view_color_list_background</item>
+        <item name="navigationViewListBackground">
+            @color/mapbox_navigation_view_color_list_background
+        </item>
 
-        <item name="navigationViewBannerBackground">@color/mapbox_navigation_view_color_banner_background</item>
-        <item name="navigationViewBannerPrimaryText">@color/mapbox_navigation_view_color_banner_primary_text</item>
-        <item name="navigationViewBannerSecondaryText">@color/mapbox_navigation_view_color_banner_secondary_text</item>
-        <item name="navigationViewBannerManeuverPrimary">@color/mapbox_navigation_view_color_banner_maneuver_primary</item>
-        <item name="navigationViewBannerManeuverSecondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary</item>
+        <item name="navigationViewBannerBackground">
+            @color/mapbox_navigation_view_color_banner_background
+        </item>
+        <item name="navigationViewBannerPrimaryText">
+            @color/mapbox_navigation_view_color_banner_primary_text
+        </item>
+        <item name="navigationViewBannerSecondaryText">
+            @color/mapbox_navigation_view_color_banner_secondary_text
+        </item>
+        <item name="navigationViewBannerManeuverPrimary">
+            @color/mapbox_navigation_view_color_banner_maneuver_primary
+        </item>
+        <item name="navigationViewBannerManeuverSecondary">
+            @color/mapbox_navigation_view_color_banner_maneuver_secondary
+        </item>
 
         <item name="navigationViewProgress">@color/mapbox_navigation_view_color_progress</item>
-        <item name="navigationViewProgressBackground">@color/mapbox_navigation_view_color_progress_background</item>
+        <item name="navigationViewProgressBackground">
+            @color/mapbox_navigation_view_color_progress_background
+        </item>
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
@@ -48,22 +73,41 @@
 
     <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
-        <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark</item>
+        <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark
+        </item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent_dark</item>
-        <item name="navigationViewPrimaryText">@color/mapbox_navigation_view_color_primary_text_dark</item>
-        <item name="navigationViewSecondaryText">@color/mapbox_navigation_view_color_accent_text_dark</item>
+        <item name="navigationViewPrimaryText">
+            @color/mapbox_navigation_view_color_primary_text_dark
+        </item>
+        <item name="navigationViewSecondaryText">
+            @color/mapbox_navigation_view_color_accent_text_dark
+        </item>
         <item name="navigationViewDivider">@color/mapbox_navigation_view_color_divider_dark</item>
 
-        <item name="navigationViewListBackground">@color/mapbox_navigation_view_color_list_background_dark</item>
+        <item name="navigationViewListBackground">
+            @color/mapbox_navigation_view_color_list_background_dark
+        </item>
 
-        <item name="navigationViewBannerBackground">@color/mapbox_navigation_view_color_banner_background_dark</item>
-        <item name="navigationViewBannerPrimaryText">@color/mapbox_navigation_view_color_banner_primary_text_dark</item>
-        <item name="navigationViewBannerSecondaryText">@color/mapbox_navigation_view_color_banner_secondary_text_dark</item>
-        <item name="navigationViewBannerManeuverPrimary">@color/mapbox_navigation_view_color_banner_maneuver_primary_dark</item>
-        <item name="navigationViewBannerManeuverSecondary">@color/mapbox_navigation_view_color_banner_maneuver_secondary_dark</item>
+        <item name="navigationViewBannerBackground">
+            @color/mapbox_navigation_view_color_banner_background_dark
+        </item>
+        <item name="navigationViewBannerPrimaryText">
+            @color/mapbox_navigation_view_color_banner_primary_text_dark
+        </item>
+        <item name="navigationViewBannerSecondaryText">
+            @color/mapbox_navigation_view_color_banner_secondary_text_dark
+        </item>
+        <item name="navigationViewBannerManeuverPrimary">
+            @color/mapbox_navigation_view_color_banner_maneuver_primary_dark
+        </item>
+        <item name="navigationViewBannerManeuverSecondary">
+            @color/mapbox_navigation_view_color_banner_maneuver_secondary_dark
+        </item>
 
         <item name="navigationViewProgress">@color/mapbox_navigation_view_color_progress_dark</item>
-        <item name="navigationViewProgressBackground">@color/mapbox_navigation_view_color_progress_background_dark</item>
+        <item name="navigationViewProgressBackground">
+            @color/mapbox_navigation_view_color_progress_background_dark
+        </item>
 
         <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
 
@@ -83,13 +127,18 @@
 
     <!-- Default InstructionView style -->
     <style name="InstructionView">
-        <item name="instructionViewPrimaryBackgroundColor">?attr/navigationViewBannerBackground</item>
+        <item name="instructionViewPrimaryBackgroundColor">?attr/navigationViewBannerBackground
+        </item>
         <item name="instructionViewSecondaryBackgroundColor">?attr/navigationViewSecondary</item>
         <item name="instructionListViewBackgroundColor">?attr/navigationViewListBackground</item>
         <item name="instructionViewPrimaryTextColor">?attr/navigationViewBannerPrimaryText</item>
-        <item name="instructionViewSecondaryTextColor">?attr/navigationViewBannerSecondaryText</item>
-        <item name="instructionManeuverViewPrimaryColor">?attr/navigationViewBannerManeuverPrimary</item>
-        <item name="instructionManeuverViewSecondaryColor">?attr/navigationViewBannerManeuverSecondary</item>
+        <item name="instructionViewSecondaryTextColor">?attr/navigationViewBannerSecondaryText
+        </item>
+        <item name="instructionManeuverViewPrimaryColor">?attr/navigationViewBannerManeuverPrimary
+        </item>
+        <item name="instructionManeuverViewSecondaryColor">
+            ?attr/navigationViewBannerManeuverSecondary
+        </item>
     </style>
 
     <!-- Default SoundButton style -->
@@ -107,7 +156,8 @@
     <!-- Default AlertView style -->
     <style name="AlertView">
         <item name="alertViewBackgroundColor">?attr/navigationViewBannerBackground</item>
-        <item name="alertViewProgressBarBackgroundColor">?attr/navigationViewProgressBackground</item>
+        <item name="alertViewProgressBarBackgroundColor">?attr/navigationViewProgressBackground
+        </item>
         <item name="alertViewProgressBarColor">?attr/navigationViewProgress</item>
         <item name="alertViewTextColor">?attr/navigationViewBannerPrimaryText</item>
     </style>
@@ -130,9 +180,51 @@
         <item name="summaryBottomSheetSecondaryColor">?attr/navigationViewSecondary</item>
         <item name="summaryBottomSheetDividerColor">?attr/navigationViewDivider</item>
         <item name="summaryBottomSheetProgressBarColor">?attr/navigationViewAccent</item>
-        <item name="summaryBottomSheetRouteOverviewDrawable">?attr/navigationViewRouteOverviewDrawable</item>
+        <item name="summaryBottomSheetRouteOverviewDrawable">
+            ?attr/navigationViewRouteOverviewDrawable
+        </item>
         <item name="summaryBottomSheetPrimaryTextColor">?attr/navigationViewPrimaryText</item>
         <item name="summaryBottomSheetSecondaryTextColor">?attr/navigationViewSecondaryText</item>
+    </style>
+
+    <style name="MapboxTextViewStyle" parent="android:TextAppearance" />
+
+    <style name="FeedbackBottomSheetTitle" parent="MapboxTextViewStyle">
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_primary_text</item>
+        <item name="android:layout_marginStart">
+            @dimen/mapbox_feedback_bottom_sheet_top_banner_title_margin_start
+        </item>
+    </style>
+
+    <style name="FeedbackBottomSheetIssueListLayout">
+        <item name="android:background">@drawable/mapbox_feedback_bottom_issue_background</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">12dp</item>
+    </style>
+
+    <style name="FeedbackBottomSheetIssueListTitle" parent="MapboxTextViewStyle">
+        <item name="android:textSize">21sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:paddingTop">@dimen/dimen_8dp</item>
+        <item name="android:paddingBottom">@dimen/dimen_8dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
+    </style>
+
+    <style name="FeedbackBottomSheetIssueDescriptionText" parent="MapboxTextViewStyle">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
+    </style>
+
+    <style name="FeedbackBottomSheetTopBanner">
+        <item name="android:background">@color/mapbox_feedback_bottom_sheet_primary</item>
     </style>
 
 </resources>

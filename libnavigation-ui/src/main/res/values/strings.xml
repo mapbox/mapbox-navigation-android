@@ -15,6 +15,30 @@
     <!-- Feedback -->
     <string name="report_feedback">Report feedback</string>
 
+    <!-- Feedback Guidance Issue -->
+    <string name="feedback_guidance_issue">Guidance Issue</string>
+
+    <!-- Feedback type for Incorrect Visual -->
+    <string name="feedback_type_incorrect_visual">Incorrect\nVisual</string>
+
+    <!-- Feedback type for Confusing Audio -->
+    <string name="feedback_type_confusing_audio">Confusing\nAudio</string>
+
+    <!-- Feedback Navigation Issue -->
+    <string name="feedback_navigation_issue">Navigation Issue</string>
+
+    <!-- Feedback type for Route Quality -->
+    <string name="feedback_type_route_quality">Route\nQuality</string>
+
+    <!-- Feedback type for Illegal Route -->
+    <string name="feedback_type_illegal_route">Illegal\nRoute</string>
+
+    <!-- Feedback type for Road Closure -->
+    <string name="feedback_type_road_closure">Road\nClosure</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="feedback_reported">Thank you! Issue Reported.</string>
+
     <!-- Feedback type for Bad Route -->
     <string name="feedback_bad_route">Inefficient or\nBad Route</string>
 

@@ -9,16 +9,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.libnavigation.ui.R;
 
+/**
+ * A ViewHolder describes a Feedback category view and metadata about its place within the RecyclerView.
+ */
 class FeedbackViewHolder extends RecyclerView.ViewHolder {
 
   private ImageView feedbackImage;
   private TextView feedbackText;
 
-  FeedbackViewHolder(View itemView, int textColor) {
+  FeedbackViewHolder(View itemView) {
     super(itemView);
     feedbackImage = itemView.findViewById(R.id.feedbackImage);
     feedbackText = itemView.findViewById(R.id.feedbackText);
-    feedbackText.setTextColor(textColor);
   }
 
   void setFeedbackImage(int feedbackImageId) {
