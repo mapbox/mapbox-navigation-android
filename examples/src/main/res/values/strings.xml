@@ -74,6 +74,9 @@
     <string name="title_faster_route" translatable="false">FasterRouteActivity</string>
     <string name="description_faster_route" translatable="false">Demonstrate how to use MapboxNavigation to listen for faster route</string>
 
+    <string name="title_multiple_stops" translatable="false">MultipleStopsActivity</string>
+    <string name="description_multiple_stops" translatable="false">Demonstrate how to use MultipleStops</string>
+
     <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
     <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet, Recenter button with core SDK.</string>
 
