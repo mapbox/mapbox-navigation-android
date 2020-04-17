@@ -2,15 +2,11 @@ package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -30,7 +26,6 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -143,8 +138,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private fun ReplayNavigationContext.onNavigationReady() {
         navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
 
-        mapboxNavigation.registerLocationObserver(locationObserver)
-
         replayHistoryPlayer.playFirstLocation()
         mapboxMap.addOnMapLongClickListener { latLng ->
             selectMapLocation(latLng)
@@ -196,8 +189,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     @SuppressLint("RestrictedApi")
     private fun initLocationComponent(locationEngine: LocationEngine, loadedMapStyle: Style, mapboxMap: MapboxMap) {
-        initLocationEngine(locationEngine)
-
         mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
         mapboxMap.locationComponent.let { locationComponent ->
             val locationComponentActivationOptions =
@@ -210,17 +201,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
             locationComponent.cameraMode = CameraMode.TRACKING
             locationComponent.renderMode = RenderMode.COMPASS
         }
-    }
-
-    private fun initLocationEngine(locationEngine: LocationEngine) {
-        val ignoredForReplayEngineRequest = LocationEngineRequest
-            .Builder(0).build()
-        locationEngine.requestLocationUpdates(
-            ignoredForReplayEngineRequest,
-            locationListenerCallback,
-            null
-        )
-        locationEngine.getLastLocation(locationListenerCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
@@ -265,8 +245,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onDestroy()
         loadNavigationJob?.cancelChildren()
         navigationContext?.apply {
-            locationEngine.removeLocationUpdates(locationListenerCallback)
-            mapboxNavigation.unregisterLocationObserver(locationObserver)
             replayHistoryPlayer.finish()
             mapboxNavigation.stopTripSession()
             mapboxNavigation.onDestroy()
@@ -277,40 +255,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
-    }
-
-    private val locationListenerCallback: LocationEngineCallback<LocationEngineResult> =
-        object : LocationEngineCallback<LocationEngineResult> {
-            override fun onSuccess(result: LocationEngineResult) {
-                if (isNavigating) return
-
-                result.lastLocation?.let {
-                    navigationContext?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
-                }
-            }
-
-            override fun onFailure(exception: Exception) {
-                Timber.i(exception)
-            }
-        }
-
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-            Timber.d("raw location %s", rawLocation.toString())
-        }
-
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            if (!isNavigating) return
-
-            if (keyPoints.isNotEmpty()) {
-                navigationContext?.mapboxMap?.locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                navigationContext?.mapboxMap?.locationComponent?.forceLocationUpdate(enhancedLocation)
-            }
-        }
     }
 }
 
