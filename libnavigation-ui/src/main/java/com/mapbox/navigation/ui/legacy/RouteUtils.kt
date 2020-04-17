@@ -7,6 +7,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import timber.log.Timber
 
+/**
+ * Utility class to manipulate data related to Route
+ */
 class RouteUtils {
 
     companion object {
@@ -34,6 +37,14 @@ class RouteUtils {
             currentState == RouteProgressState.ROUTE_ARRIVED
         } ?: false
 
+    /**
+     * Uses the [RouteProgress] and compares it with [com.mapbox.navigation.ui.NavigationViewOptions]
+     * to find if the device is close enough to final destination
+     *
+     * @param routeProgress the current route progress
+     * @param maxMeters value to compare the arrival remaining distance with
+     * @return true if device is close enough, false if not
+     */
     fun deviceCloseEnoughToFinalDestination(routeProgress: RouteProgress, maxMeters: Float?): Boolean =
             (routeProgress.distanceRemaining() <= maxMeters
                     ?: DEFAULT_MAX_METERS_AWAY_TO_TRIGGER_FINAL_DESTINATION_ARRIVAL)

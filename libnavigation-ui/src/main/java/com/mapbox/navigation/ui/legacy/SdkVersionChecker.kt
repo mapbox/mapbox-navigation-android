@@ -1,10 +1,19 @@
 package com.mapbox.navigation.ui.legacy
 
+/**
+ * The file is used to verify if the current Android SDK Version against
+ * another Android SDK Version
+ *
+ * @param currentSdkVersion The current version of Android SDK
+ */
 class SdkVersionChecker(private val currentSdkVersion: Int) {
 
-    fun isGreaterThan(sdkCode: Int): Boolean =
-        currentSdkVersion > sdkCode
-
+    /**
+     * Checks if the current SDK version is equal to or greater than the sdkCode
+     *
+     * @param sdkCode android SDK Code
+     * @return true if the sdkCode is equal or greater, false if not
+     */
     fun isEqualOrGreaterThan(sdkCode: Int): Boolean =
         currentSdkVersion >= sdkCode
 }
