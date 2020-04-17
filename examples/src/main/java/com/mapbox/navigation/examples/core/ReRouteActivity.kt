@@ -1,8 +1,8 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -16,9 +16,6 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.location.LocationComponent
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -29,14 +26,12 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
-import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.lang.ref.WeakReference
@@ -54,10 +49,8 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         const val DEFAULT_ENGINE_REQUEST_INTERVAL = 1000L
     }
 
-    private var locationComponent: LocationComponent? = null
-
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private var mapboxNavigation: MapboxNavigation? = null
+    private var navigationMapboxMap: NavigationMapboxMap? = null
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
     private val tripSessionStateObserver = object : TripSessionStateObserver {
@@ -66,34 +59,20 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 TripSessionState.STARTED -> {
                     startNavigation.visibility = GONE
                     stopLocationUpdates()
-                    mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+                    mapboxNavigation?.registerRouteProgressObserver(routeProgressObserver)
                 }
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
-                    mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+                    navigationMapboxMap?.removeRoute()
                 }
             }
         }
     }
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-        }
 
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
-            }
-        }
-    }
     private val routeObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                navigationMapboxMap.drawRoute(routes[0])
+                navigationMapboxMap?.drawRoute(routes[0])
             }
         }
     }
@@ -127,7 +106,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        initListeners()
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
             this,
             Utils.getMapboxAccessToken(this)
@@ -140,14 +118,19 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         ).also {
             it.registerRoutesObserver(routeObserver)
+            it.registerRouteProgressObserver(routeProgressObserver)
+            it.registerTripSessionStateObserver(tripSessionStateObserver)
         }
+        initListeners()
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                .show()
     }
 
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
+        navigationMapboxMap?.onStart()
+        mapboxNavigation?.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     public override fun onResume() {
@@ -162,18 +145,18 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation?.unregisterRoutesObserver(routeObserver)
+        navigationMapboxMap?.onStop()
         stopLocationUpdates()
         mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterRoutesObserver(routeObserver)
-        mapboxNavigation.stopTripSession()
-        mapboxNavigation.onDestroy()
+        mapboxNavigation?.stopTripSession()
+        mapboxNavigation?.onDestroy()
         mapView.onDestroy()
     }
 
@@ -184,30 +167,20 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
-            locationComponent = mapboxMap.locationComponent.apply {
-                activateLocationComponent(
-                    LocationComponentActivationOptions.builder(this@ReRouteActivity, style)
-                        .useDefaultLocationEngine(false)
-                        .build()
-                )
-                cameraMode = CameraMode.TRACKING
-                isLocationComponentEnabled = true
-            }
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).also {
-                it.addProgressChangeListener(mapboxNavigation)
-                it.setCamera(DynamicCamera(mapboxMap))
-            }
+            mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+
+            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
-        mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
-                mapboxNavigation.requestRoutes(
+                mapboxNavigation?.requestRoutes(
                     RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
+                            .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                            .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                            .alternatives(true)
+                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                            .build(),
                     routesReqCallback
                 )
             }
@@ -217,14 +190,16 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
         startNavigation.setOnClickListener {
-            if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-                navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-                navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
+            if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
+                navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
-            mapboxNavigation.startTripSession()
+            mapboxNavigation?.startTripSession()
+            startNavigation.visibility = View.GONE
+            stopLocationUpdates()
         }
     }
 
@@ -235,16 +210,15 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                 .build()
 
-        mapboxNavigation.locationEngine.requestLocationUpdates(
+        mapboxNavigation?.locationEngine?.requestLocationUpdates(
             requestLocationUpdateRequest,
             locationListenerCallback,
             mainLooper
         )
-        mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation.locationEngine.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 
     private class MyLocationEngineCallback(activity: ReRouteActivity) :
@@ -254,7 +228,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                activityRef.get()?.locationComponent?.forceLocationUpdate(it)
+                activityRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
             }
         }
 

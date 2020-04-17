@@ -127,7 +127,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onTick(millisUntilFinished: Long) {
                 Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
                 fasterRouteAcceptProgress.progress =
-                    (MAX_PROGRESS - millisUntilFinished / COUNT_DOWN_INTERVAL).toInt()
+                        (MAX_PROGRESS - millisUntilFinished / COUNT_DOWN_INTERVAL).toInt()
             }
 
             override fun onFinish() {
@@ -150,13 +150,15 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigationOptions.onboardRouterConfig?.toBuilder()?.tilePath("")
 
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            Utils.getMapboxAccessToken(this), mapboxNavigationOptions
+                applicationContext,
+                Utils.getMapboxAccessToken(this), mapboxNavigationOptions
         ).also {
             it.registerRoutesObserver(routesObserver)
         }
 
         initListeners()
+        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                .show()
     }
 
     override fun onLowMemory() {
@@ -206,13 +208,13 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
-                    routesReqCallback
+                        RouteOptions.builder().applyDefaultParams()
+                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                                .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                                .alternatives(true)
+                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                                .build(),
+                        routesReqCallback
                 )
             }
             true
@@ -221,7 +223,6 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFasterRoute)
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = MAX_PROGRESS.toInt()
@@ -256,15 +257,15 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("RestrictedApi")
     private fun startLocationUpdates() {
         val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(DEFAULT_ENGINE_REQUEST_INTERVAL)
-                .setFastestInterval(DEFAULT_FASTEST_INTERVAL)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .build()
+                LocationEngineRequest.Builder(DEFAULT_ENGINE_REQUEST_INTERVAL)
+                        .setFastestInterval(DEFAULT_FASTEST_INTERVAL)
+                        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                        .build()
         try {
             mapboxNavigation.locationEngine.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
+                    requestLocationUpdateRequest,
+                    locationListenerCallback,
+                    mainLooper
             )
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
         } catch (exception: SecurityException) {
@@ -273,7 +274,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private class MyLocationEngineCallback(activity: FasterRouteActivity) :
-        LocationEngineCallback<LocationEngineResult> {
+            LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 

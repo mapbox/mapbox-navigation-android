@@ -68,10 +68,10 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         )
 
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            Utils.getMapboxAccessToken(this),
-            mapboxNavigationOptions,
-            locationEngine = getLocationEngine()
+                applicationContext,
+                Utils.getMapboxAccessToken(this),
+                mapboxNavigationOptions,
+                locationEngine = getLocationEngine()
         ).also {
             it.registerRouteProgressObserver(routeProgressObserver)
             it.registerTripSessionStateObserver(tripSessionStateObserver)
@@ -79,7 +79,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         initListeners()
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-            .show()
+                .show()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -90,35 +90,46 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.restoreFrom(state)
             }
             // center the map at current location
-            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+            if (shouldSimulateRoute()) {
+                LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            } else {
+                mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+            }
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
-                    routesReqCallback
+                        RouteOptions.builder().applyDefaultParams()
+                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                                .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                                .alternatives(true)
+                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                                .build(),
+                        routesReqCallback
                 )
             }
             true
         }
     }
 
+    private val routeProgressObserver = object : RouteProgressObserver {
+        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+            // do something with the route progress
+            Timber.i("route progress: ${routeProgress.currentState()}")
+        }
+    }
+
     fun startLocationUpdates() {
         val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                .build()
+                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                        .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                        .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
+                        .build()
 
         mapboxNavigation?.locationEngine?.requestLocationUpdates(
-            requestLocationUpdateRequest,
-            locationListenerCallback,
-            mainLooper
+                requestLocationUpdateRequest,
+                locationListenerCallback,
+                mainLooper
         )
     }
 
@@ -146,7 +157,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun initListeners() {
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, Snackbar.LENGTH_LONG).show()
         startNavigation.setOnClickListener {
             navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
@@ -155,7 +165,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.startTripSession()
-            stopLocationUpdates()
             startNavigation.visibility = View.GONE
             if (!shouldSimulateRoute()) {
                 stopLocationUpdates()
@@ -218,18 +227,13 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            // do something with the route progress
-            Timber.i("route progress: ${routeProgress.currentState()}")
-        }
-    }
-
     private val tripSessionStateObserver = object : TripSessionStateObserver {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
-                    stopLocationUpdates()
+                    if (!shouldSimulateRoute()) {
+                        stopLocationUpdates()
+                    }
                 }
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
@@ -243,7 +247,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     // This is used for testing purposes.
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
-            .getBoolean(this.getString(R.string.simulate_route_key), false)
+                .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 
     // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
