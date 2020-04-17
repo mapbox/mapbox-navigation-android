@@ -10,7 +10,6 @@ import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -18,6 +17,8 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
+import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -25,7 +26,9 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.history.ReplayRouteMapper
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -41,18 +44,15 @@ import timber.log.Timber
  */
 class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    companion object {
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
-        const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
-    }
-
     private var mapboxMap: MapboxMap? = null
-    private var locationEngine: LocationEngine? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
-    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private val firstLocationCallback = FirstLocationCallback(this)
     private val stopsController = StopsController()
+
+    private val replayRouteMapper = ReplayRouteMapper()
+    private val replayHistoryPlayer = ReplayHistoryPlayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +69,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             applicationContext,
             Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
-            locationEngine = replayRouteLocationEngine
+            locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
         )
         initListeners()
         mapView.getMapAsync(this)
@@ -85,7 +85,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
-            initLocationEngine()
+            initLocationComponent(mapboxNavigation!!.locationEngine, style)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             stopsController.add(latLng)
@@ -109,21 +109,21 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    fun initLocationEngine() {
-        val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                .build()
+    private fun initLocationComponent(locationEngine: LocationEngine, loadedMapStyle: Style) {
+        mapboxMap?.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+        mapboxMap?.locationComponent.let { locationComponent ->
+            val locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(this, loadedMapStyle)
+                    .locationEngine(locationEngine)
+                    .build()
 
-        locationEngine?.requestLocationUpdates(
-            requestLocationUpdateRequest,
-            locationListenerCallback,
-            mainLooper
-        )
-        // Center the map at current location. Using LocationEngineProvider because the
-        // replay engine won't have your last location.
-        LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            locationComponent?.activateLocationComponent(locationComponentActivationOptions)
+            locationComponent?.isLocationComponentEnabled = true
+            locationComponent?.cameraMode = CameraMode.TRACKING
+            locationComponent?.renderMode = RenderMode.COMPASS
+        }
+        LocationEngineProvider.getBestLocationEngine(this)
+            .getLastLocation(firstLocationCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
@@ -131,7 +131,9 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                replayRouteLocationEngine.assign(routes[0])
+                val updateLocations = replayRouteMapper.mapToUpdateLocations(0.0, routes[0])
+                replayHistoryPlayer.pushEvents(updateLocations)
+                replayHistoryPlayer.seekTo(updateLocations.first())
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
@@ -158,6 +160,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
+            replayHistoryPlayer.play(this)
         }
     }
 
@@ -179,13 +182,13 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
         navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        replayHistoryPlayer.finish()
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
@@ -196,16 +199,19 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
-    private class MyLocationEngineCallback(activity: MultipleStopsActivity) :
+    private class FirstLocationCallback(activity: MultipleStopsActivity) :
         LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
         override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.firstOrNull()?.let {
-                activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
+            result?.locations?.firstOrNull()?.let { location ->
+                activityRef.get()?.let { activity ->
+                    val locationEvent = activity.replayRouteMapper
+                        .mapToUpdateLocation(0.0, location)
+                    activity.replayHistoryPlayer.pushEvents(locationEvent)
+                    activity.replayHistoryPlayer.playFirstLocation()
+                }
             }
         }
 
@@ -213,22 +219,18 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-    }
-}
+    private class StopsController {
+        private val stops = mutableListOf<Point>()
 
-private class StopsController {
-    private val stops = mutableListOf<Point>()
+        fun add(latLng: LatLng) {
+            stops.add(latLng.toPoint())
+        }
 
-    fun add(latLng: LatLng) {
-        stops.add(latLng.toPoint())
-    }
-
-    fun coordinates(originLocation: Location): List<Point> {
-        val coordinates = mutableListOf<Point>()
-        coordinates.add(originLocation.toPoint())
-        coordinates.addAll(stops)
-        return coordinates
+        fun coordinates(originLocation: Location): List<Point> {
+            val coordinates = mutableListOf<Point>()
+            coordinates.add(originLocation.toPoint())
+            coordinates.addAll(stops)
+            return coordinates
+        }
     }
 }

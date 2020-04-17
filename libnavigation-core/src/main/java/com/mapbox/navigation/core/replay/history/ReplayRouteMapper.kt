@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.replay.history
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
@@ -25,15 +26,51 @@ class ReplayRouteMapper(
     }
 
     /**
-     * Map a directions route into replay events.
+     * Map a [DirectionsRoute] route into replay events.
      *
-     * @param directionsRoute that is converted in
+     * @param startTime the minimum eventTimestamp in the replay events
+     * @param directionsRoute used to be converted into replay events
      * @return replay events for the [ReplayHistoryPlayer]
      */
-    fun mapToUpdateLocations(directionsRoute: DirectionsRoute): List<ReplayEventBase> {
-        val geometry = directionsRoute.geometry() ?: return emptyList()
+    fun mapToUpdateLocations(startTime: Double, directionsRoute: DirectionsRoute): List<ReplayEventBase> {
+        val routeEvents = mutableListOf<ReplayEventBase>()
+        var currentTime = startTime
+        directionsRoute.legs()?.forEach { routeLeg ->
+            val routeLegEvents = mapToUpdateLocations(currentTime, routeLeg)
+            currentTime = routeLegEvents.lastOrNull()?.eventTimestamp ?: currentTime
+            routeEvents.addAll(routeLegEvents)
+        }
+        return routeEvents
+    }
+
+    /**
+     * Map a [RouteLeg] route into replay events.
+     *
+     * @param startTime the minimum eventTimestamp in the replay events
+     * @param routeLeg used to be converted into replay events
+     * @return replay events for the [ReplayHistoryPlayer]
+     */
+    fun mapToUpdateLocations(startTime: Double, routeLeg: RouteLeg): List<ReplayEventBase> {
+        val routeLegEvents = mutableListOf<ReplayEventBase>()
+        var currentTime = startTime
+        routeLeg.steps()?.forEach {
+            val stepGeometry = it.geometry() ?: return routeLegEvents
+            val stepEvents = mapToUpdateLocations(currentTime, stepGeometry)
+            currentTime = routeLegEvents.lastOrNull()?.eventTimestamp ?: currentTime
+            routeLegEvents.addAll(stepEvents)
+        }
+        return routeLegEvents
+    }
+
+    /**
+     * Map a geometry into replay events.
+     *
+     * @param startTime the minimum eventTimestamp in the replay events
+     * @param geometry polyline string with precision 6
+     * @return replay events for the [ReplayHistoryPlayer]
+     */
+    fun mapToUpdateLocations(startTime: Double, geometry: String): List<ReplayEventBase> {
         val lineString = LineString.fromPolyline(geometry, 6) ?: return emptyList()
-        val startTime = 0.0
         val updateLocationEvents = mutableListOf<ReplayEventBase>()
         var lastPoint = lineString.coordinates().first()
         sliceRoute(lineString).fold(startTime) { replayTimeSecond, point ->
@@ -85,21 +122,20 @@ class ReplayRouteMapper(
     /**
      * Map a Android location into a replay event.
      *
+     * @param eventTimestamp the eventTimestamp for the replay event
      * @param location Android location to be replayed
      * @return a singleton list to be replayed, otherwise an empty list if the location cannot be replayed.
      */
-    fun mapToUpdateLocation(location: Location?): List<ReplayEventBase> {
+    fun mapToUpdateLocation(eventTimestamp: Double, location: Location?): List<ReplayEventBase> {
         location ?: return emptyList()
-        val replayAtTimeMillis = 0
-        val replayAtTimeSecond = replayAtTimeMillis * 1e-4
         val updateLocationEvent = ReplayEventUpdateLocation(
-            eventTimestamp = replayAtTimeSecond,
+            eventTimestamp = eventTimestamp,
             location = ReplayEventLocation(
-                lat = location.longitude,
-                lon = location.latitude,
+                lon = location.longitude,
+                lat = location.latitude,
                 provider = LOCATION_PROVIDER_REPLAY_ROUTE,
-                time = replayAtTimeSecond,
-                altitude = location.altitude,
+                time = eventTimestamp,
+                altitude = if (location.hasAltitude()) location.altitude else null,
                 accuracyHorizontal = if (location.hasAccuracy()) location.accuracy.toDouble() else null,
                 bearing = if (location.hasBearing()) location.bearing.toDouble() else null,
                 speed = if (location.hasSpeed()) location.speed.toDouble() else null
