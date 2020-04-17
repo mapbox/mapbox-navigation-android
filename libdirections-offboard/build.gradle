@@ -34,7 +34,7 @@ dependencies {
     api project(':libnavigation-base')
 
     // Support
-    implementation dependenciesList.supportAnnotation
+    implementation dependenciesList.androidXAnnotation
 
     implementation dependenciesList.kotlinStdLib
 

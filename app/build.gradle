@@ -97,11 +97,11 @@ dependencies {
   implementation dependenciesList.mapboxCrashMonitor
 
   // Support libraries
-  implementation dependenciesList.supportAppcompatV7
-  implementation dependenciesList.supportDesign
-  implementation dependenciesList.supportRecyclerView
-  implementation dependenciesList.supportConstraintLayout
-  implementation dependenciesList.supportCardView
+  implementation dependenciesList.androidXAppCompat
+  implementation dependenciesList.materialDesign
+  implementation dependenciesList.androidXRecyclerView
+  implementation dependenciesList.androidXConstraintLayout
+  implementation dependenciesList.androidXCardView
   implementation dependenciesList.lifecycleExtensions
 
   implementation dependenciesList.gmsLocation

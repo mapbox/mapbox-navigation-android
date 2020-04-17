@@ -38,7 +38,7 @@ dependencies {
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkDirectionsModels
 
-    implementation dependenciesList.supportAnnotation
+    implementation dependenciesList.androidXAnnotation
 
     //ktlint
     ktlint dependenciesList.ktlint
