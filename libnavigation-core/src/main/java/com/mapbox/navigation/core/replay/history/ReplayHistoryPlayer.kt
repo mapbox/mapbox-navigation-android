@@ -1,19 +1,9 @@
 package com.mapbox.navigation.core.replay.history
 
-import android.os.SystemClock
-import android.util.Log
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.navigation.utils.thread.ThreadController
 import java.util.Collections.singletonList
-import kotlin.math.max
-import kotlin.math.roundToLong
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 typealias ReplayEventsListener = (List<ReplayEventBase>) -> Unit
 
@@ -22,10 +12,9 @@ typealias ReplayEventsListener = (List<ReplayEventBase>) -> Unit
  */
 class ReplayHistoryPlayer {
     private val replayEvents = ReplayEvents(mutableListOf())
-    private val replayEventLookup = ReplayEventLookup(replayEvents)
+    private val replayEventSimulator = ReplayEventSimulator(replayEvents)
 
     private val replayEventsListeners: MutableList<ReplayEventsListener> = mutableListOf()
-    private val jobControl = ThreadController.getMainScopeAndRootJob()
 
     /**
      * Appends events to be replayed.
@@ -60,24 +49,8 @@ class ReplayHistoryPlayer {
      * [observeReplayEvents]
      */
     fun play(lifecycleOwner: LifecycleOwner): Job {
-        Log.i("ReplayHistory", "Simulator started")
-
-        replayEventLookup.initPivot(timeSeconds())
-
-        return jobControl.scope.launch {
-            while (isActive && isSimulating(lifecycleOwner)) {
-                val loopStart = timeSeconds()
-
-                val recordUpdate = replayEventLookup.movePivot(loopStart)
-                replayEventsListeners.forEach { it.invoke(recordUpdate) }
-
-                val loopElapsedSeconds = timeSeconds() - loopStart
-                val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
-                val delayMillis = max(0L, replayUpdateSpeedMillis - loopElapsedMillis)
-                delay(delayMillis)
-            }
-
-            Log.i("ReplayHistory", "Simulator ended")
+        return replayEventSimulator.launchPlayLoop(lifecycleOwner) { replayEvents ->
+            replayEventsListeners.forEach { it(replayEvents) }
         }
     }
 
@@ -108,8 +81,7 @@ class ReplayHistoryPlayer {
             .indexOfFirst { offsetTime <= it.eventTimestamp }
         check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${replayDurationSeconds()}: " }
 
-        replayEventLookup.seekTo(indexOfEvent)
-        replayEventLookup.initPivot(timeSeconds())
+        replayEventSimulator.seekTo(indexOfEvent)
     }
 
     /**
@@ -119,8 +91,7 @@ class ReplayHistoryPlayer {
         val indexOfEvent = replayEvents.events.indexOf(replayEvent)
         check(indexOfEvent >= 0) { "You must first pushEvents and then seekTo an event" }
 
-        replayEventLookup.seekTo(indexOfEvent)
-        replayEventLookup.initPivot(timeSeconds())
+        replayEventSimulator.seekTo(indexOfEvent)
     }
 
     /**
@@ -128,21 +99,7 @@ class ReplayHistoryPlayer {
      * Activity.onDestroy, Fragment.onDestroy, or ViewModel.onCleared
      */
     fun finish() {
-        jobControl.job.cancelChildren()
+        replayEventSimulator.stopPlaying()
         replayEventsListeners.clear()
-    }
-
-    private fun isSimulating(lifecycleOwner: LifecycleOwner): Boolean {
-        return lifecycleOwner.lifecycle.currentState != Lifecycle.State.DESTROYED &&
-            !replayEventLookup.isComplete()
-    }
-
-    companion object {
-        // The frequency that replay updates will be broad-casted
-        private const val replayUpdateSpeedMillis = 100L
-
-        private const val MILLIS_PER_SECOND = 1000
-        private const val NANOS_PER_SECOND = 1e-9
-        private fun timeSeconds(): Double = SystemClock.elapsedRealtimeNanos().toDouble() * NANOS_PER_SECOND
     }
 }
