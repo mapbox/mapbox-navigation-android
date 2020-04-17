@@ -61,6 +61,16 @@ class FeedbackEvent {
         const val FEEDBACK_TYPE_INACCURATE_GPS = "inaccurate_gps"
 
         /**
+         * Feedback type *incorrect visual guidance*: wrong visual guidance
+         */
+        const val FEEDBACK_TYPE_INCORRECT_VISUAL_GUIDANCE = "incorrect_visual_guidance"
+
+        /**
+         * Feedback type *incorrect audio guidance*: wrong audio guidance
+         */
+        const val FEEDBACK_TYPE_INCORRECT_AUDIO_GUIDANCE = "incorrect_audio_guidance"
+
+        /**
          * Feedback source *reroute*: the user tapped a feedback button in response to a reroute
          */
         const val FEEDBACK_SOURCE_REROUTE = "reroute"

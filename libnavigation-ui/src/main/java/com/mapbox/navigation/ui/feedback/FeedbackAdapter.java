@@ -1,40 +1,26 @@
 package com.mapbox.navigation.ui.feedback;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.libnavigation.ui.R;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION;
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED;
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED;
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR;
+import com.mapbox.libnavigation.ui.R;
 
+import java.util.List;
+
+/**
+ * FeedbackAdapter provides a binding from {@link FeedbackBottomSheet} data set
+ * to {@link FeedbackViewHolder} that are displayed within a {@link RecyclerView}.
+ */
 public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
-  private static final String EMPTY_FEEDBACK_DESCRIPTION = "";
-  private List<FeedbackItem> feedbackItems = new ArrayList<>();
-  private int feedbackItemTextColor;
+  private List<FeedbackItem> feedbackItems;
 
-  FeedbackAdapter(Context context, int feedbackItemTextColor) {
-    feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_road_closure),
-      R.drawable.ic_road_closed, FEEDBACK_TYPE_ROAD_CLOSED, EMPTY_FEEDBACK_DESCRIPTION));
-    feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_not_allowed),
-      R.drawable.ic_not_allowed, FEEDBACK_TYPE_NOT_ALLOWED, EMPTY_FEEDBACK_DESCRIPTION));
-    feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_confusing_instruction),
-      R.drawable.ic_confusing_directions, FEEDBACK_TYPE_CONFUSING_INSTRUCTION, EMPTY_FEEDBACK_DESCRIPTION));
-    feedbackItems.add(new FeedbackItem(context.getString(R.string.feedback_bad_route),
-      R.drawable.ic_bad_route, FEEDBACK_TYPE_ROUTING_ERROR, EMPTY_FEEDBACK_DESCRIPTION));
-
-    this.feedbackItemTextColor = feedbackItemTextColor;
+  FeedbackAdapter(List<FeedbackItem> feedbackItems) {
+    this.feedbackItems = feedbackItems;
   }
 
   @Override
@@ -42,7 +28,7 @@ public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   public FeedbackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
       .inflate(R.layout.feedback_viewholder_layout, parent, false);
-    return new FeedbackViewHolder(view, feedbackItemTextColor);
+    return new FeedbackViewHolder(view);
   }
 
   @Override

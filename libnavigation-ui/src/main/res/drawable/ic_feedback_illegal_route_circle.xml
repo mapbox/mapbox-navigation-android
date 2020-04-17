@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportWidth="70"
+    android:viewportHeight="70">
+    <path
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
+        android:fillType="evenOdd"
+        android:pathData="M70,35C70,54.3305 54.327,70 35,70C15.673,70 0,54.3305 0,35C0,15.6695 15.673,0 35,0C54.327,0 70,15.6695 70,35Z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M35.0003,16C37.2996,16 39.3326,17.2075 40.4405,19.2319L52.2227,40.7554C53.292,42.7075 53.256,45.0176 52.1275,46.9361C50.9978,48.8546 48.9996,50 46.7813,50L23.218,50C20.9998,50 19.0015,48.8546 17.8731,46.9361C16.7434,45.0176 16.7087,42.7075 17.7766,40.7554L29.5589,19.2319C30.6667,17.2075 32.701,16 35.0003,16ZM35,39C33.3434,39 32,40.3421 32,41.9992C32,43.6563 33.3434,45 35,45C36.6566,45 38,43.6563 38,41.9992C38,40.3421 36.6566,39 35,39ZM35.3407,23L34.6593,23C33.19,23 32,24.2639 32,25.8206L32,25.8206L32,34.1795C32,35.7379 33.19,37 34.6593,37L34.6593,37L35.3407,37C36.81,37 38,35.7379 38,34.1795L38,34.1795L38,25.8206C38,24.2639 36.81,23 35.3407,23L35.3407,23Z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>

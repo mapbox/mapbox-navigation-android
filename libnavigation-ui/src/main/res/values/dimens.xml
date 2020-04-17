@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="fab_margin_bottom">8dp</dimen>
-    <dimen name="fab_feedback_margin_top">16dp</dimen>
-    <dimen name="wayname_bottom_padding">8dp</dimen>
-    <dimen name="wayname_padding">16dp</dimen>
-    <dimen name="wayname_padding_bottom">2dp</dimen>
-    <dimen name="feedback_item_margin">8dp</dimen>
+    <dimen name="dimen_2dp">2dp</dimen>
+    <dimen name="dimen_8dp">8dp</dimen>
+    <dimen name="dimen_16dp">16dp</dimen>
+    <dimen name="fab_margin_bottom">@dimen/dimen_8dp</dimen>
+    <dimen name="fab_feedback_margin_top">@dimen/dimen_16dp</dimen>
+    <dimen name="wayname_bottom_padding">@dimen/dimen_8dp</dimen>
+    <dimen name="wayname_padding">@dimen/dimen_16dp</dimen>
+    <dimen name="wayname_padding_bottom">@dimen/dimen_2dp</dimen>
+
+    <!-- Feedback bottom sheet -->
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_height">50dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_margin">@dimen/dimen_8dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_title_margin_start">28dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_close_icon_padding">10dp</dimen>
+    <dimen name="mapbox_feedback_item_margin">8dp</dimen>
+    <dimen name="mapbox_feedback_item_image_size">70dp</dimen>
     <dimen name="feedback_item_margin_top">16dp</dimen>
-    <dimen name="report_feedback_padding_16">16dp</dimen>
-    <dimen name="report_feedback_padding_24">24dp</dimen>
+    <dimen name="report_feedback_margin">@dimen/dimen_16dp</dimen>
 
     <dimen name="instruction_layout_height">64dp</dimen>
     <dimen name="summary_bottomsheet_height">56dp</dimen>

@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportWidth="70"
+    android:viewportHeight="70">
+    <path
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_secondary"
+        android:fillType="evenOdd"
+        android:pathData="M70,35C70,54.3305 54.327,70 35,70C15.673,70 0,54.3305 0,35C0,15.6695 15.673,0 35,0C54.327,0 70,15.6695 70,35Z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M35,15C23.9543,15 15,23.9543 15,35C15,46.0457 23.9543,55 35,55C46.0457,55 55,46.0457 55,35C55,23.9543 46.0457,15 35,15ZM26.2305,32C25.5509,32 25,32.4197 25,32.9375L25,37.0625C25,37.5803 25.5509,38 26.2305,38L44.7695,38C45.4491,38 46,37.5803 46,37.0625L46,32.9375C46,32.4197 45.4491,32 44.7695,32L26.2305,32Z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>

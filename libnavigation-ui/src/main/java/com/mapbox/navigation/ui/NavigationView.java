@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
@@ -21,6 +22,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -78,7 +80,7 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
-    NavigationContract.View {
+  NavigationContract.View {
 
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
@@ -158,8 +160,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int bottomSheetBehaviorState = summaryBehavior == null ? INVALID_STATE : summaryBehavior.getState();
     boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
-        bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
-        isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
+      bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
+      isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -331,6 +333,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   /**
    * Set the auto-query state to provide the default way names value
    * with {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
+   *
    * @param isActive true if auto-query is enabled, false otherwise.
    */
   @Override
@@ -369,7 +372,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
    *
    * @param isVisible true to show, false to hide
-   *
    * @deprecated This method sets the auto-query, by calling
    * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}, and updates
    * the visibility of the way name view at the same time. We recommend to use {@link #setWayNameActive(boolean)}
@@ -438,6 +440,20 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
+  @Override
+  public void onFeedbackSent() {
+    Snackbar snackbar = Snackbar.make(this, R.string.feedback_reported, Snackbar.LENGTH_SHORT);
+    if (!isSummaryBottomSheetHidden()) {
+      snackbar.setAnchorView(summaryBottomSheet);
+    }
+
+    snackbar.getView().setBackgroundColor(
+      ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_snackbar));
+    snackbar.setTextColor(ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_primary_text));
+
+    snackbar.show();
+  }
+
   /**
    * Should be called when this view is completely initialized.
    *
@@ -487,10 +503,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * ready.  Note, this position is ignored during rotation in favor of the last known map position.
    *
    * @param onNavigationReadyCallback to be set to this view
-   * @param initialMapCameraPosition to be shown once the map is ready
+   * @param initialMapCameraPosition  to be shown once the map is ready
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback,
-      @NonNull CameraPosition initialMapCameraPosition) {
+                         @NonNull CameraPosition initialMapCameraPosition) {
     this.onNavigationReadyCallback = onNavigationReadyCallback;
     this.initialMapCameraPosition = initialMapCameraPosition;
     if (!isMapInitialized) {
@@ -595,7 +611,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
     summaryBehavior.setBottomSheetCallback(new SummaryBottomSheetCallback(navigationPresenter,
-        navigationViewEventDispatcher));
+      navigationViewEventDispatcher));
   }
 
   private void initializeNavigationEventDispatcher() {
@@ -605,7 +621,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeInstructionListListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
-        navigationViewEventDispatcher));
+      navigationViewEventDispatcher));
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {
@@ -659,7 +675,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
     int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
     int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
-    return new int[] { leftRightPadding, instructionHeight, leftRightPadding, summaryHeight };
+    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
   }
 
   private boolean isChangingConfigurations() {
@@ -729,10 +745,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
     final int roundingIncrement = establishRoundingIncrement(options);
     final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder(getContext())
-            .withRoundingIncrement(roundingIncrement)
-            .withUnitType(unitType)
-            .withLocale(language)
-            .build();
+      .withRoundingIncrement(roundingIncrement)
+      .withUnitType(unitType)
+      .withLocale(language)
+      .build();
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }

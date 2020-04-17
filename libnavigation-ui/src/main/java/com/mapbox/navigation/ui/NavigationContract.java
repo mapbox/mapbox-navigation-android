@@ -49,5 +49,7 @@ public interface NavigationContract {
     boolean isRecenterButtonVisible();
 
     void updateCameraRouteOverview();
+
+    void onFeedbackSent();
   }
 }

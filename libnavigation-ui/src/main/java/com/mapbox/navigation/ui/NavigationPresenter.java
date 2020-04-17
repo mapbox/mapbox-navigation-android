@@ -95,4 +95,8 @@ class NavigationPresenter {
     view.updateCameraRouteOverview();
     view.showRecenterBtn();
   }
+
+  void onFeedbackSent() {
+    view.onFeedbackSent();
+  }
 }

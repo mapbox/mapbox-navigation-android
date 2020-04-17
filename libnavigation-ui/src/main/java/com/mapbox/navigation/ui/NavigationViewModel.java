@@ -71,6 +71,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> isFeedbackSentSuccess = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
   private final MutableLiveData<Location> locationUpdates = new MutableLiveData<>();
   private final MutableLiveData<RouteProgress> routeProgressUpdates = new MutableLiveData<>();
@@ -159,6 +160,7 @@ public class NavigationViewModel extends AndroidViewModel {
    */
   public void updateFeedback(FeedbackItem feedbackItem) {
     this.feedbackItem = feedbackItem;
+    isFeedbackSentSuccess.setValue(false);
     shouldRecordScreenshot.setValue(true);
   }
 
@@ -223,6 +225,7 @@ public class NavigationViewModel extends AndroidViewModel {
       MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
         feedbackItem.getDescription(), FEEDBACK_SOURCE_UI, screenshot);
       sendEventFeedback(feedbackItem);
+      isFeedbackSentSuccess.setValue(true);
       feedbackItem = null;
     }
 
@@ -304,6 +307,10 @@ public class NavigationViewModel extends AndroidViewModel {
 
   LiveData<Boolean> retrieveShouldRecordScreenshot() {
     return shouldRecordScreenshot;
+  }
+
+  LiveData<Boolean> retrieveIsFeedbackSentSuccess() {
+    return isFeedbackSentSuccess;
   }
 
   LiveData<Location> retrieveLocationUdpates() {
