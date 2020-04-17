@@ -57,7 +57,6 @@ import java.io.File
 import java.lang.reflect.Field
 import java.net.URI
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -283,24 +282,23 @@ constructor(
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.
      */
     fun onDestroy() {
-        mainJobController.scope.launch {
-            Log.d(TAG, "onDestroy")
-            MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
-            ThreadController.cancelAllNonUICoroutines()
-            ThreadController.cancelAllUICoroutines()
-            directionsSession.shutdownSession()
-            directionsSession.unregisterAllRoutesObservers()
-            tripSession.stop()
-            tripSession.unregisterAllLocationObservers()
-            tripSession.unregisterAllRouteProgressObservers()
-            tripSession.unregisterAllOffRouteObservers()
-            tripSession.unregisterAllStateObservers()
-            tripSession.unregisterAllBannerInstructionsObservers()
-            tripSession.unregisterAllVoiceInstructionsObservers()
-            navigationSession.unregisterAllNavigationSessionStateObservers()
-            fasterRouteController.stop()
-            routeRefreshController.stop()
-        }
+        Log.d(TAG, "onDestroy")
+        MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
+        directionsSession.shutdownSession()
+        directionsSession.unregisterAllRoutesObservers()
+        tripSession.stop()
+        tripSession.unregisterAllLocationObservers()
+        tripSession.unregisterAllRouteProgressObservers()
+        tripSession.unregisterAllOffRouteObservers()
+        tripSession.unregisterAllStateObservers()
+        tripSession.unregisterAllBannerInstructionsObservers()
+        tripSession.unregisterAllVoiceInstructionsObservers()
+        tripSession.route = null
+        navigationSession.unregisterAllNavigationSessionStateObservers()
+        fasterRouteController.stop()
+        routeRefreshController.stop()
+        ThreadController.cancelAllNonUICoroutines()
+        ThreadController.cancelAllUICoroutines()
     }
 
     /**

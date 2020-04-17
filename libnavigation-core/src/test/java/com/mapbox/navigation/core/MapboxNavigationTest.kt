@@ -210,6 +210,13 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun onDestroySetsRouteToNullInTripSession() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.route = null }
+    }
+
+    @Test
     fun unregisterAllBannerInstructionsObservers() {
         mapboxNavigation.onDestroy()
 
