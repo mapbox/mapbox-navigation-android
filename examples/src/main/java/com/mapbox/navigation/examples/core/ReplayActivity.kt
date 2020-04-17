@@ -39,7 +39,7 @@ import timber.log.Timber
  */
 class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    internal var mapboxMap: MapboxMap? = null
+    private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
