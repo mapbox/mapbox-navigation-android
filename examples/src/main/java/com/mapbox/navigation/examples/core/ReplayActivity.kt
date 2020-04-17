@@ -6,10 +6,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -23,7 +21,9 @@ import com.mapbox.navigation.base.extensions.applyDefaultParams
 import com.mapbox.navigation.base.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.history.ReplayRouteMapper
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -39,17 +39,14 @@ import timber.log.Timber
  */
 class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    companion object {
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
-        const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
-    }
-
     private var mapboxMap: MapboxMap? = null
-    private var locationEngine: LocationEngine? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
-    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private val firstLocationCallback = FirstLocationCallback(this)
+
+    private val replayRouteMapper = ReplayRouteMapper()
+    private val replayHistoryPlayer = ReplayHistoryPlayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +63,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             applicationContext,
             Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
-            locationEngine = replayRouteLocationEngine
+            locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
         )
         initListeners()
         mapView.getMapAsync(this)
@@ -82,7 +79,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
-            initLocationEngine()
+            initializeFirstLocation()
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -100,21 +97,11 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    fun initLocationEngine() {
-        val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                .build()
-
-        locationEngine?.requestLocationUpdates(
-            requestLocationUpdateRequest,
-            locationListenerCallback,
-            mainLooper
-        )
+    private fun initializeFirstLocation() {
         // Center the map at current location. Using LocationEngineProvider because the
         // replay engine won't have your last location.
-        LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+        LocationEngineProvider.getBestLocationEngine(this)
+            .getLastLocation(firstLocationCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
@@ -122,7 +109,10 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                replayRouteLocationEngine.assign(routes[0])
+
+                val updateLocations = replayRouteMapper.mapToUpdateLocations(routes[0])
+                replayHistoryPlayer.pushEvents(updateLocations)
+                replayHistoryPlayer.seekTo(updateLocations.first())
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
@@ -149,6 +139,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
+            replayHistoryPlayer.play(this)
         }
     }
 
@@ -170,7 +161,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
         navigationMapboxMap?.onStop()
         mapView.onStop()
     }
@@ -187,9 +177,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
-    private class MyLocationEngineCallback(activity: ReplayActivity) :
+    private class FirstLocationCallback(activity: ReplayActivity) :
         LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
@@ -202,9 +190,5 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onFailure(exception: Exception) {
         }
-    }
-
-    private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 }
