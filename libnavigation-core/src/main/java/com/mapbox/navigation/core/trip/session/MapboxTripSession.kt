@@ -167,6 +167,7 @@ class MapboxTripSession(
         enhancedLocation = null
         routeProgress = null
         isOffRoute = false
+        route = null
     }
 
     /**
