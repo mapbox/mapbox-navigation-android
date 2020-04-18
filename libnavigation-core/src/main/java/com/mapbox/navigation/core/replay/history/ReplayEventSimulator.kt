@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.navigation.utils.thread.ThreadController
+import java.lang.IllegalStateException
 import kotlin.math.max
 import kotlin.math.roundToLong
 import kotlinx.coroutines.Job
@@ -51,6 +52,10 @@ internal class ReplayEventSimulator(
                 val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
                 val delayMillis = max(0L, replayUpdateSpeedMillis - loopElapsedMillis)
                 delay(delayMillis)
+            }
+
+            if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                throw IllegalStateException("Make sure to call ReplayHistoryPlayer.finish()")
             }
 
             Log.i("ReplayHistory", "Simulator ended")
