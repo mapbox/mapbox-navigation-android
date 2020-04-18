@@ -110,9 +110,10 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
 
-                val updateLocations = replayRouteMapper.mapToUpdateLocations(0.0, routes[0])
-                replayHistoryPlayer.pushEvents(updateLocations)
-                replayHistoryPlayer.seekTo(updateLocations.first())
+                replayRouteMapper.observeReplayEvents(routes[0]) { replayEvents ->
+                    replayHistoryPlayer.pushEvents(replayEvents)
+                    replayHistoryPlayer.seekTo(replayEvents.first())
+                }
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE

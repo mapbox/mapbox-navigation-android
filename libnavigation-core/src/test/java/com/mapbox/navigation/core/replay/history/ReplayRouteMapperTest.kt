@@ -1,6 +1,12 @@
 package com.mapbox.navigation.core.replay.history
 
+import android.graphics.Interpolator
 import android.location.Location
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.LinearInterpolator
+import com.mapbox.api.directions.v5.models.LegStep
+import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.navigation.trip.notification.maneuver.STEP_MANEUVER_TYPE_DEPART
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.assertEquals
@@ -8,17 +14,34 @@ import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.Test
 
+
 class ReplayRouteMapperTest {
 
     private val replayRouteMapper = ReplayRouteMapper()
 
+//    @Test
+//    fun `should map route with waypoints`() {
+//        val geometry = """glp_gA~ahmhFV`H?j@d@nTz@r[|@j`@aCxBgYdYgCl@yM\gkBnIkVjA"""
+//
+//        val replayEvents = replayRouteMapper.mapToUpdateLocations(0.0, 45.0, geometry)
+//
+//        assertTrue(replayEvents.isNotEmpty())
+//    }
+
     @Test
-    fun `should map route with waypoints`() {
-        val geometry = """glp_gA~ahmhFV`H?j@d@nTz@r[|@j`@aCxBgYdYgCl@yM\gkBnIkVjA"""
-
-        val replayEvents = replayRouteMapper.mapToUpdateLocations(0.0, geometry)
-
-        assertTrue(replayEvents.isNotEmpty())
+    fun `should accelerate for depart`() {
+        val routeLeg: RouteLeg = mockk {
+            every { steps() } returns listOf(
+                mockk {
+                    every { geometry() } returns "qnq_gAxdhmhFuvBlJe@?qC^"
+                    every { maneuver() } returns mockk {
+                        every { type() } returns STEP_MANEUVER_TYPE_DEPART
+                    }
+                }
+            )
+        }
+        val updateLocation = replayRouteMapper.mapToUpdateLocations(0.0, routeLeg)
+        assertTrue(updateLocation.size < 20)
     }
 
     @Test

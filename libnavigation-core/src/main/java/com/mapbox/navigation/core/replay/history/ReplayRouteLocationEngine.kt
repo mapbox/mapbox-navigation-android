@@ -1,0 +1,113 @@
+package com.mapbox.navigation.core.replay.history
+
+import android.app.PendingIntent
+import android.location.Location
+import android.os.Looper
+import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineRequest
+import com.mapbox.android.core.location.LocationEngineResult
+import java.util.Date
+
+typealias RouteEngineCallback = LocationEngineCallback<LocationEngineResult>
+
+/**
+ * Location Engine for replaying route history.
+ */
+class ReplayRouteLocationEngine(
+    replayHistoryPlayer: ReplayHistoryPlayer
+) : LocationEngine {
+
+    private val registeredCallbacks: MutableList<RouteEngineCallback> = mutableListOf()
+    private val lastLocationCallbacks: MutableList<RouteEngineCallback> = mutableListOf()
+    private var lastLocationEngineResult: LocationEngineResult? = null
+    private val myId: Int
+
+    companion object {
+        /**
+         * Counter of created instances
+         */
+        var instances = 0
+            get() { return field++ }
+    }
+
+    init {
+        myId = instances
+        replayHistoryPlayer.observeReplayEvents { recordUpdate ->
+            replayEvents(recordUpdate)
+        }
+    }
+
+    /**
+     * Requests location updates with a callback on the specified Looper thread.
+     */
+    override fun requestLocationUpdates(request: LocationEngineRequest, callback: RouteEngineCallback, looper: Looper?) {
+        registeredCallbacks.add(callback)
+    }
+
+    /**
+     * Removes location updates for the given location engine callback.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     */
+    override fun removeLocationUpdates(callback: RouteEngineCallback) {
+        registeredCallbacks.remove(callback)
+    }
+
+    /**
+     * Returns the most recent location currently available.
+     *
+     * If a location is not available, which should happen very rarely, null will be returned.
+     */
+    override fun getLastLocation(callback: RouteEngineCallback) {
+        if (lastLocationEngineResult != null) {
+            callback.onSuccess(lastLocationEngineResult)
+        } else {
+            lastLocationCallbacks.add(callback)
+        }
+    }
+
+    /**
+     * Requests location updates with callback on the specified PendingIntent.
+     */
+    override fun requestLocationUpdates(request: LocationEngineRequest, pendingIntent: PendingIntent?) {
+        throw UnsupportedOperationException("$myId requestLocationUpdates with intents is unsupported")
+    }
+
+    /**
+     * Removes location updates for the given pending intent.
+     *
+     * It is recommended to remove location requests when the activity is in a paused or
+     * stopped state, doing so helps battery performance.
+     */
+    override fun removeLocationUpdates(pendingIntent: PendingIntent?) {
+        throw UnsupportedOperationException("$myId removeLocationUpdates with intents is unsupported")
+    }
+
+    private fun replayEvents(replayEvents: List<ReplayEventBase>) {
+        replayEvents.forEach { event ->
+            when (event) {
+                is ReplayEventUpdateLocation -> replayLocation(event)
+            }
+        }
+    }
+
+    private fun replayLocation(event: ReplayEventUpdateLocation) {
+        val eventLocation = event.location
+        val location = Location(eventLocation.provider)
+        location.longitude = eventLocation.lon
+        location.latitude = eventLocation.lat
+        location.time = Date().time
+        eventLocation.accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
+        eventLocation.bearing?.toFloat()?.let { location.bearing = it }
+        eventLocation.altitude?.let { location.altitude = it }
+        eventLocation.speed?.toFloat()?.let { location.speed = it }
+        val locationEngineResult = LocationEngineResult.create(location)
+        lastLocationEngineResult = locationEngineResult
+
+        registeredCallbacks.forEach { it.onSuccess(locationEngineResult) }
+        lastLocationCallbacks.forEach { it.onSuccess(locationEngineResult) }
+        lastLocationCallbacks.clear()
+    }
+}

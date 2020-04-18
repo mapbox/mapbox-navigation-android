@@ -1,123 +1,158 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.location.Location
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.LineString
-import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import java.util.Collections
+import java.util.*
+import kotlin.math.max
+
 
 /**
  * This class converts a directions rout into events that can be
  * replayed using the [ReplayHistoryPlayer] to navigate a route.
  */
-class ReplayRouteMapper(
-    /**
-     * Determines the spacing of the replay locations by kilometers per hour
-     */
-    private var speedKph: Int = DEFAULT_REPLAY_SPEED_KPH
-) {
-    private val distancePerSecondMps by lazy {
+class ReplayRouteMapper : RouteProgressObserver {
+
+    private var replayEventsListener: ReplayEventsListener? = null
+
+    private var directionsRoute: DirectionsRoute? = null
+    private var currentLeg: Int = 0
+    private var currentStep: Int = 0
+
+    private fun speedMpsFromKph(speedKph: Double): Double {
         val oneKmInMeters = 1000.0
         val oneHourInSeconds = 3600
-        speedKph.toDouble() * oneKmInMeters / oneHourInSeconds
+        return speedKph * oneKmInMeters / oneHourInSeconds
     }
 
-    /**
-     * Map a [DirectionsRoute] route into replay events.
-     *
-     * @param startTime the minimum eventTimestamp in the replay events
-     * @param directionsRoute used to be converted into replay events
-     * @return replay events for the [ReplayHistoryPlayer]
-     */
-    fun mapToUpdateLocations(startTime: Double, directionsRoute: DirectionsRoute): List<ReplayEventBase> {
-        val routeEvents = mutableListOf<ReplayEventBase>()
-        var currentTime = startTime
-        directionsRoute.legs()?.forEach { routeLeg ->
-            val routeLegEvents = mapToUpdateLocations(currentTime, routeLeg)
-            currentTime = routeLegEvents.lastOrNull()?.eventTimestamp ?: currentTime
-            routeEvents.addAll(routeLegEvents)
-        }
-        return routeEvents
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        val stepPointsSize = routeProgress.currentLegProgress()?.currentStepProgress()?.stepPoints()?.size
+        val stepDistanceRemaining = routeProgress.currentLegProgress()?.currentStepProgress()?.distanceRemaining()
+        val legDistanceRemaining = routeProgress.currentLegProgress()?.distanceRemaining()
+        Log.i("ReplayRoute", "ReplayRoute $legDistanceRemaining $stepDistanceRemaining $stepPointsSize")
     }
 
-    /**
-     * Map a [RouteLeg] route into replay events.
-     *
-     * @param startTime the minimum eventTimestamp in the replay events
-     * @param routeLeg used to be converted into replay events
-     * @return replay events for the [ReplayHistoryPlayer]
-     */
+    fun observeReplayEvents(directionsRoute: DirectionsRoute, replayEventsListener: ReplayEventsListener) {
+        this.directionsRoute = directionsRoute
+        currentLeg = 0
+        currentStep = 0
+        this.replayEventsListener = replayEventsListener
+        val routeLeg = directionsRoute.legs()?.firstOrNull()
+            ?: return
+        val replayEvents = mapToUpdateLocations(0.0, routeLeg)
+        Log.i("ReplayRoute", "ReplayRoute first leg has events ${replayEvents.size}")
+        replayEventsListener(replayEvents)
+    }
+
+    val maxSpeedMps = speedMpsFromKph(45.0)
+
     fun mapToUpdateLocations(startTime: Double, routeLeg: RouteLeg): List<ReplayEventBase> {
-        val routeLegEvents = mutableListOf<ReplayEventBase>()
-        var currentTime = startTime
-        routeLeg.steps()?.forEach {
-            val stepGeometry = it.geometry() ?: return routeLegEvents
-            val stepEvents = mapToUpdateLocations(currentTime, stepGeometry)
-            currentTime = routeLegEvents.lastOrNull()?.eventTimestamp ?: currentTime
-            routeLegEvents.addAll(stepEvents)
-        }
-        return routeLegEvents
-    }
-
-    /**
-     * Map a geometry into replay events.
-     *
-     * @param startTime the minimum eventTimestamp in the replay events
-     * @param geometry polyline string with precision 6
-     * @return replay events for the [ReplayHistoryPlayer]
-     */
-    fun mapToUpdateLocations(startTime: Double, geometry: String): List<ReplayEventBase> {
-        val lineString = LineString.fromPolyline(geometry, 6) ?: return emptyList()
         val updateLocationEvents = mutableListOf<ReplayEventBase>()
-        var lastPoint = lineString.coordinates().first()
-        sliceRoute(lineString).fold(startTime) { replayTimeSecond, point ->
-            val distance = TurfMeasurement.distance(lastPoint, point, TurfConstants.UNIT_METERS)
-            val bearing = if (distance < 0.1) null else TurfMeasurement.bearing(lastPoint, point)
-            val deltaSeconds = 1.0
-            val speed = if (distance < 0.1) 0.0 else distance / deltaSeconds
-            val replayAtTimeSecond = replayTimeSecond + deltaSeconds
-            val updateLocationEvent = ReplayEventUpdateLocation(
-                eventTimestamp = replayAtTimeSecond,
-                location = ReplayEventLocation(
-                    lon = point.longitude(),
-                    lat = point.latitude(),
-                    provider = LOCATION_PROVIDER_REPLAY_ROUTE,
-                    time = replayAtTimeSecond,
-                    altitude = null,
-                    accuracyHorizontal = null,
-                    bearing = bearing,
-                    speed = speed
-                )
-            )
-            updateLocationEvents.add(updateLocationEvent)
-            lastPoint = point
-            replayAtTimeSecond
+        val firstStep = routeLeg.steps()?.firstOrNull() ?: return emptyList()
+        val geometry = firstStep.geometry() ?: return emptyList()
+        val lineString = LineString.fromPolyline(geometry, 6) ?: return emptyList()
+
+        var currentTime = startTime
+
+        val coordinates = lineString.coordinates()
+        for (i in 0 until coordinates.size - 1) {
+            val fromPoint = coordinates[i]
+            val toPoint = coordinates[i+1]
+            val distance = TurfMeasurement.distance(fromPoint, toPoint, TurfConstants.UNIT_METERS)
+            val bearing = TurfMeasurement.bearing(fromPoint, toPoint)
+
+            var speedMps = 0.0
+            var nextDistance = 0.0
+            var accelerationMps2 = 3.0
+            var currentPoint = fromPoint
+            val addLocationEvent: () -> Unit = {
+                updateLocationEvents.add(ReplayEventUpdateLocation(
+                    eventTimestamp = currentTime,
+                    location = ReplayEventLocation(
+                        lon = currentPoint.longitude(),
+                        lat = currentPoint.latitude(),
+                        provider = LOCATION_PROVIDER_REPLAY_ROUTE,
+                        time = currentTime,
+                        altitude = null,
+                        accuracyHorizontal = 1.0,
+                        bearing = bearing,
+                        speed = speedMps
+                    )
+                ))
+                currentTime += 1.0
+                speedMps = max(maxSpeedMps, speedMps + accelerationMps2)
+                nextDistance += speedMps
+            }
+            addLocationEvent.invoke()
+
+            while (nextDistance < distance) {
+                currentPoint = TurfMeasurement.destination(fromPoint, nextDistance, bearing, TurfConstants.UNIT_METERS)
+                addLocationEvent.invoke()
+            }
+
+            currentPoint = toPoint
+            addLocationEvent.invoke()
         }
 
-        return updateLocationEvents.toList()
+//        val interpolatedDistance = 0.0
+//        while (interpolatedDistance <= distance) {
+//            var travelled = 0.0
+//            for (i in firstStep.indices) {
+//                travelled += if (distance >= travelled && i == coords.size - 1) {
+//                    break
+//                } else if (travelled >= distance) {
+//                    val overshot = distance - travelled
+//                    return if (overshot == 0.0) {
+//                        coords.get(i)
+//                    } else {
+//                        val direction = TurfMeasurement.bearing(coords.get(i), coords.get(i - 1)) - 180
+//                        TurfMeasurement.destination(coords.get(i), overshot, direction, units)
+//                    }
+//                } else {
+//                    TurfMeasurement.distance(coords.get(i), coords.get(i + 1), units)
+//                }
+//            }
+//
+//            return coords.get(coords.size - 1)
+//        }
+        return updateLocationEvents
     }
 
-    // Evenly distributes the route into points that assume a constant speed throughout the route.
-    // This method causes known issues because actual navigation does not have constant speed.
-    // Alternatives for varying speed depending on maneuvers is not yet supported. 
-    private fun sliceRoute(lineString: LineString): List<Point> {
-        val distanceMeters = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS)
-        if (distanceMeters <= 0) {
-            return emptyList()
-        }
+//    fun mapToUpdateLocations(startTime: Double, ): List<ReplayEventBase> {
+//        val updateLocationEvents = mutableListOf<ReplayEventBase>()
+//        sliceRoute(startMps = , lineString).fold(startTime) { replayTimeSecond, point ->
+//            val distance = TurfMeasurement.distance(lastPoint, point, TurfConstants.UNIT_METERS)
+//            val bearing = if (distance < 0.1) null else TurfMeasurement.bearing(lastPoint, point)
+//            val deltaSeconds = 1.0
+//            val speed = if (distance < 0.1) 0.0 else distance / deltaSeconds
+//            val replayAtTimeSecond = replayTimeSecond + deltaSeconds
+//            val updateLocationEvent = ReplayEventUpdateLocation(
+//                eventTimestamp = replayAtTimeSecond,
+//                location = ReplayEventLocation(
+//                    lon = point.longitude(),
+//                    lat = point.latitude(),
+//                    provider = LOCATION_PROVIDER_REPLAY_ROUTE,
+//                    time = replayAtTimeSecond,
+//                    altitude = null,
+//                    accuracyHorizontal = null,
+//                    bearing = bearing,
+//                    speed = speed
+//                )
+//            )
+//            updateLocationEvents.add(updateLocationEvent)
+//            lastPoint = point
+//            replayAtTimeSecond
+//        }
+//
+//        return updateLocationEvents.toList()
+//    }
 
-        val points = ArrayList<Point>()
-        var i = 0.0
-        while (i < distanceMeters) {
-            val point = TurfMeasurement.along(lineString, i, TurfConstants.UNIT_METERS)
-            points.add(point)
-            i += distancePerSecondMps
-        }
-        return points
-    }
 
     /**
      * Map a Android location into a replay event.
@@ -148,4 +183,6 @@ class ReplayRouteMapper(
         private const val DEFAULT_REPLAY_SPEED_KPH = 45
         private const val LOCATION_PROVIDER_REPLAY_ROUTE = "ReplayRouteMapper"
     }
+
+
 }

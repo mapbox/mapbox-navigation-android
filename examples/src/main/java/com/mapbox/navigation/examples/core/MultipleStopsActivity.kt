@@ -131,9 +131,10 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                val updateLocations = replayRouteMapper.mapToUpdateLocations(0.0, routes[0])
-                replayHistoryPlayer.pushEvents(updateLocations)
-                replayHistoryPlayer.seekTo(updateLocations.first())
+                replayRouteMapper.observeReplayEvents(routes[0]) { replayEvents ->
+                    replayHistoryPlayer.pushEvents(replayEvents)
+                    replayHistoryPlayer.seekTo(replayEvents.first())
+                }
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
@@ -158,6 +159,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
+            mapboxNavigation?.registerRouteProgressObserver(replayRouteMapper)
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
             replayHistoryPlayer.play(this)
