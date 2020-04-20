@@ -90,7 +90,6 @@ dependencies {
   testImplementation dependenciesList.commonsIO
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.mockwebserver
-  testImplementation dependenciesList.workTesting
 }
 
 apply from: 'javadoc.gradle'

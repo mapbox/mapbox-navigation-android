@@ -5,8 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
-import androidx.work.Configuration
-import androidx.work.testing.WorkManagerTestInitHelper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
@@ -88,8 +86,6 @@ class MapboxNavigationTest {
 
     @Before
     fun setUp() {
-        val config = Configuration.Builder().build()
-        WorkManagerTestInitHelper.initializeTestWorkManager(context, config)
         mockkObject(MapboxModuleProvider)
         val hybridRouter: Router = mockk(relaxUnitFun = true)
         every {
