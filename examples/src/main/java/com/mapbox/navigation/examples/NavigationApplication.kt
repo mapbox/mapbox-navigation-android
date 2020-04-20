@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples
 
 import android.os.StrictMode
 import android.text.TextUtils
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.multidex.MultiDexApplication
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.logger.MapboxLogger
@@ -21,6 +22,7 @@ class NavigationApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         instance = this
         setupTimber()
         setupStrictMode()
