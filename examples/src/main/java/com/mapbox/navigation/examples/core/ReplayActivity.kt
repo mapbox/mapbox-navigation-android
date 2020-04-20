@@ -167,6 +167,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
+        replayHistoryPlayer.finish()
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
