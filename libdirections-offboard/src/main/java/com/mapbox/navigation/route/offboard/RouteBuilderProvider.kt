@@ -3,9 +3,9 @@ package com.mapbox.navigation.route.offboard
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
-import com.mapbox.navigation.base.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale
-import com.mapbox.navigation.base.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 
 internal object RouteBuilderProvider {
 

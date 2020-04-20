@@ -39,14 +39,14 @@ import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.navigation.base.extensions.ContextEx;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.base.trip.RouteProgressObserver;
 import com.mapbox.navigation.ui.FeedbackButton;
 import com.mapbox.navigation.ui.NavigationButton;
 import com.mapbox.navigation.ui.NavigationViewModel;
@@ -68,7 +68,7 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
-import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 
 /**
  * A view that can be used to display upcoming maneuver information and control

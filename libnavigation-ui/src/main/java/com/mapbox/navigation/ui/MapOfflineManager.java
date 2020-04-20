@@ -6,7 +6,7 @@ import com.mapbox.geojson.Geometry;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.base.trip.RouteProgressObserver;
 
 import org.jetbrains.annotations.NotNull;
 

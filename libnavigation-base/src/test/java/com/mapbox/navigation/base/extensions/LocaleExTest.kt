@@ -2,7 +2,9 @@ package com.mapbox.navigation.base.extensions
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.LocaleEx
+import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.METRIC
 import io.mockk.every
@@ -19,7 +21,7 @@ class LocaleExTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            mockkStatic("com.mapbox.navigation.base.extensions.ContextEx")
+            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
         }
     }
 

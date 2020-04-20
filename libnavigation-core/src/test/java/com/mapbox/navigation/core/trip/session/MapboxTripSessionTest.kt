@@ -10,6 +10,7 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.MapboxNativeNavigator

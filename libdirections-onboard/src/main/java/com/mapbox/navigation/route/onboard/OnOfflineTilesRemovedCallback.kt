@@ -4,10 +4,10 @@ import com.mapbox.geojson.BoundingBox
 
 /**
  * Listener that needs to be added to
- * [MapboxOfflineRouter.removeTiles] to know when the routing
+ * [com.mapbox.navigation.route.onboard.task.RemoveTilesTask] to know when the routing
  * tiles within the provided [BoundingBox] have been removed
  */
-interface OnOfflineTilesRemovedCallback {
+internal interface OnOfflineTilesRemovedCallback {
 
     /**
      * Called when the routing tiles within the provided [BoundingBox] have been removed completely.

@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.mapbox.navigation.base.trip.model.MapboxNotificationData
+import com.mapbox.navigation.base.internal.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.thread.ifChannelException

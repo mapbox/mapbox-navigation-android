@@ -5,10 +5,10 @@ import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

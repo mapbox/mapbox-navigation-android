@@ -6,9 +6,9 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
 import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
 /**
  * It listens for routeProgress events and applies the drawable returned by the puckDrawableSupplier

@@ -7,9 +7,9 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale
-import com.mapbox.navigation.base.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.typedef.IMPERIAL
 import com.mapbox.navigation.base.typedef.RoundingIncrement
 import com.mapbox.navigation.base.typedef.UNDEFINED

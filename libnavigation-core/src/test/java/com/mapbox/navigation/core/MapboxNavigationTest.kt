@@ -13,7 +13,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
@@ -80,7 +80,7 @@ class MapboxNavigationTest {
         @BeforeClass
         @JvmStatic
         fun initialize() {
-            mockkStatic("com.mapbox.navigation.base.extensions.ContextEx")
+            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
         }
     }
 

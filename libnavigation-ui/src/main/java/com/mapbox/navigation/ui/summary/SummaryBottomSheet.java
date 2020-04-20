@@ -26,20 +26,20 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.libnavigation.ui.R;
-import com.mapbox.navigation.base.extensions.ContextEx;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.RoundingIncrementKt;
 import com.mapbox.navigation.base.typedef.TimeFormatType;
 import com.mapbox.navigation.core.MapboxDistanceFormatter;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.base.trip.RouteProgressObserver;
 import com.mapbox.navigation.ui.NavigationViewModel;
 import com.mapbox.navigation.ui.utils.ViewUtils;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
 
-import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 import static com.mapbox.navigation.base.typedef.TimeFormatTypeKt.NONE_SPECIFIED;
 
 /**

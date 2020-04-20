@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.accounts
+package com.mapbox.navigation.base.internal.accounts
 
 /**
  * Internal usage.

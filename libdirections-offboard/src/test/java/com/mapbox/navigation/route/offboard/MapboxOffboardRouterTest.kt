@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import io.mockk.every

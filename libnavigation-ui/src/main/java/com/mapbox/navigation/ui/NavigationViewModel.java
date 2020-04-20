@@ -19,7 +19,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
-import com.mapbox.navigation.base.extensions.ContextEx;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -53,8 +53,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static com.mapbox.navigation.base.extensions.LocaleEx.getLocaleDirectionsRoute;
-import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_SOURCE_UI;
 
 public class NavigationViewModel extends AndroidViewModel {

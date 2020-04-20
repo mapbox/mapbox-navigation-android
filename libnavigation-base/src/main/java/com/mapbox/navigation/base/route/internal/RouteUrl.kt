@@ -2,7 +2,7 @@ package com.mapbox.navigation.base.route.internal
 
 import android.net.Uri
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.ifNonNull
+import com.mapbox.navigation.base.utils.ifNonNull
 
 class RouteUrl(
     val accessToken: String,

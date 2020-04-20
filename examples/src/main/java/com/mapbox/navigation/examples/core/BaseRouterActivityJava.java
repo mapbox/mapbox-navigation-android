@@ -57,8 +57,8 @@ import static com.mapbox.mapboxsdk.log.Logger.ERROR;
 import static com.mapbox.mapboxsdk.log.Logger.INFO;
 import static com.mapbox.mapboxsdk.log.Logger.VERBOSE;
 import static com.mapbox.mapboxsdk.log.Logger.WARN;
-import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
-import static com.mapbox.navigation.base.extensions.MapboxRouteOptionsUtils.coordinates;
+import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
+import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils.coordinates;
 import static com.mapbox.navigation.base.route.internal.RouteUrl.PROFILE_DRIVING_TRAFFIC;
 
 public abstract class BaseRouterActivityJava extends AppCompatActivity

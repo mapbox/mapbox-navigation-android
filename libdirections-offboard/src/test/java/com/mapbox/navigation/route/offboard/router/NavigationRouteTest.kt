@@ -5,9 +5,9 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.extensions.coordinates
-import com.mapbox.navigation.base.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import io.mockk.MockKAnnotations
@@ -16,8 +16,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import java.util.Locale
-import junit.framework.Assert.assertNotNull
 import org.hamcrest.CoreMatchers.containsString
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
@@ -29,7 +29,7 @@ class NavigationRouteTest {
         @BeforeClass
         @JvmStatic
         fun init() {
-            mockkStatic("com.mapbox.navigation.base.extensions.ContextEx")
+            mockkStatic("com.mapbox.navigation.base.internal.extensions.ContextEx")
         }
 
         const val ACESS_TOKEN = "pk.XXX"

@@ -1,6 +1,6 @@
 @file:JvmName("ContextEx")
 
-package com.mapbox.navigation.base.extensions
+package com.mapbox.navigation.base.internal.extensions
 
 import android.content.Context
 import android.os.Build

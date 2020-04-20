@@ -5,8 +5,8 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultParams
-import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.network.NetworkStatus
 import com.mapbox.navigation.utils.network.NetworkStatusService

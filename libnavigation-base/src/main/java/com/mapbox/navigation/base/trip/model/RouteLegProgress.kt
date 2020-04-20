@@ -8,7 +8,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * in the directions route, much of this information will be identical to the parent
  * [RouteProgress].
  *
- * The latest route leg progress object can be obtained through the [RouteProgressObserver].
+ * The latest route leg progress object can be obtained through the [com.mapbox.navigation.base.trip.RouteProgressObserver].
  * Note that the route leg progress object's immutable.
  */
 class RouteLegProgress private constructor(

@@ -31,7 +31,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.navigation.base.extensions.ContextEx;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
@@ -52,8 +52,8 @@ import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
 import java.util.Locale;
 
-import static com.mapbox.navigation.base.extensions.LocaleEx.getLocaleDirectionsRoute;
-import static com.mapbox.navigation.base.extensions.LocaleEx.getUnitTypeForLocale;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
+import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 
 /**
  * View that creates the drop-in UI.
