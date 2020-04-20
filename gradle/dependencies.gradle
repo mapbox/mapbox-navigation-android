@@ -12,9 +12,9 @@ ext {
       mapboxMapSdk              : '9.1.0',
       mapboxSdkServices         : '5.1.0',
       mapboxSdkDirectionsModels : '5.1.0',
-      mapboxEvents              : '5.0.0',
-      mapboxCore                : '2.0.0',
-      mapboxNavigator           : 'ak-sensor-history-2-SNAPSHOT-1',
+      mapboxEvents              : '5.0.1',
+      mapboxCore                : '2.0.1',
+      mapboxNavigator           : '11.0.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.3.1',
@@ -59,7 +59,6 @@ ext {
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
       barista                   : '3.2.0',
-      workTesting               : '2.2.0',
       androidxTestCore          : '1.2.0'
   ]
   dependenciesList = [
@@ -139,7 +138,6 @@ ext {
       testEspressoIntents       : "androidx.test.espresso:espresso-intents:${version.espressoVersion}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
       barista                   : "com.schibsted.spain:barista:${version.barista}",
-      workTesting               : "androidx.work:work-testing:${version.workTesting}",
 
       // unit test
       junit                     : "junit:junit:${version.junit}",
