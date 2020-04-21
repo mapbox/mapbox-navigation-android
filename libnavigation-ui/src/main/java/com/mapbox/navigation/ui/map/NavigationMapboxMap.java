@@ -235,7 +235,7 @@ public class NavigationMapboxMap {
    *
    * @param location to update the icon and query the map
    */
-  public void updateLocation(@NonNull Location location) {
+  public void updateLocation(@Nullable Location location) {
     if (location != null) {
       List<Location> locations = new ArrayList<>(1);
       locations.add(location);
