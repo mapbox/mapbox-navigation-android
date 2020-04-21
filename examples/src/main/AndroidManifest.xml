@@ -182,6 +182,14 @@
                 android:value=".CoreActivity"/>
         </activity>
 
+        <activity android:name=".core.BasicNavSdkOnlyActivity"
+            android:label="@string/title_basic_navigation_sdk_only_kotlin"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity"/>
+        </activity>
+
         <activity android:name=".core.FreeDriveNavigationActivity"
             android:label="@string/title_free_drive_kotlin"
             android:screenOrientation="portrait">

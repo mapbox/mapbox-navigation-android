@@ -65,6 +65,9 @@
     <string name="title_basic_navigation_kotlin" translatable="false">BasicNavigationActivity</string>
     <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from source to destination using Mapbox Navigation.</string>
 
+    <string name="title_basic_navigation_sdk_only_kotlin" translatable="false">BasicNavSdkOnlyActivity</string>
+    <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Demonstrates how to combine Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
+
     <string name="title_free_drive_kotlin" translatable="false">FreeDriveNavigationActivity</string>
     <string name="description_free_drive_kotlin" translatable="false">Demonstrates how to navigate in a free drive scenario using Mapbox Navigation.</string>
 
@@ -114,6 +117,9 @@
     <string name="msg_long_press_map_to_place_waypoint" translatable="false">Long press on the map to place a waypoint</string>
     <string name="msg_tap_map_to_place_waypoint" translatable="false">Tap on the map to place a waypoint</string>
     <string name="only_two_waypoints_supported" translatable="false">Only two waypoints are supported for this example</string>
+    <string name="no_routes" translatable="false">No available routes to that destination</string>
+    <string name="steps_in_route" translatable="false">There are %1$d steps in the route</string>
+    <string name="route_request_failed" translatable="false">The route request failed</string>
     <string name="offline_category_title" translatable="false">Offline</string>
     <string name="offline_enabled_title" translatable="false">Offline routing enabled</string>
     <string name="offline_version_title" translatable="false">Choose offline version</string>
