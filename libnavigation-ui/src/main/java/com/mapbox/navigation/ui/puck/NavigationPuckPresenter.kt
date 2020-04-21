@@ -10,6 +10,14 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
+/**
+ * It listens for routeProgress events and applies the drawable returned by the puckDrawableSupplier
+ * to the map to change the puck. The puckDrawableSupplier determines which drawable resource to
+ * use for the puck based on the routeProgress and the presenter applies that drawable
+ *
+ * @property mapboxMap instance of [com.mapbox.mapboxsdk.maps.MapboxMap]
+ * @property puckDrawableSupplier provides different [com.mapbox.navigation.ui.puck.PuckDrawableSupplier]
+ */
 class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupplier: PuckDrawableSupplier) : LifecycleObserver {
 
     private var mapboxNavigation: MapboxNavigation? = null
@@ -24,6 +32,11 @@ class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupp
         }
     }
 
+    /**
+     * Invoke the function to register for changes in routeProgress
+     *
+     * @param mapboxNavigation reference to [com.mapbox.navigation.core.MapboxNavigation]
+     */
     fun addProgressChangeListener(mapboxNavigation: MapboxNavigation) {
         this.mapboxNavigation = mapboxNavigation
         if (!observerRegistered) {

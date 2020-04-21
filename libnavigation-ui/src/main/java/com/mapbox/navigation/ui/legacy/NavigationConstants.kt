@@ -158,60 +158,214 @@ object NavigationConstants {
      */
     const val MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE = 250L
 
-    internal const val NON_NULL_APPLICATION_CONTEXT_REQUIRED =
-        "Non-null application context required."
-
-    // Bundle variable keys
+    /**
+     * Bundle key used to extract the route for launching the drop-in UI
+     */
     const val NAVIGATION_VIEW_ROUTE_KEY = "route_json"
+
+    /**
+     * Bundle key to enable/disable simulation of route
+     */
     const val NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route"
+
+    /**
+     * Bundle key to store offline path
+     */
     const val OFFLINE_PATH_KEY = "offline_path_key"
+
+    /**
+     * Bundle key to store offline version
+     */
     const val OFFLINE_VERSION_KEY = "offline_version_key"
+
+    /**
+     * Bundle key to store map database path
+     */
     const val MAP_DATABASE_PATH_KEY = "offline_map_database_path_key"
+
+    /**
+     * Bundle key to store map style URL
+     */
     const val MAP_STYLE_URL_KEY = "offline_map_style_url_key"
 
-    // Step Maneuver Types
+    /**
+     * Indicates "turn" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_TURN = "turn"
+
+    /**
+     * Indicates "new name" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_NEW_NAME = "new name"
+
+    /**
+     * Indicates "depart" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_DEPART = "depart"
+
+    /**
+     * Indicates "arrive" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_ARRIVE = "arrive"
+
+    /**
+     * Indicates "merge" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_MERGE = "merge"
+
+    /**
+     * Indicates "on ramp" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_ON_RAMP = "on ramp"
+
+    /**
+     * Indicates "off ramp" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_OFF_RAMP = "off ramp"
+
+    /**
+     * Indicates "fork" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_FORK = "fork"
+
+    /**
+     * Indicates "end of road" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_END_OF_ROAD = "end of road"
+
+    /**
+     * Indicates "continue" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_CONTINUE = "continue"
+
+    /**
+     * Indicates "roundabout" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_ROUNDABOUT = "roundabout"
+
+    /**
+     * Indicates "rotary" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_ROTARY = "rotary"
+
+    /**
+     * Indicates "roundabout turn" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_ROUNDABOUT_TURN = "roundabout turn"
+
+    /**
+     * Indicates "notification" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_NOTIFICATION = "notification"
+
+    /**
+     * Indicates "exit roundabout" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_EXIT_ROUNDABOUT = "exit roundabout"
+
+    /**
+     * Indicates "exit rotary" maneuver type to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_TYPE_EXIT_ROTARY = "exit rotary"
 
-    // Step Maneuver Modifiers
+    /**
+     * Indicates "uturn" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_UTURN = "uturn"
+
+    /**
+     * Indicates "sharp right" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_SHARP_RIGHT = "sharp right"
+
+    /**
+     * Indicates "right" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_RIGHT = "right"
+
+    /**
+     * Indicates "slight right" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT = "slight right"
+
+    /**
+     * Indicates "straight" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_STRAIGHT = "straight"
+
+    /**
+     * Indicates "slight left" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_SLIGHT_LEFT = "slight left"
+
+    /**
+     * Indicates "left" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_LEFT = "left"
+
+    /**
+     * Indicates "sharp left" maneuver modifier to be rendered in the [com.mapbox.navigation.ui.instruction.maneuver.ManeuverView]
+     */
     const val STEP_MANEUVER_MODIFIER_SHARP_LEFT = "sharp left"
 
-    // Turn Lane Indication
+    /**
+     * Indication to turn left
+     */
     const val TURN_LANE_INDICATION_LEFT = "left"
+
+    /**
+     * Indication to turn slight left
+     */
     const val TURN_LANE_INDICATION_SLIGHT_LEFT = "slight left"
+
+    /**
+     * Indication to go straight
+     */
     const val TURN_LANE_INDICATION_STRAIGHT = "straight"
+
+    /**
+     * Indication to turn right
+     */
     const val TURN_LANE_INDICATION_RIGHT = "right"
+
+    /**
+     * Indication to turn slight right
+     */
     const val TURN_LANE_INDICATION_SLIGHT_RIGHT = "slight right"
+
+    /**
+     * Indication to take a u-turn
+     */
     const val TURN_LANE_INDICATION_UTURN = "uturn"
 
-    // Distance Rounding Increments
+    /**
+     * Round small distances in increments of 5
+     */
     const val ROUNDING_INCREMENT_FIVE = 5
+
+    /**
+     * Round small distances in increments of 10
+     */
     const val ROUNDING_INCREMENT_TEN = 10
+
+    /**
+     * Round small distances in increments of 25
+     */
     const val ROUNDING_INCREMENT_TWENTY_FIVE = 25
+
+    /**
+     * Round small distances in increments of 50
+     */
     const val ROUNDING_INCREMENT_FIFTY = 50
+
+    /**
+     * Round small distances in increments of 100
+     */
     const val ROUNDING_INCREMENT_ONE_HUNDRED = 100
 
+    /**
+     * Representation of ManeuverType in form of logical types
+     */
     @StringDef(
         STEP_MANEUVER_TYPE_TURN,
         STEP_MANEUVER_TYPE_NEW_NAME,
@@ -232,6 +386,9 @@ object NavigationConstants {
     )
     annotation class ManeuverType
 
+    /**
+     * Representation of ManeuverModifier in form of logical types
+     */
     @StringDef(
         STEP_MANEUVER_MODIFIER_UTURN,
         STEP_MANEUVER_MODIFIER_SHARP_RIGHT,
@@ -244,6 +401,9 @@ object NavigationConstants {
     )
     annotation class ManeuverModifier
 
+    /**
+     * Rounding increments for use in [com.mapbox.navigation.core.MapboxDistanceFormatter].
+     */
     @IntDef(
         ROUNDING_INCREMENT_FIVE,
         ROUNDING_INCREMENT_TEN,
@@ -252,4 +412,4 @@ object NavigationConstants {
         ROUNDING_INCREMENT_ONE_HUNDRED
     )
     annotation class RoundingIncrement
-} // Empty private constructor to prevent users creating an instance of this class.
+}

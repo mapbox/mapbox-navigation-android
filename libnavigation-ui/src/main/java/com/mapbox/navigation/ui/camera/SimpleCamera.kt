@@ -13,7 +13,14 @@ import java.util.ArrayList
 open class SimpleCamera : Camera() {
 
     companion object {
+        /**
+         * Default tilt angle for the Camera
+         */
         protected const val DEFAULT_TILT = 50
+
+        /**
+         * Default zoom level for the Camera
+         */
         protected const val DEFAULT_ZOOM = 15.0
     }
 

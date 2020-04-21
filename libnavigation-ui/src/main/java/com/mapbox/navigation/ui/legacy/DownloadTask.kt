@@ -31,6 +31,13 @@ constructor(
         private const val BUFFER_SIZE = 4096
     }
 
+    /**
+     * It performs computation on the background thread. The computation works towards
+     * downloading file from ResponseBody
+     *
+     * @param responseBodies used to download the file
+     * @return File object as an output to UI thread
+     */
     override fun doInBackground(vararg responseBodies: ResponseBody): File? =
         saveAsFile(responseBodies.firstOrNull())
 
@@ -74,6 +81,11 @@ constructor(
     private fun retrieveUniqueId(): String =
         if (uniqueId++ > 0) uniqueId.toString() else ""
 
+    /**
+     * Invoked to pass the results of [doInBackground] to UI thread
+     *
+     * @param instructionFile output from [doInBackground]
+     */
     override fun onPostExecute(instructionFile: File?) {
         if (instructionFile == null) {
             downloadListener.onErrorDownloading()
@@ -86,8 +98,16 @@ constructor(
      * Interface which allows a Listener to be updated upon the completion of a [DownloadTask].
      */
     interface DownloadListener {
+        /**
+         * Notifies the user when the downloadTask has finished downloading
+         *
+         * @param file the file downloaded
+         */
         fun onFinishedDownloading(file: File)
 
+        /**
+         * Notifies the user if there is error downloading the file
+         */
         fun onErrorDownloading()
     }
 }
