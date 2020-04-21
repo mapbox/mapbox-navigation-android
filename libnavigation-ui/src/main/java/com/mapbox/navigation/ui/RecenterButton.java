@@ -96,6 +96,22 @@ public class RecenterButton extends CardView implements NavigationButton {
     }
   }
 
+  @Override
+  public void updateStyle(int styleRes) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.RecenterButton);
+
+    primaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.RecenterButton_recenterButtonPrimaryColor, R.color.mapbox_recenter_button_primary));
+    secondaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.RecenterButton_recenterButtonSecondaryColor, R.color.mapbox_recenter_button_secondary));
+
+    typedArray.recycle();
+
+    applyAttributes();
+  }
+
   /**
    * Once inflation of the view has finished,
    * create the custom animation.

@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
@@ -102,6 +103,27 @@ public class AlertView extends CardView {
       startAnimation(fadeOut);
       setVisibility(INVISIBLE);
     }
+  }
+
+  public void updateStyle(@StyleRes int styleRes) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.AlertView);
+
+    backgroundColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewBackgroundColor,
+        R.color.mapbox_alert_view_background));
+    progressBarBackgroundColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarBackgroundColor,
+        R.color.mapbox_alert_view_progress_bar_background));
+    progressBarColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarColor,
+        R.color.mapbox_alert_view_progress_bar));
+    textColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(R.styleable.AlertView_alertViewTextColor,
+        R.color.mapbox_alert_view_text));
+
+    typedArray.recycle();
+
+    applyAttributes();
   }
 
   /**

@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui;
 
 import android.view.View;
 
+import androidx.annotation.StyleRes;
+
 public interface NavigationButton {
 
   /**
@@ -27,4 +29,9 @@ public interface NavigationButton {
    * Shows the button
    */
   void show();
+
+  /**
+   * Set customized style
+   */
+  void updateStyle(@StyleRes int styleRes);
 }

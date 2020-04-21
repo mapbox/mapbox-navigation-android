@@ -26,6 +26,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
+    private val route by lazy { getDirectionsRoute() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,10 +92,9 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
                 this.mapboxMap = navMapboxMap.retrieveMap()
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
-                val directionsRoute = getDirectionsRoute()
                 val optionsBuilder = NavigationViewOptions.builder()
                 optionsBuilder.navigationListener(this)
-                optionsBuilder.directionsRoute(directionsRoute)
+                optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
                 optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
@@ -121,8 +121,9 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     }
 
     private fun getInitialCameraPosition(): CameraPosition {
+        val originCoordinate = route.routeOptions()?.coordinates()?.get(0)?.coordinates()
         return CameraPosition.Builder()
-            .target(LatLng(37.791503, -122.396255))
+            .target(LatLng(originCoordinate!![1], originCoordinate[0]))
             .zoom(15.0)
             .build()
     }
