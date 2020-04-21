@@ -8,8 +8,8 @@ import android.text.TextUtils
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
-import com.mapbox.navigation.utils.audio.AudioTypeChain
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.core.telemetry.audio.AudioTypeChain
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.floor
@@ -95,7 +95,7 @@ fun obtainScreenBrightness(context: Context): Int =
 
 /**
  * Provide audio type
- * @see [com.mapbox.navigation.utils.audio.AudioTypeResolver]
+ * @see [com.mapbox.navigation.core.telemetry.audio.AudioTypeResolver]
  */
 fun obtainAudioType(context: Context): String =
     AudioTypeChain().setup().obtainAudioType(context)

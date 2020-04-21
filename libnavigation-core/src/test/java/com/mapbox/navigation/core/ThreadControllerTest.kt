@@ -1,6 +1,6 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertTrue

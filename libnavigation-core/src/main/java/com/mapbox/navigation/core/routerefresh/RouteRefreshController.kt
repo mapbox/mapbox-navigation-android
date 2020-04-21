@@ -8,7 +8,7 @@ import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.utils.timer.MapboxTimer
+import com.mapbox.navigation.utils.internal.MapboxTimer
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Job
 

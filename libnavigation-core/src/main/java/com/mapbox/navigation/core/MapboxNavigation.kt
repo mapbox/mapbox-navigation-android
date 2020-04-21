@@ -49,11 +49,11 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.navigation.utils.network.NetworkStatusService
-import com.mapbox.navigation.utils.thread.JobControl
-import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import java.io.File
 import java.lang.reflect.Field
 import java.net.URI
@@ -150,6 +150,7 @@ constructor(
     init {
 
         ThreadController.init()
+        logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
@@ -157,16 +158,15 @@ constructor(
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = MapboxModuleProvider.createModule(
-                MapboxModuleType.NavigationTripNotification,
-                ::paramsProvider
-            )
+            MapboxModuleType.NavigationTripNotification,
+            ::paramsProvider
+        )
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
                 notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
                     isAccessible = true
                 }
         }
-        logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
             notification,
@@ -554,14 +554,18 @@ constructor(
                 arrayOf(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER))
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
+                    Logger::class.java to MapboxModuleProvider.createModule(
+                        MapboxModuleType.CommonLogger,
+                        ::paramsProvider
+                    )
                 )
             }
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
                 NavigationOptions::class.java to navigationOptions
             )
-            MapboxModuleType.CommonLogger -> arrayOf()
+            MapboxModuleType.CommonLogger -> arrayOf(Logger::class.java to logger)
             MapboxModuleType.CommonLibraryLoader -> throw IllegalArgumentException("not supported: $type")
             MapboxModuleType.CommonHttpClient -> throw IllegalArgumentException("not supported: $type")
         }

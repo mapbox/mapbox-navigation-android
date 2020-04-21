@@ -42,12 +42,14 @@ import com.mapbox.navigation.route.hybrid.MapboxHybridRouter;
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter;
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
-import com.mapbox.navigation.utils.network.NetworkStatusService;
+import com.mapbox.navigation.utils.internal.NetworkStatusService;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import timber.log.Timber;
 

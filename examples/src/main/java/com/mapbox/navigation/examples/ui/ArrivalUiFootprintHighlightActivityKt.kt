@@ -20,7 +20,7 @@ import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.listeners.RouteListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_final_destination_arrival_building_highlight.*
 
 /**
@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.activity_final_destination_arrival_buildin
  * [RouteListener.onFinalDestinationArrival].
  */
 class ArrivalUiFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
-        BannerInstructionsListener, RouteListener {
+    BannerInstructionsListener, RouteListener {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
@@ -108,7 +108,7 @@ class ArrivalUiFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationR
 
                 // Initialize the Nav UI SDK's DestinationBuildingFootprintLayer class.
                 destinationBuildingFootprintLayer = DestinationBuildingFootprintLayer(mapboxMap,
-                        navigationView.findViewById(R.id.navigationMapView))
+                    navigationView.findViewById(R.id.navigationMapView))
                 adjust_highlight_color_and_opacity.show()
 
                 val optionsBuilder = NavigationViewOptions.builder()
@@ -171,7 +171,7 @@ class ArrivalUiFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationR
          * final destination coordinate in this example's [DirectionsRoute].
          */
         destinationBuildingFootprintLayer.setDestinationBuildingLocation(LatLng(37.790932,
-                -122.414279))
+            -122.414279))
     }
 
     override fun onNavigationRunning() {

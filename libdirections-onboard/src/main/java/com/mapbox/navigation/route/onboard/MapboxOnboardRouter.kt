@@ -15,8 +15,8 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
-import com.mapbox.navigation.utils.exceptions.NavigationException
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.NavigationException
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.io.File

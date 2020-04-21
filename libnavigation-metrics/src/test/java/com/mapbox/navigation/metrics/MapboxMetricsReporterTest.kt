@@ -8,8 +8,8 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.thread.JobControl
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

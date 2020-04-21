@@ -1,6 +1,5 @@
 package com.mapbox.navigation.route.offboard.router
 
-import com.mapbox.navigation.utils.time.ElapsedTime
 import io.mockk.mockk
 import io.mockk.verify
 import okhttp3.Call

@@ -9,7 +9,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.internal.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.utils.thread.ifChannelException
+import com.mapbox.navigation.utils.internal.ifChannelException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -44,18 +44,18 @@ class MapboxTripService(
         logger: Logger
     ) : this(
         tripNotification, {
-            try {
-                applicationContext.startService(intent)
-            } catch (e: IllegalStateException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    applicationContext.startForegroundService(intent)
-                } else {
-                    throw e
-                }
+        try {
+            applicationContext.startService(intent)
+        } catch (e: IllegalStateException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(intent)
+            } else {
+                throw e
             }
-        }, {
-            applicationContext.stopService(intent)
-        },
+        }
+    }, {
+        applicationContext.stopService(intent)
+    },
         logger
     )
 
@@ -71,11 +71,11 @@ class MapboxTripService(
         tripNotification: TripNotification,
         logger: Logger
     ) : this(
-            applicationContext,
-            tripNotification,
-            Intent(applicationContext, NavigationNotificationService::class.java),
-            logger
-        )
+        applicationContext,
+        tripNotification,
+        Intent(applicationContext, NavigationNotificationService::class.java),
+        logger
+    )
 
     private val serviceStarted = AtomicBoolean(false)
 

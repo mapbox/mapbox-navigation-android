@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.trip.session
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class VoiceInstructionEvent {
 

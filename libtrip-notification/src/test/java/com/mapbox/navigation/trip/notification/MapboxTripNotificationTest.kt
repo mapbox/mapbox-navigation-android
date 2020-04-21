@@ -19,7 +19,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.trip.notification.utils.time.TimeFormatter
-import com.mapbox.navigation.utils.NOTIFICATION_ID
+import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just

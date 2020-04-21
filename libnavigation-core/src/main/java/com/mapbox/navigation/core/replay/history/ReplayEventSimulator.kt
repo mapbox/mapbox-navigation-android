@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.ThreadController
 import java.lang.IllegalStateException
 import kotlin.math.max
 import kotlin.math.roundToLong

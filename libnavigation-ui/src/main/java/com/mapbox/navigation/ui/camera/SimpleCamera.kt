@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.ArrayList
 
 /**
@@ -45,9 +45,10 @@ open class SimpleCamera : Camera() {
     private fun buildRouteCoordinatesFromRouteData(routeInformation: RouteInformation) {
         ifNonNull(routeInformation.route) { route ->
             setupLineStringAndBearing(route)
-        } ?: ifNonNull(routeInformation.routeProgress?.route()) { directionsRoute ->
-            setupLineStringAndBearing(directionsRoute)
         }
+            ?: ifNonNull(routeInformation.routeProgress?.route()) { directionsRoute ->
+                setupLineStringAndBearing(directionsRoute)
+            }
     }
 
     private fun setupLineStringAndBearing(route: DirectionsRoute) {

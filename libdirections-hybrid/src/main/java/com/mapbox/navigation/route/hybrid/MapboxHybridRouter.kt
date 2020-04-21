@@ -6,9 +6,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.utils.network.NetworkStatusService
-import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
+import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Job
 

@@ -17,8 +17,8 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.thread.JobControl
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.NavigationStatus
 import io.mockk.clearMocks
 import io.mockk.coEvery

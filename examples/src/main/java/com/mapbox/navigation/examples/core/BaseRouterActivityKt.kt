@@ -45,8 +45,8 @@ import com.mapbox.navigation.route.hybrid.MapboxHybridRouter
 import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
 import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
 import com.mapbox.navigation.ui.route.NavigationMapRoute
-import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.navigation.utils.network.NetworkStatusService
+import com.mapbox.navigation.utils.internal.NetworkStatusService
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import java.io.File
@@ -167,10 +167,10 @@ abstract class BaseRouterActivityKt :
             }
             else -> {
                 Toast.makeText(
-                        this,
-                        "Only 2 waypoints supported for this example",
-                        Toast.LENGTH_LONG
-                    )
+                    this,
+                    "Only 2 waypoints supported for this example",
+                    Toast.LENGTH_LONG
+                )
                     .show()
                 clearMap()
             }
