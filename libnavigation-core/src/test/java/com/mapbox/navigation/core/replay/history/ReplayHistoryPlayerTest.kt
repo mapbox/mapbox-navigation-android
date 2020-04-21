@@ -12,11 +12,11 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
 import java.util.concurrent.TimeUnit
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,8 +64,8 @@ class ReplayHistoryPlayerTest {
         coVerify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(2, events.size)
-        assertEquals(1580777612.853, events[0].eventTimestamp)
-        assertEquals(1580777612.89, events[1].eventTimestamp)
+        assertEquals(1580777612.853, events[0].eventTimestamp, 0.001)
+        assertEquals(1580777612.89, events[1].eventTimestamp, 0.001)
     }
 
     @Test
@@ -115,8 +115,8 @@ class ReplayHistoryPlayerTest {
         coVerify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(2, events.size)
-        assertEquals(1580777820.952, events[0].eventTimestamp)
-        assertEquals(1580777822.959, events[1].eventTimestamp)
+        assertEquals(1580777820.952, events[0].eventTimestamp, 0.001)
+        assertEquals(1580777822.959, events[1].eventTimestamp, 0.001)
     }
 
     @Test
@@ -181,7 +181,7 @@ class ReplayHistoryPlayerTest {
         assertEquals(events.size, 2)
         assertTrue(events[0] is CustomReplayEvent)
         assertEquals("custom value", (events[0] as CustomReplayEvent).customValue)
-        assertEquals(1580777613.89, events[1].eventTimestamp)
+        assertEquals(1580777613.89, events[1].eventTimestamp, 0.001)
     }
 
     @Test(expected = Exception::class)
@@ -216,7 +216,7 @@ class ReplayHistoryPlayerTest {
         verify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(1, events.size)
-        assertEquals(1580777612.89, events[0].eventTimestamp)
+        assertEquals(1580777612.89, events[0].eventTimestamp, 0.001)
     }
 
     @Test
@@ -255,8 +255,8 @@ class ReplayHistoryPlayerTest {
         coVerify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(events.size, 2)
-        assertEquals(2.452, events[0].eventTimestamp)
-        assertEquals(3.085, events[1].eventTimestamp)
+        assertEquals(2.452, events[0].eventTimestamp, 0.001)
+        assertEquals(3.085, events[1].eventTimestamp, 0.001)
     }
 
     @Test(expected = Exception::class)
@@ -291,8 +291,8 @@ class ReplayHistoryPlayerTest {
         coVerify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(events.size, 2)
-        assertEquals(2.0, events[0].eventTimestamp)
-        assertEquals(4.0, events[1].eventTimestamp)
+        assertEquals(2.0, events[0].eventTimestamp, 0.001)
+        assertEquals(4.0, events[1].eventTimestamp, 0.001)
     }
 
     @Test
@@ -315,8 +315,8 @@ class ReplayHistoryPlayerTest {
         coVerify { mockLambda(capture(replayUpdates)) }
         val events = replayUpdates.flatten()
         assertEquals(2, events.size)
-        assertEquals(1580777613.452, events[0].eventTimestamp)
-        assertEquals(1580777614.085, events[1].eventTimestamp)
+        assertEquals(1580777613.452, events[0].eventTimestamp, 0.001)
+        assertEquals(1580777614.085, events[1].eventTimestamp, 0.001)
     }
 
     /**

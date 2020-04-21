@@ -6,7 +6,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -148,8 +148,8 @@ class MapRouteProgressChangeListenerTest {
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
-        assertEquals(drawDirections.size, 1)
-        assertEquals(drawDirections[0].geometry(), "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB")
+        assertEquals(1, drawDirections.size)
+        assertEquals("{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB", drawDirections[0].geometry())
     }
 
     @Test
@@ -171,7 +171,7 @@ class MapRouteProgressChangeListenerTest {
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
-        assertEquals(drawDirections.size, 1)
-        assertEquals(drawDirections[0].distance(), 100.0)
+        assertEquals(1, drawDirections.size)
+        assertEquals(100.0, drawDirections[0].distance()!!, 0.001)
     }
 }
