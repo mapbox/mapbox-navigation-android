@@ -277,6 +277,8 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       mapboxMap.removeOnMapClickListener(this);
     }
     mapView.onDestroy();
+    MapboxLogger.INSTANCE.removeObserver();
+    MapboxMetricsReporter.INSTANCE.removeObserver();
   }
 
   @Override

@@ -219,6 +219,8 @@ abstract class BaseRouterActivityKt :
         router.shutdown()
         mapboxMap?.removeOnMapClickListener(this)
         mapView.onDestroy()
+        MapboxLogger.removeObserver()
+        MapboxMetricsReporter.removeObserver()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
