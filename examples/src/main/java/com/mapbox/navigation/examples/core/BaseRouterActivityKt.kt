@@ -278,7 +278,7 @@ abstract class BaseRouterActivityKt :
                 null,
                 null // working with pre-fetched tiles only
             )
-            return MapboxOnboardRouter(MapboxNativeNavigatorImpl, config)
+            return MapboxOnboardRouter(MapboxNativeNavigatorImpl, config, MapboxLogger)
         }
 
         fun setupHybridRouter(applicationContext: Context): Router {

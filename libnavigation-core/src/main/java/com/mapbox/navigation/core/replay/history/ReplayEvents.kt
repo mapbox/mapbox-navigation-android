@@ -27,7 +27,6 @@ interface ReplayEventBase {
  * be useful for comparing versions.
  *
  * @param eventTimestamp timestamp of event in seconds
- * @param timestamp timestamp of event in seconds
  */
 data class ReplayEventGetStatus(
     @SerializedName("event_timestamp")

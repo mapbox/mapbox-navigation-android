@@ -10,6 +10,8 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
@@ -45,7 +47,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class ReplayHistoryActivity : AppCompatActivity() {
 
@@ -78,7 +79,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             // Load and replay history on IO dispatchers
             val deferredEvents = async(Dispatchers.IO) { loadReplayHistory() }
             val replayEvents = deferredEvents.await()
-            val replayHistoryPlayer = ReplayHistoryPlayer()
+            val replayHistoryPlayer = ReplayHistoryPlayer(MapboxLogger)
                 .pushEvents(replayEvents)
             if (!isActive) return@launch
 
@@ -113,7 +114,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private suspend fun loadReplayHistory(): List<ReplayEventBase> = suspendCoroutine { cont ->
-        val replayHistoryMapper = ReplayHistoryMapper(Gson(), ReplayCustomEventMapper())
+        val replayHistoryMapper = ReplayHistoryMapper(Gson(), ReplayCustomEventMapper(), MapboxLogger)
         val rideHistoryExample = loadHistoryJsonFromAssets(this@ReplayHistoryActivity, "replay-history-activity.json")
         val replayEvents = replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
         cont.resume(replayEvents)
@@ -205,7 +206,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            Timber.d("route request success %s", routes.toString())
+            MapboxLogger.d(Message("route request success $routes"))
             if (routes.isNotEmpty()) {
                 navigationContext?.navigationMapboxMap?.drawRoute(routes[0])
                 navigationContext?.startNavigation()
@@ -213,11 +214,14 @@ class ReplayHistoryActivity : AppCompatActivity() {
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Timber.e("route request failure %s", throwable.toString())
+            MapboxLogger.e(
+                Message("route request failure"),
+                throwable
+            )
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            Timber.d("route request canceled")
+            MapboxLogger.d(Message("route request canceled"))
         }
     }
 
@@ -276,7 +280,10 @@ private fun loadHistoryJsonFromAssets(context: Context, fileName: String): Strin
         inputStream.close()
         String(buffer, forName("UTF-8"))
     } catch (e: IOException) {
-        Timber.e(e, "Your history file failed to open $fileName")
+        MapboxLogger.e(
+            Message("Your history file failed to open $fileName"),
+            e
+        )
         throw e
     }
 }

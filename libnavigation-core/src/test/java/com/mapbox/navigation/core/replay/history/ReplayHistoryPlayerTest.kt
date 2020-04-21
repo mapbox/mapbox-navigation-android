@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Called
 import io.mockk.coVerify
@@ -33,12 +34,13 @@ class ReplayHistoryPlayerTest {
         }
     }
     private val mockLambda: (List<ReplayEventBase>) -> Unit = mockk(relaxed = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
 
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventUpdateLocation(1580777612.89,
@@ -70,7 +72,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should play 2 of 3 locations that include time window`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventUpdateLocation(1580777820.952,
                     ReplayEventLocation(
@@ -121,7 +123,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1000.000),
                 ReplayEventGetStatus(1001.000),
@@ -154,7 +156,7 @@ class ReplayHistoryPlayerTest {
             override val eventTimestamp: Double,
             val customValue: String
         ) : ReplayEventBase
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 CustomReplayEvent(1580777612.853, "custom value"),
                 ReplayEventUpdateLocation(1580777613.89,
@@ -186,7 +188,7 @@ class ReplayHistoryPlayerTest {
 
     @Test(expected = Exception::class)
     fun `should crash if history data is empty`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
 
         replayHistoryPlayer.play(lifecycleOwner)
         replayHistoryPlayer.finish()
@@ -194,7 +196,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `playFirstLocation should ignore events before the first location`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventUpdateLocation(1580777612.89,
@@ -221,7 +223,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `playFirstLocation should handle history events without locations`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1580777612.853),
                 ReplayEventGetStatus(1580777613.452),
@@ -237,7 +239,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `should seekTo an event`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1.853),
                 seekToEvent,
@@ -262,7 +264,7 @@ class ReplayHistoryPlayerTest {
     @Test(expected = Exception::class)
     fun `should crash when seekTo event is missing`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1.853),
                 ReplayEventGetStatus(3.085)
@@ -273,7 +275,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should seekTo an event time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(0.0),
                 ReplayEventGetStatus(2.0),
@@ -297,7 +299,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should seekTo a time relative to total time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer()
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
                 ReplayEventGetStatus(1580777611.853),
                 ReplayEventGetStatus(1580777613.452),

@@ -1,9 +1,10 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.utils.thread.ThreadController
 import java.lang.IllegalStateException
 import kotlin.math.max
@@ -17,10 +18,15 @@ import kotlinx.coroutines.launch
 /**
  * This class keeps track of a forward playing replay. As time moves forward, it captures
  * all events from [ReplayEvents] that happened, and provides them in a [ReplayEvents]
+ *
+ * @param replayEvents events needed to be replayed by [ReplayHistoryPlayer]
+ * @param logger interface for logging any events
  */
 internal class ReplayEventSimulator(
-    private val replayEvents: ReplayEvents
+    private val replayEvents: ReplayEvents,
+    private val logger: Logger
 ) {
+
     private val jobControl = ThreadController.getMainScopeAndRootJob()
 
     // The pivot will move forward through the events with time.
@@ -36,9 +42,8 @@ internal class ReplayEventSimulator(
     }
 
     fun launchPlayLoop(lifecycleOwner: LifecycleOwner, replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
-        Log.i("ReplayHistory", "Simulator started")
+        logger.i(msg = Message("Replay started"))
         resetSimulatorClock()
-
         return jobControl.scope.launch {
             while (isActive && isSimulating(lifecycleOwner)) {
                 val loopStart = timeSeconds()
@@ -58,7 +63,7 @@ internal class ReplayEventSimulator(
                 throw IllegalStateException("Make sure to call ReplayHistoryPlayer.finish()")
             }
 
-            Log.i("ReplayHistory", "Simulator ended")
+            logger.i(msg = Message("Replay ended"))
         }
     }
 
@@ -100,6 +105,7 @@ internal class ReplayEventSimulator(
     }
 
     companion object {
+
         // The frequency that replay updates will be broad-casted
         private const val replayUpdateSpeedMillis = 100L
 

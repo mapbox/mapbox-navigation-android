@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.trip.service
 
 import android.app.Notification
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import io.mockk.every
@@ -17,10 +18,11 @@ class MapboxTripServiceTest {
     private val notification: Notification = mockk()
     private val initializeLambda: () -> Unit = mockk(relaxed = true)
     private val terminateLambda: () -> Unit = mockk(relaxed = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
-        service = MapboxTripService(tripNotification, initializeLambda, terminateLambda)
+        service = MapboxTripService(tripNotification, initializeLambda, terminateLambda, logger)
         every { tripNotification.getNotificationId() } answers { 1234 }
         every { tripNotification.getNotification() } answers { notification }
     }

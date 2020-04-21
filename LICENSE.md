@@ -1137,6 +1137,18 @@ License: [The Apache Software License, Version 2.0](https://www.apache.org/licen
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Mapbox Annotations (Artifact that provides Mapbox module and plugin annotations).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Common (Artifact that provides Mapbox module and plugin contracts).
+URL: [https://github.com/mapbox/mapbox-base-android](https://github.com/mapbox/mapbox-base-android)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Java SDK.
 URL: [https://github.com/mapbox/mapbox-java](https://github.com/mapbox/mapbox-java)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)

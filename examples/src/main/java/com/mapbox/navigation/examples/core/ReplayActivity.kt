@@ -12,6 +12,8 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -32,7 +34,6 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.*
-import timber.log.Timber
 
 /**
  * To ensure proper functioning of this example make sure your Location is turned on.
@@ -46,7 +47,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private val firstLocationCallback = FirstLocationCallback(this)
 
     private val replayRouteMapper = ReplayRouteMapper()
-    private val replayHistoryPlayer = ReplayHistoryPlayer()
+    private val replayHistoryPlayer = ReplayHistoryPlayer(MapboxLogger)
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +107,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            Timber.d("route request success %s", routes.toString())
+            MapboxLogger.d(Message("route request success $routes"))
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
 
@@ -120,11 +121,14 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Timber.e("route request failure %s", throwable.toString())
+            MapboxLogger.e(
+                Message("Route request failure"),
+                throwable
+            )
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            Timber.d("route request canceled")
+            MapboxLogger.d(Message("route request canceled"))
         }
     }
 

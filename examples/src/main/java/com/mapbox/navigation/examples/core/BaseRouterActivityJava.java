@@ -86,7 +86,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
         null // working with pre-fetched tiles only
     );
 
-    return new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config);
+    return new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config, MapboxLogger.INSTANCE);
   }
 
   public static Router setupHybridRouter(Context applicationContext) {

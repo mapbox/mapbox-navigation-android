@@ -10,6 +10,7 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
@@ -67,6 +68,7 @@ class MapboxTripSessionTest {
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val navigationStatus: NavigationStatus = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
+    private val logger: Logger = mockk(relaxUnitFun = true)
 
     private val routeProgress: RouteProgress = mockk()
     private val navigatorPredictionMillis = 1500L
@@ -88,7 +90,8 @@ class MapboxTripSessionTest {
             locationEngine,
             locationEngineRequest,
             navigatorPredictionMillis,
-            navigator
+            navigator,
+            logger = logger
         )
 
         coEvery { navigator.getStatus(any()) } returns tripStatus
@@ -227,7 +230,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -247,7 +251,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         updateLocationAndJoin()
@@ -267,7 +272,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -287,7 +293,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -308,7 +315,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val observer: LocationObserver = mockk(relaxUnitFun = true)
@@ -328,7 +336,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         updateLocationAndJoin()
@@ -348,7 +357,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val observer: LocationObserver = mockk(relaxUnitFun = true)
@@ -471,7 +481,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val routeProgressObserver: RouteProgressObserver = mockk(relaxUnitFun = true)
@@ -492,7 +503,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
@@ -538,7 +550,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
@@ -571,7 +584,8 @@ class MapboxTripSessionTest {
             locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
-            ThreadController
+            ThreadController,
+            logger = logger
         )
         tripSession.start()
         tripSession.registerVoiceInstructionsObserver(voiceInstructionsObserver)

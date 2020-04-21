@@ -1,12 +1,14 @@
 package com.mapbox.navigation.route.onboard
 
-import android.util.Log
 import com.google.gson.Gson
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
@@ -30,14 +32,18 @@ import kotlinx.coroutines.withContext
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  *
  * @param navigatorNative Native Navigator
+ * @param config configuration for on-board router
+ * @param logger interface for logging any events
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
     private val navigatorNative: MapboxNativeNavigator,
-    config: MapboxOnboardRouterConfig
+    config: MapboxOnboardRouterConfig,
+    private val logger: Logger
 ) : Router {
 
     companion object {
+        private const val TAG = "MapboxOnboardRouter"
         private const val TILES_DIR_NAME = "tiles"
     }
 
@@ -177,7 +183,7 @@ class MapboxOnboardRouter(
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
-        Log.e("MapboxOnboardRouter", errorMessage)
+        logger.e(Tag(TAG), Message(errorMessage))
         return errorMessage
     }
 }

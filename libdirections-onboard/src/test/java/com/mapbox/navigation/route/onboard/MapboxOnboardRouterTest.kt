@@ -2,6 +2,7 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
@@ -59,11 +60,12 @@ class MapboxOnboardRouterTest {
     private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
     private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
+    private val logger: Logger = mockk(relaxUnitFun = true)
 
     @Before
     fun setUp() {
         every { navigator.configureRouter(any(), any()) } returns 0
-        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(TILE_PATH))
+        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(TILE_PATH), logger)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE
