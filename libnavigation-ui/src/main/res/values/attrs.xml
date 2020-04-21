@@ -84,6 +84,9 @@
     <attr name="instructionViewSecondaryTextColor" format="reference|color"/>
     <attr name="instructionManeuverViewPrimaryColor" format="reference|color"/>
     <attr name="instructionManeuverViewSecondaryColor" format="reference|color"/>
+    <attr name="instructionViewFeedbackButtonStyle" format="reference"/>
+    <attr name="instructionViewSoundButtonStyle" format="reference"/>
+    <attr name="instructionViewAlertViewStyle" format="reference"/>
   </declare-styleable>
 
   <declare-styleable name="SoundButton">

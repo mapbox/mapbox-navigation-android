@@ -28,7 +28,7 @@
 
     <com.mapbox.navigation.ui.summary.SummaryBottomSheet
         android:id="@+id/summaryBottomSheet"
-        style="@style/SummaryBottomSheet"
+        style="@style/CustomSummaryBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
@@ -36,7 +36,7 @@
 
     <com.mapbox.navigation.ui.RecenterButton
         android:id="@+id/recenterBtn"
-        style="@style/RecenterButton"
+        style="@style/CustomRecenterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
@@ -47,7 +47,7 @@
 
     <com.mapbox.navigation.ui.map.WayNameView
         android:id="@+id/wayNameView"
-        style="@style/WayNameView"
+        style="@style/CustomWayNameView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|top"
@@ -72,7 +72,7 @@
 
     <com.mapbox.navigation.ui.instruction.InstructionView
         android:id="@+id/instructionView"
-        style="@style/InstructionView"
+        style="@style/CustomInstructionView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="top"

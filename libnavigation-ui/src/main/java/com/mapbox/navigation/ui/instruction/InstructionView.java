@@ -131,6 +131,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private int secondaryTextColor;
   private int maneuverViewPrimaryColor;
   private int maneuverViewSecondaryColor;
+  private int soundButtonStyle;
+  private int feedbackButtonStyle;
+  private int alertViewStyle;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -532,6 +535,13 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         R.styleable.InstructionView_instructionManeuverViewSecondaryColor,
         R.color.mapbox_instruction_maneuver_view_secondary));
 
+    soundButtonStyle = typedArray.getResourceId(
+      R.styleable.InstructionView_instructionViewSoundButtonStyle, -1);
+    feedbackButtonStyle = typedArray.getResourceId(
+      R.styleable.InstructionView_instructionViewFeedbackButtonStyle, -1);
+    alertViewStyle = typedArray.getResourceId(
+      R.styleable.InstructionView_instructionViewAlertViewStyle, -1);
+
     typedArray.recycle();
   }
 
@@ -605,6 +615,16 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
     rerouteLayout.setBackgroundColor(primaryBackgroundColor);
     rerouteText.setTextColor(primaryTextColor);
+
+    if (soundButtonStyle != -1) {
+      soundButton.updateStyle(soundButtonStyle);
+    }
+    if (feedbackButtonStyle != -1) {
+      feedbackButton.updateStyle(feedbackButtonStyle);
+    }
+    if (alertViewStyle != -1) {
+      alertView.updateStyle(alertViewStyle);
+    }
   }
 
   private void applyAttributesForPortrait() {

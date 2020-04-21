@@ -9,7 +9,7 @@
     </style>
 
     <!-- Define your own style for each of the Mapbox Navigation UI SDK component -->
-    <style name="InstructionView">
+    <style name="CustomInstructionView" parent="InstructionView">
         <item name="instructionViewPrimaryBackgroundColor">@color/navigation_instruction_view_primary_background</item>
         <item name="instructionViewSecondaryBackgroundColor">@color/navigation_instruction_view_secondary_background</item>
         <item name="instructionListViewBackgroundColor">@color/navigation_instruction_list_view_background</item>
@@ -17,36 +17,39 @@
         <item name="instructionViewSecondaryTextColor">@color/navigation_instruction_view_secondary_text</item>
         <item name="instructionManeuverViewPrimaryColor">@color/navigation_maneuver_view_primary</item>
         <item name="instructionManeuverViewSecondaryColor">@color/navigation_maneuver_view_secondary</item>
+        <item name="instructionViewSoundButtonStyle">@style/CustomSoundButton</item>
+        <item name="instructionViewFeedbackButtonStyle">@style/CustomFeedbackButton</item>
+        <item name="instructionViewAlertViewStyle">@style/CustomAlertView</item>
     </style>
 
-    <style name="FeedbackButton">
+    <style name="CustomFeedbackButton">
         <item name="feedbackButtonPrimaryColor">@color/navigation_primary_background</item>
         <item name="feedbackButtonSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
-    <style name="SoundButton">
+    <style name="CustomSoundButton">
         <item name="soundButtonPrimaryColor">@color/navigation_primary_background</item>
         <item name="soundButtonSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
-    <style name="AlertView">
+    <style name="CustomAlertView">
         <item name="alertViewBackgroundColor">@color/navigation_primary_background</item>
         <item name="alertViewProgressBarBackgroundColor">@color/navigation_progress_bar_background</item>
         <item name="alertViewProgressBarColor">@color/navigation_progress_bar</item>
         <item name="alertViewTextColor">@color/navigation_instruction_view_primary_text</item>
     </style>
 
-    <style name="RecenterButton">
+    <style name="CustomRecenterButton">
         <item name="recenterButtonPrimaryColor">@color/navigation_primary_background</item>
         <item name="recenterButtonSecondaryColor">@color/navigation_accent</item>
     </style>
 
-    <style name="WayNameView">
+    <style name="CustomWayNameView">
         <item name="wayNameViewPrimaryColor">@color/navigation_primary_background</item>
         <item name="wayNameViewSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
-    <style name="SummaryBottomSheet">
+    <style name="CustomSummaryBottomSheet">
         <item name="summaryBottomSheetPrimaryColor">@color/navigation_primary_background</item>
         <item name="summaryBottomSheetSecondaryColor">@color/navigation_secondary_background</item>
         <item name="summaryBottomSheetDividerColor">@color/navigation_divider</item>

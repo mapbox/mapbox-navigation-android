@@ -12,6 +12,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
+import androidx.annotation.StyleRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -82,6 +83,22 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   @Override
   public void show() {
     setVisibility(VISIBLE);
+  }
+
+  @Override
+  public void updateStyle(@StyleRes int styleRes) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.SoundButton);
+
+    primaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.SoundButton_soundButtonPrimaryColor, R.color.mapbox_sound_button_primary));
+    secondaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.SoundButton_soundButtonSecondaryColor, R.color.mapbox_sound_button_secondary));
+
+    typedArray.recycle();
+
+    applyAttributes();
   }
 
   /**

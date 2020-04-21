@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import androidx.annotation.StyleRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
@@ -69,6 +70,22 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
   }
 
   @Override
+  public void updateStyle(@StyleRes int styleRes) {
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.FeedbackButton);
+
+    primaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.FeedbackButton_feedbackButtonPrimaryColor, R.color.mapbox_feedback_button_primary));
+    secondaryColor = ContextCompat.getColor(getContext(),
+      typedArray.getResourceId(
+        R.styleable.FeedbackButton_feedbackButtonSecondaryColor, R.color.mapbox_feedback_button_secondary));
+
+    typedArray.recycle();
+
+    applyAttributes();
+  }
+
+  @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
     bind();
@@ -113,6 +130,7 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
 
   private void initAttributes(AttributeSet attributeSet) {
     TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.FeedbackButton);
+
     primaryColor = ContextCompat.getColor(getContext(),
       typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonPrimaryColor,
         R.color.mapbox_feedback_button_primary));
