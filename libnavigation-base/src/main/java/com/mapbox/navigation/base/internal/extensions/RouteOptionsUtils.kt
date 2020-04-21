@@ -1,6 +1,6 @@
 @file:JvmName("MapboxRouteOptionsUtils")
 
-package com.mapbox.navigation.base.extensions
+package com.mapbox.navigation.base.internal.extensions
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point

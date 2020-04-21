@@ -7,7 +7,7 @@ import com.mapbox.navigation.ui.legacy.NavigationConstants;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.base.trip.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.camera.OnTrackingModeChangedListener;
 import com.mapbox.navigation.ui.camera.OnTrackingModeTransitionListener;

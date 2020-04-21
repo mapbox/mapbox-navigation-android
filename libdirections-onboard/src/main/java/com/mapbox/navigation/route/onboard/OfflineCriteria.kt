@@ -3,7 +3,7 @@ package com.mapbox.navigation.route.onboard
 /**
  * Offline Criteria. Used in Direction API
  */
-object OfflineCriteria {
+internal object OfflineCriteria {
 
     /**
      * BicycleType parameter in the Directions API.

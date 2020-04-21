@@ -180,7 +180,7 @@ ext {
       mavenPublish     : '3.6.2',
       bintray          : '1.8.4',
       artifactory      : '4.9.3',
-      dokka            : '0.10.0'
+      dokka            : '0.10.1'
   ]
 
   pluginDependencies = [

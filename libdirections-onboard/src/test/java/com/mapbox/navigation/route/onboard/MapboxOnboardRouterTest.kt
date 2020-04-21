@@ -3,8 +3,8 @@ package com.mapbox.navigation.route.onboard
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.extensions.applyDefaultParams
-import com.mapbox.navigation.base.extensions.coordinates
+import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
@@ -22,9 +22,6 @@ import io.mockk.unmockkObject
 import io.mockk.verify
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,6 +32,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -78,7 +79,7 @@ class MapboxOnboardRouterTest {
 
     @Test
     fun generationSanityTest() {
-        Assert.assertNotNull(onboardRouter)
+        assertNotNull(onboardRouter)
     }
 
     @Test
@@ -187,6 +188,7 @@ class MapboxOnboardRouterTest {
 
         verify { routerCallback.onResponse(capture(routesSlot)) }
 
+        val delta = 0.000001
         // route
         assertEquals(ROUTE_SIZE, routesSlot.captured.size)
         val route = routesSlot.captured[0]
@@ -209,10 +211,10 @@ class MapboxOnboardRouterTest {
         assertEquals(STEP_DRIVING_SIDE, step.drivingSide())
         assertEquals(STEP_GEOMETRY, step.geometry())
         assertEquals(STEP_MODE, step.mode())
-        assertEquals(STEP_WEIGHT, step.weight())
-        assertEquals(STEP_DURATION, step.duration())
+        assertEquals(STEP_WEIGHT, step.weight(), delta)
+        assertEquals(STEP_DURATION, step.duration(), delta)
         assertEquals(STEP_NAME, step.name())
-        assertEquals(STEP_DISTANCE, step.distance())
+        assertEquals(STEP_DISTANCE, step.distance(), delta)
 
         // intersection
         assertEquals(INTERSECTION_SIZE, step.intersections()!!.size)
@@ -220,8 +222,8 @@ class MapboxOnboardRouterTest {
         assertEquals(INTERSECTION_OUT, intersection.out())
         assertEquals(INTERSECTION_ENTRY, intersection.entry()!![0])
         assertEquals(INTERSECTION_BEARINGS, intersection.bearings()!![0])
-        assertEquals(INTERSECTION_LONGITUDE, intersection.location().longitude())
-        assertEquals(INTERSECTION_LATITUDE, intersection.location().latitude())
+        assertEquals(INTERSECTION_LONGITUDE, intersection.location().longitude(), delta)
+        assertEquals(INTERSECTION_LATITUDE, intersection.location().latitude(), delta)
 
         // maneuver
         val maneuver = step.maneuver()
@@ -230,8 +232,8 @@ class MapboxOnboardRouterTest {
         assertEquals(MANEUVER_MODIFIER, maneuver.modifier())
         assertEquals(MANEUVER_TYPE, maneuver.type())
         assertEquals(MANEUVER_INSTRUCTION, maneuver.instruction())
-        assertEquals(MANEUVER_LONGITUDE, maneuver.location().longitude())
-        assertEquals(MANEUVER_LATITUDE, maneuver.location().latitude())
+        assertEquals(MANEUVER_LONGITUDE, maneuver.location().longitude(), delta)
+        assertEquals(MANEUVER_LATITUDE, maneuver.location().latitude(), delta)
 
         // voiceInstructions
         assertEquals(VOICE_INSTRUCTIONS_SIZE, step.voiceInstructions()!!.size)
@@ -243,7 +245,7 @@ class MapboxOnboardRouterTest {
         // bannerInstructions
         assertEquals(BANNER_INSTRUCTIONS_SIZE, step.bannerInstructions()!!.size)
         val bannerInstruction = step.bannerInstructions()!![0]
-        assertEquals(BANNER_INSTRUCTIONS_DISTANCE, bannerInstruction.distanceAlongGeometry())
+        assertEquals(BANNER_INSTRUCTIONS_DISTANCE, bannerInstruction.distanceAlongGeometry(), delta)
         assertEquals(BANNER_INSTRUCTIONS_SECONDARY, bannerInstruction.secondary())
         assertEquals(BANNER_INSTRUCTIONS_TYPE, bannerInstruction.primary().type())
         assertEquals(BANNER_INSTRUCTIONS_MODIFIER, bannerInstruction.primary().modifier())

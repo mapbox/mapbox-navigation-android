@@ -12,7 +12,7 @@ import com.mapbox.geojson.Point
  * With every new valid location update, a new route progress will be generated using the latest
  * information.
  *
- * The latest route progress object can be obtained through the [RouteProgressObserver].
+ * The latest route progress object can be obtained through the [com.mapbox.navigation.base.trip.RouteProgressObserver].
  * Note that the route progress object's immutable.
  */
 class RouteProgress private constructor(

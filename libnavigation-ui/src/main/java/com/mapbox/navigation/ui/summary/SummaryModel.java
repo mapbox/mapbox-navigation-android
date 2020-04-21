@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 
-import com.mapbox.navigation.base.extensions.LocaleEx;
+import com.mapbox.navigation.base.internal.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.typedef.TimeFormatType;

@@ -6,7 +6,7 @@ import com.mapbox.android.accounts.navigation.sku.v1.MauSku
 import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.accounts.v1.MapboxAccounts
-import com.mapbox.navigation.base.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import java.lang.IllegalStateException
 
 // TODO: make the class internal

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.trip.model
+package com.mapbox.navigation.base.internal.trip.model
 
 import android.app.Notification
 import com.mapbox.navigation.base.trip.notification.TripNotification

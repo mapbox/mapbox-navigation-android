@@ -12,7 +12,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.navigation.base.extensions.inferDeviceLocale
+import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
