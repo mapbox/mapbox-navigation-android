@@ -1,1 +1,0 @@
--keep class com.mapbox.navigation.route.offboard.MapboxOffboardRouter {*;}
