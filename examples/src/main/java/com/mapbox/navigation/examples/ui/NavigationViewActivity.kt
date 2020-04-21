@@ -121,7 +121,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     }
 
     private fun getInitialCameraPosition(): CameraPosition {
-        val originCoordinate = route.routeOptions()?.coordinates()?.get(0)?.coordinates()
+        val originCoordinate = route.routeOptions()?.coordinates()?.get(0)
         return CameraPosition.Builder()
             .target(LatLng(originCoordinate!![1], originCoordinate[0]))
             .zoom(15.0)
