@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.utils.extensions.ifNonNull
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class MetricsRouteProgress(routeProgress: RouteProgress?) {
 

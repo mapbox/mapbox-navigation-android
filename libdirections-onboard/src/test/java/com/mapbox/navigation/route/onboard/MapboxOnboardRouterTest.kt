@@ -11,8 +11,8 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.exceptions.NavigationException
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.NavigationException
+import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterResult
 import io.mockk.coEvery
 import io.mockk.every

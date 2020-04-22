@@ -8,8 +8,8 @@ import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvide
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.TripSession
-import com.mapbox.navigation.utils.extensions.ifNonNull
-import com.mapbox.navigation.utils.timer.MapboxTimer
+import com.mapbox.navigation.utils.internal.MapboxTimer
+import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,

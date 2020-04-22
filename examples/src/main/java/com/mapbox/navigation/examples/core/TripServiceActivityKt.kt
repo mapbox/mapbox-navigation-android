@@ -24,8 +24,8 @@ import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import com.mapbox.navigation.ui.route.NavigationMapRoute
-import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.android.synthetic.main.activity_trip_service.notifyTextView
 import kotlinx.android.synthetic.main.activity_trip_service.toggleNotification

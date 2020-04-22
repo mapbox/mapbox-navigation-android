@@ -9,7 +9,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -135,14 +135,14 @@ class MapboxNavigationTelemetryTest {
 
     private fun initTelemetry() {
         MapboxNavigationTelemetry.initialize(
-                context,
-                token,
-                mapboxNavigation,
-                MapboxMetricsReporter,
-                "locationEngine",
-                ThreadController.getMainScopeAndRootJob(),
-                navigationOptions,
-                "userAgent"
+            context,
+            token,
+            mapboxNavigation,
+            MapboxMetricsReporter,
+            "locationEngine",
+            ThreadController.getMainScopeAndRootJob(),
+            navigationOptions,
+            "userAgent"
         )
     }
 

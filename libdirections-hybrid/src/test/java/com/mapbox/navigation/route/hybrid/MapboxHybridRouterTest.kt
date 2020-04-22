@@ -8,8 +8,8 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.utils.network.NetworkStatus
-import com.mapbox.navigation.utils.network.NetworkStatusService
+import com.mapbox.navigation.utils.internal.NetworkStatus
+import com.mapbox.navigation.utils.internal.NetworkStatusService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

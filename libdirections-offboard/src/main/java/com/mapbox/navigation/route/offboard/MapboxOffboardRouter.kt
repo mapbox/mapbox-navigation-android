@@ -15,7 +15,7 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
-import com.mapbox.navigation.utils.exceptions.NavigationException
+import com.mapbox.navigation.utils.NavigationException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

@@ -4,7 +4,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.navigator.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineTilesRemovedCallback
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

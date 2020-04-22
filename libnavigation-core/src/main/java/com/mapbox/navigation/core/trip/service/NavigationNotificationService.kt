@@ -6,8 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
-import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import kotlinx.coroutines.cancelChildren
 
 /**

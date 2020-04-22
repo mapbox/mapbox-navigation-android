@@ -7,8 +7,8 @@ import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
-import com.mapbox.navigation.utils.thread.JobControl
-import com.mapbox.navigation.utils.thread.ThreadController
+import com.mapbox.navigation.utils.internal.JobControl
+import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 

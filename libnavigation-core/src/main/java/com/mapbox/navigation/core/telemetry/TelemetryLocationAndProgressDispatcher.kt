@@ -11,9 +11,9 @@ import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.LOCATION_B
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.TAG
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
-import com.mapbox.navigation.utils.thread.ThreadController
-import com.mapbox.navigation.utils.thread.monitorChannelWithException
-import com.mapbox.navigation.utils.time.Time
+import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
+import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import java.util.Collections
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
