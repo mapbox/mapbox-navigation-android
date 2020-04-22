@@ -63,7 +63,7 @@
   <color name="md_grey_900">#212121</color>
 
   <!-- Default Puck -->
-  <color name="accent_orange">#FF9900</color>
+  <color name="puck_arrow">#4882C6</color>
   <color name="raw_location_uncertain_gray">#858585</color>
 
   <!-- Default InstructionView -->
