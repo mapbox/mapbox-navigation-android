@@ -555,17 +555,14 @@ constructor(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
-                    Logger::class.java to MapboxModuleProvider.createModule(
-                        MapboxModuleType.CommonLogger,
-                        ::paramsProvider
-                    )
+                    Logger::class.java to logger
                 )
             }
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 Context::class.java to context.applicationContext,
                 NavigationOptions::class.java to navigationOptions
             )
-            MapboxModuleType.CommonLogger -> arrayOf(Logger::class.java to logger)
+            MapboxModuleType.CommonLogger -> arrayOf()
             MapboxModuleType.CommonLibraryLoader -> throw IllegalArgumentException("not supported: $type")
             MapboxModuleType.CommonHttpClient -> throw IllegalArgumentException("not supported: $type")
         }
