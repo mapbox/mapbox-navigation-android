@@ -67,7 +67,7 @@ dependencies {
   implementation dependenciesList.mapboxSdkTurf
 
   // Mapbox Maps SDK
-  implementation dependenciesList.mapboxMapSdk
+  api dependenciesList.mapboxMapSdk
   implementation dependenciesList.mapboxAnnotationPlugin
 
   // Support libraries
