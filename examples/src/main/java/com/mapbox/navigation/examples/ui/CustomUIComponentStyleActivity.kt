@@ -121,9 +121,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-
-        mapboxNavigation.registerLocationObserver(locationObserver)
-        mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     override fun onStop() {
@@ -338,6 +335,13 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             MapboxNavigation.defaultNavigationOptions(this, accessToken),
             replayRouteLocationEngine
         )
+        mapboxNavigation.apply {
+            registerLocationObserver(locationObserver)
+            registerTripSessionStateObserver(tripSessionStateObserver)
+            registerRouteProgressObserver(routeProgressObserver)
+            registerBannerInstructionsObserver(bannerInstructionObserver)
+            registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        }
     }
 
     private fun initializeSpeechPlayer() {
@@ -470,9 +474,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
                     navigationMapboxMap.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
                     navigationMapboxMap.updateWaynameQueryMap(true)
-                    mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
-                    mapboxNavigation.registerBannerInstructionsObserver(bannerInstructionObserver)
-                    mapboxNavigation.registerVoiceInstructionsObserver(voiceInstructionsObserver)
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
@@ -486,10 +487,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                         navigationMapboxMap.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
                         navigationMapboxMap.updateWaynameQueryMap(false)
                     }
-
-                    mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
-                    mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-                    mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
                 }
             }
         }

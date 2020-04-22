@@ -553,6 +553,10 @@ public class NavigationMapboxMap {
     handleFpsOnStart();
     locationFpsDelegate.onStart();
 
+    if (navigation != null) {
+      navigation.registerLocationObserver(locationObserver);
+    }
+
     if (navigationPuckPresenter != null) {
       navigationPuckPresenter.onStart();
     }

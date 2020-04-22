@@ -13,7 +13,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -43,13 +42,8 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.*
-import timber.log.Timber
 
 class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
-
-    companion object {
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
-    }
 
     private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
@@ -70,30 +64,29 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-                this,
-                Utils.getMapboxAccessToken(this)
+            this,
+            Utils.getMapboxAccessToken(this)
         )
 
         mapboxNavigation = MapboxNavigation(
-                applicationContext,
-                Utils.getMapboxAccessToken(this),
-                mapboxNavigationOptions,
-                replayRouteLocationEngine
-        ).also {
-            it.registerRouteProgressObserver(routeProgressObserver)
-            it.registerTripSessionStateObserver(tripSessionStateObserver)
+            applicationContext,
+            Utils.getMapboxAccessToken(this),
+            mapboxNavigationOptions,
+            replayRouteLocationEngine
+        ).apply {
+            registerTripSessionStateObserver(tripSessionStateObserver)
+            registerRouteProgressObserver(routeProgressObserver)
         }
 
         initListeners()
         Snackbar.make(navigationLayout, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-                .show()
+            .show()
     }
 
     override fun onStart() {
         super.onStart()
         mapView.onStart()
         navigationMapboxMap?.onStart()
-        mapboxNavigation?.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
     public override fun onPause() {
@@ -108,10 +101,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver)
         navigationMapboxMap?.onStop()
-        stopLocationUpdates()
         mapView.onStop()
     }
 
@@ -122,6 +112,8 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
@@ -133,7 +125,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
-        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+        mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
         }
@@ -141,17 +133,16 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
 
         mapboxMap.addOnMapLongClickListener { latLng ->
-            Timber.d("onMapLongClickListener position=%s", latLng)
             destination = latLng
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
-                        RouteOptions.builder().applyDefaultParams()
-                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                                .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                                .alternatives(true)
-                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                                .build(),
-                        routesReqCallback
+                    RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .build(),
+                    routesReqCallback
                 )
             }
             true
@@ -186,12 +177,14 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @Suppress("DEPRECATION")
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
             navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
+            navigationMapboxMap?.addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
@@ -218,50 +211,31 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun startLocationUpdates() {
-        val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                        .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                        .setMaxWaitTime(BasicNavigationActivity.DEFAULT_MAX_WAIT_TIME)
-                        .build()
-
-        mapboxNavigation?.locationEngine?.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
-        )
-    }
-
-    private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-    }
-
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
-                        .toInt()
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
+                .toInt()
         val paddingBuffer =
-                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
-                        .toInt()
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
+                .toInt()
         val instructionHeight =
-                (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
+            (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
         val summaryHeight =
-                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
-                        .toInt()
+            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
+                .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }
 
     private fun isLocationTracking(cameraMode: Int): Boolean {
         return cameraMode == CameraMode.TRACKING ||
-                cameraMode == CameraMode.TRACKING_COMPASS ||
-                cameraMode == CameraMode.TRACKING_GPS ||
-                cameraMode == CameraMode.TRACKING_GPS_NORTH
+            cameraMode == CameraMode.TRACKING_COMPASS ||
+            cameraMode == CameraMode.TRACKING_GPS ||
+            cameraMode == CameraMode.TRACKING_GPS_NORTH
     }
 
     // Callbacks and Observers
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
-            Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
                 (mapboxNavigation?.locationEngine as ReplayRouteLocationEngine).assign(routes[0])
@@ -273,11 +247,9 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
-            Timber.e("route request failure %s", throwable.toString())
         }
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-            Timber.d("route request canceled")
         }
     }
 
@@ -289,7 +261,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
-                    startLocationUpdates()
                     navigationMapboxMap?.removeRoute()
                 }
             }
@@ -332,7 +303,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
     private class MyLocationEngineCallback(activity: SummaryBottomSheetActivity) :
-            LocationEngineCallback<LocationEngineResult> {
+        LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
@@ -341,7 +312,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onFailure(exception: Exception) {
-            Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
         }
     }
 }
