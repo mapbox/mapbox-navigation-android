@@ -75,9 +75,13 @@ class MapboxHybridRouter(
         private var reserveRouterCalled = false
         private lateinit var options: RouteOptions
         private lateinit var callback: Router.Callback
+        private var fetchingInProgress = false
+        private var pendingRequest: Pair<RouteOptions, Router.Callback>? = null
 
         override fun onResponse(routes: List<DirectionsRoute>) {
+            fetchingInProgress = false
             callback.onResponse(routes)
+            checkPendingRequest()
         }
 
         /**
@@ -91,7 +95,9 @@ class MapboxHybridRouter(
             when (reserveRouterCalled) {
                 true -> {
                     reserveRouterCalled = false
+                    fetchingInProgress = false
                     callback.onFailure(throwable)
+                    checkPendingRequest()
                 }
                 false -> {
                     reserveRouterCalled = true
@@ -101,21 +107,44 @@ class MapboxHybridRouter(
         }
 
         override fun onCanceled() {
+            fetchingInProgress = false
             callback.onCanceled()
+            checkPendingRequest()
         }
 
         /**
          * This method is equivalent to calling .getRoute() with the additional parameter capture
          */
         override fun getRoute(routeOptions: RouteOptions, clientCallback: Router.Callback) {
-            reserveRouterCalled = false
-            options = routeOptions
-            callback = clientCallback
-            mainRouter.getRoute(routeOptions, this)
+            handleRouteRequest(routeOptions, clientCallback)
         }
 
         override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
             mainRouter.getRouteRefresh(route, legIndex, callback)
+        }
+
+        private fun handleRouteRequest(routeOptions: RouteOptions, clientCallback: Router.Callback) {
+            if (fetchingInProgress) {
+                pendingRequest = Pair(routeOptions, clientCallback)
+                if (reserveRouterCalled) {
+                    reserveRouter.cancel()
+                } else {
+                    mainRouter.cancel()
+                }
+            } else {
+                fetchingInProgress = true
+                reserveRouterCalled = false
+                options = routeOptions
+                callback = clientCallback
+                mainRouter.getRoute(routeOptions, this)
+            }
+        }
+
+        private fun checkPendingRequest() {
+            pendingRequest?.let {
+                getRoute(routeOptions = it.first, clientCallback = it.second)
+            }
+            pendingRequest = null
         }
     }
 
