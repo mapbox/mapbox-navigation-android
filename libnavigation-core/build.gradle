@@ -43,6 +43,7 @@ dependencies {
     implementation project(':libnavigator')
     runtimeOnly project(':libdirections-hybrid')
     runtimeOnly project(':libtrip-notification')
+    runtimeOnly dependenciesList.mapboxLogger
     implementation project(':libnavigation-metrics')
     implementation dependenciesList.mapboxAndroidAccounts
     implementation dependenciesList.mapboxSdkTurf

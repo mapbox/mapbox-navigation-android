@@ -31,7 +31,6 @@ android {
 
 dependencies {
     implementation(project(':libnavigation-base'))
-    implementation dependenciesList.mapboxCommon
 
     // Navigator
     api dependenciesList.mapboxNavigator
