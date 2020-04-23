@@ -25,7 +25,7 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.Date
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -72,12 +72,12 @@ class MapboxTripSession(
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
-    private val locationObservers = CopyOnWriteArrayList<LocationObserver>()
-    private val routeProgressObservers = CopyOnWriteArrayList<RouteProgressObserver>()
-    private val offRouteObservers = CopyOnWriteArrayList<OffRouteObserver>()
-    private val stateObservers = CopyOnWriteArrayList<TripSessionStateObserver>()
-    private val bannerInstructionsObservers = CopyOnWriteArrayList<BannerInstructionsObserver>()
-    private val voiceInstructionsObservers = CopyOnWriteArrayList<VoiceInstructionsObserver>()
+    private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
+    private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
+    private val offRouteObservers = CopyOnWriteArraySet<OffRouteObserver>()
+    private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
+    private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
+    private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
