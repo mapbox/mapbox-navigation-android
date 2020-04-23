@@ -732,6 +732,7 @@ public class NavigationMapboxMap {
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(options)
       .useDefaultLocationEngine(false)
+            .useSpecializedLocationLayer(true)
       .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
