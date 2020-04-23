@@ -1,4 +1,4 @@
-package com.mapbox.navigation.navigator
+package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute

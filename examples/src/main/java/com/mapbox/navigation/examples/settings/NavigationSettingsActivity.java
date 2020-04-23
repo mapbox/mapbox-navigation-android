@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.navigation.examples.BuildConfig;
 import com.mapbox.navigation.examples.R;
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl;
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl;
 
 import java.io.File;
 import java.io.FileOutputStream;

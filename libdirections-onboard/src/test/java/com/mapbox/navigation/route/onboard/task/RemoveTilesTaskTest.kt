@@ -1,7 +1,7 @@
 package com.mapbox.navigation.route.onboard.task
 
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.navigator.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.OnOfflineTilesRemovedCallback
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
