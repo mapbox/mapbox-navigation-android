@@ -10,6 +10,7 @@ import com.mapbox.navigation.examples.core.BasicNavSdkOnlyActivity
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
+import com.mapbox.navigation.examples.core.FeedbackButtonActivity
 import com.mapbox.navigation.examples.core.FreeDriveNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.HybridRouterActivityJava
@@ -150,6 +151,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_summary_bottom_sheet),
                 getString(R.string.description_summary_bottom_sheet),
                 SummaryBottomSheetActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_feedback_button),
+                getString(R.string.description_feedback_button),
+                FeedbackButtonActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_debug_navigation_kotlin),

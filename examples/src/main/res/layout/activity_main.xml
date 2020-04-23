@@ -88,9 +88,10 @@
         android:id="@+id/settingsFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:elevation="0dp"
         app:fabSize="mini"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/ic_settings"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_settings" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
