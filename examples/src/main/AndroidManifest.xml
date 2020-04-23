@@ -230,6 +230,14 @@
                 android:value=".CoreActivity" />
         </activity>
 
+        <activity android:name=".core.FeedbackButtonActivity"
+            android:label="@string/title_feedback_button"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
         <activity android:name=".ui.CustomPuckActivity"
             android:label="@string/title_custom_puck_example"
             android:screenOrientation="portrait">

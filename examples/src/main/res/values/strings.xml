@@ -80,10 +80,13 @@
     <string name="title_multiple_stops" translatable="false">MultipleStopsActivity</string>
     <string name="description_multiple_stops" translatable="false">Demonstrate how to use MultipleStops</string>
 
-    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
+    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheetActivity</string>
     <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet, Recenter button with core SDK.</string>
 
-    <string name="title_instruction_view" translatable="false">InstructionView</string>
+    <string name="title_feedback_button" translatable="false">FeedbackButtonActivity</string>
+    <string name="description_feedback_button" translatable="false">Shows how to integrate FeedbackButton about the Feedback Flow with core SDK.</string>
+
+    <string name="title_instruction_view" translatable="false">InstructionViewActivity</string>
     <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with core SDK.</string>
 
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
