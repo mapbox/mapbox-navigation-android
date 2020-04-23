@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import timber.log.Timber;
 
@@ -73,10 +73,10 @@ public class NavigationCamera implements LifecycleObserver {
    */
   public static final int NAVIGATION_TRACKING_MODE_NONE = 2;
   private static final int ONE_POINT = 1;
-  private final CopyOnWriteArrayList<OnTrackingModeTransitionListener> onTrackingModeTransitionListeners
-          = new CopyOnWriteArrayList<>();
-  private final CopyOnWriteArrayList<OnTrackingModeChangedListener> onTrackingModeChangedListeners
-          = new CopyOnWriteArrayList<>();
+  private final CopyOnWriteArraySet<OnTrackingModeTransitionListener> onTrackingModeTransitionListeners
+          = new CopyOnWriteArraySet<>();
+  private final CopyOnWriteArraySet<OnTrackingModeChangedListener> onTrackingModeChangedListeners
+          = new CopyOnWriteArraySet<>();
   private final OnLocationCameraTransitionListener cameraTransitionListener
           = new NavigationCameraTransitionListener(this);
   private final OnCameraTrackingChangedListener cameraTrackingChangedListener

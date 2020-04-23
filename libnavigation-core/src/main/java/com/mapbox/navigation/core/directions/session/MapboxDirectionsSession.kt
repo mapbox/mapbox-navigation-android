@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 
 // todo make internal
 /**
@@ -18,7 +18,7 @@ class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
 
-    private val routesObservers = CopyOnWriteArrayList<RoutesObserver>()
+    private val routesObservers = CopyOnWriteArraySet<RoutesObserver>()
     private var routeOptions: RouteOptions? = null
 
     /**

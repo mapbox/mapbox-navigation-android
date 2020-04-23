@@ -4,12 +4,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 
 internal class NavigationSession : RoutesObserver,
     TripSessionStateObserver {
 
-    private val stateObservers = CopyOnWriteArrayList<NavigationSessionStateObserver>()
+    private val stateObservers = CopyOnWriteArraySet<NavigationSessionStateObserver>()
 
     private var state = State.IDLE
         set(value) {
