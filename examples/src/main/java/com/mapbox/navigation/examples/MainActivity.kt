@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import java.util.ArrayList
 import kotlinx.android.synthetic.main.activity_main.*
 

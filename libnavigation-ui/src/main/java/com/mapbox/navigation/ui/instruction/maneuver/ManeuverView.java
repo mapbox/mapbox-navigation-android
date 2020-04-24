@@ -16,14 +16,14 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
 import com.mapbox.libnavigation.ui.R;
-import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper;
-import com.mapbox.navigation.trip.notification.maneuver.ManeuverIconDrawer;
-import com.mapbox.navigation.trip.notification.maneuver.ManeuversStyleKit;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconDrawer;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuversStyleKit;
 
-import static com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
-import static com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
-import static com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
-import static com.mapbox.navigation.trip.notification.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
+import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
+import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
+import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
+import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.ManeuverModifier;
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.ManeuverType;
 import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;

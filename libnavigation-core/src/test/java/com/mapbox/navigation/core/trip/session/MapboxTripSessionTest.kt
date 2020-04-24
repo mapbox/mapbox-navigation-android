@@ -14,8 +14,8 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.TripStatus
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController

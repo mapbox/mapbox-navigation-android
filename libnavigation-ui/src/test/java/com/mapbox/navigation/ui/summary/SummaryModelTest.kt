@@ -7,7 +7,7 @@ import com.mapbox.navigation.base.typedef.METRIC
 import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
 import com.mapbox.navigation.base.typedef.TWELVE_HOURS
 import com.mapbox.navigation.core.MapboxDistanceFormatter
-import com.mapbox.navigation.trip.notification.utils.time.TimeFormatter.formatTime
+import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.ui.BaseTest
 import java.util.Calendar
 import org.junit.Assert.assertEquals

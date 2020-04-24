@@ -1,4 +1,4 @@
-package com.mapbox.navigation.navigator
+package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.BannerComponents
@@ -16,7 +16,9 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.navigator.utils.ifNonNull
+import com.mapbox.navigation.navigator.ifNonNull
+import com.mapbox.navigation.navigator.toFixLocation
+import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
@@ -126,7 +128,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         legIndex: Int
     ): NavigationStatus {
         mutex.withLock {
-            this.route = route
+            MapboxNativeNavigatorImpl.route = route
             val result = navigator.setRoute(route?.toJson() ?: "{}", routeIndex, legIndex)
             navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)

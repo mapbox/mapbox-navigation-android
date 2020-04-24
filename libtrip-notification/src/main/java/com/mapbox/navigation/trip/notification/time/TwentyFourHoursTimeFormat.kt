@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification.utils.time
+package com.mapbox.navigation.trip.notification.time
 
 import java.util.Calendar
 import java.util.Locale

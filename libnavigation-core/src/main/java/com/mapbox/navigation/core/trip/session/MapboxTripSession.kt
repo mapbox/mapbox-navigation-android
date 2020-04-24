@@ -18,9 +18,9 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.navigator.MapboxNativeNavigator
-import com.mapbox.navigation.navigator.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.navigator.TripStatus
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
