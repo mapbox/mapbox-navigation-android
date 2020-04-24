@@ -24,6 +24,7 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigator.NavigationStatus
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.TimeUnit
@@ -339,6 +340,19 @@ class MapboxTripSession(
         SensorMapper.toSensorData(sensorEvent, logger)?.let { sensorData ->
             navigator.updateSensorData(sensorData)
         }
+    }
+
+    /**
+     * Follows a new leg of the already loaded directions.
+     * Returns an initialized navigation status if no errors occurred
+     * otherwise, it returns an invalid navigation status state.
+     *
+     * @param legIndex new leg index
+     *
+     * @return an initialized [NavigationStatus] if no errors, invalid otherwise
+     */
+    override fun updateLegIndex(legIndex: Int): NavigationStatus {
+        return navigator.updateLegIndex(legIndex)
     }
 
     /**

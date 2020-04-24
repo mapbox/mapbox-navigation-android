@@ -51,6 +51,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val GRID_SIZE = 0.0025f
     private const val BUFFER_DILATION: Short = 1
     private const val TWO_LEGS: Short = 2
+    private const val PRIMARY_ROUTE_INDEX = 0
 
     private val navigator: Navigator = Navigator()
     private var route: DirectionsRoute? = null
@@ -180,16 +181,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
     /**
      * Follows a new route and leg of the already loaded directions.
-     * Returns an initialized route state if no errors occurred
-     * otherwise, it returns an invalid route state.
+     * Returns an initialized navigation status if no errors occurred
+     * otherwise, it returns an invalid navigation status state.
      *
-     * @param routeIndex new route index
      * @param legIndex new leg index
      *
-     * @return an initialized route state as [NavigationStatus]
+     * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(routeIndex: Int, legIndex: Int): NavigationStatus =
-        navigator.changeRouteLeg(routeIndex, legIndex)
+    override fun updateLegIndex(legIndex: Int): NavigationStatus =
+        navigator.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
 
     // Free Drive
     /**

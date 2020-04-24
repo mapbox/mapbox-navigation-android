@@ -121,15 +121,14 @@ interface MapboxNativeNavigator {
 
     /**
      * Follows a new route and leg of the already loaded directions.
-     * Returns an initialized route state if no errors occurred
-     * otherwise, it returns an invalid route state.
+     * Returns an initialized navigation status if no errors occurred
+     * otherwise, it returns an invalid navigation status state.
      *
-     * @param routeIndex new route index
      * @param legIndex new leg index
      *
-     * @return an initialized route state as [NavigationStatus]
+     * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    fun updateLegIndex(routeIndex: Int, legIndex: Int): NavigationStatus
+    fun updateLegIndex(legIndex: Int): NavigationStatus
 
     // Free Drive
 

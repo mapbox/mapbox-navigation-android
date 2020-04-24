@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigator.NavigationStatus
 
 internal interface TripSession {
 
@@ -50,4 +51,5 @@ internal interface TripSession {
     fun updateSensorEvent(sensorEvent: SensorEvent)
 
     fun useExtendedKalmanFilter(useEKF: Boolean)
+    fun updateLegIndex(legIndex: Int): NavigationStatus
 }

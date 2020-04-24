@@ -37,6 +37,9 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.stops.ArrivalController
+import com.mapbox.navigation.core.stops.ArrivalProgressObserver
+import com.mapbox.navigation.core.stops.AutoArrivalController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
@@ -141,6 +144,7 @@ constructor(
     private val internalOffRouteObserver = createInternalOffRouteObserver()
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
+    private val arrivalProgressObserver: ArrivalProgressObserver
 
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
@@ -208,6 +212,9 @@ constructor(
         fasterRouteController = FasterRouteController(directionsSession, tripSession, logger)
         routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)
         routeRefreshController.start()
+
+        arrivalProgressObserver = ArrivalProgressObserver(tripSession)
+        attachArrivalController()
     }
 
     /**
@@ -447,6 +454,37 @@ constructor(
      */
     fun unregisterTripSessionStateObserver(tripSessionStateObserver: TripSessionStateObserver) {
         tripSession.unregisterStateObserver(tripSessionStateObserver)
+    }
+
+    /**
+     * Attach your own controller to determine when drivers arrived at stops via [ArrivalController]
+     * Use [navigateNextRouteLeg] to manually move navigator to the next stop. To reset to the
+     * automatic arrival controller, call attachArrivalController()
+     *
+     * @param arrivalController ArrivalObserver
+     */
+    @JvmOverloads fun attachArrivalController(arrivalController: ArrivalController = AutoArrivalController()) {
+        arrivalProgressObserver.attach(arrivalController)
+        tripSession.registerRouteProgressObserver(arrivalProgressObserver)
+    }
+
+    /**
+     * Disable arrival at stops completely. Use this if you want to write your
+     * own mechanism for handling arrival at stops.
+     */
+    fun removeArrivalController() {
+        tripSession.unregisterRouteProgressObserver(arrivalProgressObserver)
+    }
+
+    /**
+     * After arriving at a stop, this can be used to manually decide when to start
+     * navigating to the next stop. Use the [ArrivalController] to control when to
+     * call navigateNextRouteLeg.
+     *
+     * @return true if navigation to next stop could be started, false otherwise
+     */
+    fun navigateNextRouteLeg(): Boolean {
+        return arrivalProgressObserver.navigateNextRouteLeg()
     }
 
     /**
