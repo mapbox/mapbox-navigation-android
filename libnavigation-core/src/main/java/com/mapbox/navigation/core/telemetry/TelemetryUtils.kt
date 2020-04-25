@@ -23,7 +23,7 @@ private const val BRIGHTNESS_EXCEPTION_VALUE = -1
 /**
  * Encode route geometry to *precision 5*
  */
-fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
+internal fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
     ifNonNull(directionsRoute, directionsRoute?.geometry()) { _, geometry ->
         if (TextUtils.isEmpty(geometry)) {
             return@ifNonNull ""
@@ -37,7 +37,7 @@ fun obtainGeometry(directionsRoute: DirectionsRoute?): String =
  *
  * @see [com.mapbox.api.directions.v5.models.LegStep]
  */
-fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
+internal fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
     ifNonNull(directionsRoute, directionsRoute?.legs()) { _, legs ->
         var stepCount = 0
         for (leg in legs) {
@@ -51,7 +51,7 @@ fun obtainStepCount(directionsRoute: DirectionsRoute?): Int =
  *
  * @return Int distance unit kilometer
  */
-fun obtainAbsoluteDistance(
+internal fun obtainAbsoluteDistance(
     currentLocation: Location?,
     finalPoint: Point
 ): Int {
@@ -64,14 +64,14 @@ fun obtainAbsoluteDistance(
 /**
  * Provide the last [Point] in a [DirectionsRoute]
  */
-fun obtainRouteDestination(route: DirectionsRoute?): Point =
+internal fun obtainRouteDestination(route: DirectionsRoute?): Point =
     route?.legs()?.lastOrNull()?.steps()?.lastOrNull()?.maneuver()?.location()
         ?: Point.fromLngLat(0.0, 0.0)
 
 /**
  * Provide the volume level in the percentages(range is *0..100*)
  */
-fun obtainVolumeLevel(context: Context): Int {
+internal fun obtainVolumeLevel(context: Context): Int {
     val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     return floor(
         PERCENT_NORMALIZER * audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) /
@@ -82,7 +82,7 @@ fun obtainVolumeLevel(context: Context): Int {
 /**
  * Provide screen brightness in range *0..100*
  */
-fun obtainScreenBrightness(context: Context): Int =
+internal fun obtainScreenBrightness(context: Context): Int =
     try {
         val systemScreenBrightness = Settings.System.getInt(
             context.contentResolver,
@@ -97,7 +97,7 @@ fun obtainScreenBrightness(context: Context): Int =
  * Provide audio type
  * @see [com.mapbox.navigation.core.telemetry.audio.AudioTypeResolver]
  */
-fun obtainAudioType(context: Context): String =
+internal fun obtainAudioType(context: Context): String =
     AudioTypeChain().setup().obtainAudioType(context)
 
 private fun calculateScreenBrightnessPercentage(screenBrightness: Int): Int =

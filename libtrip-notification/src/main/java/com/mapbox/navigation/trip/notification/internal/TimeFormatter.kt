@@ -6,7 +6,7 @@ import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
-import com.mapbox.navigation.base.typedef.TimeFormatType
+import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.trip.notification.time.TimeFormattingChain
 import com.mapbox.navigation.trip.notification.time.span.SpanItem
@@ -29,7 +29,7 @@ object TimeFormatter {
      *
      * @param time Calendar
      * @param routeDuration duration in seconds
-     * @param type [TimeFormatType]
+     * @param type [TimeFormat.Type]
      * @param isDeviceTwentyFourHourFormat *true* if 24-hour format, *false* otherwise
      * @return String
      */
@@ -37,7 +37,7 @@ object TimeFormatter {
     fun formatTime(
         time: Calendar,
         routeDuration: Double,
-        @TimeFormatType type: Int,
+        @TimeFormat.Type type: Int,
         isDeviceTwentyFourHourFormat: Boolean
     ): String {
         time.add(Calendar.SECOND, routeDuration.toInt())

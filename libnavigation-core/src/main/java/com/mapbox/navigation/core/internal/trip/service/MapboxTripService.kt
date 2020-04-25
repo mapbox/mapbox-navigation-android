@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.trip.service
+package com.mapbox.navigation.core.internal.trip.service
 
 import android.app.Service
 import android.content.Context
@@ -6,15 +6,17 @@ import android.content.Intent
 import android.os.Build
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.internal.trip.model.MapboxNotificationData
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.trip.service.MapboxNotificationData
+import com.mapbox.navigation.core.trip.service.NavigationNotificationService
 import com.mapbox.navigation.utils.internal.ifChannelException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 // todo make internal
+//  Currently under internal package because it's been used by TripService examples in the test app
 /**
  * Default [TripService] implementation
  *

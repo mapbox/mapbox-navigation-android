@@ -8,8 +8,9 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.core.Rounding;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
@@ -61,6 +62,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   @Nullable
   public abstract Float maxMetersToTriggerDestinationArrival();
 
+  public abstract Integer roundingIncrement();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -108,6 +111,13 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      * @return this builder
      */
     public abstract Builder maxMetersToTriggerDestinationArrival(Float maxMetersToTriggerDestinationArrival);
+
+    /**
+     * Defines the increment displayed on the instruction view
+     * @param roundingIncrement displayed on the instruction view
+     * @return this builder
+     */
+    public abstract Builder roundingIncrement(@Rounding.Increment Integer roundingIncrement);
 
     /**
      * Add an offline path for loading offline routing data.
@@ -161,6 +171,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
             .navigationOptions(new NavigationOptions.Builder().build())
+            .roundingIncrement(Rounding.INCREMENT_FIFTY)
             .shouldSimulateRoute(false)
             .waynameChipEnabled(true);
   }

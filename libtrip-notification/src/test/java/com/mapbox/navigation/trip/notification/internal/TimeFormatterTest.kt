@@ -5,9 +5,9 @@ import android.graphics.Typeface
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import androidx.test.core.app.ApplicationProvider
-import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
-import com.mapbox.navigation.base.typedef.TWELVE_HOURS
-import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
+import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
+import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import java.util.GregorianCalendar
 import java.util.Locale
 import org.junit.Assert.assertEquals

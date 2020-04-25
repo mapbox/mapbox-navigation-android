@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.android.accounts.v1.AccountsConstants
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

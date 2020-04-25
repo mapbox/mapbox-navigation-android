@@ -26,6 +26,7 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -39,8 +40,7 @@ import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHel
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
-import com.mapbox.navigation.trip.notification.internal.maneuver.STEP_MANEUVER_MODIFIER_RIGHT
-import com.mapbox.navigation.trip.notification.internal.maneuver.STEP_MANEUVER_TYPE_ARRIVE
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
@@ -303,7 +303,7 @@ class MapboxTripNotification constructor(
                 if (isManeuverStateChanged(bannerInstructions)) {
                     updateManeuverImage(
                         routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
-                            ?: STEP_MANEUVER_MODIFIER_RIGHT
+                            ?: ManeuverModifier.RIGHT
                     )
                 }
             }
@@ -499,7 +499,7 @@ class MapboxTripNotification constructor(
     ): Bitmap? {
         val maneuver = when {
             MANEUVER_TYPES_WITH_NULL_MODIFIERS.contains(maneuverType) -> Pair(maneuverType, null)
-            !STEP_MANEUVER_TYPE_ARRIVE.contentEquals(maneuverType) && maneuverModifier != null -> Pair(
+            !StepManeuver.ARRIVE.contentEquals(maneuverType) && maneuverModifier != null -> Pair(
                 null,
                 maneuverModifier
             )

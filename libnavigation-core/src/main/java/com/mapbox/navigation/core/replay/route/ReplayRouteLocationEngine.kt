@@ -13,6 +13,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.core.internal.replay.route.ReplayLocationConverter
 import java.util.ArrayList
 
 /**

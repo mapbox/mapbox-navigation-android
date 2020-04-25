@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import com.mapbox.navigation.core.internal.trip.service.MapboxTripService
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
@@ -13,7 +14,7 @@ import kotlinx.coroutines.cancelChildren
 /**
  * Service is updating information about current trip
  */
-class NavigationNotificationService : Service() {
+internal class NavigationNotificationService : Service() {
     private val ioJobController by lazy {
         ThreadController.getIOScopeAndRootJob()
     }

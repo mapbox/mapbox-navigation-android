@@ -5,9 +5,9 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 
 internal interface MapboxNavigationTelemetryInterface {
     fun postUserFeedback(
-        @FeedbackEvent.FeedbackType feedbackType: String,
+        @FeedbackEvent.Type feedbackType: String,
         description: String,
-        @FeedbackEvent.FeedbackSource feedbackSource: String,
+        @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?
     )
 

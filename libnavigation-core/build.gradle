@@ -12,6 +12,11 @@ dokka {
     configuration {
         moduleName = 'libnavigation-core'
         reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.core.internal"
+            suppress = true
+        }
     }
 }
 

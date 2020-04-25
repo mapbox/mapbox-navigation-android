@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.core.internal
 
 import android.content.Context
 import android.content.res.Resources
@@ -8,12 +8,11 @@ import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
-import com.mapbox.navigation.base.typedef.IMPERIAL
-import com.mapbox.navigation.base.typedef.RoundingIncrement
-import com.mapbox.navigation.base.typedef.UNDEFINED
-import com.mapbox.navigation.base.typedef.VoiceUnit
+import com.mapbox.navigation.core.R
+import com.mapbox.navigation.core.Rounding
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfConversion
 import java.text.NumberFormat
@@ -35,17 +34,17 @@ import kotlin.math.roundToInt
 class MapboxDistanceFormatter private constructor(
     private val context: Context,
     private val locale: Locale,
-    @VoiceUnit unitType: String,
-    @RoundingIncrement private val roundingIncrement: Int
+    @VoiceUnit.Type unitType: String,
+    @Rounding.Increment private val roundingIncrement: Int
 ) : DistanceFormatter {
 
     private val smallUnit = when (unitType) {
-        IMPERIAL -> TurfConstants.UNIT_FEET
+        VoiceUnit.IMPERIAL -> TurfConstants.UNIT_FEET
         else -> TurfConstants.UNIT_METERS
     }
 
     private val largeUnit = when (unitType) {
-        IMPERIAL -> TurfConstants.UNIT_MILES
+        VoiceUnit.IMPERIAL -> TurfConstants.UNIT_MILES
         else -> TurfConstants.UNIT_KILOMETERS
     }
 
@@ -77,7 +76,7 @@ class MapboxDistanceFormatter private constructor(
          * @param unitType String
          * @return Builder
          */
-        fun withUnitType(@VoiceUnit unitType: String) =
+        fun withUnitType(@VoiceUnit.Type unitType: String) =
             apply { this.unitType = unitType }
 
         /**
@@ -86,7 +85,7 @@ class MapboxDistanceFormatter private constructor(
          * @see [RoundingIncrement]
          * @return Builder
          */
-        fun withRoundingIncrement(@RoundingIncrement roundingIncrement: Int) =
+        fun withRoundingIncrement(@Rounding.Increment roundingIncrement: Int) =
             apply { this.roundingIncrement = roundingIncrement }
 
         /**
@@ -104,7 +103,7 @@ class MapboxDistanceFormatter private constructor(
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
             val unitTypeToUse: String = when (unitType) {
                 null -> localeToUse.getUnitTypeForLocale()
-                UNDEFINED -> localeToUse.getUnitTypeForLocale()
+                VoiceUnit.UNDEFINED -> localeToUse.getUnitTypeForLocale()
                 else -> unitType!!
             }
 

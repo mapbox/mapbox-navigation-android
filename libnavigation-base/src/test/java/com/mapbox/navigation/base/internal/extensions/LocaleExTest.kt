@@ -2,9 +2,9 @@ package com.mapbox.navigation.base.internal.extensions
 
 import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.navigation.base.internal.VoiceUnit.IMPERIAL
+import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
-import com.mapbox.navigation.base.typedef.IMPERIAL
-import com.mapbox.navigation.base.typedef.METRIC
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic

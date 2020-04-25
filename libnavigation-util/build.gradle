@@ -9,9 +9,10 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavigation-utils'
+        reportUndocumented = true
 
         perPackageOption {
-            prefix = "utils"
+            prefix = "com.mapbox.navigation.utils.internal"
             suppress = true
         }
     }

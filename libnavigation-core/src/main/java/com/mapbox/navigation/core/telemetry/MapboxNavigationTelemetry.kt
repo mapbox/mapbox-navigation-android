@@ -17,7 +17,7 @@ import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSessionStateObserver
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
@@ -425,9 +425,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * The method may suspend until it collects 40 location events. The worst case scenario is a 40 location suspension, 20 is best case
      */
     override fun postUserFeedback(
-        @FeedbackEvent.FeedbackType feedbackType: String,
+        @FeedbackEvent.Type feedbackType: String,
         description: String,
-        @FeedbackEvent.FeedbackSource feedbackSource: String,
+        @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?
     ) {
         telemetryThreadControl.scope.launch {
@@ -439,9 +439,9 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * Helper class that posts user feedback. The call is available only after initialization
      */
     private fun postUserFeedbackHelper(
-        @FeedbackEvent.FeedbackType feedbackType: String,
+        @FeedbackEvent.Type feedbackType: String,
         description: String,
-        @FeedbackEvent.FeedbackSource feedbackSource: String,
+        @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?
     ) {
         Log.d(TAG, "trying to post a user feedback event")

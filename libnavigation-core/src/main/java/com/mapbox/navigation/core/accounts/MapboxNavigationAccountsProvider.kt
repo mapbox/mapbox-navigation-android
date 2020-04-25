@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.ProviderInfo
 import android.database.Cursor
 import android.net.Uri
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 internal class MapboxNavigationAccountsProvider : ContentProvider() {

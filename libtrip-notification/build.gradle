@@ -11,6 +11,11 @@ dokka {
     configuration {
         moduleName = 'libtrip-notification'
         reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.trip.notification.internal"
+            suppress = true
+        }
     }
 }
 

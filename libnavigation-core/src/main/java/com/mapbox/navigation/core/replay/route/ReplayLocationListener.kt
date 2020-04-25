@@ -5,7 +5,7 @@ import android.location.Location
 /**
  * Replay location listener for [ReplayRouteLocationEngine]
  */
-interface ReplayLocationListener {
+internal interface ReplayLocationListener {
 
     /**
      * Called whenever replayed location has updated

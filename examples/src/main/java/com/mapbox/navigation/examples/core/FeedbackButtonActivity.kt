@@ -27,7 +27,7 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
-import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Companion.FEEDBACK_SOURCE_UI
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -251,7 +251,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 MapboxNavigation.postUserFeedback(
                     feedback.feedbackType,
                     feedback.description,
-                    FEEDBACK_SOURCE_UI,
+                    UI,
                     encodeSnapshot(snapshot)
                 )
                 showFeedbackSent()

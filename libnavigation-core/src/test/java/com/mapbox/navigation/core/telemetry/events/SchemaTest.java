@@ -1,13 +1,7 @@
-package com.mapbox.navigation.core;
+package com.mapbox.navigation.core.telemetry.events;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
-import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent;
-import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent;
-import com.mapbox.navigation.core.telemetry.events.NavigationDepartEvent;
-import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent;
-import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent;
-import com.mapbox.navigation.core.telemetry.events.NavigationStepData;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;

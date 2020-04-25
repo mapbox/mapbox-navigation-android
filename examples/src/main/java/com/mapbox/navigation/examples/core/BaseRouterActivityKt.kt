@@ -36,7 +36,7 @@ import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl.Companion.PROFILE_DRIVING_TRAFFIC
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.metrics.MapboxMetricsReporter

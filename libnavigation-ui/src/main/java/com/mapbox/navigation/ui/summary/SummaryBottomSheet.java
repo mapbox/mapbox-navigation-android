@@ -29,10 +29,10 @@ import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.base.typedef.RoundingIncrementKt;
-import com.mapbox.navigation.base.typedef.TimeFormatType;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.base.TimeFormat;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.core.Rounding;
 import com.mapbox.navigation.ui.NavigationViewModel;
 import com.mapbox.navigation.ui.utils.ViewUtils;
 
@@ -40,7 +40,7 @@ import java.text.DecimalFormat;
 import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
-import static com.mapbox.navigation.base.typedef.TimeFormatTypeKt.NONE_SPECIFIED;
+import static com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED;
 
 /**
  * A view with {@link com.google.android.material.bottomsheet.BottomSheetBehavior}
@@ -69,7 +69,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
 
   private boolean isRerouting;
   @SuppressLint("WrongConstant")
-  @TimeFormatType
+  @TimeFormat.Type
   private int timeFormatType = NONE_SPECIFIED;
   private DistanceFormatter distanceFormatter;
   private NavigationViewModel navigationViewModel;
@@ -199,7 +199,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * @param type to use
    */
   @SuppressLint("WrongConstant")
-  public void setTimeFormat(@TimeFormatType int type) {
+  public void setTimeFormat(@TimeFormat.Type int type) {
     this.timeFormatType = type;
   }
 
@@ -250,7 +250,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     final String unitType = getUnitTypeForLocale(locale);
     distanceFormatter = new MapboxDistanceFormatter.Builder(getContext())
             .withUnitType(unitType)
-            .withRoundingIncrement(RoundingIncrementKt.ROUNDING_INCREMENT_FIFTY)
+            .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
             .withLocale(locale)
             .build();
   }

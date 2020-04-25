@@ -2,11 +2,11 @@ package com.mapbox.navigation.ui.summary
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
+import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.typedef.METRIC
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.TWELVE_HOURS
-import com.mapbox.navigation.core.MapboxDistanceFormatter
+import com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.ui.BaseTest
 import java.util.Calendar
@@ -33,7 +33,7 @@ class SummaryModelTest : BaseTest() {
         val routeProgress = buildRouteProgress()
         val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
             .withUnitType(METRIC)
-            .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+            .withRoundingIncrement(INCREMENT_FIFTY)
             .build()
 
         val result = SummaryModel(
@@ -50,7 +50,7 @@ class SummaryModelTest : BaseTest() {
         val routeProgress = buildRouteProgress()
         val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
             .withUnitType(METRIC)
-            .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+            .withRoundingIncrement(INCREMENT_FIFTY)
             .build()
 
         val result = SummaryModel(
@@ -67,7 +67,7 @@ class SummaryModelTest : BaseTest() {
         val routeProgress = buildRouteProgress()
         val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
             .withUnitType(METRIC)
-            .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+            .withRoundingIncrement(INCREMENT_FIFTY)
             .build()
         val time = Calendar.getInstance()
         val legDurationRemaining: Double = routeProgress!!

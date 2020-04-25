@@ -1,10 +1,7 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
-import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.RoundingIncrement
-import com.mapbox.navigation.base.typedef.TimeFormatType
 
 /**
  * Default navigator approximate prediction in milliseconds
@@ -32,8 +29,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param isDebugLoggingEnabled Boolean
  */
 data class NavigationOptions constructor(
-    @RoundingIncrement val roundingIncrement: Int,
-    @TimeFormatType val timeFormatType: Int,
+    @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
@@ -45,7 +41,6 @@ data class NavigationOptions constructor(
      * Get a builder to customize a subset of current options.
      */
     fun toBuilder() = Builder()
-        .roundingIncrement(roundingIncrement)
         .timeFormatType(timeFormatType)
         .navigatorPredictionMillis(navigatorPredictionMillis)
         .distanceFormatter(distanceFormatter)
@@ -56,19 +51,12 @@ data class NavigationOptions constructor(
      * Build a new [NavigationOptions]
      */
     class Builder {
-        private var roundingIncrement: Int = ROUNDING_INCREMENT_FIFTY
-        private var timeFormatType: Int = NONE_SPECIFIED
+        private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
-
-        /**
-         * Defines the increment displayed on the instruction view
-         */
-        fun roundingIncrement(roundingIncrement: Int) =
-            apply { this.roundingIncrement = roundingIncrement }
 
         /**
          * Defines time format for calculation remaining trip time
@@ -112,7 +100,6 @@ data class NavigationOptions constructor(
          */
         fun build(): NavigationOptions {
             return NavigationOptions(
-                roundingIncrement = roundingIncrement,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,

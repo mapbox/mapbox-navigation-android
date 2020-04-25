@@ -15,20 +15,17 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconDrawer;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuversStyleKit;
 
 import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
 import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
 import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
 import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.ManeuverModifier;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.ManeuverType;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_MODIFIER_LEFT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_TYPE_ARRIVE;
 
 
 /**
@@ -38,9 +35,9 @@ import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_
  */
 public class ManeuverView extends View {
 
-  @ManeuverType
+  @StepManeuver.StepManeuverType
   private String maneuverType = null;
-  @ManeuverModifier
+  @ManeuverModifier.Type
   private String maneuverModifier = null;
   @ColorInt
   private int primaryColor;
@@ -49,7 +46,7 @@ public class ManeuverView extends View {
   private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;
-  private String drivingSide = STEP_MANEUVER_MODIFIER_RIGHT;
+  private String drivingSide = ManeuverModifier.RIGHT;
 
   /**
    * A custom view that can be used with the Mapbox Directions API.
@@ -131,7 +128,7 @@ public class ManeuverView extends View {
   }
 
   public void setDrivingSide(String drivingSide) {
-    if (STEP_MANEUVER_MODIFIER_LEFT.equals(drivingSide) || STEP_MANEUVER_MODIFIER_RIGHT.equals(drivingSide)) {
+    if (ManeuverModifier.LEFT.equals(drivingSide) || ManeuverModifier.RIGHT.equals(drivingSide)) {
       updateDrivingSide(drivingSide);
       invalidate();
     }
@@ -228,7 +225,7 @@ public class ManeuverView extends View {
 
   @Nullable
   private String checkManeuverModifier(String maneuverType, String maneuverModifier) {
-    if (!maneuverType.contentEquals(STEP_MANEUVER_TYPE_ARRIVE) && maneuverModifier != null) {
+    if (!maneuverType.contentEquals(StepManeuver.ARRIVE) && maneuverModifier != null) {
       maneuverType = null;
     }
     return maneuverType;

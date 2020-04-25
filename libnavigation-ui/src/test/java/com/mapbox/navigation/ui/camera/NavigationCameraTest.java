@@ -7,7 +7,7 @@ import com.mapbox.mapboxsdk.location.OnLocationCameraTransitionListener;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.BaseTest;
 
 import org.junit.Test;
