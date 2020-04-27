@@ -13,7 +13,7 @@ import com.mapbox.navigation.base.typedef.TimeFormatType
  * in such a way as to project the location forward along the current trajectory so as to
  * appear more in sync with the users ground-truth location
  */
-const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1500L
+const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
 
 /**
  * Defines navigation options
