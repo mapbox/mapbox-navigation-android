@@ -23,9 +23,12 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.stops.ArrivalController
+import com.mapbox.navigation.core.stops.ArrivalOptions
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -109,7 +112,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    fun initLocationEngine() {
+    private fun initLocationEngine() {
         val requestLocationUpdateRequest =
             LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
@@ -149,6 +152,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun initListeners() {
+        mapboxNavigation?.attachArrivalController(arrivalObserver)
         startNavigation.setOnClickListener {
             navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
@@ -158,6 +162,20 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
+        }
+    }
+
+    private val arrivalObserver = object : ArrivalController {
+        val arrivalOptions = ArrivalOptions.Builder()
+            .arriveInSeconds(60.0)
+            .build()
+        override fun arrivalOptions(): ArrivalOptions = arrivalOptions
+
+        override fun onStopArrival(routeLegProgress: RouteLegProgress): Boolean {
+            // This example shows you can use both time and distance.
+            // Move to the next step when the distance is small
+            Timber.i("arrival_debug legIndex=${routeLegProgress.legIndex()} distanceRemaining=${routeLegProgress.distanceRemaining()}")
+            return routeLegProgress.distanceRemaining() < 5.0
         }
     }
 
