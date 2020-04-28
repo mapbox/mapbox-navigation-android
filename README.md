@@ -48,7 +48,7 @@ Step 1. Add it in your root `build.gradle` at the end of repositories:
 ```
 Step 2. Add the dependency
 ```
-  implementation 'com.github.flitsmeister:flitsmeister-navigation-android:v1.0.1'
+  implementation 'com.github.flitsmeister:flitsmeister-navigation-android:v1.0.4'
 ```
 
 ## maven
@@ -77,7 +77,7 @@ Step 1. Add it in your `build.sbt` at the end of resolvers:
 ```
 Step 2. Add the dependency
 ```
-  libraryDependencies += "com.github.flitsmeister" % "flitsmeister-navigation-android" % "v1.0.1"	
+  libraryDependencies += "com.github.flitsmeister" % "flitsmeister-navigation-android" % "v1.0.4"	
 ```
 
 ## leiningen
@@ -87,7 +87,7 @@ Step 1. Add it in your `project.clj` at the end of repositories:
 ```
 Step 2. Add the dependency
 ```
-  :dependencies [[com.github.flitsmeister/flitsmeister-navigation-android "v1.0.1"]]
+  :dependencies [[com.github.flitsmeister/flitsmeister-navigation-android "v1.0.4"]]
 ```
 
 To run the [sample code](#sample-code) on a device or emulator, include your [developer access token](https://www.mapbox.com/help/define-access-token/) in `developer-config.xml` found in the project. 
