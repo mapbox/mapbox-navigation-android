@@ -306,21 +306,22 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      * The lambda that is called if the SDK client did not initialize telemetry. If telemetry is not initialized,
      * calls to post a user feedback event will fail silently
      */
-    private val postUserEventBeforeInit: suspend (String, String, String, String?) -> Unit =
-        { _, _, _, _ ->
+    private val postUserEventBeforeInit: suspend (String, String, String, String?, Array<String>?) -> Unit =
+        { _, _, _, _, _ ->
             Log.d(TAG, "Not in a navigation session, Cannot send user feedback events")
         }
 
     /**
      * The lambda that is called once telemetry is initialized.
      */
-    private val postUserFeedbackEventAfterInit: suspend (String, String, String, String?) -> Unit =
-        { feedbackType, description, feedbackSource, screenshot ->
+    private val postUserFeedbackEventAfterInit: suspend (String, String, String, String?, Array<String>?) -> Unit =
+        { feedbackType, description, feedbackSource, screenshot, feedbackSubType ->
             postUserFeedbackHelper(
                 feedbackType,
                 description,
                 feedbackSource,
-                screenshot
+                screenshot,
+                feedbackSubType
             )
         }
 
@@ -421,10 +422,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?
+        screenshot: String?,
+        feedbackSubType: Array<String>?
     ) {
         telemetryThreadControl.scope.launch {
-            postUserEventDelegate(feedbackType, description, feedbackSource, screenshot)
+            postUserEventDelegate(feedbackType, description, feedbackSource, screenshot, feedbackSubType)
         }
     }
 
@@ -435,7 +437,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?
+        screenshot: String?,
+        feedbackSubType: Array<String>?
     ) {
         Log.d(TAG, "trying to post a user feedback event")
         val lastProgress = callbackDispatcher.getRouteProgress()
@@ -450,6 +453,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 this.screenshot = screenshot
                 this.locationsBefore = preEventBuffer.toTypedArray()
                 this.locationsAfter = postEventBuffer.toTypedArray()
+                this.feedbackSubType = feedbackSubType
             }
             populateNavigationEvent(feedbackEvent)
             val eventPosted = telemetryEventGate(feedbackEvent)

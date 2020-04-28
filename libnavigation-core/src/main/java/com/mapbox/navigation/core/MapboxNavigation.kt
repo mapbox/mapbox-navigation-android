@@ -654,19 +654,21 @@ constructor(
          * @param description description message
          * @param feedbackSource one of [FeedbackEvent.Source]
          * @param screenshot encoded screenshot (optional)
+         * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
          */
         @JvmStatic
         fun postUserFeedback(
             @FeedbackEvent.Type feedbackType: String,
             description: String,
             @FeedbackEvent.Source feedbackSource: String,
-            screenshot: String?
-        ) {
-            MapboxNavigationTelemetry.postUserFeedback(
+            screenshot: String?,
+            feedbackSubType: Array<String>? = emptyArray()
+        ) { MapboxNavigationTelemetry.postUserFeedback(
                 feedbackType,
                 description,
                 feedbackSource,
-                screenshot
+                screenshot,
+                feedbackSubType
             )
         }
 

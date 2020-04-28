@@ -22,6 +22,7 @@ internal class NavigationFeedbackEvent(
     var locationsBefore: Array<Location>? = emptyArray()
     var locationsAfter: Array<Location>? = emptyArray()
     var screenshot: String? = null
+    var feedbackSubType: Array<String>? = emptyArray()
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
 }

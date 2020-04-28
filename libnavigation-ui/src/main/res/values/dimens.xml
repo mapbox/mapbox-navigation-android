@@ -14,10 +14,10 @@
     <dimen name="mapbox_feedback_bottom_sheet_top_banner_margin">@dimen/dimen_8dp</dimen>
     <dimen name="mapbox_feedback_bottom_sheet_top_banner_title_margin_start">28dp</dimen>
     <dimen name="mapbox_feedback_bottom_sheet_top_banner_close_icon_padding">10dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_content_height">420dp</dimen>
     <dimen name="mapbox_feedback_item_margin">8dp</dimen>
     <dimen name="mapbox_feedback_item_image_size">70dp</dimen>
-    <dimen name="feedback_item_margin_top">16dp</dimen>
-    <dimen name="report_feedback_margin">@dimen/dimen_16dp</dimen>
+    <dimen name="mapbox_feedback_description_item_view_height">110dp</dimen>
 
     <dimen name="instruction_layout_height">64dp</dimen>
     <dimen name="summary_bottomsheet_height">56dp</dimen>

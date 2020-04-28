@@ -184,6 +184,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
             supportFragmentManager.let {
                 FeedbackBottomSheet.newInstance(
                     this,
+                    FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW,
                     NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
                 ).show(it, FeedbackBottomSheet.TAG)
             }
@@ -251,7 +252,8 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                     feedback.feedbackType,
                     feedback.description,
                     UI,
-                    encodeSnapshot(snapshot)
+                    encodeSnapshot(snapshot),
+                    feedback.feedbackSubType.toTypedArray()
                 )
                 showFeedbackSent()
             }
@@ -278,7 +280,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         snackbar.view.setBackgroundColor(
             ContextCompat.getColor(
                 this,
-                com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_snackbar
+                com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
             )
         )
         snackbar.setTextColor(

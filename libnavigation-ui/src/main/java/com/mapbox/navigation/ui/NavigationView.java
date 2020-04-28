@@ -440,7 +440,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
 
     snackbar.getView().setBackgroundColor(
-      ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_snackbar));
+      ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_secondary));
     snackbar.setTextColor(ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_primary_text));
 
     snackbar.show();

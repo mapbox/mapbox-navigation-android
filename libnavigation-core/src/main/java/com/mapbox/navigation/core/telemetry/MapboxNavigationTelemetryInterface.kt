@@ -8,7 +8,8 @@ internal interface MapboxNavigationTelemetryInterface {
         @FeedbackEvent.Type feedbackType: String,
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
-        screenshot: String?
+        screenshot: String?,
+        feedbackSubType: Array<String>?
     )
 
     fun unregisterListeners(mapboxNavigation: MapboxNavigation)
