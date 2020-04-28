@@ -22,11 +22,7 @@ interface AlertApi {
      * @return AlertState
      */
     fun durationToDismiss(previousState: AlertState, duration: Long): AlertState {
-        return AlertProcessor
-            .Builder(previousState)
-            .durationToDismiss(duration)
-            .build()
-            .getNewState()
+        return reducer(previousState, setDismissDuration(AlertAction.SetDismissDuration(duration)))
     }
 
     /**
@@ -35,11 +31,7 @@ interface AlertApi {
      * @param text String
      * @return AlertState
      */
-    fun showViewWith(previousState: AlertState, text: String): AlertState {
-        return AlertProcessor
-            .Builder(previousState)
-            .showViewWith(text)
-            .build()
-            .getNewState()
+    fun setAlertText(previousState: AlertState, text: String): AlertState {
+        return reducer(previousState, setAlertText(AlertAction.SetAlertText(text)))
     }
 }
