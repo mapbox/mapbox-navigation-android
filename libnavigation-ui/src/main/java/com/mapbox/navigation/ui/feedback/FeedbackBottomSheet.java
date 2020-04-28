@@ -266,7 +266,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_route_quality),
       R.drawable.ic_feedback_route_quality,
-      FeedbackEvent.FEEDBACK_TYPE_CONFUSING_INSTRUCTION,
+      FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR,
       EMPTY_FEEDBACK_DESCRIPTION));
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_illegal_route),
       R.drawable.ic_feedback_illegal_route,

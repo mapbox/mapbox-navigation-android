@@ -57,6 +57,39 @@
     <!-- Feedback type for Road Closed -->
     <string name="feedback_road_closure">Road\nClosed</string>
 
+    <!-- Feedback description for Incorrect Visual -->
+    <string name="feedback_description_turn_icon_incorrect">Turn icon incorrect</string>
+    <string name="feedback_description_street_name_incorrect">Street name incorrect</string>
+    <string name="feedback_description_instruction_unnecessary">Instruction unnecessary</string>
+    <string name="feedback_description_instruction_missing">Instruction missing</string>
+    <string name="feedback_description_maneuver_incorrect">Maneuver incorrect</string>
+    <string name="feedback_description_exit_info_incorrect">Exit info incorrect</string>
+    <string name="feedback_description_lane_guidance_incorrect">Lane guidance incorrect</string>
+    <string name="feedback_description_road_know_by_different_name">Road know by different name</string>
+
+    <!-- Feedback description for Confusing Audio -->
+    <string name="feedback_description_guidance_too_early">Guidance too early</string>
+    <string name="feedback_description_guidance_too_late">Guidance too late</string>
+    <string name="feedback_description_pronunciation_incorrect">Pronunciation incorrect</string>
+    <string name="feedback_description_road_name_repeated">Road name repeated</string>
+
+    <!-- Feedback description for Route Quality -->
+    <string name="feedback_description_route_not_drive_able">Route not drive-able</string>
+    <string name="feedback_description_route_not_preferred">Route not preferred</string>
+    <string name="feedback_description_alternative_route_not_expected">Alternative route not expected</string>
+    <string name="feedback_description_route_included_missing_roads">Route included missing roads</string>
+    <string name="feedback_description_route_had_roads_too_narrow_to_pass">Route had roads too narrow to pass</string>
+
+    <!-- Feedback description for Illegal Route -->
+    <string name="feedback_description_routed_down_a_one_way">Routed down a one-way</string>
+    <string name="feedback_description_turn_was_not_allowed">Turn was not allowed</string>
+    <string name="feedback_description_cars_not_allowed_on_street">Cars not allowed on street</string>
+    <string name="feedback_description_turn_at_intersection_was_unprotected">Turn at intersection was unprotected</string>
+
+    <!-- Feedback description for Road Closure -->
+    <string name="feedback_description_street_permanently_blocked_off">Street permanently blocked off</string>
+    <string name="feedback_description_road_is_missing_from_map">Road is missing from map</string>
+
     <!-- Shown after a feedback type has been submitted -->
     <string name="feedback_submitted">Feedback Submitted</string>
 
