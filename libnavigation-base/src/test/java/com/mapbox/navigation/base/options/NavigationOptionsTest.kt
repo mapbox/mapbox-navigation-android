@@ -1,12 +1,10 @@
 package com.mapbox.navigation.base.options
 
 import android.text.SpannableString
+import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
+import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
+import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
-import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_TEN
-import com.mapbox.navigation.base.typedef.TWELVE_HOURS
-import com.mapbox.navigation.base.typedef.TWENTY_FOUR_HOURS
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -16,7 +14,6 @@ class NavigationOptionsTest {
     fun whenBuilderBuildWithNoValuesCalledThenDefaultValuesUsed() {
         val options = NavigationOptions.Builder().build()
 
-        assertEquals(options.roundingIncrement, ROUNDING_INCREMENT_FIFTY)
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
         assertEquals(options.distanceFormatter, null)
@@ -26,7 +23,6 @@ class NavigationOptionsTest {
     @Test
     fun whenBuilderBuildCalledThenProperNavigationOptionsCreated() {
         val timeFormat = TWELVE_HOURS
-        val roundingIncrement = ROUNDING_INCREMENT_TEN
         val navigatorPredictionMillis = 1020L
         val distanceFormatter = object : DistanceFormatter {
             override fun formatDistance(distance: Double): SpannableString {
@@ -37,13 +33,11 @@ class NavigationOptionsTest {
 
         val options = NavigationOptions.Builder()
             .timeFormatType(timeFormat)
-            .roundingIncrement(roundingIncrement)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)
             .onboardRouterConfig(routerConfig)
             .build()
 
-        assertEquals(options.roundingIncrement, roundingIncrement)
         assertEquals(options.timeFormatType, timeFormat)
         assertEquals(options.navigatorPredictionMillis, navigatorPredictionMillis)
         assertEquals(options.distanceFormatter, distanceFormatter)
@@ -53,7 +47,6 @@ class NavigationOptionsTest {
     @Test
     fun whenOptionsValuesChangedThenAllOtherValuesSaved() {
         val timeFormat = TWELVE_HOURS
-        val roundingIncrement = ROUNDING_INCREMENT_TEN
         val navigatorPredictionMillis = 1020L
         val distanceFormatter = object : DistanceFormatter {
             override fun formatDistance(distance: Double): SpannableString {
@@ -64,7 +57,6 @@ class NavigationOptionsTest {
 
         var options = NavigationOptions.Builder()
             .timeFormatType(timeFormat)
-            .roundingIncrement(roundingIncrement)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)
             .onboardRouterConfig(routerConfig)
@@ -78,7 +70,6 @@ class NavigationOptionsTest {
             .navigatorPredictionMillis(newNavigatorPredictionMillis)
             .build()
 
-        assertEquals(options.roundingIncrement, roundingIncrement)
         assertEquals(options.timeFormatType, newTimeFormat)
         assertEquals(options.navigatorPredictionMillis, newNavigatorPredictionMillis)
         assertEquals(options.distanceFormatter, distanceFormatter)

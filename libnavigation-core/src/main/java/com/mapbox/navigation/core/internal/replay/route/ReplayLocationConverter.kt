@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route
+package com.mapbox.navigation.core.internal.replay.route
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute

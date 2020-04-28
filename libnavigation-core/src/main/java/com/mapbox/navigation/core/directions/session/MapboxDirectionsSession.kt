@@ -7,14 +7,13 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.CopyOnWriteArraySet
 
-// todo make internal
 /**
  * Default implementation of [DirectionsSession].
  *
  * @property router route fetcher. Usually Onboard, Offboard or Hybrid
  * @property routes a list of [DirectionsRoute]. Fetched from [Router] or might be set manually
  */
-class MapboxDirectionsSession(
+internal class MapboxDirectionsSession(
     private val router: Router
 ) : DirectionsSession {
 

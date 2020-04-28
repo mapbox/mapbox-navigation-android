@@ -8,9 +8,9 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.MapboxDirectionsSession
-import com.mapbox.navigation.core.trip.service.MapboxTripService
-import com.mapbox.navigation.core.trip.service.TripService
-import com.mapbox.navigation.core.trip.session.MapboxTripSession
+import com.mapbox.navigation.core.internal.trip.service.MapboxTripService
+import com.mapbox.navigation.core.internal.trip.service.TripService
+import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
 
 internal object NavigationComponentProvider {

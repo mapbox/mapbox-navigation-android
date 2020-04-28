@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core
+package com.mapbox.navigation.core.telemetry
 
 import android.app.AlarmManager
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 import com.mapbox.android.telemetry.MapboxTelemetryConstants
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController

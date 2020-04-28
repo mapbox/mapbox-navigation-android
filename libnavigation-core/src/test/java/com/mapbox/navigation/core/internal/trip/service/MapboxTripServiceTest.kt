@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.trip.service
+package com.mapbox.navigation.core.internal.trip.service
 
 import android.app.Notification
 import com.mapbox.base.common.logger.Logger

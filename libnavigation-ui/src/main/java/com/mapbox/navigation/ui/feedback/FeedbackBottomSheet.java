@@ -238,11 +238,11 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_incorrect_visual),
       R.drawable.ic_feedback_incorrect_visual,
-      FeedbackEvent.FEEDBACK_TYPE_INCORRECT_VISUAL_GUIDANCE,
+      FeedbackEvent.INCORRECT_VISUAL_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_confusing_audio),
       R.drawable.ic_feedback_confusing_audio,
-      FeedbackEvent.FEEDBACK_TYPE_INCORRECT_AUDIO_GUIDANCE,
+      FeedbackEvent.INCORRECT_AUDIO_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
 
     return list;
@@ -266,15 +266,15 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_route_quality),
       R.drawable.ic_feedback_route_quality,
-      FeedbackEvent.FEEDBACK_TYPE_ROUTING_ERROR,
+      FeedbackEvent.ROUTING_ERROR,
       EMPTY_FEEDBACK_DESCRIPTION));
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_illegal_route),
       R.drawable.ic_feedback_illegal_route,
-      FeedbackEvent.FEEDBACK_TYPE_NOT_ALLOWED,
+      FeedbackEvent.NOT_ALLOWED,
       EMPTY_FEEDBACK_DESCRIPTION));
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_road_closure),
       R.drawable.ic_feedback_road_closure,
-      FeedbackEvent.FEEDBACK_TYPE_ROAD_CLOSED,
+      FeedbackEvent.ROAD_CLOSED,
       EMPTY_FEEDBACK_DESCRIPTION));
 
     return list;

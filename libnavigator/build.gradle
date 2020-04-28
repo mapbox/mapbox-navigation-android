@@ -10,6 +10,11 @@ dokka {
     configuration {
         moduleName = 'libnavigator'
         reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.navigator.internal"
+            suppress = true
+        }
     }
 }
 

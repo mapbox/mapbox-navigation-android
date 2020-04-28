@@ -24,8 +24,8 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.base.typedef.TimeFormatType;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.base.TimeFormat;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
@@ -55,7 +55,7 @@ import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
-import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.FEEDBACK_SOURCE_UI;
+import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI;
 
 public class NavigationViewModel extends AndroidViewModel {
 
@@ -89,7 +89,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private RouteUtils routeUtils;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
-  @TimeFormatType
+  @TimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
@@ -223,7 +223,7 @@ public class NavigationViewModel extends AndroidViewModel {
   void updateFeedbackScreenshot(String screenshot) {
     if (feedbackItem != null) {
       MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
-        feedbackItem.getDescription(), FEEDBACK_SOURCE_UI, screenshot);
+        feedbackItem.getDescription(), UI, screenshot);
       sendEventFeedback(feedbackItem);
       isFeedbackSentSuccess.setValue(true);
       feedbackItem = null;
@@ -362,14 +362,9 @@ public class NavigationViewModel extends AndroidViewModel {
     timeFormatType = options.getTimeFormatType();
   }
 
-  private int initializeRoundingIncrement(NavigationViewOptions options) {
-    NavigationOptions navigationOptions = options.navigationOptions();
-    return navigationOptions.getRoundingIncrement();
-  }
-
   private DistanceFormatter buildDistanceFormatter(final NavigationViewOptions options) {
     final String unitType = initializeUnitType(options);
-    final int roundingIncrement = initializeRoundingIncrement(options);
+    final int roundingIncrement = options.roundingIncrement();
     final Locale locale = getLocaleDirectionsRoute(options.directionsRoute(), getApplication());
     return new MapboxDistanceFormatter.Builder(getApplication())
             .withUnitType(unitType)

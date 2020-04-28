@@ -3,11 +3,11 @@ package com.mapbox.navigation.ui.map;
 import android.content.Context;
 
 import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.navigation.ui.legacy.NavigationConstants;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.camera.OnTrackingModeChangedListener;
 import com.mapbox.navigation.ui.camera.OnTrackingModeTransitionListener;
@@ -115,9 +115,9 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
         && routeLegProgress.currentStepProgress().step() != null) {
       final String maneuverModifier = routeLegProgress.currentStepProgress().step().maneuver().modifier();
       return maneuverModifier != null
-          && (maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT)
-          || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_LEFT)
-          || maneuverModifier.equals(NavigationConstants.STEP_MANEUVER_MODIFIER_SLIGHT_RIGHT));
+          && (maneuverModifier.equals(ManeuverModifier.STRAIGHT)
+          || maneuverModifier.equals(ManeuverModifier.SLIGHT_LEFT)
+          || maneuverModifier.equals(ManeuverModifier.SLIGHT_RIGHT));
     }
     return false;
   }

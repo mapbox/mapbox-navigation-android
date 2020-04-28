@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.accounts
 
 import android.content.Context
 import com.mapbox.navigation.core.NavigationSession
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

@@ -7,7 +7,7 @@ import android.text.format.DateFormat;
 import com.mapbox.navigation.base.internal.extensions.LocaleEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.base.typedef.TimeFormatType;
+import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.trip.notification.internal.TimeFormatter;
 
 import java.util.Calendar;
@@ -20,7 +20,7 @@ public class SummaryModel {
   private final String arrivalTime;
 
   public SummaryModel(final Context context, final DistanceFormatter distanceFormatter, final RouteProgress progress,
-                      final @TimeFormatType int timeFormatType) {
+                      final @TimeFormat.Type int timeFormatType) {
     final Locale locale = progress.route() == null ? null :
             LocaleEx.getLocaleDirectionsRoute(progress.route(), context);
     distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();

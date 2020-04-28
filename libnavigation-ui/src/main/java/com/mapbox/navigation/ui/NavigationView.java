@@ -35,10 +35,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
-import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.typedef.TimeFormatType;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.base.TimeFormat;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
@@ -743,7 +742,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private void establishDistanceFormatter(final NavigationViewOptions options) {
     final String unitType = establishUnitType(options);
     final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
-    final int roundingIncrement = establishRoundingIncrement(options);
+    final int roundingIncrement = options.roundingIncrement();
     final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder(getContext())
       .withRoundingIncrement(roundingIncrement)
       .withUnitType(unitType)
@@ -753,11 +752,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }
 
-  private int establishRoundingIncrement(NavigationViewOptions navigationViewOptions) {
-    NavigationOptions navigationOptions = navigationViewOptions.navigationOptions();
-    return navigationOptions.getRoundingIncrement();
-  }
-
   private String establishUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
@@ -765,7 +759,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {
-    @TimeFormatType
+    @TimeFormat.Type
     int timeFormatType = options.navigationOptions().getTimeFormatType();
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }

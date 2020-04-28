@@ -1,13 +1,6 @@
 package com.mapbox.navigation.ui.instruction.turnlane;
 
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_MODIFIER_RIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.STEP_MANEUVER_MODIFIER_STRAIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_LEFT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_RIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_LEFT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_SLIGHT_RIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_STRAIGHT;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.TURN_LANE_INDICATION_UTURN;
+import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
 
 class TurnLaneViewData {
 
@@ -36,51 +29,51 @@ class TurnLaneViewData {
   private void buildDrawData(String laneIndications, String maneuverModifier) {
 
     // U-turn
-    if (laneIndications.contentEquals(TURN_LANE_INDICATION_UTURN)) {
+    if (laneIndications.contentEquals(ManeuverModifier.UTURN)) {
       drawMethod = DRAW_LANE_UTURN;
       shouldFlip = true;
       return;
     }
 
     // Straight
-    if (laneIndications.contentEquals(TURN_LANE_INDICATION_STRAIGHT)) {
+    if (laneIndications.contentEquals(ManeuverModifier.STRAIGHT)) {
       drawMethod = DRAW_LANE_STRAIGHT;
       return;
     }
 
     // Right or left
-    if (laneIndications.contentEquals(TURN_LANE_INDICATION_RIGHT)) {
+    if (laneIndications.contentEquals(ManeuverModifier.RIGHT)) {
       drawMethod = DRAW_LANE_RIGHT;
       return;
-    } else if (laneIndications.contentEquals(TURN_LANE_INDICATION_LEFT)) {
+    } else if (laneIndications.contentEquals(ManeuverModifier.LEFT)) {
       drawMethod = DRAW_LANE_RIGHT;
       shouldFlip = true;
       return;
     }
 
     // Slight right or slight left
-    if (laneIndications.contentEquals(TURN_LANE_INDICATION_SLIGHT_RIGHT)) {
+    if (laneIndications.contentEquals(ManeuverModifier.SLIGHT_RIGHT)) {
       drawMethod = DRAW_LANE_SLIGHT_RIGHT;
       return;
-    } else if (laneIndications.contentEquals(TURN_LANE_INDICATION_SLIGHT_LEFT)) {
+    } else if (laneIndications.contentEquals(ManeuverModifier.SLIGHT_LEFT)) {
       drawMethod = DRAW_LANE_SLIGHT_RIGHT;
       shouldFlip = true;
       return;
     }
 
     // Straight and right or left
-    if (isStraightPlusIndication(laneIndications, TURN_LANE_INDICATION_RIGHT)) {
+    if (isStraightPlusIndication(laneIndications, ManeuverModifier.RIGHT)) {
       setDrawMethodWithModifier(maneuverModifier);
-    } else if (isStraightPlusIndication(laneIndications, TURN_LANE_INDICATION_LEFT)) {
+    } else if (isStraightPlusIndication(laneIndications, ManeuverModifier.LEFT)) {
       setDrawMethodWithModifier(maneuverModifier);
       shouldFlip = true;
     }
   }
 
   private void setDrawMethodWithModifier(String maneuverModifier) {
-    if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_RIGHT)) {
+    if (maneuverModifier.contains(ManeuverModifier.RIGHT)) {
       drawMethod = DRAW_LANE_RIGHT_ONLY;
-    } else if (maneuverModifier.contains(STEP_MANEUVER_MODIFIER_STRAIGHT)) {
+    } else if (maneuverModifier.contains(ManeuverModifier.STRAIGHT)) {
       drawMethod = DRAW_LANE_STRAIGHT_ONLY;
     } else {
       drawMethod = DRAW_LANE_RIGHT_ONLY;
@@ -88,7 +81,7 @@ class TurnLaneViewData {
   }
 
   private boolean isStraightPlusIndication(String laneIndications, String turnLaneIndication) {
-    return laneIndications.contains(TURN_LANE_INDICATION_STRAIGHT)
+    return laneIndications.contains(ManeuverModifier.STRAIGHT)
       && laneIndications.contains(turnLaneIndication);
   }
 }

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.accounts
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
@@ -7,9 +7,11 @@ import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.core.accounts.Billing
 import java.lang.IllegalStateException
 
 // TODO: make the class internal
+//  Currently under internal package because it's been used by Router examples in the test app
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */

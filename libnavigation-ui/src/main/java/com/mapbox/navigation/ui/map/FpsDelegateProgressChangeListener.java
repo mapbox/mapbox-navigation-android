@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.map;
 
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 
 import org.jetbrains.annotations.NotNull;
 

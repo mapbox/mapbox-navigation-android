@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.trip.session
+package com.mapbox.navigation.core.internal.trip.session
 
 import android.hardware.SensorEvent
 import android.location.Location
@@ -13,11 +13,20 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.sensors.SensorMapper
-import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.BannerInstructionEvent
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.core.trip.session.VoiceInstructionEvent
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.TripStatus
@@ -35,6 +44,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // todo make internal
+//  Currently under internal package because it's been used by TripSession examples in the test app
+//  It should be move out of the internal package along with TripService / MapboxTripService
 /**
  * Default implementation of [TripSession]
  *

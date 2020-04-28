@@ -4,7 +4,7 @@ import com.mapbox.navigation.core.telemetry.events.FeedbackEvent;
 
 public class FeedbackItem {
 
-  @FeedbackEvent.FeedbackType
+  @FeedbackEvent.Type
   private String feedbackType;
   private String feedbackText;
   private String description;
@@ -12,7 +12,7 @@ public class FeedbackItem {
 
   FeedbackItem(String feedbackText,
       int feedbackImage,
-      @FeedbackEvent.FeedbackType
+      @FeedbackEvent.Type
           String feedbackType,
       String description) {
     this.feedbackText = feedbackText;
@@ -29,7 +29,7 @@ public class FeedbackItem {
     return feedbackImage;
   }
 
-  @FeedbackEvent.FeedbackType
+  @FeedbackEvent.Type
   public String getFeedbackType() {
     return feedbackType;
   }

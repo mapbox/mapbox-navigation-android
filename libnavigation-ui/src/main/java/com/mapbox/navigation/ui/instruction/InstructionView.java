@@ -43,10 +43,11 @@ import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.Rounding;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
-import com.mapbox.navigation.base.trip.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.FeedbackButton;
 import com.mapbox.navigation.ui.NavigationButton;
 import com.mapbox.navigation.ui.NavigationViewModel;
@@ -549,7 +550,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private void initialize() {
     final String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
-    final int roundingIncrement = NavigationConstants.ROUNDING_INCREMENT_FIFTY;
+    final int roundingIncrement = Rounding.INCREMENT_FIFTY;
     final Locale locale = ContextEx.inferDeviceLocale(getContext());
     distanceFormatter = new MapboxDistanceFormatter.Builder(getContext())
       .withUnitType(unitType)

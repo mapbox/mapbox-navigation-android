@@ -15,20 +15,17 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
+import com.mapbox.navigation.base.TimeFormat
+import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.trip.RouteProgressObserver
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.base.typedef.NONE_SPECIFIED
-import com.mapbox.navigation.base.typedef.ROUNDING_INCREMENT_FIFTY
-import com.mapbox.navigation.base.typedef.UNDEFINED
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -36,16 +33,19 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.stops.ArrivalController
 import com.mapbox.navigation.core.stops.ArrivalProgressObserver
 import com.mapbox.navigation.core.stops.AutoArrivalController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
@@ -629,16 +629,16 @@ constructor(
         /**
          * Send user feedback about an issue or problem with the Navigation SDK
          *
-         * @param feedbackType one of [FeedbackEvent.FeedbackType]
+         * @param feedbackType one of [FeedbackEvent.Type]
          * @param description description message
-         * @param feedbackSource one of [FeedbackEvent.FeedbackSource]
+         * @param feedbackSource one of [FeedbackEvent.Source]
          * @param screenshot encoded screenshot (optional)
          */
         @JvmStatic
         fun postUserFeedback(
-            @FeedbackEvent.FeedbackType feedbackType: String,
+            @FeedbackEvent.Type feedbackType: String,
             description: String,
-            @FeedbackEvent.FeedbackSource feedbackSource: String,
+            @FeedbackEvent.Source feedbackSource: String,
             screenshot: String?
         ) {
             MapboxNavigationTelemetry.postUserFeedback(
@@ -657,12 +657,11 @@ constructor(
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
             val distanceFormatter = MapboxDistanceFormatter.builder(context)
-                .withUnitType(UNDEFINED)
-                .withRoundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .withUnitType(VoiceUnit.UNDEFINED)
+                .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
                 .build()
             val builder = NavigationOptions.Builder()
-                .timeFormatType(NONE_SPECIFIED)
-                .roundingIncrement(ROUNDING_INCREMENT_FIFTY)
+                .timeFormatType(TimeFormat.NONE_SPECIFIED)
                 .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
 
