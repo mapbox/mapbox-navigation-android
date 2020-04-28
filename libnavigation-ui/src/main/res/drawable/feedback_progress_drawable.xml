@@ -8,7 +8,9 @@
 
     <item android:id="@android:id/progress">
         <clip>
-            <shape/>
+            <shape>
+                <solid android:color="@color/mapbox_feedback_bottom_sheet_secondary" />
+            </shape>
         </clip>
     </item>
 </layer-list>

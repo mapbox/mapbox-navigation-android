@@ -2,6 +2,9 @@ package com.mapbox.navigation.ui.feedback;
 
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class FeedbackItem {
 
   @FeedbackEvent.Type
@@ -9,6 +12,7 @@ public class FeedbackItem {
   private String feedbackText;
   private String description;
   private int feedbackImage;
+  private Set<String> feedbackSubType;
 
   FeedbackItem(String feedbackText,
       int feedbackImage,
@@ -19,6 +23,7 @@ public class FeedbackItem {
     this.feedbackImage = feedbackImage;
     this.feedbackType = feedbackType;
     this.description = description;
+    this.feedbackSubType = new HashSet<>();
   }
 
   String getFeedbackText() {
@@ -36,5 +41,9 @@ public class FeedbackItem {
 
   public String getDescription() {
     return description;
+  }
+
+  public Set<String> getFeedbackSubType() {
+    return this.feedbackSubType;
   }
 }

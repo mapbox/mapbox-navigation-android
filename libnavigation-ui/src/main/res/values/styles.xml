@@ -227,4 +227,19 @@
         <item name="android:background">@color/mapbox_feedback_bottom_sheet_primary</item>
     </style>
 
+    <style name="FeedbackBottomSheetDescriptionItemViewHolder">
+        <item name="android:background">@drawable/mapbox_feedback_bottom_issue_background</item>
+    </style>
+
+    <style name="FeedbackBottomSheetDescriptionItemText" parent="MapboxTextViewStyle">
+        <item name="android:textSize">21sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
+    </style>
+
+    <style name="FeedbackBottomSheetDescriptionItemCheckbox" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/mapbox_feedback_bottom_sheet_icon_secondary</item>
+        <item name="colorControlActivated">@color/mapbox_feedback_bottom_sheet_icon_secondary</item>
+    </style>
+
 </resources>
