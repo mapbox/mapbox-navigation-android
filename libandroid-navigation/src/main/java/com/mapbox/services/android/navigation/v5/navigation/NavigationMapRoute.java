@@ -888,6 +888,17 @@ public class NavigationMapRoute implements MapView.OnDidFinishLoadingStyleListen
         }
     }
 
+    /**
+     * Puts the route below a specific id.
+     */
+    public void placeRouteBelow(String layerId) {
+        belowLayer = layerId;
+        initializeUpcomingManeuverArrow();
+        drawRoutes();
+        addDirectionWaypoints();
+        showAlternativeRoutes(alternativesVisible);
+    }
+
     private void drawWaypointMarkers(@NonNull MapboxMap mapboxMap, @Nullable Drawable originMarker,
                                      @Nullable Drawable destinationMarker) {
         if (originMarker == null || destinationMarker == null) {
