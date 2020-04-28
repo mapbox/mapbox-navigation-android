@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.route;
 
 import android.content.Context;
-import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -143,8 +142,8 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.navigation = navigation;
     this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
-    this.mapRouteClickListener = new MapRouteClickListener(routeLine);
-    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
+    this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
+    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(this.routeLine, routeArrow);
     initializeDidFinishLoadingStyleListener();
     addListeners();
   }
@@ -330,12 +329,14 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteLine buildMapRouteLine(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
                                          @StyleRes int styleRes, @Nullable String belowLayer) {
     Context context = mapView.getContext();
-    MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
-    MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
-    Handler handler = new Handler(context.getMainLooper());
-    return new MapRouteLine(context, mapboxMap.getStyle(), styleRes, belowLayer,
-            drawableProvider, sourceProvider, layerProvider, handler
+    return new MapRouteLine(
+        context,
+        mapboxMap.getStyle(),
+        styleRes,
+        belowLayer,
+        layerProvider,
+        new MapRouteSourceProvider()
     );
   }
 
@@ -389,29 +390,20 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void recreateRouteLine(Style style) {
     Context context = mapView.getContext();
-    MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
-    MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
-    Handler handler = new Handler(context.getMainLooper());
 
     routeLine = new MapRouteLine(
             context,
             style,
             styleRes,
             belowLayer,
-            drawableProvider,
-            sourceProvider,
             layerProvider,
-            routeLine.retrieveDrawnRouteFeatureCollections(),
-            routeLine.retrieveDrawnWaypointsFeatureCollections(),
-            routeLine.retrieveDirectionsRoutes(),
-            routeLine.retrieveRouteFeatureCollections(),
-            routeLine.retrieveRouteLineStrings(),
-            routeLine.retrievePrimaryRouteIndex(),
+            routeLine.retrieveRouteFeatureData(),
             routeLine.retrieveVisibility(),
             routeLine.retrieveAlternativesVisible(),
-            handler
+            new MapRouteSourceProvider()
     );
+
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);

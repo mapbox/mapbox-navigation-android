@@ -45,6 +45,11 @@ android {
     }
   }
 
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
   licenseReport {
     generateHtmlReport = false
     generateJsonReport = true
@@ -100,6 +105,9 @@ dependencies {
   implementation(dependenciesList.okhttpInterceptor) {
     force = true
   }
+
+  // Coroutines
+  implementation dependenciesList.coroutinesAndroid
 
   // Unit testing
   testImplementation dependenciesList.junit

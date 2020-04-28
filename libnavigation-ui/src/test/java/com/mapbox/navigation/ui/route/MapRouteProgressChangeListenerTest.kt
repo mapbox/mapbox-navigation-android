@@ -23,7 +23,6 @@ class MapRouteProgressChangeListenerTest {
     @Before
     fun setup() {
         every { routeLine.retrieveDirectionsRoutes() } returns emptyList()
-        every { routeLine.retrievePrimaryRouteIndex() } returns 0
         every { routeLine.draw(capture(drawDirections)) } returns Unit
         every { routeArrow.addUpcomingManeuverArrow(capture(addRouteProgress)) } returns Unit
     }
@@ -47,6 +46,7 @@ class MapRouteProgressChangeListenerTest {
         val routeProgress: RouteProgress = mockk {
             every { route() } returns newRoute
         }
+        every { routeLine.getPrimaryRoute() } returns newRoute
 
         progressChangeListener.updateVisibility(true)
         progressChangeListener.onRouteProgressChanged(routeProgress)
@@ -57,6 +57,7 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should not draw route without directions route`() {
+        every { routeLine.getPrimaryRoute() } returns null
         val routeProgress: RouteProgress = mockk {
             every { route() } returns null
         }
@@ -70,6 +71,7 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should not update maneuver arrow without directions route`() {
+        every { routeLine.getPrimaryRoute() } returns null
         val routeProgress: RouteProgress = mockk {
             every { route() } returns null
         }
@@ -87,6 +89,7 @@ class MapRouteProgressChangeListenerTest {
         val routeProgress: RouteProgress = mockk {
             every { route() } returns newRoute
         }
+        every { routeLine.getPrimaryRoute() } returns newRoute
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
@@ -95,7 +98,6 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should only draw routes with geometry`() {
-        every { routeLine.retrievePrimaryRouteIndex() } returns 0
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
@@ -106,6 +108,12 @@ class MapRouteProgressChangeListenerTest {
                 every { geometry() } returns null
             }
         }
+        val newRoute: DirectionsRoute = mockk {
+            every { geometry() } returns null
+        }
+
+        every { routeLine.getPrimaryRoute() } returns newRoute
+
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
@@ -114,12 +122,13 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should only add maneuver arrow with geometry`() {
-        every { routeLine.retrievePrimaryRouteIndex() } returns 0
-        every { routeLine.retrieveDirectionsRoutes() } returns listOf(
-                mockk {
-                    every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
-                }
+        val routes = listOf(
+            mockk<DirectionsRoute> {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+            }
         )
+        every { routeLine.getPrimaryRoute() } returns routes[0]
+        every { routeLine.retrieveDirectionsRoutes() } returns routes
         val routeProgress: RouteProgress = mockk {
             every { route() } returns mockk {
                 every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
@@ -133,7 +142,6 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should draw new routes`() {
-        every { routeLine.retrievePrimaryRouteIndex() } returns 0
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
@@ -144,6 +152,7 @@ class MapRouteProgressChangeListenerTest {
                 every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
             }
         }
+        every { routeLine.getPrimaryRoute() } returns routeLine.retrieveDirectionsRoutes()[0]
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
@@ -154,7 +163,6 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should draw new routes when other values change`() {
-        every { routeLine.retrievePrimaryRouteIndex() } returns 0
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
@@ -167,6 +175,7 @@ class MapRouteProgressChangeListenerTest {
                 every { distance() } returns 100.0
             }
         }
+        every { routeLine.getPrimaryRoute() } returns routeLine.retrieveDirectionsRoutes()[0]
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 

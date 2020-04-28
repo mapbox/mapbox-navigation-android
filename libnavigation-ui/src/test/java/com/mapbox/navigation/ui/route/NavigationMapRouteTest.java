@@ -7,7 +7,6 @@ import com.mapbox.navigation.core.MapboxNavigation;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
