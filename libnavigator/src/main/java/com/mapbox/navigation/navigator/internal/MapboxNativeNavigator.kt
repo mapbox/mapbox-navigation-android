@@ -251,4 +251,9 @@ interface MapboxNativeNavigator {
      * @return [VoiceInstruction] for step index you passed
      */
     fun getVoiceInstruction(index: Int): VoiceInstruction?
+
+    /**
+     * Reset resources.
+     */
+    fun reset()
 }

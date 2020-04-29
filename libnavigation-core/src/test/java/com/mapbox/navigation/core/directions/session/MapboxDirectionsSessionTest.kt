@@ -102,7 +102,7 @@ class MapboxDirectionsSessionTest {
 
     @Test
     fun shutDown() {
-        session.shutdownSession()
+        session.shutdown()
         verify { router.shutdown() }
     }
 

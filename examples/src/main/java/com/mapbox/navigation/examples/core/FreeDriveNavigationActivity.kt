@@ -165,7 +165,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             activityRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
         }
 
-        override fun onFailure(exception: java.lang.Exception) {
+        override fun onFailure(exception: Exception) {
             Timber.i(exception)
         }
     }

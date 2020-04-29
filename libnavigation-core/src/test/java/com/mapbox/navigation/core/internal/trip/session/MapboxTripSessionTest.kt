@@ -138,14 +138,31 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun stopSession() {
+    fun stopSessionCallsTripServiceStopService() {
+        tripSession.start()
+
+        tripSession.stop()
+
+        verify { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
+    }
+
+    @Test
+    fun stopSessionCallsLocationEngineRemoveLocationUpdates() {
         tripSession.start()
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
 
         tripSession.stop()
 
-        verify { tripService.stopService() }
         verify { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
+    }
+
+    @Test
+    fun stopSessionCallsMapboxNativeNavigatorReset() {
+        tripSession.start()
+
+        tripSession.stop()
+
+        verify { navigator.reset() }
     }
 
     @Test

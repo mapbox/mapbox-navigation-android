@@ -70,5 +70,5 @@ internal interface DirectionsSession {
     /**
      * Interrupts the route-fetching request
      */
-    fun shutdownSession()
+    fun shutdown()
 }
