@@ -38,6 +38,7 @@ import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.stops.ArrivalController
+import com.mapbox.navigation.core.stops.ArrivalObserver
 import com.mapbox.navigation.core.stops.ArrivalProgressObserver
 import com.mapbox.navigation.core.stops.AutoArrivalController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
@@ -459,9 +460,9 @@ constructor(
     /**
      * Attach your own controller to determine when drivers arrived at stops via [ArrivalController]
      * Use [navigateNextRouteLeg] to manually move navigator to the next stop. To reset to the
-     * automatic arrival controller, call attachArrivalController()
+     * automatic arrival controller, call [attachArrivalController].
      *
-     * @param arrivalController ArrivalObserver
+     * @param arrivalController [ArrivalController]
      */
     @JvmOverloads fun attachArrivalController(arrivalController: ArrivalController = AutoArrivalController()) {
         arrivalProgressObserver.attach(arrivalController)
@@ -477,9 +478,28 @@ constructor(
     }
 
     /**
+     * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
+     * of arrival at stops, see [attachArrivalController].
+     *
+     * @see [unregisterArrivalObserver]
+     */
+    fun registerArrivalObserver(arrivalObserver: ArrivalObserver) {
+        arrivalProgressObserver.registerObserver(arrivalObserver)
+    }
+
+    /**
+     * Unregisters [ArrivalObserver].
+     *
+     * @see [registerArrivalObserver]
+     */
+    fun unregisterArrivalObserver(arrivalObserver: ArrivalObserver) {
+        arrivalProgressObserver.unregisterObserver(arrivalObserver)
+    }
+
+    /**
      * After arriving at a stop, this can be used to manually decide when to start
      * navigating to the next stop. Use the [ArrivalController] to control when to
-     * call navigateNextRouteLeg.
+     * call [navigateNextRouteLeg].
      *
      * @return true if navigation to next stop could be started, false otherwise
      */

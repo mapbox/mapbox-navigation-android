@@ -117,7 +117,7 @@ interface MapboxNativeNavigator {
     ): String?
 
     /**
-     * Follows a new route and leg of the already loaded directions.
+     * Follows a new leg of the already loaded directions.
      * Returns an initialized navigation status if no errors occurred
      * otherwise, it returns an invalid navigation status state.
      *
