@@ -171,7 +171,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             .build()
         override fun arrivalOptions(): ArrivalOptions = arrivalOptions
 
-        override fun onStopArrival(routeLegProgress: RouteLegProgress): Boolean {
+        override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean {
             // This example shows you can use both time and distance.
             // Move to the next step when the distance is small
             Timber.i("arrival_debug legIndex=${routeLegProgress.legIndex()} distanceRemaining=${routeLegProgress.distanceRemaining()}")

@@ -17,11 +17,13 @@ import org.junit.Test
 internal class ArrivalProgressObserverTest {
 
     private val tripSession: TripSession = mockk()
+    private val arrivalObserver: ArrivalObserver = mockk()
     private val arrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
     @Before
     fun setup() {
         every { tripSession.getRouteProgress() } returns null
+        arrivalProgressObserver.registerObserver(arrivalObserver)
     }
 
     @Test
@@ -49,13 +51,13 @@ internal class ArrivalProgressObserverTest {
         val onStopArrivalCalls = slot<RouteLegProgress>()
         val onRouteArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onStopArrivalCalls)) } returns false
-            every { onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
             }
         }
+        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
@@ -79,13 +81,13 @@ internal class ArrivalProgressObserverTest {
         val onStopArrivalCalls = slot<RouteLegProgress>()
         val onRouteArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onStopArrivalCalls)) } returns false
-            every { onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
             }
         }
+        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
@@ -109,13 +111,13 @@ internal class ArrivalProgressObserverTest {
         val onStopArrivalCalls = slot<RouteLegProgress>()
         val onRouteArrivalCalls = mutableListOf<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onStopArrivalCalls)) } returns false
-            every { onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
             }
         }
+        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
         val routeProgress: RouteProgress = mockk {
             every { currentState() } returns RouteProgressState.ROUTE_ARRIVED
             every { route() } returns mockk {
@@ -135,13 +137,14 @@ internal class ArrivalProgressObserverTest {
 
         assertEquals(1, onRouteArrivalCalls.size)
         assertFalse(onStopArrivalCalls.isCaptured)
+        verify(exactly = 1) { arrivalObserver.onRouteArrival(any()) }
     }
 
     @Test
     fun `should notify observers with time option`() {
         val onArrivalCalls = slot<RouteLegProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns 5.0
                 every { arrivalInMeters } returns null
@@ -165,7 +168,7 @@ internal class ArrivalProgressObserverTest {
     fun `should notify observers with distance option`() {
         val onArrivalCalls = slot<RouteLegProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
@@ -182,13 +185,14 @@ internal class ArrivalProgressObserverTest {
         })
 
         assertEquals(onArrivalCalls.captured.distanceRemaining(), 8.0f, 0.001f)
+        verify(exactly = 0) { arrivalObserver.onRouteArrival(any()) }
     }
 
     @Test
     fun `should notify arrival if arrived on attach`() {
         val onArrivalCalls = slot<RouteLegProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns 5.0
                 every { arrivalInMeters } returns null
@@ -213,7 +217,7 @@ internal class ArrivalProgressObserverTest {
     fun `should not navigate to next stop before arrival`() {
         val onArrivalCalls = slot<RouteLegProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(capture(onArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInMeters } returns 10.0
                 every { arrivalInSeconds } returns 5.0
@@ -279,7 +283,7 @@ internal class ArrivalProgressObserverTest {
         }
         every { tripSession.getRouteProgress() } returns routeProgress
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(any()) } returns testNavigateNextRouteLeg
+            every { navigateNextRouteLeg(any()) } returns testNavigateNextRouteLeg
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns 0.0
                 every { arrivalInMeters } returns null
@@ -313,7 +317,7 @@ internal class ArrivalProgressObserverTest {
             }
         }
         val customArrivalController: ArrivalController = mockk {
-            every { onStopArrival(any()) } returns testNavigateNextRouteLeg
+            every { navigateNextRouteLeg(any()) } returns testNavigateNextRouteLeg
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns 0.0
                 every { arrivalInMeters } returns null
@@ -323,5 +327,51 @@ internal class ArrivalProgressObserverTest {
         arrivalProgressObserver.attach(customArrivalController)
 
         verify(exactly = 0) { tripSession.updateLegIndex(any()) }
+    }
+
+    @Test
+    fun `navigateNextRouteLeg should return true when route leg is updated`() {
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { currentState() } returns RouteProgressState.LOCATION_TRACKING
+            every { route() } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
+                every { routeIndex() } returns "0"
+                every { currentLegProgress() } returns mockk {
+                    every { legIndex() } returns 1
+                }
+            }
+        }
+        every { tripSession.updateLegIndex(2) } returns mockk {
+            every { legIndex } returns 2
+        }
+
+        val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
+
+        assertTrue(didNavigate)
+    }
+
+    @Test
+    fun `navigateNextRouteLeg should return false when route leg is not updated`() {
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { currentState() } returns RouteProgressState.LOCATION_TRACKING
+            every { route() } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
+                every { routeIndex() } returns "0"
+                every { currentLegProgress() } returns mockk {
+                    every { legIndex() } returns 2
+                }
+            }
+        }
+        every { tripSession.updateLegIndex(3) } returns mockk {
+            every { legIndex } returns 2
+        }
+
+        val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
+
+        assertFalse(didNavigate)
     }
 }
