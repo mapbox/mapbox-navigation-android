@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionActivityKt
+import com.mapbox.navigation.examples.ui.BuildingExtrusionActivity
 import com.mapbox.navigation.examples.ui.BuildingFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.CustomCameraActivity
 import com.mapbox.navigation.examples.ui.CustomPuckActivity
@@ -48,9 +48,9 @@ class UIActivity : AppCompatActivity() {
                     BuildingFootprintHighlightActivityKt::class.java
             ),
             SampleItem(
-                    getString(R.string.title_arrival_ui_building_extrusions_kotlin),
-                    getString(R.string.description_arrival_ui_building_extrusions_kotlin),
-                    ArrivalUiBuildingExtrusionActivityKt::class.java
+                    getString(R.string.title_ui_building_extrusions_kotlin),
+                    getString(R.string.description_ui_building_extrusions_kotlin),
+                    BuildingExtrusionActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_custom_puck_example),

@@ -3,10 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.ArrivalUiBuildingExtrusionActivityKt">
+    android:layout_height="match_parent">
 
-    <include layout="@layout/content_simple_mapbox_navigation" />
+    <com.mapbox.navigation.ui.NavigationView
+        android:id="@+id/navigationView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/adjust_building_extrusion_color_and_opacity_fab"
@@ -14,11 +16,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:visibility="invisible"
-        tools:visibility="visible"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="80dp"
-        app:srcCompat="@drawable/ic_refresh" />
+        android:layout_marginBottom="176dp"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_refresh"
+        tools:visibility="visible" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/adjust_building_extrusion_visibility_fab"
@@ -26,10 +27,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        tools:visibility="visible"
-        android:visibility="invisible"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="160dp"
-        app:srcCompat="@drawable/ic_dismiss" />
+        android:layout_marginBottom="96dp"
+        android:visibility="visible"
+        app:srcCompat="@drawable/ic_dismiss"
+        tools:visibility="visible" />
 
 </FrameLayout>

@@ -135,8 +135,8 @@
                 android:value=".UIActivity"/>
         </activity>
 
-        <activity android:name=".ui.ArrivalUiBuildingExtrusionActivityKt"
-            android:label="@string/title_arrival_ui_building_extrusions_kotlin"
+        <activity android:name=".ui.BuildingExtrusionActivity"
+            android:label="@string/title_ui_building_extrusions_kotlin"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
