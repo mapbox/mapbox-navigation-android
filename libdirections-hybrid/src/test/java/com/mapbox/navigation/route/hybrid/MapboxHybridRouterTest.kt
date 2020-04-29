@@ -190,8 +190,6 @@ class MapboxHybridRouterTest {
         } catch (ex: Exception) {
         }
 
-        every { context.unregisterReceiver(any()) } answers {}
-
         verify { context.unregisterReceiver(any()) }
     }
 
