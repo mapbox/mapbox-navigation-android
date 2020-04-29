@@ -150,7 +150,7 @@ internal class MapboxDirectionsSession(
     /**
      * Interrupt route-fetcher request
      */
-    override fun shutdownSession() {
+    override fun shutdown() {
         router.shutdown()
     }
 }

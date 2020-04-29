@@ -221,6 +221,13 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun onDestroyCallsTripSessionStop() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.stop() }
+    }
+
+    @Test
     fun unregisterAllBannerInstructionsObservers() {
         mapboxNavigation.onDestroy()
 

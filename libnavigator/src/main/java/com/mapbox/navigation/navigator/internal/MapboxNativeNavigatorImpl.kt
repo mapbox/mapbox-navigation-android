@@ -53,7 +53,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val TWO_LEGS: Short = 2
     private const val PRIMARY_ROUTE_INDEX = 0
 
-    private val navigator: Navigator = Navigator()
+    private var navigator: Navigator = Navigator()
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val mutex = Mutex()
@@ -323,6 +323,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
         navigator.getVoiceInstruction(index)
 
+    /**
+     * Reset resources.
+     */
+    override fun reset() {
+        navigator = Navigator()
+    }
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
      */

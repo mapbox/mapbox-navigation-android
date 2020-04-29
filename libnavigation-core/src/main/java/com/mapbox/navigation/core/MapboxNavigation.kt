@@ -302,7 +302,7 @@ constructor(
             Message("onDestroy")
         )
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
-        directionsSession.shutdownSession()
+        directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
         tripSession.stop()
         tripSession.unregisterAllLocationObservers()
