@@ -42,23 +42,23 @@ internal class MapRouteProgressChangeListener(
             routeLine.draw(currentRoute)
             routeArrow.addUpcomingManeuverArrow(routeProgress)
         } else {
-            if (job == null || !job!!.isActive && directionsRoute != null) {
+            if (job == null || !job!!.isActive && currentRoute != null && hasGeometry) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val totalDist =
                         (routeProgress.distanceRemaining() + routeProgress.distanceTraveled())
                     val dist = routeProgress.distanceTraveled() / totalDist
                     if (dist > 0) {
                         val deferredExpression = async(Dispatchers.Default) {
-                            val lineString: LineString =
-                                routeLine.getLineStringForRoute(directionsRoute!!)
+                            val lineString: LineString = routeLine.getLineStringForRoute(currentRoute!!)
                             buildRouteLineExpression(
-                                    directionsRoute,
+                                currentRoute,
                                 lineString,
                                 true,
                                 dist.toDouble(),
                                 routeLine::getRouteColorForCongestion
                             )
                         }
+                        routeArrow.addUpcomingManeuverArrow(routeProgress)
                         routeLine.hideShieldLineAtOffset(dist)
                         routeLine.decorateRouteLine(deferredExpression.await())
                     }

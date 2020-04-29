@@ -77,6 +77,7 @@ import static com.mapbox.navigation.ui.route.RouteConstants.OPAQUE;
 import static com.mapbox.navigation.ui.route.RouteConstants.THIRTY;
 import static com.mapbox.navigation.ui.route.RouteConstants.TRANSPARENT;
 import static com.mapbox.navigation.ui.route.RouteConstants.TWO_POINTS;
+import static com.mapbox.navigation.ui.utils.CompareUtils.areEqualContentsIgnoreOrder;
 
 class MapRouteArrow {
 
@@ -85,6 +86,7 @@ class MapRouteArrow {
   @ColorInt
   private final int arrowBorderColor;
 
+  private List<Point> maneuverPoints;
   private List<String> arrowLayerIds;
   private GeoJsonSource arrowShaftGeoJsonSource;
   private GeoJsonSource arrowHeadGeoJsonSource;
@@ -95,6 +97,7 @@ class MapRouteArrow {
   MapRouteArrow(MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, String aboveLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
+    this.maneuverPoints = new ArrayList<>();
 
     Context context = mapView.getContext();
     TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
@@ -120,9 +123,13 @@ class MapRouteArrow {
     }
     updateVisibilityTo(true);
 
-    List<Point> maneuverPoints = obtainArrowPointsFrom(routeProgress);
-    updateArrowShaftWith(maneuverPoints);
-    updateArrowHeadWith(maneuverPoints);
+    List<Point> newManeuverPoints = obtainArrowPointsFrom(routeProgress);
+    if (!areEqualContentsIgnoreOrder(maneuverPoints, newManeuverPoints)) {
+      maneuverPoints.clear();
+      maneuverPoints.addAll(newManeuverPoints);
+      updateArrowShaftWith(maneuverPoints);
+      updateArrowHeadWith(maneuverPoints);
+    }
   }
 
   void updateVisibilityTo(boolean visible) {
