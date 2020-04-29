@@ -19,7 +19,6 @@ import java.util.Date
 interface MapboxNativeNavigator {
 
     companion object {
-        private const val INDEX_FIRST_ROUTE = 0
         private const val INDEX_FIRST_LEG = 0
         private const val GRID_SIZE = 0.0025f
         private const val BUFFER_DILATION: Short = 1
@@ -69,7 +68,6 @@ interface MapboxNativeNavigator {
      * Otherwise, it returns a invalid route state.
      *
      * @param route [DirectionsRoute] to follow.
-     * @param routeIndex Which route to follow
      * @param legIndex Which leg to follow
      *
      * @return a [NavigationStatus] route state if no errors occurred.
@@ -77,7 +75,6 @@ interface MapboxNativeNavigator {
      */
     suspend fun setRoute(
         route: DirectionsRoute?,
-        routeIndex: Int = INDEX_FIRST_ROUTE,
         legIndex: Int = INDEX_FIRST_LEG
     ): NavigationStatus
 

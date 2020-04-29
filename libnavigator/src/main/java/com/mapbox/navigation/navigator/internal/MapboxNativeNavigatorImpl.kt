@@ -117,7 +117,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Otherwise, it returns a invalid route state.
      *
      * @param route [DirectionsRoute] to follow.
-     * @param routeIndex Which route to follow
      * @param legIndex Which leg to follow
      *
      * @return a [NavigationStatus] route state if no errors occurred.
@@ -125,12 +124,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun setRoute(
         route: DirectionsRoute?,
-        routeIndex: Int,
         legIndex: Int
     ): NavigationStatus {
         mutex.withLock {
             MapboxNativeNavigatorImpl.route = route
-            val result = navigator.setRoute(route?.toJson() ?: "{}", routeIndex, legIndex)
+            val result = navigator.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
             navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
             }

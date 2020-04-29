@@ -1,6 +1,5 @@
 package com.mapbox.navigation.utils.internal
 
-import com.mapbox.navigation.testing.MainCoroutineRule
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
@@ -10,16 +9,12 @@ import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
-import org.junit.Rule
 import org.junit.Test
 
 class ThreadControllerTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Test
-    fun jobCountValidationNonUIScope() = coroutineRule.runBlockingTest {
+    fun jobCountValidationNonUIScope() {
         val maxCoroutines = 10
         val maxDelay = 100L
         val jobControl = ThreadController.getIOScopeAndRootJob()
