@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
  * @param belowLayerId determines the elevation of the route layers
  * @param layerProvider provides the layer configurations for the route layers
  */
-class MapRouteLine(
+internal class MapRouteLine(
     private val context: Context,
     private val style: Style,
     @androidx.annotation.StyleRes styleRes: Int,
