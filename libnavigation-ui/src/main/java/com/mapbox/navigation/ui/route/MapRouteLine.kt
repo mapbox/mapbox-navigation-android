@@ -578,18 +578,16 @@ class MapRouteLine(
      * @param offset the offset of the visibility in the expression
      */
     fun hideShieldLineAtOffset(offset: Float) {
-        style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID)?.setProperties(
-            lineGradient(
-                Expression.step(
-                    Expression.lineProgress(),
-                    Expression.rgba(0, 0, 0, 0),
-                    Expression.stop(
-                        offset,
-                        Expression.color(routeShieldColor)
-                    )
-                )
+        val expression = Expression.step(
+            Expression.lineProgress(),
+            Expression.rgba(0, 0, 0, 0),
+            Expression.stop(
+                offset,
+                Expression.color(routeShieldColor)
             )
         )
+
+        style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID)?.setProperties(lineGradient(expression))
     }
 
     /**
@@ -730,11 +728,6 @@ class MapRouteLine(
             distFractionToVanish: Double,
             congestionColorProvider: (String, Boolean) -> Int
         ): Expression {
-            val vanishStep = Expression.stop(
-                distFractionToVanish,
-                Expression.rgba(0, 0, 0, 0)
-            )
-
             val scrubbedRouteLegs = route.legs()
                 ?.filter { it.annotation()?.congestion() != null }
 
@@ -748,11 +741,11 @@ class MapRouteLine(
                     congestionColorProvider
                 )
             }?.flatten() ?: listOf()
-            val allLineSteps = listOf(vanishStep).plus(stopExpressionsWithTraffic)
-            return Expression.interpolate(
-                Expression.linear(),
+
+            return Expression.step(
                 Expression.lineProgress(),
-                *allLineSteps.toTypedArray()
+                Expression.rgba(0, 0, 0, 0),
+                *stopExpressionsWithTraffic.toTypedArray()
             )
         }
 
@@ -803,6 +796,14 @@ class MapRouteLine(
                         continue
                     }
 
+                    if (expressionStops.isEmpty()) {
+                        val vanishStop = Expression.stop(
+                            distFractionToVanish,
+                            Expression.color(congestionColorProvider(congestionValue, isPrimary))
+                        )
+                        expressionStops.add(vanishStop)
+                    }
+
                     val routeColor = congestionColorProvider(congestionValue, isPrimary)
                     val stop = Expression.stop(
                         fractionalDist,
@@ -812,6 +813,15 @@ class MapRouteLine(
                     expressionStops.add(stop)
                 }
             }
+
+            if (expressionStops.isEmpty()) {
+                val vanishStop = Expression.stop(
+                    distFractionToVanish,
+                    Expression.color(congestionColorProvider(congestionValue, isPrimary))
+                )
+                expressionStops.add(vanishStop)
+            }
+
             return expressionStops
         }
 
