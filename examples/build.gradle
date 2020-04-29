@@ -97,6 +97,7 @@ dependencies {
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')
     implementation project(':libnavigation-ui')
+    implementation project(':libnavui-alert')
     implementation dependenciesList.mapboxCommon
     implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin
@@ -119,9 +120,9 @@ dependencies {
 
     // Support libraries
     implementation dependenciesList.androidXCore
-    implementation dependenciesList.supportDesign
-    implementation dependenciesList.supportAppcompatV7
-    implementation dependenciesList.supportConstraintLayout
+    implementation dependenciesList.materialDesign
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXConstraintLayout
 
     implementation dependenciesList.gmsLocation
 

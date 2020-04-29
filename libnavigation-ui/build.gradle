@@ -76,10 +76,10 @@ dependencies {
   implementation dependenciesList.mapboxAnnotationPlugin
 
   // Support libraries
-  implementation dependenciesList.supportDesign
-  implementation dependenciesList.supportRecyclerView
-  implementation dependenciesList.supportConstraintLayout
-  implementation dependenciesList.supportCardView
+  implementation dependenciesList.materialDesign
+  implementation dependenciesList.androidXRecyclerView
+  implementation dependenciesList.androidXConstraintLayout
+  implementation dependenciesList.androidXCardView
 
   // Architecture libraries
   implementation dependenciesList.lifecycleExtensions

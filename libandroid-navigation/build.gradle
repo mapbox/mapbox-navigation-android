@@ -63,7 +63,7 @@ dependencies {
   implementation dependenciesList.kotlinStdLib
 
   // Support
-  implementation dependenciesList.supportAppcompatV7
+  implementation dependenciesList.androidXAppCompat
 
   // Logging
   implementation dependenciesList.timber
