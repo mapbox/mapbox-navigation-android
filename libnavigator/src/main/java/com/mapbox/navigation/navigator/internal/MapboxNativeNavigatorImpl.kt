@@ -328,6 +328,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun reset() {
         navigator = Navigator()
+        route = null
+        routeBufferGeoJson = null
     }
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
