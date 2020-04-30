@@ -9,7 +9,6 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.libnavigation.ui.R
-import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
@@ -393,7 +392,7 @@ class MapRouteLineTest {
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer("3", style)
 
-        assertEquals(LocationComponentConstants.SHADOW_LAYER, result)
+        assertEquals(RouteConstants.DEFAULT_ROUTE_LINE_LAYER_BELOW_ID, result)
     }
 
     @Test

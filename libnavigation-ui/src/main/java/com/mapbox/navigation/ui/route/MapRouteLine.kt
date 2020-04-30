@@ -686,7 +686,7 @@ internal class MapRouteLine(
          * @return either the layer ID if found else a default layer ID
          */
         fun getBelowLayer(layerId: String?, style: Style): String =
-            style.layers.firstOrNull { it.id == layerId }?.id ?: LocationComponentConstants.SHADOW_LAYER
+            style.layers.firstOrNull { it.id == layerId }?.id ?: RouteConstants.DEFAULT_ROUTE_LINE_LAYER_BELOW_ID
 
         /**
          * Generates a FeatureCollection and LineString based on the @param route.

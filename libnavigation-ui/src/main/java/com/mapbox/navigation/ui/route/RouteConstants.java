@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.route;
 
 class RouteConstants {
+  static final String DEFAULT_ROUTE_LINE_LAYER_BELOW_ID = "road-label";
   static final String CONGESTION_KEY = "congestion";
   static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
