@@ -321,6 +321,88 @@ class ReplayHistoryPlayerTest {
         assertEquals(1580777614.085, events[1].eventTimestamp, 0.001)
     }
 
+    @Test
+    fun `playbackSpeed should play one event per second at 1_0 playbackSpeed`() = coroutineRule.runBlockingTest {
+        val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+
+        replayHistoryPlayer.playbackSpeed(1.0)
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+        advanceTimeMillis(3000)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        assertEquals(3, timeCapture.size)
+    }
+
+    @Test
+    fun `playbackSpeed should play four events per second at 4_0 playbackSpeed`() = coroutineRule.runBlockingTest {
+        val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+
+        replayHistoryPlayer.playbackSpeed(4.0)
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+        advanceTimeMillis(4000)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        assertEquals(16, timeCapture.size)
+    }
+
+    @Test
+    fun `playbackSpeed should play one event every four seconds at 0_25 playbackSpeed`() = coroutineRule.runBlockingTest {
+        val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+
+        replayHistoryPlayer.playbackSpeed(0.25)
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+        advanceTimeMillis(40000)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        assertEquals(10, timeCapture.size)
+    }
+
+    @Test
+    fun `playbackSpeed should update play speed while playing`() = coroutineRule.runBlockingTest {
+        val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+
+        replayHistoryPlayer.playbackSpeed(1.0)
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+        advanceTimeMillis(2000)
+        replayHistoryPlayer.playbackSpeed(3.0)
+        advanceTimeMillis(1999) // advance a fraction to remove the equal events
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        // 2 events over 2 seconds at 1x speed.
+        // 6 events over 2 seconds at 3x speed.
+        assertEquals(2 + 6, timeCapture.size)
+        timeCapture.slice(0..1).forEach { assertTrue(it.second < 2000) }
+        timeCapture.slice(2..7).forEach { assertTrue(it.second > 2000) }
+    }
+
     /**
      * Helpers for moving the simulation clock
      */
