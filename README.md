@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/flitsmeister/flitsmeister-navigation-android/blob/master/.github/splash-image.png" alt="Flitsmeister Navigation Android Splash">
+  <img src="https://github.com/flitsmeister/flitsmeister-navigation-android/blob/master/.github/splash-image-android.png" alt="Flitsmeister Navigation Android Splash">
 </div>
 <br>
 <p align="center">
