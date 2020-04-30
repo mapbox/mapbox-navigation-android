@@ -731,16 +731,22 @@ internal class MapRouteLine(
             val scrubbedRouteLegs = route.legs()
                 ?.filter { it.annotation()?.congestion() != null }
 
-            val stopExpressionsWithTraffic: List<Expression.Stop> = scrubbedRouteLegs?.map {
-                getStopsFromLeg(
-                    it,
+            val stopExpressionsWithTraffic: List<Expression.Stop> = when (scrubbedRouteLegs?.isEmpty()) {
+                false -> scrubbedRouteLegs.map {
+                    getStopsFromLeg(
+                        it,
+                        distFractionToVanish,
+                        routeLineString,
+                        route.distance() ?: 0.0,
+                        isPrimaryRoute,
+                        congestionColorProvider
+                    )
+                }.flatten()
+                else -> listOf(Expression.stop(
                     distFractionToVanish,
-                    routeLineString,
-                    route.distance() ?: 0.0,
-                    isPrimaryRoute,
-                    congestionColorProvider
-                )
-            }?.flatten() ?: listOf()
+                    Expression.color(congestionColorProvider("", isPrimaryRoute)
+                    )))
+            }
 
             return Expression.step(
                 Expression.lineProgress(),
