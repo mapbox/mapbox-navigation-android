@@ -425,7 +425,7 @@ class MapRouteLineTest {
 
     @Test
     fun buildRouteLineExpression() {
-        val expectedExpression = "[\"interpolate\", [\"linear\"], [\"line-progress\"], 0.2, [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.31436133, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.66388464, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.6948727, [\"rgba\", 0.0, 7.0, 255.0, 0.0]]"
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.31436133, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.66388464, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.6948727, [\"rgba\", 0.0, 7.0, 255.0, 0.0]]"
         val route = getDirectionsRoute()
         val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
 
@@ -451,7 +451,7 @@ class MapRouteLineTest {
             true
         ) { _, _ -> 1 }
 
-        assertEquals(3, result.size)
+        assertEquals(4, result.size)
     }
 
     @Test
