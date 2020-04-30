@@ -75,6 +75,20 @@ class ReplayHistoryPlayer(
     }
 
     /**
+     * This determines the speed of event playback. Default is 1.0 for 1x playback speed.
+     *
+     * For faster playback, use values greater than one such as 2x, 3x or even 4x.
+     * For slower playback, use values between 0 and 1; 0.25 will replay at 1/4th speed.
+     * To pause playback, use 0.0
+     *
+     * Negative (going backwards), is not yet supported. Use [seekTo] to go backwards.
+     */
+    fun playbackSpeed(scale: Double) {
+        check(scale >= 0.0) { "Negative playback is not supported: $scale" }
+        replayEventSimulator.playbackSpeed(scale)
+    }
+
+    /**
      * Seek to a time to play from.
      *
      * @param replayTime time in seconds between 0.0 to [replayDurationSeconds]

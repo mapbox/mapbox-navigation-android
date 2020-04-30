@@ -58,6 +58,7 @@
 
     <string name="title_replay_history_kotlin" translatable="false">ReplayHistoryActivity</string>
     <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
+    <string name="replay_history_player_playback_seekbar" translatable="false">Replay speed %d</string>
 
     <string name="title_reroute_view" translatable="false">RerouteActivity</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>

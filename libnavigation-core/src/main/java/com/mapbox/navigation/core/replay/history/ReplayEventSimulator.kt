@@ -32,14 +32,9 @@ internal class ReplayEventSimulator(
     // The pivot will move forward through the events with time.
     private var historyTimeOffset: Double = 0.0
     private var simulatorTimeOffset: Double = 0.0
+    private var simulatorTimeScale: Double = 1.0
 
     private var pivotIndex = 0
-
-    fun seekTo(indexOfEvent: Int) {
-        historyTimeOffset = replayEvents.events[indexOfEvent].eventTimestamp
-        pivotIndex = indexOfEvent
-        resetSimulatorClock()
-    }
 
     fun launchPlayLoop(lifecycleOwner: LifecycleOwner, replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
         logger.i(msg = Message("Replay started"))
@@ -69,6 +64,17 @@ internal class ReplayEventSimulator(
 
     fun stopPlaying() {
         jobControl.job.cancelChildren()
+    }
+
+    fun seekTo(indexOfEvent: Int) {
+        historyTimeOffset = replayEvents.events[indexOfEvent].eventTimestamp
+        pivotIndex = indexOfEvent
+        resetSimulatorClock()
+    }
+
+    fun playbackSpeed(scale: Double) {
+        simulatorTimeScale = scale
+        resetSimulatorClock()
     }
 
     private fun resetSimulatorClock() {
@@ -104,6 +110,11 @@ internal class ReplayEventSimulator(
         return pivotIndex >= replayEvents.events.size
     }
 
+    private fun timeSeconds(): Double {
+        val elapsedNanos = SystemClock.elapsedRealtimeNanos().toDouble() * NANOS_PER_SECOND
+        return elapsedNanos * simulatorTimeScale
+    }
+
     companion object {
 
         // The frequency that replay updates will be broad-casted
@@ -111,6 +122,5 @@ internal class ReplayEventSimulator(
 
         private const val MILLIS_PER_SECOND = 1000
         private const val NANOS_PER_SECOND = 1e-9
-        private fun timeSeconds(): Double = SystemClock.elapsedRealtimeNanos().toDouble() * NANOS_PER_SECOND
     }
 }

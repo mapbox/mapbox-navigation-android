@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
@@ -137,6 +138,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
      * After the map, style, and replay history is all loaded. Connect the view.
      */
     private fun ReplayNavigationContext.onNavigationReady() {
+        setupReplayControls()
+
         navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
 
         replayHistoryPlayer.playFirstLocation()
@@ -160,6 +163,21 @@ class ReplayHistoryActivity : AppCompatActivity() {
         playReplay.setOnClickListener {
             replayHistoryPlayer.play(this@ReplayHistoryActivity)
         }
+    }
+
+    private fun ReplayNavigationContext.setupReplayControls() {
+        seekBar.max = 8
+        seekBar.progress = 1
+        seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, seekBar.progress)
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                replayHistoryPlayer.playbackSpeed(progress.toDouble())
+                seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, progress)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar) { }
+        })
     }
 
     private fun ReplayNavigationContext.selectMapLocation(latLng: LatLng) {
