@@ -1,17 +1,23 @@
 package com.mapbox.navigation.examples.activity
 
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.IdlingResource
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.core.TripServiceActivityKt
+import com.mapbox.navigation.examples.util.OnMapReadyIdlingResource
 import com.mapbox.navigation.testing.ui.NotificationTestRule
 import com.schibsted.spain.barista.assertion.BaristaEnabledAssertions.assertEnabled
 import com.schibsted.spain.barista.assertion.BaristaVisibilityAssertions.assertContains
 import com.schibsted.spain.barista.assertion.BaristaVisibilityAssertions.assertDisplayed
 import com.schibsted.spain.barista.interaction.BaristaClickInteractions.clickOn
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -19,17 +25,22 @@ import org.junit.runner.RunWith
 class TripServiceActivityKtTest :
     NotificationTestRule<TripServiceActivityKt>(TripServiceActivityKt::class.java) {
 
-    companion object {
-        /**
-         * The target app package.
-         */
-        private val TARGET_PACKAGE: String =
-            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().context.packageName
+    lateinit var mapIdlingResource: IdlingResource
+
+    @Before
+    fun setup() {
+        mapIdlingResource = OnMapReadyIdlingResource(activity)
+        IdlingRegistry.getInstance().register(mapIdlingResource)
+        Espresso.onIdle()
+    }
+
+    @After
+    fun shutdown() {
+        IdlingRegistry.getInstance().unregister(mapIdlingResource)
     }
 
     @Test
     fun checkStartButtonAccessible() {
-        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             assertDisplayed(it)
             assertEnabled(it)
@@ -39,17 +50,14 @@ class TripServiceActivityKtTest :
 
     @Test
     fun checkNotificationViewContent() {
-        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertContains(it, "")
         }
 
-        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             clickOn(it)
         }
 
-        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertDisplayed(it)
             assertContains(it, "Time elapsed: + ")
@@ -58,12 +66,10 @@ class TripServiceActivityKtTest :
 
     @Test
     fun checkNotificationContent() {
-        awaitForView("toggleNotification")
         R.id.toggleNotification.let {
             clickOn(it)
         }
 
-        awaitForView("notifyTextView")
         R.id.notifyTextView.let {
             assertDisplayed(it)
             assertContains(it, "Time elapsed: + ")
@@ -71,8 +77,6 @@ class TripServiceActivityKtTest :
 
         uiDevice.run {
             openNotification()
-            awaitForView("etaContent")
-            awaitForView("freeDriveText")
             val etaContent = By.res("com.mapbox.navigation.examples:id/etaContent")
             val freeDriveText = By.res("com.mapbox.navigation.examples:id/freeDriveText")
             wait(Until.hasObject(etaContent), 1000)
@@ -82,9 +86,5 @@ class TripServiceActivityKtTest :
             assertTrue(hasObject(freeDriveText))
             pressBack()
         }
-    }
-
-    private inline fun awaitForView(resName: String, timeout: Long = 1000) {
-        uiDevice.wait(Until.hasObject(By.res(TARGET_PACKAGE, resName)), timeout)
     }
 }
