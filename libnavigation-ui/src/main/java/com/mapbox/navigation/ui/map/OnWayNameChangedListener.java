@@ -8,8 +8,9 @@ import com.mapbox.navigation.ui.NavigationView;
  * A listener that can be added to the {@link NavigationMapboxMap} with
  * {@link NavigationMapboxMap#addOnWayNameChangedListener(OnWayNameChangedListener)}.
  * <p>
- * This listener is triggered when a new way name is found along the route.  It will be triggered
- * regardless of the map way name visibility
+ * This listener is triggered when a new way name is found along the route and it only triggers
+ * after {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)} fires. This listener
+ * will be triggered regardless of the map way name visibility.
  * ({@link NavigationView#setWayNameActive(boolean)}).
  * This is so you can hide our implementation of the way name UI and update your own if you'd like.
  */
