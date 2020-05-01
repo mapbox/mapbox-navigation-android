@@ -548,7 +548,6 @@ public class NavigationMapboxMap {
    */
   public void onStart() {
     mapCamera.onStart();
-    mapRoute.onStart();
     handleWayNameOnStart();
     handleFpsOnStart();
     locationFpsDelegate.onStart();
@@ -568,7 +567,6 @@ public class NavigationMapboxMap {
    */
   public void onStop() {
     mapCamera.onStop();
-    mapRoute.onStop();
     handleWayNameOnStop();
     handleFpsOnStop();
     locationFpsDelegate.onStop();
