@@ -33,6 +33,7 @@ dependencies {
     // Mapbox dependencies
     implementation project(':libnavui-base')
     implementation project(':libnavui-util')
+    implementation dependenciesList.mapboxMapCarbon
 
     // Android dependencies
     implementation dependenciesList.androidXCore
