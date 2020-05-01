@@ -127,8 +127,8 @@
                 android:value=".UIActivity"/>
         </activity>
 
-        <activity android:name=".ui.ArrivalUiFootprintHighlightActivityKt"
-            android:label="@string/title_final_destination_building_highlight_kotlin"
+        <activity android:name=".ui.BuildingFootprintHighlightActivityKt"
+            android:label="@string/title_building_highlight_kotlin"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
