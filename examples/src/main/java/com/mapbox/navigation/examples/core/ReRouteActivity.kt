@@ -64,6 +64,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
                     navigationMapboxMap?.removeRoute()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
@@ -123,7 +124,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         initListeners()
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-                .show()
+            .show()
     }
 
     override fun onStart() {
@@ -176,11 +177,11 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
                     RouteOptions.builder().applyDefaultParams()
-                            .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                            .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                            .alternatives(true)
-                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                            .build(),
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .build(),
                     routesReqCallback
                 )
             }
@@ -191,8 +192,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
@@ -219,6 +219,20 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun stopLocationUpdates() {
         mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 
     private class MyLocationEngineCallback(activity: ReRouteActivity) :

@@ -132,6 +132,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
                 TripSessionState.STOPPED -> {
                     instructionView.visibility = View.GONE
                     startNavigation.visibility = View.VISIBLE
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
@@ -146,8 +147,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             mapboxNavigation.startTripSession()
             mapboxNavigation.getRoutes().let { routes ->
                 if (routes.isNotEmpty()) {
@@ -198,5 +198,19 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
         mapView.onDestroy()
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 }

@@ -171,8 +171,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
@@ -221,6 +220,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
                     navigationMapboxMap?.removeRoute()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
@@ -290,5 +290,19 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         )
 
         snackbar.show()
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 }

@@ -104,6 +104,8 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     startLocationUpdates()
                     mapboxNavigation.detachFasterRouteObserver()
                     mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+                    navigationMapboxMap?.removeRoute()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
@@ -227,8 +229,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = MAX_PROGRESS.toInt()
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation)
             if (mapboxNavigation.getRoutes().isNotEmpty()) {
                 navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
@@ -270,6 +271,20 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
         } catch (exception: SecurityException) {
             Timber.e(exception)
+        }
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
         }
     }
 

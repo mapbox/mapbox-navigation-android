@@ -26,6 +26,8 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
 import com.mapbox.navigation.core.replay.history.ReplayRouteMapper
+import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -65,11 +67,14 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
-        )
+        ).apply {
+            registerTripSessionStateObserver(tripSessionStateObserver)
+        }
+
         initListeners()
         mapView.getMapAsync(this)
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-                .show()
+            .show()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -135,8 +140,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
@@ -172,6 +176,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         replayHistoryPlayer.finish()
+        mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
@@ -180,6 +185,20 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 
     private class FirstLocationCallback(activity: ReplayActivity) :
@@ -194,6 +213,15 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun onFailure(exception: Exception) {
+        }
+    }
+
+    private val tripSessionStateObserver = object : TripSessionStateObserver {
+        override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+            if (tripSessionState == TripSessionState.STOPPED) {
+                navigationMapboxMap?.removeRoute()
+                updateCameraOnNavigationStateChange(false)
+            }
         }
     }
 }
