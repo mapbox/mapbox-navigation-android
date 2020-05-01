@@ -6,9 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StyleRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -146,6 +146,14 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(this.routeLine, routeArrow);
     initializeDidFinishLoadingStyleListener();
     addListeners();
+    registerLifecycleObserver();
+  }
+
+  private void registerLifecycleObserver() {
+    final Context context = mapView.getContext();
+    if (context instanceof LifecycleOwner) {
+      ((LifecycleOwner)context).getLifecycle().addObserver(this);
+    }
   }
 
   // For testing only
@@ -307,9 +315,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link AppCompatActivity#onStart()} or
-   * {@link androidx.fragment.app.Fragment#onStart()} to handle adding and removing of listeners,
-   * preventing memory leaks.
+   * Called during the onStart event of the Lifecycle owner to initialize resources.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
@@ -317,9 +323,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method should be added in your {@link AppCompatActivity#onStop()} or
-   * {@link androidx.fragment.app.Fragment#onStop()}
-   * to handle adding and removing of listeners, preventing memory leaks.
+   * Called during the onStop event of the Lifecycle owner to clean up resources.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {

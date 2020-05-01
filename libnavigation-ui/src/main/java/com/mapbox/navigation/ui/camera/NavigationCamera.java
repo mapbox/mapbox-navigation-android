@@ -6,9 +6,6 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -52,7 +49,7 @@ import static com.mapbox.navigation.ui.legacy.NavigationConstants.NAVIGATION_MIN
  *
  * @since 0.6.0
  */
-public class NavigationCamera implements LifecycleObserver {
+public class NavigationCamera {
 
   /**
    * Camera tracks the user location, with bearing provided by the location update.
@@ -304,7 +301,6 @@ public class NavigationCamera implements LifecycleObserver {
    * and {@link LocationObserver}
    * for the camera and prevent any leaks or further updates.
    */
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
     if (navigation != null) {
       navigation.registerRouteProgressObserver(routeProgressObserver);
@@ -317,7 +313,6 @@ public class NavigationCamera implements LifecycleObserver {
    * {@link RouteProgressObserver} and {@link LocationObserver}
    * for the camera and prevent any leaks or further updates.
    */
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(routeProgressObserver);
