@@ -36,22 +36,16 @@ internal class ReplayEventSimulator(
 
     private var pivotIndex = 0
 
-    fun launchPlayLoop(lifecycleOwner: LifecycleOwner, replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
+    fun launchSimulator(lifecycleOwner: LifecycleOwner, replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
         logger.i(msg = Message("Replay started"))
         resetSimulatorClock()
         return jobControl.scope.launch {
             while (isActive && isSimulating(lifecycleOwner)) {
-                val loopStart = timeSeconds()
-
-                val replayEvents = movePivot(loopStart)
-                if (replayEvents.isNotEmpty()) {
-                    replayEventsCallback(replayEvents)
+                if (isDonePlayingEvents()) {
+                    delay(IS_DONE_PLAYING_EVENTS_DELAY_MILLIS)
+                } else {
+                    simulateEvents(replayEventsCallback)
                 }
-
-                val loopElapsedSeconds = timeSeconds() - loopStart
-                val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
-                val delayMillis = max(0L, replayUpdateSpeedMillis - loopElapsedMillis)
-                delay(delayMillis)
             }
 
             if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
@@ -60,6 +54,20 @@ internal class ReplayEventSimulator(
 
             logger.i(msg = Message("Replay ended"))
         }
+    }
+
+    private suspend fun simulateEvents(replayEventsCallback: (List<ReplayEventBase>) -> Unit) {
+        val loopStart = timeSeconds()
+
+        val replayEvents = movePivot(loopStart)
+        if (replayEvents.isNotEmpty()) {
+            replayEventsCallback(replayEvents)
+        }
+
+        val loopElapsedSeconds = timeSeconds() - loopStart
+        val loopElapsedMillis = (loopElapsedSeconds * MILLIS_PER_SECOND).roundToLong()
+        val delayMillis = max(0L, REPLAY_UPDATE_SPEED_MILLIS - loopElapsedMillis)
+        delay(delayMillis)
     }
 
     fun stopPlaying() {
@@ -79,7 +87,11 @@ internal class ReplayEventSimulator(
 
     private fun resetSimulatorClock() {
         simulatorTimeOffset = timeSeconds()
-        historyTimeOffset = replayEvents.events[pivotIndex].eventTimestamp
+        historyTimeOffset = if (isDonePlayingEvents()) {
+            replayEvents.events.last().eventTimestamp
+        } else {
+            replayEvents.events[pivotIndex].eventTimestamp
+        }
     }
 
     private fun movePivot(timeSeconds: Double): List<ReplayEventBase> {
@@ -102,11 +114,10 @@ internal class ReplayEventSimulator(
     }
 
     private fun isSimulating(lifecycleOwner: LifecycleOwner): Boolean {
-        return lifecycleOwner.lifecycle.currentState != Lifecycle.State.DESTROYED &&
-            !isComplete()
+        return lifecycleOwner.lifecycle.currentState != Lifecycle.State.DESTROYED
     }
 
-    private fun isComplete(): Boolean {
+    private fun isDonePlayingEvents(): Boolean {
         return pivotIndex >= replayEvents.events.size
     }
 
@@ -118,7 +129,10 @@ internal class ReplayEventSimulator(
     companion object {
 
         // The frequency that replay updates will be broad-casted
-        private const val replayUpdateSpeedMillis = 100L
+        private const val REPLAY_UPDATE_SPEED_MILLIS = 100L
+
+        // When there are no events to play, delay the coroutine
+        private const val IS_DONE_PLAYING_EVENTS_DELAY_MILLIS = 1000L
 
         private const val MILLIS_PER_SECOND = 1000
         private const val NANOS_PER_SECOND = 1e-9

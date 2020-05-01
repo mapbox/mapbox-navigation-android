@@ -122,6 +122,31 @@ class ReplayHistoryPlayerTest {
     }
 
     @Test
+    fun `should resume playing after completing events`() = coroutineRule.runBlockingTest {
+        val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        advanceTimeMillis(20000)
+        val extraEvents = List(7) { ReplayEventGetStatus(it.toDouble()) }
+        replayHistoryPlayer.pushEvents(extraEvents)
+        advanceTimeMillis(20000)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        // 12 events at the beginning
+        // 7 events later
+        assertEquals(12 + 7, timeCapture.size)
+        timeCapture.slice(0..11).forEach { assertTrue(it.second < 20000) }
+        timeCapture.slice(12..18).forEach { assertTrue(it.second > 20000) }
+    }
+
+    @Test
     fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
         val replayHistoryPlayer = ReplayHistoryPlayer(logger)
             .pushEvents(listOf(
@@ -401,6 +426,27 @@ class ReplayHistoryPlayerTest {
         assertEquals(2 + 6, timeCapture.size)
         timeCapture.slice(0..1).forEach { assertTrue(it.second < 2000) }
         timeCapture.slice(2..7).forEach { assertTrue(it.second > 2000) }
+    }
+
+    @Test
+    fun `playbackSpeed should not crash when events are completed`() = coroutineRule.runBlockingTest {
+        val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
+        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+            .pushEvents(testEvents)
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        replayHistoryPlayer.observeReplayEvents { replayEvents ->
+            replayEvents.forEach { timeCapture.add(Pair(it, currentTime)) }
+        }
+
+        val job = replayHistoryPlayer.play(lifecycleOwner)
+        advanceTimeMillis(20000)
+        replayHistoryPlayer.playbackSpeed(3.0)
+        advanceTimeMillis(20000)
+        replayHistoryPlayer.finish()
+        job.cancelAndJoin()
+
+        // 12 events at the beginning
+        assertEquals(12, timeCapture.size)
     }
 
     /**
