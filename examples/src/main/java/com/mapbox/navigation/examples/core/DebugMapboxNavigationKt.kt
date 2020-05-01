@@ -229,6 +229,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     @SuppressLint("MissingPermission")
     private fun initViews() {
         startNavigation.setOnClickListener {
+            updateCameraOnNavigationStateChange(true)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.getRoutes()
@@ -340,14 +341,13 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
                     startNavigation.visibility = VISIBLE
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
     }
 
     private fun initDynamicCamera(route: DirectionsRoute) {
-        navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-        navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
         navigationMapboxMap.startCamera(route)
     }
 
@@ -461,5 +461,21 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
                 .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        if (::navigationMapboxMap.isInitialized) {
+            navigationMapboxMap.apply {
+                if (navigationStarted) {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                    updateLocationLayerRenderMode(RenderMode.GPS)
+                } else {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                    updateLocationLayerRenderMode(RenderMode.COMPASS)
+                }
+            }
+        }
     }
 }

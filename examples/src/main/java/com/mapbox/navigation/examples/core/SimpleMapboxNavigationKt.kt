@@ -11,9 +11,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -115,10 +115,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 if (::originalRoute.isInitialized) {
                     val routes = mapboxNavigation.getRoutes()
                     if (routes.isNotEmpty()) {
-                        mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                            removeAt(0)
-                            add(0, originalRoute)
-                        })
+                        mapboxNavigation.setRoutes(
+                            mapboxNavigation.getRoutes().toMutableList().apply {
+                                removeAt(0)
+                                add(0, originalRoute)
+                            })
                     } else {
                         mapboxNavigation.setRoutes(listOf(originalRoute))
                     }
@@ -215,8 +216,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 replayRouteLocationEngine.assign(route)
             }
         }
-        Snackbar.make(findViewById(R.id.container), getString(R.string.msg_long_press_map_to_place_waypoint),
-                LENGTH_SHORT).show()
+        Snackbar.make(
+            findViewById(R.id.container), getString(R.string.msg_long_press_map_to_place_waypoint),
+            LENGTH_SHORT
+        ).show()
         initializeSpeechPlayer()
     }
 
@@ -235,6 +238,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
+            updateCameraOnNavigationStateChange(true)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.getRoutes()
@@ -336,7 +340,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
+        override fun onFasterRoute(
+            currentRoute: DirectionsRoute,
+            alternativeRoute: DirectionsRoute,
+            isAlternativeFaster: Boolean
+        ) {
             if (isAlternativeFaster) {
                 this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
                 fasterRouteSelectionTimer.start()
@@ -374,14 +382,29 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
                     startNavigation.visibility = VISIBLE
+                    updateCameraOnNavigationStateChange(false)
+                }
+            }
+        }
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        if (::navigationMapboxMap.isInitialized) {
+            navigationMapboxMap.apply {
+                if (navigationStarted) {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                    updateLocationLayerRenderMode(RenderMode.GPS)
+                } else {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                    updateLocationLayerRenderMode(RenderMode.COMPASS)
                 }
             }
         }
     }
 
     private fun initDynamicCamera(route: DirectionsRoute) {
-        navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-        navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
         navigationMapboxMap.startCamera(route)
     }
 
@@ -423,7 +446,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
-        if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+        if (mapboxNavigation.getRoutes()
+                .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
+        ) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
             mapboxNavigation.unregisterVoiceInstructionsObserver(this)

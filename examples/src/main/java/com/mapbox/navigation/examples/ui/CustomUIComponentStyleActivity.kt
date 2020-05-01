@@ -230,6 +230,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @Suppress("DEPRECATION")
     @SuppressLint("MissingPermission")
     private fun initViews() {
         startNavigation.apply {
@@ -240,8 +241,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 if (mapboxNavigation.getRoutes().isNotEmpty()) {
                     replayRouteLocationEngine.assign(mapboxNavigation.getRoutes()[0])
 
-                    navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-                    navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                    updateCameraOnNavigationStateChange(true)
                     navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
 
                     mapboxNavigation.startTripSession()
@@ -425,6 +425,22 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             cameraMode == CameraMode.TRACKING_GPS_NORTH
     }
 
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        if (::navigationMapboxMap.isInitialized) {
+            navigationMapboxMap.apply {
+                if (navigationStarted) {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                    updateLocationLayerRenderMode(RenderMode.GPS)
+                } else {
+                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                    updateLocationLayerRenderMode(RenderMode.COMPASS)
+                }
+            }
+        }
+    }
+
     // Callbacks and Observers
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
@@ -487,6 +503,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                         navigationMapboxMap.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
                         navigationMapboxMap.updateWaynameQueryMap(false)
                     }
+
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }

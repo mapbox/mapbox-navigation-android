@@ -95,8 +95,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
@@ -155,6 +154,20 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         mapInstanceState = savedInstanceState?.getParcelable(MAP_INSTANCE_STATE_KEY)
     }
 
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
+    }
+
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
     private class MyLocationEngineCallback(activity: FreeDriveNavigationActivity) : LocationEngineCallback<LocationEngineResult> {
@@ -206,7 +219,9 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                     stopLocationUpdates()
                 }
                 TripSessionState.STOPPED -> {
+                    startNavigation.visibility = View.VISIBLE
                     startLocationUpdates()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }

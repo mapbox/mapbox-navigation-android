@@ -129,7 +129,8 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
 
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            LocationEngineProvider.getBestLocationEngine(this)
+                .getLastLocation(locationListenerCallback)
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -181,8 +182,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             navigationMapboxMap?.addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
@@ -206,8 +206,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
         cancelBtn.setOnClickListener {
             mapboxNavigation?.stopTripSession()
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.NORMAL)
+            updateCameraOnNavigationStateChange(false)
         }
     }
 
@@ -231,6 +230,20 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
             cameraMode == CameraMode.TRACKING_COMPASS ||
             cameraMode == CameraMode.TRACKING_GPS ||
             cameraMode == CameraMode.TRACKING_GPS_NORTH
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 
     // Callbacks and Observers
@@ -262,6 +275,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
                     navigationMapboxMap?.removeRoute()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }

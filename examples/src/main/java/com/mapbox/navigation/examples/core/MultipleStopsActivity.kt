@@ -7,10 +7,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -29,6 +27,8 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.stops.ArrivalController
 import com.mapbox.navigation.core.stops.ArrivalOptions
+import com.mapbox.navigation.core.trip.session.TripSessionState
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -44,13 +44,7 @@ import timber.log.Timber
  */
 class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    companion object {
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
-        const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
-    }
-
     private var mapboxMap: MapboxMap? = null
-    private var locationEngine: LocationEngine? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
@@ -73,7 +67,9 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             locationEngine = replayRouteLocationEngine
-        )
+        ).apply {
+            registerTripSessionStateObserver(tripSessionStateObserver)
+        }
         initListeners()
         mapView.getMapAsync(this)
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
@@ -88,7 +84,10 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
-            initLocationEngine()
+
+            // Center the map at current location. Using LocationEngineProvider because the
+            // replay engine won't have your last location.
+            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             stopsController.add(latLng)
@@ -110,23 +109,6 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .build(),
             routesReqCallback
         )
-    }
-
-    private fun initLocationEngine() {
-        val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                .build()
-
-        locationEngine?.requestLocationUpdates(
-            requestLocationUpdateRequest,
-            locationListenerCallback,
-            mainLooper
-        )
-        // Center the map at current location. Using LocationEngineProvider because the
-        // replay engine won't have your last location.
-        LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
     }
 
     private val routesReqCallback = object : RoutesRequestCallback {
@@ -154,8 +136,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
     fun initListeners() {
         mapboxNavigation?.attachArrivalController(arrivalObserver)
         startNavigation.setOnClickListener {
-            navigationMapboxMap?.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-            navigationMapboxMap?.updateLocationLayerRenderMode(RenderMode.GPS)
+            updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
@@ -197,13 +178,13 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
         navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
@@ -231,8 +212,28 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+    private val tripSessionStateObserver = object : TripSessionStateObserver {
+        override fun onSessionStateChanged(tripSessionState: TripSessionState) {
+            if (tripSessionState == TripSessionState.STOPPED) {
+                stopsController.clear()
+                navigationMapboxMap?.removeRoute()
+                updateCameraOnNavigationStateChange(false)
+            }
+        }
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 }
 
@@ -241,6 +242,10 @@ private class StopsController {
 
     fun add(latLng: LatLng) {
         stops.add(latLng.toPoint())
+    }
+
+    fun clear() {
+        stops.clear()
     }
 
     fun coordinates(originLocation: Location): List<Point> {
