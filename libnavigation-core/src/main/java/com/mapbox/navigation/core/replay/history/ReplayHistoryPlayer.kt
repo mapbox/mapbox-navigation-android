@@ -53,7 +53,7 @@ class ReplayHistoryPlayer(
      * [observeReplayEvents]
      */
     fun play(lifecycleOwner: LifecycleOwner): Job {
-        return replayEventSimulator.launchPlayLoop(lifecycleOwner) { replayEvents ->
+        return replayEventSimulator.launchSimulator(lifecycleOwner) { replayEvents ->
             replayEventsListeners.forEach { it(replayEvents) }
         }
     }
