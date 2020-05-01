@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.base.common.logger.Logger
 import io.mockk.mockk
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReplayHistoryMapperTest {
@@ -20,7 +20,7 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents.size, 2)
+        assertEquals(2, historyEvents.size)
     }
 
     @Test
@@ -29,7 +29,7 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents[0].eventTimestamp, 1580744198.879556)
+        assertEquals(1580744198.879556, historyEvents[0].eventTimestamp, 0.000001)
         assertTrue(historyEvents[0] is ReplayEventGetStatus)
     }
 
@@ -39,16 +39,16 @@ class ReplayHistoryMapperTest {
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
-        assertEquals(historyEvents[1].eventTimestamp, 1580744199.407049)
+        assertEquals(1580744199.407049, historyEvents[1].eventTimestamp, 0.000001)
         (historyEvents[1] as ReplayEventUpdateLocation).location.let {
-            assertEquals(it.lat, 50.1232182)
-            assertEquals(it.lon, 8.6343946)
-            assertEquals(it.time, 1580744199.406)
-            assertEquals(it.speed, 0.02246818132698536)
-            assertEquals(it.bearing, 33.55318069458008)
-            assertEquals(it.altitude, 162.8000030517578)
-            assertEquals(it.accuracyHorizontal, 14.710000038146973)
-            assertEquals(it.provider, "fused")
+            assertEquals(50.1232182, it.lat, 0.00000001)
+            assertEquals(8.6343946, it.lon, 0.00000001)
+            assertEquals(1580744199.406, it.time)
+            assertEquals(0.02246818132698536, it.speed)
+            assertEquals(33.55318069458008, it.bearing)
+            assertEquals(162.8000030517578, it.altitude)
+            assertEquals(14.710000038146973, it.accuracyHorizontal)
+            assertEquals("fused", it.provider)
         }
     }
 
@@ -57,7 +57,7 @@ class ReplayHistoryMapperTest {
         val historyString = """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0},{"type":"getStatus","timestamp":1580744213.506,"event_timestamp":1580744212.006626,"delta_ms":0},{"type":"end_transit","properties":1580744212.223,"event_timestamp":1580744212.223644}],"version":"6.2.1","history_version":"1.0.0"}"""
         val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper(), logger = logger)
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
-        assertEquals(historyEvents.size, 4)
+        assertEquals(4, historyEvents.size)
     }
 
     @Test
@@ -65,7 +65,7 @@ class ReplayHistoryMapperTest {
         val historyString = """{"events":[{"type":"getStatus","timestamp":1551460823.922}],"version":"5.0.0","history_version":"1.0.0"}"""
         val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper(), logger = logger)
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
-        assertEquals(historyEvents.size, 1)
+        assertEquals(1, historyEvents.size)
     }
 
     private data class ExampleEndTransitEvent(

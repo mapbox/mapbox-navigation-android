@@ -37,7 +37,7 @@ internal class ArrivalProgressObserver(
         val nextLegIndex = legIndex + 1
         val nextLegStarted = if (nextLegIndex < numberOfLegs) {
             val navigationStatus = tripSession.updateLegIndex(nextLegIndex)
-            return nextLegIndex == navigationStatus.legIndex
+            nextLegIndex == navigationStatus.legIndex
         } else {
             false
         }
