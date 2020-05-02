@@ -54,6 +54,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapboxNavigation navigation;
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
+  private Boolean vanishRouteLineEnabled;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -135,6 +136,24 @@ public class NavigationMapRoute implements LifecycleObserver {
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
                             @Nullable String belowLayer) {
+    this(navigation, mapView, mapboxMap, styleRes, belowLayer, false);
+  }
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
+   *                   your route won't consider rerouting during a navigation session.
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
+   * @param styleRes   a style resource with custom route colors, scale, etc.
+   * @param belowLayer optionally pass in a layer id to place the route line below
+   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+   */
+  public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
+                            @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+                            @Nullable String belowLayer, Boolean vanishRouteLineEnabled) {
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
@@ -143,7 +162,10 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
     this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
-    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(this.routeLine, routeArrow);
+    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(
+            this.routeLine,
+            routeArrow, vanishRouteLineEnabled
+    );
     initializeDidFinishLoadingStyleListener();
     addListeners();
     registerLifecycleObserver();
@@ -417,7 +439,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
-    mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
+    mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow, vanishRouteLineEnabled);
     if (navigation != null) {
       navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }

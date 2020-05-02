@@ -127,10 +127,10 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
-        }
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
 
-        LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+        }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
             destination = latLng

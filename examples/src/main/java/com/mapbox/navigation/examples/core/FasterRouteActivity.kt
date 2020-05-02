@@ -203,7 +203,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->

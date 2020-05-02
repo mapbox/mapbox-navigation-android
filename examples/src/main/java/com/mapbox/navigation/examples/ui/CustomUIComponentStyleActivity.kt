@@ -189,7 +189,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap).apply {
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true).apply {
                 addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))

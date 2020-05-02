@@ -11,10 +11,32 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
+/**
+ * Upon receiving route progress events draws and/or updates the line on the map representing the
+ * route as well as arrow(s) representing the next maneuver.
+ *
+ * @param routeLine the route to represent on the map
+ * @param routeArrow the arrow representing the next maneuver
+ * @param vanishRouteLineEnabled determines if the route line will vanish behind the puck as the
+ * route progresses
+ */
 internal class MapRouteProgressChangeListener(
     private val routeLine: MapRouteLine,
-    private val routeArrow: MapRouteArrow
+    private val routeArrow: MapRouteArrow,
+    private val vanishRouteLineEnabled: Boolean
 ) : RouteProgressObserver {
+
+    /**
+     * Upon receiving route progress events draws and/or updates the line on the map representing the
+     * route as well as arrow(s) representing the next maneuver.
+     *
+     * @param routeLine the route to represent on the map
+     * @param routeArrow the arrow representing the next maneuver
+     */
+    constructor(
+        routeLine: MapRouteLine,
+        routeArrow: MapRouteArrow
+    ) : this(routeLine, routeArrow, false)
 
     private var job: Job? = null
     private var isVisible = true
@@ -42,7 +64,7 @@ internal class MapRouteProgressChangeListener(
             routeLine.draw(currentRoute)
             routeArrow.addUpcomingManeuverArrow(routeProgress)
         } else {
-            if (job == null || !job!!.isActive && currentRoute != null && hasGeometry) {
+            if (vanishRouteLineEnabled && (job == null || !job!!.isActive && currentRoute != null) && hasGeometry) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val totalDist =
                         (routeProgress.distanceRemaining() + routeProgress.distanceTraveled())
