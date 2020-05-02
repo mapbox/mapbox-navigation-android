@@ -40,7 +40,7 @@ class ReplayHistoryMapper(
                     val eventType: String = event["type"] as String
                     mapToEvent(eventType, event)
                 } catch (throwable: Throwable) {
-                    logger?.e(
+                    logger.e(
                         msg = Message("Failed to read index $index: $event"),
                         tr = throwable
                     )
@@ -65,7 +65,7 @@ class ReplayHistoryMapper(
             else -> {
                 val replayEvent = customEventMapper?.invoke(eventType, event)
                 if (replayEvent == null) {
-                    logger?.e(msg = Message("Replay unsupported event $eventType"))
+                    logger.e(msg = Message("Replay unsupported event $eventType"))
                 }
                 replayEvent
             }

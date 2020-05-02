@@ -17,7 +17,10 @@ import org.junit.Test
 internal class ArrivalProgressObserverTest {
 
     private val tripSession: TripSession = mockk()
-    private val arrivalObserver: ArrivalObserver = mockk()
+    private val arrivalObserver: ArrivalObserver = mockk {
+        every { onStopArrival(any()) } returns Unit
+        every { onRouteArrival(any()) } returns Unit
+    }
     private val arrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
     @Before
@@ -57,7 +60,6 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
@@ -373,5 +375,33 @@ internal class ArrivalProgressObserverTest {
         val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
 
         assertFalse(didNavigate)
+    }
+
+    @Test
+    fun `navigateNextRouteLeg should notify stop arrival`() {
+        val onStopArrivalCalls = slot<RouteLegProgress>()
+        val onRouteArrivalCalls = slot<RouteProgress>()
+        every { arrivalObserver.onStopArrival(capture(onStopArrivalCalls)) } returns Unit
+        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+        every { tripSession.getRouteProgress() } returns mockk {
+            every { currentState() } returns RouteProgressState.LOCATION_TRACKING
+            every { route() } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
+                every { routeIndex() } returns "0"
+                every { currentLegProgress() } returns mockk {
+                    every { legIndex() } returns 1
+                }
+            }
+        }
+        every { tripSession.updateLegIndex(2) } returns mockk {
+            every { legIndex } returns 2
+        }
+
+        arrivalProgressObserver.navigateNextRouteLeg()
+
+        assertTrue(onStopArrivalCalls.isCaptured)
+        assertFalse(onRouteArrivalCalls.isCaptured)
     }
 }
