@@ -168,7 +168,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
 
             mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }

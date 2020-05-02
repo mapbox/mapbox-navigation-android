@@ -125,7 +125,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
             LocationEngineProvider.getBestLocationEngine(this)
                 .getLastLocation(locationListenerCallback)
         }

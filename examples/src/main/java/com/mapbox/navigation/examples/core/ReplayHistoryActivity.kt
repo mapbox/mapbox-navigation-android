@@ -93,7 +93,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
             initLocationComponent(locationEngine, style, mapboxMap)
 
-            val navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            val navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
             val navigationContext = ReplayNavigationContext(
                 locationEngine,
                 mapboxMap,
