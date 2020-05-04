@@ -414,7 +414,7 @@ public class NavigationCamera {
   private void tryToBuildRouteInformationAndAdjustCamera() {
     if (isTrackingEnabled() && currentRouteProgress != null) {
       currentRouteInformation =
-        new RouteInformation(currentRouteProgress.route(), currentLocation, currentRouteProgress);
+        new RouteInformation(null, currentLocation, currentRouteProgress);
       if (!isCameraResetting) {
         adjustCameraFromLocation(currentRouteInformation);
       }
