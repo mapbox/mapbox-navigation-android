@@ -136,7 +136,6 @@ class MapboxNavigationTelemetryTest {
     private fun initTelemetry() {
         MapboxNavigationTelemetry.initialize(
             context,
-            token,
             mapboxNavigation,
             MapboxMetricsReporter,
             "locationEngine",
