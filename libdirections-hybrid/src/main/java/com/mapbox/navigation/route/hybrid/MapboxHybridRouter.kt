@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Job
 
@@ -72,16 +73,20 @@ class MapboxHybridRouter(
         private val reserveRouter: Router
     ) : RouterDispatchInterface, Router.Callback {
 
+        companion object {
+            private const val FIRST_POSITION = 0
+        }
+
         private var reserveRouterCalled = false
         private lateinit var options: RouteOptions
         private lateinit var callback: Router.Callback
         private var fetchingInProgress = false
-        private var pendingRequest: Pair<RouteOptions, Router.Callback>? = null
+        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> = CopyOnWriteArrayList()
 
         override fun onResponse(routes: List<DirectionsRoute>) {
             fetchingInProgress = false
             callback.onResponse(routes)
-            checkPendingRequest()
+            checkPendingRequests()
         }
 
         /**
@@ -97,7 +102,7 @@ class MapboxHybridRouter(
                     reserveRouterCalled = false
                     fetchingInProgress = false
                     callback.onFailure(throwable)
-                    checkPendingRequest()
+                    checkPendingRequests()
                 }
                 false -> {
                     reserveRouterCalled = true
@@ -109,7 +114,7 @@ class MapboxHybridRouter(
         override fun onCanceled() {
             fetchingInProgress = false
             callback.onCanceled()
-            checkPendingRequest()
+            checkPendingRequests()
         }
 
         /**
@@ -125,12 +130,7 @@ class MapboxHybridRouter(
 
         private fun handleRouteRequest(routeOptions: RouteOptions, clientCallback: Router.Callback) {
             if (fetchingInProgress) {
-                pendingRequest = Pair(routeOptions, clientCallback)
-                if (reserveRouterCalled) {
-                    reserveRouter.cancel()
-                } else {
-                    mainRouter.cancel()
-                }
+                pendingRequests.add(Pair(routeOptions, clientCallback))
             } else {
                 fetchingInProgress = true
                 reserveRouterCalled = false
@@ -140,11 +140,12 @@ class MapboxHybridRouter(
             }
         }
 
-        private fun checkPendingRequest() {
-            pendingRequest?.let {
-                getRoute(routeOptions = it.first, clientCallback = it.second)
+        private fun checkPendingRequests() {
+            if (pendingRequests.isNotEmpty()) {
+                val request = pendingRequests[FIRST_POSITION]
+                pendingRequests.removeAt(FIRST_POSITION)
+                getRoute(routeOptions = request.first, clientCallback = request.second)
             }
-            pendingRequest = null
         }
     }
 
