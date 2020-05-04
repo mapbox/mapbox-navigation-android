@@ -251,7 +251,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         }
       }
     });
-    navigationViewModel.routeJunctionModel.observe(lifecycleOwner, new Observer<RouteJunctionModel>() {
+    navigationViewModel.retrieveRouteJunctionModelUpdates().observe(lifecycleOwner, new Observer<RouteJunctionModel>() {
       @Override
       public void onChanged(RouteJunctionModel routeJunctionModel) {
         if (routeJunctionModel != null) {
@@ -274,10 +274,10 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void unsubscribe() {
     if (navigationViewModel != null) {
-      navigationViewModel.instructionModel.removeObservers(lifecycleOwner);
-      navigationViewModel.bannerInstructionModel.removeObservers(lifecycleOwner);
-      navigationViewModel.isOffRoute.removeObservers(lifecycleOwner);
-      navigationViewModel.routeJunctionModel.removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveInstructionModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveBannerInstructionModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveRouteJunctionModelUpdates().removeObservers(lifecycleOwner);
     }
   }
 
