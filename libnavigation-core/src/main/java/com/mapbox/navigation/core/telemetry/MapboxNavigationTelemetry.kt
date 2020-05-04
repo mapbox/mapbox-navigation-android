@@ -33,7 +33,6 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
-import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifChannelException
@@ -42,7 +41,6 @@ import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import java.lang.ref.WeakReference
 import java.util.ArrayDeque
 import java.util.Date
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -114,7 +112,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     internal const val TAG = "MAPBOX_TELEMETRY"
     private const val EVENT_VERSION = 7
     private lateinit var context: Context // Must be context.getApplicationContext
-    private lateinit var mapboxToken: String
     private lateinit var telemetryThreadControl: JobControl
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
@@ -335,8 +332,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     /**
      * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
      */
-    private val preInitializePredicate: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
-        { context, token, mapboxNavigation, metricsReporter, name, jobControl, options, userAgent ->
+    private val preInitializePredicate: (Context, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
+        { context, mapboxNavigation, metricsReporter, name, jobControl, options, userAgent ->
             telemetryThreadControl = jobControl
             weakMapboxNavigation = WeakReference(mapboxNavigation)
             weakMapboxNavigation.get()?.registerNavigationSessionObserver(navigationSessionObserver)
@@ -347,8 +344,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             localUserAgent = userAgent
             locationEngineNameExternal = name
             navigationOptions = options
-            mapboxToken = token
-            validateAccessToken(mapboxToken)
             this.metricsReporter = metricsReporter
             initializer =
                 postInitializePredicate // prevent primaryInitializer() from being called more than once.
@@ -359,8 +354,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         }
 
     // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitializePredicate: (Context, String, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
-        { _, _, _, _, _, _, _, _ ->
+    private var postInitializePredicate: (Context, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
+        { _, _, _, _, _, _, _ ->
             Log.i(TAG, "Already initialized")
             false
         }
@@ -379,7 +374,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     fun initialize(
         context: Context,
-        mapboxToken: String,
         mapboxNavigation: MapboxNavigation,
         metricsReporter: MetricsReporter,
         locationEngineName: String,
@@ -388,7 +382,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         userAgent: String
     ) = initializer(
         context,
-        mapboxToken,
         mapboxNavigation,
         metricsReporter,
         locationEngineName,
@@ -634,15 +627,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         Log.d(TAG, "resetting Telemetry initialization")
         MapboxMetricsReporter.disable() // Disable telemetry unconditionally
         initializer = preInitializePredicate
-    }
-
-    private fun validateAccessToken(accessToken: String?) {
-        if (accessToken.isNullOrEmpty() ||
-            (!accessToken.toLowerCase(Locale.US).startsWith("pk.") &&
-                !accessToken.toLowerCase(Locale.US).startsWith("sk."))
-        ) {
-            throw NavigationException("A valid access token must be passed in when first initializing MapboxNavigation")
-        }
     }
 
     private fun populateSessionState(newLocation: Location? = null): SessionState {

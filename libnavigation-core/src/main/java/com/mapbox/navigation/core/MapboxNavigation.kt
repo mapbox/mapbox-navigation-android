@@ -200,7 +200,6 @@ constructor(
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
             MapboxNavigationTelemetry.initialize(
                 context.applicationContext,
-                token,
                 this,
                 MapboxMetricsReporter,
                 locationEngine.javaClass.name,
