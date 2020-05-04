@@ -95,6 +95,7 @@ public class NavigationMapboxMap {
   private DestinationBuildingFootprintLayer destinationBuildingFootprintLayer;
   @Nullable
   private MapboxNavigation navigation;
+  private Boolean vanishRouteLineEnabled;
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}
@@ -112,6 +113,20 @@ public class NavigationMapboxMap {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
+   * @param mapView   for map size and Context
+   * @param mapboxMap for APIs to interact with the map
+   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+   */
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap,
+                             boolean vanishRouteLineEnabled) {
+    this(mapView, mapboxMap, null, vanishRouteLineEnabled);
+  }
+
+  /**
+   * Constructor that can be used once {@link OnMapReadyCallback}
+   * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+   *
    * @param mapView           for map size and Context
    * @param mapboxMap         for APIs to interact with the map
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
@@ -119,8 +134,25 @@ public class NavigationMapboxMap {
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap,
                              @Nullable String routeBelowLayerId) {
+    this(mapView, mapboxMap, routeBelowLayerId, false);
+  }
+
+  /**
+   * Constructor that can be used once {@link OnMapReadyCallback}
+   * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
+   *
+   * @param mapView           for map size and Context
+   * @param mapboxMap         for APIs to interact with the map
+   * @param routeBelowLayerId optionally pass in a layer id to place the route line below
+   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+   */
+  public NavigationMapboxMap(@NonNull MapView mapView,
+                             @NonNull MapboxMap mapboxMap,
+                             @Nullable String routeBelowLayerId,
+                             boolean vanishRouteLineEnabled) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
@@ -758,7 +790,7 @@ public class NavigationMapboxMap {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
       R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute);
-    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId);
+    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId, vanishRouteLineEnabled);
   }
 
   private void initializeCamera(MapboxMap map) {

@@ -160,7 +160,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
 
             // center the map at current location
             if (shouldSimulateRoute()) {
