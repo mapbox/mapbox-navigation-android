@@ -64,14 +64,15 @@ internal class MapRouteProgressChangeListener(
             routeLine.draw(currentRoute)
             routeArrow.addUpcomingManeuverArrow(routeProgress)
         } else {
-            if (vanishRouteLineEnabled && (job == null || !job!!.isActive && currentRoute != null) && hasGeometry) {
+            if (vanishRouteLineEnabled && currentRoute != null && hasGeometry) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val totalDist =
                         (routeProgress.distanceRemaining() + routeProgress.distanceTraveled())
                     val dist = routeProgress.distanceTraveled() / totalDist
                     if (dist > 0) {
                         val deferredExpression = async(Dispatchers.Default) {
-                            val lineString: LineString = routeLine.getLineStringForRoute(currentRoute!!)
+                            val lineString: LineString =
+                                routeLine.getLineStringForRoute(currentRoute)
                             buildRouteLineExpression(
                                 currentRoute,
                                 lineString,

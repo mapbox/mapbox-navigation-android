@@ -93,7 +93,6 @@ abstract class BaseRouterActivityKt :
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
-        mapboxMap.addOnMapClickListener(this)
         MapboxLogger.d(Message("Map is ready"))
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             MapboxLogger.d(Message("Style setting finished"))
@@ -103,6 +102,7 @@ abstract class BaseRouterActivityKt :
             Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint,
                 LENGTH_SHORT).show()
             newOrigin()
+            mapboxMap.addOnMapClickListener(this)
         }
     }
 
