@@ -167,7 +167,6 @@ public class NavigationMapRoute implements LifecycleObserver {
             routeArrow, vanishRouteLineEnabled
     );
     initializeDidFinishLoadingStyleListener();
-    addListeners();
     registerLifecycleObserver();
   }
 
