@@ -32,8 +32,6 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.ThemeSwitcher;
-import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer;
-import com.mapbox.navigation.ui.arrival.DestinationBuildingFootprintLayer;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.puck.NavigationPuckPresenter;
@@ -91,8 +89,6 @@ public class NavigationMapboxMap {
   @Nullable
   private MapFpsDelegate mapFpsDelegate;
   private LocationFpsDelegate locationFpsDelegate;
-  private BuildingExtrusionLayer buildingExtrusionLayer;
-  private DestinationBuildingFootprintLayer destinationBuildingFootprintLayer;
   @Nullable
   private MapboxNavigation navigation;
   private Boolean vanishRouteLineEnabled;
@@ -157,7 +153,6 @@ public class NavigationMapboxMap {
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
-    initializeArrivalExperience(mapboxMap, mapView);
     initializeCamera(mapboxMap);
     initializeLocationComponent();
   }
@@ -671,26 +666,6 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Updates the visibility of the building extrusion layer. Extrusions are added during the arrival experience.
-   *
-   * @param isVisible true if the building extrusions should be visible, false otherwise
-   */
-  public void updateBuildingExtrusionVisibility(boolean isVisible) {
-    buildingExtrusionLayer.updateVisibility(isVisible);
-  }
-
-  /**
-   * Updates the visibility of the destination building footprint highlight
-   * {@link com.mapbox.mapboxsdk.style.layers.FillLayer}. This layer is added during the arrival
-   * experience so that the final destination can be seen more easily.
-   *
-   * @param isVisible true if the building extrusions should be visible, false otherwise
-   */
-  public void updateDestinationFootprintHighlightVisibility(boolean isVisible) {
-    destinationBuildingFootprintLayer.updateVisibility(isVisible);
-  }
-
-  /**
    * Add a {@link OnCameraTrackingChangedListener} to the {@link LocationComponent} that is
    * wrapped within this class.
    * <p>
@@ -799,11 +774,6 @@ public class NavigationMapboxMap {
 
   private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
     locationFpsDelegate = new LocationFpsDelegate(map, locationComponent);
-  }
-
-  private void initializeArrivalExperience(MapboxMap map, MapView mapView) {
-    buildingExtrusionLayer = new BuildingExtrusionLayer(map, mapView);
-    destinationBuildingFootprintLayer = new DestinationBuildingFootprintLayer(map, mapView);
   }
 
   private void initializeWayName(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {

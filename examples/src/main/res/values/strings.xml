@@ -47,8 +47,8 @@
     <string name="title_custom_ui_component_style" translatable="false">Custom UI Component Style Example</string>
     <string name="description_custom_ui_component_style" translatable="false">Shows how to use your own colors to style the UI SDK Components: InstructionView, SummaryBottomSheet ans so on</string>
 
-    <string name="title_final_destination_building_highlight_kotlin" translatable="false">Final Destination Building Highlight UI Kotlin</string>
-    <string name="description_final_destination_building_highlight_kotlin" translatable="false">Show how the final destination building footprint can be highlighted when the device has arrived. Example\'s in Kotlin.</string>
+    <string name="title_building_highlight_kotlin" translatable="false">Building Footprint Highlight</string>
+    <string name="description_building_highlight_kotlin" translatable="false">Use the Nav UI SDK\'s BuildingFootprintHighlightLayer to show and customize a highlighted building footprint. Great to show the final destination building location. Example\'s in Kotlin.</string>
 
     <string name="title_arrival_ui_building_extrusions_kotlin" translatable="false">Arrival UI Building Extrusions Kotlin</string>
     <string name="description_arrival_ui_building_extrusions_kotlin" translatable="false">Show building extrusions once the device is close enough to the final destination. Example\'s in Kotlin.</string>

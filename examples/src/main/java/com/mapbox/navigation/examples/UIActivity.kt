@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.ui.ArrivalUiBuildingExtrusionActivityKt
-import com.mapbox.navigation.examples.ui.ArrivalUiFootprintHighlightActivityKt
+import com.mapbox.navigation.examples.ui.BuildingFootprintHighlightActivityKt
 import com.mapbox.navigation.examples.ui.CustomCameraActivity
 import com.mapbox.navigation.examples.ui.CustomPuckActivity
 import com.mapbox.navigation.examples.ui.CustomUIComponentStyleActivity
@@ -43,9 +43,9 @@ class UIActivity : AppCompatActivity() {
                     NavigationViewActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_final_destination_building_highlight_kotlin),
-                    getString(R.string.description_final_destination_building_highlight_kotlin),
-                    ArrivalUiFootprintHighlightActivityKt::class.java
+                    getString(R.string.title_building_highlight_kotlin),
+                    getString(R.string.description_building_highlight_kotlin),
+                    BuildingFootprintHighlightActivityKt::class.java
             ),
             SampleItem(
                     getString(R.string.title_arrival_ui_building_extrusions_kotlin),

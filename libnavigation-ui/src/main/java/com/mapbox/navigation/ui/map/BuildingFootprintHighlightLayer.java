@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.arrival;
+package com.mapbox.navigation.ui.map;
 
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -22,10 +22,10 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
-public class DestinationBuildingFootprintLayer {
+public class BuildingFootprintHighlightLayer {
 
-  private static final String DESTINATION_BUILDING_FOOTPRINT_SOURCE_ID = "destination-building-source-id";
-  private static final String DESTINATION_BUILDING_FOOTPRINT_LAYER_ID = "destination-building-footprint-layer-id";
+  private static final String BUILDING_FOOTPRINT_SOURCE_ID = "building-source-id";
+  private static final String BUILDING_FOOTPRINT_LAYER_ID = "building-footprint-layer-id";
   private static final String BUILDING_LAYER_ID = "building";
   private static final String BUILDING_STATION_LAYER_ID = "building station";
   private static final Integer DEFAULT_FOOTPRINT_COLOR = Color.RED;
@@ -37,13 +37,13 @@ public class DestinationBuildingFootprintLayer {
   private Integer color;
   private Float opacity;
 
-  public DestinationBuildingFootprintLayer(MapboxMap mapboxMap, MapView mapView) {
+  public BuildingFootprintHighlightLayer(MapboxMap mapboxMap, MapView mapView) {
     this.mapboxMap = mapboxMap;
     this.mapView = mapView;
   }
 
   /**
-   * Toggles the visibility of the destination building highlight layer.
+   * Toggles the visibility of the building footprint highlight layer.
    *
    * @param visible true if the layer should be placed/displayed. False if it should be hidden.
    */
@@ -54,7 +54,7 @@ public class DestinationBuildingFootprintLayer {
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
-        FillLayer buildingFootprintFillLayer = style.getLayerAs(DESTINATION_BUILDING_FOOTPRINT_LAYER_ID);
+        FillLayer buildingFootprintFillLayer = style.getLayerAs(BUILDING_FOOTPRINT_LAYER_ID);
         if (buildingFootprintFillLayer == null) {
           addFootprintHighlightFillLayerToMap();
         } else if ((buildingFootprintFillLayer.getVisibility().value.equals(VISIBLE)) != visible) {
@@ -65,17 +65,17 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Set the location of the destination building highlight layer.
+   * Set the location of the building footprint highlight layer.
    *
-   * @param destinationLatLng the new coordinates to use in querying the building layer
+   * @param targetLatLng the new coordinates to use in querying the building layer
    *                          to get the associated {@link Polygon} to eventually highlight.
    */
-  public void setDestinationBuildingLocation(final LatLng destinationLatLng) {
+  public void setBuildingFootprintLocation(final LatLng targetLatLng) {
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
-        GeoJsonSource geoJsonSource = style.getSourceAs(DESTINATION_BUILDING_FOOTPRINT_SOURCE_ID);
-        Polygon polygon = getFootprintPolygonAssociatedWithDestinationBuilding(destinationLatLng);
+        GeoJsonSource geoJsonSource = style.getSourceAs(BUILDING_FOOTPRINT_SOURCE_ID);
+        Polygon polygon = getFootprintPolygonAssociatedWithBuilding(targetLatLng);
         if (polygon != null && geoJsonSource != null) {
           geoJsonSource.setGeoJson(polygon);
         }
@@ -84,7 +84,7 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Set the color of the destination building highlight layer.
+   * Set the color of the building footprint highlight layer.
    *
    * @param newFootprintColor the new color value
    */
@@ -92,10 +92,9 @@ public class DestinationBuildingFootprintLayer {
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
-        FillLayer buildingFootprintFillLayer = style.getLayerAs(DESTINATION_BUILDING_FOOTPRINT_LAYER_ID);
+        FillLayer buildingFootprintFillLayer = style.getLayerAs(BUILDING_FOOTPRINT_LAYER_ID);
         if (buildingFootprintFillLayer != null) {
-          buildingFootprintFillLayer.setProperties(
-            fillColor(newFootprintColor));
+          buildingFootprintFillLayer.setProperties(fillColor(newFootprintColor));
           color = newFootprintColor;
         }
       }
@@ -103,7 +102,7 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Set the opacity of the destination building highlight layer.
+   * Set the opacity of the building footprint highlight layer.
    *
    * @param newFootprintOpacity the new opacity value
    */
@@ -111,10 +110,9 @@ public class DestinationBuildingFootprintLayer {
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
-        FillLayer buildingFootprintFillLayer = style.getLayerAs(DESTINATION_BUILDING_FOOTPRINT_LAYER_ID);
+        FillLayer buildingFootprintFillLayer = style.getLayerAs(BUILDING_FOOTPRINT_LAYER_ID);
         if (buildingFootprintFillLayer != null) {
-          buildingFootprintFillLayer.setProperties(
-            fillOpacity(opacity));
+          buildingFootprintFillLayer.setProperties(fillOpacity(newFootprintOpacity));
           opacity = newFootprintOpacity;
         }
       }
@@ -122,10 +120,10 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Retrieve the {@link Polygon} geometry of the building that the route's final destination
-   * coordinates correspond to.
+   * Retrieve the {@link Polygon} geometry of the footprint of the building that's associated with
+   * the latest targetLatLng.
    *
-   * @return The {@link Polygon}
+   * @return the {@link Polygon}
    */
   public Polygon getBuildingPolygon() {
     return buildingPolygon;
@@ -133,8 +131,8 @@ public class DestinationBuildingFootprintLayer {
 
   /**
    *
-   * Retrieve the building {@link Feature} that the route's final destination
-   * coordinates correspond to.
+   * Retrieve the {@link Feature} the polygonal footprint of the building that's associated with
+   * the latest targetLatLng.
    *
    * @return the {@link Feature}
    */
@@ -143,7 +141,7 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Retrieve the latest set color of the destination building highlight layer.
+   * Retrieve the latest set color of the building footprint highlight layer.
    *
    * @return the color Integer
    */
@@ -152,7 +150,7 @@ public class DestinationBuildingFootprintLayer {
   }
 
   /**
-   * Retrieve the latest set opacity of the destination building highlight layer.
+   * Retrieve the latest set opacity of the building footprint highlight layer.
    *
    * @return the opacity Float
    */
@@ -160,25 +158,22 @@ public class DestinationBuildingFootprintLayer {
     return opacity;
   }
 
-  private Polygon getFootprintPolygonAssociatedWithDestinationBuilding(final LatLng destinationLatLng) {
+  private Polygon getFootprintPolygonAssociatedWithBuilding(final LatLng targetLatLng) {
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
         PointF pixel = mapboxMap.getProjection().toScreenLocation(new LatLng(
-          destinationLatLng.getLatitude(),
-          destinationLatLng.getLongitude()
+            targetLatLng.getLatitude(), targetLatLng.getLongitude()
         ));
 
         // Check whether the map style has a building layer
         if (style.getLayer(BUILDING_LAYER_ID) != null) {
 
-          // Retrieve the building Feature that is displayed in the middle of the map
+          // Retrieve the building Feature that is associated with the target LatLng
           List<Feature> features = mapboxMap.queryRenderedFeatures(pixel, BUILDING_LAYER_ID, BUILDING_STATION_LAYER_ID);
-          if (features.size() > 0) {
-            if (features.get(0).geometry() instanceof Polygon) {
+          if (features.size() > 0 && features.get(0).geometry() instanceof Polygon) {
               buildingPolygonFeature = features.get(0);
-              buildingPolygon = (Polygon) features.get(0).geometry();
-            }
+              buildingPolygon = (Polygon) buildingPolygonFeature.geometry();
           }
         }
       }
@@ -192,17 +187,17 @@ public class DestinationBuildingFootprintLayer {
       public void onStyleLoaded(@NonNull Style style) {
         FillLayer existingBuildingLayerId = style.getLayerAs(BUILDING_LAYER_ID);
         if (existingBuildingLayerId != null) {
-          GeoJsonSource buildingFootprintGeojsonSource = new GeoJsonSource(DESTINATION_BUILDING_FOOTPRINT_SOURCE_ID);
-          style.addSource(buildingFootprintGeojsonSource);
-          FillLayer finalDestinationBuildingFillLayer = new FillLayer(DESTINATION_BUILDING_FOOTPRINT_LAYER_ID,
-            DESTINATION_BUILDING_FOOTPRINT_SOURCE_ID);
-          finalDestinationBuildingFillLayer.setProperties(
+          GeoJsonSource buildingFootprintGeoJsonSource = new GeoJsonSource(BUILDING_FOOTPRINT_SOURCE_ID);
+          style.addSource(buildingFootprintGeoJsonSource);
+          FillLayer buildingFillLayer = new FillLayer(BUILDING_FOOTPRINT_LAYER_ID,
+              BUILDING_FOOTPRINT_SOURCE_ID);
+          buildingFillLayer.setProperties(
             fillColor(color == null ? DEFAULT_FOOTPRINT_COLOR :
               color),
             fillOpacity(opacity == null ? DEFAULT_BUILDING_FOOTPRINT_OPACITY :
               opacity)
           );
-          style.addLayerAbove(finalDestinationBuildingFillLayer, BUILDING_LAYER_ID);
+          style.addLayerAbove(buildingFillLayer, BUILDING_LAYER_ID);
         }
       }
     });
