@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
+import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
@@ -45,7 +46,8 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.arrival.BuildingExtrusionLayer
-import com.mapbox.navigation.ui.route.NavigationMapRoute
+import com.mapbox.navigation.ui.camera.NavigationCamera
+import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -65,14 +67,14 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
     private val restartSessionEventChannel = Channel<RestartTripSessionAction>(1)
 
     private var mapboxMap: MapboxMap? = null
-    private var navigationMapRoute: NavigationMapRoute? = null
+    private var navigationMapboxMap: NavigationMapboxMap? = null
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
     private var fasterRoute: DirectionsRoute? = null
     private var colorList = listOf(Color.BLUE, Color.MAGENTA, Color.parseColor("#32a88f"))
     private var opacityList = listOf(.5f, .2f, .8f)
-    private var adjustExtrusionsStyleButtonIndex = 0
 
+    private var adjustExtrusionsStyleButtonIndex = 0
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
@@ -161,16 +163,16 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
                 isLocationComponentEnabled = true
             }
 
-            navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
-            navigationMapRoute?.setOnRouteSelectionChangeListener { route ->
+            symbolManager = SymbolManager(mapView, mapboxMap, style)
+            style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
+
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap?.setOnRouteSelectionChangeListener { route ->
                 mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
                     remove(route)
                     add(0, route)
                 })
             }
-
-            symbolManager = SymbolManager(mapView, mapboxMap, style)
-            style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
             // Initialize the Nav UI SDK's DestinationBuildingFootprintLayer class.
             buildingExtrusionLayer = BuildingExtrusionLayer(mapboxMap, mapView)
@@ -182,6 +184,7 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
     @SuppressLint("MissingPermission")
     private fun initViews() {
         startNavigation.setOnClickListener {
+            updateCameraOnNavigationStateChange(true)
             mapboxNavigation.startTripSession()
         }
         adjust_building_extrusion_visibility_fab.setOnClickListener {
@@ -246,7 +249,7 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
 
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
-            navigationMapRoute?.addRoutes(routes)
+            navigationMapboxMap?.drawRoutes(routes)
             if (routes.isEmpty()) {
                 Toast.makeText(this@ArrivalUiBuildingExtrusionActivityKt, "Empty routes", Toast.LENGTH_SHORT)
                     .show()
@@ -273,7 +276,7 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
             if (isAlternativeFaster) {
-                this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = fasterRoute
+                this@ArrivalUiBuildingExtrusionActivityKt.fasterRoute = alternativeRoute
                 fasterRouteSelectionTimer.start()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
@@ -306,6 +309,9 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
                     startNavigation.visibility = VISIBLE
+                    navigationMapboxMap?.removeRoute()
+                    symbolManager?.deleteAll()
+                    updateCameraOnNavigationStateChange(false)
                 }
             }
         }
@@ -372,6 +378,20 @@ class ArrivalUiBuildingExtrusionActivityKt : AppCompatActivity(), OnMapReadyCall
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+    }
+
+    private fun updateCameraOnNavigationStateChange(
+        navigationStarted: Boolean
+    ) {
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
+            }
+        }
     }
 
     private class MyLocationEngineCallback(activity: ArrivalUiBuildingExtrusionActivityKt) :
