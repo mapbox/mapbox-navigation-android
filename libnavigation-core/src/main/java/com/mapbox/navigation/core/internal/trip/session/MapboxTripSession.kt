@@ -383,7 +383,7 @@ class MapboxTripSession(
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
                 updateRawLocation(it)
-            }
+            } ?: updateDataFromNavigatorStatus(Date())
         }
 
         override fun onFailure(exception: Exception) {

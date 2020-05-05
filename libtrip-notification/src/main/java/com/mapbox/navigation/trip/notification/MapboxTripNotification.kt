@@ -293,7 +293,8 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateNotificationViews(routeProgress: RouteProgress) {
-        routeProgress.route()?.let {
+        val directionsRoute = routeProgress.route()
+        directionsRoute?.let {
             updateInstructionText(routeProgress.bannerInstructions())
             updateDistanceText(routeProgress)
             generateArrivalTime(routeProgress)?.let { formattedTime ->
@@ -306,9 +307,9 @@ class MapboxTripNotification constructor(
                             ?: ManeuverModifier.RIGHT
                     )
                 }
-            }
-            setFreeDriveMode(false)
-        } ?: setFreeDriveMode(true)
+            } ?: updateManeuverImageResource(true)
+        }
+        setFreeDriveMode(directionsRoute == null)
     }
 
     private fun setFreeDriveMode(isFreeDriveMode: Boolean) {
