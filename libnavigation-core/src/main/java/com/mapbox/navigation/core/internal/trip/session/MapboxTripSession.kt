@@ -184,7 +184,6 @@ class MapboxTripSession(
         enhancedLocation = null
         routeProgress = null
         isOffRoute = false
-        navigator.reset()
     }
 
     /**

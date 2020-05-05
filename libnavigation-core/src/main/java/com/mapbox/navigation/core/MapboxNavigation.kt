@@ -136,6 +136,7 @@ constructor(
 
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
+    private val navigator: MapboxNativeNavigator
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
@@ -172,6 +173,7 @@ constructor(
                     isAccessible = true
                 }
         }
+        navigator = NavigationComponentProvider.createNativeNavigator()
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
             notification,
@@ -182,7 +184,8 @@ constructor(
             locationEngine,
             locationEngineRequest,
             navigationOptions.navigatorPredictionMillis,
-            logger
+            navigator = navigator,
+            logger = logger
         )
         tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
@@ -312,6 +315,7 @@ constructor(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.route = null
+        navigator.reset()
         navigationSession.unregisterAllNavigationSessionStateObservers()
         fasterRouteController.stop()
         routeRefreshController.stop()
@@ -463,7 +467,8 @@ constructor(
      *
      * @param arrivalController [ArrivalController]
      */
-    @JvmOverloads fun attachArrivalController(arrivalController: ArrivalController = AutoArrivalController()) {
+    @JvmOverloads
+    fun attachArrivalController(arrivalController: ArrivalController = AutoArrivalController()) {
         arrivalProgressObserver.attach(arrivalController)
         tripSession.registerRouteProgressObserver(arrivalProgressObserver)
     }

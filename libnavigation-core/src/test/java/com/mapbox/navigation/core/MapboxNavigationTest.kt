@@ -29,6 +29,7 @@ import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
@@ -62,8 +63,9 @@ class MapboxNavigationTest {
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk(relaxUnitFun = true)
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
-    private val tripSession: TripSession = mockk(relaxUnitFun = true)
+    private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
+    private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
     private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
     private val onBoardRouterConfig: MapboxOnboardRouterConfig = mockk(relaxed = true)
@@ -122,6 +124,7 @@ class MapboxNavigationTest {
         every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
 
         mockLocation()
+        mockNativeNavigator()
         mockTripService()
         mockTripSession()
         mockDirectionSession()
@@ -225,6 +228,13 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { tripSession.stop() }
+    }
+
+    @Test
+    fun onDestroyCallsNativeNavigatorReset() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { navigator.reset() }
     }
 
     @Test
@@ -388,6 +398,12 @@ class MapboxNavigationTest {
         every { location.bearing } returns DEFAULT_REROUTE_BEARING_ANGLE
     }
 
+    private fun mockNativeNavigator() {
+        every {
+            NavigationComponentProvider.createNativeNavigator()
+        } returns navigator
+    }
+
     private fun mockTripService() {
         every {
             NavigationComponentProvider.createTripService(
@@ -405,7 +421,8 @@ class MapboxNavigationTest {
                 locationEngine,
                 locationEngineRequest,
                 any(),
-                logger
+                navigator = navigator,
+                logger = logger
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location
