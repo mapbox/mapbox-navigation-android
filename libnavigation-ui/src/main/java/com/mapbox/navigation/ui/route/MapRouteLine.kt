@@ -19,6 +19,7 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineGradient
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildRouteLineExpression
@@ -685,8 +686,14 @@ internal class MapRouteLine(
          *
          * @return either the layer ID if found else a default layer ID
          */
-        fun getBelowLayer(layerId: String?, style: Style): String =
-            style.layers.firstOrNull { it.id == layerId }?.id ?: LocationComponentConstants.SHADOW_LAYER
+        fun getBelowLayer(layerId: String?, style: Style): String {
+            return when (layerId.isNullOrEmpty()) {
+                false -> style.layers.firstOrNull { it.id == layerId }?.id
+                true -> style.layers.reversed().filter { it !is SymbolLayer }
+                    .firstOrNull { it.id != RouteConstants.MAPBOX_LOCATION_ID }
+                    ?.id
+            } ?: LocationComponentConstants.SHADOW_LAYER
+        }
 
         /**
          * Generates a FeatureCollection and LineString based on the @param route.
