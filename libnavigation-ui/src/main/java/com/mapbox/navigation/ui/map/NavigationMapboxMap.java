@@ -91,7 +91,7 @@ public class NavigationMapboxMap {
   private LocationFpsDelegate locationFpsDelegate;
   @Nullable
   private MapboxNavigation navigation;
-  private Boolean vanishRouteLineEnabled;
+  private boolean vanishRouteLineEnabled;
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}

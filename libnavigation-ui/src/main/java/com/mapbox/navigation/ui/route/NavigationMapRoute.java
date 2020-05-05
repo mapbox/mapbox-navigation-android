@@ -54,7 +54,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapboxNavigation navigation;
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
-  private Boolean vanishRouteLineEnabled;
+  private boolean vanishRouteLineEnabled;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
