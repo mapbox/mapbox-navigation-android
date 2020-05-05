@@ -2,7 +2,6 @@ package com.mapbox.navigation.examples.ui
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.location.Location
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -10,10 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
-import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -39,7 +36,6 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -80,8 +76,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var locationEngine: LocationEngine
-    private lateinit var navigationMapboxMap: NavigationMapboxMap
+    private var navigationMapboxMap: NavigationMapboxMap? = null
     private lateinit var speechPlayer: NavigationSpeechPlayer
     private lateinit var destination: LatLng
     private lateinit var summaryBehavior: BottomSheetBehavior<SummaryBottomSheet>
@@ -103,7 +98,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         initNavigation()
         initializeSpeechPlayer()
     }
@@ -121,13 +115,13 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onStart() {
         super.onStart()
         mapView.onStart()
+        navigationMapboxMap?.onStart()
     }
 
     override fun onStop() {
         super.onStop()
         mapView.onStop()
-
-        stopLocationUpdates()
+        navigationMapboxMap?.onStop()
     }
 
     override fun onLowMemory() {
@@ -139,7 +133,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onDestroy()
         mapView.onDestroy()
 
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
@@ -194,6 +187,10 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))
             }
+
+            LocationEngineProvider.getBestLocationEngine(this)
+                .getLastLocation(locationListenerCallback)
+
             Snackbar.make(
                 findViewById(R.id.navigationLayout),
                 R.string.msg_long_press_map_to_place_waypoint,
@@ -242,7 +239,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                     replayRouteLocationEngine.assign(mapboxNavigation.getRoutes()[0])
 
                     updateCameraOnNavigationStateChange(true)
-                    navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+                    navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
 
                     mapboxNavigation.startTripSession()
                 }
@@ -257,7 +254,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
         routeOverviewButton = findViewById(R.id.routeOverviewBtn)
         routeOverviewButton.setOnClickListener {
-            navigationMapboxMap.showRouteOverview(routeOverviewPadding)
+            navigationMapboxMap?.showRouteOverview(routeOverviewPadding)
             recenterBtn.show()
         }
 
@@ -270,8 +267,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             hide()
             addOnClickListener {
                 recenterBtn.hide()
-                navigationMapboxMap.resetPadding()
-                navigationMapboxMap.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                navigationMapboxMap?.resetPadding()
+                navigationMapboxMap?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             }
         }
 
@@ -336,7 +333,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             replayRouteLocationEngine
         )
         mapboxNavigation.apply {
-            registerLocationObserver(locationObserver)
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
             registerBannerInstructionsObserver(bannerInstructionObserver)
@@ -355,24 +351,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         val speechPlayerProvider =
             SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
-    }
-
-    private fun startLocationUpdates() {
-        val requestLocationUpdateRequest =
-            LocationEngineRequest.Builder(1000L)
-                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                .build()
-
-        locationEngine.requestLocationUpdates(
-            requestLocationUpdateRequest,
-            locationListenerCallback,
-            mainLooper
-        )
-        locationEngine.getLastLocation(locationListenerCallback)
-    }
-
-    private fun stopLocationUpdates() {
-        locationEngine.removeLocationUpdates(locationListenerCallback)
     }
 
     private fun showFeedbackBottomSheet() {
@@ -428,15 +406,13 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun updateCameraOnNavigationStateChange(
         navigationStarted: Boolean
     ) {
-        if (::navigationMapboxMap.isInitialized) {
-            navigationMapboxMap.apply {
-                if (navigationStarted) {
-                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
-                    updateLocationLayerRenderMode(RenderMode.GPS)
-                } else {
-                    updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
-                    updateLocationLayerRenderMode(RenderMode.COMPASS)
-                }
+        navigationMapboxMap?.apply {
+            if (navigationStarted) {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                updateLocationLayerRenderMode(RenderMode.GPS)
+            } else {
+                updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
+                updateLocationLayerRenderMode(RenderMode.COMPASS)
             }
         }
     }
@@ -446,7 +422,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
-                navigationMapboxMap.drawRoute(routes[0])
+                navigationMapboxMap?.drawRoute(routes[0])
                 startNavigation.visibility = View.VISIBLE
                 startNavigation.isEnabled = true
             } else {
@@ -463,46 +439,24 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-            Timber.d("raw location %s", rawLocation.toString())
-        }
-
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            if (keyPoints.isNotEmpty()) {
-                navigationMapboxMap.updateLocation(keyPoints)
-                locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
-            }
-        }
-    }
-
     private val tripSessionStateObserver = object : TripSessionStateObserver {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
-                    stopLocationUpdates()
 
-                    navigationMapboxMap.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
-                    navigationMapboxMap.updateWaynameQueryMap(true)
+                    navigationMapboxMap?.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap?.updateWaynameQueryMap(true)
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
-                    startLocationUpdates()
 
                     if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                        navigationMapboxMap.removeRoute()
+                        navigationMapboxMap?.removeRoute()
                     }
 
-                    if (::navigationMapboxMap.isInitialized) {
-                        navigationMapboxMap.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
-                        navigationMapboxMap.updateWaynameQueryMap(false)
-                    }
+                    navigationMapboxMap?.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap?.updateWaynameQueryMap(false)
 
                     updateCameraOnNavigationStateChange(false)
                 }

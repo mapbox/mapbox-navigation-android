@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.preference.PreferenceManager
@@ -43,7 +42,6 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -239,35 +237,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private val locationObserver = object : LocationObserver {
-        override fun onRawLocationChanged(rawLocation: Location) {
-            symbolManager?.create(
-                    SymbolOptions()
-                            .withIconImage("raw")
-                            .withGeometry(rawLocation.toPoint())
-            )
-            Timber.d("raw location %s", rawLocation.toString())
-        }
-
-        override fun onEnhancedLocationChanged(
-            enhancedLocation: Location,
-            keyPoints: List<Location>
-        ) {
-            symbolManager?.create(
-                    SymbolOptions()
-                            .withIconImage("enhanced")
-                            .withGeometry(enhancedLocation.toPoint())
-            )
-            if (keyPoints.isNotEmpty()) {
-                locationComponent?.forceLocationUpdate(keyPoints, true)
-            } else {
-                locationComponent?.forceLocationUpdate(enhancedLocation)
-            }
-            Timber.d("enhanced location %s", enhancedLocation)
-            Timber.d("enhanced keyPoints %s", keyPoints)
-        }
-    }
-
     private fun startLocationUpdates() {
         val request = LocationEngineRequest.Builder(1000L)
                 .setFastestInterval(500L)
@@ -371,7 +340,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             mapboxNavigation.startTripSession()
         }
 
-        mapboxNavigation.registerLocationObserver(locationObserver)
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
@@ -381,7 +349,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         super.onStop()
         mapView.onStop()
 
-        mapboxNavigation.unregisterLocationObserver(locationObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
@@ -472,6 +439,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
                     updateLocationLayerRenderMode(RenderMode.GPS)
                 } else {
+                    symbolManager?.deleteAll()
+                    removeRoute()
                     updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
                     updateLocationLayerRenderMode(RenderMode.COMPASS)
                 }
