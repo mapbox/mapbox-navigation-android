@@ -95,7 +95,7 @@ public class NavigationMapboxMap {
   private DestinationBuildingFootprintLayer destinationBuildingFootprintLayer;
   @Nullable
   private MapboxNavigation navigation;
-  private Boolean vanishRouteLineEnabled;
+  private boolean vanishRouteLineEnabled;
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}
