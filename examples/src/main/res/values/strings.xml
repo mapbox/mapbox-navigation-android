@@ -3,101 +3,98 @@
 
     <!-- MainActivity -->
     <string name="navigation_core_sdk_title" translatable="false">Navigation Core SDK</string>
-    <string name="navigation_core_sdk_description" translatable="false">Hosts examples to demonstrate the use of the Core SDK</string>
+    <string name="navigation_core_sdk_description" translatable="false">Hosts examples to demonstrate the use of the core Navigation SDK.</string>
 
     <string name="navigation_ui_sdk_title" translatable="false">Navigation UI SDK</string>
-    <string name="navigation_ui_sdk_description" translatable="false">Hosts examples to demonstrate the use of the UI SDK</string>
+    <string name="navigation_ui_sdk_description" translatable="false">Hosts examples to demonstrate the use of the Navigation UI SDK.</string>
 
     <string name="title_offboard_router_kotlin" translatable="false">Offboard Router Kotlin</string>
     <string name="description_offboard_router_kotlin" translatable="false">Shows routes using offboard routing api in Kotlin code.</string>
 
-    <string name="title_offboard_router_java" translatable="false">Offboard Router Java</string>
+    <string name="title_offboard_router_java" translatable="false">Offboard router Java</string>
     <string name="description_offboard_router_java" translatable="false">Shows routes using offboard routing api in Java code.</string>
 
-    <string name="title_onboard_router_kotlin" translatable="false">Onboard Router Kotlin</string>
+    <string name="title_onboard_router_kotlin" translatable="false">Onboard router Kotlin</string>
     <string name="description_onboard_router_kotlin" translatable="false">Shows routes using onboard routing api in Kotlin code.</string>
 
-    <string name="title_onboard_router_java" translatable="false">Onboard Router Java</string>
+    <string name="title_onboard_router_java" translatable="false">Onboard router Java</string>
     <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
 
-    <string name="title_hybrid_router_kotlin" translatable="false">Hybrid Router Kotlin</string>
+    <string name="title_hybrid_router_kotlin" translatable="false">Hybrid router Kotlin</string>
     <string name="description_hybrid_router_kotlin" translatable="false">Shows routes using hybrid routing api in Kotlin code.</string>
 
-    <string name="title_hybrid_router_java" translatable="false">Hybrid Router Java</string>
+    <string name="title_hybrid_router_java" translatable="false">Hybrid router Java</string>
     <string name="description_hybrid_router_java" translatable="false">Shows routes using hybrid routing api in Java code.</string>
 
-    <string name="title_trip_service_kotlin" translatable="false">Trip Service Kotlin</string>
-    <string name="description_trip_service_kotlin" translatable="false">Shows how to use the Service to push notifications in Kotlin code.</string>
+    <string name="title_trip_service_kotlin" translatable="false">TripService Kotlin</string>
+    <string name="description_trip_service_kotlin" translatable="false">Shows how to use the TripService to push notifications in Kotlin code.</string>
 
-    <string name="title_trip_session_kotlin" translatable="false">Trip Session Kotlin</string>
-    <string name="description_trip_session_kotlin" translatable="false">Shows how to use the Session API in Kotlin code.</string>
+    <string name="title_trip_session_kotlin" translatable="false">TripSession Kotlin</string>
+    <string name="description_trip_session_kotlin" translatable="false">Shows how to use the TripSession in Kotlin code.</string>
 
-    <string name="title_simple_navigation_kotlin" translatable="false">Simple Mapbox Navigation Kotlin</string>
-    <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation in Kotlin code.</string>
+    <string name="title_simple_navigation_kotlin" translatable="false">Simple MapboxNavigation Kotlin</string>
+    <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the MapboxNavigation class in Kotlin code.</string>
 
-    <string name="title_navigation_view" translatable="false">Navigation View</string>
-    <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn</string>
+    <string name="title_navigation_view" translatable="false">NavigationView</string>
+    <string name="description_navigation_view" translatable="false">Shows how to use NavigationView to implement turn by turn.</string>
 
-    <string name="title_custom_puck_example" translatable="false">Custom Puck</string>
-    <string name="description_custom_puck_example" translatable="false">Shows how to use NavigationView with a custom puck</string>
+    <string name="title_custom_puck_example" translatable="false">Custom puck</string>
+    <string name="description_custom_puck_example" translatable="false">Shows how to use NavigationView with a custom puck.</string>
 
-    <string name="title_custom_camera_example" translatable="false">Custom Camera</string>
-    <string name="description_custom_camera_example" translatable="false">Shows how to use NavigationView with a custom camera tilt and zoom</string>
+    <string name="title_custom_camera_example" translatable="false">Custom camera</string>
+    <string name="description_custom_camera_example" translatable="false">Shows how to use NavigationView with a custom camera tilt and zoom.</string>
 
-    <string name="title_custom_ui_component_style" translatable="false">Custom UI Component Style</string>
-    <string name="description_custom_ui_component_style" translatable="false">Shows how to use your own colors to style the UI SDK Components: InstructionView, SummaryBottomSheet, and so on</string>
+    <string name="title_custom_ui_component_style" translatable="false">Custom UI component style</string>
+    <string name="description_custom_ui_component_style" translatable="false">Shows how to use your own colors to style the UI SDK Components: InstructionView, SummaryBottomSheet, and so on.</string>
 
-    <string name="title_building_highlight_kotlin" translatable="false">Building Footprint Highlight</string>
-    <string name="description_building_highlight_kotlin" translatable="false">Use the Nav UI SDK\'s BuildingFootprintHighlightLayer to show and customize a highlighted building footprint. Great to show the final destination building location. Example\'s in Kotlin.</string>
-
-    <string name="title_final_destination_building_highlight_kotlin" translatable="false">Final Destination Building Highlight UI</string>
-    <string name="description_final_destination_building_highlight_kotlin" translatable="false">Show how the final destination building footprint can be highlighted when the device has arrived.</string>
+    <string name="title_building_highlight_kotlin" translatable="false">Building footprint highlight</string>
+    <string name="description_building_highlight_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize a highlighted building footprint. Great to show the final destination building location. Example\'s in Kotlin.</string>
 
     <string name="title_ui_building_extrusions_kotlin" translatable="false">Building extrusions</string>
-    <string name="description_ui_building_extrusions_kotlin" translatable="false">Use the Nav UI SDK\'s BuildingExtrusionLayer to show and customize 3D building extrusions.</string>
+    <string name="description_ui_building_extrusions_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize 3D building extrusions.</string>
 
-    <string name="title_replay_navigation_kotlin" translatable="false">ReplayEngineActivity</string>
-    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the Mapbox Navigation with the replay engine in Kotlin code.</string>
+    <string name="title_replay_navigation_kotlin" translatable="false">Replay engine</string>
+    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the MapboxNavigation class with the replay engine in Kotlin code.</string>
 
-    <string name="title_replay_history_kotlin" translatable="false">ReplayHistoryActivity</string>
+    <string name="title_replay_history_kotlin" translatable="false">Replay history</string>
     <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
     <string name="replay_history_player_playback_seekbar" translatable="false">Replay speed %d</string>
 
-    <string name="title_reroute_view" translatable="false">RerouteActivity</string>
+    <string name="title_reroute_view" translatable="false">Reroute events</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
 
-    <string name="title_basic_navigation_kotlin" translatable="false">BasicNavigationActivity</string>
-    <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from source to destination using Mapbox Navigation.</string>
+    <string name="title_basic_navigation_kotlin" translatable="false">Basic navigation</string>
+    <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from the device location to a destination using the MapboxNavigation class.</string>
 
-    <string name="title_basic_navigation_sdk_only_kotlin" translatable="false">BasicNavSdkOnlyActivity</string>
-    <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Demonstrates how to combine Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
+    <string name="title_basic_navigation_sdk_only_kotlin" translatable="false">Basic Navigation + Maps SDK integration</string>
+    <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Demonstrates how to combine the Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
 
-    <string name="title_free_drive_kotlin" translatable="false">FreeDriveNavigationActivity</string>
-    <string name="description_free_drive_kotlin" translatable="false">Demonstrates how to navigate in a free drive scenario using Mapbox Navigation.</string>
+    <string name="title_free_drive_kotlin" translatable="false">Free drive navigation</string>
+    <string name="description_free_drive_kotlin" translatable="false">Demonstrates how to navigate in a free drive scenario using the MapboxNavigation class.</string>
 
-    <string name="title_guidance_view" translatable="false">GuidanceViewActivity</string>
-    <string name="description_guidance_view" translatable="false">Demonstrate the use of guidance view to show images at proper junctions</string>
+    <string name="title_guidance_view" translatable="false">GuidanceView</string>
+    <string name="description_guidance_view" translatable="false">Demonstrates the use of a GuidanceView to show an instructional image at proper junctions.</string>
 
-    <string name="title_faster_route" translatable="false">FasterRouteActivity</string>
-    <string name="description_faster_route" translatable="false">Demonstrate how to use MapboxNavigation to listen for faster route</string>
+    <string name="title_faster_route" translatable="false">Faster route</string>
+    <string name="description_faster_route" translatable="false">Demonstrate how to use the MapboxNavigation class to listen for a faster route.</string>
 
-    <string name="title_multiple_stops" translatable="false">MultipleStopsActivity</string>
-    <string name="description_multiple_stops" translatable="false">Demonstrate how to use MultipleStops</string>
+    <string name="title_multiple_stops" translatable="false">Multiple stops</string>
+    <string name="description_multiple_stops" translatable="false">Demonstrates how to use navigate to multiple stops.</string>
 
-    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheetActivity</string>
-    <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet, Recenter button with core SDK.</string>
+    <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
+    <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet and a recenter button with the Navigation SDK.</string>
 
-    <string name="title_feedback_button" translatable="false">FeedbackButtonActivity</string>
-    <string name="description_feedback_button" translatable="false">Shows how to integrate FeedbackButton about the Feedback Flow with core SDK.</string>
+    <string name="title_feedback_button" translatable="false">Feedback button</string>
+    <string name="description_feedback_button" translatable="false">Shows how to integrate FeedbackButton about the Feedback Flow with the Navigation SDK.</string>
 
-    <string name="title_instruction_view" translatable="false">InstructionViewActivity</string>
-    <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with core SDK.</string>
+    <string name="title_instruction_view" translatable="false">InstructionView</string>
+    <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with the Navigation SDK.</string>
 
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
-    <string name="description_component_navigation" translatable="false">MapboxNavigation with UI components</string>
+    <string name="description_component_navigation" translatable="false">Shows how to use the MapboxNavigation class with UI components.</string>
 
-    <string name="title_debug_navigation_kotlin" translatable="false">Debug Mapbox Navigation Kotlin</string>
-    <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update</string>
+    <string name="title_debug_navigation_kotlin" translatable="false">Debug MapboxNavigation Kotlin</string>
+    <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update.</string>
 
     <string name="settings" translatable="false">Settings</string>
     <string name="simulate_route" translatable="false">Simulate Route</string>
