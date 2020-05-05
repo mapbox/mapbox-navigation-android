@@ -157,15 +157,6 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun stopSessionCallsMapboxNativeNavigatorReset() {
-        tripSession.start()
-
-        tripSession.stop()
-
-        verify { navigator.reset() }
-    }
-
-    @Test
     fun stopSessionDoesNotClearUpRoute() {
         tripSession.route = route
         tripSession.start()

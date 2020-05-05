@@ -12,12 +12,16 @@ import com.mapbox.navigation.core.internal.trip.service.MapboxTripService
 import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
         router: Router
     ): DirectionsSession =
         MapboxDirectionsSession(router)
+
+    fun createNativeNavigator(): MapboxNativeNavigator = MapboxNativeNavigatorImpl
 
     fun createTripService(
         applicationContext: Context,
@@ -34,12 +38,14 @@ internal object NavigationComponentProvider {
         locationEngine: LocationEngine,
         locationEngineRequest: LocationEngineRequest,
         navigatorPredictionMillis: Long,
+        navigator: MapboxNativeNavigator,
         logger: Logger
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
         locationEngineRequest,
         navigatorPredictionMillis,
+        navigator = navigator,
         logger = logger
     )
 
