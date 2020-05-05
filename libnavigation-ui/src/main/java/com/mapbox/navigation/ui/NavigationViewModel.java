@@ -25,6 +25,7 @@ import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.TimeFormat;
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -52,6 +53,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
@@ -63,11 +65,11 @@ public class NavigationViewModel extends AndroidViewModel {
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
 
-  public final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
-  public final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
-  public final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
-  public final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
-  public final MutableLiveData<RouteJunctionModel> routeJunctionModel = new MutableLiveData<>();
+  private final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
+  private final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
+  private final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  private final MutableLiveData<RouteJunctionModel> routeJunctionModel = new MutableLiveData<>();
   private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -250,6 +252,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.unregisterOffRouteObserver(offRouteObserver);
     navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
+    navigation.detachFasterRouteObserver();
     navigation.stopTripSession();
   }
 
@@ -313,7 +316,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return isFeedbackSentSuccess;
   }
 
-  LiveData<Location> retrieveLocationUdpates() {
+  LiveData<Location> retrieveLocationUpdates() {
     return locationUpdates;
   }
 
@@ -323,6 +326,10 @@ public class NavigationViewModel extends AndroidViewModel {
 
   public LiveData<InstructionModel> retrieveInstructionModel() {
     return instructionModel;
+  }
+
+  public LiveData<RouteJunctionModel> retrieveRouteJunctionModelUpdates() {
+    return routeJunctionModel;
   }
 
   public LiveData<BannerInstructionModel> retrieveBannerInstructionModel() {
@@ -443,7 +450,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerOffRouteObserver(offRouteObserver);
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
-    // navigation.addFasterRouteListener(fasterRouteListener); TODO waiting for implementation
+    navigation.attachFasterRouteObserver(fasterRouteObserver);
   }
 
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
@@ -473,13 +480,34 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  // TODO Faster route
-  /*private FasterRouteListener fasterRouteListener = new FasterRouteListener() {
-    @Override
-    public void fasterRouteFound(DirectionsRoute directionsRoute) {
-      updateRoute(directionsRoute);
+  private void updateRoute(DirectionsRoute route) {
+    this.route.setValue(route);
+    if (!isChangingConfigurations) {
+      startNavigation(route);
+      updateReplayEngine(route);
+      sendEventOnRerouteAlong(route);
+      isOffRoute.setValue(false);
     }
-  };*/
+    resetConfigurationFlag();
+  }
+
+  private FasterRouteObserver fasterRouteObserver = new FasterRouteObserver() {
+    @Override
+    public void onFasterRoute(
+            @NotNull DirectionsRoute currentRoute,
+            @NotNull DirectionsRoute alternativeRoute,
+            boolean isAlternativeFaster
+    ) {
+      if (isAlternativeFaster) {
+        updateRoute(alternativeRoute);
+      }
+    }
+
+    @Override
+    public long restartAfterMillis() {
+      return TimeUnit.MINUTES.toMillis(2);
+    }
+  };
 
   private RoutesObserver routesObserver = new RoutesObserver() {
     @Override
