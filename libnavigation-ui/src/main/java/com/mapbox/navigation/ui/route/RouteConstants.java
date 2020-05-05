@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.route;
 
 class RouteConstants {
-  static final String CONGESTION_KEY = "congestion";
   static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
   static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
   static final String PRIMARY_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
@@ -37,15 +36,13 @@ class RouteConstants {
   static final float OPAQUE = 0.0f;
   static final int ARROW_HIDDEN_ZOOM_LEVEL = 14;
   static final float TRANSPARENT = 1.0f;
-  static final String LAYER_ABOVE_UPCOMING_MANEUVER_ARROW = "com.mapbox.annotations.points";
-  static final int FIRST_COLLECTION_INDEX = 0;
   static final String WAYPOINT_PROPERTY_KEY = "wayPoint";
   static final String WAYPOINT_ORIGIN_VALUE = "origin";
   static final String WAYPOINT_DESTINATION_VALUE = "destination";
-  static final String PRIMARY_ROUTE_PROPERTY_KEY = "primary-route";
   static final String MODERATE_CONGESTION_VALUE = "moderate";
   static final String HEAVY_CONGESTION_VALUE = "heavy";
   static final String SEVERE_CONGESTION_VALUE = "severe";
   static final String ORIGIN_MARKER_NAME = "originMarker";
   static final String DESTINATION_MARKER_NAME = "destinationMarker";
+  static final String MAPBOX_LOCATION_ID = "mapbox-location";
 }
