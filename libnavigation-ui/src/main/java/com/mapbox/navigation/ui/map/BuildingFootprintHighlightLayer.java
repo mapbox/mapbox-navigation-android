@@ -6,7 +6,6 @@ import android.graphics.PointF;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
@@ -22,6 +21,14 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
+/**
+ * This layer handles the creation and customization of a {@link FillLayer}
+ * to highlight the footprint of an individual building. For now, this layer is only
+ * compatible with the Mapbox Streets v8 vector tile source. See
+ * [https://docs.mapbox.com/vector-tiles/reference/mapbox-streets-v8/]
+ * (https://docs.mapbox.com/vector-tiles/reference/mapbox-streets-v8/) for more information
+ * about the Mapbox Streets v8 vector tile source.
+ */
 public class BuildingFootprintHighlightLayer {
 
   private static final String BUILDING_FOOTPRINT_SOURCE_ID = "building-source-id";
@@ -31,15 +38,13 @@ public class BuildingFootprintHighlightLayer {
   private static final Integer DEFAULT_FOOTPRINT_COLOR = Color.RED;
   private static final Float DEFAULT_BUILDING_FOOTPRINT_OPACITY = 1f;
   private final MapboxMap mapboxMap;
-  private final MapView mapView;
   private Polygon buildingPolygon;
   private Feature buildingPolygonFeature;
   private Integer color;
   private Float opacity;
 
-  public BuildingFootprintHighlightLayer(MapboxMap mapboxMap, MapView mapView) {
+  public BuildingFootprintHighlightLayer(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapView = mapView;
   }
 
   /**
@@ -48,9 +53,6 @@ public class BuildingFootprintHighlightLayer {
    * @param visible true if the layer should be placed/displayed. False if it should be hidden.
    */
   public void updateVisibility(final boolean visible) {
-    if (mapView.isDestroyed()) {
-      return;
-    }
     mapboxMap.getStyle(new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {

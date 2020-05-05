@@ -119,8 +119,7 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Nav UI SDK's BuildingFootprintHighlightLayer class.
-                buildingFootprintHighlightLayer = BuildingFootprintHighlightLayer(mapboxMap,
-                        navigationView.findViewById(R.id.navigationMapView))
+                buildingFootprintHighlightLayer = BuildingFootprintHighlightLayer(mapboxMap)
                 adjust_highlight_color_and_opacity.show()
 
                 adjust_highlight_color_and_opacity.setOnClickListener {
