@@ -41,9 +41,6 @@ import com.mapbox.navigation.ui.utils.MapUtils
 import com.mapbox.navigation.utils.extensions.parallelMap
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.turf.TurfMeasurement
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 
 /**
  * Responsible for the appearance of the route lines on the map. This class applies styling
@@ -474,33 +471,27 @@ internal class MapRouteLine(
     }
 
     private fun drawRoutes(routeData: List<RouteFeatureData>) {
-        routeData.firstOrNull { it.route == primaryRoute }?.let {
+        val partitionedRoutes = routeData.partition { it.route == primaryRoute }
+
+        partitionedRoutes.first.firstOrNull()?.let {
             setPrimaryRoutesSource(it.featureCollection)
+            val lineString: LineString = getLineStringForRoute(it.route)
+            val expression = buildRouteLineExpression(
+                it.route,
+                lineString,
+                true,
+                0.0,
+                ::getRouteColorForCongestion)
+
+            if (style.isFullyLoaded) {
+                style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
+            }
         }
 
-        routeData.filter { it.route != primaryRoute }.mapNotNull {
+        partitionedRoutes.second.mapNotNull {
             it.featureCollection.features()
         }.flatten().let {
             setAlternativeRoutesSource(FeatureCollection.fromFeatures(it))
-        }
-
-        primaryRoute?.let {
-            decorateRouteWithCongestionIndicators(it)
-        }
-    }
-
-    private fun decorateRouteWithCongestionIndicators(route: DirectionsRoute) {
-        ThreadController.getMainScopeAndRootJob().scope.launch {
-            val deferredExpression = async(Dispatchers.Default) {
-                val lineString: LineString = getLineStringForRoute(route)
-                buildRouteLineExpression(
-                    route,
-                    lineString,
-                    true,
-                    0.0,
-                    ::getRouteColorForCongestion)
-            }
-            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(deferredExpression.await()))
         }
     }
 
@@ -596,11 +587,13 @@ internal class MapRouteLine(
      * @param expression the Expression to apply to the layer properties
      */
     fun decorateRouteLine(expression: Expression) {
-        style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(
-            lineGradient(
-                expression
+        if (style.isFullyLoaded) {
+            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(
+                lineGradient(
+                    expression
+                )
             )
-        )
+        }
     }
 
     internal object MapRouteLineSupport {

@@ -146,7 +146,6 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.mapboxMap.addOnMapClickListener(this);
     MapboxLogger.INSTANCE.d(new Message("Map is ready"));
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       MapboxLogger.INSTANCE.d(new Message("Style setting finished"));
@@ -157,6 +156,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint, LENGTH_SHORT)
           .show();
       newOrigin();
+      this.mapboxMap.addOnMapClickListener(this);
     });
   }
 
