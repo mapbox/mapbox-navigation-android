@@ -439,7 +439,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigation(Context context, NavigationOptions options, LocationEngine locationEngine) {
-    navigation = new MapboxNavigation(context, accessToken, options, locationEngine);
+    navigation = new MapboxNavigation(context, options, locationEngine);
     addNavigationListeners();
   }
 

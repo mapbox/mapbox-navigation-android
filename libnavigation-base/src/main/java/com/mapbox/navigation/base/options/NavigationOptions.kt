@@ -23,12 +23,14 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * in such a way as to project the location forward along the current trajectory so as to
  * appear more in sync with the users ground-truth location
  *
+ * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
  * @param onboardRouterConfig [MapboxOnboardRouterConfig] defines configuration for the default on-board router
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
  */
 data class NavigationOptions constructor(
+    val accessToken: String?,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
@@ -41,6 +43,7 @@ data class NavigationOptions constructor(
      * Get a builder to customize a subset of current options.
      */
     fun toBuilder() = Builder()
+        .accessToken(accessToken)
         .timeFormatType(timeFormatType)
         .navigatorPredictionMillis(navigatorPredictionMillis)
         .distanceFormatter(distanceFormatter)
@@ -51,12 +54,19 @@ data class NavigationOptions constructor(
      * Build a new [NavigationOptions]
      */
     class Builder {
+        private var _accessToken: String? = null
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
+
+        /**
+         * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
+         */
+        fun accessToken(accessToken: String?) =
+            apply { this._accessToken = accessToken }
 
         /**
          * Defines time format for calculation remaining trip time
@@ -100,6 +110,7 @@ data class NavigationOptions constructor(
          */
         fun build(): NavigationOptions {
             return NavigationOptions(
+                accessToken = _accessToken,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,

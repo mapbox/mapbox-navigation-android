@@ -74,7 +74,6 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
 
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
-                Utils.getMapboxAccessToken(this),
                 mapboxNavigationOptions,
                 LocationEngineProvider.getBestLocationEngine(this)
         )

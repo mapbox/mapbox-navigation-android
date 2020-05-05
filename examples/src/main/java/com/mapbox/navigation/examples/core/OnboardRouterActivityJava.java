@@ -6,6 +6,6 @@ public class OnboardRouterActivityJava extends BaseRouterActivityJava {
 
   @Override
   Router setupRouter() {
-    return setupOnboardRouter();
+    return setupOnboardRouter(this);
   }
 }

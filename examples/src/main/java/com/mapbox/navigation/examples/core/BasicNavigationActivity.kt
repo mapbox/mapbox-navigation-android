@@ -76,7 +76,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             locationEngine = getLocationEngine()
         ).apply {

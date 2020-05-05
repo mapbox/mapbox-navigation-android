@@ -31,12 +31,14 @@ import kotlinx.coroutines.withContext
  * It uses offline storage path to store and retrieve data, setup endpoint,
  * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
  *
+ * @param accessToken Mapbox token
  * @param navigatorNative Native Navigator
  * @param config configuration for on-board router
  * @param logger interface for logging any events
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
+    private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
     config: MapboxOnboardRouterConfig,
     private val logger: Logger
@@ -67,7 +69,7 @@ class MapboxOnboardRouter(
                     TileEndpointConfiguration(
                         it.host,
                         it.version,
-                        it.token,
+                        accessToken,
                         it.userAgent,
                         ""
                     )

@@ -151,10 +151,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         mapboxNavigationOptions.onboardRouterConfig?.toBuilder()?.tilePath("")
 
-        mapboxNavigation = MapboxNavigation(
-                applicationContext,
-                Utils.getMapboxAccessToken(this), mapboxNavigationOptions
-        ).also {
+        mapboxNavigation = MapboxNavigation(applicationContext, mapboxNavigationOptions).also {
             it.registerRoutesObserver(routesObserver)
         }
 

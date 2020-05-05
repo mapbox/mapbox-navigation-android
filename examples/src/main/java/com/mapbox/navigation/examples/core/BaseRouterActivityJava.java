@@ -75,7 +75,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
         MapboxNavigationAccounts.getInstance(context));
   }
 
-  public static Router setupOnboardRouter() {
+  public static Router setupOnboardRouter(Context context) {
     File file = new File(
         Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath(),
         "2019_04_13-00_00_11");
@@ -88,12 +88,17 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
         null // working with pre-fetched tiles only
     );
 
-    return new MapboxOnboardRouter(MapboxNativeNavigatorImpl.INSTANCE, config, MapboxLogger.INSTANCE);
+    return new MapboxOnboardRouter(
+            Utils.getMapboxAccessToken(context),
+            MapboxNativeNavigatorImpl.INSTANCE,
+            config,
+            MapboxLogger.INSTANCE
+    );
   }
 
   public static Router setupHybridRouter(Context applicationContext) {
     return new MapboxHybridRouter(
-        setupOnboardRouter(),
+        setupOnboardRouter(applicationContext),
         setupOffboardRouter(applicationContext),
         new NetworkStatusService(applicationContext)
     );

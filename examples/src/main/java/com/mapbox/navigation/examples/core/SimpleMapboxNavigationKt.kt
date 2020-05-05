@@ -484,14 +484,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         return if (shouldSimulateRoute()) {
             return MapboxNavigation(
                 applicationContext,
-                Utils.getMapboxAccessToken(this),
                 navigationOptions = options,
                 locationEngine = replayRouteLocationEngine
             )
         } else {
             MapboxNavigation(
                 applicationContext,
-                Utils.getMapboxAccessToken(this),
                 navigationOptions = options
             )
         }

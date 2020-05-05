@@ -68,7 +68,6 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             replayRouteLocationEngine
         ).apply {

@@ -114,8 +114,8 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required
  * todo should we expose a "primaryRouteIndex" field instead of relying on the list's order?
  *
  * @param context activity/fragment's context
- * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
- * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK
+ * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
+ * Use [defaultNavigationOptions] to set default options
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
@@ -123,17 +123,14 @@ class MapboxNavigation
 @JvmOverloads
 constructor(
     private val context: Context,
-    private val accessToken: String?,
-    private val navigationOptions: NavigationOptions = defaultNavigationOptions(
-        context,
-        accessToken
-    ),
+    private val navigationOptions: NavigationOptions,
     val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
 ) {
 
+    private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
     private val navigator: MapboxNativeNavigator
@@ -154,7 +151,6 @@ constructor(
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {
-
         ThreadController.init()
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         navigationSession = NavigationComponentProvider.createNavigationSession()
@@ -614,6 +610,7 @@ constructor(
             MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
+                    String::class.java to accessToken,
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
@@ -685,6 +682,7 @@ constructor(
                 .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
                 .build()
             val builder = NavigationOptions.Builder()
+                .accessToken(accessToken)
                 .timeFormatType(TimeFormat.NONE_SPECIFIED)
                 .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
@@ -708,7 +706,6 @@ constructor(
                     Endpoint(
                         tilesUri.toString(),
                         tilesVersion,
-                        accessToken ?: "",
                         "MapboxNavigationNative"
                     )
                 )
