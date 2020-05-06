@@ -39,7 +39,6 @@ import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.BannerInstructionModel;
 import com.mapbox.navigation.ui.instruction.InstructionModel;
 import com.mapbox.navigation.ui.junction.RouteJunctionModel;
-import com.mapbox.navigation.ui.legacy.RouteUtils;
 import com.mapbox.navigation.ui.summary.SummaryModel;
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
@@ -88,14 +87,12 @@ public class NavigationViewModel extends AndroidViewModel {
   private RouteProgress routeProgress;
   private FeedbackItem feedbackItem;
   private String language;
-  private RouteUtils routeUtils;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
   @TimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
-  private boolean arrivedAtFinalDestination = false;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
   private NavigationViewModelProgressObserver navigationProgressObserver =
@@ -107,7 +104,6 @@ public class NavigationViewModel extends AndroidViewModel {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
     initializeLocationEngine();
-    this.routeUtils = new RouteUtils();
     this.connectivityController = new MapConnectivityController();
   }
 
@@ -266,12 +262,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   void updateRouteProgress(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
-    sendEventArrival(routeProgress);
-    if (routeUtils.deviceCloseEnoughToFinalDestination(routeProgress,
-        navigationViewOptions.maxMetersToTriggerDestinationArrival())
-        && !arrivedAtFinalDestination) {
-      sendEventFinalDestinationArrival();
-    }
+
     instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
     summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
     routeJunctionModel.setValue(new RouteJunctionModel(routeProgress));
@@ -564,19 +555,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private void sendEventFeedback(FeedbackItem feedbackItem) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
-    }
-  }
-
-  private void sendEventArrival(RouteProgress routeProgress) {
-    if (navigationViewEventDispatcher != null && routeUtils.isArrivalEvent(routeProgress)) {
-      navigationViewEventDispatcher.onArrival();
-    }
-  }
-
-  private void sendEventFinalDestinationArrival() {
-    if (navigationViewEventDispatcher != null) {
-      navigationViewEventDispatcher.onFinalDestinationArrival();
-      arrivedAtFinalDestination = true;
     }
   }
 

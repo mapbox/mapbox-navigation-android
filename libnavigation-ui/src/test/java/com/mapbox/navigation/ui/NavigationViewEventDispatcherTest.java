@@ -216,49 +216,6 @@ public class NavigationViewEventDispatcherTest {
   }
 
   @Test
-  public void setArrivalListener_arrivalListenerIsCalled() throws Exception {
-    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
-    RouteListener routeListener = mock(RouteListener.class);
-    eventDispatcher.assignRouteListener(routeListener);
-
-    eventDispatcher.onArrival();
-
-    verify(routeListener, times(1)).onArrival();
-  }
-
-  @Test
-  public void onRouteListenerNotSet_arrivalListenerIsNotCalled() throws Exception {
-    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
-    RouteListener routeListener = mock(RouteListener.class);
-
-    eventDispatcher.onArrival();
-
-    verify(routeListener, times(0)).onArrival();
-  }
-
-  @Test
-  public void setFinalDestinationArrivalListener_finalDestinationArrivalListenerIsCalled() throws Exception {
-    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
-    RouteListener routeListener = mock(RouteListener.class);
-    eventDispatcher.assignRouteListener(routeListener);
-
-    eventDispatcher.onFinalDestinationArrival();
-
-    verify(routeListener, times(1)).onFinalDestinationArrival();
-  }
-
-  @Test
-  public void setFinalDestinationArrivalListener_finalDestinationArrivalListenerIsNotCalled() throws Exception {
-    NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
-    RouteListener routeListener = mock(RouteListener.class);
-
-    eventDispatcher.onFinalDestinationArrival();
-
-    verify(routeListener, times(0)).onFinalDestinationArrival();
-  }
-
-
-  @Test
   public void setFeedbackListener_feedbackOpenIsCalled() throws Exception {
     NavigationViewEventDispatcher eventDispatcher = new NavigationViewEventDispatcher();
     FeedbackListener feedbackListener = mock(FeedbackListener.class);
