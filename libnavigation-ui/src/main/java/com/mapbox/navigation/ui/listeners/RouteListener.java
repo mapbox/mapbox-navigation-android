@@ -29,7 +29,7 @@ public interface RouteListener {
   boolean allowRerouteFrom(Point offRoutePoint);
 
   /**
-   * Will triggered only if {@link RouteListener#allowRerouteFrom(Point)} returns true.
+   * Will trigger only if {@link RouteListener#allowRerouteFrom(Point)} returns true.
    * <p>
    * This serves as the official off route event and will continue the process to fetch a new route
    * with the given off route {@link Point}.
@@ -55,21 +55,4 @@ public interface RouteListener {
    * @since 0.8.0
    */
   void onFailedReroute(String errorMessage);
-
-  /**
-   * Will trigger when a user has arrived at a given waypoint along a {@link DirectionsRoute}.
-   * <p>
-   * For example, if there are two {@link com.mapbox.api.directions.v5.models.LegStep}s, this callback
-   * will be triggered twice, once for each waypoint.
-   *
-   * @since 0.14.0
-   */
-  void onArrival();
-
-  /**
-   * Will trigger when a user has arrived at the final destination on
-   * the {@link DirectionsRoute}. The final destination is the same as the final
-   * {@link com.mapbox.api.directions.v5.models.DirectionsWaypoint} along the route.
-   */
-  void onFinalDestinationArrival();
 }

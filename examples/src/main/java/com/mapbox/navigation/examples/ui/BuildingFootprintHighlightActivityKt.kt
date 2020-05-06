@@ -5,20 +5,21 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory.zoomTo
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.stops.ArrivalObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
 import com.mapbox.navigation.ui.listeners.NavigationListener
-import com.mapbox.navigation.ui.listeners.RouteListener
 import com.mapbox.navigation.ui.map.BuildingFootprintHighlightLayer
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -27,10 +28,10 @@ import kotlinx.android.synthetic.main.activity_final_destination_arrival_buildin
 /**
  * This example shows how to use the Navigation UI SDK's [BuildingFootprintHighlightLayer]
  * class to highlight a building footprint. The final destination arrival callback is from
- * [RouteListener.onFinalDestinationArrival].
+ * [ArrivalObserver.onRouteArrival].
  */
 class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
-    BannerInstructionsListener, RouteListener {
+    BannerInstructionsListener, ArrivalObserver {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
@@ -109,8 +110,8 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 val optionsBuilder = NavigationViewOptions.builder()
                 optionsBuilder.navigationListener(this)
 
-                // Pass the RouteListener interface (this activity)
-                optionsBuilder.routeListener(this)
+                // Pass the ArrivalObserver interface (this activity)
+                optionsBuilder.arrivalObserver(this)
 
                 optionsBuilder.directionsRoute(directionsRoute)
                 optionsBuilder.shouldSimulateRoute(true)
@@ -138,29 +139,11 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
         return instructions!!
     }
 
-    override fun allowRerouteFrom(offRoutePoint: Point?): Boolean {
-        // Not needed in this example
-        return true
-    }
-
-    override fun onOffRoute(offRoutePoint: Point?) {
+    override fun onStopArrival(routeLegProgress: RouteLegProgress) {
         // Not needed in this example
     }
 
-    override fun onRerouteAlong(directionsRoute: DirectionsRoute?) {
-        // Not needed in this example
-    }
-
-    override fun onFailedReroute(errorMessage: String?) {
-        // Not needed in this example
-    }
-
-    override fun onArrival() {
-        // Not needed in this example
-    }
-
-    override fun onFinalDestinationArrival() {
-
+    override fun onRouteArrival(routeProgress: RouteProgress) {
         mapboxMap.easeCamera(zoomTo(18.0), 1800)
 
         // Adjust the visibility of the building footprint highlight layer
@@ -178,11 +161,11 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
     }
 
     override fun onNavigationRunning() {
-        // todo
+        // Not needed in this example
     }
 
     override fun onNavigationFinished() {
-        // todo
+        // Not needed in this example
     }
 
     override fun onCancelNavigation() {

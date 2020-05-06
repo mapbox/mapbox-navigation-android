@@ -7,8 +7,8 @@ import com.google.auto.value.AutoValue;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.options.NavigationOptions;
-import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.Rounding;
+import com.mapbox.navigation.core.stops.ArrivalObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.Camera;
@@ -60,7 +60,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
   public abstract LocationEngine locationEngine();
 
   @Nullable
-  public abstract Float maxMetersToTriggerDestinationArrival();
+  public abstract ArrivalObserver arrivalObserver();
 
   public abstract Integer roundingIncrement();
 
@@ -102,15 +102,12 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder locationEngine(LocationEngine locationEngine);
 
     /**
-     * The number of meters the device needs to be away from the final route destination to trigger
-     * {@link RouteListener#onFinalDestinationArrival()}. Once
-     * {@link RouteProgress#distanceRemaining()} is equal to or less than this meter number,
-     * the Nav UI SDK will fire the arrival method.
+     * Add an {@link ArrivalObserver} to monitor the progress of arrival, include stop arrival and route arrival.
      *
-     * @param maxMetersToTriggerDestinationArrival the number of meters away from the final destination
+     * @param arrivalObserver the observer instance to receive arrival callbacks
      * @return this builder
      */
-    public abstract Builder maxMetersToTriggerDestinationArrival(Float maxMetersToTriggerDestinationArrival);
+    public abstract Builder arrivalObserver(ArrivalObserver arrivalObserver);
 
     /**
      * Defines the increment displayed on the instruction view
