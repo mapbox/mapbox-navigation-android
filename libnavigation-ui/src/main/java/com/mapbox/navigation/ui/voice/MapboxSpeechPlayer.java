@@ -68,6 +68,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     if (isInvalidAnnouncement) {
       return;
     }
+    this.announcement = announcement;
     playAnnouncementTextAndTypeFrom(announcement);
   }
 
