@@ -59,11 +59,10 @@ internal class MapRouteProgressChangeListener(
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
         val currentRoute = routeProgress.route()
         val hasGeometry = currentRoute?.geometry()?.isNotEmpty() ?: false
-        if (currentRoute != null && hasGeometry && currentRoute != directionsRoute) {
-            routeLine.draw(currentRoute)
-            routeArrow.addUpcomingManeuverArrow(routeProgress)
+        if (hasGeometry && currentRoute != directionsRoute) {
+            routeLine.draw(currentRoute!!)
         } else {
-            if (vanishRouteLineEnabled && currentRoute != null && hasGeometry) {
+            if (vanishRouteLineEnabled && hasGeometry && (job == null || !job!!.isActive)) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val totalDist =
                         (routeProgress.distanceRemaining() + routeProgress.distanceTraveled())
@@ -71,7 +70,7 @@ internal class MapRouteProgressChangeListener(
                     if (dist > 0) {
                         val deferredExpression = async(Dispatchers.Default) {
                             val lineString: LineString =
-                                routeLine.getLineStringForRoute(currentRoute)
+                                routeLine.getLineStringForRoute(currentRoute!!)
                             buildRouteLineExpression(
                                 currentRoute,
                                 lineString,
@@ -80,12 +79,12 @@ internal class MapRouteProgressChangeListener(
                                 routeLine::getRouteColorForCongestion
                             )
                         }
-                        routeArrow.addUpcomingManeuverArrow(routeProgress)
                         routeLine.hideShieldLineAtOffset(dist)
                         routeLine.decorateRouteLine(deferredExpression.await())
                     }
                 }
             }
         }
+        routeArrow.addUpcomingManeuverArrow(routeProgress)
     }
 }
