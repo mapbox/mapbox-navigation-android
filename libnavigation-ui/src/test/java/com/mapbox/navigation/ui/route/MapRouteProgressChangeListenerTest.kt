@@ -70,33 +70,6 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should not update maneuver arrow without directions route`() {
-        every { routeLine.getPrimaryRoute() } returns null
-        val routeProgress: RouteProgress = mockk {
-            every { route() } returns null
-        }
-
-        progressChangeListener.onRouteProgressChanged(routeProgress)
-
-        verify(exactly = 0) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
-    }
-
-    @Test
-    fun `should not add maneuver arrow without geometry`() {
-        val newRoute: DirectionsRoute = mockk {
-            every { geometry() } returns null
-        }
-        val routeProgress: RouteProgress = mockk {
-            every { route() } returns newRoute
-        }
-        every { routeLine.getPrimaryRoute() } returns newRoute
-
-        progressChangeListener.onRouteProgressChanged(routeProgress)
-
-        verify(exactly = 0) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
-    }
-
-    @Test
     fun `should draw routes when route progress has geometry`() {
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {
