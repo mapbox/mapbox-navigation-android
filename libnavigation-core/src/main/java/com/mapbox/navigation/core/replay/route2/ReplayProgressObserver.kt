@@ -23,7 +23,7 @@ class ReplayProgressObserver(
     private var currentRouteLeg: RouteLeg? = null
 
     /**
-     * @param options allow you to control the driver and car behavior
+     * @param options allow you to control the driver and car behavior.
      */
     fun updateOptions(options: ReplayRouteOptions): ReplayProgressObserver {
         replayRouteMapper.options = options

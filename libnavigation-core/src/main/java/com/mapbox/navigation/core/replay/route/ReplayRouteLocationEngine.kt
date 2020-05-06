@@ -22,9 +22,12 @@ import java.util.ArrayList
  * @param logger [Logger](optional)
  * @param converter ReplayLocationConverter
  */
-class ReplayRouteLocationEngine(
+class ReplayRouteLocationEngine @JvmOverloads constructor(
     val logger: Logger? = null,
-    private val converter: ReplayLocationConverter
+    private val converter: ReplayLocationConverter = ReplayRouteLocationConverter(
+        DEFAULT_SPEED,
+        DEFAULT_DELAY
+    )
 ) : LocationEngine, Runnable {
 
     private var speed = DEFAULT_SPEED
@@ -36,17 +39,6 @@ class ReplayRouteLocationEngine(
     private var lastLocation = Location(REPLAY_ROUTE)
     private var route: DirectionsRoute? = null
     private var point: Point? = null
-
-    /**
-     * @param [Logger](optional)
-     */
-    constructor(logger: Logger? = null) : this(
-        logger,
-        ReplayRouteLocationConverter(
-            DEFAULT_SPEED,
-            DEFAULT_DELAY
-        )
-    )
 
     companion object {
         private const val HEAD = 0

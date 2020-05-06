@@ -1,12 +1,8 @@
 package com.mapbox.navigation.core.replay.history
 
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.base.common.logger.Logger
 import java.util.Collections.singletonList
-import kotlinx.coroutines.Job
-
-typealias ReplayEventsListener = (List<ReplayEventBase>) -> Unit
 
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
@@ -18,10 +14,13 @@ class ReplayHistoryPlayer(
     private val replayEvents = ReplayEvents(mutableListOf())
     private val replayEventSimulator = ReplayEventSimulator(replayEvents, logger)
 
-    private val replayEventsListeners: MutableList<ReplayEventsListener> = mutableListOf()
+    private val replayEventsObservers: MutableList<ReplayEventsObserver> = mutableListOf()
 
     /**
-     * Appends events to be replayed.
+     * Appends events to be replayed. Notice the basis of your [ReplayEventBase.eventTimestamp].
+     * When they are drastically different, you may need to [seekTo] events.
+     *
+     * @param events the events to be replayed.
      */
     fun pushEvents(events: List<ReplayEventBase>): ReplayHistoryPlayer {
         this.replayEvents.events.addAll(events)
@@ -29,33 +28,74 @@ class ReplayHistoryPlayer(
     }
 
     /**
-     * Events from the [ReplayEvents] will be published to your listener.
-     * Your subscriber will be removed after you call [finish]
+     * Clear all replay events.
      */
-    fun observeReplayEvents(function: ReplayEventsListener) {
-        replayEventsListeners.add(function)
+    fun clearEvents() {
+        replayEvents.events.clear()
     }
 
     /**
-     * The duration of the replay. This value will be between 0.0 and the total duration.
+     * Register replay event observers.
      *
-     * @return the duration in seconds
+     * @param observer the observer registered
      */
-    fun replayDurationSeconds(): Double {
-        val firstEvent = replayEvents.events.first()
-        val lastEvent = replayEvents.events.last()
-        return lastEvent.eventTimestamp - firstEvent.eventTimestamp
+    fun registerObserver(observer: ReplayEventsObserver) {
+        replayEventsObservers.add(observer)
     }
 
     /**
-     * Meant to be called from an Android component, such as an Activity, Fragment, or ViewModel.
-     * This will begin playing the [ReplayEvents] and notifying listeners attached to
-     * [observeReplayEvents]
+     * Remove registered observers.
+     *
+     * @param observer the observer being removed
+     * @return true if the observer was registered, false otherwise
      */
-    fun play(lifecycleOwner: LifecycleOwner): Job {
-        return replayEventSimulator.launchSimulator(lifecycleOwner) { replayEvents ->
-            replayEventsListeners.forEach { it(replayEvents) }
+    fun unregisterObserver(observer: ReplayEventsObserver): Boolean {
+        return replayEventsObservers.remove(observer)
+    }
+
+    /**
+     * Remove all registered observers. If the player is still playing,
+     * none of the events will be observed.
+     *
+     * @see [finish]
+     */
+    fun unregisterObservers() {
+        replayEventsObservers.clear()
+    }
+
+    /**
+     * This will begin playing the [ReplayEventBase] and notifying observers
+     * registered via [registerObserver]
+     */
+    fun play() {
+        replayEventSimulator.launchSimulator { replayEvents ->
+            replayEventsObservers.forEach { it.replayEvents(replayEvents) }
         }
+    }
+
+    /**
+     * Stop playing all remaining and incoming events. To play events, you must
+     * restart the player by calling [play].
+     *
+     * @see [playbackSpeed] to pause the player
+     * @see [finish] to clean up the player
+     */
+    fun stop() {
+        replayEventSimulator.stopSimulator()
+    }
+
+    /**
+     * This determines the speed of event playback. Default is 1.0 for 1x playback speed.
+     *
+     * For faster playback, use values greater than one such as 2x, 3x or even 4x.
+     * For slower playback, use values between 0 and 1; 0.25 will replay at 1/4th speed.
+     * To pause playback, use 0.0
+     *
+     * Negative (going backwards), is not supported. Use [seekTo] to go back in time.
+     */
+    fun playbackSpeed(scale: Double) {
+        check(scale >= 0.0) { "Negative playback is not supported: $scale" }
+        replayEventSimulator.playbackSpeed(scale)
     }
 
     /**
@@ -70,40 +110,40 @@ class ReplayHistoryPlayer(
         }
         firstUpdateLocation?.let { replayEvent ->
             val replayEvents = singletonList(replayEvent)
-            replayEventsListeners.forEach { it(replayEvents) }
+            replayEventsObservers.forEach { it.replayEvents(replayEvents) }
         }
     }
 
     /**
-     * This determines the speed of event playback. Default is 1.0 for 1x playback speed.
+     * The duration of the replay. This value will be between 0.0 and the total duration.
      *
-     * For faster playback, use values greater than one such as 2x, 3x or even 4x.
-     * For slower playback, use values between 0 and 1; 0.25 will replay at 1/4th speed.
-     * To pause playback, use 0.0
-     *
-     * Negative (going backwards), is not yet supported. Use [seekTo] to go backwards.
+     * @return the duration in seconds
      */
-    fun playbackSpeed(scale: Double) {
-        check(scale >= 0.0) { "Negative playback is not supported: $scale" }
-        replayEventSimulator.playbackSpeed(scale)
+    fun durationSeconds(): Double {
+        val firstEvent = replayEvents.events.first()
+        val lastEvent = replayEvents.events.last()
+        return lastEvent.eventTimestamp - firstEvent.eventTimestamp
     }
 
     /**
      * Seek to a time to play from.
      *
-     * @param replayTime time in seconds between 0.0 to [replayDurationSeconds]
+     * @param replayTime time in seconds between 0.0 to [durationSeconds]
      */
     fun seekTo(replayTime: Double) {
         val offsetTime = replayTime + replayEvents.events.first().eventTimestamp
         val indexOfEvent = replayEvents.events
             .indexOfFirst { offsetTime <= it.eventTimestamp }
-        check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${replayDurationSeconds()}: " }
+        check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${durationSeconds()}: " }
 
         replayEventSimulator.seekTo(indexOfEvent)
     }
 
     /**
      * Seek to the event you want to play from.
+     *
+     * @param replayEvent an event that has been pushed to [pushEvents]
+     * @throws IllegalStateException if [replayEvent] was not pushed
      */
     fun seekTo(replayEvent: ReplayEventBase) {
         val indexOfEvent = replayEvents.events.indexOf(replayEvent)
@@ -113,11 +153,11 @@ class ReplayHistoryPlayer(
     }
 
     /**
-     * Remove all the [observeReplayEvents]. Designed to be called in tear down functions like
-     * Activity.onDestroy, Fragment.onDestroy, or ViewModel.onCleared
+     * Convenience function to stop, remove listeners, and clean up the player.
      */
     fun finish() {
-        replayEventSimulator.stopPlaying()
-        replayEventsListeners.clear()
+        stop()
+        unregisterObservers()
+        clearEvents()
     }
 }

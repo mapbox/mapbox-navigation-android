@@ -75,11 +75,11 @@ class ReplayHistoryMapperTest {
     ) : ReplayEventBase
 
     private class ExampleCustomEventMapper : CustomEventMapper {
-        override fun invoke(eventType: String, parameters: LinkedTreeMap<*, *>): ReplayEventBase? {
+        override fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase? {
             return when (eventType) {
                 "end_transit" -> ExampleEndTransitEvent(
-                    eventTimestamp = parameters["event_timestamp"] as Double,
-                    properties = parameters["properties"] as Double
+                    eventTimestamp = properties["event_timestamp"] as Double,
+                    properties = properties["properties"] as Double
                 )
                 else -> null
             }
