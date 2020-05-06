@@ -414,9 +414,10 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void recreateRouteLine(Style style) {
-    Context context = mapView.getContext();
-    MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+    final Context context = mapView.getContext();
+    final MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
 
+    final List<DirectionsRoute> preExistingRoutes = routeLine.retrieveDirectionsRoutes();
     routeLine = new MapRouteLine(
             context,
             style,
@@ -428,7 +429,7 @@ public class NavigationMapRoute implements LifecycleObserver {
             routeLine.retrieveAlternativesVisible(),
             new MapRouteSourceProvider()
     );
-
+    routeLine.draw(preExistingRoutes);
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
