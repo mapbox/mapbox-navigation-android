@@ -3,6 +3,7 @@ package com.mapbox.navigation.route.hybrid
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
@@ -191,6 +192,36 @@ class MapboxHybridRouterTest {
         }
 
         verify { context.unregisterReceiver(any()) }
+    }
+
+    @Test
+    fun whenMultipleRoutesFetchedCallbacksHandledCorrectly() = runBlocking {
+        enableNetworkConnection()
+
+        val originalCallback: Router.Callback = mockk(relaxUnitFun = true)
+        val additionalCallbackFirst: Router.Callback = mockk(relaxUnitFun = true)
+        val additionalCallbackSecond: Router.Callback = mockk(relaxUnitFun = true)
+        val additionalCallbackThird: Router.Callback = mockk(relaxUnitFun = true)
+
+        val originalResult = listOf<DirectionsRoute>(DirectionsRoute.builder().build())
+        val additionalResultFirst = emptyList<DirectionsRoute>()
+        val additionalResultSecond = emptyList<DirectionsRoute>()
+        val additionalResultThird = emptyList<DirectionsRoute>()
+
+        hybridRouter.getRoute(routerOptions, originalCallback)
+        hybridRouter.getRoute(routerOptions, additionalCallbackFirst)
+        hybridRouter.getRoute(routerOptions, additionalCallbackSecond)
+        hybridRouter.getRoute(routerOptions, additionalCallbackThird)
+
+        internalCallback.captured.onResponse(originalResult)
+        internalCallback.captured.onResponse(additionalResultFirst)
+        internalCallback.captured.onResponse(additionalResultSecond)
+        internalCallback.captured.onResponse(additionalResultThird)
+
+        verify(exactly = 1) { originalCallback.onResponse(originalResult) }
+        verify(exactly = 1) { additionalCallbackFirst.onResponse(additionalResultFirst) }
+        verify(exactly = 1) { additionalCallbackSecond.onResponse(additionalResultSecond) }
+        verify(exactly = 1) { additionalCallbackThird.onResponse(additionalResultThird) }
     }
 
     private suspend fun enableNetworkConnection() = networkConnected(true)
