@@ -70,7 +70,6 @@ class NavigationPresenter {
       view.resumeCamera(location);
       resumeState = false;
     }
-    view.updateNavigationMap(location);
   }
 
   void onWayNameChanged(@NonNull String wayName) {

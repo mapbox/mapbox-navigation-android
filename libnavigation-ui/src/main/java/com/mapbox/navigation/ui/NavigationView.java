@@ -425,13 +425,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   @Override
-  public void updateNavigationMap(Location location) {
-    if (navigationMap != null) {
-      navigationMap.updateLocation(location);
-    }
-  }
-
-  @Override
   public void updateCameraRouteOverview() {
     if (navigationMap != null) {
       int[] padding = buildRouteOverviewPadding(getContext());
