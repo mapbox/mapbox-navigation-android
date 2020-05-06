@@ -44,8 +44,6 @@ public interface NavigationContract {
 
     void resumeCamera(Location location);
 
-    void updateNavigationMap(Location location);
-
     boolean isRecenterButtonVisible();
 
     void updateCameraRouteOverview();
