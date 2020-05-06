@@ -97,15 +97,15 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should only draw routes with geometry`() {
+    fun `should draw routes when route progress has geometry`() {
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {
-                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+                every { geometry() } returns null
             }
         )
         val routeProgress: RouteProgress = mockk {
             every { route() } returns mockk {
-                every { geometry() } returns null
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
             }
         }
         val newRoute: DirectionsRoute = mockk {
@@ -116,8 +116,7 @@ class MapRouteProgressChangeListenerTest {
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
-        verify(exactly = 0) { routeLine.draw(any<List<DirectionsRoute>>()) }
+        verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
     }
 
     @Test
