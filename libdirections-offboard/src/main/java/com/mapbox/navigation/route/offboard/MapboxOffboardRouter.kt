@@ -110,6 +110,12 @@ class MapboxOffboardRouter(
                 .accessToken(accessToken)
                 .requestId(route.routeOptions()?.requestUuid())
                 .legIndex(legIndex)
+                .interceptor {
+                    val httpUrl = it.request().url()
+                    val skuUrl =
+                        skuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                    it.proceed(it.request().newBuilder().url(skuUrl).build())
+                }
 
             mapboxDirectionsRefresh = refreshBuilder.build()
             mapboxDirectionsRefresh?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
