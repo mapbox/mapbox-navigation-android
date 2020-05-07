@@ -325,7 +325,12 @@ internal class MapRouteLine(
      * Returns the DirectionsRoutes being used.
      */
     fun retrieveDirectionsRoutes(): List<DirectionsRoute> {
-        return routeFeatureData.map { it.route }
+        val itemsToReturn: MutableList<DirectionsRoute> = when (primaryRoute) {
+            null -> mutableListOf()
+            else -> mutableListOf(primaryRoute!!)
+        }
+        val filteredItems = routeFeatureData.map { it.route }.filter { it != primaryRoute }
+        return itemsToReturn.plus(filteredItems)
     }
 
     /**
@@ -473,7 +478,6 @@ internal class MapRouteLine(
 
     private fun drawRoutes(routeData: List<RouteFeatureData>) {
         val partitionedRoutes = routeData.partition { it.route == primaryRoute }
-
         partitionedRoutes.first.firstOrNull()?.let {
             setPrimaryRoutesSource(it.featureCollection)
             val lineString: LineString = getLineStringForRoute(it.route)
@@ -578,8 +582,10 @@ internal class MapRouteLine(
                 Expression.color(routeShieldColor)
             )
         )
-
-        style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID)?.setProperties(lineGradient(expression))
+        if (style.isFullyLoaded) {
+            style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID)
+                ?.setProperties(lineGradient(expression))
+        }
     }
 
     /**

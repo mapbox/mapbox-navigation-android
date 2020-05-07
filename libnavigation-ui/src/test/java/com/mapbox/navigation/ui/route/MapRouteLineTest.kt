@@ -6,6 +6,7 @@ import android.content.res.TypedArray
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.libnavigation.ui.R
@@ -121,7 +122,7 @@ class MapRouteLineTest {
     fun getPrimaryRoute() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -129,7 +130,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.getPrimaryRoute()
+        val result = mapRouteLine.getPrimaryRoute()
 
         assertEquals(result, directionsRoute)
     }
@@ -138,7 +139,7 @@ class MapRouteLineTest {
     fun getLineStringForRoute() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -146,7 +147,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.getLineStringForRoute(directionsRoute)
+        val result = mapRouteLine.getLineStringForRoute(directionsRoute)
 
         assertEquals(result.coordinates().size, 4)
     }
@@ -156,7 +157,7 @@ class MapRouteLineTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val directionsRoute2: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -164,7 +165,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.getLineStringForRoute(directionsRoute2)
+        val result = mapRouteLine.getLineStringForRoute(directionsRoute2)
 
         assertNotNull(result)
     }
@@ -173,7 +174,7 @@ class MapRouteLineTest {
     fun retrieveRouteFeatureData() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -181,7 +182,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.retrieveRouteFeatureData()
+        val result = mapRouteLine.retrieveRouteFeatureData()
 
         assertEquals(result.size, 1)
         assertEquals(result[0].route, directionsRoute)
@@ -191,7 +192,7 @@ class MapRouteLineTest {
     fun retrieveRouteLineStrings() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -199,7 +200,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.retrieveRouteLineStrings()
+        val result = mapRouteLine.retrieveRouteLineStrings()
 
         assertEquals(result.size, 1)
     }
@@ -208,7 +209,7 @@ class MapRouteLineTest {
     fun retrieveDirectionsRoutes() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -216,15 +217,60 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute)) }
 
-        val result = mrl.retrieveDirectionsRoutes()
+        val result = mapRouteLine.retrieveDirectionsRoutes()
 
         assertEquals(result[0], directionsRoute)
     }
 
     @Test
+    fun retrieveDirectionsRoutesPrimaryRouteIsFirstInList() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val alternativeRoute: DirectionsRoute = getDirectionsRoute(false)
+        val directionsRoutes = mutableListOf(primaryRoute, alternativeRoute)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider).also { it.draw(directionsRoutes) }
+        directionsRoutes.reverse()
+
+        val result = mapRouteLine.retrieveDirectionsRoutes()
+
+        assertEquals(result[0], primaryRoute)
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun retrieveDirectionsRoutesWhenPrimaryRouteIsNull() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val firstRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondRoute: DirectionsRoute = getDirectionsRoute(false)
+        val directionsRoutes = listOf(
+            RouteFeatureData(firstRoute, mockk<FeatureCollection>(), mockk<LineString>()),
+            RouteFeatureData(secondRoute, mockk<FeatureCollection>(), mockk<LineString>()))
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            directionsRoutes,
+            false,
+            false,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.retrieveDirectionsRoutes()
+
+        assertEquals(2, result.size)
+    }
+
+    @Test
     fun getTopLayerId() {
         every { style.layers } returns listOf(primaryRouteLayer)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -232,7 +278,7 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider)
 
-        val result = mrl.getTopLayerId()
+        val result = mapRouteLine.getTopLayerId()
 
         assertEquals(result, "mapbox-navigation-waypoint-layer")
     }
@@ -242,7 +288,7 @@ class MapRouteLineTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val directionsRoute: DirectionsRoute = getDirectionsRoute(true)
         val directionsRoute2: DirectionsRoute = getDirectionsRoute(true)
-        val mrl = MapRouteLine(
+        val mapRouteLine = MapRouteLine(
             ctx,
             style,
             styleRes,
@@ -250,10 +296,10 @@ class MapRouteLineTest {
             layerProvider,
             mapRouteSourceProvider).also { it.draw(listOf(directionsRoute, directionsRoute2)) }
 
-        assertEquals(mrl.getPrimaryRoute(), directionsRoute)
+        assertEquals(mapRouteLine.getPrimaryRoute(), directionsRoute)
 
-        mrl.updatePrimaryRouteIndex(directionsRoute2)
-        val result = mrl.getPrimaryRoute()
+        mapRouteLine.updatePrimaryRouteIndex(directionsRoute2)
+        val result = mapRouteLine.getPrimaryRoute()
 
         assertEquals(result, directionsRoute2)
     }
