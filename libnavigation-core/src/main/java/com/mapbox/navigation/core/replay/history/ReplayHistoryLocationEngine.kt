@@ -16,7 +16,7 @@ private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
  */
 class ReplayHistoryLocationEngine(
     replayHistoryPlayer: ReplayHistoryPlayer
-) : LocationEngine {
+) : LocationEngine, ReplayEventsObserver {
 
     private val registeredCallbacks: MutableList<EngineCallback> = mutableListOf()
     private val lastLocationCallbacks: MutableList<EngineCallback> = mutableListOf()
@@ -33,9 +33,7 @@ class ReplayHistoryLocationEngine(
 
     init {
         myId = instances
-        replayHistoryPlayer.observeReplayEvents { recordUpdate ->
-            replayEvents(recordUpdate)
-        }
+        replayHistoryPlayer.registerObserver(this)
     }
 
     /**
@@ -85,7 +83,7 @@ class ReplayHistoryLocationEngine(
         throw UnsupportedOperationException("$myId removeLocationUpdates with intents is unsupported")
     }
 
-    private fun replayEvents(replayEvents: List<ReplayEventBase>) {
+    override fun replayEvents(replayEvents: List<ReplayEventBase>) {
         replayEvents.forEach { event ->
             when (event) {
                 is ReplayEventUpdateLocation -> replayLocation(event)

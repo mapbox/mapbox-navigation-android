@@ -16,7 +16,7 @@ import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
  * This class converts a [DirectionsRoute] into events that can be
  * replayed using the [ReplayHistoryPlayer] to navigate a route.
  */
-class ReplayRouteMapper(
+class ReplayRouteMapper @JvmOverloads constructor(
     /**
      * Options that allow you to control the driver and car behavior
      */

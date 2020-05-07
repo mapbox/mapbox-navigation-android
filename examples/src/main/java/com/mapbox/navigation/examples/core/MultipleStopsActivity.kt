@@ -45,11 +45,11 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import java.util.Collections
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.container
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.mapView
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.seekBar
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.seekBarText
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.startNavigation
+import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.container
+import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.mapView
+import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.seekBar
+import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.seekBarText
+import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.startNavigation
 import timber.log.Timber
 
 /**
@@ -70,7 +70,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.replay_engine_example_activity_layout)
+        setContentView(R.layout.multiple_stops_example_activity_layout)
         mapView.onCreate(savedInstanceState)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
@@ -165,7 +165,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxNavigation?.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
-            replayHistoryPlayer.play(this)
+            replayHistoryPlayer.play()
         }
     }
 

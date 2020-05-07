@@ -26,6 +26,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.history.CustomEventMapper
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
@@ -143,20 +144,22 @@ class ReplayHistoryActivity : AppCompatActivity() {
             true
         }
 
-        replayHistoryPlayer.observeReplayEvents {
-            it.forEach { event ->
-                when (event) {
-                    is ReplayEventInitialRoute -> {
-                        event.coordinates.lastOrNull()?.let { latLng ->
-                            selectMapLocation(latLng)
+        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+            override fun replayEvents(events: List<ReplayEventBase>) {
+                events.forEach { event ->
+                    when (event) {
+                        is ReplayEventInitialRoute -> {
+                            event.coordinates.lastOrNull()?.let { latLng ->
+                                selectMapLocation(latLng)
+                            }
                         }
                     }
                 }
             }
-        }
+        })
 
         playReplay.setOnClickListener {
-            replayHistoryPlayer.play(this@ReplayHistoryActivity)
+            replayHistoryPlayer.play()
         }
     }
 
@@ -300,18 +303,18 @@ private fun loadHistoryJsonFromAssets(context: Context, fileName: String): Strin
 }
 
 private class ReplayCustomEventMapper : CustomEventMapper {
-    override fun invoke(eventType: String, event: LinkedTreeMap<*, *>): ReplayEventBase? {
+    override fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase? {
         return when (eventType) {
             "start_transit" -> ReplayEventStartTransit(
-                eventTimestamp = event["event_timestamp"] as Double,
-                properties = event["properties"] as Double)
+                eventTimestamp = properties["event_timestamp"] as Double,
+                properties = properties["properties"] as Double)
             "initial_route" -> {
-                val properties = event["properties"] as LinkedTreeMap<*, *>
-                val routeOptions = properties["routeOptions"] as LinkedTreeMap<*, *>
+                val eventProperties = properties["properties"] as LinkedTreeMap<*, *>
+                val routeOptions = eventProperties["routeOptions"] as LinkedTreeMap<*, *>
                 val coordinates = routeOptions["coordinates"] as List<List<Double>>
                 val coordinatesLatLng = coordinates.map { LatLng(it[1], it[0]) }
                 ReplayEventInitialRoute(
-                    eventTimestamp = event["event_timestamp"] as Double,
+                    eventTimestamp = properties["event_timestamp"] as Double,
                     coordinates = coordinatesLatLng
                 )
             }

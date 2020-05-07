@@ -5,7 +5,17 @@ import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 
-typealias CustomEventMapper = (String, LinkedTreeMap<*, *>) -> ReplayEventBase?
+/**
+ * Additional mapper that can be used with [ReplayHistoryMapper].
+ */
+interface CustomEventMapper {
+
+    /**
+     * Override to map your own custom events from history files,
+     * into [ReplayEventBase] for the [ReplayHistoryPlayer]
+     */
+    fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase?
+}
 
 /**
  * This class is responsible for creating [ReplayEvents] from history data.
@@ -15,7 +25,7 @@ typealias CustomEventMapper = (String, LinkedTreeMap<*, *>) -> ReplayEventBase?
  * own [CustomEventMapper] (optional)
  * @param logger interface for logging any events (optional)
  */
-class ReplayHistoryMapper(
+class ReplayHistoryMapper @JvmOverloads constructor(
     private val gson: Gson = Gson(),
     private val customEventMapper: CustomEventMapper? = null,
     private val logger: Logger
@@ -63,7 +73,7 @@ class ReplayHistoryMapper(
                     eventTimestamp = eventTimestamp)
             }
             else -> {
-                val replayEvent = customEventMapper?.invoke(eventType, event)
+                val replayEvent = customEventMapper?.map(eventType, event)
                 if (replayEvent == null) {
                     logger.e(msg = Message("Replay unsupported event $eventType"))
                 }

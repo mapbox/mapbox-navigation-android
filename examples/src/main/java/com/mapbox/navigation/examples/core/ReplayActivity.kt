@@ -147,7 +147,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
-            replayHistoryPlayer.play(this)
+            replayHistoryPlayer.play()
         }
     }
 

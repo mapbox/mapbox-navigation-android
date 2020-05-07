@@ -1,12 +1,9 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.utils.internal.ThreadController
-import java.lang.IllegalStateException
 import kotlin.math.max
 import kotlin.math.roundToLong
 import kotlinx.coroutines.Job
@@ -36,20 +33,16 @@ internal class ReplayEventSimulator(
 
     private var pivotIndex = 0
 
-    fun launchSimulator(lifecycleOwner: LifecycleOwner, replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
+    fun launchSimulator(replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
         logger.i(msg = Message("Replay started"))
         resetSimulatorClock()
         return jobControl.scope.launch {
-            while (isActive && isSimulating(lifecycleOwner)) {
+            while (isActive) {
                 if (isDonePlayingEvents()) {
                     delay(IS_DONE_PLAYING_EVENTS_DELAY_MILLIS)
                 } else {
                     simulateEvents(replayEventsCallback)
                 }
-            }
-
-            if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
-                throw IllegalStateException("Make sure to call ReplayHistoryPlayer.finish()")
             }
 
             logger.i(msg = Message("Replay ended"))
@@ -70,7 +63,7 @@ internal class ReplayEventSimulator(
         delay(delayMillis)
     }
 
-    fun stopPlaying() {
+    fun stopSimulator() {
         jobControl.job.cancelChildren()
     }
 
@@ -88,7 +81,7 @@ internal class ReplayEventSimulator(
     private fun resetSimulatorClock() {
         simulatorTimeOffset = timeSeconds()
         historyTimeOffset = if (isDonePlayingEvents()) {
-            replayEvents.events.last().eventTimestamp
+            replayEvents.events.lastOrNull()?.eventTimestamp ?: 0.0
         } else {
             replayEvents.events[pivotIndex].eventTimestamp
         }
@@ -111,10 +104,6 @@ internal class ReplayEventSimulator(
         }
 
         return eventHappened
-    }
-
-    private fun isSimulating(lifecycleOwner: LifecycleOwner): Boolean {
-        return lifecycleOwner.lifecycle.currentState != Lifecycle.State.DESTROYED
     }
 
     private fun isDonePlayingEvents(): Boolean {
