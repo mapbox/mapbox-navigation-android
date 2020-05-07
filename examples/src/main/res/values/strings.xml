@@ -116,6 +116,7 @@
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation" translatable="false">Start Navigation</string>
+    <string name="navigate_waypoints_next_stop" translatable="false">Next stop</string>
     <string name="play_history" translatable="false">Play history</string>
     <string name="offline_region_download_title" translatable="false">Download offline region</string>
     <string name="msg_long_press_map_to_place_waypoint" translatable="false">Long press on the map to place a waypoint</string>

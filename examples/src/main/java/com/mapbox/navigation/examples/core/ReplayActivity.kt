@@ -25,7 +25,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
-import com.mapbox.navigation.core.replay.history.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -116,9 +116,10 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
 
-                val updateLocations = replayRouteMapper.mapToUpdateLocations(routes[0])
-                replayHistoryPlayer.pushEvents(updateLocations)
-                replayHistoryPlayer.seekTo(updateLocations.first())
+                val replayEvents = replayRouteMapper.mapGeometry(routes[0].geometry()!!)
+                replayHistoryPlayer.pushEvents(replayEvents)
+                replayHistoryPlayer.seekTo(replayEvents.first())
+
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
