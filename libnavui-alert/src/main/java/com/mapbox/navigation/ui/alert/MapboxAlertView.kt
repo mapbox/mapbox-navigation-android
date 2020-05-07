@@ -31,8 +31,8 @@ class MapboxAlertView @JvmOverloads constructor(
 
     /**
      * Entry point for [MapboxAlertView]
-     * @param data AlertState state to render on the screen
+     * @param state AlertState state to render on the screen
      */
-    override fun render(data: AlertState) {
+    override fun render(state: AlertState) {
     }
 }

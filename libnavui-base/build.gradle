@@ -34,5 +34,10 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     ktlint dependenciesList.ktlint
 
+    api project(':libnavigation-base')
+    api dependenciesList.mapboxSdkGeoJSON
+    api dependenciesList.androidXAnnotation
+    api dependenciesList.androidXCore
+
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
