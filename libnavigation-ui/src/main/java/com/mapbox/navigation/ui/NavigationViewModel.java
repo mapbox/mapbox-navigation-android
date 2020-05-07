@@ -32,6 +32,8 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
+import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
@@ -248,6 +250,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.unregisterOffRouteObserver(offRouteObserver);
     navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
+    navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
     navigation.detachFasterRouteObserver();
     navigation.stopTripSession();
   }
@@ -441,6 +444,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerOffRouteObserver(offRouteObserver);
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
+    navigation.registerTripSessionStateObserver(tripSessionStateObserver);
     navigation.attachFasterRouteObserver(fasterRouteObserver);
   }
 
@@ -468,6 +472,17 @@ public class NavigationViewModel extends AndroidViewModel {
     @Override
     public void onNewBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
       updateBannerInstruction(bannerInstructions);
+    }
+  };
+
+  private TripSessionStateObserver tripSessionStateObserver = new TripSessionStateObserver() {
+    @Override
+    public void onSessionStateChanged(@NotNull TripSessionState tripSessionState) {
+      if (tripSessionState == TripSessionState.STOPPED) {
+        navigationViewEventDispatcher.onNavigationFinished();
+      } else if (tripSessionState == TripSessionState.STARTED) {
+        navigationViewEventDispatcher.onNavigationRunning();
+      }
     }
   };
 
@@ -557,17 +572,6 @@ public class NavigationViewModel extends AndroidViewModel {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
     }
   }
-
-  // TODO NavigationEvents wait for implementation
-  /*private void sendNavigationStatusEvent(boolean isRunning) {
-    if (navigationViewEventDispatcher != null) {
-      if (isRunning) {
-        navigationViewEventDispatcher.onNavigationRunning();
-      } else {
-        navigationViewEventDispatcher.onNavigationFinished();
-      }
-    }
-  }*/
 
   private void sendEventOnRerouteAlong(DirectionsRoute route) {
     if (navigationViewEventDispatcher != null && isOffRoute()) {

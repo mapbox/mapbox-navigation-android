@@ -112,7 +112,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     }
 
     override fun onNavigationFinished() {
-        // todo
+        finish()
     }
 
     override fun onCancelNavigation() {

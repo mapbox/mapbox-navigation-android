@@ -111,7 +111,7 @@ class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback, Navig
     }
 
     override fun onNavigationFinished() {
-        // todo
+        finish()
     }
 
     override fun onCancelNavigation() {

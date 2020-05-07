@@ -165,7 +165,7 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
     }
 
     override fun onNavigationFinished() {
-        // Not needed in this example
+        finish()
     }
 
     override fun onCancelNavigation() {
