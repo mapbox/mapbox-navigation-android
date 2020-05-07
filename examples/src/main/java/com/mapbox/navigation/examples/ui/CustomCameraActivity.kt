@@ -141,7 +141,7 @@ class CustomCameraActivity : AppCompatActivity(), OnNavigationReadyCallback, Nav
     }
 
     override fun onNavigationFinished() {
-    // todo
+        finish()
     }
 
     override fun onCancelNavigation() {

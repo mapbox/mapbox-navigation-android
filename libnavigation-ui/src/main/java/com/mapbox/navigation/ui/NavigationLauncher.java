@@ -76,7 +76,6 @@ public class NavigationLauncher {
       .remove(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY)
       .remove(NavigationConstants.NAVIGATION_VIEW_SIMULATE_ROUTE)
       .remove(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME)
-      .remove(NavigationConstants.NAVIGATION_VIEW_PREFERENCE_SET_THEME)
       .remove(NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME)
       .remove(NavigationConstants.NAVIGATION_VIEW_DARK_THEME)
       .remove(NavigationConstants.OFFLINE_PATH_KEY)

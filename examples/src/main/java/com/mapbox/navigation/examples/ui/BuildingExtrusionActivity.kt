@@ -140,7 +140,7 @@ class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback
     }
 
     override fun onNavigationFinished() {
-        // todo
+        finish()
     }
 
     override fun onCancelNavigation() {
