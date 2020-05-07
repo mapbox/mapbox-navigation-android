@@ -10,5 +10,5 @@ interface View<in S : State> {
     /**
      * Entry point for the [View] to render itself based on a [State].
      */
-    fun render(data: S)
+    fun render(state: S)
 }

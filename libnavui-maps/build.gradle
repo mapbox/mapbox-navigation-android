@@ -31,9 +31,14 @@ android {
 
 dependencies {
     // Mapbox dependencies
-    implementation project(':libnavui-base')
+    api project(':libnavui-base')
     implementation project(':libnavui-util')
-    implementation dependenciesList.mapboxMapCarbon
+    api "com.mapbox.maps:android:10.0.0-alpha.5"
+    api "com.mapbox.plugin:maps-style:10.0.0-alpha.5"
+    api "com.mapbox.plugin:maps-gesture:10.0.0-alpha.5"
+    api "com.mapbox.plugin:maps-compass:10.0.0-alpha.5"
+    api "com.mapbox.plugin:maps-logo:10.0.0-alpha.5"
+    api "com.mapbox.plugin:maps-attribution:10.0.0-alpha.5"
 
     // Android dependencies
     implementation dependenciesList.androidXCore
