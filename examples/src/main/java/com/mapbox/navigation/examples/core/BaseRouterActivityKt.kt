@@ -99,8 +99,10 @@ abstract class BaseRouterActivityKt :
             style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
             navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
             symbolManager = SymbolManager(mapView, mapboxMap, style)
-            Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint,
-                LENGTH_SHORT).show()
+            Snackbar.make(
+                findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint,
+                LENGTH_SHORT
+            ).show()
             newOrigin()
             mapboxMap.addOnMapClickListener(this)
         }
@@ -265,7 +267,7 @@ abstract class BaseRouterActivityKt :
             )
         }
 
-        fun setupOnboardRouter(): Router {
+        fun setupOnboardRouter(accessToken: String): Router {
             val file = File(
                 Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
                 "2019_04_13-00_00_11"
@@ -278,12 +280,12 @@ abstract class BaseRouterActivityKt :
                 null,
                 null // working with pre-fetched tiles only
             )
-            return MapboxOnboardRouter(MapboxNativeNavigatorImpl, config, MapboxLogger)
+            return MapboxOnboardRouter(accessToken, MapboxNativeNavigatorImpl, config, MapboxLogger)
         }
 
-        fun setupHybridRouter(applicationContext: Context): Router {
+        fun setupHybridRouter(accessToken: String, applicationContext: Context): Router {
             return MapboxHybridRouter(
-                setupOnboardRouter(),
+                setupOnboardRouter(accessToken),
                 setupOffboardRouter(applicationContext),
                 NetworkStatusService(applicationContext)
             )

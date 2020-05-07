@@ -92,7 +92,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             locationEngine = getLocationEngine()
         ).apply {

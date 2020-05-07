@@ -65,7 +65,7 @@ class MapboxOnboardRouterTest {
     @Before
     fun setUp() {
         every { navigator.configureRouter(any(), any()) } returns 0
-        onboardRouter = MapboxOnboardRouter(navigator, MapboxOnboardRouterConfig(TILE_PATH), logger)
+        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, MapboxOnboardRouterConfig(TILE_PATH), logger)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE

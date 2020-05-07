@@ -124,7 +124,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         return MapboxNavigation(
             applicationContext,
-            accessToken,
             mapboxNavigationOptions,
             locationEngine
         )

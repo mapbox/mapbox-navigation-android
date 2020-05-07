@@ -328,7 +328,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         val accessToken = Utils.getMapboxAccessToken(this)
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            accessToken,
             MapboxNavigation.defaultNavigationOptions(this, accessToken),
             replayRouteLocationEngine
         )

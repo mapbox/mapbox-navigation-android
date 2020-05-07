@@ -132,6 +132,7 @@ class MapboxNavigationTest {
 
         val navigationOptions = NavigationOptions
             .Builder()
+            .accessToken(accessToken)
             .distanceFormatter(distanceFormatter)
             .navigatorPredictionMillis(1500L)
             .onboardRouterConfig(onBoardRouterConfig)
@@ -141,7 +142,6 @@ class MapboxNavigationTest {
         mapboxNavigation =
             MapboxNavigation(
                 context,
-                accessToken,
                 navigationOptions,
                 locationEngine,
                 locationEngineRequest

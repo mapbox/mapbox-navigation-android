@@ -60,7 +60,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
-                Utils.getMapboxAccessToken(this),
                 updatedOptions
         )
         initListeners()
@@ -205,7 +204,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 Endpoint(
                         tilesUri.toString(),
                         tilesVersion,
-                        Utils.getMapboxAccessToken(this) ?: "",
                         "MapboxNavigationNative"
                 )
         )

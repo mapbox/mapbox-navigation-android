@@ -61,7 +61,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
-                Utils.getMapboxAccessToken(this),
                 options,
                 locationEngine = replayRouteLocationEngine
         ).also {

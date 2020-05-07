@@ -114,7 +114,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mapboxNavigation = MapboxNavigation(
             applicationContext,
-            Utils.getMapboxAccessToken(this),
             mapboxNavigationOptions,
             locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         ).also {

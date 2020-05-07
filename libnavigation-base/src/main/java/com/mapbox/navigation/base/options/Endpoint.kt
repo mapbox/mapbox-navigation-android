@@ -5,13 +5,11 @@ package com.mapbox.navigation.base.options
  *
  * @param host tiles endpoint
  * @param version version of tiles
- * @param token the token for retrieving tiles. In most cases, this will be a Mapbox accessToken.
  * @param userAgent HttpClient UserAgent
  */
 data class Endpoint(
     val host: String,
     val version: String,
-    val token: String,
     val userAgent: String
 ) {
 
@@ -19,7 +17,7 @@ data class Endpoint(
      * Get a builder to customize a subset of current options.
      */
     fun toBuilder() = Builder(
-        host, version, token, userAgent
+        host, version, userAgent
     )
 
     /**
@@ -27,13 +25,11 @@ data class Endpoint(
      *
      * @param host tile endpoint
      * @param version version of tiles
-     * @param token the token for retrieving tiles. In most cases, this will be a Mapbox accessToken.
      * @param userAgent HttpClient UserAgent
      */
     data class Builder(
         private var host: String,
         private var version: String,
-        private var token: String,
         private var userAgent: String
     ) {
         /**
@@ -49,12 +45,6 @@ data class Endpoint(
             apply { this.version = version }
 
         /**
-         * Token for tiles retrieving (in most cases mapbox accessToken)
-         */
-        fun token(token: String) =
-            apply { this.token = token }
-
-        /**
          * HttpClient UserAgent
          */
         fun userAgent(userAgent: String) =
@@ -63,6 +53,6 @@ data class Endpoint(
         /**
          * Build the [Endpoint]
          */
-        fun build() = Endpoint(host, version, token, userAgent)
+        fun build() = Endpoint(host, version, userAgent)
     }
 }
