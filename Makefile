@@ -155,6 +155,18 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:artifactoryPublish
 	./gradlew :libnavigation-core:artifactoryPublish
 
+.PHONY: 1.0-core-dependency-graph
+1.0-core-dependency-graph:
+	./gradlew :libnavigator:generateDependencyGraphMapboxLibraries
+	./gradlew :libnavigation-base:generateDependencyGraphMapboxLibraries
+	./gradlew :libdirections-onboard:generateDependencyGraphMapboxLibraries
+	./gradlew :libdirections-offboard:generateDependencyGraphMapboxLibraries
+	./gradlew :libdirections-hybrid:generateDependencyGraphMapboxLibraries
+	./gradlew :libnavigation-metrics:generateDependencyGraphMapboxLibraries
+	./gradlew :libtrip-notification:generateDependencyGraphMapboxLibraries
+	./gradlew :libnavigation-util:generateDependencyGraphMapboxLibraries
+	./gradlew :libnavigation-core:generateDependencyGraphMapboxLibraries
+
 .PHONY: 1.0-build-ui-debug
 1.0-build-ui-debug:
 	./gradlew :libnavigation-ui:assembleDebug
