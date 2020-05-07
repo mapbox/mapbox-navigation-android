@@ -30,4 +30,15 @@
         android:textColor="@android:color/white"
         android:visibility="gone" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabToggleStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/startNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_layers_24dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

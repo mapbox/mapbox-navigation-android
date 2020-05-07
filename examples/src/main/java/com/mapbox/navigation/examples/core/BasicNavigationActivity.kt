@@ -54,6 +54,14 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
 
+    private val mapStyles = listOf(
+        Style.MAPBOX_STREETS,
+        Style.OUTDOORS,
+        Style.LIGHT,
+        Style.DARK,
+        Style.SATELLITE_STREETS
+    )
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -169,6 +177,10 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
             stopLocationUpdates()
+        }
+
+        fabToggleStyle.setOnClickListener {
+            navigationMapboxMap?.retrieveMap()?.setStyle(mapStyles.shuffled().first())
         }
     }
 
