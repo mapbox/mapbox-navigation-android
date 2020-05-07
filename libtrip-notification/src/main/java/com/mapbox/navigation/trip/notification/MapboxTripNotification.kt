@@ -307,7 +307,10 @@ class MapboxTripNotification constructor(
                             ?: ManeuverModifier.RIGHT
                     )
                 }
-            } ?: updateManeuverImageResource(true)
+            } ?: updateManeuverImage(
+                    routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
+                            ?: ManeuverModifier.RIGHT
+            )
         }
         setFreeDriveMode(directionsRoute == null)
     }
