@@ -33,7 +33,7 @@ class ReplayRouteOptions(
      */
     class Builder {
         private var maxSpeedMps = 30.0
-        private var turnSpeedMps = 6.0
+        private var turnSpeedMps = 3.0
         private var uTurnSpeedMps = 1.0
         private var maxAcceleration = 4.0
         private var minAcceleration = -4.0
