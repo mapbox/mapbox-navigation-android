@@ -15,11 +15,11 @@ interface ArrivalObserver {
      * Once [MapboxNavigation.navigateNextRouteLeg] has been called and returns true,
      * this observer will be notified of a stop arrival.
      */
-    fun onStopArrival(routeLegProgress: RouteLegProgress) {}
+    fun onStopArrival(routeLegProgress: RouteLegProgress)
 
     /**
      * Once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_ARRIVED]
      * for the last stop, this will be called once.
      */
-    fun onRouteArrival(routeProgress: RouteProgress) {}
+    fun onRouteArrival(routeProgress: RouteProgress)
 }
