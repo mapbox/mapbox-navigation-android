@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
@@ -23,7 +22,6 @@ import kotlinx.android.synthetic.main.activity_navigation_view.*
 class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
     BannerInstructionsListener {
 
-    private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
     private val route by lazy { getDirectionsRoute() }
@@ -59,7 +57,6 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
     override fun onPause() {
         super.onPause()
         navigationView.onPause()
-        // stopLocationUpdates()
     }
 
     override fun onDestroy() {
@@ -89,7 +86,6 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
             ifNonNull(navigationView.retrieveNavigationMapboxMap()) { navMapboxMap ->
                 this.navigationMapboxMap = navMapboxMap
                 this.navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.NORMAL)
-                this.mapboxMap = navMapboxMap.retrieveMap()
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
                 val optionsBuilder = NavigationViewOptions.builder()
@@ -97,7 +93,9 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder()
+                        .accessToken(Utils.getMapboxAccessToken(this))
+                        .build())
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }

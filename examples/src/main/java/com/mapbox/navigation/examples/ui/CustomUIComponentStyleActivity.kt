@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
@@ -308,6 +309,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 instructionView.visibility = View.VISIBLE
                 feedbackButton.show()
                 instructionSoundButton.show()
+                showLogoAndAttribution()
             }
             TripSessionState.STOPPED -> {
                 startNavigation.visibility = View.VISIBLE
@@ -322,6 +324,26 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 instructionSoundButton.hide()
             }
         }
+    }
+
+    private fun showLogoAndAttribution() {
+        summaryBottomSheet.viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                navigationMapboxMap?.retrieveMap()?.uiSettings?.apply {
+                    val bottomMargin = summaryBottomSheet.measuredHeight
+                    setLogoMargins(logoMarginLeft,
+                            logoMarginTop,
+                            logoMarginRight,
+                            bottomMargin)
+                    setAttributionMargins(attributionMarginLeft,
+                            attributionMarginTop,
+                            attributionMarginRight,
+                            bottomMargin)
+                }
+                summaryBottomSheet.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
     }
 
     private fun initNavigation() {

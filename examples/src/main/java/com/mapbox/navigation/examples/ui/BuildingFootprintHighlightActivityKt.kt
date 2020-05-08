@@ -116,7 +116,9 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 optionsBuilder.directionsRoute(directionsRoute)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder()
+                        .accessToken(Utils.getMapboxAccessToken(this))
+                        .build())
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Nav UI SDK's BuildingFootprintHighlightLayer class.
