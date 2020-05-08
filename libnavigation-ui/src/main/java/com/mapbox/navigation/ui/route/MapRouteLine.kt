@@ -53,14 +53,24 @@ import com.mapbox.turf.TurfMeasurement
  * @param styleRes a style resource
  * @param belowLayerId determines the elevation of the route layers
  * @param layerProvider provides the layer configurations for the route layers
+ * @param routeFeatureDatas used to restore this class with supplied values
+ * @param allRoutesVisible true if all the route layers should be visible
+ * @param alternativesVisible true if the alternative route layer is visible
+ * @param mapRouteSourceProvider wrapper for creating GeoJsonSource objects
+ * @param vanishPoint the percentage of the route line from the origin that should not be visible.
  */
 internal class MapRouteLine(
-    private val context: Context,
+    context: Context,
     private val style: Style,
     @androidx.annotation.StyleRes styleRes: Int,
     belowLayerId: String?,
     layerProvider: MapRouteLayerProvider,
-    mapRouteSourceProvider: MapRouteSourceProvider
+    routeFeatureDatas: List<RouteFeatureData>,
+    routeExpressionData: List<RouteLineExpressionData>,
+    allRoutesVisible: Boolean,
+    alternativesVisible: Boolean,
+    mapRouteSourceProvider: MapRouteSourceProvider,
+    vanishPoint: Float
 ) {
 
     /**
@@ -69,9 +79,6 @@ internal class MapRouteLine(
      * @param styleRes a style resource
      * @param belowLayerId determines the elevation of the route layers
      * @param layerProvider provides the layer configurations for the route layers
-     * @param routeFeatureDatas used to restore this class with supplied values
-     * @param allRoutesVisible true if all the route layers should be visible
-     * @param alternativesVisible true if the alternative route layer is visible
      */
     constructor(
         context: Context,
@@ -79,15 +86,8 @@ internal class MapRouteLine(
         @androidx.annotation.StyleRes styleRes: Int,
         belowLayerId: String?,
         layerProvider: MapRouteLayerProvider,
-        routeFeatureDatas: List<RouteFeatureData>,
-        allRoutesVisible: Boolean,
-        alternativesVisible: Boolean,
         mapRouteSourceProvider: MapRouteSourceProvider
-    ) : this(context, style, styleRes, belowLayerId, layerProvider, mapRouteSourceProvider) {
-        this.alternativesVisible = alternativesVisible
-        this.allLayersAreVisible = allRoutesVisible
-        this.routeFeatureData.addAll(routeFeatureDatas)
-    }
+    ) : this(context, style, styleRes, belowLayerId, layerProvider, listOf(), listOf(), true, true, mapRouteSourceProvider, 0f)
 
     private var drawnWaypointsFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
     private var drawnPrimaryRouteFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
@@ -103,6 +103,8 @@ internal class MapRouteLine(
     private var alternativesVisible = true
     private var allLayersAreVisible = true
     private var primaryRoute: DirectionsRoute? = null
+    var vanishPointOffset: Float = 0f
+        private set
 
     private val routeDefaultColor: Int by lazy {
         getStyledColor(
@@ -207,6 +209,24 @@ internal class MapRouteLine(
      * Initializes the instance with appropriate default values.
      */
     init {
+        this.alternativesVisible = alternativesVisible
+        this.allLayersAreVisible = allRoutesVisible
+        this.routeFeatureData.addAll(routeFeatureDatas)
+        this.routeLineExpressionData.addAll(routeExpressionData)
+        this.vanishPointOffset = vanishPoint
+
+        if (routeFeatureData.isNotEmpty()) {
+            this.primaryRoute = routeFeatureDatas.first().route
+            this.drawnPrimaryRouteFeatureCollection = routeFeatureData.first().featureCollection
+            this.drawnAlternativeRouteFeatureCollection = routeFeatureData
+                .filter { it.route != primaryRoute }
+                .mapNotNull { it.featureCollection.features() }
+                .flatten()
+                .run { FeatureCollection.fromFeatures(this) }
+
+            this.drawnWaypointsFeatureCollection = buildWayPointFeatureCollection(routeFeatureData.first().route)
+        }
+
         val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
         wayPointSource = mapRouteSourceProvider.build(
             RouteConstants.WAYPOINT_SOURCE_ID,
@@ -251,6 +271,12 @@ internal class MapRouteLine(
         initializeLayers(style, layerProvider, originIcon!!, destinationIcon!!, belowLayer)
         updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
         updateAllLayersVisibility(allLayersAreVisible)
+
+        if (style.isFullyLoaded && routeFeatureData.isNotEmpty()) {
+            val expression = getExpressionAtOffset(vanishPointOffset)
+            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
+            hideShieldLineAtOffset(vanishPointOffset)
+        }
     }
 
     /**
@@ -356,6 +382,10 @@ internal class MapRouteLine(
      */
     fun retrieveRouteFeatureData(): List<RouteFeatureData> {
         return routeFeatureData.toList()
+    }
+
+    fun retrieveRouteExpressionData(): List<RouteLineExpressionData> {
+        return routeLineExpressionData
     }
 
     /**
@@ -514,6 +544,7 @@ internal class MapRouteLine(
      * @return the Expression that can be used in a Layer's properties.
      */
     fun getExpressionAtOffset(distanceOffset: Float): Expression {
+        vanishPointOffset = distanceOffset
         val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
         val trafficExpressions = when (filteredItems.isEmpty()) {
             true -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
@@ -532,6 +563,7 @@ internal class MapRouteLine(
     }
 
     private fun clearRouteData() {
+        vanishPointOffset = 0f
         directionsRoutes.clear()
         routeFeatureData.clear()
         routeLineExpressionData.clear()
@@ -721,7 +753,7 @@ internal class MapRouteLine(
             return when (layerId.isNullOrEmpty()) {
                 false -> style.layers.firstOrNull { it.id == layerId }?.id
                 true -> style.layers.reversed().filter { it !is SymbolLayer }
-                    .firstOrNull { it.id != RouteConstants.MAPBOX_LOCATION_ID }
+                    .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
                     ?.id
             } ?: LocationComponentConstants.SHADOW_LAYER
         }

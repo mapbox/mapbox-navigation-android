@@ -417,7 +417,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     final Context context = mapView.getContext();
     final MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
 
-    final List<DirectionsRoute> preExistingRoutes = routeLine.retrieveDirectionsRoutes();
+    final float vanishingPointOffset = routeLine.getVanishPointOffset();
     routeLine = new MapRouteLine(
             context,
             style,
@@ -425,11 +425,12 @@ public class NavigationMapRoute implements LifecycleObserver {
             belowLayer,
             layerProvider,
             routeLine.retrieveRouteFeatureData(),
+            routeLine.retrieveRouteExpressionData(),
             routeLine.retrieveVisibility(),
             routeLine.retrieveAlternativesVisible(),
-            new MapRouteSourceProvider()
+            new MapRouteSourceProvider(),
+            vanishingPointOffset
     );
-    routeLine.draw(preExistingRoutes);
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
