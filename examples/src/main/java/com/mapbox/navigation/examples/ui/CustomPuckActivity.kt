@@ -95,7 +95,9 @@ class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback, Navig
                 optionsBuilder.directionsRoute(directionsRoute)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder()
+                        .accessToken(Utils.getMapboxAccessToken(this))
+                        .build())
                 optionsBuilder.puckDrawableSupplier(CustomPuckDrawableSupplier())
                 navigationView.startNavigation(optionsBuilder.build())
             }

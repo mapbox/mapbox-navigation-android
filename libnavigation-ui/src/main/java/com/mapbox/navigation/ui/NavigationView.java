@@ -33,6 +33,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.maps.UiSettings;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
@@ -83,6 +84,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
+  private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
@@ -102,6 +104,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private CameraPosition initialMapCameraPosition;
   private boolean isMapInitialized;
   private boolean isSubscribed;
+  private boolean logoAndAttributionShownForFirstTime;
   private LifecycleRegistry lifecycleRegistry;
 
   public NavigationView(Context context) {
@@ -246,6 +249,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       @Override
       public void onStyleLoaded(@NonNull Style style) {
         initializeNavigationMap(mapView, mapboxMap);
+        moveMapboxLogoAboveBottomSheet();
+        moveMapboxAttributionAboveBottomSheet();
+        logoAndAttributionShownForFirstTime = true;
         initializeWayNameListener();
         onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
         isMapInitialized = true;
@@ -255,6 +261,17 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   @Override
   public void setSummaryBehaviorState(int state) {
+    // Adjust the Mapbox logo and attribution based on
+    // the SummaryBottomSheet's new state
+    if (logoAndAttributionShownForFirstTime) {
+      if (mapboxLogoEnabled() && attributionEnabled()) {
+        updateLogoAndAttributionVisibility(state != BottomSheetBehavior.STATE_HIDDEN);
+        logoAndAttributionShownForFirstTime = false;
+      }
+    } else {
+      updateLogoAndAttributionVisibility(state != BottomSheetBehavior.STATE_HIDDEN);
+    }
+    // Update the SummaryBottomSheet's state
     summaryBehavior.setState(state);
   }
 
@@ -447,6 +464,62 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
+   * Updates the visibility of the Mapbox logo and attribution button
+   *
+   * @param isVisible what the new visibility should be. True makes
+   *                  them visible, false to hide.
+   */
+  private void updateLogoAndAttributionVisibility(boolean isVisible) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
+        uiSettings.setLogoEnabled(isVisible);
+        uiSettings.setAttributionEnabled(isVisible);
+      }
+    }
+  }
+
+  private boolean mapboxLogoEnabled() {
+    return navigationMap.retrieveMap().getUiSettings().isLogoEnabled();
+  }
+
+  private boolean attributionEnabled() {
+    return navigationMap.retrieveMap().getUiSettings().isAttributionEnabled();
+  }
+
+  /**
+   * Set the margins of the Mapbox logo within the {@link NavigationView}.
+   *
+   * @param left margin in pixels
+   * @param top margin in pixels
+   * @param right margin in pixels
+   * @param bottom margin in pixels
+   */
+  private void updateMapboxLogoMargins(int left, int top, int right, int bottom) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        navigationMap.retrieveMap().getUiSettings().setLogoMargins(left, top, right, bottom);
+      }
+    }
+  }
+
+  /**
+   * Set the margins of the attribution icon within the {@link NavigationView}.
+   *
+   * @param left margin in pixels
+   * @param top margin in pixels
+   * @param right margin in pixels
+   * @param bottom margin in pixels
+   */
+  private void updateAttributionMargins(int left, int top, int right, int bottom) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        navigationMap.retrieveMap().getUiSettings().setAttributionMargins(left, top, right, bottom);
+      }
+    }
+  }
+
+  /**
    * Should be called when this view is completely initialized.
    *
    * @param options with containing route / coordinate data
@@ -625,6 +698,41 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);
       return;
+    }
+  }
+
+  /**
+   * Sets the margins of the Mapbox logo so that it's visible just
+   * above the default {@link SummaryBottomSheet}.
+   */
+  private void moveMapboxLogoAboveBottomSheet() {
+    int summaryBottomSheetHeight = (int) getContext().getResources()
+        .getDimension(R.dimen.summary_bottomsheet_height);
+    if (navigationMap != null && navigationMap.retrieveMap() != null) {
+      UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
+      updateMapboxLogoMargins(
+          uiSettings.getLogoMarginLeft(),
+          uiSettings.getLogoMarginTop(),
+          uiSettings.getAttributionMarginLeft(),
+          summaryBottomSheetHeight
+              + DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION);
+    }
+  }
+
+  /**
+   * Sets the margins of the attribution button so that
+   * it's visible just above the default {@link SummaryBottomSheet}.
+   */
+  private void moveMapboxAttributionAboveBottomSheet() {
+    int summaryBottomSheetHeight = (int) getContext().getResources()
+        .getDimension(R.dimen.summary_bottomsheet_height);
+    if (navigationMap != null && navigationMap.retrieveMap() != null) {
+      UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
+      updateAttributionMargins(
+          uiSettings.getAttributionMarginLeft(),
+          uiSettings.getAttributionMarginTop(),
+          uiSettings.getAttributionMarginRight(),
+          summaryBottomSheetHeight + DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION);
     }
   }
 

@@ -10,9 +10,7 @@
         android:id="@+id/navigationMapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_uiAttribution="false"
-        app:mapbox_uiCompass="false"
-        app:mapbox_uiLogo="false" />
+        app:mapbox_uiCompass="false" />
 
     <ImageView
         android:id="@+id/screenshotView"
