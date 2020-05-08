@@ -18,8 +18,8 @@ internal class ArrivalProgressObserverTest {
 
     private val tripSession: TripSession = mockk()
     private val arrivalObserver: ArrivalObserver = mockk {
-        every { onStopArrival(any()) } returns Unit
-        every { onRouteArrival(any()) } returns Unit
+        every { onNextRouteLegStart(any()) } returns Unit
+        every { onFinalDestinationArrival(any()) } returns Unit
     }
     private val arrivalProgressObserver = ArrivalProgressObserver(tripSession)
 
@@ -50,11 +50,11 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should notify stop arrival when arrived at waypoint`() {
-        val onStopArrivalCalls = slot<RouteLegProgress>()
-        val onRouteArrivalCalls = slot<RouteProgress>()
+    fun `should notify next leg start when the next leg started`() {
+        val onNextRouteLegStartCalls = slot<RouteLegProgress>()
+        val onFinalDestinationArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onNextRouteLegStartCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
@@ -74,22 +74,22 @@ internal class ArrivalProgressObserverTest {
             }
         })
 
-        assertTrue(onStopArrivalCalls.isCaptured)
-        assertFalse(onRouteArrivalCalls.isCaptured)
+        assertTrue(onNextRouteLegStartCalls.isCaptured)
+        assertFalse(onFinalDestinationArrivalCalls.isCaptured)
     }
 
     @Test
-    fun `should notify route arrival when arrived at last stop`() {
-        val onStopArrivalCalls = slot<RouteLegProgress>()
-        val onRouteArrivalCalls = slot<RouteProgress>()
+    fun `should notify final destination arrival when arrived at last waypoint`() {
+        val onNextRouteLegStartCalls = slot<RouteLegProgress>()
+        val onFinalDestinationArrivalCalls = slot<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onNextRouteLegStartCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
@@ -104,22 +104,22 @@ internal class ArrivalProgressObserverTest {
             }
         })
 
-        assertFalse(onStopArrivalCalls.isCaptured)
-        assertTrue(onRouteArrivalCalls.isCaptured)
+        assertFalse(onNextRouteLegStartCalls.isCaptured)
+        assertTrue(onFinalDestinationArrivalCalls.isCaptured)
     }
 
     @Test
-    fun `should notify route arrival when arrived at last stop only once`() {
-        val onStopArrivalCalls = slot<RouteLegProgress>()
-        val onRouteArrivalCalls = mutableListOf<RouteProgress>()
+    fun `should notify final destination arrival when arrived at last waypoint only once`() {
+        val onNextRouteLegStartCalls = slot<RouteLegProgress>()
+        val onFinalDestinationArrivalCalls = mutableListOf<RouteProgress>()
         val customArrivalController: ArrivalController = mockk {
-            every { navigateNextRouteLeg(capture(onStopArrivalCalls)) } returns false
+            every { navigateNextRouteLeg(capture(onNextRouteLegStartCalls)) } returns false
             every { arrivalOptions() } returns mockk {
                 every { arrivalInSeconds } returns null
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
         val routeProgress: RouteProgress = mockk {
             every { currentState() } returns RouteProgressState.ROUTE_ARRIVED
             every { route() } returns mockk {
@@ -137,9 +137,9 @@ internal class ArrivalProgressObserverTest {
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
 
-        assertEquals(1, onRouteArrivalCalls.size)
-        assertFalse(onStopArrivalCalls.isCaptured)
-        verify(exactly = 1) { arrivalObserver.onRouteArrival(any()) }
+        assertEquals(1, onFinalDestinationArrivalCalls.size)
+        assertFalse(onNextRouteLegStartCalls.isCaptured)
+        verify(exactly = 1) { arrivalObserver.onFinalDestinationArrival(any()) }
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class ArrivalProgressObserverTest {
         })
 
         assertEquals(onArrivalCalls.captured.distanceRemaining(), 8.0f, 0.001f)
-        verify(exactly = 0) { arrivalObserver.onRouteArrival(any()) }
+        verify(exactly = 0) { arrivalObserver.onFinalDestinationArrival(any()) }
     }
 
     @Test
@@ -216,7 +216,7 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should not navigate to next stop before arrival`() {
+    fun `should not navigate to next route leg before arrival`() {
         val onArrivalCalls = slot<RouteLegProgress>()
         val customArrivalController: ArrivalController = mockk {
             every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
@@ -239,7 +239,7 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should navigate to next stop automatically by default`() {
+    fun `should navigate to next waypoint automatically by default`() {
         every { tripSession.getRouteProgress() } returns mockk {
             every { route() } returns mockk {
                 every { legs() } returns listOf(
@@ -267,7 +267,7 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should navigate to next stop automatically using options`() {
+    fun `should navigate to next waypoint automatically using options`() {
         val testNavigateNextRouteLeg = true
         val routeProgress: RouteProgress = mockk {
             every { currentState() } returns RouteProgressState.LOCATION_TRACKING
@@ -302,7 +302,7 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `should not navigate to next stop automatically using options`() {
+    fun `should not navigate to next waypoint automatically using options`() {
         val testNavigateNextRouteLeg = false
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentState() } returns RouteProgressState.LOCATION_TRACKING
@@ -378,11 +378,11 @@ internal class ArrivalProgressObserverTest {
     }
 
     @Test
-    fun `navigateNextRouteLeg should notify stop arrival`() {
-        val onStopArrivalCalls = slot<RouteLegProgress>()
-        val onRouteArrivalCalls = slot<RouteProgress>()
-        every { arrivalObserver.onStopArrival(capture(onStopArrivalCalls)) } returns Unit
-        every { arrivalObserver.onRouteArrival(capture(onRouteArrivalCalls)) } returns Unit
+    fun `navigateNextRouteLeg should notify next route leg start`() {
+        val onNavigateNextRouteLegCalls = slot<RouteLegProgress>()
+        val onFinalDestinationArrivalCalls = slot<RouteProgress>()
+        every { arrivalObserver.onNextRouteLegStart(capture(onNavigateNextRouteLegCalls)) } returns Unit
+        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentState() } returns RouteProgressState.LOCATION_TRACKING
             every { route() } returns mockk {
@@ -401,7 +401,7 @@ internal class ArrivalProgressObserverTest {
 
         arrivalProgressObserver.navigateNextRouteLeg()
 
-        assertTrue(onStopArrivalCalls.isCaptured)
-        assertFalse(onRouteArrivalCalls.isCaptured)
+        assertTrue(onNavigateNextRouteLegCalls.isCaptured)
+        assertFalse(onFinalDestinationArrivalCalls.isCaptured)
     }
 }

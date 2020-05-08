@@ -43,6 +43,10 @@ import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
 
 /**
+ * This example shows how to use the Navigation SDK's [FasterRouteObserver]
+ * and display the observer's faster routes that are returned if the
+ * device goes off of the original [DirectionsRoute].
+ *
  * To ensure proper functioning of this example make sure your Location is turned on.
  */
 class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -113,7 +117,11 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fasterRouteObserver = object : FasterRouteObserver {
         // [Optional] Override the interval to check for faster routes.
         override fun restartAfterMillis() = FasterRouteObserver.DEFAULT_INTERVAL_MILLIS
-        override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+        override fun onFasterRoute(
+            currentRoute: DirectionsRoute,
+            alternatives: List<DirectionsRoute>,
+            isAlternativeFaster: Boolean
+        ) {
             if (isAlternativeFaster) {
                 this@FasterRouteActivity.fasterRoutes = alternatives
                 fasterRouteSelectionTimer.start()
@@ -127,7 +135,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             override fun onTick(millisUntilFinished: Long) {
                 Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
                 fasterRouteAcceptProgress.progress =
-                        (MAX_PROGRESS - millisUntilFinished / COUNT_DOWN_INTERVAL).toInt()
+                    (MAX_PROGRESS - millisUntilFinished / COUNT_DOWN_INTERVAL).toInt()
             }
 
             override fun onFinish() {
@@ -144,8 +152,8 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-                this,
-                Mapbox.getAccessToken()
+            this,
+            Mapbox.getAccessToken()
         )
         mapboxNavigationOptions.onboardRouterConfig?.toBuilder()?.tilePath("")
 
@@ -155,7 +163,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         initListeners()
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-                .show()
+            .show()
     }
 
     override fun onLowMemory() {
@@ -207,13 +215,13 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation.requestRoutes(
-                        RouteOptions.builder().applyDefaultParams()
-                                .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                                .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                                .alternatives(true)
-                                .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                                .build(),
-                        routesReqCallback
+                    RouteOptions.builder().applyDefaultParams()
+                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                        .alternatives(true)
+                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .build(),
+                    routesReqCallback
                 )
             }
             true
@@ -252,15 +260,15 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("RestrictedApi")
     private fun startLocationUpdates() {
         val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_ENGINE_REQUEST_INTERVAL)
-                        .setFastestInterval(DEFAULT_FASTEST_INTERVAL)
-                        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                        .build()
+            LocationEngineRequest.Builder(DEFAULT_ENGINE_REQUEST_INTERVAL)
+                .setFastestInterval(DEFAULT_FASTEST_INTERVAL)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         try {
             mapboxNavigation.locationEngine.requestLocationUpdates(
-                    requestLocationUpdateRequest,
-                    locationListenerCallback,
-                    mainLooper
+                requestLocationUpdateRequest,
+                locationListenerCallback,
+                mainLooper
             )
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
         } catch (exception: SecurityException) {
@@ -283,7 +291,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private class MyLocationEngineCallback(activity: FasterRouteActivity) :
-            LocationEngineCallback<LocationEngineResult> {
+        LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
