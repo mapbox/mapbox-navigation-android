@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_final_destination_arrival_buildin
 /**
  * This example shows how to use the Navigation UI SDK's [BuildingFootprintHighlightLayer]
  * class to highlight a building footprint. The final destination arrival callback is from
- * [ArrivalObserver.onRouteArrival].
+ * [ArrivalObserver.onFinalDestinationArrival].
  */
 class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
     BannerInstructionsListener, ArrivalObserver {
@@ -139,11 +139,11 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
         return instructions!!
     }
 
-    override fun onStopArrival(routeLegProgress: RouteLegProgress) {
+    override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
         // Not needed in this example
     }
 
-    override fun onRouteArrival(routeProgress: RouteProgress) {
+    override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
         mapboxMap.easeCamera(zoomTo(18.0), 1800)
 
         // Adjust the visibility of the building footprint highlight layer

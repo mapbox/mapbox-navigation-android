@@ -13,7 +13,7 @@ internal class ArrivalProgressObserver(
 
     private var arrivalController: ArrivalController = AutoArrivalController()
     private val arrivalObservers = CopyOnWriteArraySet<ArrivalObserver>()
-    private var arrivedForRoute = false
+    private var finalDestinationArrived = false
 
     fun attach(arrivalController: ArrivalController) {
         this.arrivalController = arrivalController
@@ -42,7 +42,7 @@ internal class ArrivalProgressObserver(
             false
         }
         if (nextLegStarted) {
-            arrivalObservers.forEach { it.onStopArrival(legProgress) }
+            arrivalObservers.forEach { it.onNextRouteLegStart(legProgress) }
         }
         return nextLegStarted
     }
@@ -53,13 +53,13 @@ internal class ArrivalProgressObserver(
 
         val arrivalOptions = arrivalController.arrivalOptions()
         if (routeProgress.currentState() == RouteProgressState.ROUTE_ARRIVED && !hasMoreLegs(routeProgress)) {
-            doOnRouteArrival(routeProgress)
+            doOnFinalDestinationArrival(routeProgress)
         } else if (arrivalOptions.arrivalInSeconds != null) {
-            checkStopArrivalTime(arrivalOptions.arrivalInSeconds, routeLegProgress)
+            checkWaypointArrivalTime(arrivalOptions.arrivalInSeconds, routeLegProgress)
         } else if (arrivalOptions.arrivalInMeters != null) {
-            checkStopArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
+            checkWaypointArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
         }
-        arrivedForRoute = (routeProgress.currentState() ?: RouteProgressState.ROUTE_UNCERTAIN) == RouteProgressState.ROUTE_ARRIVED
+        finalDestinationArrived = (routeProgress.currentState() ?: RouteProgressState.ROUTE_UNCERTAIN) == RouteProgressState.ROUTE_ARRIVED
     }
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
@@ -68,28 +68,28 @@ internal class ArrivalProgressObserver(
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
-    private fun checkStopArrivalTime(arrivalInSeconds: Double, routeLegProgress: RouteLegProgress) {
+    private fun checkWaypointArrivalTime(arrivalInSeconds: Double, routeLegProgress: RouteLegProgress) {
         if (routeLegProgress.durationRemaining() <= arrivalInSeconds) {
-            doOnStopArrival(routeLegProgress)
+            doOnWaypointArrival(routeLegProgress)
         }
     }
 
-    private fun checkStopArrivalDistance(arrivalInMeters: Double, routeLegProgress: RouteLegProgress) {
+    private fun checkWaypointArrivalDistance(arrivalInMeters: Double, routeLegProgress: RouteLegProgress) {
         if (routeLegProgress.distanceRemaining() <= arrivalInMeters) {
-            doOnStopArrival(routeLegProgress)
+            doOnWaypointArrival(routeLegProgress)
         }
     }
 
-    private fun doOnStopArrival(routeLegProgress: RouteLegProgress) {
+    private fun doOnWaypointArrival(routeLegProgress: RouteLegProgress) {
         val moveToNextLeg = arrivalController.navigateNextRouteLeg(routeLegProgress)
         if (moveToNextLeg) {
             navigateNextRouteLeg()
         }
     }
 
-    private fun doOnRouteArrival(routeProgress: RouteProgress) {
-        if (!arrivedForRoute) {
-            arrivalObservers.forEach { it.onRouteArrival(routeProgress) }
+    private fun doOnFinalDestinationArrival(routeProgress: RouteProgress) {
+        if (!finalDestinationArrived) {
+            arrivalObservers.forEach { it.onFinalDestinationArrival(routeProgress) }
         }
     }
 }
