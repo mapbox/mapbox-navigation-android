@@ -38,7 +38,6 @@ import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.lang.ref.WeakReference
-import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
@@ -113,7 +112,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         // [Optional] Override the interval to check for faster routes.
-        override fun restartAfterMillis(): Long = TimeUnit.MINUTES.toMillis(1)
+        override fun restartAfterMillis() = FasterRouteObserver.DEFAULT_INTERVAL_MILLIS
 
         override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
             if (isAlternativeFaster) {

@@ -11,7 +11,7 @@ interface FasterRouteObserver {
     /**
      * Overridable value to change when the next faster route will be checked.
      */
-    fun restartAfterMillis(): Long = TimeUnit.MINUTES.toMillis(2)
+    fun restartAfterMillis(): Long = DEFAULT_INTERVAL_MILLIS
 
     /**
      * Invoked whenever a faster route was inspected.
@@ -21,4 +21,11 @@ interface FasterRouteObserver {
      * @param isAlternativeFaster true if the alternativeRoute is faster, false otherwise
      */
     fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean)
+
+    companion object {
+        /**
+         * The default and recommended interval for checking for faster routes.
+         */
+        val DEFAULT_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5)
+    }
 }

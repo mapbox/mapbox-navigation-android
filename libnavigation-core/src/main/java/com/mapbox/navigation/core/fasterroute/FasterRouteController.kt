@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import com.mapbox.navigation.utils.internal.ifNonNull
+import java.util.concurrent.TimeUnit
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
@@ -25,7 +26,11 @@ internal class FasterRouteController(
         val previousFasterRouteObserver = this.fasterRouteObserver
         this.fasterRouteObserver = fasterRouteObserver
         if (previousFasterRouteObserver == null) {
-            fasterRouteTimer.restartAfterMillis = fasterRouteObserver.restartAfterMillis()
+            val restartAfterMillis = fasterRouteObserver.restartAfterMillis()
+            check(TimeUnit.MILLISECONDS.toMinutes(restartAfterMillis) >= 2) {
+                "Faster route should be >= 2 minutes, $restartAfterMillis is out of range"
+            }
+            fasterRouteTimer.restartAfterMillis = restartAfterMillis
             fasterRouteTimer.startTimer {
                 requestFasterRoute()
             }
