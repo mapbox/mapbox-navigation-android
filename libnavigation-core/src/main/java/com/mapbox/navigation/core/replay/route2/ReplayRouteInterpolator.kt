@@ -54,10 +54,11 @@ internal class ReplayRouteInterpolator {
      */
     fun createBearingProfile(replayRouteLocations: List<ReplayRouteLocation>) {
         var bearing = replayRouteLocations.first().bearing
+        val lookAhead = 2
         replayRouteLocations.forEachIndexed { index, location ->
-            if (index + 1 < replayRouteLocations.lastIndex) {
+            if (index + lookAhead < replayRouteLocations.lastIndex) {
                 val fromPoint = location.point
-                val toPoint = replayRouteLocations[index + 1].point
+                val toPoint = replayRouteLocations[index + lookAhead].point
                 bearing = TurfMeasurement.bearing(fromPoint, toPoint)
             }
             location.bearing = bearing
@@ -149,6 +150,7 @@ internal class ReplayRouteInterpolator {
                 positionMeters = previous.positionMeters + positionSpeed
             ))
         }
+        steps[steps.lastIndex] = ReplayRouteStep(steps.last().acceleration, endSpeed, distance)
     }
 
     private fun distanceToSlowDown(options: ReplayRouteOptions, velocity: Double, acceleration: Double, endVelocity: Double): Double {

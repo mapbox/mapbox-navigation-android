@@ -3,9 +3,8 @@ package com.mapbox.navigation.core.replay.route2
 import com.mapbox.geojson.LineString
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import org.junit.Ignore
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReplayRouteDriverTest {
@@ -46,7 +45,6 @@ class ReplayRouteDriverTest {
     }
 
     @Test
-    @Ignore // TODO fix the floating point rounding errors 223.96630390737917 > 223.96630390737914
     fun `should slow down at the end of a route`() {
         val geometry = """qnq_gAxdhmhFuvBlJe@?qC^^`GD|@bBpq@pB~{@om@xCqL\"""
 
