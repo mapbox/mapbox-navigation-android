@@ -20,7 +20,12 @@ fun Context.inferDeviceLanguage(): String = inferDeviceLocale().language
  */
 fun Context.inferDeviceLocale(): Locale =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        this.resources.configuration.locales.get(0)
+        val locales = this.resources.configuration.locales
+        if (!locales.isEmpty && locales[0] != null) {
+            locales[0]
+        } else {
+            Locale.getDefault()
+        }
     } else {
         this.resources.configuration.locale
     }
