@@ -1,14 +1,14 @@
 package com.mapbox.navigation.ui.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.geojson.LineString
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildRouteLineExpression
+import com.mapbox.navigation.ui.route.RouteConstants.VANISHING_ROUTE_LINE_UPDATE_DELAY
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -69,16 +69,9 @@ internal class MapRouteProgressChangeListener(
                     val dist = routeProgress.distanceTraveled() / totalDist
                     if (dist > 0) {
                         val deferredExpression = async(Dispatchers.Default) {
-                            val lineString: LineString =
-                                routeLine.getLineStringForRoute(currentRoute!!)
-                            buildRouteLineExpression(
-                                currentRoute,
-                                lineString,
-                                true,
-                                dist.toDouble(),
-                                routeLine::getRouteColorForCongestion
-                            )
+                            routeLine.getExpressionAtOffset(dist)
                         }
+                        delay(VANISHING_ROUTE_LINE_UPDATE_DELAY)
                         routeLine.hideShieldLineAtOffset(dist)
                         routeLine.decorateRouteLine(deferredExpression.await())
                     }
