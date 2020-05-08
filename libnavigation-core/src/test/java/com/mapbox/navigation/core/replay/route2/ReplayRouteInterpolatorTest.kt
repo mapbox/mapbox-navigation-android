@@ -128,6 +128,22 @@ class ReplayRouteInterpolatorTest {
     }
 
     @Test
+    fun `should handle distances at low precision`() {
+        val startSpeedMps = 0.0
+        val endSpeedMps = 3.0
+        val distanceMeters = 223.96630390737917
+
+        val segment = routeInterpolator.interpolateSpeed(
+            defaultOptions,
+            startSpeedMps,
+            endSpeedMps,
+            distanceMeters)
+
+        assertEquals(223.96630390737917, segment.steps.last().positionMeters, 0.00001)
+        assertEquals(3.0, segment.endSpeedMps, 0.0001)
+    }
+
+    @Test
     fun `should create speed for each point`() {
         val coordinates = listOf(
             Point.fromLngLat(-121.46991, 38.550876),
