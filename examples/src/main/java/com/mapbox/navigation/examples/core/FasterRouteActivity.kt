@@ -56,7 +56,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private var mapboxMap: MapboxMap? = null
-    private var fasterRoute: DirectionsRoute? = null
+    private var fasterRoutes: List<DirectionsRoute> = emptyList()
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private var navigationMapboxMap: NavigationMapboxMap? = null
@@ -113,10 +113,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     private val fasterRouteObserver = object : FasterRouteObserver {
         // [Optional] Override the interval to check for faster routes.
         override fun restartAfterMillis() = FasterRouteObserver.DEFAULT_INTERVAL_MILLIS
-
-        override fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean) {
+        override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
             if (isAlternativeFaster) {
-                this@FasterRouteActivity.fasterRoute = alternativeRoute
+                this@FasterRouteActivity.fasterRoutes = alternatives
                 fasterRouteSelectionTimer.start()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
@@ -133,7 +132,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
             override fun onFinish() {
                 Timber.d("FASTER_ROUTE: finished")
-                this@FasterRouteActivity.fasterRoute = null
+                this@FasterRouteActivity.fasterRoutes = emptyList()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
@@ -236,14 +235,11 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
         }
-        acceptLayout.setOnClickListener {
-            fasterRoute?.let {
-                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                    removeAt(0)
-                    add(0, it)
-                })
-                fasterRouteSelectionTimer.onFinish()
+        acceptLayout.setOnClickListener { _ ->
+            fasterRoutes.takeIf { it.isNotEmpty() }?.let { newRoutes ->
+                mapboxNavigation.setRoutes(newRoutes)
             }
+            fasterRouteSelectionTimer.onFinish()
         }
     }
 

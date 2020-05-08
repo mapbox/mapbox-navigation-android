@@ -133,7 +133,7 @@ class FasterRouteControllerTest {
             })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
-        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes[0], true) }
+        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes, true) }
 
         fasterRouteController.stop()
         coroutineRule.testDispatcher.cleanupTestCoroutines()
@@ -163,7 +163,7 @@ class FasterRouteControllerTest {
         })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
-        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes[0], false) }
+        verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes, false) }
 
         fasterRouteController.stop()
         coroutineRule.testDispatcher.cleanupTestCoroutines()
