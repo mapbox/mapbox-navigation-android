@@ -250,9 +250,15 @@ class MapRouteLineTest {
         every { style.layers } returns listOf(primaryRouteLayer)
         val firstRoute: DirectionsRoute = getDirectionsRoute(true)
         val secondRoute: DirectionsRoute = getDirectionsRoute(false)
+        val firstRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val secondRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
         val directionsRoutes = listOf(
-            RouteFeatureData(firstRoute, mockk<FeatureCollection>(), mockk<LineString>()),
-            RouteFeatureData(secondRoute, mockk<FeatureCollection>(), mockk<LineString>()))
+            RouteFeatureData(firstRoute, firstRouteFeatureCollection, mockk<LineString>()),
+            RouteFeatureData(secondRoute, secondRouteFeatureCollection, mockk<LineString>()))
         val mapRouteLine = MapRouteLine(
             ctx,
             style,
@@ -260,9 +266,12 @@ class MapRouteLineTest {
             null,
             layerProvider,
             directionsRoutes,
+            listOf(),
             false,
             false,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            0f
+        )
 
         val result = mapRouteLine.retrieveDirectionsRoutes()
 
