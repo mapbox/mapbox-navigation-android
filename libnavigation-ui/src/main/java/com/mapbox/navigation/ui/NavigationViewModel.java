@@ -25,7 +25,6 @@ import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.base.TimeFormat;
-import com.mapbox.navigation.core.fasterroute.FasterRouteObserver;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -54,7 +53,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
@@ -62,7 +60,6 @@ import static com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI;
 
 public class NavigationViewModel extends AndroidViewModel {
 
-  private static final String EMPTY_STRING = "";
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
 
@@ -94,7 +91,6 @@ public class NavigationViewModel extends AndroidViewModel {
   @TimeFormat.Type
   private int timeFormatType;
   private boolean isRunning;
-  private boolean isChangingConfigurations;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
   private NavigationViewModelProgressObserver navigationProgressObserver =
@@ -134,7 +130,6 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   public void onDestroy(boolean isChangingConfigurations) {
-    this.isChangingConfigurations = isChangingConfigurations;
     if (!isChangingConfigurations) {
       endNavigation();
       destroyMapOffline();
@@ -251,7 +246,6 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
-    navigation.detachFasterRouteObserver();
     navigation.stopTripSession();
   }
 
@@ -445,7 +439,6 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.registerTripSessionStateObserver(tripSessionStateObserver);
-    navigation.attachFasterRouteObserver(fasterRouteObserver);
   }
 
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
@@ -486,35 +479,6 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private void updateRoute(DirectionsRoute route) {
-    this.route.setValue(route);
-    if (!isChangingConfigurations) {
-      startNavigation(route);
-      updateReplayEngine(route);
-      sendEventOnRerouteAlong(route);
-      isOffRoute.setValue(false);
-    }
-    resetConfigurationFlag();
-  }
-
-  private FasterRouteObserver fasterRouteObserver = new FasterRouteObserver() {
-    @Override
-    public void onFasterRoute(
-            @NotNull DirectionsRoute currentRoute,
-            @NotNull DirectionsRoute alternativeRoute,
-            boolean isAlternativeFaster
-    ) {
-      if (isAlternativeFaster) {
-        updateRoute(alternativeRoute);
-      }
-    }
-
-    @Override
-    public long restartAfterMillis() {
-      return TimeUnit.MINUTES.toMillis(2);
-    }
-  };
-
   private RoutesObserver routesObserver = new RoutesObserver() {
     @Override
     public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
@@ -532,10 +496,6 @@ public class NavigationViewModel extends AndroidViewModel {
       voiceInstructionsToAnnounce = 0;
       voiceInstructionCache.initCache(route);
     }
-  }
-
-  private void updateReplayEngine(DirectionsRoute route) {
-    locationEngineConductor.updateSimulatedRoute(route);
   }
 
   private void endNavigation() {
@@ -570,18 +530,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private void sendEventFeedback(FeedbackItem feedbackItem) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
-    }
-  }
-
-  private void sendEventOnRerouteAlong(DirectionsRoute route) {
-    if (navigationViewEventDispatcher != null && isOffRoute()) {
-      navigationViewEventDispatcher.onRerouteAlong(route);
-    }
-  }
-
-  private void resetConfigurationFlag() {
-    if (isChangingConfigurations) {
-      isChangingConfigurations = false;
     }
   }
 
