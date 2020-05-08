@@ -53,12 +53,15 @@
     <string name="title_ui_building_extrusions_kotlin" translatable="false">Building extrusions</string>
     <string name="description_ui_building_extrusions_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize 3D building extrusions.</string>
 
-    <string name="title_replay_navigation_kotlin" translatable="false">Replay engine</string>
-    <string name="description_replay_navigation_kotlin" translatable="false">Shows how to use the MapboxNavigation class with the replay engine in Kotlin code.</string>
+    <string name="title_replay_route" translatable="false">Replay route</string>
+    <string name="description_replay_route" translatable="false">Shows how to use the MapboxNavigation class with the replay engine in Kotlin code.</string>
+    <string name="replay_playback_speed_seekbar" translatable="false">Replay speed %d</string>
 
     <string name="title_replay_history_kotlin" translatable="false">Replay history</string>
     <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
-    <string name="replay_history_player_playback_seekbar" translatable="false">Replay speed %d</string>
+
+    <string name="title_replay_waypoints" translatable="false">Replay waypoints</string>
+    <string name="description_replay_waypoints" translatable="false">Demonstrates how to use navigate to waypoints.</string>
 
     <string name="title_reroute_view" translatable="false">Reroute events</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
@@ -77,9 +80,6 @@
 
     <string name="title_faster_route" translatable="false">Faster route</string>
     <string name="description_faster_route" translatable="false">Demonstrate how to use the MapboxNavigation class to listen for a faster route.</string>
-
-    <string name="title_multiple_stops" translatable="false">Multiple stops</string>
-    <string name="description_multiple_stops" translatable="false">Demonstrates how to use navigate to multiple stops.</string>
 
     <string name="title_summary_bottom_sheet" translatable="false">SummaryBottomSheet</string>
     <string name="description_summary_bottom_sheet" translatable="false">Shows how to integrate SummaryBottomSheet and a recenter button with the Navigation SDK.</string>

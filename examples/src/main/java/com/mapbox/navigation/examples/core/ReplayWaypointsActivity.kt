@@ -45,17 +45,17 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import java.util.Collections
-import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.container
-import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.mapView
-import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.seekBar
-import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.seekBarText
-import kotlinx.android.synthetic.main.multiple_stops_example_activity_layout.startNavigation
+import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.container
+import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.mapView
+import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.seekBar
+import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.seekBarText
+import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.startNavigation
 import timber.log.Timber
 
 /**
  * To ensure proper functioning of this example make sure your Location is turned on.
  */
-class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
+class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
@@ -70,7 +70,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.multiple_stops_example_activity_layout)
+        setContentView(R.layout.activity_replay_waypoints_layout)
         mapView.onCreate(savedInstanceState)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
@@ -172,11 +172,11 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setupReplayControls() {
         seekBar.max = 4
         seekBar.progress = 1
-        seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, seekBar.progress)
+        seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 replayHistoryPlayer.playbackSpeed(progress.toDouble())
-                seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, progress)
+                seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) { }
@@ -248,7 +248,7 @@ class MultipleStopsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
     }
 
-    private class FirstLocationCallback(activity: MultipleStopsActivity) :
+    private class FirstLocationCallback(activity: ReplayWaypointsActivity) :
         LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
