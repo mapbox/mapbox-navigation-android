@@ -532,30 +532,54 @@ class MapRouteLineTest {
 
     @Test
     fun buildRouteLineExpression() {
-        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.31436133, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.66388464, [\"rgba\", 0.0, 7.0, 255.0, 0.0], 0.6948727, [\"rgba\", 0.0, 7.0, 255.0, 0.0]]"
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31436133, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.66388464, [\"rgba\", 233.0, 51.0, 64.0, 1.0], 0.6948727, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getDirectionsRoute(true)
-        val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider).also { it.draw(listOf(route)) }
 
-        val expression = MapRouteLine.MapRouteLineSupport.buildRouteLineExpression(
-            route,
-            lineString,
-            true,
-            .2) { _, _ -> 2047 }
+        val expression = mapRouteLine.getExpressionAtOffset(.2f)
 
         assertEquals(expectedExpression, expression.toString())
     }
 
     @Test
     fun buildRouteLineExpressionWhenNoTraffic() {
-        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 0.0, 7.0, 255.0, 0.0]]"
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getDirectionsRoute(false)
-        val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider).also { it.draw(listOf(route)) }
 
-        val expression = MapRouteLine.MapRouteLineSupport.buildRouteLineExpression(
-            route,
-            lineString,
-            true,
-            .2) { _, _ -> 2047 }
+        val expression = mapRouteLine.getExpressionAtOffset(.2f)
+
+        assertEquals(expectedExpression, expression.toString())
+    }
+
+    @Test
+    fun buildRouteLineExpressionOffsetAfterLastLeg() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.9, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val route = getDirectionsRoute(false)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider).also { it.draw(listOf(route)) }
+
+        val expression = mapRouteLine.getExpressionAtOffset(.9f)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -565,9 +589,8 @@ class MapRouteLineTest {
         val route = getDirectionsRoute(true)
         val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
 
-        val result = MapRouteLine.MapRouteLineSupport.getStopsFromLeg(
+        val result = MapRouteLine.MapRouteLineSupport.calculateRouteLineSegmentFromLeg(
             route.legs()!![0],
-            0.0,
             lineString,
             route.distance()!!,
             true
