@@ -151,8 +151,8 @@
                 android:value=".UIActivity"/>
         </activity>
 
-        <activity android:name=".core.MultipleStopsActivity"
-            android:label="@string/title_replay_navigation_kotlin"
+        <activity android:name=".core.ReplayWaypointsActivity"
+            android:label="@string/title_replay_route"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -160,7 +160,7 @@
         </activity>
 
         <activity android:name=".core.ReplayActivity"
-            android:label="@string/title_replay_navigation_kotlin"
+            android:label="@string/title_replay_route"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -168,7 +168,7 @@
         </activity>
 
         <activity android:name=".core.ReplayHistoryActivity"
-            android:label="@string/title_replay_navigation_kotlin">
+            android:label="@string/title_replay_route">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity"/>

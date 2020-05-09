@@ -35,7 +35,7 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
-import kotlinx.android.synthetic.main.replay_engine_example_activity_layout.*
+import kotlinx.android.synthetic.main.activity_replay_route_layout.*
 
 /**
  * To ensure proper functioning of this example make sure your Location is turned on.
@@ -54,7 +54,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.replay_engine_example_activity_layout)
+        setContentView(R.layout.activity_replay_route_layout)
         mapView.onCreate(savedInstanceState)
 
         val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(

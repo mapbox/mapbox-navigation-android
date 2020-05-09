@@ -40,8 +40,8 @@ import java.io.InputStream
 import java.nio.charset.Charset.forName
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.android.synthetic.main.activity_replay_history_layout.*
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
-import kotlinx.android.synthetic.main.replay_history_example_activity_layout.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -60,7 +60,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.replay_history_example_activity_layout)
+        setContentView(R.layout.activity_replay_history_layout)
         mapView.onCreate(savedInstanceState)
 
         getNavigationAsync {
@@ -166,11 +166,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private fun ReplayNavigationContext.setupReplayControls() {
         seekBar.max = 8
         seekBar.progress = 1
-        seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, seekBar.progress)
+        seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 replayHistoryPlayer.playbackSpeed(progress.toDouble())
-                seekBarText.text = getString(R.string.replay_history_player_playback_seekbar, progress)
+                seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) { }

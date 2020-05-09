@@ -16,7 +16,6 @@ import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.HybridRouterActivityJava
 import com.mapbox.navigation.examples.core.HybridRouterActivityKt
 import com.mapbox.navigation.examples.core.InstructionViewActivity
-import com.mapbox.navigation.examples.core.MultipleStopsActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
 import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
@@ -24,6 +23,7 @@ import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
 import com.mapbox.navigation.examples.core.ReRouteActivity
 import com.mapbox.navigation.examples.core.ReplayActivity
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
+import com.mapbox.navigation.examples.core.ReplayWaypointsActivity
 import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
 import com.mapbox.navigation.examples.core.SummaryBottomSheetActivity
 import com.mapbox.navigation.examples.core.TripServiceActivityKt
@@ -123,8 +123,8 @@ class CoreActivity : AppCompatActivity() {
                 FreeDriveNavigationActivity::class.java
             ),
             SampleItem(
-                getString(R.string.title_replay_navigation_kotlin),
-                getString(R.string.description_replay_navigation_kotlin),
+                getString(R.string.title_replay_route),
+                getString(R.string.description_replay_route),
                 ReplayActivity::class.java
             ),
             SampleItem(
@@ -133,14 +133,14 @@ class CoreActivity : AppCompatActivity() {
                 ReplayHistoryActivity::class.java
             ),
             SampleItem(
+                getString(R.string.title_replay_waypoints),
+                getString(R.string.description_replay_waypoints),
+                ReplayWaypointsActivity::class.java
+            ),
+            SampleItem(
                 getString(R.string.title_faster_route),
                 getString(R.string.description_faster_route),
                 FasterRouteActivity::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_multiple_stops),
-                getString(R.string.description_multiple_stops),
-                MultipleStopsActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_instruction_view),
