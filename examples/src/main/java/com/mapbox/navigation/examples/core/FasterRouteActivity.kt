@@ -198,10 +198,12 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
+
+        mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
         }
+
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation.requestRoutes(
@@ -287,7 +289,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
+                if (activityRef.get()?.mapboxMap?.locationComponent?.isLocationComponentActivated == true) {
+                    activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
+                }
             }
         }
 
