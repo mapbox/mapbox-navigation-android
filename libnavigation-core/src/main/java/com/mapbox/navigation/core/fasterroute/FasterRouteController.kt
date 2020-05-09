@@ -63,7 +63,7 @@ internal class FasterRouteController(
                 ?: return
             tripSession.getRouteProgress()?.let { progress ->
                 val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], progress)
-                fasterRouteObserver?.onFasterRoute(currentRoute, routes[0], isAlternativeFaster)
+                fasterRouteObserver?.onFasterRoute(currentRoute, routes, isAlternativeFaster)
             }
         }
 

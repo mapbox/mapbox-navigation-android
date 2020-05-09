@@ -84,7 +84,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
-    private var fasterRoute: DirectionsRoute? = null
+    private var fasterRoutes: List<DirectionsRoute> = emptyList()
     private lateinit var originalRoute: DirectionsRoute
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -247,12 +247,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()
         }
-        acceptLayout.setOnClickListener {
-            fasterRoute?.let {
-                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                    removeAt(0)
-                    add(0, it)
-                })
+        acceptLayout.setOnClickListener { _ ->
+            fasterRoutes.takeIf { it.isNotEmpty() }?.let { newRoutes ->
+                mapboxNavigation.setRoutes(newRoutes)
                 fasterRouteSelectionTimer.onFinish()
             }
         }
@@ -313,19 +310,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
             override fun onFinish() {
                 Timber.d("FASTER_ROUTE: finished")
-                this@SimpleMapboxNavigationKt.fasterRoute = null
+                this@SimpleMapboxNavigationKt.fasterRoutes = emptyList()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRoute(
-            currentRoute: DirectionsRoute,
-            alternativeRoute: DirectionsRoute,
-            isAlternativeFaster: Boolean
-        ) {
+        override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
             if (isAlternativeFaster) {
-                this@SimpleMapboxNavigationKt.fasterRoute = fasterRoute
+                this@SimpleMapboxNavigationKt.fasterRoutes = alternatives
                 fasterRouteSelectionTimer.start()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }

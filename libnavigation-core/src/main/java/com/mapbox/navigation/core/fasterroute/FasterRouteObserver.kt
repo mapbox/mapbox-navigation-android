@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import java.util.concurrent.TimeUnit
 
 /**
- * Interface definition for an observer that get's notified whenever the SDK finds a faster route to the destination.
+ * Interface definition for an observer that is notified whenever the Navigation SDK checks for a faster route to the destination.
  */
 interface FasterRouteObserver {
 
@@ -16,11 +16,11 @@ interface FasterRouteObserver {
     /**
      * Invoked whenever a faster route was inspected.
      *
-     * @param currentRoute reference to the current route.
-     * @param alternativeRoute reference to the alternative checked.
-     * @param isAlternativeFaster true if the alternativeRoute is faster, false otherwise
+     * @param currentRoute the current route.
+     * @param alternatives the routes where alternatives[0] may be faster
+     * @param isAlternativeFaster true if the alternatives[0] is faster, false otherwise
      */
-    fun onFasterRoute(currentRoute: DirectionsRoute, alternativeRoute: DirectionsRoute, isAlternativeFaster: Boolean)
+    fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean)
 
     companion object {
         /**
