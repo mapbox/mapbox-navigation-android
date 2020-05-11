@@ -1,18 +1,15 @@
 package com.mapbox.navigation.core.replay.history
 
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.base.common.logger.Logger
 import java.util.Collections.singletonList
 
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
  */
-class ReplayHistoryPlayer(
-    logger: Logger
-) {
+class ReplayHistoryPlayer {
 
     private val replayEvents = ReplayEvents(mutableListOf())
-    private val replayEventSimulator = ReplayEventSimulator(replayEvents, logger)
+    private val replayEventSimulator = ReplayEventSimulator(replayEvents)
 
     private val replayEventsObservers: MutableList<ReplayEventsObserver> = mutableListOf()
 

@@ -77,7 +77,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             // Load and replay history on IO dispatchers
             val deferredEvents = async(Dispatchers.IO) { loadReplayHistory() }
             val replayEvents = deferredEvents.await()
-            val replayHistoryPlayer = ReplayHistoryPlayer(MapboxLogger)
+            val replayHistoryPlayer = ReplayHistoryPlayer()
                 .pushEvents(replayEvents)
             if (!isActive) return@launch
 

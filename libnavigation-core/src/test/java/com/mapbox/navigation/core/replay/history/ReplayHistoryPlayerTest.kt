@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Called
 import io.mockk.coVerify
@@ -26,27 +25,26 @@ class ReplayHistoryPlayerTest {
     val coroutineRule = MainCoroutineRule()
 
     private val replayEventsObserver: ReplayEventsObserver = mockk(relaxed = true)
-    private val logger: Logger = mockk(relaxUnitFun = true)
-
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
+
+    val replayHistoryPlayer = ReplayHistoryPlayer()
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1580777612.853),
-                ReplayEventUpdateLocation(1580777612.89,
-                    ReplayEventLocation(
-                        lat = 49.2492411,
-                        lon = 8.8512315,
-                        provider = "fused",
-                        time = 1580777612.892,
-                        altitude = 212.4732666015625,
-                        accuracyHorizontal = 4.288000106811523,
-                        bearing = 243.31265258789063,
-                        speed = 0.5585000514984131)
-                )
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1580777612.853),
+            ReplayEventUpdateLocation(1580777612.89,
+                ReplayEventLocation(
+                    lat = 49.2492411,
+                    lon = 8.8512315,
+                    provider = "fused",
+                    time = 1580777612.892,
+                    altitude = 212.4732666015625,
+                    accuracyHorizontal = 4.288000106811523,
+                    bearing = 243.31265258789063,
+                    speed = 0.5585000514984131)
+            )
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
 
         replayHistoryPlayer.play()
@@ -63,39 +61,38 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should play 2 of 3 locations that include time window`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventUpdateLocation(1580777820.952,
-                    ReplayEventLocation(
-                        lat = 49.2450478,
-                        lon = 8.8682922,
-                        time = 1580777820.952,
-                        speed = 30.239412307739259,
-                        bearing = 108.00135040283203,
-                        altitude = 222.47210693359376,
-                        accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused")),
-                ReplayEventUpdateLocation(1580777822.959,
-                    ReplayEventLocation(
-                        lat = 49.2448858,
-                        lon = 8.8690847,
-                        time = 1580777822.958,
-                        speed = 29.931121826171876,
-                        bearing = 106.001953125,
-                        altitude = 221.9241943359375,
-                        accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused")),
-                ReplayEventUpdateLocation(1580777824.953,
-                    ReplayEventLocation(
-                        lat = 49.2447354,
-                        lon = 8.8698759,
-                        time = 1580777824.89,
-                        speed = 29.96711540222168,
-                        bearing = 106.00138092041016,
-                        altitude = 221.253662109375,
-                        accuracyHorizontal = 3.9000000953674318,
-                        provider = "fused"))
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventUpdateLocation(1580777820.952,
+                ReplayEventLocation(
+                    lat = 49.2450478,
+                    lon = 8.8682922,
+                    time = 1580777820.952,
+                    speed = 30.239412307739259,
+                    bearing = 108.00135040283203,
+                    altitude = 222.47210693359376,
+                    accuracyHorizontal = 3.9000000953674318,
+                    provider = "fused")),
+            ReplayEventUpdateLocation(1580777822.959,
+                ReplayEventLocation(
+                    lat = 49.2448858,
+                    lon = 8.8690847,
+                    time = 1580777822.958,
+                    speed = 29.931121826171876,
+                    bearing = 106.001953125,
+                    altitude = 221.9241943359375,
+                    accuracyHorizontal = 3.9000000953674318,
+                    provider = "fused")),
+            ReplayEventUpdateLocation(1580777824.953,
+                ReplayEventLocation(
+                    lat = 49.2447354,
+                    lon = 8.8698759,
+                    time = 1580777824.89,
+                    speed = 29.96711540222168,
+                    bearing = 106.00138092041016,
+                    altitude = 221.253662109375,
+                    accuracyHorizontal = 3.9000000953674318,
+                    provider = "fused"))
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
 
         replayHistoryPlayer.play()
@@ -114,7 +111,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `should resume playing after completing events`() = coroutineRule.runBlockingTest {
         val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
+        val replayHistoryPlayer = ReplayHistoryPlayer()
             .pushEvents(testEvents)
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
         replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
@@ -139,12 +136,11 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1000.000),
-                ReplayEventGetStatus(1001.000),
-                ReplayEventGetStatus(1003.000)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1000.000),
+            ReplayEventGetStatus(1001.000),
+            ReplayEventGetStatus(1003.000)
+        ))
         val timeCapture = mutableListOf<Long>()
         replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
@@ -173,20 +169,19 @@ class ReplayHistoryPlayerTest {
             override val eventTimestamp: Double,
             val customValue: String
         ) : ReplayEventBase
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                CustomReplayEvent(1580777612.853, "custom value"),
-                ReplayEventUpdateLocation(1580777613.89,
-                    ReplayEventLocation(
-                        lat = 49.2492411,
-                        lon = 8.8512315,
-                        time = null,
-                        provider = null,
-                        altitude = null,
-                        accuracyHorizontal = null,
-                        bearing = null,
-                        speed = null))
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            CustomReplayEvent(1580777612.853, "custom value"),
+            ReplayEventUpdateLocation(1580777613.89,
+                ReplayEventLocation(
+                    lat = 49.2492411,
+                    lon = 8.8512315,
+                    time = null,
+                    provider = null,
+                    altitude = null,
+                    accuracyHorizontal = null,
+                    bearing = null,
+                    speed = null))
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
 
         replayHistoryPlayer.play()
@@ -204,28 +199,25 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should not crash if history data is empty`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-
         replayHistoryPlayer.play()
         replayHistoryPlayer.finish()
     }
 
     @Test
     fun `playFirstLocation should ignore events before the first location`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1580777612.853),
-                ReplayEventUpdateLocation(1580777612.89,
-                    ReplayEventLocation(
-                        lat = 49.2492411,
-                        lon = 8.8512315,
-                        provider = "fused",
-                        time = 1580777612.892,
-                        altitude = 212.4732666015625,
-                        accuracyHorizontal = 4.288000106811523,
-                        bearing = 243.31265258789063,
-                        speed = 0.5585000514984131))
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1580777612.853),
+            ReplayEventUpdateLocation(1580777612.89,
+                ReplayEventLocation(
+                    lat = 49.2492411,
+                    lon = 8.8512315,
+                    provider = "fused",
+                    time = 1580777612.892,
+                    altitude = 212.4732666015625,
+                    accuracyHorizontal = 4.288000106811523,
+                    bearing = 243.31265258789063,
+                    speed = 0.5585000514984131))
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
 
         replayHistoryPlayer.playFirstLocation()
@@ -239,12 +231,11 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `playFirstLocation should handle history events without locations`() {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1580777612.853),
-                ReplayEventGetStatus(1580777613.452),
-                ReplayEventGetStatus(1580777614.085)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1580777612.853),
+            ReplayEventGetStatus(1580777613.452),
+            ReplayEventGetStatus(1580777614.085)
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
 
         replayHistoryPlayer.playFirstLocation()
@@ -255,12 +246,11 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `should seekTo an event`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1.853),
-                seekToEvent,
-                ReplayEventGetStatus(3.085)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1.853),
+            seekToEvent,
+            ReplayEventGetStatus(3.085)
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
         replayHistoryPlayer.seekTo(seekToEvent)
 
@@ -279,23 +269,21 @@ class ReplayHistoryPlayerTest {
     @Test(expected = Exception::class)
     fun `should crash when seekTo event is missing`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1.853),
-                ReplayEventGetStatus(3.085)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1.853),
+            ReplayEventGetStatus(3.085)
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
         replayHistoryPlayer.seekTo(seekToEvent)
     }
 
     @Test
     fun `should seekTo an event time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(0.0),
-                ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(4.0)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(0.0),
+            ReplayEventGetStatus(2.0),
+            ReplayEventGetStatus(4.0)
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
         replayHistoryPlayer.seekTo(1.0)
 
@@ -313,12 +301,11 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should seekTo a time relative to total time`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1580777611.853),
-                ReplayEventGetStatus(1580777613.452),
-                ReplayEventGetStatus(1580777614.085)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1580777611.853),
+            ReplayEventGetStatus(1580777613.452),
+            ReplayEventGetStatus(1580777614.085)
+        ))
         replayHistoryPlayer.registerObserver(replayEventsObserver)
         replayHistoryPlayer.seekTo(1.0)
 
@@ -337,9 +324,8 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should play one event per second at 1_0 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(testEvents)
 
+        replayHistoryPlayer.pushEvents(testEvents)
         replayHistoryPlayer.playbackSpeed(1.0)
         replayHistoryPlayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
@@ -357,8 +343,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should play four events per second at 4_0 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(testEvents)
+        replayHistoryPlayer.pushEvents(testEvents)
 
         replayHistoryPlayer.playbackSpeed(4.0)
         replayHistoryPlayer.play()
@@ -377,8 +362,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should play one event every four seconds at 0_25 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(testEvents)
+        replayHistoryPlayer.pushEvents(testEvents)
 
         replayHistoryPlayer.playbackSpeed(0.25)
         replayHistoryPlayer.play()
@@ -397,8 +381,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should update play speed while playing`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(testEvents)
+        replayHistoryPlayer.pushEvents(testEvents)
 
         replayHistoryPlayer.playbackSpeed(1.0)
         replayHistoryPlayer.play()
@@ -423,8 +406,7 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should not crash when events are completed`() = coroutineRule.runBlockingTest {
         val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(testEvents)
+        replayHistoryPlayer.pushEvents(testEvents)
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
         replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
@@ -444,12 +426,11 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should register multiple observers`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1.0),
-                ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1.0),
+            ReplayEventGetStatus(2.0),
+            ReplayEventGetStatus(3.0)
+        ))
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
         replayHistoryPlayer.registerObserver(firstObserver)
@@ -471,12 +452,11 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should unregister single observers`() = coroutineRule.runBlockingTest {
-        val replayHistoryPlayer = ReplayHistoryPlayer(logger)
-            .pushEvents(listOf(
-                ReplayEventGetStatus(1.0),
-                ReplayEventGetStatus(2.0),
-                ReplayEventGetStatus(3.0)
-            ))
+        replayHistoryPlayer.pushEvents(listOf(
+            ReplayEventGetStatus(1.0),
+            ReplayEventGetStatus(2.0),
+            ReplayEventGetStatus(3.0)
+        ))
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
         replayHistoryPlayer.registerObserver(firstObserver)
