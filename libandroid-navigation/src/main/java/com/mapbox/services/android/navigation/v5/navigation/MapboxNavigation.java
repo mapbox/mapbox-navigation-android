@@ -17,6 +17,9 @@ import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigator.Navigator;
 import com.mapbox.navigator.NavigatorConfig;
+import com.mapbox.navigator.ProfileApplication;
+import com.mapbox.navigator.ProfilePlatform;
+import com.mapbox.navigator.SettingsProfile;
 import com.mapbox.services.android.navigation.BuildConfig;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonParams;
 import com.mapbox.services.android.navigation.v5.internal.navigation.ElectronicHorizonRequestBuilder;
@@ -1075,7 +1078,7 @@ public class MapboxNavigation implements ServiceConnection {
 
   @NotNull
   private Navigator configureNavigator() {
-    Navigator navigator = new Navigator();
+    Navigator navigator = new Navigator(new SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), "");
     NavigatorConfig navigatorConfig = navigator.getConfig();
     navigator.setConfig(navigatorConfig);
     return navigator;

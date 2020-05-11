@@ -15,7 +15,7 @@ public class OffRouteDetectorTest {
   @Test
   public void isUserOffRouteWith_returnsTrueWithRouteStateOffRoute() {
     NavigationStatus status = mock(NavigationStatus.class);
-    when(status.getRouteState()).thenReturn(RouteState.OFFROUTE);
+    when(status.getRouteState()).thenReturn(RouteState.OFF_ROUTE);
     OffRouteDetector offRouteDetector = new OffRouteDetector();
 
     boolean isOffRoute = offRouteDetector.isUserOffRouteWith(status);

@@ -3,7 +3,7 @@ package com.mapbox.navigation.route.offboard
 import android.content.Context
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 
@@ -12,7 +12,7 @@ internal object RouteBuilderProvider {
     fun getBuilder(
         accessToken: String,
         context: Context,
-        skuTokenProvider: SkuTokenProvider
+        urlSkuTokenProvider: UrlSkuTokenProvider
     ): MapboxDirections.Builder =
         MapboxDirections.builder()
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
@@ -31,7 +31,7 @@ internal object RouteBuilderProvider {
             .interceptor {
                 val httpUrl = it.request().url()
                 val skuUrl =
-                    skuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                    urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }
 }

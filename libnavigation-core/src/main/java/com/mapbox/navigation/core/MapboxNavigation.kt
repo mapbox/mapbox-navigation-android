@@ -18,6 +18,7 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.Endpoint
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
@@ -152,6 +153,7 @@ constructor(
 
     init {
         ThreadController.init()
+        navigator = NavigationComponentProvider.createNativeNavigator()
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
@@ -169,7 +171,6 @@ constructor(
                     isAccessible = true
                 }
         }
-        navigator = NavigationComponentProvider.createNativeNavigator()
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
             notification,
@@ -605,7 +606,7 @@ constructor(
                 String::class.java to (accessToken
                     ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
                 Context::class.java to context,
-                SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
+                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
             )
             MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
@@ -614,7 +615,8 @@ constructor(
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
-                    Logger::class.java to logger
+                    Logger::class.java to logger,
+                    SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
                 )
             }
             MapboxModuleType.NavigationTripNotification -> arrayOf(

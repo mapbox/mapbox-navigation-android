@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import io.mockk.every
@@ -29,7 +29,7 @@ class MapboxOffboardRouterTest : BaseTest() {
     private lateinit var offboardRouter: MapboxOffboardRouter
     private lateinit var callback: Callback<DirectionsResponse>
     private val routeOptions: RouteOptions = mockk(relaxed = true)
-    private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
+    private val mockSkuTokenProvider = mockk<UrlSkuTokenProvider>(relaxed = true)
     private val call: Call<DirectionsResponse> = mockk()
 
     @Before
