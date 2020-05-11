@@ -489,9 +489,16 @@ internal class MapRouteLine(
                 ::getRouteColorForCongestion)
 
             if (style.isFullyLoaded) {
+                // Log.e("MapRouteLine","*********: ${it.route.toJson()}")
+                // Log.e("MapRouteLine","*********: $expression")
                 style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
             }
         }
+
+        // GlobalScope.launch(Dispatchers.Default) {
+        //     partitionedRoutes.first.first().route.toJson()
+        //     Log.e("MapRouteLine","*********:")
+        // }
 
         partitionedRoutes.second.mapNotNull {
             it.featureCollection.features()
@@ -734,25 +741,18 @@ internal class MapRouteLine(
             distFractionToVanish: Double,
             congestionColorProvider: (String, Boolean) -> Int
         ): Expression {
-            val scrubbedRouteLegs = route.legs()
-                ?.filter { it.annotation()?.congestion() != null }
+            val congestionSections = route.legs()
+                ?.map { it.annotation()?.congestion() ?: listOf() }
+                ?.flatten() ?: listOf()
 
-            val stopExpressionsWithTraffic: List<Expression.Stop> = when (scrubbedRouteLegs?.isEmpty()) {
-                false -> scrubbedRouteLegs.map {
-                    getStopsFromLeg(
-                        it,
-                        distFractionToVanish,
-                        routeLineString,
-                        route.distance() ?: 0.0,
-                        isPrimaryRoute,
-                        congestionColorProvider
-                    )
-                }.flatten()
-                else -> listOf(Expression.stop(
-                    distFractionToVanish,
-                    Expression.color(congestionColorProvider("", isPrimaryRoute)
-                    )))
-            }
+            val stopExpressionsWithTraffic = getStopsFromCongestion(
+                congestionSections,
+                distFractionToVanish,
+                routeLineString,
+                route.distance() ?: 0.0,
+                isPrimaryRoute,
+                congestionColorProvider
+            )
 
             return Expression.step(
                 Expression.lineProgress(),
@@ -763,7 +763,7 @@ internal class MapRouteLine(
 
         /**
          * Creates a collection of Expression.Stop objects.
-         * @param leg the RouteLeg to use in the calculation
+         * @param congestionSections the traffic congestion sections from the route legs
          * @param distFractionToVanish the fractional value of the route's distance that shouldn't
          * be visible
          * @param lineString derived from the route's geometry, used for calculating the fractional
@@ -775,65 +775,59 @@ internal class MapRouteLine(
          *
          *  @return the collection of Expression.Stop objects created
          */
-        fun getStopsFromLeg(
-            leg: RouteLeg,
+        fun getStopsFromCongestion(
+            congestionSections: List<String>,
             distFractionToVanish: Double,
             lineString: LineString,
             routeDistance: Double,
             isPrimary: Boolean,
             congestionColorProvider: (String, Boolean) -> Int
         ): List<Expression.Stop> {
-            val previousDistances = mutableListOf<Double>()
             val expressionStops = mutableListOf<Expression.Stop>()
-            val numCongestionPoints: Int = leg.annotation()?.congestion()?.size ?: 0
-            var congestionValue = ""
+            val numCongestionPoints: Int = congestionSections.size
+            var previousCongestion = ""
+            var distanceTraveled = 0.0
             for (i in 0 until numCongestionPoints) {
-                val currentLegCongestionValue = leg.annotation()?.congestion()?.get(i) ?: ""
-                if (currentLegCongestionValue == congestionValue) {
-                    continue
-                }
-                congestionValue = currentLegCongestionValue
-
-                if (numCongestionPoints + 1 <= lineString.coordinates().size) {
-                    val dist = (TurfMeasurement.distance(
-                        lineString.coordinates()[0],
+                if (i + 1 <= lineString.coordinates().size) {
+                    distanceTraveled += (TurfMeasurement.distance(
+                        lineString.coordinates()[i],
                         lineString.coordinates()[i + 1]
                     ) * 1000)
-                    val fractionalDist: Double = dist / routeDistance
-                    if (fractionalDist < distFractionToVanish) {
+
+                    if (congestionSections[i] == previousCongestion) {
                         continue
                     }
 
-                    if (previousDistances.isNotEmpty() && fractionalDist < previousDistances[previousDistances.size - 1]) {
+                    val fractionalDist: Double = distanceTraveled / routeDistance
+                    if (fractionalDist < .001f || fractionalDist < distFractionToVanish) {
                         continue
                     }
 
                     if (expressionStops.isEmpty()) {
                         val vanishStop = Expression.stop(
                             distFractionToVanish,
-                            Expression.color(congestionColorProvider(congestionValue, isPrimary))
+                            Expression.color(congestionColorProvider(congestionSections[i], isPrimary))
                         )
                         expressionStops.add(vanishStop)
                     }
 
-                    val routeColor = congestionColorProvider(congestionValue, isPrimary)
+                    val routeColor = congestionColorProvider(congestionSections[i], isPrimary)
                     val stop = Expression.stop(
                         fractionalDist,
                         Expression.color(routeColor)
                     )
-                    previousDistances.add(fractionalDist)
                     expressionStops.add(stop)
+                    previousCongestion = congestionSections[i]
                 }
             }
 
             if (expressionStops.isEmpty()) {
                 val vanishStop = Expression.stop(
                     distFractionToVanish,
-                    Expression.color(congestionColorProvider(congestionValue, isPrimary))
+                    Expression.color(congestionColorProvider("", isPrimary))
                 )
                 expressionStops.add(vanishStop)
             }
-
             return expressionStops
         }
 
