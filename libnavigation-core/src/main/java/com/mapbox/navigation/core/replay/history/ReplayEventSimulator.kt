@@ -1,8 +1,6 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlin.math.max
 import kotlin.math.roundToLong
@@ -20,8 +18,7 @@ import kotlinx.coroutines.launch
  * @param logger interface for logging any events
  */
 internal class ReplayEventSimulator(
-    private val replayEvents: ReplayEvents,
-    private val logger: Logger
+    private val replayEvents: ReplayEvents
 ) {
 
     private val jobControl = ThreadController.getMainScopeAndRootJob()
@@ -34,7 +31,6 @@ internal class ReplayEventSimulator(
     private var pivotIndex = 0
 
     fun launchSimulator(replayEventsCallback: (List<ReplayEventBase>) -> Unit): Job {
-        logger.i(msg = Message("Replay started"))
         resetSimulatorClock()
         return jobControl.scope.launch {
             while (isActive) {
@@ -44,8 +40,6 @@ internal class ReplayEventSimulator(
                     simulateEvents(replayEventsCallback)
                 }
             }
-
-            logger.i(msg = Message("Replay ended"))
         }
     }
 

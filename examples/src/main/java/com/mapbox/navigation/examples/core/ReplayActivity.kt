@@ -49,7 +49,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private val firstLocationCallback = FirstLocationCallback(this)
 
     private val replayRouteMapper = ReplayRouteMapper()
-    private val replayHistoryPlayer = ReplayHistoryPlayer(MapboxLogger)
+    private val replayHistoryPlayer = ReplayHistoryPlayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {

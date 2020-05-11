@@ -15,7 +15,6 @@ import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -64,7 +63,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val firstLocationCallback = FirstLocationCallback(this)
     private val stopsController = StopsController()
 
-    private val replayHistoryPlayer = ReplayHistoryPlayer(MapboxLogger)
+    private val replayHistoryPlayer = ReplayHistoryPlayer()
     private val replayProgressObserver = ReplayProgressObserver(replayHistoryPlayer)
 
     @SuppressLint("MissingPermission")
