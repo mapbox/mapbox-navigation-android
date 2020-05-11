@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.WalkingOptions
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.route.internal.RouteUrl
@@ -37,7 +37,7 @@ class NavigationRouteTest {
 
     val origin: Point = Point.fromLngLat(0.0, 0.0)
     val destination: Point = Point.fromLngLat(1.0, 1.0)
-    private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
+    private val mockSkuTokenProvider = mockk<UrlSkuTokenProvider>(relaxed = true)
 
     @MockK
     private lateinit var context: Context

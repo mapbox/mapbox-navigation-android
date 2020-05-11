@@ -5,5 +5,5 @@ import com.mapbox.navigation.examples.utils.Utils
 
 class OnboardRouterActivityKt : BaseRouterActivityKt() {
 
-    override fun setupRouter(): Router = setupOnboardRouter(Utils.getMapboxAccessToken(this))
+    override fun setupRouter(): Router = setupOnboardRouter(Utils.getMapboxAccessToken(this), applicationContext)
 }

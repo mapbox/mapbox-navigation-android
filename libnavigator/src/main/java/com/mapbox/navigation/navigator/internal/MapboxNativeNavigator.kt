@@ -127,23 +127,8 @@ interface MapboxNativeNavigator {
      */
     fun updateLegIndex(legIndex: Int): NavigationStatus
 
-    // Free Drive
-
-    /**
-     * Uses routing engine and local tile data to generate electronic horizon json.
-     *
-     * Consumes a list of points, matches them to the routing graph
-     * (i.e. does traceAttributes) and prolongs this path
-     * in selected directions (one way, one way with branches, all ways)
-     * according to the provided eHorizon distance (the speed is derived from input points).
-     *
-     * @param request the uri used when hitting the http service
-     *
-     * @return a [RouterResult] object with the json and a success/fail boolean
-     */
-    fun getElectronicHorizon(request: String): RouterResult
-
     // Offline
+
     /**
      * Caches tiles around the last set route
      */

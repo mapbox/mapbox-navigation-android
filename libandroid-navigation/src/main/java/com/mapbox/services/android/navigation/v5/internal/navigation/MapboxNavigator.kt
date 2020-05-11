@@ -107,7 +107,8 @@ internal class MapboxNavigator(val navigator: Navigator) {
 
     @Synchronized
     fun retrieveElectronicHorizon(request: String): RouterResult {
-        return navigator.getElectronicHorizon(request)
+        // Navigator#getElectronicHorizon is not available anymore, returning empty RouterResult
+        return RouterResult("{}", false)
     }
 
     private fun buildFixLocationFromLocation(location: Location): FixLocation {
