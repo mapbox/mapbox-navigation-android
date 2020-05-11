@@ -606,12 +606,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the SoLoader (Reliable native code loader for Android).
-URL: [https://github.com/facebook/soloader](https://github.com/facebook/soloader)
-License: [Apache-2](https://github.com/facebook/soloader/blob/master/LICENSE)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Timber (No-nonsense injectable logging.).
 URL: [https://github.com/JakeWharton/timber](https://github.com/JakeWharton/timber)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
