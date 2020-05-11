@@ -30,6 +30,7 @@ import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
+import com.mapbox.navigator.SkuToken
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlinx.coroutines.sync.Mutex
@@ -309,6 +310,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator.setConfig(config)
     }
 
+    // SKU
+    /**
+     * Sets the SKU token callback needed for retrieving the current SDK SKU token needed for ART.
+     *
+     * @param callback SKU token callback that retrieves current SDK SKU token
+     */
+    override fun setSkuTokenSource(callback: SkuToken) {
+        navigator.setSkuTokenSource(callback)
+    }
+
     // Other
     /**
      * Gets the voice instruction at a specific step index in the route. If there is no
@@ -329,6 +340,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         route = null
         routeBufferGeoJson = null
     }
+
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
      */

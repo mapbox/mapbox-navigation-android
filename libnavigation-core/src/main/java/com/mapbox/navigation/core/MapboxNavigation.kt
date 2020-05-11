@@ -26,6 +26,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.accounts.NativeSkuTokenProvider
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -152,6 +153,9 @@ constructor(
 
     init {
         ThreadController.init()
+        navigator = NavigationComponentProvider.createNativeNavigator()
+        // Navigator#setSkuTokenSource should be called before Navigator#configureRouter
+        navigator.setSkuTokenSource(NativeSkuTokenProvider(context.applicationContext))
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
@@ -169,7 +173,6 @@ constructor(
                     isAccessible = true
                 }
         }
-        navigator = NavigationComponentProvider.createNativeNavigator()
         tripService = NavigationComponentProvider.createTripService(
             context.applicationContext,
             notification,

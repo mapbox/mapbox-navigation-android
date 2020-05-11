@@ -88,6 +88,8 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
 
     internal fun obtainSkuId(): String = MapboxAccounts.SKU_ID_NAVIGATION_MAUS
 
+    internal fun obtainSkuToken(): String = skuToken
+
     private fun buildResourceUrlWithSku(
         resourceUrl: String,
         querySize: Int,
