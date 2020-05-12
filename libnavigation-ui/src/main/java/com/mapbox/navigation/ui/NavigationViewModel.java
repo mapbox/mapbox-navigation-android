@@ -73,8 +73,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isFeedbackSentSuccess = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
-  private final MutableLiveData<Location> locationUpdates = new MutableLiveData<>();
-  private final MutableLiveData<RouteProgress> routeProgressUpdates = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   private LocationEngineConductor locationEngineConductor;
@@ -251,21 +249,12 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.stopTripSession();
   }
 
-  boolean isOffRoute() {
-    try {
-      return isOffRoute.getValue();
-    } catch (NullPointerException exception) {
-      return false;
-    }
-  }
-
   void updateRouteProgress(RouteProgress routeProgress) {
     this.routeProgress = routeProgress;
 
     instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
     summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
     routeJunctionModel.setValue(new RouteJunctionModel(routeProgress));
-    routeProgressUpdates.setValue(routeProgress);
   }
 
   void updateLocation(Location location) {
@@ -277,12 +266,6 @@ public class NavigationViewModel extends AndroidViewModel {
     if (instructions != null) {
       BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
       bannerInstructionModel.setValue(model);
-    }
-  }
-
-  void sendEventFailedReroute(String errorMessage) {
-    if (navigationViewEventDispatcher != null) {
-      navigationViewEventDispatcher.onFailedReroute(errorMessage);
     }
   }
 
@@ -304,14 +287,6 @@ public class NavigationViewModel extends AndroidViewModel {
 
   LiveData<Boolean> retrieveIsFeedbackSentSuccess() {
     return isFeedbackSentSuccess;
-  }
-
-  LiveData<Location> retrieveLocationUpdates() {
-    return locationUpdates;
-  }
-
-  LiveData<RouteProgress> retrieveRouteProgressUpdates() {
-    return routeProgressUpdates;
   }
 
   public LiveData<InstructionModel> retrieveInstructionModel() {
@@ -489,16 +464,6 @@ public class NavigationViewModel extends AndroidViewModel {
       }
     }
   };
-
-  @SuppressLint("MissingPermission")
-  private void startNavigation(DirectionsRoute route) {
-    if (route != null) {
-      navigation.setRoutes(Arrays.asList(route));
-      navigation.startTripSession();
-      voiceInstructionsToAnnounce = 0;
-      voiceInstructionCache.initCache(route);
-    }
-  }
 
   private void endNavigation() {
     if (navigation != null) {

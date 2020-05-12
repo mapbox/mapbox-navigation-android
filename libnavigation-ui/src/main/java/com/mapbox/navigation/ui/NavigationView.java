@@ -685,8 +685,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void initializeInstructionListListener() {
-    instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationPresenter,
-      navigationViewEventDispatcher));
+    instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationViewEventDispatcher));
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {

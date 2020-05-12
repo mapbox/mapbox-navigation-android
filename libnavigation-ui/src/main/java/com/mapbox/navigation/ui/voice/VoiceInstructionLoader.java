@@ -4,6 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
 import com.mapbox.navigation.ui.ConnectivityStatusProvider;
 
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,6 +33,7 @@ public class VoiceInstructionLoader {
   private final Cache cache;
   private final Context context;
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
+  private UrlSkuTokenProvider urlSkuTokenProvider;
 
   public VoiceInstructionLoader(Context context, String accessToken, Cache cache) {
     this.connectivityStatus = new ConnectivityStatusProvider(context);
@@ -37,17 +41,19 @@ public class VoiceInstructionLoader {
     this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
+    this.urlSkuTokenProvider = MapboxNavigationAccounts.getInstance(context.getApplicationContext());
   }
 
   // Package private (no modifier) for testing purposes
-  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
-                         ConnectivityStatusProvider connectivityStatus) {
+  VoiceInstructionLoader(Context context, String accessToken, Cache cache, UrlSkuTokenProvider urlSkuTokenProvider,
+                         MapboxSpeech.Builder mapboxSpeechBuilder, ConnectivityStatusProvider connectivityStatus) {
     this.accessToken = accessToken;
     this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
     this.mapboxSpeechBuilder = mapboxSpeechBuilder;
     this.connectivityStatus = connectivityStatus;
+    this.urlSkuTokenProvider = urlSkuTokenProvider;
   }
 
   public List<String> evictVoiceInstructions() {
@@ -86,21 +92,27 @@ public class VoiceInstructionLoader {
   void setupMapboxSpeechBuilder(String language) {
     if (mapboxSpeechBuilder == null) {
       mapboxSpeechBuilder = MapboxSpeech.builder()
-              .accessToken(accessToken)
-              .language(language)
-              .cache(cache)
-              .interceptor(provideOfflineCacheInterceptor());
+        .accessToken(accessToken)
+        .language(language)
+        .cache(cache)
+        .interceptor(provideOfflineCacheInterceptor());
     }
   }
 
   void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
     if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
-      mapboxSpeechBuilder
-              .instruction(instruction); // TODO Sku interceptor
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
-          .instruction(instruction)
-          .textType(textType)
-          .build();
+        .instruction(instruction)
+        .textType(textType)
+        .interceptor(new Interceptor() {
+          @Override
+          public Response intercept(Chain chain) throws IOException {
+            HttpUrl httpUrl = chain.request().url();
+            String skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize());
+            return chain.proceed(chain.request().newBuilder().url(skuUrl).build());
+          }
+        })
+        .build();
       mapboxSpeech.enqueueCall(callback);
     }
   }
@@ -134,11 +146,11 @@ public class VoiceInstructionLoader {
         Request request = chain.request();
         if (!connectivityStatus.isConnected()) {
           CacheControl cacheControl = new CacheControl.Builder()
-                  .maxStale(3, TimeUnit.DAYS)
-                  .build();
+            .maxStale(3, TimeUnit.DAYS)
+            .build();
           request = request.newBuilder()
-                  .cacheControl(cacheControl)
-                  .build();
+            .cacheControl(cacheControl)
+            .build();
         }
         return chain.proceed(request);
       }
