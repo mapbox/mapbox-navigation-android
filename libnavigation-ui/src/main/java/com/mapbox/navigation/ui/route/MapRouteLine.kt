@@ -32,6 +32,7 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResour
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
 import com.mapbox.navigation.ui.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.route.RouteConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.route.RouteConstants.SEVERE_CONGESTION_VALUE
@@ -764,82 +765,91 @@ internal class MapRouteLine(
             isPrimaryRoute: Boolean,
             congestionColorProvider: (String, Boolean) -> Int
         ): List<RouteLineExpressionData> {
-            val scrubbedRouteLegs = route.legs()
-                ?.filter { it.annotation()?.congestion() != null }
+            val congestionSections = route.legs()
+                ?.map { it.annotation()?.congestion() ?: listOf() }
+                ?.flatten() ?: listOf()
 
-            return when (scrubbedRouteLegs?.isEmpty()) {
-                false -> scrubbedRouteLegs.map {
-                    calculateRouteLineSegmentFromLeg(
-                        it,
-                        routeLineString,
-                        route.distance() ?: 0.0,
-                        isPrimaryRoute,
-                        congestionColorProvider
-                    )
-                }.flatten()
-                else -> listOf(RouteLineExpressionData(0f, congestionColorProvider("", isPrimaryRoute)))
+            return when (congestionSections.isEmpty()) {
+                false -> calculateRouteLineSegmentsFromCongestion(
+                    congestionSections,
+                    routeLineString,
+                    route.distance() ?: 0.0,
+                    isPrimaryRoute,
+                    congestionColorProvider
+                )
+                true -> listOf(RouteLineExpressionData(0f, congestionColorProvider("", isPrimaryRoute)))
             }
         }
 
         /**
-         * Calculates a line segment based on the @param routeLeg and color representation
+         * Calculates the traffic congestion segments based on the @param routeLeg and color representation
          * of the traffic congestion.
          *
-         * @param routeLeg the DirectionsRoute used for the Expression calculations
+         * @param congestionSections the traffic congestion sections from the route legs
          * @param lineString an optional LineString derived from the [DirectionsRoute.geometry]
          * @param routeDistance the total distance of the route
          * @param isPrimary indicates if the route used is the primary route
          * @param congestionColorProvider a function that provides the colors used for various
          * traffic congestion values
          *
-         * @return the distance offset and traffic congestion color for the leg
+         * @return the distance offset and traffic congestion color for the route leg(s)
          */
-        fun calculateRouteLineSegmentFromLeg(
-            routeLeg: RouteLeg,
+        fun calculateRouteLineSegmentsFromCongestion(
+            congestionSections: List<String>,
             lineString: LineString,
             routeDistance: Double,
             isPrimary: Boolean,
             congestionColorProvider: (String, Boolean) -> Int
         ): List<RouteLineExpressionData> {
-            val previousDistances = mutableListOf<Double>()
             val expressionStops = mutableListOf<RouteLineExpressionData>()
-            val numCongestionPoints: Int = routeLeg.annotation()?.congestion()?.size ?: 0
-            var congestionValue = ""
+            val numCongestionPoints: Int = congestionSections.size
+            var previousCongestion = ""
+            var distanceTraveled = 0.0
             for (i in 0 until numCongestionPoints) {
-                val currentLegCongestionValue = routeLeg.annotation()?.congestion()?.get(i) ?: ""
-                if (currentLegCongestionValue == congestionValue) {
-                    continue
-                }
-                congestionValue = currentLegCongestionValue
-
-                if (numCongestionPoints + 1 <= lineString.coordinates().size) {
-                    val dist = (TurfMeasurement.distance(
-                        lineString.coordinates()[0],
+                if (i + 1 < lineString.coordinates().size) {
+                    distanceTraveled += (TurfMeasurement.distance(
+                        lineString.coordinates()[i],
                         lineString.coordinates()[i + 1]
                     ) * 1000)
-                    val fractionalDist: Double = dist / routeDistance
-                    if (fractionalDist < 0) {
+
+                    if (congestionSections[i] == previousCongestion) {
                         continue
                     }
 
-                    if (previousDistances.isNotEmpty() && fractionalDist < previousDistances[previousDistances.size - 1]) {
+                    // sometimes the fractional distance is returned in scientific notation
+                    // which the Maps Expression doesn't accept as valid input.
+                    // This checks that the value is above a certain threshold to prevent that.
+                    val fractionalDist: Double = distanceTraveled / routeDistance
+                    if (fractionalDist < MINIMUM_ROUTE_LINE_OFFSET) {
                         continue
                     }
 
                     if (expressionStops.isEmpty()) {
-                        expressionStops.add(RouteLineExpressionData(0f, congestionColorProvider(congestionValue, isPrimary)))
+                        expressionStops.add(
+                            RouteLineExpressionData(
+                                0f,
+                                congestionColorProvider(congestionSections[i], isPrimary)
+                            )
+                        )
                     }
-
-                    val routeColor = congestionColorProvider(congestionValue, isPrimary)
-                    previousDistances.add(fractionalDist)
-                    expressionStops.add(RouteLineExpressionData(fractionalDist.toFloat(), routeColor))
+                    val routeColor = congestionColorProvider(congestionSections[i], isPrimary)
+                    expressionStops.add(
+                        RouteLineExpressionData(
+                            fractionalDist.toFloat(),
+                            routeColor
+                        )
+                    )
+                    previousCongestion = congestionSections[i]
                 }
             }
-
             if (expressionStops.isEmpty()) {
-                expressionStops.add(RouteLineExpressionData(0f, congestionColorProvider(congestionValue, isPrimary)))
+                expressionStops.add(
+                    RouteLineExpressionData(
+                        0f,
+                        congestionColorProvider("", isPrimary)
+                    )
+                )
             }
-
             return expressionStops
         }
 

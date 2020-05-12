@@ -46,4 +46,5 @@ class RouteConstants {
   static final String DESTINATION_MARKER_NAME = "destinationMarker";
   static final String MAPBOX_LOCATION_ID = "mapbox-location";
   static final long VANISHING_ROUTE_LINE_UPDATE_DELAY = 600;
+  static final double MINIMUM_ROUTE_LINE_OFFSET = .001;
 }
