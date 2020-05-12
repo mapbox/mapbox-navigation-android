@@ -535,7 +535,7 @@ jobs:
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     environment:
-      BINTRAY_REPO: mapbox
+      BINTRAY_REPO: mapbox_private
     steps:
       - generate-core-version-name
       - checkout
@@ -551,7 +551,7 @@ jobs:
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     environment:
-      BINTRAY_REPO: mapbox_private
+      BINTRAY_REPO: mapbox_internal
     steps:
       - generate-core-version-name
       - checkout
@@ -597,7 +597,7 @@ jobs:
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     environment:
-      BINTRAY_REPO: mapbox
+      BINTRAY_REPO: mapbox_private
     steps:
       - generate-ui-version-name
       - checkout
@@ -613,7 +613,7 @@ jobs:
     docker:
       - image: mbgl/61abee1674:android-ndk-r18
     environment:
-      BINTRAY_REPO: mapbox_private
+      BINTRAY_REPO: mapbox_internal
     steps:
       - generate-ui-version-name
       - checkout
