@@ -6,9 +6,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
-import com.mapbox.geojson.Point;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.stops.ArrivalObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
@@ -18,13 +16,11 @@ import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.navigation.ui.listeners.RouteListener;
 import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},
- * {@link RouteListener}, or {@link FeedbackListener} and firing listener events when
- * triggered by the {@link NavigationView}.
+ * or {@link FeedbackListener} and firing listener events when triggered by the {@link NavigationView}.
  */
 class NavigationViewEventDispatcher {
 
@@ -32,7 +28,6 @@ class NavigationViewEventDispatcher {
   private LocationObserver locationObserver;
   private FeedbackListener feedbackListener;
   private NavigationListener navigationListener;
-  private RouteListener routeListener;
   private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
   private InstructionListListener instructionListListener;
   private SpeechAnnouncementListener speechAnnouncementListener;
@@ -47,7 +42,6 @@ class NavigationViewEventDispatcher {
   void initializeListeners(NavigationViewOptions navigationViewOptions, NavigationViewModel navigationViewModel) {
     assignFeedbackListener(navigationViewOptions.feedbackListener());
     assignNavigationListener(navigationViewOptions.navigationListener(), navigationViewModel);
-    assignRouteListener(navigationViewOptions.routeListener());
     assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
     assignInstructionListListener(navigationViewOptions.instructionListListener());
     assignSpeechAnnouncementListener(navigationViewOptions.speechAnnouncementListener());
@@ -77,10 +71,6 @@ class NavigationViewEventDispatcher {
     if (navigationListener != null && navigationViewModel.isRunning()) {
       navigationListener.onNavigationRunning();
     }
-  }
-
-  void assignRouteListener(@Nullable RouteListener routeListener) {
-    this.routeListener = routeListener;
   }
 
   void assignBottomSheetCallback(@Nullable BottomSheetBehavior.BottomSheetCallback bottomSheetCallback) {
@@ -132,28 +122,6 @@ class NavigationViewEventDispatcher {
   void onNavigationRunning() {
     if (navigationListener != null) {
       navigationListener.onNavigationRunning();
-    }
-  }
-
-  boolean allowRerouteFrom(Point point) {
-    return routeListener == null || routeListener.allowRerouteFrom(point);
-  }
-
-  void onOffRoute(Point point) {
-    if (routeListener != null) {
-      routeListener.onOffRoute(point);
-    }
-  }
-
-  void onRerouteAlong(DirectionsRoute directionsRoute) {
-    if (routeListener != null) {
-      routeListener.onRerouteAlong(directionsRoute);
-    }
-  }
-
-  void onFailedReroute(String errorMessage) {
-    if (routeListener != null) {
-      routeListener.onFailedReroute(errorMessage);
     }
   }
 

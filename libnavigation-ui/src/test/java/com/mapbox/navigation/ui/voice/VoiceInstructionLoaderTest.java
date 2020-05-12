@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.voice;
 import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
 import com.mapbox.navigation.ui.BaseTest;
 import com.mapbox.navigation.ui.ConnectivityStatusProvider;
 
@@ -16,6 +17,7 @@ import okhttp3.Cache;
 import retrofit2.Callback;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -33,8 +35,12 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     urlsToBeCached.remove(4);
     Iterator<String> urlsCached = urlsToBeCached.iterator();
     when(aCache.urls()).thenReturn(urlsCached);
+    UrlSkuTokenProvider anySkuTokenProvider = mock(UrlSkuTokenProvider.class);
+    MapboxSpeech.Builder anySpeechBuilder = mock(MapboxSpeech.Builder.class);
+    ConnectivityStatusProvider anyConnectivityStatus = mock(ConnectivityStatusProvider.class);
+
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(anyContext, "any_access_token",
-      aCache);
+      aCache, anySkuTokenProvider, anySpeechBuilder, anyConnectivityStatus);
     List<String> urlsToCache = buildUrlsToCache();
     theVoiceInstructionLoader.addStubUrlsToCache(urlsToCache);
 
@@ -50,12 +56,14 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech.Builder aSpeechBuilder = mock(MapboxSpeech.Builder.class);
     when(aSpeechBuilder.instruction(anyString())).thenReturn(aSpeechBuilder);
     when(aSpeechBuilder.textType(anyString())).thenReturn(aSpeechBuilder);
+    when(aSpeechBuilder.interceptor(any())).thenReturn(aSpeechBuilder);
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     when(aSpeechBuilder.build()).thenReturn(aSpeech);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
+    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, aSpeechBuilder, connectivityStatus);
+      anyCache, anyUrlSkuTokenProvider, aSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);
@@ -71,8 +79,9 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
+    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, anySpeechBuilder, connectivityStatus);
+      anyCache, anyUrlSkuTokenProvider, anySpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);
@@ -88,8 +97,9 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
+    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, nullSpeechBuilder, connectivityStatus);
+      anyCache, anyUrlSkuTokenProvider, nullSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);
@@ -99,26 +109,26 @@ public class VoiceInstructionLoaderTest extends BaseTest {
 
   private List<String> buildUrlsToCache() {
     List<String> urlsCached = new ArrayList<>();
-    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody" +
-      "%20rate=%221.08%22%3EIn%20200%20meters," +
-      "%20enter%20the%20traffic%20circle%20and%20take%20the%203rd%20exit%20onto%20%3Csay-as%20interpret-as=%22address" +
-      "%22%3E14th%3C%2Fsay-as%3E%20Street%20Northwest%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType" +
-      "=ssml&language=en&access_token=pk.XXX");
-    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody" +
-      "%20rate=%221.08%22%3EContinue%20on%20%3Csay-as%20interpret-as=%22address%22%3E14th%3C%2Fsay-as%3E%20Street" +
-      "%20Northwest%20for%20600%20meters%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType=ssml&language" +
-      "=en&access_token=pk.XXX");
-    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody" +
-      "%20rate=%221.08%22%3EIn%20200%20meters," +
-      "%20enter%20the%20traffic%20circle%20and%20take%20the%204th%20exit%20onto%20Rhode%20Island%20Avenue%20Northwest" +
-      "%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType=ssml&language=en&access_token=pk.XXX");
-    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody" +
-      "%20rate=%221.08%22%3ETurn%20right%20onto%20Rhode%20Island%20Avenue%20Northwest%3C%2Fprosody%3E%3C%2Famazon" +
-      ":effect%3E%3C%2Fspeak%3E?textType=ssml&language=en&access_token=pk.XXX");
-    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody" +
-      "%20rate=%221.08%22%3EIn%20300%20meters," +
-      "%20turn%20right%20onto%20Rhode%20Island%20Avenue%20Northwest%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak" +
-      "%3E?textType=ssml&language=en&access_token=pk.XXX");
+    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody"
+      + "%20rate=%221.08%22%3EIn%20200%20meters,"
+      + "%20enter%20the%20traffic%20circle%20and%20take%20the%203rd%20exit%20onto%20%3Csay-as%20interpret-as=%22address"
+      + "%22%3E14th%3C%2Fsay-as%3E%20Street%20Northwest%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType"
+      + "=ssml&language=en&access_token=pk.XXX");
+    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody"
+      + "%20rate=%221.08%22%3EContinue%20on%20%3Csay-as%20interpret-as=%22address%22%3E14th%3C%2Fsay-as%3E%20Street"
+      + "%20Northwest%20for%20600%20meters%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType=ssml&language"
+      + "=en&access_token=pk.XXX");
+    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody"
+      + "%20rate=%221.08%22%3EIn%20200%20meters,"
+      + "%20enter%20the%20traffic%20circle%20and%20take%20the%204th%20exit%20onto%20Rhode%20Island%20Avenue%20Northwest"
+      + "%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak%3E?textType=ssml&language=en&access_token=pk.XXX");
+    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody"
+      + "%20rate=%221.08%22%3ETurn%20right%20onto%20Rhode%20Island%20Avenue%20Northwest%3C%2Fprosody%3E%3C%2Famazon"
+      + ":effect%3E%3C%2Fspeak%3E?textType=ssml&language=en&access_token=pk.XXX");
+    urlsCached.add("https://api.mapbox.com/voice/v1/speak/%3Cspeak%3E%3Camazon:effect%20name=%22drc%22%3E%3Cprosody"
+      + "%20rate=%221.08%22%3EIn%20300%20meters,"
+      + "%20turn%20right%20onto%20Rhode%20Island%20Avenue%20Northwest%3C%2Fprosody%3E%3C%2Famazon:effect%3E%3C%2Fspeak"
+      + "%3E?textType=ssml&language=en&access_token=pk.XXX");
     return urlsCached;
   }
 

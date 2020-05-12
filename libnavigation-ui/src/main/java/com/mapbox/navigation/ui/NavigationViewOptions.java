@@ -16,7 +16,6 @@ import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.navigation.ui.listeners.RouteListener;
 import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
 import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
@@ -28,9 +27,6 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   @Nullable
   public abstract FeedbackListener feedbackListener();
-
-  @Nullable
-  public abstract RouteListener routeListener();
 
   @Nullable
   public abstract NavigationListener navigationListener();
@@ -80,8 +76,6 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder navigationOptions(NavigationOptions navigationOptions);
 
     public abstract Builder feedbackListener(FeedbackListener feedbackListener);
-
-    public abstract Builder routeListener(RouteListener routeListener);
 
     public abstract Builder navigationListener(NavigationListener navigationListener);
 

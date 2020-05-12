@@ -23,7 +23,6 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   private static final String DEFAULT_UTTERANCE_ID = "default_id";
 
   private TextToSpeech textToSpeech;
-  private VoiceListener voiceListener;
 
   private boolean isMuted;
   private boolean languageSupported = false;
@@ -129,7 +128,6 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   }
 
   private void setVoiceListener(final VoiceListener voiceListener) {
-    this.voiceListener = voiceListener;
     textToSpeech.setOnUtteranceProgressListener(new UtteranceListener(voiceListener));
   }
 }
