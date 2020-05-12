@@ -30,7 +30,8 @@ internal class OfflineNavigator @JvmOverloads constructor(
             version,
             accessToken,
             userAgent,
-            "" // will be removed in the next nav-native release
+            "", // will be removed in the next nav-native release
+            NativeSkuTokenProvider()
         )
 
         val routerParams = RouterParams(

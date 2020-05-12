@@ -7,6 +7,7 @@ import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.core.accounts.Billing
 import java.lang.IllegalStateException
 
@@ -15,7 +16,7 @@ import java.lang.IllegalStateException
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */
-class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
+class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuTokenProvider {
 
     companion object {
         private const val SKU_KEY = "sku"
@@ -53,7 +54,7 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     }
 
     /**
-     * Returns a raw SKU token or a token attached to the URL query.
+     * Returns a token attached to the URL query or the given [resourceUrl].
      */
     @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
@@ -71,6 +72,11 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         } ?: resourceUrl
     }
 
+    /**
+     * Returns current SDK SKU token needed for ART.
+     */
+    override fun obtainSkuToken(): String = skuToken
+
     internal fun initializeSku() {
         skuGenerator?.apply {
             initializeSKU()
@@ -87,8 +93,6 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     }
 
     internal fun obtainSkuId(): String = MapboxAccounts.SKU_ID_NAVIGATION_MAUS
-
-    internal fun obtainSkuToken(): String = skuToken
 
     private fun buildResourceUrlWithSku(
         resourceUrl: String,

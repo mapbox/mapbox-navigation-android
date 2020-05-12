@@ -18,6 +18,6 @@ class OffRouteDetector : OffRoute() {
     }
 
     fun isUserOffRouteWith(status: NavigationStatus): Boolean {
-        return status.routeState == RouteState.OFFROUTE
+        return status.routeState == RouteState.OFF_ROUTE
     }
 }

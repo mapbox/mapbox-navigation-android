@@ -10,7 +10,6 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
-import com.mapbox.navigator.SkuToken
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 
@@ -145,6 +144,7 @@ interface MapboxNativeNavigator {
     fun getElectronicHorizon(request: String): RouterResult
 
     // Offline
+
     /**
      * Caches tiles around the last set route
      */
@@ -237,15 +237,6 @@ interface MapboxNativeNavigator {
      * @param config the new [NavigatorConfig]
      */
     fun setConfig(config: NavigatorConfig?)
-
-    // SKU
-
-    /**
-     * Sets the SKU token callback needed for retrieving the current SDK SKU token needed for ART.
-     *
-     * @param callback SKU token callback that retrieves current SDK SKU token
-     */
-    fun setSkuTokenSource(callback: SkuToken)
 
     // Other
 

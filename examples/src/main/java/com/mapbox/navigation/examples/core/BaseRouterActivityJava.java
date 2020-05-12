@@ -92,7 +92,8 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
             Utils.getMapboxAccessToken(context),
             MapboxNativeNavigatorImpl.INSTANCE,
             config,
-            MapboxLogger.INSTANCE
+            MapboxLogger.INSTANCE,
+            MapboxNavigationAccounts.getInstance(context)
     );
   }
 

@@ -3,6 +3,9 @@ package com.mapbox.services.android.navigation.v5.navigation
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.BoundingBox
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.ProfileApplication
+import com.mapbox.navigator.ProfilePlatform
+import com.mapbox.navigator.SettingsProfile
 import java.io.File
 
 /**
@@ -26,7 +29,7 @@ class MapboxOfflineRouter {
         }
 
         this.tilePath = tileDir.absolutePath
-        offlineNavigator = OfflineNavigator(Navigator())
+        offlineNavigator = OfflineNavigator(Navigator(SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), ""))
         offlineTileVersions = OfflineTileVersions()
     }
 

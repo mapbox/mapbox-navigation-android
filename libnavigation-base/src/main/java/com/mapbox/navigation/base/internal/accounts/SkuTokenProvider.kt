@@ -6,7 +6,7 @@ package com.mapbox.navigation.base.internal.accounts
 interface SkuTokenProvider {
 
     /**
-     * Returns a raw SKU token or a token attached to the URL query.
+     * Returns current SDK SKU token needed for ART.
      */
-    fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String
+    fun obtainSkuToken(): String
 }

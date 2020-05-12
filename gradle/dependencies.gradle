@@ -15,7 +15,7 @@ ext {
       mapboxSdkDirectionsModels : '5.1.0',
       mapboxEvents              : '5.0.1',
       mapboxCore                : '2.0.1',
-      mapboxNavigator           : 'ms-free-drive-billing-SNAPSHOT-4',
+      mapboxNavigator           : '12.0.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.3.1',

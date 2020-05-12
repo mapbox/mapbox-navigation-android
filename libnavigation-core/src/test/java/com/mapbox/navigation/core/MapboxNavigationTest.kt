@@ -39,7 +39,6 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import io.mockk.verifyOrder
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -178,26 +177,6 @@ class MapboxNavigationTest {
     @Test
     fun init_registerNavigationSessionStateObserver() {
         verify(exactly = 2) { navigationSession.registerNavigationSessionStateObserver(any()) }
-
-        mapboxNavigation.onDestroy()
-    }
-
-    @Test
-    fun init_Navigator_setSkuTokenSource() {
-        verify(exactly = 1) { navigator.setSkuTokenSource(any()) }
-
-        mapboxNavigation.onDestroy()
-    }
-
-    @Test
-    fun init_Navigator_setSkuTokenSource_before_create_NavigationRouter_Navigator_configureRouter() {
-        verifyOrder {
-            navigator.setSkuTokenSource(any())
-            MapboxModuleProvider.createModule<Router>(
-                eq(MapboxModuleType.NavigationRouter),
-                any()
-            )
-        }
 
         mapboxNavigation.onDestroy()
     }
