@@ -105,9 +105,7 @@ class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.routeProgressObserver(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder()
-                        .accessToken(Utils.getMapboxAccessToken(this))
-                        .build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Navigation UI SDK's BuildingExtrusionLayer class.
