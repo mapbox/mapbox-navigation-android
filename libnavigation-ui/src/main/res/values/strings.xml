@@ -37,7 +37,7 @@
     <string name="feedback_type_road_closure">Road\nClosure</string>
 
     <!-- Shown after a feedback type has been submitted -->
-    <string name="feedback_reported">Thank you! Issue Reported.</string>
+    <string name="feedback_reported">Thank you! Issue reported.</string>
 
     <!-- Feedback type for Bad Route -->
     <string name="feedback_bad_route">Inefficient or\nBad Route</string>
