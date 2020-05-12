@@ -184,6 +184,7 @@ public class NavigationViewModel extends AndroidViewModel {
     initializeLanguage(options);
     NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
       .toBuilder()
+      .accessToken(accessToken)
       .isFromNavigationUi(true);
 
     if (options.navigationOptions().getDistanceFormatter() == null) {

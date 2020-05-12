@@ -104,9 +104,7 @@ class CustomCameraActivity : AppCompatActivity(), OnNavigationReadyCallback, Nav
                 // Add the custom camera
                 optionsBuilder.camera(CustomCamera())
 
-                optionsBuilder.navigationOptions(NavigationOptions.Builder()
-                        .accessToken(Utils.getMapboxAccessToken(this))
-                        .build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }

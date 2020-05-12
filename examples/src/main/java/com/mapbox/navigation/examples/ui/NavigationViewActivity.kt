@@ -93,9 +93,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, N
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder()
-                        .accessToken(Utils.getMapboxAccessToken(this))
-                        .build())
+                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }
