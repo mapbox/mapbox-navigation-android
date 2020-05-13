@@ -391,12 +391,11 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
-      JVM_OPTS: -Xmx3200m
+      JVM_OPTS: -Xmx4g
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
-      GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false
     steps:
       - checkout
       - restore-gradle-cache
@@ -445,7 +444,9 @@ jobs:
   build-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
+    environment:
+      JVM_OPTS: -Xmx4g
     steps:
       - checkout
       - restore-gradle-cache-1_0
@@ -458,11 +459,10 @@ jobs:
 
   ui-tests-1_0:
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     working_directory: ~/code
     environment:
-      JVM_OPTS: -Xmx3200m
-      BUILDTYPE: Debug
+      JVM_OPTS: -Xmx4g
     steps:
       - checkout
       - restore-gradle-cache-1_0
@@ -479,7 +479,7 @@ jobs:
 # ------------------------------------------------------------------------------
   release:
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     working_directory: ~/code
     environment:
       BUILDTYPE: Release
@@ -518,7 +518,7 @@ jobs:
   release-core-1_0-snapshot:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     steps:
       - checkout
       - build-release-core-1_0
@@ -532,7 +532,7 @@ jobs:
   release-core-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox
     steps:
@@ -548,7 +548,7 @@ jobs:
   release-core-1_0-qa:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox_private
     steps:
@@ -564,7 +564,7 @@ jobs:
   release-core-1_0-prod:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox_collab
     steps:
@@ -580,7 +580,7 @@ jobs:
   release-ui-1_0-snapshot:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     steps:
       - checkout
       - build-release-ui-1_0
@@ -594,7 +594,7 @@ jobs:
   release-ui-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox
     steps:
@@ -610,7 +610,7 @@ jobs:
   release-ui-1_0-qa:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox_private
     steps:
@@ -626,7 +626,7 @@ jobs:
   release-ui-1_0-prod:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: mbgl/android-ndk-r20:7b7c4b42cf
     environment:
       BINTRAY_REPO: mapbox_collab
     steps:
