@@ -9,7 +9,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directionsrefresh.v1.MapboxDirectionsRefresh
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
@@ -24,14 +24,14 @@ import retrofit2.Response
  * MapboxOffboardRouter provides online route-fetching
  *
  * @param accessToken mapboxAccessToken token
- * @param context application Context
- * @param skuTokenProvider SkuTokenProvider
+ * @param context application [Context]
+ * @param urlSkuTokenProvider [UrlSkuTokenProvider]
  */
 @MapboxModule(MapboxModuleType.NavigationOffboardRouter)
 class MapboxOffboardRouter(
     private val accessToken: String,
     private val context: Context,
-    private val skuTokenProvider: SkuTokenProvider
+    private val urlSkuTokenProvider: UrlSkuTokenProvider
 ) : Router {
 
     companion object {
@@ -51,7 +51,7 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, skuTokenProvider)
+        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, urlSkuTokenProvider)
             .routeOptions(routeOptions)
             .enableRefresh(routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .build()
@@ -113,7 +113,7 @@ class MapboxOffboardRouter(
                 .interceptor {
                     val httpUrl = it.request().url()
                     val skuUrl =
-                        skuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                        urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
                     it.proceed(it.request().newBuilder().url(skuUrl).build())
                 }
 

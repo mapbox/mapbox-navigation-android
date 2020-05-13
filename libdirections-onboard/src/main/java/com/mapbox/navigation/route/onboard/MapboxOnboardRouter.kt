@@ -9,6 +9,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
@@ -35,13 +36,15 @@ import kotlinx.coroutines.withContext
  * @param navigatorNative Native Navigator
  * @param config configuration for on-board router
  * @param logger interface for logging any events
+ * @param skuTokenProvider skuTokenProvider [SkuTokenProvider]
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
     private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
     config: MapboxOnboardRouterConfig,
-    private val logger: Logger
+    private val logger: Logger,
+    private val skuTokenProvider: SkuTokenProvider
 ) : Router {
 
     companion object {
@@ -71,7 +74,8 @@ class MapboxOnboardRouter(
                         it.version,
                         accessToken,
                         it.userAgent,
-                        ""
+                        "",
+                        NativeSkuTokenProvider(skuTokenProvider)
                     )
                 })
             navigatorNative.configureRouter(routerParams, null)

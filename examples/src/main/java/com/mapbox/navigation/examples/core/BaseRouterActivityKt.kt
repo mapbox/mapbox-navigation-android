@@ -267,7 +267,7 @@ abstract class BaseRouterActivityKt :
             )
         }
 
-        fun setupOnboardRouter(accessToken: String): Router {
+        fun setupOnboardRouter(accessToken: String, context: Context): Router {
             val file = File(
                 Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
                 "2019_04_13-00_00_11"
@@ -280,12 +280,12 @@ abstract class BaseRouterActivityKt :
                 null,
                 null // working with pre-fetched tiles only
             )
-            return MapboxOnboardRouter(accessToken, MapboxNativeNavigatorImpl, config, MapboxLogger)
+            return MapboxOnboardRouter(accessToken, MapboxNativeNavigatorImpl, config, MapboxLogger, MapboxNavigationAccounts.getInstance(context))
         }
 
         fun setupHybridRouter(accessToken: String, applicationContext: Context): Router {
             return MapboxHybridRouter(
-                setupOnboardRouter(accessToken),
+                setupOnboardRouter(accessToken, applicationContext),
                 setupOffboardRouter(applicationContext),
                 NetworkStatusService(applicationContext)
             )

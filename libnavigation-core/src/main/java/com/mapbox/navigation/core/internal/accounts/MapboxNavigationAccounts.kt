@@ -7,6 +7,7 @@ import com.mapbox.android.accounts.navigation.sku.v1.SkuGenerator
 import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.core.accounts.Billing
 import java.lang.IllegalStateException
 
@@ -15,15 +16,15 @@ import java.lang.IllegalStateException
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */
-class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
+class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuTokenProvider {
 
     companion object {
         private const val SKU_KEY = "sku"
+        private const val EMPTY_SKU = ""
         private const val MAU_TIMER_EXPIRE_THRESHOLD = 1
         private const val TIMER_EXPIRE_AFTER = DateUtils.HOUR_IN_MILLIS / 1000
         private var skuGenerator: SkuGenerator? = null
         private var INSTANCE: MapboxNavigationAccounts? = null
-        private var skuToken: String = ""
 
         /**
          * Provide singleton instance of [MapboxNavigationAccounts]
@@ -53,12 +54,12 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
     }
 
     /**
-     * Returns a raw SKU token or a token attached to the URL query.
+     * Returns a token attached to the URL query or the given [resourceUrl].
      */
     @Synchronized
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->
-            skuToken = generator.generateToken()
+            val skuToken = generator.generateToken()
             check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty") }
 
             when {
@@ -71,10 +72,16 @@ class MapboxNavigationAccounts private constructor() : SkuTokenProvider {
         } ?: resourceUrl
     }
 
+    /**
+     * Returns current SDK SKU token needed for API Routing Tiles.
+     */
+    @Synchronized
+    override fun obtainSkuToken(): String = skuGenerator?.generateToken() ?: EMPTY_SKU
+
     internal fun initializeSku() {
         skuGenerator?.apply {
             initializeSKU()
-            skuToken = generateToken()
+            generateToken()
         }
     }
 

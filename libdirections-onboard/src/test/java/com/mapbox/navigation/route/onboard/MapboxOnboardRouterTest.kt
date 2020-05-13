@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
@@ -61,11 +62,13 @@ class MapboxOnboardRouterTest {
     private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val logger: Logger = mockk(relaxUnitFun = true)
+    private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
 
     @Before
     fun setUp() {
         every { navigator.configureRouter(any(), any()) } returns 0
-        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, MapboxOnboardRouterConfig(TILE_PATH), logger)
+        every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
+        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, MapboxOnboardRouterConfig(TILE_PATH), logger, mockSkuTokenProvider)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE

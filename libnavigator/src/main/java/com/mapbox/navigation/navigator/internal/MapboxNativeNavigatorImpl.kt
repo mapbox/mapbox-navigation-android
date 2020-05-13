@@ -26,10 +26,13 @@ import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.ProfileApplication
+import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
+import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlinx.coroutines.sync.Mutex
@@ -53,7 +56,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val TWO_LEGS: Short = 2
     private const val PRIMARY_ROUTE_INDEX = 0
 
-    private var navigator: Navigator = Navigator()
+    private var navigator: Navigator = Navigator(SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), "")
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val mutex = Mutex()
@@ -105,12 +108,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 status.location.toLocation(),
                 status.key_points.map { it.toLocation() },
                 status.getRouteProgress(),
-                status.routeState == RouteState.OFFROUTE
+                status.routeState == RouteState.OFF_ROUTE
             )
         }
     }
 
     // Routing
+
     /**
      * Sets the route path for the navigator to process.
      * Returns initialized route state if no errors occurred.
@@ -189,22 +193,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun updateLegIndex(legIndex: Int): NavigationStatus =
         navigator.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
 
-    // Free Drive
-    /**
-     * Uses routing engine and local tile data to generate electronic horizon json.
-     *
-     * Consumes a list of points, matches them to the routing graph
-     * (i.e. does traceAttributes) and prolongs this path
-     * in selected directions (one way, one way with branches, all ways)
-     * according to the provided eHorizon distance (the speed is derived from input points).
-     *
-     * @param request the uri used when hitting the http service
-     *
-     * @return a [RouterResult] object with the json and a success/fail boolean
-     */
-    override fun getElectronicHorizon(request: String): RouterResult =
-        navigator.getElectronicHorizon(request)
-
     // Offline
 
     /**
@@ -262,6 +250,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         navigator.removeTiles(tilePath, southwest, northeast)
 
     // History traces
+
     /**
      * Gets the history of state-changing calls to the navigator. This can be used to
      * replay a sequence of events for the purpose of bug fixing.
@@ -293,6 +282,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     // Configuration
+
     /**
      * Gets the current configuration used for navigation.
      *
@@ -310,6 +300,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 
     // Other
+
     /**
      * Gets the voice instruction at a specific step index in the route. If there is no
      * voice instruction at the specified index, *null* is returned.
@@ -325,10 +316,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Reset resources.
      */
     override fun reset() {
-        navigator = Navigator()
+        navigator = Navigator(SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), "")
         route = null
         routeBufferGeoJson = null
     }
+
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
      */
@@ -517,7 +509,7 @@ private fun RouteState.convertState(): RouteProgressState? {
         RouteState.INITIALIZED -> RouteProgressState.ROUTE_INITIALIZED
         RouteState.TRACKING -> RouteProgressState.LOCATION_TRACKING
         RouteState.COMPLETE -> RouteProgressState.ROUTE_ARRIVED
-        RouteState.OFFROUTE -> null // send in a callback instead
+        RouteState.OFF_ROUTE -> null // send in a callback instead
         RouteState.STALE -> RouteProgressState.LOCATION_STALE
         RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }
