@@ -389,8 +389,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
                     updateLocationLayerRenderMode(RenderMode.GPS)
                 } else {
-                    symbolManager?.deleteAll()
-                    removeRoute()
                     updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
                     updateLocationLayerRenderMode(RenderMode.COMPASS)
                 }
@@ -514,7 +512,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun clearMap() {
-        if (mapboxMap != null) {
+        if (::navigationMapboxMap.isInitialized) {
             navigationMapboxMap.removeRoute()
             symbolManager?.deleteAll()
         }
