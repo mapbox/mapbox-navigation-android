@@ -8,5 +8,3 @@ fun Context.isLocationProviderEnabled(): Boolean {
     return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
             manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 }
-
-
