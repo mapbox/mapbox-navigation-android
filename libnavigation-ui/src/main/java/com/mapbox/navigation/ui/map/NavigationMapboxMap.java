@@ -765,7 +765,15 @@ public class NavigationMapboxMap {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
       R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute);
-    mapRoute = new NavigationMapRoute(null, mapView, map, routeStyleRes, routeBelowLayerId, vanishRouteLineEnabled);
+    mapRoute = new NavigationMapRoute(
+            null,
+            mapView,
+            map,
+            routeStyleRes,
+            routeBelowLayerId,
+            vanishRouteLineEnabled,
+            null
+    );
   }
 
   private void initializeCamera(MapboxMap map) {

@@ -30,6 +30,7 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBoolea
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getFloatStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
+import com.mapbox.navigation.ui.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.route.RouteConstants.HEAVY_CONGESTION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
@@ -58,7 +59,8 @@ import com.mapbox.turf.TurfMeasurement
  * @param allRoutesVisible true if all the route layers should be visible
  * @param alternativesVisible true if the alternative route layer is visible
  * @param mapRouteSourceProvider wrapper for creating GeoJsonSource objects
- * @param vanishPoint the percentage of the route line from the origin that should not be visible.
+ * @param vanishPoint the percentage of the route line from the origin that should not be visible
+ * @param routeLineInitializedCallback called to indicate that the route line layer has been added to the current style
  */
 internal class MapRouteLine(
     context: Context,
@@ -71,7 +73,8 @@ internal class MapRouteLine(
     allRoutesVisible: Boolean,
     alternativesVisible: Boolean,
     mapRouteSourceProvider: MapRouteSourceProvider,
-    vanishPoint: Float
+    vanishPoint: Float,
+    routeLineInitializedCallback: MapRouteLineInitializedCallback?
 ) {
 
     /**
@@ -80,6 +83,7 @@ internal class MapRouteLine(
      * @param styleRes a style resource
      * @param belowLayerId determines the elevation of the route layers
      * @param layerProvider provides the layer configurations for the route layers
+     * @param routeLineInitializedCallback called to indicate that the route line layer has been added to the current style
      */
     constructor(
         context: Context,
@@ -87,8 +91,21 @@ internal class MapRouteLine(
         @androidx.annotation.StyleRes styleRes: Int,
         belowLayerId: String?,
         layerProvider: MapRouteLayerProvider,
-        mapRouteSourceProvider: MapRouteSourceProvider
-    ) : this(context, style, styleRes, belowLayerId, layerProvider, listOf(), listOf(), true, true, mapRouteSourceProvider, 0f)
+        mapRouteSourceProvider: MapRouteSourceProvider,
+        routeLineInitializedCallback: MapRouteLineInitializedCallback?
+    ) : this(
+        context,
+        style,
+        styleRes,
+        belowLayerId,
+        layerProvider,
+        listOf(),
+        listOf(),
+        true,
+        true,
+        mapRouteSourceProvider,
+        0f,
+        routeLineInitializedCallback)
 
     private var drawnWaypointsFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
     private var drawnPrimaryRouteFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
@@ -278,6 +295,10 @@ internal class MapRouteLine(
             style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
             hideShieldLineAtOffset(vanishPointOffset)
         }
+
+        routeLineInitializedCallback?.onInitialized(
+            RouteLineLayerIds(PRIMARY_ROUTE_LAYER_ID, ALTERNATIVE_ROUTE_LAYER_ID)
+        )
     }
 
     /**
