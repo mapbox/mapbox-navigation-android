@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Looper
@@ -73,10 +74,13 @@ import timber.log.Timber
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     VoiceInstructionsObserver {
 
-    private val VOICE_INSTRUCTION_CACHE = "voice-instruction-cache"
-    private val startTimeInMillis = 5000L
-    private val countdownInterval = 10L
-    private val maxProgress = startTimeInMillis / countdownInterval
+    companion object {
+        private const val VOICE_INSTRUCTION_CACHE = "voice-instruction-cache"
+        private const val START_TIME_IN_MILLIS = 5000L
+        private const val COUNTDOWN_INTERVAL = 10L
+    }
+
+    private val maxProgress = START_TIME_IN_MILLIS / COUNTDOWN_INTERVAL
     private val locationEngineCallback = MyLocationEngineCallback(this)
     private val restartSessionEventChannel = Channel<RestartTripSessionAction>(1)
 
@@ -168,23 +172,31 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
 
         mapboxMap.addOnMapLongClickListener { click ->
-            locationComponent?.lastKnownLocation?.let { location ->
-                mapboxNavigation.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(location.toPoint(), null, click.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
-                    routesReqCallback
-                )
+            if (isLocationProviderEnabled()) {
+                locationComponent?.lastKnownLocation?.let { location ->
+                    mapboxNavigation.requestRoutes(
+                            RouteOptions.builder().applyDefaultParams()
+                                    .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                                    .coordinates(location.toPoint(), null, click.toPoint())
+                                    .alternatives(true)
+                                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                                    .build(),
+                            routesReqCallback
+                    )
 
-                symbolManager?.deleteAll()
-                symbolManager?.create(
-                    SymbolOptions()
-                        .withIconImage("marker")
-                        .withGeometry(click.toPoint())
-                )
+                    symbolManager?.deleteAll()
+                    symbolManager?.create(
+                            SymbolOptions()
+                                    .withIconImage("marker")
+                                    .withGeometry(click.toPoint())
+                    )
+                }
+            } else {
+                Toast.makeText(
+                    this@SimpleMapboxNavigationKt,
+                    "Enable location provider (GPS) to get route",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             false
         }
@@ -235,12 +247,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
-            updateCameraOnNavigationStateChange(true)
-            mapboxNavigation.registerVoiceInstructionsObserver(this)
-            mapboxNavigation.startTripSession()
-            val routes = mapboxNavigation.getRoutes()
-            if (routes.isNotEmpty()) {
-                initDynamicCamera(routes[0])
+            if (isLocationProviderEnabled()) {
+                updateCameraOnNavigationStateChange(true)
+                mapboxNavigation.registerVoiceInstructionsObserver(this)
+                mapboxNavigation.startTripSession()
+                val routes = mapboxNavigation.getRoutes()
+                if (routes.isNotEmpty()) {
+                    initDynamicCamera(routes[0])
+                }
+            } else {
+                Toast.makeText(
+                    this@SimpleMapboxNavigationKt,
+                    "Enable location provider (GPS) to start session",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         dismissLayout.setOnClickListener {
@@ -300,11 +320,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private val fasterRouteSelectionTimer: CountDownTimer =
-        object : CountDownTimer(startTimeInMillis, countdownInterval) {
+        object : CountDownTimer(START_TIME_IN_MILLIS, COUNTDOWN_INTERVAL) {
             override fun onTick(millisUntilFinished: Long) {
                 Timber.d("FASTER_ROUTE: millisUntilFinished $millisUntilFinished")
                 fasterRouteAcceptProgress.progress =
-                    (maxProgress - millisUntilFinished / countdownInterval).toInt()
+                    (maxProgress - millisUntilFinished / COUNTDOWN_INTERVAL).toInt()
             }
 
             override fun onFinish() {
@@ -351,6 +371,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     startNavigation.visibility = GONE
                 }
                 TripSessionState.STOPPED -> {
+                    clearMap()
                     startLocationUpdates()
                     startNavigation.visibility = VISIBLE
                     updateCameraOnNavigationStateChange(false)
@@ -490,5 +511,18 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    private fun clearMap() {
+        if (mapboxMap != null) {
+            navigationMapboxMap.removeRoute()
+            symbolManager?.deleteAll()
+        }
+    }
+
+    private fun isLocationProviderEnabled(): Boolean {
+        val manager = getSystemService(LOCATION_SERVICE) as LocationManager
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 }

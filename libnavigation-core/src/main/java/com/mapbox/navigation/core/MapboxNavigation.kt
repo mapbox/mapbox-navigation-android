@@ -54,6 +54,7 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.utils.extensions.isLocationProviderEnabled
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -218,17 +219,19 @@ constructor(
     }
 
     /**
-     * Starts listening for location updates and enters an `Active Guidance` state if there's a primary route available
-     * or a `Free Drive` state otherwise.
+     * If any location provider (gps/network) is enabled - starts listening for location updates
+     * and enters an `Active Guidance` state if there's a primary route available or a `Free Drive` state otherwise.
      *
      * @see [registerTripSessionStateObserver]
      * @see [registerRouteProgressObserver]
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun startTripSession() {
-        tripSession.start()
-        notificationChannelField?.let {
-            monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
+        if (context.isLocationProviderEnabled()) {
+            tripSession.start()
+            notificationChannelField?.let {
+                monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
+            }
         }
     }
 
@@ -247,7 +250,7 @@ constructor(
     fun getTripSessionState() = tripSession.getState()
 
     /**
-     * Requests a route using the provided [Router] implementation.
+     * If any location provider (gps/network) is enabled - requests a route using the provided [Router] implementation.
      * If the request succeeds and the SDK enters an `Active Guidance` state, meaningful [RouteProgress] updates will be available.
      *
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
@@ -264,7 +267,9 @@ constructor(
         routeOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback? = null
     ) {
-        directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+        if (context.isLocationProviderEnabled()) {
+            directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+        }
     }
 
     /**

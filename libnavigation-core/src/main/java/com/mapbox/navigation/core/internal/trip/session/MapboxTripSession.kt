@@ -180,6 +180,7 @@ class MapboxTripSession(
     }
 
     private fun reset() {
+        route = null
         rawLocation = null
         enhancedLocation = null
         routeProgress = null
