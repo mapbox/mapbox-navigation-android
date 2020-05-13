@@ -63,7 +63,7 @@ internal class ReplayRouteDriver {
         var distanceTraveled = 0.0
         annotation.distance()?.forEachIndexed { index, distance ->
             distanceTraveled += distance
-            val point = TurfMeasurement.along(LineString.fromLngLats(points), distanceTraveled, TurfConstants.UNIT_METERS)
+            val point = TurfMeasurement.along(points, distanceTraveled, TurfConstants.UNIT_METERS)
             val replayRouteLocation = ReplayRouteLocation(index, point)
             replayRouteLocation.speedMps = annotation.speed()?.get(index)!!
             replayRouteLocation.distance = annotation.distance()?.get(index)!!
@@ -107,7 +107,7 @@ internal class ReplayRouteDriver {
 
         for (stepIndex in 1..segment.steps.lastIndex) {
             val step = segment.steps[stepIndex]
-            val point = TurfMeasurement.along(LineString.fromLngLats(segmentRoute), step.positionMeters, TurfConstants.UNIT_METERS)
+            val point = TurfMeasurement.along(segmentRoute, step.positionMeters, TurfConstants.UNIT_METERS)
             val location = ReplayRouteLocation(null, point)
             location.distance = step.positionMeters
             location.speedMps = step.speedMps
