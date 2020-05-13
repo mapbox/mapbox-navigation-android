@@ -26,6 +26,7 @@ import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
+import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
@@ -40,7 +41,6 @@ import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHel
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
