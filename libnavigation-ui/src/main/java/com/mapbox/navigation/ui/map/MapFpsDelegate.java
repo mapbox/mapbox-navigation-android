@@ -2,8 +2,8 @@ package com.mapbox.navigation.ui.map;
 
 import android.content.Context;
 
+import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;

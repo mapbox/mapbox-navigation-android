@@ -3,6 +3,7 @@ package com.mapbox.navigation.trip.notification.internal.maneuver
 import android.graphics.Canvas
 import android.graphics.PointF
 import androidx.core.util.Pair
+import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 
 /**

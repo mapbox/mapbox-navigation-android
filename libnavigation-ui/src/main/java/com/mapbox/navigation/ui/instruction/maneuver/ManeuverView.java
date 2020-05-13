@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconDrawer;
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuversStyleKit;
 
 import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;

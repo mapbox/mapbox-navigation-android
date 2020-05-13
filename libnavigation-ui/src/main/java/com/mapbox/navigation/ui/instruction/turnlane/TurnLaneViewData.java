@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.instruction.turnlane;
 
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverModifier;
+import com.mapbox.api.directions.v5.models.ManeuverModifier;
 
 class TurnLaneViewData {
 
