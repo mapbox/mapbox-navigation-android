@@ -55,6 +55,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
   private boolean vanishRouteLineEnabled;
+  private MapRouteLineInitializedCallback routeLineInitializedCallback;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -136,7 +137,26 @@ public class NavigationMapRoute implements LifecycleObserver {
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
                             @Nullable String belowLayer) {
-    this(navigation, mapView, mapboxMap, styleRes, belowLayer, false);
+    this(navigation, mapView, mapboxMap, styleRes, belowLayer, false, null);
+  }
+
+  /**
+   * Construct an instance of {@link NavigationMapRoute}.
+   *
+   * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
+   *                   your route won't consider rerouting during a navigation session.
+   * @param mapView    the MapView to apply the route to
+   * @param mapboxMap  the MapboxMap to apply route with
+   * @param styleRes   a style resource with custom route colors, scale, etc.
+   * @param belowLayer optionally pass in a layer id to place the route line below
+   * @param routeLineInitializedCallback called to indicate that the route line layer has been added
+   *                   to the current style
+   */
+  public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
+                            @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+                            @Nullable String belowLayer,
+                            @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback) {
+    this(navigation, mapView, mapboxMap, styleRes, belowLayer, false, routeLineInitializedCallback);
   }
 
   /**
@@ -152,7 +172,8 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
                             @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
-                            @Nullable String belowLayer, Boolean vanishRouteLineEnabled) {
+                            @Nullable String belowLayer, Boolean vanishRouteLineEnabled,
+                            @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback) {
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
@@ -166,6 +187,7 @@ public class NavigationMapRoute implements LifecycleObserver {
             this.routeLine,
             routeArrow, vanishRouteLineEnabled
     );
+    this.routeLineInitializedCallback = routeLineInitializedCallback;
     initializeDidFinishLoadingStyleListener();
     registerLifecycleObserver();
   }
@@ -361,7 +383,8 @@ public class NavigationMapRoute implements LifecycleObserver {
         styleRes,
         belowLayer,
         layerProvider,
-        new MapRouteSourceProvider()
+        new MapRouteSourceProvider(),
+        routeLineInitializedCallback
     );
   }
 
@@ -429,7 +452,8 @@ public class NavigationMapRoute implements LifecycleObserver {
             routeLine.retrieveVisibility(),
             routeLine.retrieveAlternativesVisible(),
             new MapRouteSourceProvider(),
-            vanishingPointOffset
+            vanishingPointOffset,
+            routeLineInitializedCallback
     );
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
