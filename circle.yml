@@ -396,7 +396,7 @@ jobs:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
-      GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - checkout
       - restore-gradle-cache
@@ -463,6 +463,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
     steps:
       - checkout
       - restore-gradle-cache-1_0
