@@ -11,51 +11,79 @@
 
     <!-- Define your own style for each of the Mapbox Navigation UI SDK component -->
     <style name="CustomInstructionView" parent="InstructionView">
+        <!-- Color of the banner view background -->
         <item name="instructionViewPrimaryBackgroundColor">@color/navigation_instruction_view_primary_background</item>
+        <!-- Color of the banner reroute view background -->
         <item name="instructionViewSecondaryBackgroundColor">@color/navigation_instruction_view_secondary_background</item>
+        <!-- Alternate background color for the dropdown list of upcoming steps -->
         <item name="instructionListViewBackgroundColor">@color/navigation_instruction_list_view_background</item>
+        <!-- Color of the banner view primary label that displays the turn name -->
         <item name="instructionViewPrimaryTextColor">@color/navigation_instruction_view_primary_text</item>
+        <!-- Color for the secondary label that occasionally appears underneath the primary label -->
         <item name="instructionViewSecondaryTextColor">@color/navigation_instruction_view_secondary_text</item>
+        <!-- Primary color for the turn arrow icons -->
         <item name="instructionManeuverViewPrimaryColor">@color/navigation_maneuver_view_primary</item>
+        <!-- Secondary color for the turn arrow icons (e.g. the line segment that forks off) -->
         <item name="instructionManeuverViewSecondaryColor">@color/navigation_maneuver_view_secondary</item>
+        <!-- Style for the sound button -->
         <item name="instructionViewSoundButtonStyle">@style/CustomSoundButton</item>
+        <!-- Style for the feedback button -->
         <item name="instructionViewFeedbackButtonStyle">@style/CustomFeedbackButton</item>
+        <!-- Style for the alert view -->
         <item name="instructionViewAlertViewStyle">@style/CustomAlertView</item>
     </style>
 
     <style name="CustomFeedbackButton">
+        <!-- Feedback button background color -->
         <item name="feedbackButtonPrimaryColor">@color/navigation_primary_background</item>
+        <!-- Feedback icon tint color -->
         <item name="feedbackButtonSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
     <style name="CustomSoundButton">
+        <!-- Sound button background color -->
         <item name="soundButtonPrimaryColor">@color/navigation_primary_background</item>
+        <!-- Sound button tint color -->
         <item name="soundButtonSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
     <style name="CustomAlertView">
+        <!-- Alert view background color -->
         <item name="alertViewBackgroundColor">@color/navigation_primary_background</item>
+        <!-- Alert view progress bar background color -->
         <item name="alertViewProgressBarBackgroundColor">@color/navigation_progress_bar_background</item>
+        <!-- Alert view progress bar color -->
         <item name="alertViewProgressBarColor">@color/navigation_progress_bar</item>
+        <!-- Alert view message text color -->
         <item name="alertViewTextColor">@color/navigation_instruction_view_primary_text</item>
     </style>
 
     <style name="CustomRecenterButton">
+        <!-- Recenter button background color -->
         <item name="recenterButtonPrimaryColor">@color/navigation_primary_background</item>
+        <!-- Recenter button text color -->
         <item name="recenterButtonSecondaryColor">@color/navigation_accent</item>
     </style>
 
     <style name="CustomWayNameView">
+        <!-- Way name view background color -->
         <item name="wayNameViewPrimaryColor">@color/navigation_primary_background</item>
+        <!-- Way name view text color -->
         <item name="wayNameViewSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
     <style name="CustomSummaryBottomSheet">
+        <!-- Summary bottom sheet background color -->
         <item name="summaryBottomSheetPrimaryColor">@color/navigation_primary_background</item>
+        <!-- Summary bottom sheet icon tint color -->
         <item name="summaryBottomSheetSecondaryColor">@color/navigation_secondary_background</item>
+        <!-- Summary bottom sheet divider view color -->
         <item name="summaryBottomSheetDividerColor">@color/navigation_divider</item>
+        <!-- Summary bottom sheet reroute progress bar background color -->
         <item name="summaryBottomSheetProgressBarColor">@color/navigation_accent</item>
+        <!-- Summary bottom sheet primary text color (e.g. the remaining time label) -->
         <item name="summaryBottomSheetPrimaryTextColor">@color/navigation_primary_text</item>
+        <!-- Summary bottom sheet secondary text color (e.g. the remaining distance label) -->
         <item name="summaryBottomSheetSecondaryTextColor">@color/navigation_secondary_text</item>
     </style>
 </resources>
