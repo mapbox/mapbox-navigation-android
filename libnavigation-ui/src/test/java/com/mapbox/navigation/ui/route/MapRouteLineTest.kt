@@ -714,6 +714,166 @@ class MapRouteLineTest {
         assertEquals("\"origin\"", result!!.properties()!!["wayPoint"].toString())
     }
 
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionModerate() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.MODERATE_CONGESTION_VALUE, true)
+
+        assertEquals(-809393, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionHeavy() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.HEAVY_CONGESTION_VALUE, true)
+
+        assertEquals(-1494208, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionSevere() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.SEVERE_CONGESTION_VALUE, true)
+
+        assertEquals(-1494208, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionUnknown() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.UNKNOWN_CONGESTION_VALUE, true)
+
+        assertEquals(-11097861, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionPrimaryRouteCongestionDefault() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion("foobar", true)
+
+        assertEquals(-11097861, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionModerate() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.MODERATE_CONGESTION_VALUE, false)
+
+        assertEquals(-4881791, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionHeavy() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.HEAVY_CONGESTION_VALUE, false)
+
+        assertEquals(-4881791, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionSevere() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.SEVERE_CONGESTION_VALUE, false)
+
+        assertEquals(-4881791, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionUnknown() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.UNKNOWN_CONGESTION_VALUE, false)
+
+        assertEquals(-7957339, result)
+    }
+
+    @Test
+    fun getRouteColorForCongestionNonPrimaryRouteCongestionDefault() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider)
+
+        val result = mapRouteLine.getRouteColorForCongestion("foobar", false)
+
+        assertEquals(-7957339, result)
+    }
+
     private fun getDirectionsRoute(includeCongestion: Boolean): DirectionsRoute {
         val congestion = when (includeCongestion) {
             true -> "\"unknown\",\"heavy\",\"low\""
