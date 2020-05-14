@@ -28,6 +28,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param onboardRouterConfig [MapboxOnboardRouterConfig] defines configuration for the default on-board router
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
+ * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
  */
 data class NavigationOptions constructor(
     val accessToken: String?,
@@ -36,7 +37,8 @@ data class NavigationOptions constructor(
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
     val isFromNavigationUi: Boolean = false,
-    val isDebugLoggingEnabled: Boolean = false
+    val isDebugLoggingEnabled: Boolean = false,
+    val deviceProfile: DeviceProfile
 ) {
 
     /**
@@ -61,12 +63,19 @@ data class NavigationOptions constructor(
         private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
+        private var deviceProfile: DeviceProfile = HandheldProfile()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
          */
         fun accessToken(accessToken: String?) =
             apply { this._accessToken = accessToken }
+
+        /**
+         * Defines the type of device creating localization data
+         */
+        fun deviceProfile(deviceProfile: DeviceProfile) =
+            apply { this.deviceProfile = deviceProfile }
 
         /**
          * Defines time format for calculation remaining trip time
@@ -116,7 +125,8 @@ data class NavigationOptions constructor(
                 distanceFormatter = distanceFormatter,
                 onboardRouterConfig = onboardRouterConfig,
                 isFromNavigationUi = isFromNavigationUi,
-                isDebugLoggingEnabled = isDebugLoggingEnabled
+                isDebugLoggingEnabled = isDebugLoggingEnabled,
+                deviceProfile = deviceProfile
             )
         }
     }

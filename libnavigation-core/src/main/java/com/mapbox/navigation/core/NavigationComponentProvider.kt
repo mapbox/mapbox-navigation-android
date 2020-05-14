@@ -4,6 +4,7 @@ import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -21,7 +22,8 @@ internal object NavigationComponentProvider {
     ): DirectionsSession =
         MapboxDirectionsSession(router)
 
-    fun createNativeNavigator(): MapboxNativeNavigator = MapboxNativeNavigatorImpl
+    fun createNativeNavigator(deviceProfile: DeviceProfile): MapboxNativeNavigator =
+        MapboxNativeNavigatorImpl.create(deviceProfile)
 
     fun createTripService(
         applicationContext: Context,
