@@ -13,7 +13,8 @@ dokka {
     outputFormat = 'javadoc'
     configuration {
         moduleName = 'libnavui-base'
-        reportUndocumented = true
+        // TODO temporarily disabled for prototyping phase
+        reportUndocumented = false
     }
 }
 
