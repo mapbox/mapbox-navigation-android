@@ -13,6 +13,8 @@ import com.mapbox.navigation.trip.notification.internal.TimeFormatter;
 import java.util.Calendar;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class SummaryModel {
 
   private final String distanceRemaining;
@@ -22,12 +24,20 @@ public class SummaryModel {
   public SummaryModel(final Context context, final DistanceFormatter distanceFormatter, final RouteProgress progress,
                       final @TimeFormat.Type int timeFormatType) {
     final Locale locale = progress.route() == null ? null :
-            LocaleEx.getLocaleDirectionsRoute(progress.route(), context);
+      LocaleEx.getLocaleDirectionsRoute(progress.route(), context);
     distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
     final double legDurationRemaining = progress.currentLegProgress().durationRemaining();
     timeRemaining = TimeFormatter.formatTimeRemaining(context, legDurationRemaining, locale);
     final Calendar time = Calendar.getInstance();
-    final boolean isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
+
+    boolean isTwentyFourHourFormat;
+    try {
+      isTwentyFourHourFormat = DateFormat.is24HourFormat(context);
+    } catch (NullPointerException npe) {
+      Timber.e(npe, "isTwentyFourHourFormat set to true when NPE occurs");
+      isTwentyFourHourFormat = true;
+    }
+
     arrivalTime = TimeFormatter.formatTime(time, legDurationRemaining, timeFormatType, isTwentyFourHourFormat);
   }
 
