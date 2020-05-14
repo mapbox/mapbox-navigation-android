@@ -76,6 +76,15 @@ class MapboxNavigationTest {
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
 
+    private val navigationOptions = NavigationOptions
+        .Builder()
+        .accessToken(accessToken)
+        .distanceFormatter(distanceFormatter)
+        .navigatorPredictionMillis(1500L)
+        .onboardRouterConfig(onBoardRouterConfig)
+        .timeFormatType(NONE_SPECIFIED)
+        .build()
+
     private lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
@@ -130,14 +139,7 @@ class MapboxNavigationTest {
         mockDirectionSession()
         mockNavigationSession()
 
-        val navigationOptions = NavigationOptions
-            .Builder()
-            .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
-            .navigatorPredictionMillis(1500L)
-            .onboardRouterConfig(onBoardRouterConfig)
-            .timeFormatType(NONE_SPECIFIED)
-            .build()
+        every { navigator.create(any()) } returns navigator
 
         mapboxNavigation =
             MapboxNavigation(
@@ -234,7 +236,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsNativeNavigatorReset() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.reset() }
+        verify(exactly = 1) { navigator.create(navigationOptions.deviceProfile) }
     }
 
     @Test
@@ -400,7 +402,7 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator()
+            NavigationComponentProvider.createNativeNavigator(any())
         } returns navigator
     }
 

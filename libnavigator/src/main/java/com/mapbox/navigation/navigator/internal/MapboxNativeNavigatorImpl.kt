@@ -12,6 +12,7 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
@@ -26,13 +27,10 @@ import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
-import com.mapbox.navigator.ProfileApplication
-import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.RouteState
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
-import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
 import kotlinx.coroutines.sync.Mutex
@@ -43,11 +41,6 @@ import kotlinx.coroutines.sync.withLock
  */
 object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
 
-    // Order matters! https://kotlinlang.org/docs/reference/classes.html#constructors
-    init {
-        System.loadLibrary("navigator-android")
-    }
-
     private const val ONE_INDEX = 1
     private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
     private const val FIRST_BANNER_INSTRUCTION = 0
@@ -56,12 +49,23 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private const val TWO_LEGS: Short = 2
     private const val PRIMARY_ROUTE_INDEX = 0
 
-    private var navigator: Navigator = Navigator(SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), "")
+    private var navigator: Navigator? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
     private val mutex = Mutex()
 
     // Route following
+
+    /**
+     * Create or reset resources. This must be called before calling any
+     * functions within [MapboxNativeNavigatorImpl]
+     */
+    override fun create(deviceProfile: DeviceProfile): MapboxNativeNavigator {
+        navigator = NavigatorLoader.createNavigator(deviceProfile)
+        route = null
+        routeBufferGeoJson = null
+        return this
+    }
 
     /**
      * Passes in the current raw location of the user.
@@ -72,7 +76,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun updateLocation(rawLocation: Location, date: Date): Boolean {
         mutex.withLock {
-            return navigator.updateLocation(rawLocation.toFixLocation(date))
+            return navigator!!.updateLocation(rawLocation.toFixLocation(date))
         }
     }
 
@@ -84,7 +88,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return true if the sensor data was usable, false if not.
      */
     override fun updateSensorData(sensorData: SensorData): Boolean {
-        return navigator.updateSensorData(sensorData)
+        return navigator!!.updateSensorData(sensorData)
     }
 
     /**
@@ -103,7 +107,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun getStatus(date: Date): TripStatus {
         mutex.withLock {
-            val status = navigator.getStatus(date)
+            val status = navigator!!.getStatus(date)
             return TripStatus(
                 status.location.toLocation(),
                 status.key_points.map { it.toLocation() },
@@ -132,8 +136,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     ): NavigationStatus {
         mutex.withLock {
             MapboxNativeNavigatorImpl.route = route
-            val result = navigator.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
-            navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
+            val result = navigator!!.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
+            navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
             }
             return result
@@ -154,7 +158,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         legAnnotationJson: String,
         routeIndex: Int,
         legIndex: Int
-    ): Boolean = navigator.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
+    ): Boolean = navigator!!.updateAnnotations(legAnnotationJson, routeIndex, legIndex)
 
     /**
      * Gets the banner at a specific step index in the route. If there is no
@@ -165,7 +169,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return [BannerInstruction] for step index you passed
      */
     override fun getBannerInstruction(index: Int): BannerInstruction? =
-        navigator.getBannerInstruction(index)
+        navigator!!.getBannerInstruction(index)
 
     /**
      * Gets a polygon around the currently loaded route. The method uses a bitmap approach
@@ -179,7 +183,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a geojson as [String] representing the route buffer polygon
      */
     override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? =
-        navigator.getRouteBufferGeoJson(gridSize, bufferDilation)
+        navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
 
     /**
      * Follows a new leg of the already loaded directions.
@@ -191,7 +195,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
     override fun updateLegIndex(legIndex: Int): NavigationStatus =
-        navigator.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
+        navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
 
     // Offline
 
@@ -199,7 +203,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Caches tiles around the last set route
      */
     override fun cacheLastRoute() {
-        navigator.cacheLastRoute()
+        navigator!!.cacheLastRoute()
     }
 
     /**
@@ -213,7 +217,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return number of tiles founded in the directory
      */
     override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
-        navigator.configureRouter(routerParams, httpClient)
+        navigator!!.configureRouter(routerParams, httpClient)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
@@ -221,7 +225,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param url the directions-based uri used when hitting the http service
      * @return a [RouterResult] object with the json and a success/fail boolean
      */
-    override fun getRoute(url: String): RouterResult = navigator.getRoute(url)
+    override fun getRoute(url: String): RouterResult = navigator!!.getRoute(url)
 
     /**
      * Passes in an input path to the tar file and output path.
@@ -232,7 +236,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return the number of unpacked tiles
      */
     override fun unpackTiles(tarPath: String, destinationPath: String): Long =
-        navigator.unpackTiles(tarPath, destinationPath)
+        navigator!!.unpackTiles(tarPath, destinationPath)
 
     /**
      * Removes tiles wholly within the supplied bounding box. If the tile is not
@@ -247,7 +251,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return the number of tiles removed
      */
     override fun removeTiles(tilePath: String, southwest: Point, northeast: Point): Long =
-        navigator.removeTiles(tilePath, southwest, northeast)
+        navigator!!.removeTiles(tilePath, southwest, northeast)
 
     // History traces
 
@@ -258,7 +262,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a json representing the series of events that happened since the last time
      * the history was toggled on.
      */
-    override fun getHistory(): String = navigator.history
+    override fun getHistory(): String = navigator!!.history
 
     /**
      * Toggles the recording of history on or off.
@@ -267,7 +271,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param isEnabled set this to true to turn on history recording and false to turn it off
      */
     override fun toggleHistory(isEnabled: Boolean) {
-        navigator.toggleHistory(isEnabled)
+        navigator!!.toggleHistory(isEnabled)
     }
 
     /**
@@ -278,7 +282,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param eventJsonProperties the json to attach to the "properties" key of the event
      */
     override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
-        navigator.pushHistory(eventType, eventJsonProperties)
+        navigator!!.pushHistory(eventType, eventJsonProperties)
     }
 
     // Configuration
@@ -288,7 +292,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return the [NavigatorConfig] used for navigation.
      */
-    override fun getConfig(): NavigatorConfig = navigator.config
+    override fun getConfig(): NavigatorConfig = navigator!!.config
 
     /**
      * Updates the configuration used for navigation. Passing null resets the config.
@@ -296,7 +300,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @param config the new [NavigatorConfig]
      */
     override fun setConfig(config: NavigatorConfig?) {
-        navigator.setConfig(config)
+        navigator!!.setConfig(config)
     }
 
     // Other
@@ -310,16 +314,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return [VoiceInstruction] for step index you passed
      */
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
-        navigator.getVoiceInstruction(index)
-
-    /**
-     * Reset resources.
-     */
-    override fun reset() {
-        navigator = Navigator(SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID), "")
-        route = null
-        routeBufferGeoJson = null
-    }
+        navigator!!.getVoiceInstruction(index)
 
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]

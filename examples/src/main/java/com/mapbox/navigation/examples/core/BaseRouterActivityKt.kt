@@ -33,6 +33,8 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.metrics.MetricsObserver
+import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.base.options.HandheldProfile
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl.Companion.PROFILE_DRIVING_TRAFFIC
@@ -61,7 +63,7 @@ abstract class BaseRouterActivityKt :
     MetricsObserver,
     LoggerObserver {
 
-    private val router: Router by lazy { setupRouter() }
+    private val router: Router by lazy { setupRouter(HandheldProfile()) }
     private var origin: Point? = null
     private var destination: Point? = null
     private var waypoint: Point? = null
@@ -69,7 +71,7 @@ abstract class BaseRouterActivityKt :
     private var navigationMapRoute: NavigationMapRoute? = null
     private var symbolManager: SymbolManager? = null
 
-    abstract fun setupRouter(): Router
+    abstract fun setupRouter(deviceProfile: DeviceProfile): Router
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -267,7 +269,7 @@ abstract class BaseRouterActivityKt :
             )
         }
 
-        fun setupOnboardRouter(accessToken: String, context: Context): Router {
+        fun setupOnboardRouter(accessToken: String, deviceProfile: DeviceProfile, context: Context): Router {
             val file = File(
                 Environment.getExternalStoragePublicDirectory("Offline").absolutePath,
                 "2019_04_13-00_00_11"
@@ -280,12 +282,13 @@ abstract class BaseRouterActivityKt :
                 null,
                 null // working with pre-fetched tiles only
             )
-            return MapboxOnboardRouter(accessToken, MapboxNativeNavigatorImpl, config, MapboxLogger, MapboxNavigationAccounts.getInstance(context))
+            val nativeNavigator = MapboxNativeNavigatorImpl.create(deviceProfile)
+            return MapboxOnboardRouter(accessToken, nativeNavigator, config, MapboxLogger, MapboxNavigationAccounts.getInstance(context))
         }
 
-        fun setupHybridRouter(accessToken: String, applicationContext: Context): Router {
+        fun setupHybridRouter(accessToken: String, deviceProfile: DeviceProfile, applicationContext: Context): Router {
             return MapboxHybridRouter(
-                setupOnboardRouter(accessToken, applicationContext),
+                setupOnboardRouter(accessToken, deviceProfile, applicationContext),
                 setupOffboardRouter(applicationContext),
                 NetworkStatusService(applicationContext)
             )

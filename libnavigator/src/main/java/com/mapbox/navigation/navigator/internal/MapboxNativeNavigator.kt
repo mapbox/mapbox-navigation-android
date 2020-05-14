@@ -3,6 +3,7 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
@@ -23,6 +24,11 @@ interface MapboxNativeNavigator {
         private const val GRID_SIZE = 0.0025f
         private const val BUFFER_DILATION: Short = 1
     }
+
+    /**
+     * Initialize the navigator with a device profile
+     */
+    fun create(deviceProfile: DeviceProfile): MapboxNativeNavigator
 
     // Route following
 
@@ -233,9 +239,4 @@ interface MapboxNativeNavigator {
      * @return [VoiceInstruction] for step index you passed
      */
     fun getVoiceInstruction(index: Int): VoiceInstruction?
-
-    /**
-     * Reset resources.
-     */
-    fun reset()
 }
