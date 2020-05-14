@@ -164,7 +164,8 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       @SuppressLint("WrongConstant")
-      SummaryModel model = new SummaryModel(getContext(), distanceFormatter, routeProgress, timeFormatType);
+      SummaryModel model = new SummaryModel(getContext().getApplicationContext(),
+        distanceFormatter, routeProgress, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());
       distanceRemainingText.setText(model.getDistanceRemaining());
