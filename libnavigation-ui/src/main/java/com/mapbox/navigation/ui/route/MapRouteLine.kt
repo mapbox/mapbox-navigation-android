@@ -36,6 +36,7 @@ import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.route.RouteConstants.SEVERE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_PROPERTY_KEY
@@ -107,6 +108,15 @@ internal class MapRouteLine(
     var vanishPointOffset: Float = 0f
         private set
 
+    private val routeUnknownColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_routeUnknownCongestionColor,
+            R.color.mapbox_navigation_route_layer_congestion_unknown,
+            context,
+            styleRes
+        )
+    }
+
     private val routeDefaultColor: Int by lazy {
         getStyledColor(
             R.styleable.NavigationMapRoute_routeColor,
@@ -120,6 +130,15 @@ internal class MapRouteLine(
         getStyledColor(
             R.styleable.NavigationMapRoute_routeModerateCongestionColor,
             R.color.mapbox_navigation_route_layer_congestion_yellow,
+            context,
+            styleRes
+        )
+    }
+
+    private val routeHeavyColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_routeHeavyCongestionColor,
+            R.color.mapbox_navigation_route_layer_congestion_heavy,
             context,
             styleRes
         )
@@ -161,6 +180,15 @@ internal class MapRouteLine(
         )
     }
 
+    private val alternativeRouteUnknownColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_alternativeRouteUnknownCongestionColor,
+            R.color.mapbox_navigation_route_alternative_congestion_unknown,
+            context,
+            styleRes
+        )
+    }
+
     private val alternativeRouteDefaultColor: Int by lazy {
         getStyledColor(
             R.styleable.NavigationMapRoute_alternativeRouteColor,
@@ -174,6 +202,15 @@ internal class MapRouteLine(
         getStyledColor(
             R.styleable.NavigationMapRoute_alternativeRouteSevereCongestionColor,
             R.color.mapbox_navigation_route_alternative_congestion_red,
+            context,
+            styleRes
+        )
+    }
+
+    private val alternativeRouteHeavyColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_alternativeRouteHeavyCongestionColor,
+            R.color.mapbox_navigation_route_alternative_congestion_heavy,
             context,
             styleRes
         )
@@ -620,14 +657,16 @@ internal class MapRouteLine(
         return when (isPrimaryRoute) {
             true -> when (congestionValue) {
                 MODERATE_CONGESTION_VALUE -> routeModerateColor
-                HEAVY_CONGESTION_VALUE -> routeSevereColor
+                HEAVY_CONGESTION_VALUE -> routeHeavyColor
                 SEVERE_CONGESTION_VALUE -> routeSevereColor
+                UNKNOWN_CONGESTION_VALUE -> routeUnknownColor
                 else -> routeDefaultColor
             }
             false -> when (congestionValue) {
                 MODERATE_CONGESTION_VALUE -> alternativeRouteModerateColor
-                HEAVY_CONGESTION_VALUE -> alternativeRouteSevereColor
+                HEAVY_CONGESTION_VALUE -> alternativeRouteHeavyColor
                 SEVERE_CONGESTION_VALUE -> alternativeRouteSevereColor
+                UNKNOWN_CONGESTION_VALUE -> alternativeRouteUnknownColor
                 else -> alternativeRouteDefaultColor
             }
         }

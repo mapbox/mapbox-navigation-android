@@ -42,6 +42,7 @@ class RouteConstants {
   static final String MODERATE_CONGESTION_VALUE = "moderate";
   static final String HEAVY_CONGESTION_VALUE = "heavy";
   static final String SEVERE_CONGESTION_VALUE = "severe";
+  static final String UNKNOWN_CONGESTION_VALUE = "unknown";
   static final String ORIGIN_MARKER_NAME = "originMarker";
   static final String DESTINATION_MARKER_NAME = "destinationMarker";
   static final String MAPBOX_LOCATION_ID = "mapbox-location";
