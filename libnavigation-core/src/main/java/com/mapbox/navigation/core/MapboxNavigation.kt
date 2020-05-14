@@ -241,6 +241,7 @@ constructor(
      * @see [registerTripSessionStateObserver]
      */
     fun stopTripSession() {
+        setRoutes(emptyList())
         tripSession.stop()
     }
 
@@ -586,7 +587,10 @@ constructor(
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
         mainJobController.scope.monitorChannelWithException(channel, { notificationAction ->
             when (notificationAction) {
-                NotificationAction.END_NAVIGATION -> tripSession.stop()
+                NotificationAction.END_NAVIGATION -> {
+                    setRoutes(emptyList())
+                    tripSession.stop()
+                }
             }
         })
     }
