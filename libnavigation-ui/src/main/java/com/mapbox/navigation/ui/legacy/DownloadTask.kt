@@ -79,7 +79,7 @@ constructor(
     }
 
     private fun retrieveUniqueId(): String =
-        if (uniqueId++ > 0) uniqueId.toString() else ""
+        if (++uniqueId > 0) uniqueId.toString() else ""
 
     /**
      * Invoked to pass the results of [doInBackground] to UI thread

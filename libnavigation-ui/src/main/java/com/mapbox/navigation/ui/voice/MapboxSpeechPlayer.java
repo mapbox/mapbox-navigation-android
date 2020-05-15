@@ -97,7 +97,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
 
   private void setupCaches(Context context) {
     mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
-    mapboxCache.mkdir();
+    mapboxCache.mkdirs();
   }
 
   private void playAnnouncementTextAndTypeFrom(VoiceInstructions announcement) {
