@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.history
+package com.mapbox.navigation.core.replay
 
 import android.app.PendingIntent
 import android.location.Location
@@ -7,6 +7,9 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import java.util.Date
 
 private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
@@ -14,8 +17,8 @@ private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 /**
  * Location Engine for replaying route history.
  */
-class ReplayHistoryLocationEngine(
-    replayHistoryPlayer: ReplayHistoryPlayer
+class ReplayLocationEngine(
+    mapboxReplayer: MapboxReplayer
 ) : LocationEngine, ReplayEventsObserver {
 
     private val registeredCallbacks: MutableList<EngineCallback> = mutableListOf()
@@ -33,7 +36,7 @@ class ReplayHistoryLocationEngine(
 
     init {
         myId = instances
-        replayHistoryPlayer.registerObserver(this)
+        mapboxReplayer.registerObserver(this)
     }
 
     /**

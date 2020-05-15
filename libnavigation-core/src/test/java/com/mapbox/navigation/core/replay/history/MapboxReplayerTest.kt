@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
+import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Called
 import io.mockk.coVerify
@@ -19,7 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class ReplayHistoryPlayerTest {
+class MapboxReplayerTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -27,11 +28,11 @@ class ReplayHistoryPlayerTest {
     private val replayEventsObserver: ReplayEventsObserver = mockk(relaxed = true)
     private var deviceElapsedTimeNanos = TimeUnit.HOURS.toNanos(11)
 
-    val replayHistoryPlayer = ReplayHistoryPlayer()
+    private val mapboxReplayer = MapboxReplayer()
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1580777612.853),
             ReplayEventUpdateLocation(1580777612.89,
                 ReplayEventLocation(
@@ -45,11 +46,11 @@ class ReplayHistoryPlayerTest {
                     speed = 0.5585000514984131)
             )
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.registerObserver(replayEventsObserver)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -61,7 +62,7 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should play 2 of 3 locations that include time window`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventUpdateLocation(1580777820.952,
                 ReplayEventLocation(
                     lat = 49.2450478,
@@ -93,11 +94,11 @@ class ReplayHistoryPlayerTest {
                     accuracyHorizontal = 3.9000000953674318,
                     provider = "fused"))
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.registerObserver(replayEventsObserver)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(3000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         // Note that it only played 2 of the 3 locations
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
@@ -111,21 +112,20 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `should resume playing after completing events`() = coroutineRule.runBlockingTest {
         val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
-        val replayHistoryPlayer = ReplayHistoryPlayer()
-            .pushEvents(testEvents)
+        mapboxReplayer.pushEvents(testEvents)
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(20000)
         val extraEvents = List(7) { ReplayEventGetStatus(it.toDouble()) }
-        replayHistoryPlayer.pushEvents(extraEvents)
+        mapboxReplayer.pushEvents(extraEvents)
         advanceTimeMillis(20000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         // 12 events at the beginning
         // 7 events later
@@ -136,13 +136,13 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1000.000),
             ReplayEventGetStatus(1001.000),
             ReplayEventGetStatus(1003.000)
         ))
         val timeCapture = mutableListOf<Long>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 if (events.isNotEmpty()) {
                     timeCapture.add(currentTime)
@@ -151,11 +151,11 @@ class ReplayHistoryPlayerTest {
             }
         })
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         for (i in 0..3000) {
             advanceTimeMillis(1)
         }
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         assertEquals(3, timeCapture.size)
         assertEquals(0L, timeCapture[0])
@@ -169,7 +169,7 @@ class ReplayHistoryPlayerTest {
             override val eventTimestamp: Double,
             val customValue: String
         ) : ReplayEventBase
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             CustomReplayEvent(1580777612.853, "custom value"),
             ReplayEventUpdateLocation(1580777613.89,
                 ReplayEventLocation(
@@ -182,11 +182,11 @@ class ReplayHistoryPlayerTest {
                     bearing = null,
                     speed = null))
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.registerObserver(replayEventsObserver)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -199,13 +199,13 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should not crash if history data is empty`() {
-        replayHistoryPlayer.play()
-        replayHistoryPlayer.finish()
+        mapboxReplayer.play()
+        mapboxReplayer.finish()
     }
 
     @Test
     fun `playFirstLocation should ignore events before the first location`() {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1580777612.853),
             ReplayEventUpdateLocation(1580777612.89,
                 ReplayEventLocation(
@@ -218,9 +218,9 @@ class ReplayHistoryPlayerTest {
                     bearing = 243.31265258789063,
                     speed = 0.5585000514984131))
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.registerObserver(replayEventsObserver)
 
-        replayHistoryPlayer.playFirstLocation()
+        mapboxReplayer.playFirstLocation()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         verify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -231,14 +231,14 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `playFirstLocation should handle history events without locations`() {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1580777612.853),
             ReplayEventGetStatus(1580777613.452),
             ReplayEventGetStatus(1580777614.085)
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.registerObserver(replayEventsObserver)
 
-        replayHistoryPlayer.playFirstLocation()
+        mapboxReplayer.playFirstLocation()
 
         verify { replayEventsObserver wasNot Called }
     }
@@ -246,17 +246,17 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `should seekTo an event`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1.853),
             seekToEvent,
             ReplayEventGetStatus(3.085)
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
-        replayHistoryPlayer.seekTo(seekToEvent)
+        mapboxReplayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.seekTo(seekToEvent)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -269,27 +269,27 @@ class ReplayHistoryPlayerTest {
     @Test(expected = Exception::class)
     fun `should crash when seekTo event is missing`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1.853),
             ReplayEventGetStatus(3.085)
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
-        replayHistoryPlayer.seekTo(seekToEvent)
+        mapboxReplayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.seekTo(seekToEvent)
     }
 
     @Test
     fun `should seekTo an event time`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(0.0),
             ReplayEventGetStatus(2.0),
             ReplayEventGetStatus(4.0)
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
-        replayHistoryPlayer.seekTo(1.0)
+        mapboxReplayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.seekTo(1.0)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -301,17 +301,17 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should seekTo a time relative to total time`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1580777611.853),
             ReplayEventGetStatus(1580777613.452),
             ReplayEventGetStatus(1580777614.085)
         ))
-        replayHistoryPlayer.registerObserver(replayEventsObserver)
-        replayHistoryPlayer.seekTo(1.0)
+        mapboxReplayer.registerObserver(replayEventsObserver)
+        mapboxReplayer.seekTo(1.0)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val replayUpdates = mutableListOf<List<ReplayEventBase>>()
         coVerify { replayEventsObserver.replayEvents(capture(replayUpdates)) }
@@ -325,17 +325,17 @@ class ReplayHistoryPlayerTest {
     fun `playbackSpeed should play one event per second at 1_0 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
 
-        replayHistoryPlayer.pushEvents(testEvents)
-        replayHistoryPlayer.playbackSpeed(1.0)
-        replayHistoryPlayer.play()
+        mapboxReplayer.pushEvents(testEvents)
+        mapboxReplayer.playbackSpeed(1.0)
+        mapboxReplayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
         advanceTimeMillis(3000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         assertEquals(3, timeCapture.size)
     }
@@ -343,18 +343,18 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should play four events per second at 4_0 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        replayHistoryPlayer.pushEvents(testEvents)
+        mapboxReplayer.pushEvents(testEvents)
 
-        replayHistoryPlayer.playbackSpeed(4.0)
-        replayHistoryPlayer.play()
+        mapboxReplayer.playbackSpeed(4.0)
+        mapboxReplayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
         advanceTimeMillis(4000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         assertEquals(16, timeCapture.size)
     }
@@ -362,18 +362,18 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should play one event every four seconds at 0_25 playbackSpeed`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        replayHistoryPlayer.pushEvents(testEvents)
+        mapboxReplayer.pushEvents(testEvents)
 
-        replayHistoryPlayer.playbackSpeed(0.25)
-        replayHistoryPlayer.play()
+        mapboxReplayer.playbackSpeed(0.25)
+        mapboxReplayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
         advanceTimeMillis(40000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         assertEquals(10, timeCapture.size)
     }
@@ -381,20 +381,20 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should update play speed while playing`() = coroutineRule.runBlockingTest {
         val testEvents = List(20) { ReplayEventGetStatus(it.toDouble()) }
-        replayHistoryPlayer.pushEvents(testEvents)
+        mapboxReplayer.pushEvents(testEvents)
 
-        replayHistoryPlayer.playbackSpeed(1.0)
-        replayHistoryPlayer.play()
+        mapboxReplayer.playbackSpeed(1.0)
+        mapboxReplayer.play()
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
         advanceTimeMillis(2000)
-        replayHistoryPlayer.playbackSpeed(3.0)
+        mapboxReplayer.playbackSpeed(3.0)
         advanceTimeMillis(1999) // advance a fraction to remove the equal events
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         // 2 events over 2 seconds at 1x speed.
         // 6 events over 2 seconds at 3x speed.
@@ -406,19 +406,19 @@ class ReplayHistoryPlayerTest {
     @Test
     fun `playbackSpeed should not crash when events are completed`() = coroutineRule.runBlockingTest {
         val testEvents = List(12) { ReplayEventGetStatus(it.toDouble()) }
-        replayHistoryPlayer.pushEvents(testEvents)
+        mapboxReplayer.pushEvents(testEvents)
         val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { timeCapture.add(Pair(it, currentTime)) }
             }
         })
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(20000)
-        replayHistoryPlayer.playbackSpeed(3.0)
+        mapboxReplayer.playbackSpeed(3.0)
         advanceTimeMillis(20000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         // 12 events at the beginning
         assertEquals(12, timeCapture.size)
@@ -426,19 +426,19 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should register multiple observers`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1.0),
             ReplayEventGetStatus(2.0),
             ReplayEventGetStatus(3.0)
         ))
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
-        replayHistoryPlayer.registerObserver(firstObserver)
-        replayHistoryPlayer.registerObserver(secondObserver)
+        mapboxReplayer.registerObserver(firstObserver)
+        mapboxReplayer.registerObserver(secondObserver)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(5000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val firstObserverEvents = mutableListOf<List<ReplayEventBase>>()
         coVerify { firstObserver.replayEvents(capture(firstObserverEvents)) }
@@ -452,21 +452,21 @@ class ReplayHistoryPlayerTest {
 
     @Test
     fun `should unregister single observers`() = coroutineRule.runBlockingTest {
-        replayHistoryPlayer.pushEvents(listOf(
+        mapboxReplayer.pushEvents(listOf(
             ReplayEventGetStatus(1.0),
             ReplayEventGetStatus(2.0),
             ReplayEventGetStatus(3.0)
         ))
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
-        replayHistoryPlayer.registerObserver(firstObserver)
-        replayHistoryPlayer.registerObserver(secondObserver)
+        mapboxReplayer.registerObserver(firstObserver)
+        mapboxReplayer.registerObserver(secondObserver)
 
-        replayHistoryPlayer.play()
+        mapboxReplayer.play()
         advanceTimeMillis(1000)
-        replayHistoryPlayer.unregisterObserver(firstObserver)
+        mapboxReplayer.unregisterObserver(firstObserver)
         advanceTimeMillis(2000)
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
 
         val firstObserverEvents = mutableListOf<List<ReplayEventBase>>()
         coVerify { firstObserver.replayEvents(capture(firstObserverEvents)) }
