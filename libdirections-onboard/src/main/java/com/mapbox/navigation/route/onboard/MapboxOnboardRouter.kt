@@ -49,7 +49,6 @@ class MapboxOnboardRouter(
 
     companion object {
         private const val TAG = "MapboxOnboardRouter"
-        private const val TILES_DIR_NAME = "tiles"
     }
 
     private val mainJobControl by lazy {
@@ -59,7 +58,7 @@ class MapboxOnboardRouter(
 
     init {
         if (config.tilePath.isNotEmpty()) {
-            val tileDir = File(config.tilePath, TILES_DIR_NAME)
+            val tileDir = File(config.tilePath)
             if (!tileDir.exists()) {
                 tileDir.mkdirs()
             }

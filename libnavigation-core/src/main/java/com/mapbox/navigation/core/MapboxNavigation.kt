@@ -652,6 +652,8 @@ constructor(
 
     companion object {
 
+        private const val TILES_DIR_NAME = "tiles"
+
         /**
          * Send user feedback about an issue or problem with the Navigation SDK
          *
@@ -694,13 +696,14 @@ constructor(
                 .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
 
-            // TODO provide a production routing tiles endpoint
-            val tilesUri = URI("")
-            val tilesVersion = ""
+            val tilesUri = URI("https://api.mapbox.com")
+            // Latest version available https://api.mapbox.com/route-tiles/v1/versions?access_token=
+            // as of 05/18/2020
+            val tilesVersion = "2020_02_02-03_00_00"
             val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
                 File(
                     context.filesDir,
-                    "Offline/${tilesUri.host}/$tilesVersion"
+                    "Offline/${tilesUri.host}/$tilesVersion/$TILES_DIR_NAME"
                 ).absolutePath
             } else ""
 

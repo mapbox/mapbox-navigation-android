@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.navigation.base.metrics.MetricsObserver;
+import com.mapbox.navigation.base.options.HandheldProfile;
 import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
@@ -95,7 +96,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
 
     return new MapboxOnboardRouter(
             Utils.getMapboxAccessToken(context),
-            MapboxNativeNavigatorImpl.INSTANCE,
+            MapboxNativeNavigatorImpl.INSTANCE.create(new HandheldProfile()),
             config,
             MapboxLogger.INSTANCE,
             MapboxNavigationAccounts.getInstance(context)
