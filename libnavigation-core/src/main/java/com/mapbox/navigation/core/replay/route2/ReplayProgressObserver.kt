@@ -3,12 +3,12 @@ package com.mapbox.navigation.core.replay.route2
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
 /**
  * Register this to [MapboxNavigation.registerRouteProgressObserver].
- * This class will feed locations to your [ReplayHistoryPlayer] and simulate
+ * This class will feed locations to your [MapboxReplayer] and simulate
  * your active route for you.
  */
 class ReplayProgressObserver(
@@ -16,7 +16,7 @@ class ReplayProgressObserver(
      * As navigation receives [RouteProgress], this will push events to your
      * replay history player to be played.
      */
-    private val replayHistoryPlayer: ReplayHistoryPlayer
+    private val mapboxReplayer: MapboxReplayer
 ) : RouteProgressObserver {
 
     private val replayRouteMapper = ReplayRouteMapper()
@@ -48,8 +48,8 @@ class ReplayProgressObserver(
         if (routeProgressRouteLeg != null) {
             val replayEvents = replayRouteMapper.mapRouteLegGeometry(routeProgressRouteLeg)
             if (replayEvents.isNotEmpty()) {
-                replayHistoryPlayer.pushEvents(replayEvents)
-                replayHistoryPlayer.seekTo(replayEvents.first())
+                mapboxReplayer.pushEvents(replayEvents)
+                mapboxReplayer.seekTo(replayEvents.first())
             }
         }
     }

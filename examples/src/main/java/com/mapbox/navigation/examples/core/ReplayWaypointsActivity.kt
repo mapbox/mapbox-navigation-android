@@ -27,8 +27,8 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route2.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
 import com.mapbox.navigation.core.stops.ArrivalController
@@ -63,8 +63,8 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val firstLocationCallback = FirstLocationCallback(this)
     private val stopsController = StopsController()
 
-    private val replayHistoryPlayer = ReplayHistoryPlayer()
-    private val replayProgressObserver = ReplayProgressObserver(replayHistoryPlayer)
+    private val mapboxReplayer = MapboxReplayer()
+    private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +80,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             mapboxNavigationOptions,
-            locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
+            locationEngine = ReplayLocationEngine(mapboxReplayer)
         ).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
         }
@@ -164,7 +164,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxNavigation?.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
-            replayHistoryPlayer.play()
+            mapboxReplayer.play()
         }
     }
 
@@ -174,7 +174,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                replayHistoryPlayer.playbackSpeed(progress.toDouble())
+                mapboxReplayer.playbackSpeed(progress.toDouble())
                 seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
             }
 
@@ -235,7 +235,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
@@ -257,8 +257,8 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                 activityRef.get()?.let { activity ->
                     val locationEvent = ReplayRouteMapper.mapToUpdateLocation(0.0, location)
                     val locationEventList = Collections.singletonList(locationEvent)
-                    activity.replayHistoryPlayer.pushEvents(locationEventList)
-                    activity.replayHistoryPlayer.playFirstLocation()
+                    activity.mapboxReplayer.pushEvents(locationEventList)
+                    activity.mapboxReplayer.playFirstLocation()
                     activity.navigationMapboxMap?.updateLocation(result.lastLocation)
                 }
             }

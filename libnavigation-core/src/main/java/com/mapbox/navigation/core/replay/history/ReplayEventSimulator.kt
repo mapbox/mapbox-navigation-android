@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.history
 
 import android.os.SystemClock
+import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlin.math.max
 import kotlin.math.roundToLong
@@ -14,8 +15,7 @@ import kotlinx.coroutines.launch
  * This class keeps track of a forward playing replay. As time moves forward, it captures
  * all events from [ReplayEvents] that happened, and provides them in a [ReplayEvents]
  *
- * @param replayEvents events needed to be replayed by [ReplayHistoryPlayer]
- * @param logger interface for logging any events
+ * @param replayEvents events needed to be replayed by [MapboxReplayer]
  */
 internal class ReplayEventSimulator(
     private val replayEvents: ReplayEvents

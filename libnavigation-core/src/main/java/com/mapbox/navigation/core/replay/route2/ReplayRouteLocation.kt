@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.replay.route2
 
 import android.location.Location
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.MapboxReplayer
 
 internal data class ReplayRouteSegment(
     val startSpeedMps: Double,
@@ -23,7 +23,7 @@ internal class ReplayRouteLocation(
 ) {
 
     /**
-     * [ReplayHistoryPlayer] is in Double seconds and [Location] is in milliseconds.
+     * [MapboxReplayer] is in Double seconds and [Location] is in milliseconds.
      * Keep track of the mapping in between
      */
     var timeMillis: Long = 0L

@@ -7,14 +7,14 @@ import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventLocation
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
 
 /**
  * This class converts a [DirectionsRoute] into events that can be
- * replayed using the [ReplayHistoryPlayer] to navigate a route.
+ * replayed using the [MapboxReplayer] to navigate a route.
  */
 class ReplayRouteMapper @JvmOverloads constructor(
     /**
@@ -26,7 +26,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
     private val replayRouteDriver = ReplayRouteDriver()
 
     /**
-     * Take a [DirectionsRoute] and map it to events that can be replayed by the [ReplayHistoryPlayer].
+     * Take a [DirectionsRoute] and map it to events that can be replayed by the [MapboxReplayer].
      * Uses the Directions API [DirectionsRoute.geometry] to calculate the speed
      * and position estimates for the replay locations.
      *
@@ -72,7 +72,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
     }
 
     /**
-     * Take a [DirectionsRoute] and map it to events that can be replayed by the [ReplayHistoryPlayer].
+     * Take a [DirectionsRoute] and map it to events that can be replayed by the [MapboxReplayer].
      * Uses the Directions API [LegAnnotation] to create the speed and position
      * estimates for the replay locations.
      *

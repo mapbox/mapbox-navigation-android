@@ -1,7 +1,9 @@
 package com.mapbox.navigation.core.replay.history
 
+import com.mapbox.navigation.core.replay.MapboxReplayer
+
 /**
- * Used to observe events replayed by the [ReplayHistoryPlayer]
+ * Used to observe events replayed by the [MapboxReplayer]
  */
 interface ReplayEventsObserver {
 

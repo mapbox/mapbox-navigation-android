@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.core.replay.MapboxReplayer
 
 /**
  * Additional mapper that can be used with [ReplayHistoryMapper].
@@ -12,7 +13,7 @@ interface CustomEventMapper {
 
     /**
      * Override to map your own custom events from history files,
-     * into [ReplayEventBase] for the [ReplayHistoryPlayer]
+     * into [ReplayEventBase] for the [MapboxReplayer]
      */
     fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase?
 }
@@ -28,11 +29,11 @@ interface CustomEventMapper {
 class ReplayHistoryMapper @JvmOverloads constructor(
     private val gson: Gson = Gson(),
     private val customEventMapper: CustomEventMapper? = null,
-    private val logger: Logger
+    private val logger: Logger? = null
 ) {
 
     /**
-     * Given raw json string return [ReplayEvents] that can be given to a [ReplayHistoryPlayer]
+     * Given raw json string return [ReplayEvents] that can be given to a [MapboxReplayer]
      */
     fun mapToReplayEvents(historyData: String): List<ReplayEventBase> {
         val exampleHistoryData = gson.fromJson(historyData, ReplayHistoryDTO::class.java)
@@ -40,7 +41,7 @@ class ReplayHistoryMapper @JvmOverloads constructor(
     }
 
     /**
-     * Given [ReplayHistoryDTO] return [ReplayEvents] that can be given to a [ReplayHistoryPlayer]
+     * Given [ReplayHistoryDTO] return [ReplayEvents] that can be given to a [MapboxReplayer]
      */
     fun mapToReplayEvents(historyDTO: ReplayHistoryDTO): List<ReplayEventBase> {
         return historyDTO.events
@@ -50,7 +51,7 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                     val eventType: String = event["type"] as String
                     mapToEvent(eventType, event)
                 } catch (throwable: Throwable) {
-                    logger.e(
+                    logger?.e(
                         msg = Message("Failed to read index $index: $event"),
                         tr = throwable
                     )
@@ -75,7 +76,7 @@ class ReplayHistoryMapper @JvmOverloads constructor(
             else -> {
                 val replayEvent = customEventMapper?.map(eventType, event)
                 if (replayEvent == null) {
-                    logger.e(msg = Message("Replay unsupported event $eventType"))
+                    logger?.e(msg = Message("Replay unsupported event $eventType"))
                 }
                 replayEvent
             }

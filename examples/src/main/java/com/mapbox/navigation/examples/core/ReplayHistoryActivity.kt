@@ -24,12 +24,12 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.CustomEventMapper
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
-import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -77,11 +77,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
             // Load and replay history on IO dispatchers
             val deferredEvents = async(Dispatchers.IO) { loadReplayHistory() }
             val replayEvents = deferredEvents.await()
-            val replayHistoryPlayer = ReplayHistoryPlayer()
+            val mapboxReplay = MapboxReplayer()
                 .pushEvents(replayEvents)
             if (!isActive) return@launch
 
-            val locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
+            val locationEngine = ReplayLocationEngine(mapboxReplay)
 
             // Await the map and we're ready for navigation
             val mapboxNavigation = createMapboxNavigation(locationEngine)
@@ -97,7 +97,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 style,
                 mapboxNavigation,
                 navigationMapboxMap,
-                replayHistoryPlayer
+                mapboxReplay
             )
             callback(navigationContext)
         }
@@ -138,13 +138,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
 
-        replayHistoryPlayer.playFirstLocation()
+        mapboxReplayer.playFirstLocation()
         mapboxMap.addOnMapLongClickListener { latLng ->
             selectMapLocation(latLng)
             true
         }
 
-        replayHistoryPlayer.registerObserver(object : ReplayEventsObserver {
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
                 events.forEach { event ->
                     when (event) {
@@ -159,7 +159,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         })
 
         playReplay.setOnClickListener {
-            replayHistoryPlayer.play()
+            mapboxReplayer.play()
         }
     }
 
@@ -169,7 +169,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                replayHistoryPlayer.playbackSpeed(progress.toDouble())
+                mapboxReplayer.playbackSpeed(progress.toDouble())
                 seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
             }
 
@@ -263,7 +263,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onDestroy()
         loadNavigationJob?.cancelChildren()
         navigationContext?.apply {
-            replayHistoryPlayer.finish()
+            mapboxReplayer.finish()
             mapboxNavigation.stopTripSession()
             mapboxNavigation.onDestroy()
         }
@@ -282,7 +282,7 @@ private data class ReplayNavigationContext(
     val style: Style,
     val mapboxNavigation: MapboxNavigation,
     val navigationMapboxMap: NavigationMapboxMap,
-    val replayHistoryPlayer: ReplayHistoryPlayer
+    val mapboxReplayer: MapboxReplayer
 )
 
 private fun loadHistoryJsonFromAssets(context: Context, fileName: String): String {
