@@ -50,6 +50,9 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+/**
+ * This activity shows how to use replay ride history.
+ */
 class ReplayHistoryActivity : AppCompatActivity() {
 
     private var navigationContext: ReplayNavigationContext? = null

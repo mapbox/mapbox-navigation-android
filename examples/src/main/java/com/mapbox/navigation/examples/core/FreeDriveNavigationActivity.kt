@@ -31,7 +31,14 @@ import kotlinx.android.synthetic.main.free_drive_navigation_layout.startNavigati
 import timber.log.Timber
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to enable the Navigation SDK's "free-drive"
+ * mode when the device isn't headed to a specific destination (no route is set a.k.a. passive navigation). This
+ * mode keeps the map continually centered on the device’s current
+ * location. In this mode, users can see information about nearby roads and
+ * places such as traffic, incidents, and POIs. Particularly when
+ * users are in familiar areas and do not need turn-by-turn instructions,
+ * free-drive mode enables you to engage users and proactively surface
+ * relevant information to them.
  */
 class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 

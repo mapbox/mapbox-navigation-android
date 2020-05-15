@@ -43,6 +43,12 @@ import com.mapbox.navigation.ui.utils.ViewUtils
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_feedback_button.*
 
+/**
+ * This activity shows how to integrate the [com.mapbox.navigation.ui.FeedbackButton]'s
+ * feedback report flow with the Navigation SDK. Road closures and
+ * traffic incidents are just two of the several types of live navigation
+ * feedback that can be reported.
+ */
 class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener {
 

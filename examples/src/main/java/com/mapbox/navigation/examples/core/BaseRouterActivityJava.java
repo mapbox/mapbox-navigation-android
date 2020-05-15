@@ -63,6 +63,11 @@ import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsU
 import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils.coordinates;
 import static com.mapbox.navigation.base.route.internal.RouteUrl.PROFILE_DRIVING_TRAFFIC;
 
+/**
+ * This base activity sets up various Mapbox Navigation SDK routers so that
+ * they don't have to be set up each time in other test app examples that are
+ * related to routers.
+ */
 public abstract class BaseRouterActivityJava extends AppCompatActivity
     implements OnMapReadyCallback, MapboxMap.OnMapClickListener, MetricsObserver, LoggerObserver {
 

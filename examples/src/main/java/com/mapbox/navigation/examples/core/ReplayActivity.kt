@@ -38,7 +38,8 @@ import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_replay_route_layout.*
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to use the MapboxNavigation
+ * class with the Navigation SDK's [ReplayHistoryLocationEngine].
  */
 class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 

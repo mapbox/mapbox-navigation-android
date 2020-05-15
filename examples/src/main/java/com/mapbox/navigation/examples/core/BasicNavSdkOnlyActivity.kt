@@ -50,8 +50,9 @@ import kotlinx.android.synthetic.main.activity_basic_navigation_sdk_only_layout.
 import timber.log.Timber
 
 /**
- * This example demonstrates how to combine Maps SDK with ONLY the
- * Navigation SDK. There is no Navigation UI SDK code of any kind in this example.
+ * This activity shows how to combine the Mapbox Maps SDK with
+ * ONLY the Navigation SDK. There is no Navigation UI SDK code
+ * of any kind in this example.
  */
 class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxMap.OnMapLongClickListener {
 

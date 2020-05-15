@@ -43,6 +43,11 @@ import com.mapbox.navigation.ui.summary.SummaryBottomSheet
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.*
 
+/**
+ * This activity shows how to integrate the
+ * Navigation UI SDK's [SummaryBottomSheet] and
+ * a camera re-centering button with the Navigation SDK.
+ */
 class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }

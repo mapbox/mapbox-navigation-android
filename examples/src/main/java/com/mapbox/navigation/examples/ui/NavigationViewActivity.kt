@@ -19,6 +19,10 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_navigation_view.*
 
+/**
+ * This activity shows how to use a [com.mapbox.navigation.ui.NavigationView]
+ * to implement a basic turn-by-turn navigation experience.
+ */
 class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
     BannerInstructionsListener {
 

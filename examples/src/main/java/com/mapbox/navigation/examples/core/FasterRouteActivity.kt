@@ -43,7 +43,7 @@ import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
 
 /**
- * This example shows how to use the Navigation SDK's [FasterRouteObserver]
+ * This activity shows how to use the Navigation SDK's [FasterRouteObserver]
  * and display the observer's faster routes that are returned if the
  * device goes off of the original [DirectionsRoute].
  *

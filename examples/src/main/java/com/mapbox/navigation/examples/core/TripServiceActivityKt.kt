@@ -36,6 +36,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+/**
+ * This activity shows how to use the Navigation SDK's
+ * [MapboxTripService] to update the Android-system
+ * foreground service notification. The [MapboxTripNotification] class
+ * updates the notification's displayed navigation information.
+ */
 class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
     private var mainJobController = ThreadController.getMainScopeAndRootJob()

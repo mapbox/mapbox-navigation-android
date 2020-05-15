@@ -69,7 +69,9 @@ import okhttp3.Cache
 import timber.log.Timber
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to use your own colors
+ * to style the UI SDK components including the InstructionView
+ * and SummaryBottomSheet.
  */
 class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener, OnWayNameChangedListener {

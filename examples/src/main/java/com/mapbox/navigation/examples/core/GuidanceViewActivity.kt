@@ -35,8 +35,12 @@ import kotlinx.android.synthetic.main.activity_guidance_view.mapView
 import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
 
 /**
- * Warning: This activity is for code demonstration. The guidance view api
- * is currently only supported by staging access_tokens, ask Mapbox for one.
+ * This activity shows how to display Mapbox's guidance view images,
+ * which visualize certain maneuvers, such as exiting off of a
+ * highway. Access to guidance view images is limited to certain
+ * Mapbox access tokens. Please contact Mapbox at
+ * https://www.mapbox.com/contact/sales/ if you'd like a valid
+ * access token.
  */
 class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 

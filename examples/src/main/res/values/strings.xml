@@ -61,19 +61,19 @@
     <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
 
     <string name="title_replay_waypoints" translatable="false">Replay waypoints</string>
-    <string name="description_replay_waypoints" translatable="false">Demonstrates how to use navigate to waypoints.</string>
+    <string name="description_replay_waypoints" translatable="false">Shows how to use navigate to waypoints.</string>
 
     <string name="title_reroute_view" translatable="false">Reroute events</string>
     <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
 
     <string name="title_basic_navigation_kotlin" translatable="false">Basic navigation</string>
-    <string name="description_basic_navigation_kotlin" translatable="false">Demonstrates how to navigate from the device location to a destination using the MapboxNavigation class.</string>
+    <string name="description_basic_navigation_kotlin" translatable="false">Shows how to navigate from the device location to a destination using the MapboxNavigation class.</string>
 
     <string name="title_basic_navigation_sdk_only_kotlin" translatable="false">Basic Navigation + Maps SDK integration</string>
-    <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Demonstrates how to combine the Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
+    <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Shows how to combine the Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
 
     <string name="title_free_drive_kotlin" translatable="false">Free drive navigation</string>
-    <string name="description_free_drive_kotlin" translatable="false">Demonstrates how to navigate in a free drive scenario using the MapboxNavigation class.</string>
+    <string name="description_free_drive_kotlin" translatable="false">Shows how to navigate in a free drive scenario using the MapboxNavigation class.</string>
 
     <string name="title_guidance_view" translatable="false">GuidanceView</string>
     <string name="description_guidance_view" translatable="false">Demonstrates the use of a GuidanceView to show an instructional image at proper junctions.</string>
