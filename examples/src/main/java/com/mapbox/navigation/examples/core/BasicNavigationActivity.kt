@@ -40,7 +40,9 @@ import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import timber.log.Timber
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to set up a basic turn-by-turn
+ * navigation experience with the Navigation SDK and
+ * Navigation UI SDK.
  */
 class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 

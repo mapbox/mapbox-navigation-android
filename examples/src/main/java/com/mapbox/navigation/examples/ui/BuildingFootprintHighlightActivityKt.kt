@@ -26,7 +26,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_final_destination_arrival_building_highlight.*
 
 /**
- * This example shows how to use the Navigation UI SDK's [BuildingFootprintHighlightLayer]
+ * This activity shows how to use the Navigation UI SDK's [BuildingFootprintHighlightLayer]
  * class to highlight a building footprint. The final destination arrival callback is from
  * [ArrivalObserver.onFinalDestinationArrival].
  */

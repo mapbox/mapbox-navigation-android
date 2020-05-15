@@ -62,7 +62,9 @@ import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
 import okhttp3.Cache
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to integrate the Navigation UI SDK's
+ * InstructionView, FeedbackButton, and SoundButton with
+ * the Navigation SDK.
  */
 class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener {

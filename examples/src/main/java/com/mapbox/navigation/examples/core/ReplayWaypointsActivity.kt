@@ -52,7 +52,12 @@ import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.startNavi
 import timber.log.Timber
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to use navigate to various waypoints
+ * along a [DirectionsRoute] with the Navigation SDK's
+ * [ArrivalObserver] and [ArrivalController].
+ *
+ * The activity also shows how to the Navigation SDK's
+ * route replay infrastructure.
  */
 class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 

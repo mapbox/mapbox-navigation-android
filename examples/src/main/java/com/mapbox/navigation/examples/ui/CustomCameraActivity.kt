@@ -21,8 +21,10 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_navigation_view.navigationView
 
 /**
- * This activity shows how to create a custom class that extends [Camera] and then passing
- * it to [NavigationViewOptions.builder]'s `camera()` class.
+ * This activity shows how to create a custom class that extends the
+ * [Camera] class. The custom class' object is then given to
+ * the [NavigationViewOptions.Builder] via
+ * [NavigationViewOptions.Builder.camera].
  */
 class CustomCameraActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
     BannerInstructionsListener {

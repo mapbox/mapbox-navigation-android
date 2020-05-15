@@ -31,6 +31,10 @@ const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
 const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500
 private const val NAVIGATOR_POLLING_DELAY = 1500L
 
+/**
+ * This activity shows how to use the Navigation SDK's
+ * [MapboxTripSession].
+ */
 class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
 
     private var mapboxMap: MapboxMap? = null

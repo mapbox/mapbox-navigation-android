@@ -70,6 +70,11 @@ import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
 
+/**
+ * This activity shows how to set up a basic turn-by-turn
+ * navigation experience with many of the the Navigation SDK's
+ * [MapboxNavigation] class' capabilities.
+ */
 class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     VoiceInstructionsObserver {
 

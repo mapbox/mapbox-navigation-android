@@ -20,6 +20,12 @@ import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_navigation_view.*
 
+/**
+ * This activity shows how to use a
+ * [com.mapbox.navigation.ui.NavigationView] and customize the
+ * device location puck's image based on the [RouteProgressState]
+ * status.
+ */
 class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
     BannerInstructionsListener {
 

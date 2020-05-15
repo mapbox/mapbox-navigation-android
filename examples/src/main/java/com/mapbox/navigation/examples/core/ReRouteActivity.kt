@@ -40,7 +40,8 @@ import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import timber.log.Timber
 
 /**
- * To ensure proper functioning of this example make sure your Location is turned on.
+ * This activity shows how to observe reroute events with the
+ * Navigation SDK's [RoutesObserver].
  */
 class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 

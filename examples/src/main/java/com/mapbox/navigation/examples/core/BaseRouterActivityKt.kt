@@ -56,6 +56,11 @@ import kotlinx.android.synthetic.main.activity_mock_navigation.mapView
 import kotlinx.android.synthetic.main.activity_mock_navigation.newLocationFab
 import timber.log.Timber
 
+/**
+ * This base activity sets up various Mapbox Navigation SDK routers so that
+ * they don't have to be set up each time in other test app examples that are
+ * related to routers.
+ */
 abstract class BaseRouterActivityKt :
     AppCompatActivity(),
     OnMapReadyCallback,

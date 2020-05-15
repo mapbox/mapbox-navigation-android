@@ -22,8 +22,9 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_building_extrusion.*
 
 /**
- * Use the Navigation UI SDK's [BuildingExtrusionLayer] to show and customize 3D building
- * extrusions on the [NavigationView]'s map.
+ * This activity shows how to use the Navigation UI SDK's
+ * [BuildingExtrusionLayer] to show and customize 3D building
+ * extrusions on the [com.mapbox.navigation.ui.NavigationView]'s map.
  */
 class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
         RouteProgressObserver {

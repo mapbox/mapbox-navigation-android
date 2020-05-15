@@ -65,6 +65,10 @@ import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
 
+/**
+ * This activity shows debug points for raw(red) and
+ * enhanced(blue) location updates.
+ */
 class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         VoiceInstructionsObserver {
 
