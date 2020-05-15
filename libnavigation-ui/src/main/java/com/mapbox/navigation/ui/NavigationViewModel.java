@@ -28,7 +28,11 @@ import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.replay.MapboxReplayer;
+import com.mapbox.navigation.core.replay.ReplayLocationEngine;
+import com.mapbox.navigation.core.replay.history.ReplayEventBase;
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
@@ -51,6 +55,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,7 +80,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
-  private LocationEngineConductor locationEngineConductor;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private SpeechPlayer speechPlayer;
   private VoiceInstructionLoader voiceInstructionLoader;
@@ -95,11 +99,11 @@ public class NavigationViewModel extends AndroidViewModel {
       new NavigationViewModelProgressObserver(this);
 
   private NavigationViewOptions navigationViewOptions;
+  private MapboxReplayer mapboxReplayer = new MapboxReplayer();
 
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
-    initializeLocationEngine();
     this.connectivityController = new MapConnectivityController();
   }
 
@@ -112,11 +116,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,
-      LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
-      VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
+      NavigationViewEventDispatcher dispatcher, VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
     super(application);
     this.navigation = navigation;
-    this.locationEngineConductor = conductor;
     this.navigationViewEventDispatcher = dispatcher;
     this.voiceInstructionCache = cache;
     this.speechPlayer = speechPlayer;
@@ -124,6 +126,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   @Override
   protected void onCleared() {
+    mapboxReplayer.finish();
     super.onCleared();
   }
 
@@ -179,6 +182,8 @@ public class NavigationViewModel extends AndroidViewModel {
    */
   @SuppressLint("MissingPermission")
   void initialize(NavigationViewOptions options) {
+    this.navigationViewOptions = options;
+
     initializeLanguage(options);
     NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
       .toBuilder()
@@ -208,7 +213,6 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeNavigationSpeechPlayer(options);
       initializeMapOfflineManager(options);
     }
-    this.navigationViewOptions = options;
     navigation.setRoutes(Arrays.asList(options.directionsRoute()));
     navigation.startTripSession();
     voiceInstructionCache.initCache(options.directionsRoute());
@@ -309,10 +313,6 @@ public class NavigationViewModel extends AndroidViewModel {
     return summaryModel;
   }
 
-  private void initializeLocationEngine() {
-    locationEngineConductor = new LocationEngineConductor();
-  }
-
   private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     language = ContextEx.inferDeviceLanguage(getApplication());
@@ -390,17 +390,16 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private LocationEngine initializeLocationEngineFrom(final NavigationViewOptions options) {
-    final LocationEngine locationEngine = options.locationEngine();
-    final boolean shouldReplayRoute = options.shouldSimulateRoute();
-    locationEngineConductor.initializeLocationEngine(getApplication(), locationEngine, shouldReplayRoute);
-
-    final LocationEngine locationEngineToReturn = locationEngineConductor.obtainLocationEngine();
-    if (locationEngineToReturn instanceof ReplayRouteLocationEngine) {
+    if (options.shouldSimulateRoute()) {
+      ReplayLocationEngine replayLocationEngine = new ReplayLocationEngine(mapboxReplayer);
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
-      ((ReplayRouteLocationEngine) locationEngineToReturn).assignLastLocation(lastLocation);
-      ((ReplayRouteLocationEngine) locationEngineToReturn).assign(options.directionsRoute());
+      ReplayEventBase replayEventOrigin = ReplayRouteMapper.mapToUpdateLocation(0.0, lastLocation);
+      mapboxReplayer.pushEvents(Collections.singletonList(replayEventOrigin));
+      mapboxReplayer.play();
+      return replayLocationEngine;
+    } else {
+      return options.locationEngine();
     }
-    return locationEngineToReturn;
   }
 
   private void initializeNavigation(Context context, NavigationOptions options, LocationEngine locationEngine) {
@@ -416,6 +415,9 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.registerTripSessionStateObserver(tripSessionStateObserver);
+    if (navigationViewOptions.shouldSimulateRoute()) {
+      navigation.registerRouteProgressObserver(new ReplayProgressObserver(mapboxReplayer));
+    }
   }
 
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {

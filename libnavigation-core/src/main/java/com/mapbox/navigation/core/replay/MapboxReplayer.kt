@@ -10,7 +10,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEvents
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
-import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import java.util.Collections.singletonList
 
 /**

@@ -21,7 +21,10 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -30,6 +33,7 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import java.util.Collections
 import kotlinx.android.synthetic.main.activity_guidance_view.*
 import kotlinx.android.synthetic.main.activity_guidance_view.mapView
 import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
@@ -44,7 +48,7 @@ import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
  */
 class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private val mapboxReplayer = MapboxReplayer()
     private val origin: Point = Point.fromLngLat(139.7772481, 35.6818019)
     private val destination: Point = Point.fromLngLat(139.7756523, 35.6789722)
 
@@ -66,7 +70,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
                 options,
-                locationEngine = replayRouteLocationEngine
+                locationEngine = ReplayLocationEngine(mapboxReplayer)
         ).also {
             it.registerRouteProgressObserver(routeProgressObserver)
             it.registerBannerInstructionsObserver(bannerInstructionObserver)
@@ -98,6 +102,11 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
                             .build(),
                     routesReqCallback
             )
+
+            mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+            val replayEventOrigin = ReplayRouteMapper.mapToUpdateLocation(0.0, origin)
+            mapboxReplayer.pushEvents(Collections.singletonList(replayEventOrigin))
+            mapboxReplayer.play()
         }
     }
 
@@ -111,7 +120,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             navigationMapboxMap?.drawRoute(routes[0])
-            replayRouteLocationEngine.assign(routes[0])
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
@@ -196,6 +204,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxReplayer.finish()
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
         mapView.onDestroy()

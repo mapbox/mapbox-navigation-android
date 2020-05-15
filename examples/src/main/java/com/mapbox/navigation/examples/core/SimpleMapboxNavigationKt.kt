@@ -43,7 +43,9 @@ import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -96,7 +98,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var speechPlayer: NavigationSpeechPlayer
-    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+    private val mapboxReplayer = MapboxReplayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,7 +127,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     } else {
                         mapboxNavigation.setRoutes(listOf(originalRoute))
                     }
-                    replayRouteLocationEngine.assign(originalRoute)
                 }
             }
         }
@@ -192,7 +193,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     remove(route)
                     add(0, route)
                 })
-                replayRouteLocationEngine.assign(route)
             }
         }
         Snackbar.make(
@@ -311,7 +311,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             originalRoute = routes[0]
             navigationMapboxMap.drawRoutes(routes)
             Timber.d("route request success %s", routes.toString())
-            replayRouteLocationEngine.assign(originalRoute)
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
@@ -419,6 +418,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         super.onDestroy()
         mapView.onDestroy()
 
+        mapboxReplayer.finish()
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
@@ -456,11 +456,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
         return if (shouldSimulateRoute()) {
-            return MapboxNavigation(
+            MapboxNavigation(
                 applicationContext,
                 navigationOptions = options,
-                locationEngine = replayRouteLocationEngine
-            )
+                locationEngine = ReplayLocationEngine(mapboxReplayer)
+            ).apply {
+                registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxReplayer.pushRealLocation(applicationContext, 0.0)
+                mapboxReplayer.play()
+            }
         } else {
             MapboxNavigation(
                 applicationContext,

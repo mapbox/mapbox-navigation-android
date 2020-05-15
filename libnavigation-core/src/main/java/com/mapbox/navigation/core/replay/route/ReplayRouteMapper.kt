@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route2
+package com.mapbox.navigation.core.replay.route
 
 import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
@@ -105,12 +106,37 @@ class ReplayRouteMapper @JvmOverloads constructor(
         private const val REPLAY_ROUTE_ACCURACY_HORIZONTAL = 3.0
 
         /**
+         * Map a point into a replay event.
+         *
+         * @param eventTimestamp the eventTimestamp for the replay event
+         * @param point [Point] location to be replayed
+         * @return a [ReplayEventBase] event that can be replayed
+         */
+        @JvmStatic
+        fun mapToUpdateLocation(eventTimestamp: Double, point: Point): ReplayEventUpdateLocation {
+            return ReplayEventUpdateLocation(
+                eventTimestamp = eventTimestamp,
+                location = ReplayEventLocation(
+                    lon = point.longitude(),
+                    lat = point.latitude(),
+                    provider = "ReplayRoute",
+                    time = eventTimestamp,
+                    altitude = null,
+                    accuracyHorizontal = null,
+                    bearing = null,
+                    speed = null
+                )
+            )
+        }
+
+        /**
          * Map an Android location into a replay event.
          *
          * @param eventTimestamp the eventTimestamp for the replay event
          * @param location Android location to be replayed
          * @return a [ReplayEventBase] event that can be replayed
          */
+        @JvmStatic
         fun mapToUpdateLocation(eventTimestamp: Double, location: Location): ReplayEventBase {
             return ReplayEventUpdateLocation(
                 eventTimestamp = eventTimestamp,

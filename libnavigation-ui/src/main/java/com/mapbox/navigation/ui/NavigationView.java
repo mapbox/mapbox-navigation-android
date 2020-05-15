@@ -40,7 +40,7 @@ import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
+import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.instruction.ImageCreator;
@@ -69,7 +69,7 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * Once valid data is obtained, this activity will immediately begin navigation
  * with {@link MapboxNavigation}.
  * <p>
- * If launched with the simulation boolean set to true, a {@link ReplayRouteLocationEngine}
+ * If launched with the simulation boolean set to true, a {@link MapboxReplayer}
  * will be initialized and begin pushing updates.
  * <p>
  * This activity requires user permissions ACCESS_FINE_LOCATION
