@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route2
+package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point

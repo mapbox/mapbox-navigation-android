@@ -8,8 +8,8 @@ import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.legacy.NavigationConstants;
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine;
 import com.mapbox.navigation.base.route.Router;
 
 /**
@@ -19,7 +19,7 @@ import com.mapbox.navigation.base.route.Router;
  * {@link Router}.
  * </p><p>
  * For testing, you can launch with simulation, in which our
- * {@link ReplayRouteLocationEngine} will begin
+ * {@link MapboxReplayer} will begin
  * following the given {@link DirectionsRoute} once the UI is initialized.
  * </p>
  */

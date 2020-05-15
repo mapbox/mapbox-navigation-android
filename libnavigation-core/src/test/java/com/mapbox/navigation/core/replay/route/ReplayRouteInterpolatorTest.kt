@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route2
+package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals

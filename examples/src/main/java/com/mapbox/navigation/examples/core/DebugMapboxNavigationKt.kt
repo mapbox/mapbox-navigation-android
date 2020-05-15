@@ -43,7 +43,7 @@ import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
-import com.mapbox.navigation.core.replay.route2.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -364,6 +364,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         super.onDestroy()
         mapView.onDestroy()
 
+        mapboxReplayer.finish()
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()

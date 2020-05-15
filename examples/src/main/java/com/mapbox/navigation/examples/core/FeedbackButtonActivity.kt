@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -26,7 +25,9 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -52,12 +53,11 @@ import kotlinx.android.synthetic.main.activity_feedback_button.*
 class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener {
 
-    private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }
-
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private lateinit var destination: LatLng
+    private val mapboxReplayer = MapboxReplayer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +75,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             mapboxNavigationOptions,
-            replayRouteLocationEngine
+            ReplayLocationEngine(mapboxReplayer)
         ).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
         }
@@ -112,6 +112,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxReplayer.finish()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
@@ -129,8 +130,11 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
-            LocationEngineProvider.getBestLocationEngine(this)
-                .getLastLocation(locationListenerCallback)
+
+            mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+            mapboxReplayer.pushRealLocation(this, 0.0)
+            mapboxReplayer.play()
+            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -200,7 +204,6 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                (mapboxNavigation?.locationEngine as ReplayRouteLocationEngine).assign(routes[0])
                 startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = true
             } else {

@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.ImageButton
@@ -11,7 +12,6 @@ import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -34,7 +34,9 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -75,7 +77,6 @@ import timber.log.Timber
  */
 class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener, OnWayNameChangedListener {
-    private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -88,6 +89,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var feedbackButton: NavigationButton
     private lateinit var instructionSoundButton: NavigationButton
     private lateinit var alertView: NavigationAlertView
+    private val mapboxReplayer = MapboxReplayer()
 
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
@@ -134,6 +136,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onDestroy()
         mapView.onDestroy()
 
+        mapboxReplayer.finish()
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
@@ -189,8 +192,12 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 setCamera(DynamicCamera(mapboxMap))
             }
 
-            LocationEngineProvider.getBestLocationEngine(this)
-                .getLastLocation(locationListenerCallback)
+            if (shouldSimulateRoute()) {
+                mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxReplayer.pushRealLocation(this, 0.0)
+                mapboxReplayer.play()
+            }
+            mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
 
             Snackbar.make(
                 findViewById(R.id.navigationLayout),
@@ -237,8 +244,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             setOnClickListener {
                 Timber.d("start navigation")
                 if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                    replayRouteLocationEngine.assign(mapboxNavigation.getRoutes()[0])
-
                     updateCameraOnNavigationStateChange(true)
                     navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
 
@@ -358,7 +363,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             MapboxNavigation.defaultNavigationOptions(this, accessToken),
-            replayRouteLocationEngine
+            ReplayLocationEngine(mapboxReplayer)
         )
         mapboxNavigation.apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
@@ -545,5 +550,10 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         override fun onFailure(exception: Exception) {
             Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
         }
+    }
+
+    private fun shouldSimulateRoute(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+            .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 }

@@ -131,12 +131,11 @@ public class NavigationViewModelTest {
   public void isMuted_falseWithNullSpeechPlayer() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    LocationEngineConductor conductor = mock(LocationEngineConductor.class);
     NavigationViewEventDispatcher dispatcher = mock(NavigationViewEventDispatcher.class);
     VoiceInstructionCache cache = mock(VoiceInstructionCache.class);
     SpeechPlayer speechPlayer = null;
     NavigationViewModel viewModel = new NavigationViewModel(
-      application, navigation, conductor, dispatcher, cache, speechPlayer
+      application, navigation, dispatcher, cache, speechPlayer
     );
 
     boolean isMuted = viewModel.isMuted();
@@ -148,13 +147,12 @@ public class NavigationViewModelTest {
   public void isMuted_trueWithMutedSpeechPlayer() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    LocationEngineConductor conductor = mock(LocationEngineConductor.class);
     NavigationViewEventDispatcher dispatcher = mock(NavigationViewEventDispatcher.class);
     VoiceInstructionCache cache = mock(VoiceInstructionCache.class);
     SpeechPlayer speechPlayer = mock(SpeechPlayer.class);
     when(speechPlayer.isMuted()).thenReturn(true);
     NavigationViewModel viewModel = new NavigationViewModel(
-      application, navigation, conductor, dispatcher, cache, speechPlayer
+      application, navigation, dispatcher, cache, speechPlayer
     );
 
     boolean isMuted = viewModel.isMuted();

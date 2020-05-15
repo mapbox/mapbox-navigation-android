@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route2
+package com.mapbox.navigation.core.replay.route
 
 /**
  * Replay route simulates a driver on a direction route. These options

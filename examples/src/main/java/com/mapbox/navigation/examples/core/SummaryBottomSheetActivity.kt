@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -11,6 +12,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
@@ -30,7 +32,9 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -50,7 +54,6 @@ import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.*
  */
 class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private val replayRouteLocationEngine by lazy { ReplayRouteLocationEngine() }
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private var mapboxNavigation: MapboxNavigation? = null
@@ -59,6 +62,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var summaryBehavior: BottomSheetBehavior<SummaryBottomSheet>
     private lateinit var routeOverviewButton: ImageButton
     private lateinit var cancelBtn: AppCompatImageButton
+    private val mapboxReplayer = MapboxReplayer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +80,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             mapboxNavigationOptions,
-            replayRouteLocationEngine
+            getLocationEngine()
         ).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
@@ -114,6 +118,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
+        mapboxReplayer.finish()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation?.stopTripSession()
@@ -131,8 +136,12 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
-            LocationEngineProvider.getBestLocationEngine(this)
-                .getLastLocation(locationListenerCallback)
+            if (shouldSimulateRoute()) {
+                mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxReplayer.pushRealLocation(this, 0.0)
+                mapboxReplayer.play()
+            }
+            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -149,6 +158,15 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             }
             true
+        }
+    }
+
+    // for testing else a real location engine is used.
+    private fun getLocationEngine(): LocationEngine {
+        return if (shouldSimulateRoute()) {
+            ReplayLocationEngine(mapboxReplayer)
+        } else {
+            LocationEngineProvider.getBestLocationEngine(this)
         }
     }
 
@@ -253,7 +271,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                (mapboxNavigation?.locationEngine as ReplayRouteLocationEngine).assign(routes[0])
                 startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = true
             } else {
@@ -329,5 +346,10 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onFailure(exception: Exception) {
         }
+    }
+
+    private fun shouldSimulateRoute(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+            .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 }

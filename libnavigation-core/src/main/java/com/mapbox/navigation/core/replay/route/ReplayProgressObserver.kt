@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.replay.route2
+package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteProgress
