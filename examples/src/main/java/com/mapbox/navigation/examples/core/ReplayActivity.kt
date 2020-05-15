@@ -23,8 +23,8 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.history.ReplayHistoryLocationEngine
-import com.mapbox.navigation.core.replay.history.ReplayHistoryPlayer
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -50,7 +50,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private val firstLocationCallback = FirstLocationCallback(this)
 
     private val replayRouteMapper = ReplayRouteMapper()
-    private val replayHistoryPlayer = ReplayHistoryPlayer()
+    private val mapboxReplayer = MapboxReplayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,7 +66,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             mapboxNavigationOptions,
-            locationEngine = ReplayHistoryLocationEngine(replayHistoryPlayer)
+            locationEngine = ReplayLocationEngine(mapboxReplayer)
         ).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
         }
@@ -117,8 +117,8 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.drawRoute(routes[0])
 
                 val replayEvents = replayRouteMapper.mapGeometry(routes[0].geometry()!!)
-                replayHistoryPlayer.pushEvents(replayEvents)
-                replayHistoryPlayer.seekTo(replayEvents.first())
+                mapboxReplayer.pushEvents(replayEvents)
+                mapboxReplayer.seekTo(replayEvents.first())
 
                 startNavigation.visibility = View.VISIBLE
             } else {
@@ -148,7 +148,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
-            replayHistoryPlayer.play()
+            mapboxReplayer.play()
         }
     }
 
@@ -176,7 +176,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        replayHistoryPlayer.finish()
+        mapboxReplayer.finish()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()

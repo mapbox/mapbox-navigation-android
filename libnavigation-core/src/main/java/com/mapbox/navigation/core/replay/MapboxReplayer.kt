@@ -1,12 +1,17 @@
-package com.mapbox.navigation.core.replay.history
+package com.mapbox.navigation.core.replay
 
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.navigation.core.replay.history.ReplayEventBase
+import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
+import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
+import com.mapbox.navigation.core.replay.history.ReplayEvents
+import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import java.util.Collections.singletonList
 
 /**
  * This class is similar to a music player. It will include controls like play, pause, seek.
  */
-class ReplayHistoryPlayer {
+class MapboxReplayer {
 
     private val replayEvents = ReplayEvents(mutableListOf())
     private val replayEventSimulator = ReplayEventSimulator(replayEvents)
@@ -19,7 +24,7 @@ class ReplayHistoryPlayer {
      *
      * @param events the events to be replayed.
      */
-    fun pushEvents(events: List<ReplayEventBase>): ReplayHistoryPlayer {
+    fun pushEvents(events: List<ReplayEventBase>): MapboxReplayer {
         this.replayEvents.events.addAll(events)
         return this
     }
