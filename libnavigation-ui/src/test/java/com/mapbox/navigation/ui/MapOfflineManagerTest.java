@@ -157,12 +157,12 @@ public class MapOfflineManagerTest {
 
   private RouteProgress buildMockRouteProgress(String routeSummary, Geometry routeBufferGeometry) {
     RouteProgress mockedRouteProgress = mock(RouteProgress.class);
-    when(mockedRouteProgress.routeGeometryWithBuffer()).thenReturn(routeBufferGeometry);
+    when(mockedRouteProgress.getRouteGeometryWithBuffer()).thenReturn(routeBufferGeometry);
     DirectionsRoute mockedRoute = mock(DirectionsRoute.class);
     RouteOptions mockedRouteOptions = mock(RouteOptions.class);
     when(mockedRouteOptions.requestUuid()).thenReturn(routeSummary);
     when(mockedRoute.routeOptions()).thenReturn(mockedRouteOptions);
-    when(mockedRouteProgress.route()).thenReturn(mockedRoute);
+    when(mockedRouteProgress.getRoute()).thenReturn(mockedRoute);
     return mockedRouteProgress;
   }
 

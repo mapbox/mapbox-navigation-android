@@ -111,12 +111,12 @@ class MapRouteArrow {
   }
 
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
-    boolean invalidUpcomingStepPoints = routeProgress.upcomingStepPoints() == null
-            || routeProgress.upcomingStepPoints().size() < TWO_POINTS;
-    boolean invalidCurrentStepPoints = routeProgress.currentLegProgress() == null
-            || routeProgress.currentLegProgress().currentStepProgress() == null
-            || routeProgress.currentLegProgress().currentStepProgress().stepPoints() == null
-            || routeProgress.currentLegProgress().currentStepProgress().stepPoints().size() < TWO_POINTS;
+    boolean invalidUpcomingStepPoints = routeProgress.getUpcomingStepPoints() == null
+            || routeProgress.getUpcomingStepPoints().size() < TWO_POINTS;
+    boolean invalidCurrentStepPoints = routeProgress.getCurrentLegProgress() == null
+            || routeProgress.getCurrentLegProgress().getCurrentStepProgress() == null
+            || routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStepPoints() == null
+            || routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStepPoints().size() < TWO_POINTS;
     if (invalidUpcomingStepPoints || invalidCurrentStepPoints) {
       updateVisibilityTo(false);
       return;
@@ -149,11 +149,11 @@ class MapRouteArrow {
 
   private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {
     List<Point> reversedCurrent =
-      new ArrayList<>(routeProgress.currentLegProgress().currentStepProgress().stepPoints());
+      new ArrayList<>(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStepPoints());
     Collections.reverse(reversedCurrent);
 
     LineString arrowLineCurrent = LineString.fromLngLats(reversedCurrent);
-    LineString arrowLineUpcoming = LineString.fromLngLats(routeProgress.upcomingStepPoints());
+    LineString arrowLineUpcoming = LineString.fromLngLats(routeProgress.getUpcomingStepPoints());
 
     LineString arrowCurrentSliced =
       TurfMisc.lineSliceAlong(arrowLineCurrent, 0, THIRTY, TurfConstants.UNIT_METERS);

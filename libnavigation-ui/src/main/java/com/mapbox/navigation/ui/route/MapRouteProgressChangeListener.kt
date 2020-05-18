@@ -57,7 +57,7 @@ internal class MapRouteProgressChangeListener(
     }
 
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
-        val currentRoute = routeProgress.route()
+        val currentRoute = routeProgress.route
         val hasGeometry = currentRoute?.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute!!)
@@ -65,8 +65,8 @@ internal class MapRouteProgressChangeListener(
             if (vanishRouteLineEnabled && hasGeometry && (job == null || !job!!.isActive)) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val totalDist =
-                        (routeProgress.distanceRemaining() + routeProgress.distanceTraveled())
-                    val dist = routeProgress.distanceTraveled() / totalDist
+                        (routeProgress.distanceRemaining + routeProgress.distanceTraveled)
+                    val dist = routeProgress.distanceTraveled / totalDist
                     if (dist > 0) {
                         val deferredExpression = async(Dispatchers.Default) {
                             routeLine.getExpressionAtOffset(dist)

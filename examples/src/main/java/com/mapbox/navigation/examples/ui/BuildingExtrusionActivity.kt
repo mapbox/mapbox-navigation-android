@@ -133,7 +133,7 @@ class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        routeProgress.distanceRemaining()
+        // todo
     }
 
     override fun onNavigationRunning() {

@@ -13,7 +13,7 @@ internal class VoiceInstructionEvent {
         updateCurrentAnnouncement(routeProgress)
 
     private fun updateCurrentAnnouncement(routeProgress: RouteProgress): Boolean =
-        ifNonNull(routeProgress.voiceInstructions()) {
+        ifNonNull(routeProgress.voiceInstructions) {
             voiceInstructions = it
             true
         } ?: false

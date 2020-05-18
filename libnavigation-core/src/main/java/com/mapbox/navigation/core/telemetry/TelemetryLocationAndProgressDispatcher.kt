@@ -215,7 +215,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
         val data = RouteProgressWithTimestamp(Time.SystemImpl.millis(), routeProgress)
         this.routeProgress.set(data)
         channelOnRouteProgress.offer(data)
-        if (routeProgress.currentState() == RouteProgressState.ROUTE_ARRIVED) {
+        if (routeProgress.currentState == RouteProgressState.ROUTE_ARRIVED) {
             routeProgressPredicate.set { progress -> afterArrival(progress) }
         }
     }
@@ -225,12 +225,12 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
      * It stores the route progress data without notifying listeners.
      */
     private fun afterArrival(routeProgress: RouteProgress) {
-        when (routeProgress.currentState()) {
+        when (routeProgress.currentState) {
             priorState -> {
             }
             else -> {
-                priorState = routeProgress.currentState() ?: priorState
-                Log.d(TAG, "route progress state = ${routeProgress.currentState()}")
+                priorState = routeProgress.currentState ?: priorState
+                Log.d(TAG, "route progress state = ${routeProgress.currentState}")
             }
         }
         val data = RouteProgressWithTimestamp(Time.SystemImpl.millis(), routeProgress)

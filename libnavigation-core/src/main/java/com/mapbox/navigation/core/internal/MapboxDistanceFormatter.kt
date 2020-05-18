@@ -35,7 +35,8 @@ class MapboxDistanceFormatter private constructor(
     private val context: Context,
     private val locale: Locale,
     @VoiceUnit.Type unitType: String,
-    @Rounding.Increment private val roundingIncrement: Int
+    @Rounding.Increment private val roundingIncrement: Int,
+    private val builder: Builder
 ) : DistanceFormatter {
 
     private val smallUnit = when (unitType) {
@@ -62,11 +63,15 @@ class MapboxDistanceFormatter private constructor(
         fun builder(context: Context): Builder = Builder(context)
     }
 
+    fun toBuilder() = builder
+
     /**
      * Builder of [MapboxDistanceFormatter]
      * @param context is application's [Context]
      */
-    class Builder(private val context: Context) {
+    class Builder(
+        private val context: Context
+    ) {
         private var unitType: String? = null
         private var locale: Locale? = null
         private var roundingIncrement = 0
@@ -82,7 +87,7 @@ class MapboxDistanceFormatter private constructor(
         /**
          * Minimal value that distance might be stripped
          *
-         * @see [RoundingIncrement]
+         * @see [Rounding.Increment]
          * @return Builder
          */
         fun withRoundingIncrement(@Rounding.Increment roundingIncrement: Int) =
@@ -111,7 +116,8 @@ class MapboxDistanceFormatter private constructor(
                 context.applicationContext,
                 localeToUse,
                 unitTypeToUse,
-                roundingIncrement)
+                roundingIncrement,
+                this)
         }
     }
 

@@ -15,7 +15,6 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
 /**
  * Defines navigation options
  *
- * @param roundingIncrement defines the increment displayed on the instruction view
  * @param timeFormatType defines time format for calculation remaining trip time
  * @param navigatorPredictionMillis defines approximate navigator prediction in milliseconds
  *
@@ -37,8 +36,8 @@ data class NavigationOptions(
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
-    val isFromNavigationUi: Boolean = false,
-    val isDebugLoggingEnabled: Boolean = false,
+    val isFromNavigationUi: Boolean,
+    val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
     val builder: Builder
 ) {

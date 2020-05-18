@@ -241,7 +241,7 @@ public class NavigationCamera {
   public void showRouteOverview(int[] padding) {
     updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
     RouteInformation routeInformation =
-      new RouteInformation(currentRouteProgress.route(), null, null);
+      new RouteInformation(currentRouteProgress.getRoute(), null, null);
     animateCameraForRouteOverview(routeInformation, padding);
   }
 

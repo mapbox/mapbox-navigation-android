@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui;
 
-import com.mapbox.navigation.ui.OfflineMetadataProvider;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

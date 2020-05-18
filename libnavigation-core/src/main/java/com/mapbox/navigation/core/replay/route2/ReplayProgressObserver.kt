@@ -37,7 +37,7 @@ class ReplayProgressObserver(
      * @param routeProgress from the navigation session
      */
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        val routeProgressRouteLeg = routeProgress.currentLegProgress()?.routeLeg()
+        val routeProgressRouteLeg = routeProgress.currentLegProgress?.routeLeg
         if (routeProgressRouteLeg != currentRouteLeg) {
             this.currentRouteLeg = routeProgressRouteLeg
             onRouteLegChanged(routeProgressRouteLeg)

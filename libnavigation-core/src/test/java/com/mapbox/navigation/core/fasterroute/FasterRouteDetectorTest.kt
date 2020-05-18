@@ -17,7 +17,7 @@ class FasterRouteDetectorTest {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 402.6
         val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining() } returns 797.447
+        every { routeProgress.durationRemaining } returns 797.447
 
         val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
@@ -29,7 +29,7 @@ class FasterRouteDetectorTest {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 512.2
         val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining() } returns 450.501
+        every { routeProgress.durationRemaining } returns 450.501
 
         val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
@@ -41,7 +41,7 @@ class FasterRouteDetectorTest {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns null
         val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining() } returns 727.228
+        every { routeProgress.durationRemaining } returns 727.228
 
         val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
@@ -53,7 +53,7 @@ class FasterRouteDetectorTest {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 634.7
         val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining() } returns 695.811
+        every { routeProgress.durationRemaining } returns 695.811
 
         val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 

@@ -45,10 +45,10 @@ class MapOfflineManager implements RouteProgressObserver {
 
   @Override
   public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-    Geometry currentRouteGeometry = routeProgress.routeGeometryWithBuffer();
+    Geometry currentRouteGeometry = routeProgress.getRouteGeometryWithBuffer();
     if (previousRouteGeometry == null || !previousRouteGeometry.equals(currentRouteGeometry)) {
       previousRouteGeometry = currentRouteGeometry;
-      String routeSummary = routeProgress.route().routeOptions().requestUuid();
+      String routeSummary = routeProgress.getRoute().routeOptions().requestUuid();
       download(routeSummary, previousRouteGeometry, regionDownloadCallback);
     }
   }

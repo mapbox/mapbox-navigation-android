@@ -44,7 +44,7 @@ public class DynamicCamera extends SimpleCamera {
 
     RouteProgress progress = routeInformation.getRouteProgress();
     if (progress != null) {
-      double distanceRemaining = progress.currentLegProgress().currentStepProgress().distanceRemaining();
+      double distanceRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDistanceRemaining();
       return createTilt(distanceRemaining);
     }
     return super.tilt(routeInformation);
@@ -111,7 +111,7 @@ public class DynamicCamera extends SimpleCamera {
       return DEFAULT_ZOOM;
     }
     boolean routeProgressIsUncertain = routeInformation.getRouteProgress() != null
-            && routeInformation.getRouteProgress().currentState() == RouteProgressState.ROUTE_UNCERTAIN;
+            && routeInformation.getRouteProgress().getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
 
     if (routeProgressIsUncertain) {
       return DEFAULT_ZOOM;
@@ -134,7 +134,7 @@ public class DynamicCamera extends SimpleCamera {
    * @return camera position that encompasses both locations
    */
   private CameraPosition createCameraPosition(Location location, RouteProgress routeProgress) {
-    LegStep upComingStep = routeProgress.currentLegProgress().upcomingStep();
+    LegStep upComingStep = routeProgress.getCurrentLegProgress().getUpcomingStep();
     if (upComingStep != null) {
       Point stepManeuverPoint = upComingStep.maneuver().location();
 
@@ -174,8 +174,8 @@ public class DynamicCamera extends SimpleCamera {
    */
   private boolean isNewStep(RouteProgress routeProgress) {
     boolean isNewStep = currentStep == null
-      || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
-    currentStep = routeProgress.currentLegProgress().currentStepProgress().step();
+      || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
+    currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
     resetAlertLevels(isNewStep);
     return isNewStep;
   }
@@ -199,13 +199,13 @@ public class DynamicCamera extends SimpleCamera {
       || isLowAlert(progress)
       || isMediumAlert(progress)
       || isHighAlert(progress)
-      || progress.currentState() == RouteProgressState.ROUTE_UNCERTAIN;
+      || progress.getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
   }
 
   private boolean isLowAlert(RouteProgress progress) {
     if (!hasPassedLowAlertLevel) {
-      double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
       boolean isLowAlert = durationRemaining < NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_LOW_ALERT_DURATION;
       if (hasValidStepDuration && isLowAlert) {
@@ -218,8 +218,8 @@ public class DynamicCamera extends SimpleCamera {
 
   private boolean isMediumAlert(RouteProgress progress) {
     if (!hasPassedMediumAlertLevel) {
-      double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
       boolean isMediumAlert = durationRemaining < NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_MEDIUM_ALERT_DURATION;
       if (hasValidStepDuration && isMediumAlert) {
@@ -232,8 +232,8 @@ public class DynamicCamera extends SimpleCamera {
 
   private boolean isHighAlert(RouteProgress progress) {
     if (!hasPassedHighAlertLevel) {
-      double durationRemaining = progress.currentLegProgress().currentStepProgress().durationRemaining();
-      double stepDuration = progress.currentLegProgress().currentStepProgress().step().duration();
+      double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
+      double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
       boolean isHighAlert = durationRemaining < NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
       boolean hasValidStepDuration = stepDuration > NavigationConstants.NAVIGATION_HIGH_ALERT_DURATION;
       if (hasValidStepDuration && isHighAlert) {

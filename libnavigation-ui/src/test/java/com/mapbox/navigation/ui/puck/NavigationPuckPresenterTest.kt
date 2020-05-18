@@ -32,7 +32,7 @@ class NavigationPuckPresenterTest {
         val drawableSlot = slot<Int>()
         every { mapboxMap.locationComponent } returns locationComponent
         every { locationComponent.locationComponentOptions } returns locationComponentOptions
-        every { routeProgress.currentState() } returns RouteProgressState.LOCATION_TRACKING
+        every { routeProgress.currentState } returns RouteProgressState.LOCATION_TRACKING
         every { locationComponentOptions.gpsDrawable() } returns 0
         every { locationComponentOptions.toBuilder() } returns builder
         every { builder.gpsDrawable(capture(drawableSlot)) } returns builder
