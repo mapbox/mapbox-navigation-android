@@ -13,26 +13,24 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.core.internal.replay.route.ReplayLocationConverter
 import java.util.ArrayList
 
 /**
  * Mock [LocationEngine] for replaying route movement through [DirectionsRoute]
  *
- * @param logger [Logger](optional)
- * @param converter ReplayLocationConverter
+ * @param logger [Logger] (optional)
  */
 class ReplayRouteLocationEngine @JvmOverloads constructor(
-    val logger: Logger? = null,
-    private val converter: ReplayLocationConverter = ReplayRouteLocationConverter(
-        DEFAULT_SPEED,
-        DEFAULT_DELAY
-    )
+    val logger: Logger? = null
 ) : LocationEngine, Runnable {
 
     private var speed = DEFAULT_SPEED
     private var delay = DEFAULT_DELAY
     private val handler: Handler = Handler()
+    private val converter: ReplayLocationConverter = ReplayRouteLocationConverter(
+        DEFAULT_SPEED,
+        DEFAULT_DELAY
+    )
     private lateinit var mockedLocations: MutableList<Location>
     private lateinit var dispatcher: ReplayLocationDispatcher
     private lateinit var replayLocationListener: ReplayRouteLocationListener
