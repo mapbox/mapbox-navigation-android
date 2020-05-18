@@ -58,6 +58,15 @@ class ReplayRouteDriverTest {
     }
 
     @Test
+    fun `should not crash for smallest trip`() {
+        val geometry = """ooq_gAbehmhFO@"""
+
+        val locations = replayRouteDriver.driveGeometry(defaultOptions, geometry)
+
+        assertEquals(2, locations.size)
+    }
+
+    @Test
     fun `should travel along the route at each step`() {
         val geometry = """inq_gAxdhmhF}vBlJe@?qC^mDLmcAfE]LqCNNpGF\`Bnr@pBp{@rBp{@bA|_@"""
 
