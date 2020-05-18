@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.replay.route
+package com.mapbox.navigation.core.replay.route
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -9,7 +9,7 @@ import com.mapbox.geojson.Point
  * The [ReplayLocationConverter] interface is for the [ReplayRouteLocationEngine] to interpolate
  * speed and time on the route.
  */
-interface ReplayLocationConverter {
+internal interface ReplayLocationConverter {
 
     /**
      * *true* if route has more than one leg, *false* otherwise
