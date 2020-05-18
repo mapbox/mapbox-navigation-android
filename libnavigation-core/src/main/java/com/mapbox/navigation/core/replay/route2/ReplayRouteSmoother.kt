@@ -65,7 +65,7 @@ internal class ReplayRouteSmoother {
      */
     private fun smoothRouteIndices(points: List<Point>, thresholdMeters: Double): List<Int> {
         val smoothedRouteIndices = mutableListOf<Int>()
-        if (points.size <= 3) return List(3) { it }
+        if (points.size <= 3) return List(points.size) { it }
 
         smoothedRouteIndices.add(0)
         var sumDistance = 0.0
