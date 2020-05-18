@@ -4,7 +4,6 @@ import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.core.internal.replay.route.ReplayLocationConverter
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 
