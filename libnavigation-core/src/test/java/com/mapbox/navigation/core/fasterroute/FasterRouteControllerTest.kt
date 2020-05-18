@@ -121,7 +121,7 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every { tripSession.getRouteProgress() } returns mockk {
-            every { durationRemaining() } returns 601.334
+            every { durationRemaining } returns 601.334
         }
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
 
@@ -151,7 +151,7 @@ class FasterRouteControllerTest {
             every { longitude } returns 151.206087
         }
         every { tripSession.getRouteProgress() } returns mockk {
-            every { durationRemaining() } returns 751.334
+            every { durationRemaining } returns 751.334
         }
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
 

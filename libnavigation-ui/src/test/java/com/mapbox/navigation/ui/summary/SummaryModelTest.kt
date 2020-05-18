@@ -71,9 +71,8 @@ class SummaryModelTest : BaseTest() {
             .build()
         val time = Calendar.getInstance()
         val legDurationRemaining: Double = routeProgress!!
-            .currentLegProgress()!!
-            .durationRemaining()
-            .toDouble()
+            .currentLegProgress!!
+            .durationRemaining
         val expectedResult =
             formatTime(
                 time,

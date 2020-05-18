@@ -202,8 +202,7 @@ public class DynamicCameraTest extends BaseTest {
 
   @Nullable
   private List<Point> buildRouteCoordinatesFrom(RouteProgress routeProgress) {
-    DirectionsRoute route = routeProgress.route();
-    return generateRouteCoordinates(route);
+    return generateRouteCoordinates(routeProgress.getRoute());
   }
 
   @NonNull

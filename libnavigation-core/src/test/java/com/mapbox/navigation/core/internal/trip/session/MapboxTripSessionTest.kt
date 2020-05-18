@@ -106,8 +106,8 @@ class MapboxTripSessionTest {
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false
-        every { routeProgress.bannerInstructions() } returns null
-        every { routeProgress.voiceInstructions() } returns null
+        every { routeProgress.bannerInstructions } returns null
+        every { routeProgress.voiceInstructions } returns null
 
         every {
             locationEngine.requestLocationUpdates(
@@ -471,8 +471,8 @@ class MapboxTripSessionTest {
 
     @Test
     fun unregisterAllLocationObservers() = coroutineRule.runBlockingTest {
-        every { routeProgress.bannerInstructions() } returns null
-        every { routeProgress.voiceInstructions() } returns null
+        every { routeProgress.bannerInstructions } returns null
+        every { routeProgress.voiceInstructions } returns null
 
         tripSession.start()
         val observer: LocationObserver = mockk(relaxUnitFun = true)
@@ -554,8 +554,8 @@ class MapboxTripSessionTest {
         val bannerInstructionsObserver: BannerInstructionsObserver = mockk(relaxUnitFun = true)
         val bannerInstructions: BannerInstructions = mockk()
 
-        every { routeProgress.bannerInstructions() } returns bannerInstructions
-        every { routeProgress.voiceInstructions() } returns null
+        every { routeProgress.bannerInstructions } returns bannerInstructions
+        every { routeProgress.voiceInstructions } returns null
         every { tripStatus.offRoute } returns true
 
         tripSession = MapboxTripSession(
@@ -588,8 +588,8 @@ class MapboxTripSessionTest {
     fun unregisterAllVoiceInstructionsObservers() = coroutineRule.runBlockingTest {
         val voiceInstructionsObserver: VoiceInstructionsObserver = mockk(relaxUnitFun = true)
         val voiceInstructions: VoiceInstructions = mockk()
-        every { routeProgress.bannerInstructions() } returns null
-        every { routeProgress.voiceInstructions() } returns voiceInstructions
+        every { routeProgress.bannerInstructions } returns null
+        every { routeProgress.voiceInstructions } returns voiceInstructions
         every { tripStatus.offRoute } returns true
 
         tripSession = MapboxTripSession(

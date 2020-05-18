@@ -564,10 +564,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         while (coroutineContext.isActive && continueRunning) {
             try {
                 val routeData = callbackDispatcher.getRouteProgressChannel().receive()
-                dynamicValues.distanceCompleted.set(dynamicValues.distanceCompleted.get() + routeData.routeProgress.distanceTraveled())
-                dynamicValues.distanceRemaining.set(routeData.routeProgress.distanceRemaining().toLong())
-                dynamicValues.durationRemaining.set(routeData.routeProgress.durationRemaining().toInt())
-                when (routeData.routeProgress.currentState()) {
+                dynamicValues.distanceCompleted.set(dynamicValues.distanceCompleted.get() + routeData.routeProgress.distanceTraveled)
+                dynamicValues.distanceRemaining.set(routeData.routeProgress.distanceRemaining.toLong())
+                dynamicValues.durationRemaining.set(routeData.routeProgress.durationRemaining.toInt())
+                when (routeData.routeProgress.currentState) {
                     RouteProgressState.ROUTE_ARRIVED -> {
                         when (dynamicValues.sessionStarted.get()) {
                             true -> {
@@ -581,8 +581,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         }
                     } // END
                     RouteProgressState.LOCATION_TRACKING -> {
-                        dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining().toInt())
-                        dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining().toLong())
+                        dynamicValues.timeRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.durationRemaining.toInt())
+                        dynamicValues.distanceRemaining.set(callbackDispatcher.getRouteProgress().routeProgress.distanceRemaining.toLong())
                         when (trackingEvent > 20) {
                             true -> {
                                 Log.i(TAG, "LOCATION_TRACKING received $trackingEvent")
@@ -644,13 +644,13 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             eventLocation = newLocation ?: callbackDispatcher.getLastLocation() ?: Location("unknown")
 
             eventDate = Date()
-            eventRouteDistanceCompleted = callbackDispatcher.getRouteProgress().routeProgress.distanceTraveled().toDouble()
+            eventRouteDistanceCompleted = callbackDispatcher.getRouteProgress().routeProgress.distanceTraveled.toDouble()
             originalDirectionRoute = callbackDispatcher.getOriginalRouteReadOnly()?.route
-            currentDirectionRoute = callbackDispatcher.getRouteProgress().routeProgress.route()
+            currentDirectionRoute = callbackDispatcher.getRouteProgress().routeProgress.route
             sessionIdentifier = dynamicValues.sessionId
             tripIdentifier = dynamicValues.tripIdentifier.get()
             originalRequestIdentifier = callbackDispatcher.getOriginalRouteReadOnly()?.route?.routeOptions()?.requestUuid()
-            requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route()?.routeOptions()?.requestUuid()
+            requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.requestUuid()
             mockLocation = locationEngineName == MOCK_PROVIDER
             rerouteCount = dynamicValues.rerouteCount.get()
             startTimestamp = dynamicValues.sessionStartTime
@@ -662,15 +662,15 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     private fun populateNavigationEvent(navigationEvent: NavigationEvent, route: DirectionsRoute? = null, newLocation: Location? = null) {
-        val directionsRoute = route ?: callbackDispatcher.getRouteProgress().routeProgress.route()
+        val directionsRoute = route ?: callbackDispatcher.getRouteProgress().routeProgress.route
         val location = newLocation ?: callbackDispatcher.getLastLocation()
         navigationEvent.startTimestamp = TelemetryUtils.generateCreateDateFormatted(dynamicValues.sessionStartTime)
         navigationEvent.sdkIdentifier = generateSdkIdentifier()
         navigationEvent.sessionIdentifier = dynamicValues.sessionId
-        navigationEvent.geometry = callbackDispatcher.getRouteProgress().routeProgress.route()?.geometry()
-        navigationEvent.profile = callbackDispatcher.getRouteProgress().routeProgress.route()?.routeOptions()?.profile()
+        navigationEvent.geometry = callbackDispatcher.getRouteProgress().routeProgress.route?.geometry()
+        navigationEvent.profile = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.profile()
         navigationEvent.originalRequestIdentifier = callbackDispatcher.getOriginalRouteReadOnly()?.route?.routeOptions()?.requestUuid()
-        navigationEvent.requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route()?.routeOptions()?.requestUuid()
+        navigationEvent.requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.requestUuid()
         navigationEvent.originalGeometry = callbackDispatcher.getOriginalRouteReadOnly()?.route?.geometry()
         navigationEvent.locationEngine = locationEngineNameExternal
         navigationEvent.tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
@@ -689,11 +689,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         navigationEvent.rerouteCount = dynamicValues.rerouteCount.get()
         navigationEvent.originalEstimatedDistance = callbackDispatcher.getOriginalRouteReadOnly()?.route?.distance()?.toInt() ?: 0
         navigationEvent.originalEstimatedDuration = callbackDispatcher.getOriginalRouteReadOnly()?.route?.duration()?.toInt() ?: 0
-        navigationEvent.stepCount = obtainStepCount(callbackDispatcher.getRouteProgress().routeProgress.route())
+        navigationEvent.stepCount = obtainStepCount(callbackDispatcher.getRouteProgress().routeProgress.route)
         navigationEvent.originalStepCount = obtainStepCount(callbackDispatcher.getOriginalRouteReadOnly()?.route)
-        navigationEvent.legIndex = callbackDispatcher.getRouteProgress().routeProgress.route()?.routeIndex()?.toInt() ?: 0
-        navigationEvent.legCount = callbackDispatcher.getRouteProgress().routeProgress.route()?.legs()?.size ?: 0
-        navigationEvent.stepIndex = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress()?.currentStepProgress()?.stepIndex() ?: 0
+        navigationEvent.legIndex = callbackDispatcher.getRouteProgress().routeProgress.route?.routeIndex()?.toInt() ?: 0
+        navigationEvent.legCount = callbackDispatcher.getRouteProgress().routeProgress.route?.legs()?.size ?: 0
+        navigationEvent.stepIndex = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress?.currentStepProgress?.stepIndex ?: 0
 
         // TODO:OZ voiceIndex is not available in SDK 1.0 and was not set in the legacy telemetry        navigationEvent.voiceIndex
         // TODO:OZ bannerIndex is not available in SDK 1.0 and was not set in the legacy telemetry        navigationEvent.bannerIndex

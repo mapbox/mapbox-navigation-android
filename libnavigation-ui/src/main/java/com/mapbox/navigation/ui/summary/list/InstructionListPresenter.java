@@ -114,10 +114,10 @@ class InstructionListPresenter {
   private void addBannerInstructions(RouteProgress routeProgress) {
     if (isNewLeg(routeProgress)) {
       instructions = new ArrayList<>();
-      currentLeg = routeProgress.currentLegProgress().routeLeg();
-      if (routeProgress.currentLegProgress().currentStepProgress() != null
-          && routeProgress.currentLegProgress().currentStepProgress().step() != null) {
-        drivingSide = routeProgress.currentLegProgress().currentStepProgress().step().drivingSide();
+      currentLeg = routeProgress.getCurrentLegProgress().getRouteLeg();
+      if (routeProgress.getCurrentLegProgress().getCurrentStepProgress() != null
+          && routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep() != null) {
+        drivingSide = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep().drivingSide();
       }
       if (currentLeg != null) {
         List<LegStep> steps = currentLeg.steps();
@@ -132,16 +132,16 @@ class InstructionListPresenter {
   }
 
   private boolean isNewLeg(RouteProgress routeProgress) {
-    return currentLeg == null || !currentLeg.equals(routeProgress.currentLegProgress());
+    return currentLeg == null || !currentLeg.equals(routeProgress.getCurrentLegProgress());
   }
 
   private boolean updateInstructionList(RouteProgress routeProgress) {
     if (instructions.isEmpty()) {
       return false;
     }
-    RouteLegProgress legProgress = routeProgress.currentLegProgress();
-    LegStep currentStep = legProgress.currentStepProgress().step();
-    double stepDistanceRemaining = legProgress.currentStepProgress().distanceRemaining();
+    RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
+    LegStep currentStep = legProgress.getCurrentStepProgress().getStep();
+    double stepDistanceRemaining = legProgress.getCurrentStepProgress().getDistanceRemaining();
     BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
         currentStep, stepDistanceRemaining
     );

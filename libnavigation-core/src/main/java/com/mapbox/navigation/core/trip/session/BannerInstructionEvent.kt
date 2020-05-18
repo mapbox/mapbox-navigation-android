@@ -12,7 +12,7 @@ internal class BannerInstructionEvent {
     fun isOccurring(routeProgress: RouteProgress): Boolean = updateCurrentBanner(routeProgress)
 
     private fun updateCurrentBanner(routeProgress: RouteProgress): Boolean =
-        ifNonNull(routeProgress.bannerInstructions()) {
+        ifNonNull(routeProgress.bannerInstructions) {
             bannerInstructions = it
             true
         } ?: false

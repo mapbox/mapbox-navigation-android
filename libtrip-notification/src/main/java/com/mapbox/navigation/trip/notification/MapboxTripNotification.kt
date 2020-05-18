@@ -293,16 +293,16 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateNotificationViews(routeProgress: RouteProgress) {
-        routeProgress.route()?.let {
-            updateInstructionText(routeProgress.bannerInstructions())
+        routeProgress.route?.let {
+            updateInstructionText(routeProgress.bannerInstructions)
             updateDistanceText(routeProgress)
             generateArrivalTime(routeProgress)?.let { formattedTime ->
                 updateViewsWithArrival(formattedTime)
             }
-            routeProgress.bannerInstructions()?.let { bannerInstructions ->
+            routeProgress.bannerInstructions?.let { bannerInstructions ->
                 if (isManeuverStateChanged(bannerInstructions)) {
                     updateManeuverImage(
-                        routeProgress.currentLegProgress()?.currentStepProgress()?.step()?.drivingSide()
+                        routeProgress.currentLegProgress?.currentStepProgress?.step?.drivingSide()
                             ?: ManeuverModifier.RIGHT
                     )
                 }
@@ -394,9 +394,9 @@ class MapboxTripNotification constructor(
         if (currentDistanceText == null || newDistanceText(routeProgress)) {
             currentDistanceText = ifNonNull(
                 distanceFormatter,
-                routeProgress.currentLegProgress()
+                routeProgress.currentLegProgress
             ) { distanceFormatter, routeLegProgress ->
-                routeLegProgress.currentStepProgress()?.distanceRemaining()?.let {
+                routeLegProgress.currentStepProgress?.distanceRemaining?.let {
                     distanceFormatter.formatDistance(it.toDouble())
                 }
             }
@@ -415,8 +415,8 @@ class MapboxTripNotification constructor(
         routeProgress: RouteProgress,
         time: Calendar = Calendar.getInstance()
     ): String? =
-        ifNonNull(routeProgress.currentLegProgress()) { currentLegProgress ->
-            val legDurationRemaining = currentLegProgress.durationRemaining()
+        ifNonNull(routeProgress.currentLegProgress) { currentLegProgress ->
+            val legDurationRemaining = currentLegProgress.durationRemaining
             val timeFormatType = navigationOptions.timeFormatType
             val arrivalTime = formatTime(
                 time,
@@ -443,10 +443,10 @@ class MapboxTripNotification constructor(
     private fun newDistanceText(routeProgress: RouteProgress) =
         ifNonNull(
             distanceFormatter,
-            routeProgress.currentLegProgress(),
+            routeProgress.currentLegProgress,
             currentDistanceText
         ) { distanceFormatter, currentLegProgress, currentDistanceText ->
-            val item = currentLegProgress.currentStepProgress()?.distanceRemaining()
+            val item = currentLegProgress.currentStepProgress?.distanceRemaining
             // The call below can return an empty spannable string. toString() will cause a NPE and ?. will not catch it.
             val str = item?.let {
                 distanceFormatter.formatDistance(it.toDouble())

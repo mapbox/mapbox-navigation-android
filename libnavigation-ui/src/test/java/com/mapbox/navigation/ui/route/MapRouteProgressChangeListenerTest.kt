@@ -44,7 +44,7 @@ class MapRouteProgressChangeListenerTest {
             every { geometry() } returns null
         }
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns newRoute
+            every { route } returns newRoute
         }
         every { routeLine.getPrimaryRoute() } returns newRoute
 
@@ -59,7 +59,7 @@ class MapRouteProgressChangeListenerTest {
     fun `should not draw route without directions route`() {
         every { routeLine.getPrimaryRoute() } returns null
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns null
+            every { route } returns null
         }
 
         progressChangeListener.updateVisibility(true)
@@ -77,7 +77,7 @@ class MapRouteProgressChangeListenerTest {
             }
         )
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns mockk {
+            every { route } returns mockk {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
             }
         }
@@ -102,7 +102,7 @@ class MapRouteProgressChangeListenerTest {
         every { routeLine.getPrimaryRoute() } returns routes[0]
         every { routeLine.retrieveDirectionsRoutes() } returns routes
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns mockk {
+            every { route } returns mockk {
                 every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
             }
         }
@@ -120,7 +120,7 @@ class MapRouteProgressChangeListenerTest {
             }
         )
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns mockk {
+            every { route } returns mockk {
                 every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
             }
         }
@@ -142,7 +142,7 @@ class MapRouteProgressChangeListenerTest {
             }
         )
         val routeProgress: RouteProgress = mockk {
-            every { route() } returns mockk {
+            every { route } returns mockk {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
                 every { distance() } returns 100.0
             }

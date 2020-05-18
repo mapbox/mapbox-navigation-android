@@ -29,10 +29,10 @@ internal class ArrivalProgressObserver(
 
     fun navigateNextRouteLeg(): Boolean {
         val routeProgress = tripSession.getRouteProgress()
-        val numberOfLegs = routeProgress?.route()?.legs()?.size
+        val numberOfLegs = routeProgress?.route?.legs()?.size
             ?: return false
-        val legProgress = routeProgress.currentLegProgress()
-        val legIndex = legProgress?.legIndex()
+        val legProgress = routeProgress.currentLegProgress
+        val legIndex = legProgress?.legIndex
             ?: return false
         val nextLegIndex = legIndex + 1
         val nextLegStarted = if (nextLegIndex < numberOfLegs) {
@@ -48,34 +48,34 @@ internal class ArrivalProgressObserver(
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        val routeLegProgress = routeProgress.currentLegProgress()
+        val routeLegProgress = routeProgress.currentLegProgress
             ?: return
 
         val arrivalOptions = arrivalController.arrivalOptions()
-        if (routeProgress.currentState() == RouteProgressState.ROUTE_ARRIVED && !hasMoreLegs(routeProgress)) {
+        if (routeProgress.currentState == RouteProgressState.ROUTE_ARRIVED && !hasMoreLegs(routeProgress)) {
             doOnFinalDestinationArrival(routeProgress)
         } else if (arrivalOptions.arrivalInSeconds != null) {
             checkWaypointArrivalTime(arrivalOptions.arrivalInSeconds, routeLegProgress)
         } else if (arrivalOptions.arrivalInMeters != null) {
             checkWaypointArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
         }
-        finalDestinationArrived = (routeProgress.currentState() ?: RouteProgressState.ROUTE_UNCERTAIN) == RouteProgressState.ROUTE_ARRIVED
+        finalDestinationArrived = (routeProgress.currentState ?: RouteProgressState.ROUTE_UNCERTAIN) == RouteProgressState.ROUTE_ARRIVED
     }
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
-        val currentLegIndex = routeProgress.currentLegProgress()?.legIndex()
-        val lastLegIndex = routeProgress.route()?.legs()?.lastIndex
+        val currentLegIndex = routeProgress.currentLegProgress?.legIndex
+        val lastLegIndex = routeProgress.route?.legs()?.lastIndex
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
     private fun checkWaypointArrivalTime(arrivalInSeconds: Double, routeLegProgress: RouteLegProgress) {
-        if (routeLegProgress.durationRemaining() <= arrivalInSeconds) {
+        if (routeLegProgress.durationRemaining <= arrivalInSeconds) {
             doOnWaypointArrival(routeLegProgress)
         }
     }
 
     private fun checkWaypointArrivalDistance(arrivalInMeters: Double, routeLegProgress: RouteLegProgress) {
-        if (routeLegProgress.distanceRemaining() <= arrivalInMeters) {
+        if (routeLegProgress.distanceRemaining <= arrivalInMeters) {
             doOnWaypointArrival(routeLegProgress)
         }
     }

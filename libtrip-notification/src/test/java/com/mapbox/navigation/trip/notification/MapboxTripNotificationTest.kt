@@ -330,7 +330,7 @@ class MapboxTripNotificationTest {
     @Test
     fun whenFreeDrive() {
         val routeProgress = mockk<RouteProgress>(relaxed = true)
-        every { routeProgress.route() } returns null
+        every { routeProgress.route } returns null
         mockUpdateNotificationAndroidInteractions()
 
         notification.onTripSessionStarted()
@@ -362,7 +362,7 @@ class MapboxTripNotificationTest {
     ): BannerText {
         val bannerText = mockk<BannerText>()
         val bannerInstructions = mockk<BannerInstructions>()
-        every { routeProgress.bannerInstructions() } returns bannerInstructions
+        every { routeProgress.bannerInstructions } returns bannerInstructions
         every { bannerInstructions.primary() } returns bannerText
         every { bannerText.text() } answers { primaryText() }
         every { bannerText.type() } answers { primaryType() }
@@ -377,9 +377,9 @@ class MapboxTripNotificationTest {
         duration: Double
     ): RouteLegProgress {
         val currentLegProgress = mockk<RouteLegProgress>(relaxed = true)
-        every { routeProgress.currentLegProgress() } returns currentLegProgress
-        every { currentLegProgress.currentStepProgress()?.distanceRemaining() } returns distance
-        every { currentLegProgress.durationRemaining() } returns duration
+        every { routeProgress.currentLegProgress } returns currentLegProgress
+        every { currentLegProgress.currentStepProgress?.distanceRemaining } returns distance
+        every { currentLegProgress.durationRemaining } returns duration
         return currentLegProgress
     }
 

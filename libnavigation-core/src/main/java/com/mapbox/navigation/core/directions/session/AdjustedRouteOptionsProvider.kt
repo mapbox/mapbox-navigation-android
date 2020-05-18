@@ -16,7 +16,7 @@ internal object AdjustedRouteOptionsProvider {
 
         val optionsBuilder = routeOptions.toBuilder()
         val coordinates = routeOptions.coordinates()
-        routeProgress.currentLegProgress()?.legIndex()?.let { index ->
+        routeProgress.currentLegProgress?.legIndex?.let { index ->
             optionsBuilder
                 .coordinates(
                     coordinates.drop(index + 1).toMutableList().apply {

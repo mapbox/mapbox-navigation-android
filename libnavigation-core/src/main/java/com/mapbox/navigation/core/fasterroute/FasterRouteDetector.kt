@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 internal class FasterRouteDetector {
     fun isRouteFaster(newRoute: DirectionsRoute, routeProgress: RouteProgress): Boolean {
         val newRouteDuration = newRoute.duration() ?: return false
-        val weightedDuration = routeProgress.durationRemaining() * PERCENTAGE_THRESHOLD
+        val weightedDuration = routeProgress.durationRemaining * PERCENTAGE_THRESHOLD
         return newRouteDuration < weightedDuration
     }
 

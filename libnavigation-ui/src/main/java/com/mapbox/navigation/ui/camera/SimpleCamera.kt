@@ -46,7 +46,7 @@ open class SimpleCamera : Camera() {
         ifNonNull(routeInformation.route) { route ->
             setupLineStringAndBearing(route)
         }
-            ?: ifNonNull(routeInformation.routeProgress?.route()) { directionsRoute ->
+            ?: ifNonNull(routeInformation.routeProgress?.route) { directionsRoute ->
                 setupLineStringAndBearing(directionsRoute)
             }
     }

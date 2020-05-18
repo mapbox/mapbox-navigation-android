@@ -32,6 +32,6 @@ class MapWayNameChangeObserver implements RouteProgressObserver, LocationObserve
 
   @Override
   public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
-    mapWayName.updateProgress(routeProgress.currentLegProgress().currentStepProgress().stepPoints());
+    mapWayName.updateProgress(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStepPoints());
   }
 }

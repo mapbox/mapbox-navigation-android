@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteStepProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
@@ -99,7 +100,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
 
   private int determineMaxFpsFrom(RouteProgress routeProgress, Context context) {
     final boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
-    RouteLegProgress routeLegProgress = routeProgress.currentLegProgress();
+    RouteLegProgress routeLegProgress = routeProgress.getCurrentLegProgress();
 
     if (isPluggedIn) {
       return LOW_POWER_MAX_FPS;
@@ -111,9 +112,9 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
   }
 
   private boolean validLowFpsManeuver(RouteLegProgress routeLegProgress) {
-    if (routeLegProgress.currentStepProgress() != null
-        && routeLegProgress.currentStepProgress().step() != null) {
-      final String maneuverModifier = routeLegProgress.currentStepProgress().step().maneuver().modifier();
+    if (routeLegProgress.getCurrentStepProgress() != null
+        && routeLegProgress.getCurrentStepProgress().getStep() != null) {
+      final String maneuverModifier = routeLegProgress.getCurrentStepProgress().getStep().maneuver().modifier();
       return maneuverModifier != null
           && (maneuverModifier.equals(ManeuverModifier.STRAIGHT)
           || maneuverModifier.equals(ManeuverModifier.SLIGHT_LEFT)
@@ -123,9 +124,10 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
   }
 
   private boolean validLowFpsDuration(RouteLegProgress routeLegProgress) {
-    if (routeLegProgress.currentStepProgress() != null && routeLegProgress.currentStepProgress().step() != null) {
-      final double expectedStepDuration = routeLegProgress.currentStepProgress().step().duration();
-      final double durationUntilNextManeuver = routeLegProgress.currentStepProgress().durationRemaining();
+    RouteStepProgress currentStepProgress = routeLegProgress.getCurrentStepProgress();
+    if (currentStepProgress != null && currentStepProgress.getStep() != null) {
+      final double expectedStepDuration = routeLegProgress.getCurrentStepProgress().getStep().duration();
+      final double durationUntilNextManeuver = routeLegProgress.getCurrentStepProgress().getDurationRemaining();
       final double durationSincePreviousManeuver = expectedStepDuration - durationUntilNextManeuver;
       return durationUntilNextManeuver > VALID_DURATION_IN_SECONDS_UNTIL_NEXT_MANEUVER
           && durationSincePreviousManeuver > VALID_DURATION_IN_SECONDS_SINCE_PREVIOUS_MANEUVER;

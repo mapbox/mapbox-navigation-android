@@ -265,7 +265,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             Timber.d("route progress %s", routeProgress.toString())
-            if (routeProgress.route() != null) {
+            if (routeProgress.route != null) {
                 navigationMapboxMap.onNewRouteProgress(routeProgress)
             }
         }

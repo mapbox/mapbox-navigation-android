@@ -23,10 +23,10 @@ public class SummaryModel {
 
   public SummaryModel(final Context context, final DistanceFormatter distanceFormatter, final RouteProgress progress,
                       final @TimeFormat.Type int timeFormatType) {
-    final Locale locale = progress.route() == null ? null :
-      LocaleEx.getLocaleDirectionsRoute(progress.route(), context);
-    distanceRemaining = distanceFormatter.formatDistance(progress.distanceRemaining()).toString();
-    final double legDurationRemaining = progress.currentLegProgress().durationRemaining();
+    final Locale locale = progress.getRoute() == null ? null :
+      LocaleEx.getLocaleDirectionsRoute(progress.getRoute(), context);
+    distanceRemaining = distanceFormatter.formatDistance(progress.getDistanceRemaining()).toString();
+    final double legDurationRemaining = progress.getCurrentLegProgress().getDurationRemaining();
     timeRemaining = TimeFormatter.formatTimeRemaining(context, legDurationRemaining, locale);
     final Calendar time = Calendar.getInstance();
 

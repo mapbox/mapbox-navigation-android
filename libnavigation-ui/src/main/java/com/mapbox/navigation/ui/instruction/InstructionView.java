@@ -288,12 +288,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       float currentStepDistanceTraveled = 0f;
       String guidanceUrl = null;
 
-      RouteLegProgress legProgress = routeProgress.currentLegProgress();
-      if (legProgress != null && legProgress.currentStepProgress() != null) {
-        guidanceUrl = legProgress.currentStepProgress().guidanceViewURL();
-        if (legProgress.currentStepProgress().step() != null) {
-          currentStepTotalDistance = legProgress.currentStepProgress().step().distance();
-          currentStepDistanceTraveled = legProgress.currentStepProgress().distanceTraveled();
+      RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
+      if (legProgress != null && legProgress.getCurrentStepProgress() != null) {
+        guidanceUrl = legProgress.getCurrentStepProgress().getGuidanceViewURL();
+        if (legProgress.getCurrentStepProgress().getStep() != null) {
+          currentStepTotalDistance = legProgress.getCurrentStepProgress().getStep().distance();
+          currentStepDistanceTraveled = legProgress.getCurrentStepProgress().getDistanceTraveled();
         }
       }
       if (guidanceUrl != null && !this.guidanceImageUrl.equals(guidanceUrl)) {
@@ -813,8 +813,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newStep(RouteProgress routeProgress) {
     boolean newStep = currentStep == null
-      || !currentStep.equals(routeProgress.currentLegProgress().currentStepProgress().step());
-    currentStep = routeProgress.currentLegProgress().currentStepProgress().step();
+      || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
+    currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
     return newStep;
   }
 
@@ -955,7 +955,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     updateDistanceText(model);
     updateInstructionList(model);
     if (newStep(model.retrieveProgress())) {
-      LegStep upComingStep = model.retrieveProgress().currentLegProgress().upcomingStep();
+      LegStep upComingStep = model.retrieveProgress().getCurrentLegProgress().getUpcomingStep();
       ImageCreator.getInstance().prefetchImageCache(upComingStep);
     }
   }

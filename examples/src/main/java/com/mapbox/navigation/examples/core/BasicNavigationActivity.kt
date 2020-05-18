@@ -124,7 +124,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             // do something with the route progress
-            Timber.i("route progress: ${routeProgress.currentState()}")
+            Timber.i("route progress: ${routeProgress.currentState}")
         }
     }
 
