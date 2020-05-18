@@ -723,7 +723,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.MODERATE_CONGESTION_VALUE, true)
 
@@ -739,7 +740,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.HEAVY_CONGESTION_VALUE, true)
 
@@ -755,7 +757,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.SEVERE_CONGESTION_VALUE, true)
 
@@ -771,7 +774,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.UNKNOWN_CONGESTION_VALUE, true)
 
@@ -787,7 +791,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion("foobar", true)
 
@@ -803,7 +808,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.MODERATE_CONGESTION_VALUE, false)
 
@@ -819,7 +825,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.HEAVY_CONGESTION_VALUE, false)
 
@@ -835,7 +842,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.SEVERE_CONGESTION_VALUE, false)
 
@@ -851,7 +859,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion(RouteConstants.UNKNOWN_CONGESTION_VALUE, false)
 
@@ -867,7 +876,8 @@ class MapRouteLineTest {
             styleRes,
             null,
             layerProvider,
-            mapRouteSourceProvider)
+            mapRouteSourceProvider,
+            null)
 
         val result = mapRouteLine.getRouteColorForCongestion("foobar", false)
 
