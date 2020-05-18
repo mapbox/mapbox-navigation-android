@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="NavigationMapRoute">
         <!-- Colors -->
@@ -26,6 +26,7 @@
     </style>
 
     <style name="NavigationViewLight" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:colorPrimary" tools:targetApi="lollipop">@android:color/white</item>
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
         <item name="navigationViewAccent">@color/mapbox_navigation_view_color_accent</item>
@@ -72,6 +73,7 @@
     </style>
 
     <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:colorPrimary" tools:targetApi="lollipop">@android:color/white</item>
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark
         </item>
