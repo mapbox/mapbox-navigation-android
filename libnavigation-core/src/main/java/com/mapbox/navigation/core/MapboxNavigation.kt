@@ -54,11 +54,11 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.utils.extensions.isLocationProviderEnabled
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.isLocationProviderEnabled
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import java.io.File
 import java.lang.reflect.Field
@@ -148,9 +148,6 @@ constructor(
     private val arrivalProgressObserver: ArrivalProgressObserver
 
     private var notificationChannelField: Field? = null
-    private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
-        "com.mapbox.navigation.trip.notification.MapboxTripNotification"
-    private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {
         ThreadController.init()
@@ -195,7 +192,7 @@ constructor(
             )
             MapboxMetricsReporter.init(
                 context,
-                accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
+                token,
                 obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
@@ -232,6 +229,11 @@ constructor(
             notificationChannelField?.let {
                 monitorNotificationActionButton(it.get(null) as ReceiveChannel<NotificationAction>)
             }
+        } else {
+            logger.d(
+                Tag(TAG),
+                Message("Sessions is not started because of disabled location provider")
+            )
         }
     }
 
@@ -270,6 +272,11 @@ constructor(
     ) {
         if (context.isLocationProviderEnabled()) {
             directionsSession.requestRoutes(routeOptions, routesRequestCallback)
+        } else {
+            logger.d(
+                Tag(TAG),
+                Message("Route is not requested because of disabled location provider")
+            )
         }
     }
 
@@ -657,6 +664,11 @@ constructor(
     }
 
     companion object {
+
+        private const val TAG = "MapboxNavigation"
+        private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
+                "com.mapbox.navigation.trip.notification.MapboxTripNotification"
+        private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
         /**
          * Send user feedback about an issue or problem with the Navigation SDK

@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Looper
@@ -59,6 +58,7 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
+import com.mapbox.navigation.utils.internal.isLocationProviderEnabled
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
@@ -516,11 +516,5 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             navigationMapboxMap.removeRoute()
             symbolManager?.deleteAll()
         }
-    }
-
-    private fun isLocationProviderEnabled(): Boolean {
-        val manager = getSystemService(LOCATION_SERVICE) as LocationManager
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 }
