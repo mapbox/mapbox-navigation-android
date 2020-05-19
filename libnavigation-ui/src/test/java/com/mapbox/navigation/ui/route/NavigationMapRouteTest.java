@@ -326,28 +326,6 @@ public class NavigationMapRouteTest {
   }
 
   @Test
-  public void updateRouteVisibilityTo_progressChangeVisibilityIsUpdated() {
-    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
-    MapView mockedMapView = mock(MapView.class);
-    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
-    int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
-    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
-      mock(MapView.OnDidFinishLoadingStyleListener.class);
-    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
-    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
-    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
-    NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-      mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
-      mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
-    boolean isVisible = false;
-
-    theNavigationMapRoute.updateRouteVisibilityTo(isVisible);
-
-    verify(mockedProgressChangeListener).updateVisibility(isVisible);
-  }
-
-  @Test
   public void updateRouteArrowVisibilityTo_routeArrowReceivesNewVisibility() {
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);

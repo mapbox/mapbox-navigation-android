@@ -39,16 +39,9 @@ internal class MapRouteProgressChangeListener(
     ) : this(routeLine, routeArrow, false)
 
     private var job: Job? = null
-    private var isVisible = true
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        if (!isVisible) return
-
         onProgressChange(routeProgress)
-    }
-
-    fun updateVisibility(isVisible: Boolean) {
-        this.isVisible = isVisible
     }
 
     private fun onProgressChange(routeProgress: RouteProgress) {

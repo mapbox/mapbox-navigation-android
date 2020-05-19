@@ -365,6 +365,7 @@ internal class MapRouteLine(
             )
             routeFeatureData.addAll(newRouteFeatureData)
             drawRoutes(newRouteFeatureData)
+            hideShieldLineAtOffset(0f)
             drawWayPoints()
             updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
             updateAllLayersVisibility(allLayersAreVisible)
