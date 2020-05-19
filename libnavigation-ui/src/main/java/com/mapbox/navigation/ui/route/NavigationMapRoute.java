@@ -288,7 +288,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void updateRouteVisibilityTo(boolean isVisible) {
     routeLine.updateVisibilityTo(isVisible);
-    mapRouteProgressChangeListener.updateVisibility(isVisible);
   }
 
 

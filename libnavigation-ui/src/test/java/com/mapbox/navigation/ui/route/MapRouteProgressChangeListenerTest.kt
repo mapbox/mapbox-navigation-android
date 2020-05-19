@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui.route
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,17 +27,6 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should do nothing when invisible`() {
-        val routeProgress: RouteProgress = mockk()
-
-        progressChangeListener.updateVisibility(false)
-        progressChangeListener.onRouteProgressChanged(routeProgress)
-
-        verify { routeLine wasNot Called }
-        verify { routeArrow wasNot Called }
-    }
-
-    @Test
     fun `should not draw route without geometry`() {
         val newRoute: DirectionsRoute = mockk {
             every { geometry() } returns null
@@ -48,7 +36,6 @@ class MapRouteProgressChangeListenerTest {
         }
         every { routeLine.getPrimaryRoute() } returns newRoute
 
-        progressChangeListener.updateVisibility(true)
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
@@ -62,7 +49,6 @@ class MapRouteProgressChangeListenerTest {
             every { route() } returns null
         }
 
-        progressChangeListener.updateVisibility(true)
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 0) { routeLine.draw(any<DirectionsRoute>()) }
