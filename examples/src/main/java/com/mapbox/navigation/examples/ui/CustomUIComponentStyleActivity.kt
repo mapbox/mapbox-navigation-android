@@ -222,11 +222,11 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onWayNameChanged(wayName: String) {
-        if (summaryBottomSheet.visibility == View.VISIBLE) {
-            wayNameView.updateWayNameText(wayName)
-            showWayNameView()
-        } else {
+        wayNameView.updateWayNameText(wayName)
+        if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
             hideWayNameView()
+        } else {
+            showWayNameView()
         }
     }
 
@@ -270,6 +270,9 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             hide()
             addOnClickListener {
                 recenterBtn.hide()
+                summaryBehavior.isHideable = false
+                summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                showWayNameView()
                 navigationMapboxMap?.resetPadding()
                 navigationMapboxMap?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             }
@@ -330,18 +333,22 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun showLogoAndAttribution() {
         summaryBottomSheet.viewTreeObserver.addOnGlobalLayoutListener(object :
-                ViewTreeObserver.OnGlobalLayoutListener {
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 navigationMapboxMap?.retrieveMap()?.uiSettings?.apply {
                     val bottomMargin = summaryBottomSheet.measuredHeight
-                    setLogoMargins(logoMarginLeft,
-                            logoMarginTop,
-                            logoMarginRight,
-                            bottomMargin)
-                    setAttributionMargins(attributionMarginLeft,
-                            attributionMarginTop,
-                            attributionMarginRight,
-                            bottomMargin)
+                    setLogoMargins(
+                        logoMarginLeft,
+                        logoMarginTop,
+                        logoMarginRight,
+                        bottomMargin
+                    )
+                    setAttributionMargins(
+                        attributionMarginLeft,
+                        attributionMarginTop,
+                        attributionMarginRight,
+                        bottomMargin
+                    )
                 }
                 summaryBottomSheet.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
@@ -417,13 +424,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
                 .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
-    }
-
-    private fun isLocationTracking(cameraMode: Int): Boolean {
-        return cameraMode == CameraMode.TRACKING ||
-            cameraMode == CameraMode.TRACKING_COMPASS ||
-            cameraMode == CameraMode.TRACKING_GPS ||
-            cameraMode == CameraMode.TRACKING_GPS_NORTH
     }
 
     private fun updateCameraOnNavigationStateChange(
@@ -508,11 +508,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private val cameraTrackingChangedListener = object : OnCameraTrackingChangedListener {
         override fun onCameraTrackingChanged(currentMode: Int) {
-            if (isLocationTracking(currentMode)) {
-                summaryBehavior.isHideable = false
-                summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                showWayNameView()
-            }
         }
 
         override fun onCameraTrackingDismissed() {

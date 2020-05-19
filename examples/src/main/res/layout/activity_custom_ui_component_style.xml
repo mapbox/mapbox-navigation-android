@@ -15,13 +15,9 @@
 
     <ImageView
         android:id="@+id/screenshotView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
     <com.mapbox.navigation.ui.summary.SummaryBottomSheet
@@ -29,7 +25,6 @@
         style="@style/CustomSummaryBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
     <com.mapbox.navigation.ui.RecenterButton
@@ -67,17 +62,12 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
-
     <com.mapbox.navigation.ui.instruction.InstructionView
         android:id="@+id/instructionView"
         style="@style/CustomInstructionView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="top"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
