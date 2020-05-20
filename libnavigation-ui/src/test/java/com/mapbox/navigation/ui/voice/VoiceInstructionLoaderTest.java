@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui.voice;
 import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
-import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
 import com.mapbox.navigation.ui.BaseTest;
 import com.mapbox.navigation.ui.ConnectivityStatusProvider;
 
@@ -17,7 +16,6 @@ import okhttp3.Cache;
 import retrofit2.Callback;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -35,12 +33,11 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     urlsToBeCached.remove(4);
     Iterator<String> urlsCached = urlsToBeCached.iterator();
     when(aCache.urls()).thenReturn(urlsCached);
-    UrlSkuTokenProvider anySkuTokenProvider = mock(UrlSkuTokenProvider.class);
     MapboxSpeech.Builder anySpeechBuilder = mock(MapboxSpeech.Builder.class);
     ConnectivityStatusProvider anyConnectivityStatus = mock(ConnectivityStatusProvider.class);
 
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(anyContext, "any_access_token",
-      aCache, anySkuTokenProvider, anySpeechBuilder, anyConnectivityStatus);
+      aCache, anySpeechBuilder, anyConnectivityStatus);
     List<String> urlsToCache = buildUrlsToCache();
     theVoiceInstructionLoader.addStubUrlsToCache(urlsToCache);
 
@@ -56,14 +53,12 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech.Builder aSpeechBuilder = mock(MapboxSpeech.Builder.class);
     when(aSpeechBuilder.instruction(anyString())).thenReturn(aSpeechBuilder);
     when(aSpeechBuilder.textType(anyString())).thenReturn(aSpeechBuilder);
-    when(aSpeechBuilder.interceptor(any())).thenReturn(aSpeechBuilder);
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     when(aSpeechBuilder.build()).thenReturn(aSpeech);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
-    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, anyUrlSkuTokenProvider, aSpeechBuilder, connectivityStatus);
+      anyCache, aSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);
@@ -79,9 +74,8 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
-    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, anyUrlSkuTokenProvider, anySpeechBuilder, connectivityStatus);
+      anyCache, anySpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);
@@ -97,9 +91,8 @@ public class VoiceInstructionLoaderTest extends BaseTest {
     MapboxSpeech aSpeech = mock(MapboxSpeech.class);
     ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
     Context context = mock(Context.class);
-    UrlSkuTokenProvider anyUrlSkuTokenProvider = mock(UrlSkuTokenProvider.class);
     VoiceInstructionLoader theVoiceInstructionLoader = new VoiceInstructionLoader(context, "any_access_token",
-      anyCache, anyUrlSkuTokenProvider, nullSpeechBuilder, connectivityStatus);
+      anyCache, nullSpeechBuilder, connectivityStatus);
     Callback aCallback = mock(Callback.class);
 
     theVoiceInstructionLoader.requestInstruction("anyInstruction", "anyType", aCallback);

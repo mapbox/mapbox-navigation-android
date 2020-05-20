@@ -8,6 +8,8 @@ import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
 import com.mapbox.navigation.ui.ConnectivityStatusProvider;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,15 +47,14 @@ public class VoiceInstructionLoader {
   }
 
   // Package private (no modifier) for testing purposes
-  VoiceInstructionLoader(Context context, String accessToken, Cache cache, UrlSkuTokenProvider urlSkuTokenProvider,
-                         MapboxSpeech.Builder mapboxSpeechBuilder, ConnectivityStatusProvider connectivityStatus) {
+  VoiceInstructionLoader(Context context, String accessToken, Cache cache, MapboxSpeech.Builder mapboxSpeechBuilder,
+                         ConnectivityStatusProvider connectivityStatus) {
     this.accessToken = accessToken;
     this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
     this.mapboxSpeechBuilder = mapboxSpeechBuilder;
     this.connectivityStatus = connectivityStatus;
-    this.urlSkuTokenProvider = urlSkuTokenProvider;
   }
 
   public List<String> evictVoiceInstructions() {
@@ -104,14 +105,6 @@ public class VoiceInstructionLoader {
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .instruction(instruction)
         .textType(textType)
-        .interceptor(new Interceptor() {
-          @Override
-          public Response intercept(Chain chain) throws IOException {
-            HttpUrl httpUrl = chain.request().url();
-            String skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize());
-            return chain.proceed(chain.request().newBuilder().url(skuUrl).build());
-          }
-        })
         .build();
       mapboxSpeech.enqueueCall(callback);
     }
@@ -141,18 +134,24 @@ public class VoiceInstructionLoader {
 
   private Interceptor provideOfflineCacheInterceptor() {
     return new Interceptor() {
+      @NotNull
       @Override
-      public Response intercept(Chain chain) throws IOException {
+      public Response intercept(@NotNull Chain chain) throws IOException {
         Request request = chain.request();
+
+        HttpUrl httpUrl = chain.request().url();
+        String skuUrl = urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize());
+        Request.Builder newBuilder = request.newBuilder();
+        newBuilder.url(skuUrl);
+
         if (!connectivityStatus.isConnected()) {
           CacheControl cacheControl = new CacheControl.Builder()
             .maxStale(3, TimeUnit.DAYS)
             .build();
-          request = request.newBuilder()
-            .cacheControl(cacheControl)
-            .build();
+          newBuilder.cacheControl(cacheControl);
         }
-        return chain.proceed(request);
+
+        return chain.proceed(newBuilder.build());
       }
     };
   }
