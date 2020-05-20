@@ -6,8 +6,6 @@
 -keep class com.mapbox.navigation.route.onboard.MapboxOnboardRouter {*;}
 -keep class com.mapbox.navigation.route.offboard.MapboxOffboardRouter {*;}
 -keep class com.mapbox.navigation.trip.notification.MapboxTripNotification {*;}
-# TODO Remove this rule when added in com.mapbox.common:logger https://github.com/mapbox/mapbox-base-android/issues/41
--keep class com.mapbox.common.logger.MapboxLogger {*;}
 
 # --- OkHttp ---
 -dontwarn okhttp3.**
