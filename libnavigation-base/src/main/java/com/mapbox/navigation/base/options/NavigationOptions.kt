@@ -29,8 +29,9 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
+ * @param builder [Builder] used the create the [NavigationOptions]
  */
-data class NavigationOptions constructor(
+data class NavigationOptions(
     val accessToken: String?,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
@@ -38,19 +39,14 @@ data class NavigationOptions constructor(
     val onboardRouterConfig: MapboxOnboardRouterConfig?,
     val isFromNavigationUi: Boolean = false,
     val isDebugLoggingEnabled: Boolean = false,
-    val deviceProfile: DeviceProfile
+    val deviceProfile: DeviceProfile,
+    val builder: Builder
 ) {
 
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder() = Builder()
-        .accessToken(accessToken)
-        .timeFormatType(timeFormatType)
-        .navigatorPredictionMillis(navigatorPredictionMillis)
-        .distanceFormatter(distanceFormatter)
-        .onboardRouterConfig(onboardRouterConfig)
-        .isFromNavigationUi(isFromNavigationUi)
+    fun toBuilder() = builder
 
     /**
      * Build a new [NavigationOptions]
@@ -126,7 +122,8 @@ data class NavigationOptions constructor(
                 onboardRouterConfig = onboardRouterConfig,
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
-                deviceProfile = deviceProfile
+                deviceProfile = deviceProfile,
+                builder = this
             )
         }
     }
