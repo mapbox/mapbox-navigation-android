@@ -85,7 +85,7 @@ ext {
       mapboxLogger              : "com.mapbox.common:logger:${version.mapboxLogger}",
 
       // Kotlin
-      kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${version.kotlinStdLib}",
+      kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",
       ankoCommon                : "org.jetbrains.anko:anko-common:${version.ankoCommon}",
 
       // Coroutines and Channels
