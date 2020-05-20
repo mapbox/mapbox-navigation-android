@@ -137,8 +137,6 @@ dependencies {
 
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug
-    releaseImplementation dependenciesList.leakCanaryRelease
-    androidTestImplementation dependenciesList.leakCanaryTest
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"
