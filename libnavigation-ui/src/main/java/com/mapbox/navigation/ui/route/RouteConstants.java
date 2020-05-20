@@ -48,4 +48,6 @@ class RouteConstants {
   static final String MAPBOX_LOCATION_ID = "mapbox-location";
   static final long VANISHING_ROUTE_LINE_UPDATE_DELAY = 600;
   static final double MINIMUM_ROUTE_LINE_OFFSET = .001;
+  static final long ROUTE_LINE_VANISH_ANIMATION_DURATION = 900;
+  static final long ROUTE_LINE_VANISH_ANIMATION_DELAY = 100;
 }

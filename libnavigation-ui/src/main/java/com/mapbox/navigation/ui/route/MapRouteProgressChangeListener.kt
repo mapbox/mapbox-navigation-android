@@ -1,14 +1,15 @@
 package com.mapbox.navigation.ui.route
 
+import android.animation.ValueAnimator
+import android.view.animation.LinearInterpolator
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.route.RouteConstants.VANISHING_ROUTE_LINE_UPDATE_DELAY
+import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
+import com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY
+import com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DURATION
 import com.mapbox.navigation.utils.internal.ThreadController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -39,6 +40,8 @@ internal class MapRouteProgressChangeListener(
     ) : this(routeLine, routeArrow, false)
 
     private var job: Job? = null
+    private var isVisible = true
+    private var lastDistanceValue = 0f
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         onProgressChange(routeProgress)
@@ -55,22 +58,39 @@ internal class MapRouteProgressChangeListener(
         if (hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute!!)
         } else {
-            if (vanishRouteLineEnabled && hasGeometry && (job == null || !job!!.isActive)) {
+            if (vanishRouteLineEnabled && (job == null || !job!!.isActive)) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
-                    val totalDist =
-                        (routeProgress.distanceRemaining + routeProgress.distanceTraveled)
-                    val dist = routeProgress.distanceTraveled / totalDist
-                    if (dist > 0) {
-                        val deferredExpression = async(Dispatchers.Default) {
-                            routeLine.getExpressionAtOffset(dist)
-                        }
-                        delay(VANISHING_ROUTE_LINE_UPDATE_DELAY)
-                        routeLine.hideShieldLineAtOffset(dist)
-                        routeLine.decorateRouteLine(deferredExpression.await())
+                    val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
+                    if (percentDistanceTraveled > 0) {
+                        animateVanishRouteLineUpdate(lastDistanceValue, percentDistanceTraveled)
+                        lastDistanceValue = percentDistanceTraveled
                     }
                 }
             }
         }
         routeArrow.addUpcomingManeuverArrow(routeProgress)
+    }
+
+    private fun animateVanishRouteLineUpdate(startingDistanceValue: Float, percentDistanceTraveled: Float) {
+        ValueAnimator.ofFloat(startingDistanceValue, percentDistanceTraveled).apply {
+            duration = ROUTE_LINE_VANISH_ANIMATION_DURATION
+            interpolator = LinearInterpolator()
+            startDelay = ROUTE_LINE_VANISH_ANIMATION_DELAY
+            addUpdateListener {
+                val animationDistanceValue = it.animatedValue as Float
+                if (animationDistanceValue > MINIMUM_ROUTE_LINE_OFFSET) {
+                    val expression = routeLine.getExpressionAtOffset(animationDistanceValue)
+                    routeLine.hideShieldLineAtOffset(animationDistanceValue)
+                    routeLine.decorateRouteLine(expression)
+                }
+            }
+            start()
+        }
+    }
+
+    private fun getPercentDistanceTraveled(routeProgress: RouteProgress): Float {
+        val totalDist =
+            (routeProgress.distanceRemaining + routeProgress.distanceTraveled)
+        return routeProgress.distanceTraveled / totalDist
     }
 }

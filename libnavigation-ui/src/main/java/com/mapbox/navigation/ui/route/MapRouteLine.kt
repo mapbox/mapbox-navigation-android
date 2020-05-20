@@ -608,7 +608,15 @@ internal class MapRouteLine(
         val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
         val trafficExpressions = when (filteredItems.isEmpty()) {
             true -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
-            false -> listOf(filteredItems.first().copy(offset = distanceOffset)).plus(filteredItems)
+            false -> {
+                val firstItemIndex = routeLineExpressionData.indexOf(filteredItems.first())
+                val fillerItem = if (firstItemIndex == 0) {
+                    routeLineExpressionData[firstItemIndex]
+                } else {
+                    routeLineExpressionData[firstItemIndex - 1]
+                }
+                listOf(fillerItem.copy(offset = distanceOffset)).plus(filteredItems)
+            }
         }.map {
             Expression.stop(
                 it.offset,
