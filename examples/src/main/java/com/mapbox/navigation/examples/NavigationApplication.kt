@@ -9,7 +9,6 @@ import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.DelegatesExt
-import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 
 private const val DEFAULT_MAPBOX_ACCESS_TOKEN = "YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE"
@@ -26,7 +25,6 @@ class NavigationApplication : MultiDexApplication() {
         instance = this
         setupTimber()
         setupStrictMode()
-        setupCanary()
         setupMapbox()
     }
 
@@ -51,15 +49,6 @@ class NavigationApplication : MultiDexApplication() {
                     .build()
             )
         }
-    }
-
-    private fun setupCanary() {
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return
-        }
-        LeakCanary.install(this)
     }
 
     private fun setupMapbox() {
