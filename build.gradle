@@ -78,6 +78,14 @@ subprojects {
   dependencies {
     errorprone dependenciesList.errorprone
   }
+
+  plugins.withId('org.jetbrains.kotlin.jvm') {
+    compileKotlin {
+      kotlinOptions {
+        jvmTarget = "1.8"
+      }
+    }
+  }
 }
 
 task clean(type: Delete) {
