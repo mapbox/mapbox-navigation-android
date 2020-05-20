@@ -128,8 +128,6 @@ dependencies {
 
   // Leak Canary
   debugImplementation dependenciesList.leakCanaryDebug
-  releaseImplementation dependenciesList.leakCanaryRelease
-  androidTestImplementation dependenciesList.leakCanaryTest
 
   // Unit Testing
   testImplementation dependenciesList.junit

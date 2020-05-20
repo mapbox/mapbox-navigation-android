@@ -38,7 +38,7 @@ ext {
       hamcrest                  : '2.0.0.0',
       errorprone                : '2.3.1',
       butterknife               : '10.1.0',
-      leakCanaryVersion         : '1.6.3',
+      leakCanaryVersion         : '2.3',
       timber                    : '4.7.1',
       testRunnerVersion         : '1.2.0',
       orchestratorVersion       : '1.2.0',
@@ -130,8 +130,6 @@ ext {
       timber                    : "com.jakewharton.timber:timber:${version.timber}",
       picasso                   : "com.squareup.picasso:picasso:${version.picasso}",
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
-      leakCanaryRelease         : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
-      leakCanaryTest            : "com.squareup.leakcanary:leakcanary-android-no-op:${version.leakCanaryVersion}",
 
       // instrumentation test
       testSpoonRunner           : "com.squareup.spoon:spoon-client:${version.spoonRunner}",
