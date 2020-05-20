@@ -6,10 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StyleRes;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.libnavigation.ui.R;
@@ -39,7 +35,7 @@ import java.util.List;
  * @since 0.4.0
  */
 
-public class NavigationMapRoute implements LifecycleObserver {
+public class NavigationMapRoute {
 
   @StyleRes
   private final int styleRes;
@@ -189,14 +185,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     );
     this.routeLineInitializedCallback = routeLineInitializedCallback;
     initializeDidFinishLoadingStyleListener();
-    registerLifecycleObserver();
-  }
-
-  private void registerLifecycleObserver() {
-    final Context context = mapView.getContext();
-    if (context instanceof LifecycleOwner) {
-      ((LifecycleOwner)context).getLifecycle().addObserver(this);
-    }
   }
 
   // For testing only
@@ -360,7 +348,6 @@ public class NavigationMapRoute implements LifecycleObserver {
   /**
    * Called during the onStart event of the Lifecycle owner to initialize resources.
    */
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
   public void onStart() {
     addListeners();
   }
@@ -368,7 +355,6 @@ public class NavigationMapRoute implements LifecycleObserver {
   /**
    * Called during the onStop event of the Lifecycle owner to clean up resources.
    */
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   public void onStop() {
     removeListeners();
   }
