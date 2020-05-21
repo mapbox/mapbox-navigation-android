@@ -307,6 +307,23 @@ commands:
               --use-orchestrator \
               --timeout 5m
 
+  run-firebase-robo:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Run robo tests on Firebase
+          no_output_timeout: 10m
+          command: |
+            gcloud firebase test android run --type robo \
+              --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
+              --device-ids sailfish --os-version-ids "26" --locales en --orientations portrait --timeout 5m
+
   generate-maven-credentials:
     steps:
       - run:
@@ -474,6 +491,9 @@ jobs:
           module_target: "examples"
       - login-google-cloud-platform
       - run-firebase-instrumentation:
+          module_target: "examples"
+          variant: "debug"
+      - run-firebase-robo:
           module_target: "examples"
           variant: "debug"
 
