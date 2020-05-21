@@ -1,4 +1,8 @@
 version: 2.1
+parameters:
+  docker-image-tag:
+    type: string
+    default: "mbgl/android-ndk-r21:769c31f1d8"
 
 workflows:
   version: 2
@@ -408,7 +412,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       JVM_OPTS: -Xmx3200m
       BUILDTYPE: Debug
@@ -462,7 +466,7 @@ jobs:
   build-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     steps:
       - checkout
       - restore-gradle-cache-1_0
@@ -475,7 +479,7 @@ jobs:
 
   ui-tests-1_0:
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     working_directory: ~/code
     environment:
       JVM_OPTS: -Xmx3200m
@@ -500,7 +504,7 @@ jobs:
 # ------------------------------------------------------------------------------
   release:
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     working_directory: ~/code
     environment:
       BUILDTYPE: Release
@@ -539,7 +543,7 @@ jobs:
   release-core-1_0-snapshot:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     steps:
       - checkout
       - build-release-core-1_0
@@ -553,7 +557,7 @@ jobs:
   release-core-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_private
     steps:
@@ -569,7 +573,7 @@ jobs:
   release-core-1_0-qa:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_internal
     steps:
@@ -585,7 +589,7 @@ jobs:
   release-core-1_0-prod:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_collab
     steps:
@@ -601,7 +605,7 @@ jobs:
   release-ui-1_0-snapshot:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     steps:
       - checkout
       - build-release-ui-1_0
@@ -615,7 +619,7 @@ jobs:
   release-ui-1_0:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_private
     steps:
@@ -631,7 +635,7 @@ jobs:
   release-ui-1_0-qa:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_internal
     steps:
@@ -647,7 +651,7 @@ jobs:
   release-ui-1_0-prod:
     working_directory: ~/code
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     environment:
       BINTRAY_REPO: mapbox_collab
     steps:
@@ -662,7 +666,7 @@ jobs:
 # ------------------------------------------------------------------------------
   publish:
     docker:
-      - image: mbgl/61abee1674:android-ndk-r18
+      - image: << pipeline.parameters.docker-image-tag >>
     working_directory: ~/code
     environment:
       JVM_OPTS: -Xmx3200m
