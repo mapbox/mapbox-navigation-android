@@ -5,29 +5,27 @@ package com.mapbox.navigation.core.replay.route2
  * allow you to control the behavior of that driver.
  *
  * Note that the default values are recommended because they have been tested.
+ *
+ * @param maxSpeedMps Max speed the driver will drive on straight-aways
+ * @param turnSpeedMps Speed the driver will slow down for turns approaching 90 degrees
+ * @param uTurnSpeedMps Speed the driver will go when facing a u-turn
+ * @param maxAcceleration How fast the driver will accelerate to [maxSpeedMps] in mps^2
+ * @param minAcceleration How fast the driver will decelerate in mps^2
+ * @param builder used for updating options
  */
 class ReplayRouteOptions(
-    /**
-     * Max speed the driver will drive on straight-aways
-     */
     val maxSpeedMps: Double,
-    /**
-     * Speed the driver will slow down for turns approaching 90 degrees
-     */
     val turnSpeedMps: Double,
-    /**
-     * Speed the driver will go when facing a u-turn
-     */
     val uTurnSpeedMps: Double,
-    /**
-     * How fast the driver will accelerate to [maxSpeedMps] in mps^2
-     */
     val maxAcceleration: Double,
-    /**
-     * How fast the driver will decelerate in mps^2
-     */
-    val minAcceleration: Double
+    val minAcceleration: Double,
+    val builder: Builder
 ) {
+    /**
+     * @return the builder that created the [ReplayRouteOptions]
+     */
+    fun toBuilder() = builder
+
     /**
      * Used to build [ReplayRouteOptions].
      */
@@ -47,7 +45,8 @@ class ReplayRouteOptions(
                 turnSpeedMps = turnSpeedMps,
                 uTurnSpeedMps = uTurnSpeedMps,
                 maxAcceleration = maxAcceleration,
-                minAcceleration = minAcceleration
+                minAcceleration = minAcceleration,
+                builder = this
             )
         }
 
