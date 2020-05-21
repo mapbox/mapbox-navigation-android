@@ -82,7 +82,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
                     .zoom(16.5)
                     .build()
             mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true).also {
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).also {
                 it.addProgressChangeListener(mapboxNavigation)
             }
 
@@ -168,7 +168,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
@@ -187,7 +186,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
-        navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 

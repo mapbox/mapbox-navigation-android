@@ -130,7 +130,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
         mapboxNavigation?.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
@@ -149,7 +148,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver)
         mapboxNavigation?.unregisterRoutesObserver(routeObserver)
-        navigationMapboxMap?.onStop()
         stopLocationUpdates()
         mapView.onStop()
     }
@@ -169,7 +167,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
             mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }

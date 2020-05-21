@@ -163,7 +163,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
       MapboxLogger.INSTANCE.d(new Message("Style setting finished"));
       Drawable image = ContextCompat.getDrawable(this, R.drawable.mapbox_marker_icon_default);
       style.addImage(MARKER_ROUTE, image);
-      navigationMapRoute = new NavigationMapRoute(mapView, mapboxMap);
+      navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this).build();
       symbolManager = new SymbolManager(mapView, mapboxMap, style);
       Snackbar.make(findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint, LENGTH_SHORT)
           .show();

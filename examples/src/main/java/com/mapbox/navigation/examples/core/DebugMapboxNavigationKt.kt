@@ -204,7 +204,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             style.addImage("raw", ContextCompat.getDrawable(this, R.drawable.ic_circle_red)!!)
             style.addImage("enhanced", ContextCompat.getDrawable(this, R.drawable.ic_circle_blue)!!)
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this)
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
