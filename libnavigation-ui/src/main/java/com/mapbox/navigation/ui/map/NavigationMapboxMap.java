@@ -9,6 +9,10 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -40,6 +44,7 @@ import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +63,7 @@ import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGA
  * <p>
  * These APIs include drawing a route line, camera animations, and more.
  */
-public class NavigationMapboxMap {
+public class NavigationMapboxMap implements LifecycleObserver {
 
   static final String STREETS_LAYER_ID = "streetsLayer";
   private static final String MAPBOX_STREETS_V7_URL = "mapbox.mapbox-streets-v7";
@@ -75,8 +80,12 @@ public class NavigationMapboxMap {
   private final MapWayNameChangedListener internalWayNameChangedListener
     = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
+  @NonNull
   private MapView mapView;
+  @NonNull
   private MapboxMap mapboxMap;
+  @NonNull
+  private LifecycleOwner lifecycleOwner;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
   private NavigationSymbolManager navigationSymbolManager;
@@ -99,10 +108,12 @@ public class NavigationMapboxMap {
    *
    * @param mapView   for map size and Context
    * @param mapboxMap for APIs to interact with the map
+   * @param lifecycleOwner provides lifecycle for component
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
-                             @NonNull MapboxMap mapboxMap) {
-    this(mapView, mapboxMap, null);
+                             @NonNull MapboxMap mapboxMap,
+                             @NonNull LifecycleOwner lifecycleOwner) {
+    this(mapView, mapboxMap, lifecycleOwner, null);
   }
 
   /**
@@ -111,12 +122,14 @@ public class NavigationMapboxMap {
    *
    * @param mapView   for map size and Context
    * @param mapboxMap for APIs to interact with the map
+   * @param lifecycleOwner provides lifecycle for component
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap,
+                             @NonNull LifecycleOwner lifecycleOwner,
                              boolean vanishRouteLineEnabled) {
-    this(mapView, mapboxMap, null, vanishRouteLineEnabled);
+    this(mapView, mapboxMap, lifecycleOwner,null, vanishRouteLineEnabled);
   }
 
   /**
@@ -125,12 +138,14 @@ public class NavigationMapboxMap {
    *
    * @param mapView           for map size and Context
    * @param mapboxMap         for APIs to interact with the map
+   * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap,
+                             @NonNull LifecycleOwner lifecycleOwner,
                              @Nullable String routeBelowLayerId) {
-    this(mapView, mapboxMap, routeBelowLayerId, false);
+    this(mapView, mapboxMap, lifecycleOwner, routeBelowLayerId, false);
   }
 
   /**
@@ -139,22 +154,26 @@ public class NavigationMapboxMap {
    *
    * @param mapView           for map size and Context
    * @param mapboxMap         for APIs to interact with the map
+   * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap,
+                             @NonNull LifecycleOwner lifecycleOwner,
                              @Nullable String routeBelowLayerId,
                              boolean vanishRouteLineEnabled) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+    this.lifecycleOwner = lifecycleOwner;
     initializeMapPaddingAdjustor(mapView, mapboxMap);
     initializeNavigationSymbolManager(mapView, mapboxMap);
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
     initializeCamera(mapboxMap);
     initializeLocationComponent();
+    registerLifecycleOwnerObserver();
   }
 
   private void initializeLocationComponent() {
@@ -162,33 +181,33 @@ public class NavigationMapboxMap {
     initializeLocationFpsDelegate(mapboxMap, locationComponent);
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(MapLayerInteractor layerInteractor) {
     this.layerInteractor = layerInteractor;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(LocationComponent locationComponent) {
     this.locationComponent = locationComponent;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(NavigationMapRoute mapRoute) {
     this.mapRoute = mapRoute;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(NavigationSymbolManager navigationSymbolManager) {
     this.navigationSymbolManager = navigationSymbolManager;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(@NonNull MapWayName mapWayName, @NonNull MapFpsDelegate mapFpsDelegate) {
     this.mapWayName = mapWayName;
     this.mapFpsDelegate = mapFpsDelegate;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(@NonNull MapWayName mapWayName, @NonNull MapFpsDelegate mapFpsDelegate,
                       NavigationMapRoute mapRoute, NavigationCamera mapCamera,
                       LocationFpsDelegate locationFpsDelegate) {
@@ -199,7 +218,7 @@ public class NavigationMapboxMap {
     this.locationFpsDelegate = locationFpsDelegate;
   }
 
-  // Package private (no modifier) for testing purposes
+  @TestOnly
   NavigationMapboxMap(MapboxMap mapboxMap, MapLayerInteractor layerInteractor, MapPaddingAdjustor adjustor) {
     this.layerInteractor = layerInteractor;
     this.mapboxMap = mapboxMap;
@@ -570,10 +589,10 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Should be used in {@link FragmentActivity#onStart()} to ensure proper
-   * accounting for the lifecycle.
+   * Called during the onStart event of the Lifecycle owner to initialize resources.
    */
-  public void onStart() {
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  protected void onStart() {
     mapCamera.onStart();
     handleWayNameOnStart();
     handleFpsOnStart();
@@ -589,10 +608,10 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Should be used in {@link FragmentActivity#onStop()} to ensure proper
-   * accounting for the lifecycle.
+   * Called during the onStop event of the Lifecycle owner to clean up resources.
    */
-  public void onStop() {
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  protected void onStop() {
     mapCamera.onStop();
     handleWayNameOnStop();
     handleFpsOnStop();
@@ -763,17 +782,14 @@ public class NavigationMapboxMap {
 
   private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
-    int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
-      R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute);
-    mapRoute = new NavigationMapRoute(
-            null,
-            mapView,
-            map,
-            routeStyleRes,
-            routeBelowLayerId,
-            vanishRouteLineEnabled,
-            null
+    int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(
+            context, R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
     );
+    mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
+            .withStyle(routeStyleRes)
+            .withBelowLayer(routeBelowLayerId)
+            .withVanishRouteLineEnabled(vanishRouteLineEnabled)
+            .build();
   }
 
   private void initializeCamera(MapboxMap map) {
@@ -809,6 +825,10 @@ public class NavigationMapboxMap {
       mapboxMap.getStyle().addSource(streetSource);
       layerInteractor.addStreetsLayer(STREETS_SOURCE_ID, STREETS_V8_ROAD_LABEL);
     }
+  }
+
+  private void registerLifecycleOwnerObserver() {
+    lifecycleOwner.getLifecycle().addObserver(this);
   }
 
   @Nullable

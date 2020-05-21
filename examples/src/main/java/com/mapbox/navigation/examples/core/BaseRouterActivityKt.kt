@@ -104,7 +104,7 @@ abstract class BaseRouterActivityKt :
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             MapboxLogger.d(Message("Style setting finished"))
             style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
-            navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
+            navigationMapRoute = NavigationMapRoute.Builder(mapView, mapboxMap, this).build()
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             Snackbar.make(
                 findViewById(R.id.container), R.string.msg_tap_map_to_place_waypoint,

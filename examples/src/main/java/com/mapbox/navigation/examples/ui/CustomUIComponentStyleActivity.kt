@@ -118,13 +118,11 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
     }
 
     override fun onStop() {
         super.onStop()
         mapView.onStop()
-        navigationMapboxMap?.onStop()
     }
 
     override fun onLowMemory() {
@@ -185,7 +183,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true).apply {
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).apply {
                 addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))

@@ -184,7 +184,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->

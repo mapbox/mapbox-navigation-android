@@ -193,9 +193,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   public void onStart() {
     mapView.onStart();
-    if (navigationMap != null) {
-      navigationMap.onStart();
-    }
     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START);
   }
 
@@ -212,9 +209,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   public void onStop() {
     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
     mapView.onStop();
-    if (navigationMap != null) {
-      navigationMap.onStop();
-    }
   }
 
   /**
@@ -695,7 +689,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (initialMapCameraPosition != null) {
       map.setCameraPosition(initialMapCameraPosition);
     }
-    navigationMap = new NavigationMapboxMap(mapView, map, null, false);
+    navigationMap = new NavigationMapboxMap(mapView, map, this, null, false);
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreFrom(mapInstanceState);

@@ -93,7 +93,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
@@ -187,7 +187,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
     }
 
     public override fun onResume() {
@@ -202,7 +201,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        navigationMapboxMap?.onStop()
         stopLocationUpdates()
         mapView.onStop()
     }

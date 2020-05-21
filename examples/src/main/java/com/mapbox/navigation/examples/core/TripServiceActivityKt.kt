@@ -55,7 +55,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
-            navigationMapRoute = NavigationMapRoute(mapView, mapboxMap)
+            navigationMapRoute = NavigationMapRoute.Builder(mapView, mapboxMap, this).build()
             newOrigin()
             toggleNotification.setOnClickListener {
                 when (mapboxTripService.hasServiceStarted()) {

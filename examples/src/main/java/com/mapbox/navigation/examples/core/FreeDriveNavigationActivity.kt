@@ -75,7 +75,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
@@ -115,7 +115,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
         mapboxNavigation?.registerTripSessionStateObserver(tripSessionStateObserver)
     }
 
@@ -133,7 +132,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onStop()
         stopLocationUpdates()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 

@@ -90,7 +90,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         mapView.onStart()
-        navigationMapboxMap?.onStart()
     }
 
     public override fun onPause() {
@@ -105,7 +104,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        navigationMapboxMap?.onStop()
         mapView.onStop()
     }
 
@@ -131,7 +129,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
             LocationEngineProvider.getBestLocationEngine(this)
                 .getLastLocation(locationListenerCallback)
