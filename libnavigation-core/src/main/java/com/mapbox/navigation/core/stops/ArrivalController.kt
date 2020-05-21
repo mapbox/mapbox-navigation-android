@@ -46,23 +46,25 @@ class AutoArrivalController : ArrivalController {
 
 /**
  * Choose when to be notified of arrival.
+ *
+ * @param arrivalInSeconds While the next stop is less than [arrivalInSeconds] away,
+ * [ArrivalController.navigateNextRouteLeg] will be called
+ * @param arrivalInMeters While the next stop is less than [arrivalInMeters] away,
+ * [ArrivalController.navigateNextRouteLeg] will be called
+ * @param builder used for updating options
  */
 data class ArrivalOptions(
-
-    /**
-     * While the next stop is less than [arrivalInSeconds] away,
-     * [ArrivalController.navigateNextRouteLeg] will be called.
-     */
     val arrivalInSeconds: Double?,
-
-    /**
-     * While the next stop is less than [arrivalInMeters] away,
-     * [ArrivalController.navigateNextRouteLeg] will be called.
-     */
-    val arrivalInMeters: Double?
+    val arrivalInMeters: Double?,
+    val builder: Builder
 ) {
     /**
-     * Build your arrival options.
+     * @return the builder that created the [ArrivalOptions]
+     */
+    fun toBuilder() = builder
+
+    /**
+     * Build your [ArrivalOptions].
      */
     class Builder {
 
@@ -95,7 +97,8 @@ data class ArrivalOptions(
             }
             return ArrivalOptions(
                 arrivalInSeconds = arrivalInSeconds,
-                arrivalInMeters = arrivalInMeters
+                arrivalInMeters = arrivalInMeters,
+                builder = this
             )
         }
     }

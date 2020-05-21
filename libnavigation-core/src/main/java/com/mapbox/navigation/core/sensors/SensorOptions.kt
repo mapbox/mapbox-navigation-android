@@ -6,11 +6,18 @@ package com.mapbox.navigation.core.sensors
  *
  * @param enabledSensorTypes set of enabled sensors
  * @param signalsPerSecond signals per second received from sensors
+ * @param builder used for updating options
  */
 data class SensorOptions(
     val enabledSensorTypes: Set<Int>,
-    val signalsPerSecond: Int
+    val signalsPerSecond: Int,
+    val builder: Builder
 ) {
+    /**
+     * @return the builder that created the [SensorOptions]
+     */
+    fun toBuilder() = builder
+
     /**
      * Builder of [SensorOptions]
      */
@@ -55,8 +62,9 @@ data class SensorOptions(
          */
         fun build(): SensorOptions {
             return SensorOptions(
-                enabledSensors,
-                signalsPerSecond
+                enabledSensorTypes = enabledSensors,
+                signalsPerSecond = signalsPerSecond,
+                builder = this
             )
         }
     }
