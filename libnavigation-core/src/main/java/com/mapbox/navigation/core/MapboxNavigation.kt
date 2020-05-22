@@ -686,10 +686,10 @@ constructor(
          */
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
-            val distanceFormatter = MapboxDistanceFormatter.builder(context)
+            val distanceFormatter = MapboxDistanceFormatter.builder()
                 .withUnitType(VoiceUnit.UNDEFINED)
                 .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
-                .build()
+                .build(context)
             val builder = NavigationOptions.Builder()
                 .accessToken(accessToken)
                 .timeFormatType(TimeFormat.NONE_SPECIFIED)

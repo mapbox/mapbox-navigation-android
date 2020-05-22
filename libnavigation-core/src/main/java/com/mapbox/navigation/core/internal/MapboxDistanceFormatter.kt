@@ -26,13 +26,14 @@ import kotlin.math.roundToInt
  *
  * This constructor will infer device language and unit type using the device locale.
  *
- * @param context from which to get localized strings from
+ * @param applicationContext from which to get localized strings from
  * @param locale the locale to use for localization of distance resources
  * @param unitType to use, or UNDEFINED to use default for locale country
  * @param roundingIncrement increment by which to round small distances
+ * @param builder used for updating options
  */
 class MapboxDistanceFormatter private constructor(
-    private val context: Context,
+    private val applicationContext: Context,
     private val locale: Locale,
     @VoiceUnit.Type unitType: String,
     @Rounding.Increment private val roundingIncrement: Int,
@@ -56,22 +57,21 @@ class MapboxDistanceFormatter private constructor(
         /**
          * A new instance of [MapboxDistanceFormatter.Builder]
          *
-         * @param context is application's [Context]
          * @return Builder
          */
         @JvmStatic
-        fun builder(context: Context): Builder = Builder(context)
+        fun builder(): Builder = Builder()
     }
 
+    /**
+     * @return the [Builder] that created the [MapboxDistanceFormatter]
+     */
     fun toBuilder() = builder
 
     /**
      * Builder of [MapboxDistanceFormatter]
-     * @param context is application's [Context]
      */
-    class Builder(
-        private val context: Context
-    ) {
+    class Builder {
         private var unitType: String? = null
         private var locale: Locale? = null
         private var roundingIncrement = 0
@@ -103,8 +103,10 @@ class MapboxDistanceFormatter private constructor(
 
         /**
          * Build a new instance of [MapboxDistanceFormatter]
+         *
+         * @param context converted to applicationContext to save memory leaks
          */
-        fun build(): MapboxDistanceFormatter {
+        fun build(context: Context): MapboxDistanceFormatter {
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
             val unitTypeToUse: String = when (unitType) {
                 null -> localeToUse.getUnitTypeForLocale()
@@ -113,11 +115,11 @@ class MapboxDistanceFormatter private constructor(
             }
 
             return MapboxDistanceFormatter(
-                context.applicationContext,
-                localeToUse,
-                unitTypeToUse,
-                roundingIncrement,
-                this)
+                applicationContext = context.applicationContext,
+                locale = localeToUse,
+                unitType = unitTypeToUse,
+                roundingIncrement = roundingIncrement,
+                builder = this)
         }
     }
 
@@ -152,7 +154,7 @@ class MapboxDistanceFormatter private constructor(
             TurfConstants.UNIT_METERS,
             smallUnit
         )
-        val resources = context.resourcesWithLocale(locale)
+        val resources = applicationContext.resourcesWithLocale(locale)
         val unitStringSuffix = getUnitString(resources, smallUnit)
         val roundedNumber = distanceUnit.roundToInt() / roundingIncrement * roundingIncrement
         val roundedValue = (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber).toString()
@@ -160,7 +162,7 @@ class MapboxDistanceFormatter private constructor(
     }
 
     private fun formatDistanceAndSuffixForLargeUnit(distance: Double, maxFractionDigits: Int): Pair<String, String> {
-        val resources = context.resourcesWithLocale(locale)
+        val resources = applicationContext.resourcesWithLocale(locale)
         val unitStringSuffix = getUnitString(resources, largeUnit)
         val distanceUnit =
             TurfConversion.convertLength(distance, TurfConstants.UNIT_METERS, largeUnit)

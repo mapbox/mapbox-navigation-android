@@ -843,11 +843,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     final String unitType = establishUnitType(options);
     final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
     final int roundingIncrement = options.roundingIncrement();
-    final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder(getContext())
+    final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder()
       .withRoundingIncrement(roundingIncrement)
       .withUnitType(unitType)
       .withLocale(language)
-      .build();
+      .build(getContext());
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }
