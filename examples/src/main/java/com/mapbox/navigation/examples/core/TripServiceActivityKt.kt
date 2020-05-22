@@ -84,11 +84,11 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val formatter = MapboxDistanceFormatter.builder(this)
+        val formatter = MapboxDistanceFormatter.builder()
             .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
             .withUnitType(METRIC)
             .withLocale(this.inferDeviceLocale())
-            .build()
+            .build(this)
 
         mapboxTripNotification = MapboxTripNotification(
             applicationContext,

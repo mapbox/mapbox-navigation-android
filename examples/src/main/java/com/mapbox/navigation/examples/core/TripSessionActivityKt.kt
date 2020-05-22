@@ -94,11 +94,11 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val formatter = MapboxDistanceFormatter.builder(this)
+        val formatter = MapboxDistanceFormatter.builder()
             .withUnitType(METRIC)
             .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
             .withLocale(this.inferDeviceLocale())
-            .build()
+            .build(this)
 
         tripSession = MapboxTripSession(
             MapboxTripService(
