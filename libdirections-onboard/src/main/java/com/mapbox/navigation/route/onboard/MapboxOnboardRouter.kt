@@ -10,7 +10,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
@@ -30,11 +30,11 @@ import kotlinx.coroutines.withContext
  * MapboxOnboardRouter provides offline route fetching
  *
  * It uses offline storage path to store and retrieve data, setup endpoint,
- * tiles' version, token. Config is provided via [MapboxOnboardRouterConfig].
+ * tiles' version, token. Config is provided via [OnboardRouterOptions].
  *
  * @param accessToken Mapbox token
  * @param navigatorNative Native Navigator
- * @param config configuration for on-board router
+ * @param options configuration for on-board router
  * @param logger interface for logging any events
  * @param skuTokenProvider skuTokenProvider [SkuTokenProvider]
  */
@@ -42,13 +42,15 @@ import kotlinx.coroutines.withContext
 class MapboxOnboardRouter(
     private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
-    config: MapboxOnboardRouterConfig,
+    private val options: OnboardRouterOptions,
     private val logger: Logger,
     private val skuTokenProvider: SkuTokenProvider
 ) : Router {
 
     companion object {
         private const val TAG = "MapboxOnboardRouter"
+        private const val USER_AGENT: String = "MapboxNavigationNative"
+        private const val THREADS_COUNT = 2
     }
 
     private val mainJobControl by lazy {
@@ -57,26 +59,25 @@ class MapboxOnboardRouter(
     private val gson = Gson()
 
     init {
-        if (config.tilePath.isNotEmpty()) {
-            val tileDir = File(config.tilePath)
+        if (options.filePath.isNotEmpty()) {
+            val tileDir = File(options.filePath)
             if (!tileDir.exists()) {
                 tileDir.mkdirs()
             }
             val routerParams = RouterParams(
                 tileDir.absolutePath,
-                config.inMemoryTileCache,
-                config.mapMatchingSpatialCache,
-                config.threadsCount,
-                config.endpoint?.let {
-                    TileEndpointConfiguration(
-                        it.host,
-                        it.version,
+                null,
+                null,
+                THREADS_COUNT,
+                TileEndpointConfiguration(
+                        options.tilesUri.toString(),
+                        options.tilesVersion,
                         accessToken,
-                        it.userAgent,
+                        USER_AGENT,
                         "",
                         NativeSkuTokenProvider(skuTokenProvider)
                     )
-                })
+                )
             navigatorNative.configureRouter(routerParams, null)
         }
     }

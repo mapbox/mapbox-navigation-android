@@ -20,9 +20,8 @@ import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
-import com.mapbox.navigation.base.options.Endpoint
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
@@ -59,9 +58,7 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import java.io.File
 import java.lang.reflect.Field
-import java.net.URI
 import kotlinx.coroutines.channels.ReceiveChannel
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
@@ -95,7 +92,7 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required
  * or the enhanced one map-matched internally using SDK's native capabilities.
  *
  * In `Free Drive` mode, the enhanced location is computed using nearby to user location's routing tiles that are continuously updating in the background.
- * This can be configured using the [MapboxOnboardRouterConfig] in the [NavigationOptions].
+ * This can be configured using the [OnboardRouterOptions] in the [NavigationOptions].
  *
  * If the session is stopped, the SDK will stop listening for raw location updates and enter the `Idle` state.
  *
@@ -616,7 +613,7 @@ constructor(
                 arrayOf(
                     String::class.java to accessToken,
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                    MapboxOnboardRouterConfig::class.java to (navigationOptions.onboardRouterConfig
+                    OnboardRouterOptions::class.java to (navigationOptions.onboardRouterOptions
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
                     Logger::class.java to logger,
                     SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
@@ -651,8 +648,6 @@ constructor(
     }
 
     companion object {
-
-        private const val TILES_DIR_NAME = "tiles"
 
         /**
          * Send user feedback about an issue or problem with the Navigation SDK
@@ -696,30 +691,10 @@ constructor(
                 .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
 
-            val tilesUri = URI("https://api.mapbox.com")
-            // Latest version available https://api.mapbox.com/route-tiles/v1/versions?access_token=
-            // as of 05/18/2020
-            val tilesVersion = "2020_02_02-03_00_00"
-            val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
-                File(
-                    context.filesDir,
-                    "Offline/${tilesUri.host}/$tilesVersion/$TILES_DIR_NAME"
-                ).absolutePath
-            } else ""
-
-            builder.onboardRouterConfig(
-                MapboxOnboardRouterConfig(
-                    tilesDir,
-                    null,
-                    null,
-                    2,
-                    Endpoint(
-                        tilesUri.toString(),
-                        tilesVersion,
-                        "MapboxNavigationNative"
-                    )
-                )
-            )
+            val onboardRouterOptions = OnboardRouterOptions.Builder()
+                .internalFilePath(context)
+                .build()
+            builder.onboardRouterOptions(onboardRouterOptions)
 
             return builder.build()
         }

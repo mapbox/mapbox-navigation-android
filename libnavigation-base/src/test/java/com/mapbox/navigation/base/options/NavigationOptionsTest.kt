@@ -17,7 +17,7 @@ class NavigationOptionsTest {
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
         assertEquals(options.distanceFormatter, null)
-        assertEquals(options.onboardRouterConfig, null)
+        assertEquals(options.onboardRouterOptions, null)
     }
 
     @Test
@@ -29,19 +29,16 @@ class NavigationOptionsTest {
                 throw NotImplementedError()
             }
         }
-        val routerConfig = MapboxOnboardRouterConfig("someTilePath")
 
         val options = NavigationOptions.Builder()
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)
-            .onboardRouterConfig(routerConfig)
             .build()
 
         assertEquals(options.timeFormatType, timeFormat)
         assertEquals(options.navigatorPredictionMillis, navigatorPredictionMillis)
         assertEquals(options.distanceFormatter, distanceFormatter)
-        assertEquals(options.onboardRouterConfig, routerConfig)
     }
 
     @Test
@@ -53,13 +50,11 @@ class NavigationOptionsTest {
                 throw NotImplementedError()
             }
         }
-        val routerConfig = MapboxOnboardRouterConfig("someTilePath")
 
         var options = NavigationOptions.Builder()
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)
-            .onboardRouterConfig(routerConfig)
             .build()
 
         val builder = options.toBuilder()
@@ -73,6 +68,5 @@ class NavigationOptionsTest {
         assertEquals(options.timeFormatType, newTimeFormat)
         assertEquals(options.navigatorPredictionMillis, newNavigatorPredictionMillis)
         assertEquals(options.distanceFormatter, distanceFormatter)
-        assertEquals(options.onboardRouterConfig, routerConfig)
     }
 }
