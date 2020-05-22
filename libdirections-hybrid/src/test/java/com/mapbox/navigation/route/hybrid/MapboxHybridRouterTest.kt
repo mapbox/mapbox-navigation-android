@@ -186,12 +186,7 @@ class MapboxHybridRouterTest {
     fun networkStatusService_cleanup_calledOnChannelClose() = runBlocking {
         (networkStatusService.getNetworkStatusChannel() as Channel).close()
 
-        try {
-            networkStatusService.getNetworkStatusChannel().receive()
-        } catch (ex: Exception) {
-        }
-
-        every { context.unregisterReceiver(any()) } answers {}
+        hybridRouter.networkStatusJob.join()
 
         verify { context.unregisterReceiver(any()) }
     }

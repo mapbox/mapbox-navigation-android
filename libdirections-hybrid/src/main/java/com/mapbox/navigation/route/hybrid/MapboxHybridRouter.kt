@@ -34,7 +34,7 @@ class MapboxHybridRouter(
     private val onboardRouterHandler: RouterHandler by lazy {
         RouterHandler(mainRouter = onboardRouter, reserveRouter = offboardRouter)
     }
-    private val networkStatusJob: Job
+    internal val networkStatusJob: Job
 
     /**
      * routeDispatchHandler always references a router, (on-board or off-board).
