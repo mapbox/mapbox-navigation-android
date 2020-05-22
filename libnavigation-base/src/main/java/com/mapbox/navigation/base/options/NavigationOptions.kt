@@ -24,7 +24,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  *
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
- * @param onboardRouterConfig [MapboxOnboardRouterConfig] defines configuration for the default on-board router
+ * @param onboardRouterOptions [OnboardRouterOptions] defines configuration for the default on-board router
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
@@ -35,7 +35,7 @@ data class NavigationOptions(
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
-    val onboardRouterConfig: MapboxOnboardRouterConfig?,
+    val onboardRouterOptions: OnboardRouterOptions?,
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
@@ -55,7 +55,7 @@ data class NavigationOptions(
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
-        private var onboardRouterConfig: MapboxOnboardRouterConfig? = null
+        private var onboardRouterOptions: OnboardRouterOptions? = null
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = HandheldProfile()
@@ -93,8 +93,8 @@ data class NavigationOptions(
         /**
          * Defines configuration for the default on-board router
          */
-        fun onboardRouterConfig(onboardRouterConfig: MapboxOnboardRouterConfig?) =
-            apply { this.onboardRouterConfig = onboardRouterConfig }
+        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions?) =
+            apply { this.onboardRouterOptions = onboardRouterOptions }
 
         /**
          * Defines if the builder instance is created from the Navigation UI
@@ -118,7 +118,7 @@ data class NavigationOptions(
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,
-                onboardRouterConfig = onboardRouterConfig,
+                onboardRouterOptions = onboardRouterOptions,
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
                 deviceProfile = deviceProfile,

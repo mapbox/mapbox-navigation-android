@@ -16,8 +16,8 @@ import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -68,7 +68,7 @@ class MapboxNavigationTest {
     private val tripSession: TripSession = mockk(relaxUnitFun = true)
     private val location: Location = mockk(relaxUnitFun = true)
     private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
-    private val onBoardRouterConfig: MapboxOnboardRouterConfig = mockk(relaxed = true)
+    private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
     private val routes: List<DirectionsRoute> = listOf(mockk())
@@ -81,7 +81,7 @@ class MapboxNavigationTest {
         .accessToken(accessToken)
         .distanceFormatter(distanceFormatter)
         .navigatorPredictionMillis(1500L)
-        .onboardRouterConfig(onBoardRouterConfig)
+        .onboardRouterOptions(onBoardRouterOptions)
         .timeFormatType(NONE_SPECIFIED)
         .build()
 

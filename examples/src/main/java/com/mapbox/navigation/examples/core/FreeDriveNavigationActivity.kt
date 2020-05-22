@@ -13,8 +13,7 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.navigation.base.options.Endpoint
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -23,11 +22,8 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
-import java.io.File
 import java.lang.ref.WeakReference
-import java.net.URI
-import kotlinx.android.synthetic.main.free_drive_navigation_layout.mapView
-import kotlinx.android.synthetic.main.free_drive_navigation_layout.startNavigation
+import kotlinx.android.synthetic.main.free_drive_navigation_layout.*
 import timber.log.Timber
 
 /**
@@ -63,7 +59,14 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 this,
                 Utils.getMapboxAccessToken(this)
         )
-        val updatedOptions = mapboxNavigationOptions.toBuilder().onboardRouterConfig(getOnBoardRouterConfig()).build()
+
+        val updatedOptions = mapboxNavigationOptions.toBuilder()
+            .onboardRouterOptions(OnboardRouterOptions.Builder()
+                .tilesUri("https://api-routing-tiles-staging.tilestream.net")
+                .tilesVersion("2020_02_02-03_00_00")
+                .internalFilePath(this)
+                .build())
+            .build()
 
         mapboxNavigation = MapboxNavigation(
                 applicationContext,
@@ -189,29 +192,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun stopLocationUpdates() {
         mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-    }
-
-    private fun getOnBoardRouterConfig(): MapboxOnboardRouterConfig {
-        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-        val tilesVersion = "2020_02_02-03_00_00"
-        val tilesDir = if (tilesUri.toString().isNotEmpty() && tilesVersion.isNotEmpty()) {
-            File(
-                    this.filesDir,
-                    "Offline/${tilesUri.host}/$tilesVersion"
-            ).absolutePath
-        } else ""
-
-        return MapboxOnboardRouterConfig(
-                tilesDir,
-                null,
-                null,
-                2,
-                Endpoint(
-                        tilesUri.toString(),
-                        tilesVersion,
-                        "MapboxNavigationNative"
-                )
-        )
     }
 
     private val tripSessionStateObserver = object : TripSessionStateObserver {

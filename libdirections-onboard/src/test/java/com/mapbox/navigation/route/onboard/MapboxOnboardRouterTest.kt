@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -61,6 +61,9 @@ class MapboxOnboardRouterTest {
     private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
     private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
+    private val onboardRouterOptions = OnboardRouterOptions.Builder()
+        .filePath("test_file_path")
+        .build()
     private val logger: Logger = mockk(relaxUnitFun = true)
     private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
 
@@ -68,7 +71,7 @@ class MapboxOnboardRouterTest {
     fun setUp() {
         every { navigator.configureRouter(any(), any()) } returns 0
         every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
-        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, MapboxOnboardRouterConfig(TILE_PATH), logger, mockSkuTokenProvider)
+        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE

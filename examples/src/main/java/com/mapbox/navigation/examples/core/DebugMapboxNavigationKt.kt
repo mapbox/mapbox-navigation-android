@@ -36,6 +36,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -57,7 +58,6 @@ import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
-import java.net.URI
 import java.util.Date
 import java.util.Locale
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
@@ -136,29 +136,14 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         val options =
                 MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
 
-        val tilesUri = URI("https://api-routing-tiles-staging.tilestream.net")
-        val tilesVersion = "2020_02_02-03_00_00"
-
-        val endpoint = options.onboardRouterConfig?.endpoint?.toBuilder()
-                ?.host(tilesUri.toString())
-                ?.version(tilesVersion)
-                ?.build()
-
-        val onboardRouterConfig = options.onboardRouterConfig?.toBuilder()
-                ?.tilePath(
-                        File(
-                                filesDir,
-                                "Offline/${tilesUri.host}/$tilesVersion"
-                        ).absolutePath
-                )
-                ?.endpoint(endpoint)
-                ?.build()
-
-        val newOptions =
-                options.toBuilder()
-                        .onboardRouterConfig(onboardRouterConfig)
-                        .navigatorPredictionMillis(1000L)
-                        .build()
+        val newOptions = options.toBuilder()
+            .onboardRouterOptions(OnboardRouterOptions.Builder()
+                .tilesUri("https://api-routing-tiles-staging.tilestream.net")
+                .tilesVersion("2020_02_02-03_00_00")
+                .internalFilePath(this)
+                .build())
+            .navigatorPredictionMillis(1000L)
+            .build()
 
         mapboxNavigation = getMapboxNavigation(newOptions)
     }

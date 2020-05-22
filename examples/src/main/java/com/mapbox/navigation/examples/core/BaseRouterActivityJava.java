@@ -32,7 +32,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.navigation.base.metrics.MetricsObserver;
 import com.mapbox.navigation.base.options.HandheldProfile;
-import com.mapbox.navigation.base.options.MapboxOnboardRouterConfig;
+import com.mapbox.navigation.base.options.OnboardRouterOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
 import com.mapbox.navigation.examples.R;
@@ -82,22 +82,16 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   }
 
   public static Router setupOnboardRouter(Context context) {
-    File file = new File(
-        Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath(),
-        "2019_04_13-00_00_11");
-    File fileTiles = new File(file, "tiles");
-    MapboxOnboardRouterConfig config = new MapboxOnboardRouterConfig(
-        fileTiles.getAbsolutePath(),
-        null,
-        null,
-        null,
-        null // working with pre-fetched tiles only
-    );
+    String externalFilePath = Environment.getExternalStoragePublicDirectory("Offline").getAbsolutePath();
+    File file = new File(externalFilePath, "tiles");
+    OnboardRouterOptions onboardRouterOptions = new OnboardRouterOptions.Builder()
+            .filePath(file.getAbsolutePath())
+            .build();
 
     return new MapboxOnboardRouter(
             Utils.getMapboxAccessToken(context),
             MapboxNativeNavigatorImpl.INSTANCE.create(new HandheldProfile()),
-            config,
+            onboardRouterOptions,
             MapboxLogger.INSTANCE,
             MapboxNavigationAccounts.getInstance(context)
     );
