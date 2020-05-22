@@ -125,6 +125,15 @@ internal class MapRouteLine(
     var vanishPointOffset: Float = 0f
         private set
 
+    private val routeLineTraveledColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_routeLineTraveledColor,
+            R.color.mapbox_navigation_route_line_traveled_color,
+            context,
+            styleRes
+        )
+    }
+
     private val routeUnknownColor: Int by lazy {
         getStyledColor(
             R.styleable.NavigationMapRoute_routeUnknownCongestionColor,
@@ -625,7 +634,7 @@ internal class MapRouteLine(
 
         return Expression.step(
             Expression.lineProgress(),
-            Expression.rgba(0, 0, 0, 0),
+            Expression.color(routeLineTraveledColor),
             *trafficExpressions.toTypedArray()
         )
     }
