@@ -9,8 +9,7 @@ apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
 dokka {
-    outputDirectory = "$buildDir/javadoc"
-    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/kdoc"
     configuration {
         moduleName = 'libnavui-base'
         // TODO temporarily disabled for prototyping phase

@@ -2,11 +2,11 @@ package com.mapbox.navigation.ui.alert
 
 import com.mapbox.navigation.ui.base.model.AlertState
 
-typealias SetAlertText<T1, T2> = (input: T1) -> T2
+internal typealias SetAlertText<T1, T2> = (input: T1) -> T2
 
-typealias SetDismissDuration<T1, T2> = (input: T1) -> T2
+internal typealias SetDismissDuration<T1, T2> = (input: T1) -> T2
 
-typealias AlertReducer<T1, T2> = (input1: T1, input2: T2) -> T1
+internal typealias AlertReducer<T1, T2> = (input1: T1, input2: T2) -> T1
 
 internal val setAlertText: SetAlertText<AlertAction, AlertResult> = { action ->
     if (action is AlertAction.SetAlertText) {

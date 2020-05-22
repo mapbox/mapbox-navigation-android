@@ -5,8 +5,7 @@ apply plugin: 'com.jaredsburrows.license'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
 dokka {
-    outputDirectory = "$buildDir/javadoc"
-    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/kdoc"
     configuration {
         moduleName = 'libnavigation-base'
         reportUndocumented = true

@@ -25,7 +25,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 
 private const val DISPATCHER_TAG = "TELEMETRY_TEST"
-typealias RouteProgressReference = (RouteProgress) -> Unit
+private typealias RouteProgressReference = (RouteProgress) -> Unit
 
 internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     RouteProgressObserver, LocationObserver, RoutesObserver, OffRouteObserver {
