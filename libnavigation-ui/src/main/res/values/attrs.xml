@@ -8,6 +8,7 @@
     <attr name="routeHeavyCongestionColor" format="color"/>
     <attr name="routeSevereCongestionColor" format="color"/>
     <attr name="routeShieldColor" format="color"/>
+    <attr name="routeLineTraveledColor" format="color"/>
 
     <!-- Alternative route colors -->
     <attr name="alternativeRouteColor" format="color"/>
