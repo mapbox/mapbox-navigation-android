@@ -40,7 +40,6 @@ internal class MapRouteProgressChangeListener(
     ) : this(routeLine, routeArrow, false)
 
     private var job: Job? = null
-    private var isVisible = true
     private var lastDistanceValue = 0f
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
@@ -58,7 +57,9 @@ internal class MapRouteProgressChangeListener(
         if (hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute!!)
         } else {
-            if (vanishRouteLineEnabled && (job == null || !job!!.isActive)) {
+            // if there is no geometry then the session is in free drive and the vanishing
+            // route line code should not execute.
+            if (vanishRouteLineEnabled && hasGeometry && (job == null || !job!!.isActive)) {
                 job = ThreadController.getMainScopeAndRootJob().scope.launch {
                     val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
                     if (percentDistanceTraveled > 0) {
