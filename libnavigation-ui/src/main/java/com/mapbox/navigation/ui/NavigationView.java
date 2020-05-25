@@ -119,6 +119,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     super(context, attrs, defStyleAttr);
     ThemeSwitcher.setTheme(context, attrs);
     initializeView();
+    lifecycleRegistry = new LifecycleRegistry(this);
   }
 
   /**
@@ -129,8 +130,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   public void onCreate(@Nullable Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
     updatePresenterState(savedInstanceState);
-    lifecycleRegistry = new LifecycleRegistry(this);
-    lifecycleRegistry.markState(Lifecycle.State.CREATED);
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
   }
 
   /**
@@ -190,6 +190,33 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
   }
 
+
+  public void onStart() {
+    mapView.onStart();
+    if (navigationMap != null) {
+      navigationMap.onStart();
+    }
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START);
+  }
+
+  public void onResume() {
+    mapView.onResume();
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);
+  }
+
+  public void onPause() {
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);
+    mapView.onPause();
+  }
+
+  public void onStop() {
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
+    mapView.onStop();
+    if (navigationMap != null) {
+      navigationMap.onStop();
+    }
+  }
+
   /**
    * Called to ensure the {@link MapView} is destroyed
    * properly.
@@ -200,32 +227,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * be in {@link androidx.fragment.app.Fragment#onDestroyView()}.
    */
   public void onDestroy() {
+    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
     shutdown();
-    lifecycleRegistry.markState(Lifecycle.State.DESTROYED);
-  }
-
-  public void onStart() {
-    mapView.onStart();
-    if (navigationMap != null) {
-      navigationMap.onStart();
-    }
-    lifecycleRegistry.markState(Lifecycle.State.STARTED);
-  }
-
-  public void onResume() {
-    mapView.onResume();
-    lifecycleRegistry.markState(Lifecycle.State.RESUMED);
-  }
-
-  public void onPause() {
-    mapView.onPause();
-  }
-
-  public void onStop() {
-    mapView.onStop();
-    if (navigationMap != null) {
-      navigationMap.onStop();
-    }
   }
 
   @NonNull
