@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.route;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +26,9 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY;
+import static com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DURATION;
 
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
@@ -62,6 +67,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteArrow routeArrow;
   private boolean vanishRouteLineEnabled;
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
+  private ValueAnimator vanishingRouteLineAnimator;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -93,10 +99,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
     this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
-    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(
-            this.routeLine,
-            routeArrow, vanishRouteLineEnabled
-    );
+    this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     this.routeLineInitializedCallback = routeLineInitializedCallback;
     this.lifecycleOwner = lifecycleOwner;
     initializeDidFinishLoadingStyleListener();
@@ -269,6 +272,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param navigation to remove the progress change listener
    */
   public void removeProgressChangeListener(MapboxNavigation navigation) {
+    shutdownVanishingRouteLineAnimator();
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
@@ -287,6 +291,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   protected void onStop() {
+    shutdownVanishingRouteLineAnimator();
     removeListeners();
   }
 
@@ -347,6 +352,13 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
+  private void shutdownVanishingRouteLineAnimator() {
+    if (this.vanishingRouteLineAnimator != null) {
+      this.vanishingRouteLineAnimator.removeAllUpdateListeners();
+      this.vanishingRouteLineAnimator.cancel();
+    }
+  }
+
   private void redraw(Style style) {
     recreateRouteLine(style);
     boolean arrowVisibility = routeArrow.routeArrowIsVisible();
@@ -383,7 +395,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
-    mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow, vanishRouteLineEnabled);
+    mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     if (navigation != null) {
       navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }
@@ -393,6 +405,24 @@ public class NavigationMapRoute implements LifecycleObserver {
     if (mapRouteProgressChangeListener != null) {
       mapRouteProgressChangeListener.onRouteProgressChanged(routeProgress);
     }
+  }
+
+  private MapRouteProgressChangeListener buildMapRouteProgressChangeListener() {
+    shutdownVanishingRouteLineAnimator();
+    if (vanishRouteLineEnabled) {
+      vanishingRouteLineAnimator = ValueAnimator.ofFloat();
+      vanishingRouteLineAnimator.setDuration(ROUTE_LINE_VANISH_ANIMATION_DURATION);
+      vanishingRouteLineAnimator.setInterpolator(new LinearInterpolator());
+      vanishingRouteLineAnimator.setStartDelay(ROUTE_LINE_VANISH_ANIMATION_DELAY);
+    } else {
+      vanishingRouteLineAnimator = null;
+    }
+
+    return new MapRouteProgressChangeListener(
+            this.routeLine,
+            routeArrow,
+            vanishingRouteLineAnimator
+    );
   }
 
   /**
