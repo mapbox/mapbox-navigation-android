@@ -1,5 +1,3 @@
-@file:JvmName("SpanEx")
-
 package com.mapbox.navigation.trip.notification.time.span
 
 import android.os.Build

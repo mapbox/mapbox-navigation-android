@@ -23,6 +23,7 @@ class MapboxReplayer {
      * When they are drastically different, you may need to [seekTo] events.
      *
      * @param events the events to be replayed.
+     * @return [MapboxReplayer]
      */
     fun pushEvents(events: List<ReplayEventBase>): MapboxReplayer {
         this.replayEvents.events.addAll(events)

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.base.route.internal
+package com.mapbox.navigation.base.internal.route
 
 import android.net.Uri
 import com.mapbox.geojson.Point

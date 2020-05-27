@@ -8,7 +8,5 @@ package com.mapbox.navigation.utils
  *
  * @param message the detail message (which is saved for later retrieval by the
  * [Throwable.message] method).
- *
- * @since 0.2.0
  */
 class NavigationException(message: String) : RuntimeException(message)

@@ -1,5 +1,3 @@
-@file:JvmName("MapboxDirectionsUtils")
-
 package com.mapbox.navigation.route.offboard.router
 
 import com.mapbox.api.directions.v5.MapboxDirections

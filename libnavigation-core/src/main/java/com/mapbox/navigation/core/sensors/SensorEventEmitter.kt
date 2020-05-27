@@ -7,7 +7,7 @@ import android.hardware.SensorManager
 
 /**
  * This class makes it simple to register listeners to the [SensorManager]. Use [start] to
- * register and pass the [SensorEvent]s to MapboxNavigation.updateSensorEvent.
+ * register and pass the [SensorEvent]s to [MapboxNavigation.updateSensorEvent].
  *
  * @param sensorManager [SensorManager]
  */

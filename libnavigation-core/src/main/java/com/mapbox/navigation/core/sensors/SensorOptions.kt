@@ -38,6 +38,7 @@ data class SensorOptions(
         /**
          * Set a set of sensors that will be handled
          *
+         * @param sensorTypes that will be handled
          * @return Builder
          */
         fun enableSensors(sensorTypes: Set<Int>): Builder {
@@ -48,6 +49,7 @@ data class SensorOptions(
         /**
          * Signals per second received from sensors
          *
+         * @param signalsPerSecond received from sensors
          * @return Builder
          */
         fun signalsPerSecond(signalsPerSecond: Int): Builder {

@@ -23,7 +23,6 @@ import kotlin.math.roundToInt
  * Creates an instance of DistanceFormatter, which can format distances in meters
  * based on a language format and unit type.
  *
- *
  * This constructor will infer device language and unit type using the device locale.
  *
  * @param applicationContext from which to get localized strings from
@@ -78,6 +77,7 @@ class MapboxDistanceFormatter private constructor(
 
         /**
          * Policy for the various units of measurement, UNDEFINED uses default for locale country
+         *
          * @param unitType String
          * @return Builder
          */
@@ -87,7 +87,7 @@ class MapboxDistanceFormatter private constructor(
         /**
          * Minimal value that distance might be stripped
          *
-         * @see [Rounding.Increment]
+         * @param roundingIncrement [Rounding.Increment]
          * @return Builder
          */
         fun withRoundingIncrement(@Rounding.Increment roundingIncrement: Int) =
@@ -96,6 +96,7 @@ class MapboxDistanceFormatter private constructor(
         /**
          * Use a non-default [Locale]. By default, the [Locale] is used from applicationContext
          *
+         * @param locale [Locale]
          * @return Builder
          */
         fun withLocale(locale: Locale) =
@@ -105,6 +106,7 @@ class MapboxDistanceFormatter private constructor(
          * Build a new instance of [MapboxDistanceFormatter]
          *
          * @param context converted to applicationContext to save memory leaks
+         * @return [MapboxDistanceFormatter]
          */
         fun build(context: Context): MapboxDistanceFormatter {
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
@@ -176,9 +178,9 @@ class MapboxDistanceFormatter private constructor(
      * Takes in a distance and units and returns a formatted SpannableString where the number is bold
      * and the unit is shrunked to .65 times the size
      *
-     * @param distance formatted with appropriate decimal places
-     * @param unit string from TurfConstants. This will be converted to the abbreviated form.
-     * @return String with bolded distance and shrunken units
+     * @param distanceAndSuffix distance formatted with appropriate decimal places and unit string
+     * from TurfConstants. This will be converted to the abbreviated form.
+     * @return [SpannableString] with bolded distance and shrunken units
      */
     internal fun getSpannableDistanceString(distanceAndSuffix: Pair<String, String>): SpannableString {
         val spannableString = SpannableString("${distanceAndSuffix.first} ${distanceAndSuffix.second}")

@@ -114,7 +114,7 @@ class MapboxTripService(
     }
 
     /**
-     * Stop MapboxTripSerice
+     * Stop MapboxTripService
      */
     override fun stopService() {
         when (serviceStarted.compareAndSet(true, false)) {

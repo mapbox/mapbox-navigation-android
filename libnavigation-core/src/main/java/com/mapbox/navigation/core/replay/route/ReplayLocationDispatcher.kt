@@ -4,7 +4,6 @@ import android.location.Location
 import android.os.Handler
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
-import org.jetbrains.annotations.TestOnly
 
 internal class ReplayLocationDispatcher : Runnable {
     private var locationsToReplay: MutableList<Location>
@@ -22,14 +21,6 @@ internal class ReplayLocationDispatcher : Runnable {
         checkValidInput(locationsToReplay)
         this.locationsToReplay = CopyOnWriteArrayList(locationsToReplay)
         initialize()
-    }
-
-    @TestOnly
-    constructor(locationsToReplay: MutableList<Location>, handler: Handler) {
-        checkValidInput(locationsToReplay)
-        this.locationsToReplay = locationsToReplay
-        initialize()
-        this.handler = handler
     }
 
     override fun run() {
