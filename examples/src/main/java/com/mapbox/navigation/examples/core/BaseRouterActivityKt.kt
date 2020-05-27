@@ -32,12 +32,12 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.internal.route.RouteUrl.Companion.PROFILE_DRIVING_TRAFFIC
 import com.mapbox.navigation.base.metrics.MetricsObserver
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.HandheldProfile
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.internal.RouteUrl.Companion.PROFILE_DRIVING_TRAFFIC
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils

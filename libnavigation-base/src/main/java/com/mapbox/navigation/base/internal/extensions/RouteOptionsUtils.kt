@@ -4,7 +4,7 @@ package com.mapbox.navigation.base.internal.extensions
 
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.route.internal.RouteUrl
+import com.mapbox.navigation.base.internal.route.RouteUrl
 
 /**
  * Applies default [RouteOptions] parameters to the RouteOptions builder

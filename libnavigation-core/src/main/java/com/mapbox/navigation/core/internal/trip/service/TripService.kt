@@ -17,7 +17,7 @@ interface TripService {
     fun startService()
 
     /**
-     * Stop TripSerice
+     * Stop TripService
      */
     fun stopService()
 

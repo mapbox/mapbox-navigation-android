@@ -1,4 +1,4 @@
-package com.mapbox.navigation.utils.extensions
+package com.mapbox.navigation.utils.internal
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
  *
  * @param f a function that transforms the element in the list to another type
  * @param scope the coroutine scope to use for execute the asynchronous operation
+ * @return a [List] of `B`
  */
 fun <A, B> List<A>.parallelMap(f: (A) -> B, scope: CoroutineScope): List<B> = runBlocking {
     map { scope.async(Dispatchers.Default) { f(it) } }.map { it.await() }

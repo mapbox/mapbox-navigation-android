@@ -42,8 +42,8 @@ import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
 import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_PROPERTY_KEY
 import com.mapbox.navigation.ui.utils.MapUtils
-import com.mapbox.navigation.utils.extensions.parallelMap
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfMeasurement
 
 /**

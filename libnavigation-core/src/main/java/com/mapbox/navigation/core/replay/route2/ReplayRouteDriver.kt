@@ -21,6 +21,7 @@ internal class ReplayRouteDriver {
      *
      * @param options allow you to control the driver and car behavior
      * @param geometry polyline string at [DirectionsCriteria.GEOMETRY_POLYLINE6]
+     * @return [ReplayRouteLocation] [List]
      */
     fun driveGeometry(options: ReplayRouteOptions, geometry: String): List<ReplayRouteLocation> {
         val coordinates = LineString.fromPolyline(geometry, 6).coordinates()
@@ -32,6 +33,7 @@ internal class ReplayRouteDriver {
      *
      * @param options allow you to control the driver and car behavior
      * @param points list of points describing a route
+     * @return [ReplayRouteLocation] [List]
      */
     fun drivePointList(options: ReplayRouteOptions, points: List<Point>): List<ReplayRouteLocation> {
         val distinctPoints = routeSmoother.distinctPoints(points, ReplayRouteSmoother.DISTINCT_POINT_METERS)
@@ -50,6 +52,7 @@ internal class ReplayRouteDriver {
      * [DirectionsCriteria.ANNOTATION_DISTANCE].
      *
      * @param routeLeg Directions API response of a [RouteLeg].
+     * @return [ReplayRouteLocation] [List]
      */
     fun driveRouteLeg(routeLeg: RouteLeg): List<ReplayRouteLocation> {
         val replayRouteLocations = mutableListOf<ReplayRouteLocation>()

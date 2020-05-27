@@ -239,7 +239,13 @@ constructor(
     }
 
     /**
-     * Return the current [TripSessionState].
+     * Return the current [TripSession]'s state.
+     * The state is [STARTED] when the session is active, running a foreground service and
+     * requesting and returning location updates.
+     * The state is [STOPPED] when the session is inactive.
+     *
+     * @return current [TripSessionState]
+     * @see [registerTripSessionStateObserver]
      */
     fun getTripSessionState() = tripSession.getState()
 
@@ -322,6 +328,8 @@ constructor(
 
     /**
      * API used to retrieve logged location and route progress samples for debug purposes.
+     *
+     * @return history trace string
      */
     fun retrieveHistory(): String {
         return MapboxNativeNavigatorImpl.getHistory()
@@ -342,7 +350,9 @@ constructor(
     }
 
     /**
-     * API used to retrieve the ssmlannouncement for voice instruction.
+     * API used to retrieve the SSML announcement for voice instructions.
+     *
+     * @return SSML voice instruction announcement string
      */
     fun retrieveSsmlAnnouncementInstruction(index: Int): String? =
         MapboxNativeNavigatorImpl.getVoiceInstruction(index)?.ssmlAnnouncement
@@ -551,12 +561,12 @@ constructor(
     private fun createInternalOffRouteObserver() = object : OffRouteObserver {
         override fun onOffRouteStateChanged(offRoute: Boolean) {
             if (offRoute) {
-                reRoute()
+                reroute()
             }
         }
     }
 
-    private fun reRoute() {
+    private fun reroute() {
         ifNonNull(tripSession.getEnhancedLocation()) { location ->
             val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(
                 directionsSession,
@@ -678,6 +688,10 @@ constructor(
          * Returns a pre-build set of [NavigationOptions] with smart defaults.
          *
          * Use [NavigationOptions.toBuilder] to easily customize selected options.
+         *
+         * @param context [Context]
+         * @param accessToken Mapbox access token
+         * @return default [NavigationOptions]
          */
         @JvmStatic
         fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {

@@ -3,6 +3,7 @@ package com.mapbox.navigation.base.route.internal
 import android.net.Uri
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
+import com.mapbox.navigation.base.internal.route.RouteUrl
 import java.net.URLDecoder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

@@ -3,9 +3,7 @@ package com.mapbox.navigation.route.offboard.router
 import okhttp3.Call
 import okhttp3.EventListener
 
-internal class NavigationRouteEventListener
-@JvmOverloads
-constructor(
+internal class NavigationRouteEventListener(
     val time: ElapsedTime = ElapsedTime()
 ) : EventListener() {
 

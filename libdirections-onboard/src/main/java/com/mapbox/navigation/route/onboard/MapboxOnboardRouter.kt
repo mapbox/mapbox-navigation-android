@@ -10,10 +10,10 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
+import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
-import com.mapbox.navigation.base.route.internal.RouteUrl
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.utils.NavigationException
@@ -104,7 +104,8 @@ class MapboxOnboardRouter(
                 origin = origin,
                 waypoints = waypoints,
                 destination = destination,
-                steps = routeOptions.steps() ?: RouteUrl.STEPS_DEFAULT_VALUE,
+                steps = routeOptions.steps()
+                    ?: RouteUrl.STEPS_DEFAULT_VALUE,
                 voiceInstruction = routeOptions.voiceInstructions()
                     ?: RouteUrl.VOICE_INSTRUCTION_DEFAULT_VALUE,
                 voiceUnits = routeOptions.voiceUnits(),
@@ -112,7 +113,8 @@ class MapboxOnboardRouter(
                     ?: RouteUrl.BANNER_INSTRUCTION_DEFAULT_VALUE,
                 roundaboutExits = routeOptions.roundaboutExits()
                     ?: RouteUrl.ROUNDABOUT_EXITS_DEFAULT_VALUE,
-                alternatives = routeOptions.alternatives() ?: RouteUrl.ALTERNATIVES_DEFAULT_VALUE,
+                alternatives = routeOptions.alternatives()
+                    ?: RouteUrl.ALTERNATIVES_DEFAULT_VALUE,
                 continueStraight = routeOptions.continueStraight(),
                 exclude = routeOptions.exclude(),
                 language = routeOptions.language(),

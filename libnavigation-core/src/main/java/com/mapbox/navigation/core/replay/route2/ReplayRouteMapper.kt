@@ -31,6 +31,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * and position estimates for the replay locations.
      *
      * @param directionsRoute the [DirectionsRoute] containing information about a route
+     * @return [ReplayEventBase] [List]
      */
     fun mapDirectionsRouteGeometry(directionsRoute: DirectionsRoute): List<ReplayEventBase> {
         val geometries = directionsRoute.routeOptions()?.geometries()
@@ -47,6 +48,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * [LegStep.geometry] composed together.
      *
      * @param routeLeg the [RouteLeg] that is converted to replay events
+     * @return [ReplayEventBase] [List]
      */
     fun mapRouteLegGeometry(routeLeg: RouteLeg): List<ReplayEventBase> {
         val replayEvents = mutableListOf<ReplayEventBase>()
@@ -65,6 +67,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * Simulate a driver navigating a polyline string.
      *
      * @param geometry is a [DirectionsCriteria.GEOMETRY_POLYLINE6]
+     * @return [ReplayEventBase] [List]
      */
     fun mapGeometry(geometry: String): List<ReplayEventBase> {
         return replayRouteDriver.driveGeometry(options, geometry)
@@ -77,6 +80,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * estimates for the replay locations.
      *
      * @param directionsRoute the [DirectionsRoute] containing information about a route
+     * @return [ReplayEventBase] [List]
      */
     fun mapDirectionsRouteLegAnnotation(directionsRoute: DirectionsRoute): List<ReplayEventBase> {
         return directionsRoute.legs()?.flatMap { routeLeg ->
@@ -90,6 +94,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
      * [DirectionsCriteria.ANNOTATION_DISTANCE]
      *
      * @param routeLeg the [RouteLeg] to be mapped into replay events
+     * @return [ReplayEventBase] [List]
      */
     fun mapRouteLegAnnotation(routeLeg: RouteLeg): List<ReplayEventBase> {
         return replayRouteDriver.driveRouteLeg(routeLeg)
@@ -104,7 +109,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
          *
          * @param eventTimestamp the eventTimestamp for the replay event
          * @param location Android location to be replayed
-         * @return an event that can be replayed
+         * @return a [ReplayEventBase] event that can be replayed
          */
         fun mapToUpdateLocation(eventTimestamp: Double, location: Location): ReplayEventBase {
             return ReplayEventUpdateLocation(
@@ -126,7 +131,7 @@ class ReplayRouteMapper @JvmOverloads constructor(
          * Map an Android location into a replay event.
          *
          * @param location simulated location used for replay
-         * @return an event that can be replayed
+         * @return a [ReplayEventBase] event that can be replayed
          */
         internal fun mapToUpdateLocation(location: ReplayRouteLocation): ReplayEventBase {
             return ReplayEventUpdateLocation(

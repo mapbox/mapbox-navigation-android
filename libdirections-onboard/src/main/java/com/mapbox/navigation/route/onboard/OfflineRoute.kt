@@ -2,11 +2,11 @@ package com.mapbox.navigation.route.onboard
 
 import android.net.Uri
 import androidx.annotation.FloatRange
-import com.mapbox.navigation.base.route.internal.RouteUrl
+import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.utils.internal.ifNonNull
 
 /**
- * The [OfflineRoute] class wraps the [NavigationRoute] class with parameters which
+ * The [OfflineRoute] class wraps the [RouteUrl] class with parameters which
  * could be set in order for an offline navigation session to successfully begin.
  */
 internal class OfflineRoute

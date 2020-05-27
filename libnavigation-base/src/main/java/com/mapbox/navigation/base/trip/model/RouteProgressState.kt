@@ -9,8 +9,8 @@ enum class RouteProgressState {
 
     /**
      * The [com.mapbox.api.directions.v5.models.DirectionsRoute] provided
-     * via [com.mapbox.navigation.core.MapboxNavigation.startNavigation]
-     * is not valid.
+     * via [com.mapbox.navigation.core.MapboxNavigation.setRoutes]
+     * when in `Active Guidance` is not valid.
      */
     ROUTE_INVALID,
 

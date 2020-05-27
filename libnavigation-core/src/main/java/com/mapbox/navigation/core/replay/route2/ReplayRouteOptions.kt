@@ -38,6 +38,8 @@ class ReplayRouteOptions(
 
         /**
          * Build your [ReplayRouteOptions].
+         *
+         * @return [ReplayRouteOptions]
          */
         fun build(): ReplayRouteOptions {
             return ReplayRouteOptions(
@@ -52,6 +54,9 @@ class ReplayRouteOptions(
 
         /**
          * Max speed the driver will drive on straight-aways
+         *
+         * @param maxSpeedMps
+         * @return [Builder]
          */
         fun maxSpeedMps(maxSpeedMps: Double): Builder {
             this.maxSpeedMps = maxSpeedMps
@@ -60,6 +65,9 @@ class ReplayRouteOptions(
 
         /**
          * Speed the driver will slow down for turns approaching 90 degrees
+         *
+         * @param minSpeedMps
+         * @return [Builder]
          */
         fun turnSpeedMps(minSpeedMps: Double): Builder {
             this.turnSpeedMps = minSpeedMps
@@ -68,6 +76,9 @@ class ReplayRouteOptions(
 
         /**
          * Speed the driver will go when facing a u-turn
+         *
+         * @param uTurnSpeedMps
+         * @return [Builder]
          */
         fun uTurnSpeedMps(uTurnSpeedMps: Double): Builder {
             this.uTurnSpeedMps = uTurnSpeedMps
@@ -75,7 +86,10 @@ class ReplayRouteOptions(
         }
 
         /**
-         * How fast the driver will accelerate to [maxSpeedMps] in mps^2
+         * How fast the driver will accelerate to [maxSpeedMps]
+         *
+         * @param maxAcceleration in mps^2
+         * @return [Builder]
          */
         fun maxAcceleration(maxAcceleration: Double): Builder {
             this.maxAcceleration = maxAcceleration
@@ -83,7 +97,10 @@ class ReplayRouteOptions(
         }
 
         /**
-         * How fast the driver will decelerate in mps^2
+         * How fast the driver will decelerate
+         *
+         * @param minAcceleration in mps^2
+         * @return [Builder]
          */
         fun minAcceleration(minAcceleration: Double): Builder {
             this.minAcceleration = minAcceleration

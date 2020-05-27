@@ -62,7 +62,7 @@ import static com.mapbox.mapboxsdk.log.Logger.VERBOSE;
 import static com.mapbox.mapboxsdk.log.Logger.WARN;
 import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils.applyDefaultParams;
 import static com.mapbox.navigation.base.internal.extensions.MapboxRouteOptionsUtils.coordinates;
-import static com.mapbox.navigation.base.route.internal.RouteUrl.PROFILE_DRIVING_TRAFFIC;
+import static com.mapbox.navigation.base.internal.route.RouteUrl.PROFILE_DRIVING_TRAFFIC;
 
 /**
  * This base activity sets up various Mapbox Navigation SDK routers so that
