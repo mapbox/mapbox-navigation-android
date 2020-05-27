@@ -86,4 +86,34 @@
         <!-- Summary bottom sheet secondary text color (e.g. the remaining distance label) -->
         <item name="summaryBottomSheetSecondaryTextColor">@color/navigation_secondary_text</item>
     </style>
+
+    <style name="CustomRouteTheme" parent="NavigationViewLight">
+        <item name="navigationViewRouteStyle">@style/CustomRouteStyle</item>
+    </style>
+
+    <style name="CustomRouteStyle" parent="@style/NavigationMapRoute">
+        <item name="routeColor">@color/customRouteColor</item>
+        <item name="routeUnknownCongestionColor">@color/customRouteUnknownCongestionColor</item>
+        <item name="routeModerateCongestionColor">@color/customRouteModerateCongestionColor</item>
+        <item name="routeHeavyCongestionColor">@color/customRouteHeavyCongestionColor</item>
+        <item name="routeSevereCongestionColor">@color/customRouteSevereCongestionColor</item>
+        <item name="routeShieldColor">@color/customRouteShieldColor</item>
+        <item name="routeLineTraveledColor">@color/customRouteLineTraveledColor</item>
+        <item name="alternativeRouteColor">@color/customAlternativeRouteColor</item>
+        <item name="alternativeRouteUnknownCongestionColor">
+            @color/customAlternativeRouteUnknownCongestionColor
+        </item>
+        <item name="alternativeRouteModerateCongestionColor">
+            @color/customAlternativeRouteModerateCongestionColor
+        </item>
+        <item name="alternativeRouteHeavyCongestionColor">
+            @color/customAlternativeRouteHeavyCongestionColor
+        </item>
+        <item name="alternativeRouteSevereCongestionColor">
+            @color/customAlternativeRouteSevereCongestionColor
+        </item>
+        <item name="alternativeRouteShieldColor">
+            @color/customAlternativeRouteShieldColor
+        </item>
+    </style>
 </resources>
