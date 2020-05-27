@@ -391,7 +391,6 @@ class MapboxTripSession(
                 msg = Message("location on failure"),
                 tr = exception
             )
-            stopLocationUpdates()
         }
     }
 
