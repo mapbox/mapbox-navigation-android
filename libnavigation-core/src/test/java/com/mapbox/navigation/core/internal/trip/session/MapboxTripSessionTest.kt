@@ -35,6 +35,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import java.lang.Exception
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -176,6 +177,17 @@ class MapboxTripSessionTest {
 
         verify { observer.onRawLocationChanged(location) }
         assertEquals(location, tripSession.getRawLocation())
+
+        tripSession.stop()
+    }
+
+    @Test
+    fun locationObserverOnFailure() {
+        tripSession.start()
+
+        locationCallbackSlot.captured.onFailure(Exception("location failure"))
+
+        verify(exactly = 0) { locationEngine.removeLocationUpdates(locationCallbackSlot.captured) }
 
         tripSession.stop()
     }
