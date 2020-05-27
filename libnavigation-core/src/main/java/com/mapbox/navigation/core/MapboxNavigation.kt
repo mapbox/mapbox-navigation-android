@@ -27,6 +27,10 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
+import com.mapbox.navigation.core.arrival.ArrivalController
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
+import com.mapbox.navigation.core.arrival.AutoArrivalController
 import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -37,10 +41,6 @@ import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.trip.service.TripService
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
-import com.mapbox.navigation.core.stops.ArrivalController
-import com.mapbox.navigation.core.stops.ArrivalObserver
-import com.mapbox.navigation.core.stops.ArrivalProgressObserver
-import com.mapbox.navigation.core.stops.AutoArrivalController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver

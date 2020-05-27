@@ -26,14 +26,14 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalController
+import com.mapbox.navigation.core.arrival.ArrivalObserver
+import com.mapbox.navigation.core.arrival.ArrivalOptions
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route2.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
-import com.mapbox.navigation.core.stops.ArrivalController
-import com.mapbox.navigation.core.stops.ArrivalObserver
-import com.mapbox.navigation.core.stops.ArrivalOptions
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
