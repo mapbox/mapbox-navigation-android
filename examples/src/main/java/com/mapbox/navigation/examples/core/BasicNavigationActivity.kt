@@ -44,7 +44,7 @@ import timber.log.Timber
  * navigation experience with the Navigation SDK and
  * Navigation UI SDK.
  */
-class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
+open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         const val MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state"

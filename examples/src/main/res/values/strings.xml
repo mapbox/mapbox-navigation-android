@@ -96,6 +96,9 @@
     <string name="title_debug_navigation_kotlin" translatable="false">Debug MapboxNavigation Kotlin</string>
     <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update.</string>
 
+    <string name="title_custom_route_styling_kotlin" translatable="false">Custom Route Styling Kotlin</string>
+    <string name="description_custom_route_styling_kotlin" translatable="false">Demonstrates applying a custom style for the routes.</string>
+
     <string name="settings" translatable="false">Settings</string>
     <string name="simulate_route" translatable="false">Simulate Route</string>
     <string name="language" translatable="false">Language</string>

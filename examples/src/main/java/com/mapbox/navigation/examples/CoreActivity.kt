@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.core.BasicNavSdkOnlyActivity
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
+import com.mapbox.navigation.examples.core.CustomRouteStylingActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
 import com.mapbox.navigation.examples.core.FeedbackButtonActivity
@@ -161,7 +162,12 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_debug_navigation_kotlin),
                 getString(R.string.description_debug_navigation_kotlin),
                 DebugMapboxNavigationKt::class.java
-            )
+            ),
+            SampleItem(
+                getString(R.string.title_custom_route_styling_kotlin),
+                getString(R.string.description_custom_route_styling_kotlin),
+                CustomRouteStylingActivity::class.java
+        )
         )
     }
 }
