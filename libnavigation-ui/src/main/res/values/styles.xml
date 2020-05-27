@@ -4,16 +4,39 @@
     <style name="NavigationMapRoute">
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
+        <item name="routeUnknownCongestionColor">
+            @color/mapbox_navigation_route_layer_congestion_unknown
+        </item>
         <item name="routeModerateCongestionColor">
             @color/mapbox_navigation_route_layer_congestion_yellow
+        </item>
+        <item name="routeHeavyCongestionColor">
+            @color/mapbox_navigation_route_layer_congestion_heavy
         </item>
         <item name="routeSevereCongestionColor">
             @color/mapbox_navigation_route_layer_congestion_red
         </item>
         <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
-
+        <item name="routeLineTraveledColor">@color/mapbox_navigation_route_line_traveled_color</item>
+        <item name="alternativeRouteColor">@color/mapbox_navigation_route_alternative_color</item>
+        <item name="alternativeRouteUnknownCongestionColor">
+            @color/mapbox_navigation_route_alternative_congestion_unknown
+        </item>
+        <item name="alternativeRouteModerateCongestionColor">
+            @color/mapbox_navigation_route_alternative_congestion_yellow
+        </item>
+        <item name="alternativeRouteHeavyCongestionColor">
+            @color/mapbox_navigation_route_alternative_congestion_heavy
+        </item>
+        <item name="alternativeRouteSevereCongestionColor">
+            @color/mapbox_navigation_route_alternative_congestion_red
+        </item>
+        <item name="alternativeRouteShieldColor">
+            @color/mapbox_navigation_route_alternative_shield_color
+        </item>
         <!-- Scales -->
         <item name="routeScale">1.0</item>
+        <item name="alternativeRouteScale">1.0</item>
         <item name="upcomingManeuverArrowColor">
             @color/mapbox_navigation_route_upcoming_maneuver_arrow_color
         </item>
