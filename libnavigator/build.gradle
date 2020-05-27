@@ -47,6 +47,18 @@ dependencies {
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
 
+    implementation dependenciesList.mapboxBindgenSupport
+    implementation dependenciesList.mapboxCoreCommon
+    implementation dependenciesList.mapboxAndroidCommon
+
+    // Network
+    implementation(dependenciesList.okhttp) {
+        force = true
+    }
+    implementation(dependenciesList.okhttpInterceptor) {
+        force = true
+    }
+
     //ktlint
     ktlint dependenciesList.ktlint
 

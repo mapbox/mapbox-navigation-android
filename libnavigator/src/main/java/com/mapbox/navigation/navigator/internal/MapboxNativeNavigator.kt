@@ -2,10 +2,10 @@ package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigator.BannerInstruction
-import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterParams
@@ -28,7 +28,7 @@ interface MapboxNativeNavigator {
     /**
      * Initialize the navigator with a device profile
      */
-    fun create(deviceProfile: DeviceProfile): MapboxNativeNavigator
+    fun create(deviceProfile: DeviceProfile, logger: Logger?): MapboxNativeNavigator
 
     // Route following
 
@@ -145,12 +145,10 @@ interface MapboxNativeNavigator {
      *
      * @param routerParams Optional [RouterParams] object which contains router configurations for
      * getting routes offline.
-     * @param httpClient A platform specific [HttpInterface]. Can be null so default
-     * implementation will be used.
      *
      * @return number of tiles founded in the directory
      */
-    fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long
+    fun configureRouter(routerParams: RouterParams): Long
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.

@@ -139,7 +139,7 @@ class MapboxNavigationTest {
         mockDirectionSession()
         mockNavigationSession()
 
-        every { navigator.create(any()) } returns navigator
+        every { navigator.create(any(), logger) } returns navigator
 
         mapboxNavigation =
             MapboxNavigation(
@@ -236,7 +236,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsNativeNavigatorReset() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.create(navigationOptions.deviceProfile) }
+        verify(exactly = 1) { navigator.create(navigationOptions.deviceProfile, logger) }
     }
 
     @Test
@@ -402,7 +402,7 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator(any())
+            NavigationComponentProvider.createNativeNavigator(any(), logger)
         } returns navigator
     }
 

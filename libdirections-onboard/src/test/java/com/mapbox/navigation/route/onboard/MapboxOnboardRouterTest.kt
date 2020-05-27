@@ -69,7 +69,7 @@ class MapboxOnboardRouterTest {
 
     @Before
     fun setUp() {
-        every { navigator.configureRouter(any(), any()) } returns 0
+        every { navigator.configureRouter(any()) } returns 0
         every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
         onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
 

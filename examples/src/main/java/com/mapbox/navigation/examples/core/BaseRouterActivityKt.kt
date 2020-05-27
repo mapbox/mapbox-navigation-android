@@ -279,7 +279,7 @@ abstract class BaseRouterActivityKt :
             val onboardRouterOptions = OnboardRouterOptions.Builder()
                 .filePath(file.absolutePath)
                 .build()
-            val nativeNavigator = MapboxNativeNavigatorImpl.create(deviceProfile)
+            val nativeNavigator = MapboxNativeNavigatorImpl.create(deviceProfile, null)
             return MapboxOnboardRouter(accessToken, nativeNavigator, onboardRouterOptions, MapboxLogger, MapboxNavigationAccounts.getInstance(context))
         }
 

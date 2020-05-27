@@ -98,7 +98,7 @@ dependencies {
     implementation project(':libnavigator')
     implementation project(':libnavigation-ui')
     implementation project(':libnavui-alert')
-    implementation dependenciesList.mapboxCommon
+    implementation dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxSdkTurf

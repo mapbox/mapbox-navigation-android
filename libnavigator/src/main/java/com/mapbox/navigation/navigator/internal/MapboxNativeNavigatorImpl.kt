@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
@@ -23,7 +24,6 @@ import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
-import com.mapbox.navigator.HttpInterface
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
@@ -60,8 +60,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Create or reset resources. This must be called before calling any
      * functions within [MapboxNativeNavigatorImpl]
      */
-    override fun create(deviceProfile: DeviceProfile): MapboxNativeNavigator {
-        navigator = NavigatorLoader.createNavigator(deviceProfile)
+    override fun create(deviceProfile: DeviceProfile, logger: Logger?): MapboxNativeNavigator {
+        navigator = NavigatorLoader.createNavigator(deviceProfile, logger)
         route = null
         routeBufferGeoJson = null
         return this
@@ -211,13 +211,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @param routerParams Optional [RouterParams] object which contains router configurations for
      * getting routes offline.
-     * @param httpClient A platform specific [HttpInterface]. Can be null so default
-     * implementation will be used.
      *
      * @return number of tiles founded in the directory
      */
-    override fun configureRouter(routerParams: RouterParams, httpClient: HttpInterface?): Long =
-        navigator!!.configureRouter(routerParams, httpClient)
+    override fun configureRouter(routerParams: RouterParams): Long =
+        navigator!!.configureRouter(routerParams)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.

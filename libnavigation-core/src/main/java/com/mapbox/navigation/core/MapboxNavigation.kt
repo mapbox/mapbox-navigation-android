@@ -150,8 +150,8 @@ constructor(
 
     init {
         ThreadController.init()
-        navigator = NavigationComponentProvider.createNativeNavigator(navigationOptions.deviceProfile)
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
+        navigator = NavigationComponentProvider.createNativeNavigator(navigationOptions.deviceProfile, logger)
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
@@ -317,7 +317,7 @@ constructor(
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
-        navigator.create(navigationOptions.deviceProfile)
+        navigator.create(navigationOptions.deviceProfile, logger)
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         fasterRouteController.stop()
