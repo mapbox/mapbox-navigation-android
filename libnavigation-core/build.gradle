@@ -45,7 +45,7 @@ android {
 
 dependencies {
     implementation dependenciesList.mapboxAnnotations
-    api dependenciesList.mapboxCommon
+    api dependenciesList.mapboxAndroidCommon
 
     api project(':libnavigation-base')
     implementation project(':libnavigation-util')

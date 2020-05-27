@@ -60,6 +60,6 @@ class NavigationApplication : MultiDexApplication() {
         }
 
         Mapbox.getInstance(applicationContext, mapboxAccessToken)
-        MapboxNativeNavigatorImpl.create(HandheldProfile())
+        MapboxNativeNavigatorImpl.create(HandheldProfile(), MapboxLogger)
     }
 }
