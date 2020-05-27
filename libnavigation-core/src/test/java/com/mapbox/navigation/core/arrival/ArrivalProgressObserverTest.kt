@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.stops
+package com.mapbox.navigation.core.arrival
 
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress

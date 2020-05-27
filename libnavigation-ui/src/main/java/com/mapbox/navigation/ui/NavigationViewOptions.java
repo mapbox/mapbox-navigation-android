@@ -8,7 +8,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.Rounding;
-import com.mapbox.navigation.core.stops.ArrivalObserver;
+import com.mapbox.navigation.core.arrival.ArrivalObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.Camera;
