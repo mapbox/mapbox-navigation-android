@@ -24,6 +24,7 @@ class MapRouteProgressChangeListenerTest {
         every { routeLine.retrieveDirectionsRoutes() } returns emptyList()
         every { routeLine.draw(capture(drawDirections)) } returns Unit
         every { routeArrow.addUpcomingManeuverArrow(capture(addRouteProgress)) } returns Unit
+        every { routeArrow.routeArrowIsVisible() } returns true
     }
 
     @Test
@@ -79,7 +80,7 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should only add maneuver arrow with geometry`() {
+    fun `should only add maneuver arrow when visible`() {
         val routes = listOf(
             mockk<DirectionsRoute> {
                 every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
@@ -96,6 +97,27 @@ class MapRouteProgressChangeListenerTest {
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify(exactly = 1) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
+    }
+
+    @Test
+    fun `should not add maneuver arrow when not visible`() {
+        every { routeArrow.routeArrowIsVisible() } returns false
+        val routes = listOf(
+            mockk<DirectionsRoute> {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+            }
+        )
+        every { routeLine.getPrimaryRoute() } returns routes[0]
+        every { routeLine.retrieveDirectionsRoutes() } returns routes
+        val routeProgress: RouteProgress = mockk {
+            every { route } returns mockk {
+                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
+            }
+        }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 0) { routeArrow.addUpcomingManeuverArrow(routeProgress) }
     }
 
     @Test

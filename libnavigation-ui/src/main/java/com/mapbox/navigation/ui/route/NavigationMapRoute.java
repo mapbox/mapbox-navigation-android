@@ -349,7 +349,9 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void redraw(Style style) {
     recreateRouteLine(style);
+    boolean arrowVisibility = routeArrow.routeArrowIsVisible();
     routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
+    routeArrow.updateVisibilityTo(arrowVisibility);
     updateProgressChangeListener();
   }
 

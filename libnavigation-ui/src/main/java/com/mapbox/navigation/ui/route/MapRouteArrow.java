@@ -93,6 +93,7 @@ class MapRouteArrow {
 
   private final MapView mapView;
   private final MapboxMap mapboxMap;
+  private boolean isVisible = true;
 
   MapRouteArrow(MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, String aboveLayer) {
     this.mapView = mapView;
@@ -108,6 +109,7 @@ class MapRouteArrow {
     typedArray.recycle();
 
     initialize(aboveLayer);
+    updateVisibilityTo(isVisible);
   }
 
   void addUpcomingManeuverArrow(RouteProgress routeProgress) {
@@ -133,6 +135,7 @@ class MapRouteArrow {
   }
 
   void updateVisibilityTo(boolean visible) {
+    this.isVisible = visible;
     Style style = mapboxMap.getStyle();
     if (style != null) {
       for (String layerId : arrowLayerIds) {
@@ -145,6 +148,10 @@ class MapRouteArrow {
         }
       }
     }
+  }
+
+  public boolean routeArrowIsVisible() {
+    return isVisible;
   }
 
   private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {

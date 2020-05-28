@@ -69,7 +69,9 @@ internal class MapRouteProgressChangeListener(
                 }
             }
         }
-        routeArrow.addUpcomingManeuverArrow(routeProgress)
+        if (routeArrow.routeArrowIsVisible()) {
+            routeArrow.addUpcomingManeuverArrow(routeProgress)
+        }
     }
 
     private fun animateVanishRouteLineUpdate(startingDistanceValue: Float, percentDistanceTraveled: Float) {
