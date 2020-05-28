@@ -54,7 +54,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
+import static com.mapbox.navigation.ui.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 
 /**
  * This activity demonstrates turn by turn navigation using the NavigationMapRoute class. This can

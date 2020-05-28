@@ -34,11 +34,12 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
+import com.mapbox.navigation.ui.NavigationConstants;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
-import com.mapbox.navigation.ui.ThemeSwitcher;
+import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
-import com.mapbox.navigation.ui.puck.NavigationPuckPresenter;
+import com.mapbox.navigation.ui.internal.puck.NavigationPuckPresenter;
 import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
@@ -52,7 +53,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
+import static com.mapbox.navigation.ui.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
 /**
@@ -295,7 +296,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * The puck and the camera will be animated between each of the points linearly until reaching the target.
    *
    * If the timestamp of the last location in the list is in the future by more than
-   * {@link com.mapbox.navigation.ui.legacy.NavigationConstants#MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE},
+   * {@link NavigationConstants#MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE},
    * the "lookahead animation" will be executed,
    * which aims to position the puck at the desired location without a typical animation delay.
    *

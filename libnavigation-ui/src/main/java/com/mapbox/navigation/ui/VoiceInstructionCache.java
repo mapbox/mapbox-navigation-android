@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 
 import org.jetbrains.annotations.TestOnly;

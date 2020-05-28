@@ -5,7 +5,7 @@ import android.animation.ValueAnimator
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.utils.internal.ThreadController
 import kotlinx.coroutines.launch
 

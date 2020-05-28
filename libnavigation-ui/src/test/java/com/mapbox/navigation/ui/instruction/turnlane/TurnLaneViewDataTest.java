@@ -1,9 +1,11 @@
 package com.mapbox.navigation.ui.instruction.turnlane;
 
+import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData;
+
 import org.junit.Test;
 
-import static com.mapbox.navigation.ui.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
-import static com.mapbox.navigation.ui.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
+import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT;
+import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData.DRAW_LANE_RIGHT_ONLY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

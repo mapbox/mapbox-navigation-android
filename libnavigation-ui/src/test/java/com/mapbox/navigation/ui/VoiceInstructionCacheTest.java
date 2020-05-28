@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 
 import org.junit.Test;

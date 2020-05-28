@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.navigation.ui.BaseTest;
-import com.mapbox.navigation.ui.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import org.junit.Test;
 

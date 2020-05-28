@@ -20,15 +20,17 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.ui.utils.CompareUtils;
+import com.mapbox.navigation.ui.internal.route.MapRouteLayerProvider;
+import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
+import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY;
-import static com.mapbox.navigation.ui.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DURATION;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DURATION;
 
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using

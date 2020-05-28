@@ -22,6 +22,21 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineGradient
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.navigation.ui.internal.route.MapRouteLayerProvider
+import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
+import com.mapbox.navigation.ui.internal.route.RouteConstants
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
+import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.generateFeatureCollection
@@ -30,18 +45,6 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBoolea
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getFloatStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
-import com.mapbox.navigation.ui.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.route.RouteConstants.HEAVY_CONGESTION_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
-import com.mapbox.navigation.ui.route.RouteConstants.MODERATE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.route.RouteConstants.SEVERE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
-import com.mapbox.navigation.ui.route.RouteConstants.WAYPOINT_PROPERTY_KEY
-import com.mapbox.navigation.ui.utils.MapUtils
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfMeasurement
@@ -106,11 +109,15 @@ internal class MapRouteLine(
         true,
         mapRouteSourceProvider,
         0f,
-        routeLineInitializedCallback)
+        routeLineInitializedCallback
+    )
 
-    private var drawnWaypointsFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
-    private var drawnPrimaryRouteFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
-    private var drawnAlternativeRouteFeatureCollection: FeatureCollection = FeatureCollection.fromFeatures(arrayOf())
+    private var drawnWaypointsFeatureCollection: FeatureCollection =
+        FeatureCollection.fromFeatures(arrayOf())
+    private var drawnPrimaryRouteFeatureCollection: FeatureCollection =
+        FeatureCollection.fromFeatures(arrayOf())
+    private var drawnAlternativeRouteFeatureCollection: FeatureCollection =
+        FeatureCollection.fromFeatures(arrayOf())
     private val routeLineExpressionData = mutableListOf<RouteLineExpressionData>()
 
     private var wayPointSource: GeoJsonSource
@@ -288,7 +295,8 @@ internal class MapRouteLine(
                 .flatten()
                 .run { FeatureCollection.fromFeatures(this) }
 
-            this.drawnWaypointsFeatureCollection = buildWayPointFeatureCollection(routeFeatureData.first().route)
+            this.drawnWaypointsFeatureCollection =
+                buildWayPointFeatureCollection(routeFeatureData.first().route)
         }
 
         val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
@@ -307,7 +315,8 @@ internal class MapRouteLine(
         )
         style.addSource(primaryRouteLineSource)
 
-        val alternativeRouteLineGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
+        val alternativeRouteLineGeoJsonOptions =
+            GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
         alternativeRouteLineSource = mapRouteSourceProvider.build(
             ALTERNATIVE_ROUTE_SOURCE_ID,
             drawnAlternativeRouteFeatureCollection,
@@ -629,7 +638,8 @@ internal class MapRouteLine(
         }.map {
             Expression.stop(
                 it.offset,
-                Expression.color(it.segmentColor))
+                Expression.color(it.segmentColor)
+            )
         }
 
         return Expression.step(
@@ -664,7 +674,10 @@ internal class MapRouteLine(
         wayPointSource.setGeoJson(drawnWaypointsFeatureCollection)
     }
 
-    private fun updateAlternativeLayersVisibility(isAlternativeVisible: Boolean, routeLayerIds: Set<String>) {
+    private fun updateAlternativeLayersVisibility(
+        isAlternativeVisible: Boolean,
+        routeLayerIds: Set<String>
+    ) {
         if (style.isFullyLoaded) {
             routeLayerIds.filter {
                 it == RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID ||
@@ -758,7 +771,8 @@ internal class MapRouteLine(
          * @return the resource value
          */
         fun getStyledColor(index: Int, colorResourceId: Int, context: Context, styleRes: Int): Int {
-            val typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+            val typedArray =
+                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
             return typedArray.getColor(
                 index,
                 ContextCompat.getColor(
@@ -779,8 +793,14 @@ internal class MapRouteLine(
          *
          * @return the resource value
          */
-        fun getFloatStyledValue(index: Int, defaultValue: Float, context: Context, styleRes: Int): Float {
-            val typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+        fun getFloatStyledValue(
+            index: Int,
+            defaultValue: Float,
+            context: Context,
+            styleRes: Int
+        ): Float {
+            val typedArray =
+                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
             return typedArray.getFloat(index, defaultValue).also {
                 typedArray.recycle()
             }
@@ -795,8 +815,14 @@ internal class MapRouteLine(
          *
          * @return the resource value
          */
-        fun getBooleanStyledValue(index: Int, defaultValue: Boolean, context: Context, styleRes: Int): Boolean {
-            val typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+        fun getBooleanStyledValue(
+            index: Int,
+            defaultValue: Boolean,
+            context: Context,
+            styleRes: Int
+        ): Boolean {
+            val typedArray =
+                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
             return typedArray.getBoolean(index, defaultValue).also {
                 typedArray.recycle()
             }
@@ -811,8 +837,14 @@ internal class MapRouteLine(
          *
          * @return the resource value
          */
-        fun getResourceStyledValue(index: Int, defaultValue: Int, context: Context, styleRes: Int): Int {
-            val typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+        fun getResourceStyledValue(
+            index: Int,
+            defaultValue: Int,
+            context: Context,
+            styleRes: Int
+        ): Int {
+            val typedArray =
+                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
             return typedArray.getResourceId(
                 index,
                 defaultValue
@@ -851,7 +883,11 @@ internal class MapRouteLine(
             )
             val routeFeature = Feature.fromGeometry(routeGeometry)
 
-            return RouteFeatureData(route, FeatureCollection.fromFeatures(listOf(routeFeature)), routeGeometry)
+            return RouteFeatureData(
+                route,
+                FeatureCollection.fromFeatures(listOf(routeFeature)),
+                routeGeometry
+            )
         }
 
         /**
@@ -887,7 +923,12 @@ internal class MapRouteLine(
                     isPrimaryRoute,
                     congestionColorProvider
                 )
-                true -> listOf(RouteLineExpressionData(0f, congestionColorProvider("", isPrimaryRoute)))
+                true -> listOf(
+                    RouteLineExpressionData(
+                        0f,
+                        congestionColorProvider("", isPrimaryRoute)
+                    )
+                )
             }
         }
 
@@ -978,7 +1019,7 @@ internal class MapRouteLine(
 
                 it.steps()?.let { steps ->
                     buildWayPointFeatureFromLeg(it, steps.lastIndex)?.let { feature ->
-                    wayPointFeatures.add(feature)
+                        wayPointFeatures.add(feature)
                     }
                 }
             }
@@ -998,7 +1039,8 @@ internal class MapRouteLine(
             return leg.steps()?.get(index)?.maneuver()?.location()?.run {
                 Feature.fromGeometry(Point.fromLngLat(this.longitude(), this.latitude()))
             }?.also {
-                val propValue = if (index == 0) WAYPOINT_ORIGIN_VALUE else WAYPOINT_DESTINATION_VALUE
+                val propValue =
+                    if (index == 0) WAYPOINT_ORIGIN_VALUE else WAYPOINT_DESTINATION_VALUE
                 it.addStringProperty(WAYPOINT_PROPERTY_KEY, propValue)
             }
         }

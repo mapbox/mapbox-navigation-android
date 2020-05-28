@@ -18,19 +18,19 @@ class BannerShield {
     return url;
   }
 
-  public String getText() {
+  String getText() {
     return text;
   }
 
-  public int getNodeIndex() {
+  int getNodeIndex() {
     return nodeIndex;
   }
 
-  public void setStartIndex(int startIndex) {
+  void setStartIndex(int startIndex) {
     this.startIndex = startIndex;
   }
 
-  public int getStartIndex() {
+  int getStartIndex() {
     return startIndex;
   }
 

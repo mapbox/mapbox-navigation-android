@@ -34,13 +34,13 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
+import com.mapbox.navigation.ui.NavigationConstants
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
-import com.mapbox.navigation.ui.legacy.NavigationConstants
+import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.utils.ViewUtils
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_feedback_button.*
 

@@ -20,8 +20,8 @@ import com.mapbox.navigation.ui.feedback.FeedbackItem;
 
 import timber.log.Timber;
 
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.ALERT_VIEW_PROBLEM_DURATION;
-import static com.mapbox.navigation.ui.legacy.NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
+import static com.mapbox.navigation.ui.NavigationConstants.ALERT_VIEW_PROBLEM_DURATION;
+import static com.mapbox.navigation.ui.NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
 
 public class NavigationAlertView extends AlertView implements FeedbackBottomSheetListener {
 

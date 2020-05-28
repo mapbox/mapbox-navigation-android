@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Transition;
 import androidx.transition.TransitionListenerAdapter;
 
-import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
+import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 
 class InstructionListTransitionListener extends TransitionListenerAdapter {
 

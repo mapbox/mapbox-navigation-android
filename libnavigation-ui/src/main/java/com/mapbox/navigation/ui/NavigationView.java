@@ -43,13 +43,14 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
-import com.mapbox.navigation.ui.instruction.ImageCreator;
 import com.mapbox.navigation.ui.instruction.InstructionView;
 import com.mapbox.navigation.ui.instruction.NavigationAlertView;
+import com.mapbox.navigation.ui.internal.NavigationContract;
+import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
-import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
+import com.mapbox.navigation.ui.internal.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
 import java.util.Locale;
@@ -893,7 +894,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
-    ImageCreator.getInstance().shutdown();
     navigationMap = null;
   }
 }

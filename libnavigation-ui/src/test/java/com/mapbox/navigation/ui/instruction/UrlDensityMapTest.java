@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.instruction;
 
-
-import com.mapbox.navigation.ui.legacy.SdkVersionChecker;
+import com.mapbox.navigation.ui.SdkVersionChecker;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

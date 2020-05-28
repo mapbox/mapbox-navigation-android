@@ -7,7 +7,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 
-import com.mapbox.navigation.ui.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
