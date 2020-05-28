@@ -1,11 +1,16 @@
 package com.mapbox.navigation.core.replay
 
+import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventSimulator
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import com.mapbox.navigation.core.replay.history.ReplayEvents
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
+import com.mapbox.navigation.core.replay.route2.ReplayRouteMapper
 import java.util.Collections.singletonList
 
 /**
@@ -115,6 +120,26 @@ class MapboxReplayer {
             val replayEvents = singletonList(replayEvent)
             replayEventsObservers.forEach { it.replayEvents(replayEvents) }
         }
+    }
+
+    /**
+     * When initializing or testing an app, it is needed and useful to push a device location.
+     * This helper function can be used to push the actual location into the replayer.
+     */
+    fun pushRealLocation(context: Context, eventTimestamp: Double) {
+        LocationEngineProvider.getBestLocationEngine(context.applicationContext)
+            .getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let {
+                        val event = ReplayRouteMapper.mapToUpdateLocation(eventTimestamp, it)
+                        pushEvents(singletonList(event))
+                    }
+                }
+
+                override fun onFailure(exception: Exception) {
+                    // Intentionally empty
+                }
+            })
     }
 
     /**

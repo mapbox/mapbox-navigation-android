@@ -25,7 +25,9 @@ import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route2.ReplayProgressObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -55,6 +57,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
+    private val mapboxReplayer = MapboxReplayer()
 
     private val mapStyles = listOf(
         Style.MAPBOX_STREETS,
@@ -99,11 +102,11 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             }
             // center the map at current location
             if (shouldSimulateRoute()) {
-                LocationEngineProvider.getBestLocationEngine(this)
-                    .getLastLocation(locationListenerCallback)
-            } else {
-                mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+                mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxReplayer.pushRealLocation(this, 0.0)
+                mapboxReplayer.play()
             }
+            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -148,9 +151,6 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoute(routes[0])
-                if (shouldSimulateRoute()) {
-                    (mapboxNavigation?.locationEngine as ReplayRouteLocationEngine).assign(routes[0])
-                }
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE
@@ -264,7 +264,7 @@ class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     // for testing else a real location engine is used.
     private fun getLocationEngine(): LocationEngine {
         return if (shouldSimulateRoute()) {
-            ReplayRouteLocationEngine()
+            ReplayLocationEngine(mapboxReplayer)
         } else {
             LocationEngineProvider.getBestLocationEngine(this)
         }

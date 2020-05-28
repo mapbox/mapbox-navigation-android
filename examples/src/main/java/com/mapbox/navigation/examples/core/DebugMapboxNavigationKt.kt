@@ -41,7 +41,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.replay.route.ReplayRouteLocationEngine
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route2.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -87,7 +89,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var localLocationEngine: LocationEngine
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var speechPlayer: NavigationSpeechPlayer
-    private val replayRouteLocationEngine = ReplayRouteLocationEngine()
+
+    private val mapboxReplayer = MapboxReplayer()
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -275,7 +278,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             originalRoute = routes[0]
             Timber.d("route request success %s", routes.toString())
-            replayRouteLocationEngine.assign(originalRoute)
         }
 
         override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
@@ -402,8 +404,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             return MapboxNavigation(
                     applicationContext,
                     navigationOptions = options,
-                    locationEngine = replayRouteLocationEngine
-            )
+                    locationEngine = ReplayLocationEngine(mapboxReplayer)
+            ).apply {
+                registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxReplayer.pushRealLocation(this@DebugMapboxNavigationKt, 0.0)
+                mapboxReplayer.play()
+            }
         } else {
             MapboxNavigation(
                     applicationContext,
