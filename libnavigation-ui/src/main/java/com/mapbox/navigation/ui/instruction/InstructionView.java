@@ -55,14 +55,16 @@ import com.mapbox.navigation.ui.SoundButton;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
+import com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel;
+import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
-import com.mapbox.navigation.ui.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.navigation.ui.junction.RouteJunction;
-import com.mapbox.navigation.ui.junction.RouteJunctionModel;
-import com.mapbox.navigation.ui.legacy.NavigationConstants;
-import com.mapbox.navigation.ui.listeners.InstructionListListener;
-import com.mapbox.navigation.ui.summary.list.InstructionListAdapter;
-import com.mapbox.navigation.ui.utils.ViewUtils;
+import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneAdapter;
+import com.mapbox.navigation.ui.internal.junction.RouteJunction;
+import com.mapbox.navigation.ui.internal.junction.RouteJunctionModel;
+import com.mapbox.navigation.ui.NavigationConstants;
+import com.mapbox.navigation.ui.internal.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
+import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.Locale;
@@ -222,21 +224,21 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       }
     });
     navigationViewModel.retrieveBannerInstructionModel()
-      .observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
-        @Override
-        public void onChanged(@Nullable BannerInstructionModel model) {
-          if (model != null) {
-            updateManeuverView(
-              model.retrievePrimaryManeuverType(),
-              model.retrievePrimaryManeuverModifier(),
-              model.retrievePrimaryRoundaboutAngle(),
-              model.retrieveDrivingSide()
-            );
-            updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-            updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+        .observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
+          @Override
+          public void onChanged(@Nullable BannerInstructionModel model) {
+            if (model != null) {
+              updateManeuverView(
+                  model.retrievePrimaryManeuverType(),
+                  model.retrievePrimaryManeuverModifier(),
+                  model.retrievePrimaryRoundaboutAngle(),
+                  model.retrieveDrivingSide()
+              );
+              updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
+              updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+            }
           }
-        }
-      });
+        });
     navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
       @Override
       public void onChanged(@Nullable Boolean isOffRoute) {
@@ -279,6 +281,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
       navigationViewModel.retrieveRouteJunctionModelUpdates().removeObservers(lifecycleOwner);
     }
+    ImageCreator.getInstance().shutdown();
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -327,12 +330,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void updateBannerInstructionsWith(BannerInstructions instructions) {
     if (instructions != null) {
       updateBannerInstructions(instructions.primary(),
-        instructions.secondary(), instructions.sub(), currentStep.drivingSide());
+          instructions.secondary(), instructions.sub(), currentStep.drivingSide());
     }
   }
 
   private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
-                                        BannerText subBanner, String currentDrivingSide) {
+      BannerText subBanner, String currentDrivingSide) {
     if (primaryBanner != null) {
       updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
       updateDataFromBannerText(primaryBanner, secondaryBanner);
@@ -349,7 +352,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (fragmentManager != null) {
       long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
       FeedbackBottomSheet.newInstance(this, duration)
-        .show(fragmentManager, FeedbackBottomSheet.TAG);
+          .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
 
@@ -501,46 +504,46 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void initAttributes(AttributeSet attributeSet) {
     TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.InstructionView);
     primaryBackgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewPrimaryBackgroundColor,
-        R.color.mapbox_instruction_view_primary_background));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionViewPrimaryBackgroundColor,
+            R.color.mapbox_instruction_view_primary_background));
 
     secondaryBackgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewSecondaryBackgroundColor,
-        R.color.mapbox_instruction_view_secondary_background));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionViewSecondaryBackgroundColor,
+            R.color.mapbox_instruction_view_secondary_background));
 
     listViewBackgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionListViewBackgroundColor,
-        R.color.mapbox_instruction_list_view_background));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionListViewBackgroundColor,
+            R.color.mapbox_instruction_list_view_background));
 
     primaryTextColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewPrimaryTextColor,
-        R.color.mapbox_instruction_view_primary_text));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionViewPrimaryTextColor,
+            R.color.mapbox_instruction_view_primary_text));
 
     secondaryTextColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewSecondaryTextColor,
-        R.color.mapbox_instruction_view_secondary_text));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionViewSecondaryTextColor,
+            R.color.mapbox_instruction_view_secondary_text));
 
     maneuverViewPrimaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionManeuverViewPrimaryColor,
-        R.color.mapbox_instruction_maneuver_view_primary));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionManeuverViewPrimaryColor,
+            R.color.mapbox_instruction_maneuver_view_primary));
 
     maneuverViewSecondaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.InstructionView_instructionManeuverViewSecondaryColor,
-        R.color.mapbox_instruction_maneuver_view_secondary));
+        typedArray.getResourceId(
+            R.styleable.InstructionView_instructionManeuverViewSecondaryColor,
+            R.color.mapbox_instruction_maneuver_view_secondary));
 
     soundButtonStyle = typedArray.getResourceId(
-      R.styleable.InstructionView_instructionViewSoundButtonStyle, -1);
+        R.styleable.InstructionView_instructionViewSoundButtonStyle, -1);
     feedbackButtonStyle = typedArray.getResourceId(
-      R.styleable.InstructionView_instructionViewFeedbackButtonStyle, -1);
+        R.styleable.InstructionView_instructionViewFeedbackButtonStyle, -1);
     alertViewStyle = typedArray.getResourceId(
-      R.styleable.InstructionView_instructionViewAlertViewStyle, -1);
+        R.styleable.InstructionView_instructionViewAlertViewStyle, -1);
 
     typedArray.recycle();
   }
@@ -553,10 +556,10 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     final int roundingIncrement = Rounding.INCREMENT_FIFTY;
     final Locale locale = ContextEx.inferDeviceLocale(getContext());
     distanceFormatter = new MapboxDistanceFormatter.Builder()
-      .withUnitType(unitType)
-      .withRoundingIncrement(roundingIncrement)
-      .withLocale(locale)
-      .build(getContext());
+        .withUnitType(unitType)
+        .withRoundingIncrement(roundingIncrement)
+        .withLocale(locale)
+        .build(getContext());
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 
@@ -658,7 +661,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
-      LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager.HORIZONTAL, false));
   }
 
   /**
@@ -667,7 +670,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void initializeInstructionListRecyclerView() {
     instructionListAdapter = new InstructionListAdapter(distanceFormatter);
     instructionListAdapter.setColors(primaryTextColor, secondaryTextColor,
-      maneuverViewPrimaryColor, maneuverViewSecondaryColor);
+        maneuverViewPrimaryColor, maneuverViewSecondaryColor);
     rvInstructions.setAdapter(instructionListAdapter);
     rvInstructions.setHasFixedSize(true);
     rvInstructions.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -779,9 +782,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newDistanceText(InstructionModel model) {
     return !stepDistanceText.getText().toString().isEmpty()
-      && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
-      && !stepDistanceText.getText().toString()
-      .contentEquals(model.retrieveStepDistanceRemaining().toString());
+        && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
+        && !stepDistanceText.getText().toString()
+        .contentEquals(model.retrieveStepDistanceRemaining().toString());
   }
 
   /**
@@ -813,7 +816,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private boolean newStep(RouteProgress routeProgress) {
     boolean newStep = currentStep == null
-      || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
+        || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
     currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
     return newStep;
   }
@@ -849,8 +852,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private boolean shouldShowSubStep(@Nullable BannerText subText) {
     return subText != null
-      && subText.type() != null
-      && !subText.type().contains(COMPONENT_TYPE_LANE);
+        && subText.type() != null
+        && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
   private void showSubLayout() {
@@ -1000,7 +1003,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Updates new maneuver image if one is found.
    */
   private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
-                                  @Nullable Double roundaboutAngle, String drivingSide) {
+      @Nullable Double roundaboutAngle, String drivingSide) {
     maneuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (roundaboutAngle != null) {
       maneuverView.setRoundaboutAngle(roundaboutAngle.floatValue());

@@ -15,7 +15,7 @@ import java.util.List;
  * FeedbackAdapter provides a binding from {@link FeedbackBottomSheet} data set
  * to {@link FeedbackViewHolder} that are displayed within a {@link RecyclerView}.
  */
-public class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
+class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
 
   private List<FeedbackItem> feedbackItems;
 

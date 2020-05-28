@@ -11,7 +11,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.base.trip.model.RouteProgressState;
-import com.mapbox.navigation.ui.legacy.NavigationConstants;
+import com.mapbox.navigation.ui.NavigationConstants;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 import java.util.ArrayList;

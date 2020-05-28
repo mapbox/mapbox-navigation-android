@@ -9,7 +9,7 @@ import com.mapbox.libnavigation.ui.R
  * FeedbackSubTypeAdapter provides a binding from [FeedbackBottomSheet] data set
  * to [FeedbackSubTypeViewHolder] that are displayed within a [RecyclerView].
  */
-internal class FeedbackSubTypeAdapter internal constructor(
+internal class FeedbackSubTypeAdapter constructor(
     private val feedbackSubTypeItems: List<FeedbackSubTypeItem>,
     private val itemClickListener: OnSubTypeItemClickListener
 ) : RecyclerView.Adapter<FeedbackSubTypeViewHolder>() {

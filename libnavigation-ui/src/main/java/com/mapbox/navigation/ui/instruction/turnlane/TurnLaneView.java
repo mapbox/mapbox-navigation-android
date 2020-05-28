@@ -10,6 +10,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
+import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneDrawableMap;
+import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData;
 
 /**
  * Use this view to render turn lane data.
@@ -41,7 +43,7 @@ public class TurnLaneView extends AppCompatImageView {
    * Updates this view based on the banner component lane data and the given maneuver
    * modifier (to highlight which lane should be chosen).
    *
-   * @param lane             data {@link BannerComponents}
+   * @param lane data {@link BannerComponents}
    * @param maneuverModifier for the given maneuver
    */
   public void updateLaneView(@NonNull BannerComponents lane, @NonNull String maneuverModifier) {
@@ -83,7 +85,7 @@ public class TurnLaneView extends AppCompatImageView {
 
   private void drawFor(@NonNull BannerComponents lane, TurnLaneViewData drawData, Integer resId) {
     final Drawable turnLaneDrawable = VectorDrawableCompat.create(
-      getResources(), resId, getContext().getTheme()
+        getResources(), resId, getContext().getTheme()
     );
     setImageDrawable(turnLaneDrawable);
     setAlpha(!lane.active() ? HALF_OPACITY : FULL_OPACITY);

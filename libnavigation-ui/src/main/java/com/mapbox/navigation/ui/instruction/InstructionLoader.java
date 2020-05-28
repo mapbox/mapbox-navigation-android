@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}/
  */
-public class InstructionLoader {
+class InstructionLoader {
   private TextView textView;
   private BannerComponentTree bannerComponentTree;
 
@@ -31,7 +31,7 @@ public class InstructionLoader {
    * @param textView to populate with instruction
    * @param bannerText containing components to populate into textView
    */
-  public InstructionLoader(TextView textView, @NonNull BannerText bannerText) {
+  InstructionLoader(TextView textView, @NonNull BannerText bannerText) {
     this(textView, new BannerComponentTree(bannerText, new ExitSignCreator(),
       ImageCreator.getInstance(), new AbbreviationCreator(), new TextCreator()));
   }
@@ -46,7 +46,7 @@ public class InstructionLoader {
    * a new {@link Spannable} with text / {@link ImageSpan}s which is loaded
    * into the given {@link TextView}.
    */
-  public void loadInstruction() {
+  void loadInstruction() {
     bannerComponentTree.loadInstruction(textView);
   }
 }

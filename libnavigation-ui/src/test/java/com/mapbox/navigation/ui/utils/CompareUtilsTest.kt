@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.utils
 
+import com.mapbox.navigation.ui.internal.utils.CompareUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

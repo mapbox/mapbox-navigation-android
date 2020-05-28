@@ -11,7 +11,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
-import com.mapbox.navigation.ui.legacy.SdkVersionChecker;
+import com.mapbox.navigation.ui.SdkVersionChecker;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.List;
  * If a shield URL is found, {@link Picasso} is used to load the image.  Then, once the image is loaded,
  * a new {@link ImageSpan} is created and set to the appropriate position of the {@link Spannable}
  */
-public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
+class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
 
   private static ImageCreator instance;
   private boolean isInitialized;
@@ -42,7 +42,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
 
   @Override
   BannerComponentNode setupNode(BannerComponents components, int index, int startIndex,
-                                String modifier) {
+      String modifier) {
     addShieldInfo(components, index);
     return new BannerComponentNode(components, startIndex);
   }
@@ -52,7 +52,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    * information needed to load the proper image into the TextView where appropriate.
    *
    * @param bannerComponents containing image info
-   * @param index            of the BannerComponentNode which refers to the given BannerComponents
+   * @param index of the BannerComponentNode which refers to the given BannerComponents
    */
   private void addShieldInfo(BannerComponents bannerComponents, int index) {
     bannerShieldList.add(new BannerShield(bannerComponents, index));
@@ -63,7 +63,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    *
    * @return ImageCoordinator
    */
-  public static synchronized ImageCreator getInstance() {
+  static synchronized ImageCreator getInstance() {
     if (instance == null) {
       instance = new ImageCreator(new ImageVerifier());
     }
@@ -79,7 +79,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    *
    * @param context to init Picasso
    */
-  public void initialize(Context context) {
+  void initialize(Context context) {
     if (!isInitialized) {
       initializePicasso(context);
       initializeData(context);
@@ -95,12 +95,12 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
    *
    * @param legStep providing the image Urls
    */
-  public void prefetchImageCache(LegStep legStep) {
+  void prefetchImageCache(LegStep legStep) {
     checkIsInitialized();
     fetchInstructions(legStep);
   }
 
-  public void shutdown() {
+  void shutdown() {
     targets.clear();
   }
 
@@ -137,7 +137,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
 
   private void fetchInstructions(LegStep legStep) {
     if (legStep == null || legStep.bannerInstructions() == null
-      || legStep.bannerInstructions().isEmpty()) {
+        || legStep.bannerInstructions().isEmpty()) {
       return;
     }
 
@@ -185,12 +185,12 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
 
     for (final BannerShield bannerShield : bannerShieldList) {
       targets.add(new InstructionTarget(textView, instructionSpannable, bannerShieldList, bannerShield,
-        new InstructionTarget.InstructionLoadedCallback() {
-          @Override
-          public void onInstructionLoaded(InstructionTarget target) {
-            targets.remove(target);
-          }
-        }));
+          new InstructionTarget.InstructionLoadedCallback() {
+            @Override
+            public void onInstructionLoaded(InstructionTarget target) {
+              targets.remove(target);
+            }
+          }));
     }
     bannerShieldList.clear();
   }
@@ -198,7 +198,7 @@ public class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier
   private void loadTargets() {
     for (InstructionTarget target : new ArrayList<>(targets)) {
       picassoImageLoader.load(urlDensityMap.get(target.getShield().getUrl()))
-        .into(target);
+          .into(target);
     }
   }
 

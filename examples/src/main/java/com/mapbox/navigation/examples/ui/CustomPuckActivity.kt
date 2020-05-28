@@ -13,8 +13,8 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
-import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
-import com.mapbox.navigation.ui.listeners.NavigationListener
+import com.mapbox.navigation.ui.internal.listeners.BannerInstructionsListener
+import com.mapbox.navigation.ui.internal.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -26,8 +26,9 @@ import kotlinx.android.synthetic.main.activity_navigation_view.*
  * device location puck's image based on the [RouteProgressState]
  * status.
  */
-class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback, NavigationListener,
-    BannerInstructionsListener {
+class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback,
+        NavigationListener,
+        BannerInstructionsListener {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap

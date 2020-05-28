@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.ui.internal.NavigationContract;
 
 class NavigationPresenter {
 

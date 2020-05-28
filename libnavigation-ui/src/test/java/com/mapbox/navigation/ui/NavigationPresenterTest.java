@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 
+import com.mapbox.navigation.ui.internal.NavigationContract;
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;

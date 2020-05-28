@@ -45,15 +45,15 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
+import com.mapbox.navigation.ui.NavigationConstants
 import com.mapbox.navigation.ui.SoundButton
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.instruction.NavigationAlertView
-import com.mapbox.navigation.ui.legacy.NavigationConstants
+import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.utils.ViewUtils
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader

@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
-import com.mapbox.navigation.ui.legacy.DownloadTask;
+import com.mapbox.navigation.ui.DownloadTask;
 
 import java.io.File;
 import java.io.IOException;

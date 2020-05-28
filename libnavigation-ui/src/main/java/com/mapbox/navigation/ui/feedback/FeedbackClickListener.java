@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-public class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
+class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
 
   private static final int FEEDBACK_AT_FIRST_POS = 0;
   private GestureDetector gestureDetector;

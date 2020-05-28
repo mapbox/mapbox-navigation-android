@@ -6,7 +6,7 @@ import android.text.TextUtils;
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
-import com.mapbox.navigation.ui.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import org.jetbrains.annotations.NotNull;
 

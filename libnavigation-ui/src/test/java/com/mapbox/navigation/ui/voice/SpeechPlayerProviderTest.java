@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.voice;
 
 import android.content.Context;
 
-import com.mapbox.navigation.ui.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import org.junit.Test;
 

@@ -12,11 +12,11 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
-import com.mapbox.navigation.ui.listeners.FeedbackListener;
-import com.mapbox.navigation.ui.listeners.InstructionListListener;
-import com.mapbox.navigation.ui.listeners.NavigationListener;
-import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
+import com.mapbox.navigation.ui.internal.listeners.BannerInstructionsListener;
+import com.mapbox.navigation.ui.internal.listeners.FeedbackListener;
+import com.mapbox.navigation.ui.internal.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.internal.listeners.NavigationListener;
+import com.mapbox.navigation.ui.internal.listeners.SpeechAnnouncementListener;
 
 /**
  * In charge of holding any {@link NavigationView} related listeners {@link NavigationListener},

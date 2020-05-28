@@ -6,7 +6,7 @@ import android.media.AudioManager;
 import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.navigation.ui.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 
 import java.util.ArrayList;
 import java.util.List;

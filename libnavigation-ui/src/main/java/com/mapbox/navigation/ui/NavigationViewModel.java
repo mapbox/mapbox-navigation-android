@@ -41,9 +41,10 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.navigation.ui.instruction.BannerInstructionModel;
-import com.mapbox.navigation.ui.instruction.InstructionModel;
-import com.mapbox.navigation.ui.junction.RouteJunctionModel;
+import com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel;
+import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
+import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
+import com.mapbox.navigation.ui.internal.junction.RouteJunctionModel;
 import com.mapbox.navigation.ui.summary.SummaryModel;
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
@@ -188,9 +189,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
     initializeLanguage(options);
     NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
-      .toBuilder()
-      .accessToken(accessToken)
-      .isFromNavigationUi(true);
+        .toBuilder()
+        .accessToken(accessToken)
+        .isFromNavigationUi(true);
 
     if (options.navigationOptions().getDistanceFormatter() == null) {
       this.distanceFormatter = buildDistanceFormatter(options);
@@ -201,7 +202,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
     if (options.navigationOptions().getOnboardRouterOptions() == null) {
       OnboardRouterOptions onboardRouterOptions =
-        MapboxNavigation.defaultNavigationOptions(getApplication(), accessToken).getOnboardRouterOptions();
+          MapboxNavigation.defaultNavigationOptions(getApplication(), accessToken).getOnboardRouterOptions();
       updatedOptionsBuilder.onboardRouterOptions(onboardRouterOptions);
     }
 
@@ -223,8 +224,8 @@ public class NavigationViewModel extends AndroidViewModel {
   void updateFeedbackScreenshot(String screenshot) {
     if (feedbackItem != null) {
       MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
-        feedbackItem.getDescription(), UI, screenshot,
-        feedbackItem.getFeedbackSubType().toArray(new String[0]));
+          feedbackItem.getDescription(), UI, screenshot,
+          feedbackItem.getFeedbackSubType().toArray(new String[0]));
       sendEventFeedback(feedbackItem);
       isFeedbackSentSuccess.setValue(true);
       feedbackItem = null;
@@ -341,10 +342,10 @@ public class NavigationViewModel extends AndroidViewModel {
     final int roundingIncrement = options.roundingIncrement();
     final Locale locale = getLocaleDirectionsRoute(options.directionsRoute(), getApplication());
     return new MapboxDistanceFormatter.Builder()
-            .withUnitType(unitType)
-            .withRoundingIncrement(roundingIncrement)
-            .withLocale(locale)
-            .build(getApplication());
+        .withUnitType(unitType)
+        .withRoundingIncrement(roundingIncrement)
+        .withLocale(locale)
+        .build(getApplication());
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {

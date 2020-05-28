@@ -15,7 +15,7 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class InstructionTarget implements Target {
+class InstructionTarget implements Target {
 
   private TextView textView;
   private Spannable instructionSpannable;
