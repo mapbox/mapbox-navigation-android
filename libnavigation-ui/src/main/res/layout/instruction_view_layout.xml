@@ -9,15 +9,7 @@
         android:id="@+id/instructionLayout"
         layout="@layout/instruction_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <include
-        android:id="@+id/instructionListLayout"
-        layout="@layout/instruction_list_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/instructionLayout"
-        android:visibility="gone"/>
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:id="@+id/extraInstructionContentLayout"
@@ -32,14 +24,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <include
             android:id="@+id/subStepLayout"
             layout="@layout/sub_instruction_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/guidanceImageView"
@@ -56,33 +48,41 @@
         style="@style/AlertView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
         android:layout_below="@id/extraInstructionContentLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
         android:clickable="true"
         android:focusable="true"
         android:focusableInTouchMode="false"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible"/>
+        android:visibility="invisible" />
 
     <com.mapbox.navigation.ui.SoundButton
         android:id="@+id/soundLayout"
         style="@style/SoundButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_below="@id/extraInstructionContentLayout"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/extraInstructionContentLayout"/>
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
 
     <com.mapbox.navigation.ui.FeedbackButton
         android:id="@+id/feedbackLayout"
         style="@style/FeedbackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignWithParentIfMissing="true"
         android:layout_below="@id/soundLayout"
-        android:layout_alignWithParentIfMissing="true"/>
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true" />
+
+    <include
+        android:id="@+id/instructionListLayout"
+        layout="@layout/instruction_list_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/instructionLayout"
+        android:visibility="gone" />
 
 </RelativeLayout>
