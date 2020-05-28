@@ -755,7 +755,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(options)
-      .useDefaultLocationEngine(false)
+      .useDefaultLocationEngine(true)
       .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
