@@ -36,4 +36,8 @@
     <dimen name="data_margin_left">8dp</dimen>
     <dimen name="attribution_margin_start">4dp</dimen>
     <dimen name="autocomplete_bottomsheet_margin">8dp</dimen>
+
+    <dimen name="history_app_bar_height">180dp</dimen>
+    <dimen name="history_fab_margin">16dp</dimen>
+    <dimen name="history_text_margin">16dp</dimen>
 </resources>

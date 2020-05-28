@@ -329,6 +329,14 @@
                 android:value=".UIActivity" />
         </activity>
 
+        <activity android:name=".history.HistoryFilesActivity"
+            android:label="@string/title_select_replay_history">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".core.ReplayHistoryActivity" />
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

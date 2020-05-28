@@ -136,6 +136,12 @@ dependencies {
 
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug
+
+    // Networking
+    implementation dependenciesList.mapboxSdkServices
+    implementation(dependenciesList.okhttp) {
+        force = true
+    }
 }
 
 apply from: "${rootDir}/gradle/developer-config.gradle"

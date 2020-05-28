@@ -2,10 +2,13 @@ package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -13,8 +16,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
-import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
@@ -29,12 +30,14 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.history.HistoryFilesActivity
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.io.IOException
 import java.io.InputStream
+import java.lang.ref.WeakReference
 import java.nio.charset.Charset.forName
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -47,6 +50,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * This activity shows how to use replay ride history.
@@ -58,15 +62,24 @@ class ReplayHistoryActivity : AppCompatActivity() {
     // You choose your loading mechanism. Use Coroutines, ViewModels, RxJava, Threads, etc..
     private var loadNavigationJob: Job? = null
 
-    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replay_history_layout)
         mapView.onCreate(savedInstanceState)
 
+        selectHistoryButton.setOnClickListener {
+            val activityIntent = Intent(this, HistoryFilesActivity::class.java)
+            startActivity(activityIntent)
+            finish()
+        }
+
         getNavigationAsync {
             navigationContext = it
             it.onNavigationReady()
+
+            it.mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
+            it.navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            it.locationEngine.getLastLocation(FirstLocationCallback(it))
         }
     }
 
@@ -75,9 +88,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             // Load map and style on Main dispatchers
             val deferredMapboxWithStyle = async { loadMapWithStyle() }
 
-            // Load and replay history on IO dispatchers
-            val deferredEvents = async(Dispatchers.IO) { loadReplayHistory() }
-            val replayEvents = deferredEvents.await()
+            val replayEvents = loadReplayHistory()
             val mapboxReplay = MapboxReplayer()
                 .pushEvents(replayEvents)
             if (!isActive) return@launch
@@ -88,8 +99,6 @@ class ReplayHistoryActivity : AppCompatActivity() {
             val mapboxNavigation = createMapboxNavigation(locationEngine)
             val (mapboxMap, style) = deferredMapboxWithStyle.await()
             if (!isActive) return@launch
-
-            initLocationComponent(locationEngine, style, mapboxMap)
 
             val navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this@ReplayHistoryActivity, true)
             val navigationContext = ReplayNavigationContext(
@@ -112,11 +121,17 @@ class ReplayHistoryActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun loadReplayHistory(): List<ReplayEventBase> = suspendCoroutine { cont ->
+    private suspend fun loadReplayHistory(): List<ReplayEventBase> = withContext(Dispatchers.IO) {
+        HistoryFilesActivity.selectedHistory?.let {
+            val replayHistoryMapper = ReplayHistoryMapper(ReplayCustomEventMapper(), MapboxLogger)
+            replayHistoryMapper.mapToReplayEvents(it)
+        } ?: loadDefaultReplayHistory()
+    }
+
+    private suspend fun loadDefaultReplayHistory(): List<ReplayEventBase> = withContext(Dispatchers.IO) {
         val replayHistoryMapper = ReplayHistoryMapper(ReplayCustomEventMapper(), MapboxLogger)
         val rideHistoryExample = loadHistoryJsonFromAssets(this@ReplayHistoryActivity, "replay-history-activity.json")
-        val replayEvents = replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
-        cont.resume(replayEvents)
+        replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
     }
 
     private fun createMapboxNavigation(locationEngine: LocationEngine): MapboxNavigation {
@@ -130,6 +145,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     /**
      * After the map, style, and replay history is all loaded. Connect the view.
      */
+    @SuppressLint("MissingPermission")
     private fun ReplayNavigationContext.onNavigationReady() {
         setupReplayControls()
 
@@ -157,6 +173,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         playReplay.setOnClickListener {
             mapboxReplayer.play()
+            mapboxNavigation.startTripSession()
         }
     }
 
@@ -199,19 +216,18 @@ class ReplayHistoryActivity : AppCompatActivity() {
         mapboxNavigation.startTripSession()
     }
 
-    @SuppressLint("RestrictedApi")
-    private fun initLocationComponent(locationEngine: LocationEngine, loadedMapStyle: Style, mapboxMap: MapboxMap) {
-        mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-        mapboxMap.locationComponent.let { locationComponent ->
-            val locationComponentActivationOptions =
-                LocationComponentActivationOptions.builder(this, loadedMapStyle)
-                    .locationEngine(locationEngine)
-                    .build()
+    private class FirstLocationCallback(navigationContext: ReplayNavigationContext) :
+        LocationEngineCallback<LocationEngineResult> {
 
-            locationComponent.activateLocationComponent(locationComponentActivationOptions)
-            locationComponent.isLocationComponentEnabled = true
-            locationComponent.cameraMode = CameraMode.TRACKING
-            locationComponent.renderMode = RenderMode.COMPASS
+        private val navigationContextRef = WeakReference(navigationContext)
+
+        override fun onSuccess(result: LocationEngineResult?) {
+            result?.locations?.firstOrNull()?.let {
+                navigationContextRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
+            }
+        }
+
+        override fun onFailure(exception: Exception) {
         }
     }
 
