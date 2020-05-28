@@ -59,6 +59,7 @@
 
     <string name="title_replay_history_kotlin" translatable="false">Replay history</string>
     <string name="description_replay_history_kotlin" translatable="false">Shows how to use replay ride history in Kotlin code.</string>
+    <string name="title_select_replay_history" translatable="false">Select history</string>
 
     <string name="title_replay_waypoints" translatable="false">Replay waypoints</string>
     <string name="description_replay_waypoints" translatable="false">Shows how to use navigate to waypoints.</string>
@@ -130,6 +131,7 @@
     <string name="start_navigation" translatable="false">Start Navigation</string>
     <string name="navigate_waypoints_next_stop" translatable="false">Next stop</string>
     <string name="play_history" translatable="false">Play history</string>
+    <string name="select_history" translatable="false">Select history</string>
     <string name="offline_region_download_title" translatable="false">Download offline region</string>
     <string name="msg_long_press_map_to_place_waypoint" translatable="false">Long press on the map to place a waypoint</string>
     <string name="msg_tap_map_to_place_waypoint" translatable="false">Tap on the map to place a waypoint</string>
@@ -144,5 +146,8 @@
     <string name="send_user_feedback" translatable="false">Send User Feedback</string>
     <string name="simple_mapbox_navigation_clear_routes" translatable="false">CLEAR ROUTES</string>
     <string name="simple_mapbox_navigation_add_original_route" translatable="false">ADD ORIGINAL ROUTE</string>
+    <string name="history_failed_to_load_item" translatable="false">History failed to load item</string>
+    <string name="history_failed_to_load_list" translatable="false">Failed to load list</string>
+    <string name="history_local_history_file" translatable="false">Local history file</string>
 
 </resources>
