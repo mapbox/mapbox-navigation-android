@@ -264,6 +264,22 @@ public class NavigationMapRoute implements LifecycleObserver {
     navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
   }
 
+  /**
+   * This method will allow this class to listen to new routes based on
+   * the progress updates from {@link MapboxNavigation}.
+   * <p>
+   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
+   * class will automatically draw the new route.
+   *
+   * @param navigation to add the progress change listener
+   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck.
+   */
+  public void addProgressChangeListener(MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
+    this.navigation = navigation;
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+    navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
+  }
+
 
   /**
    * Should be called if {@link NavigationMapRoute#addProgressChangeListener(MapboxNavigation)} was
@@ -454,10 +470,14 @@ public class NavigationMapRoute implements LifecycleObserver {
     /**
      * An instance of the {@link MapboxNavigation} object. Default is null that means
      * your route won't consider rerouting during a navigation session.
+     *
+     * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck
+     *                               during navigation. By default is `false`
      * @return the builder
      */
-    public Builder withMapboxNavigation(@Nullable MapboxNavigation navigation) {
+    public Builder withMapboxNavigation(@Nullable MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
       this.navigation = navigation;
+      this.vanishRouteLineEnabled = vanishRouteLineEnabled;
       return this;
     }
 
@@ -476,15 +496,6 @@ public class NavigationMapRoute implements LifecycleObserver {
      */
     public Builder withBelowLayer(@Nullable String belowLayer) {
       this.belowLayer = belowLayer;
-      return this;
-    }
-
-    /**
-     * Determines if the route line should vanish behind the puck during navigation. By default is `false`
-     * @return the builder
-     */
-    public Builder withVanishRouteLineEnabled(boolean vanishRouteLineEnabled) {
-      this.vanishRouteLineEnabled = vanishRouteLineEnabled;
       return this;
     }
 
