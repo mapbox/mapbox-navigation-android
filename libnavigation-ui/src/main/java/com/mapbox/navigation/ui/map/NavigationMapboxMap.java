@@ -384,7 +384,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     this.navigation = navigation;
     initializeWayName(mapboxMap, mapPaddingAdjustor);
     initializeFpsDelegate(mapView);
-    mapRoute.addProgressChangeListener(navigation);
+    mapRoute.addProgressChangeListener(navigation, vanishRouteLineEnabled);
     mapCamera.addProgressChangeListener(navigation);
     mapWayName.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
@@ -788,7 +788,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
             .withStyle(routeStyleRes)
             .withBelowLayer(routeBelowLayerId)
-            .withVanishRouteLineEnabled(vanishRouteLineEnabled)
             .build();
   }
 
