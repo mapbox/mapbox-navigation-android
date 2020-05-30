@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.replay.route
 
+import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfMeasurement
 import kotlin.math.abs
@@ -12,6 +13,7 @@ import kotlin.math.sqrt
 internal class ReplayRouteInterpolator {
 
     private val routeSmoother = ReplayRouteSmoother()
+    private val routeBender = ReplayRouteBender()
 
     /**
      * Given a list of coordinates on a route, detect sections of the route that have significant
@@ -22,13 +24,17 @@ internal class ReplayRouteInterpolator {
         distinctPoints: List<Point>
     ): List<ReplayRouteLocation> {
         val smoothLocations = routeSmoother.smoothRoute(distinctPoints, SMOOTH_THRESHOLD_METERS)
-        smoothLocations.first().speedMps = 0.0
-        smoothLocations.last().speedMps = 0.0
+        val bentPoints = routeBender.bendRoute(smoothLocations)
+        createBearingProfile(bentPoints)
+        println("smoothLocations ${MultiPoint.fromLngLats(smoothLocations.map { it.point }).toJson()}")
+        println("bentPoints ${MultiPoint.fromLngLats(bentPoints.map { it.point }).toJson()}")
+        bentPoints.first().speedMps = 0.0
+        bentPoints.last().speedMps = 0.0
 
-        createSpeedForTurns(options, smoothLocations)
-        reduceSpeedForDistances(options, smoothLocations)
+        createSpeedForTurns(options, bentPoints)
+        reduceSpeedForDistances(options, bentPoints)
 
-        return smoothLocations
+        return bentPoints
     }
 
     /**

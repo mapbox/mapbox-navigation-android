@@ -3,6 +3,8 @@ package com.mapbox.navigation.core.replay.route
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.geojson.LineString
+import com.mapbox.geojson.MultiPoint
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
@@ -28,11 +30,11 @@ internal class ReplayRouteDriver {
         points: List<Point>
     ): List<ReplayRouteLocation> {
         val distinctPoints = routeSmoother.distinctPoints(points)
+        println("distinctPoints ${MultiPoint.fromLngLats(distinctPoints).toJson()}")
         if (distinctPoints.size < 2) return emptyList()
 
         val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
         val replayRouteLocations = interpolateLocations(options, distinctPoints, smoothLocations)
-        routeInterpolator.createBearingProfile(replayRouteLocations)
         timeMillis += 1000.0 / options.frequency
 
         return replayRouteLocations

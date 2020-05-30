@@ -140,6 +140,14 @@ class ReplayRouteDriverTest {
     }
 
     @Test
+    fun `testing another route`() {
+        val points = PolylineUtils.decode("""ajuphAp}vtfFgLwDxPm`AfAeHcDy@oA]iOwDy]d[yIxHkRnPcMvKoVgI""", 6)
+        val locations = replayRouteDriver.drivePointList(defaultOptions, points)
+
+        assertTrue(locations.size > 10)
+    }
+
+    @Test
     fun `should not be weighted by duplicates`() {
         val points =
             LineString.fromJson(resourceAsString("not_be_weighted_by_duplicates_test.txt"))
