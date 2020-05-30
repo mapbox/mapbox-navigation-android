@@ -16,7 +16,6 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
-import com.mapbox.navigation.base.options.HandheldProfile
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.core.Rounding
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
@@ -24,7 +23,6 @@ import com.mapbox.navigation.core.internal.trip.service.MapboxTripService
 import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.trip.notification.MapboxTripNotification
 import kotlinx.android.synthetic.main.activity_trip_session.*
 import timber.log.Timber
@@ -92,8 +90,6 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_trip_session)
-
-        MapboxNativeNavigatorImpl.create(HandheldProfile())
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
