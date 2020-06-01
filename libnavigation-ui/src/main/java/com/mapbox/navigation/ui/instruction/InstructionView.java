@@ -1025,6 +1025,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void updateLandscapeConstraintsTo(int layoutRes) {
     final int feedbackButtonVisibility = feedbackButton.getVisibility();
     final int soundButtonVisibility = feedbackButton.getVisibility();
+    final int subInstructionLayoutVisitbility = subStepLayout.getVisibility();
 
     ConstraintSet collapsed = new ConstraintSet();
     collapsed.clone(getContext(), layoutRes);
@@ -1032,6 +1033,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
     feedbackButton.setVisibility(feedbackButtonVisibility);
     soundButton.setVisibility(soundButtonVisibility);
+    subStepLayout.setVisibility(subInstructionLayoutVisitbility);
   }
 
   /**
