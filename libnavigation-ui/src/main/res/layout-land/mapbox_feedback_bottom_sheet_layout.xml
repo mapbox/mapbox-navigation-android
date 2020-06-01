@@ -21,9 +21,9 @@
         android:background="@android:color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topBanner"
+        tools:ignore="MissingDefaultResource"
         tools:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -44,8 +44,11 @@
                 android:id="@+id/reportIssueBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="45dp"
-                android:layout_centerInParent="true"
+                android:layout_above="@id/feedbackProgress"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/mapbox_feedback_item_margin"
                 android:background="@drawable/mapbox_feedback_report_issue_button_background"
+                android:gravity="center_vertical"
                 android:paddingStart="32dp"
                 android:paddingEnd="32dp"
                 android:text="@string/report_feedback"
@@ -68,19 +71,20 @@
         android:id="@+id/feedbackMainLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/mapbox_feedback_bottom_sheet_content_height"
-        android:orientation="vertical"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topBanner"
-        app:layout_constraintBottom_toBottomOf="parent"
         tools:visibility="gone">
 
         <LinearLayout
             android:id="@+id/guidanceIssueLayout"
             style="@style/FeedbackBottomSheetIssueListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2">
 
             <TextView
                 style="@style/FeedbackBottomSheetIssueListTitle"
@@ -100,9 +104,9 @@
         <LinearLayout
             android:id="@+id/navigationIssueLayout"
             style="@style/FeedbackBottomSheetIssueListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3">
 
             <TextView
                 style="@style/FeedbackBottomSheetIssueListTitle"

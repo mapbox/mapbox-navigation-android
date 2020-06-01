@@ -17,7 +17,8 @@
             @color/mapbox_navigation_route_layer_congestion_red
         </item>
         <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
-        <item name="routeLineTraveledColor">@color/mapbox_navigation_route_line_traveled_color</item>
+        <item name="routeLineTraveledColor">@color/mapbox_navigation_route_line_traveled_color
+        </item>
         <item name="alternativeRouteColor">@color/mapbox_navigation_route_alternative_color</item>
         <item name="alternativeRouteUnknownCongestionColor">
             @color/mapbox_navigation_route_alternative_congestion_unknown
@@ -227,6 +228,7 @@
     <style name="FeedbackBottomSheetIssueListLayout">
         <item name="android:background">@drawable/mapbox_feedback_bottom_issue_background</item>
         <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingBottom">12dp</item>
     </style>
