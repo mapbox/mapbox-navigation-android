@@ -454,6 +454,7 @@ public class NavigationViewModel extends AndroidViewModel {
         navigationViewEventDispatcher.onNavigationFinished();
       } else if (tripSessionState == TripSessionState.STARTED) {
         navigationViewEventDispatcher.onNavigationRunning();
+        isRunning = true;
       }
     }
   };
