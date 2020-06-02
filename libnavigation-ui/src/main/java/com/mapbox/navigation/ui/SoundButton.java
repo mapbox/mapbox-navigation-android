@@ -170,7 +170,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
     soundChipText.setTextColor(secondaryColor);
 
     soundFab.setBackgroundTintList(ColorStateList.valueOf(primaryColor));
-    soundFab.setColorFilter(secondaryColor);
+    soundFab.setSupportImageTintList(ColorStateList.valueOf(secondaryColor));
   }
 
   /**
