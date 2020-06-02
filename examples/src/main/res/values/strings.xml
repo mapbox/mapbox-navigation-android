@@ -99,6 +99,9 @@
     <string name="title_custom_route_styling_kotlin" translatable="false">Custom Route Styling Kotlin</string>
     <string name="description_custom_route_styling_kotlin" translatable="false">Demonstrates applying a custom style for the routes.</string>
 
+    <string name="title_navigation_view_fragment" translatable="false">NavigationView In A Fragment</string>
+    <string name="description_navigation_view_fragment" translatable="false">Shows how to use NavigationView to implement turn by turn in a fragment.</string>
+
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">An example using NavigationMapRoute</string>
 
