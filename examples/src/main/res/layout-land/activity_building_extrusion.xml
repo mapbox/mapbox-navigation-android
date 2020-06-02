@@ -27,9 +27,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/dimen_16dp"
-        android:layout_marginBottom="@dimen/dimen_16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/adjust_building_extrusion_visibility_fab"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adjust_building_extrusion_visibility_fab"
         android:visibility="visible"
         app:srcCompat="@drawable/ic_refresh"
         tools:visibility="visible" />
