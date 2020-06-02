@@ -280,6 +280,14 @@
                 android:value=".CoreActivity" />
         </activity>
 
+        <activity
+            android:name=".core.NavigationMapRouteActivity"
+            android:label="@string/title_navigation_route_ui">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />
