@@ -17,6 +17,7 @@ import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.HybridRouterActivityJava
 import com.mapbox.navigation.examples.core.HybridRouterActivityKt
 import com.mapbox.navigation.examples.core.InstructionViewActivity
+import com.mapbox.navigation.examples.core.NavigationMapRouteActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
 import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
@@ -167,7 +168,12 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_custom_route_styling_kotlin),
                 getString(R.string.description_custom_route_styling_kotlin),
                 CustomRouteStylingActivity::class.java
-        )
+            ),
+            SampleItem(
+                getString(R.string.title_navigation_route_ui),
+                getString(R.string.description_navigation_route_ui),
+                NavigationMapRouteActivity::class.java
+            )
         )
     }
 }
