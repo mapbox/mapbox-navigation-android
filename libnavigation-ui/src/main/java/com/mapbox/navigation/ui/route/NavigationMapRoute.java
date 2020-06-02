@@ -277,6 +277,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   public void addProgressChangeListener(MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
     this.navigation = navigation;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+    this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
   }
 
