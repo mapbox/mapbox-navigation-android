@@ -28,6 +28,7 @@ javadoc-dokka:
 	./gradlew :libdirections-offboard:dokka
 	./gradlew :libdirections-hybrid:dokka
 	./gradlew :libnavigation-metrics:dokka
+	./gradlew :libnavigation-util:dokka
 	./gradlew :libtrip-notification:dokka
 	./gradlew :libnavigation-core:dokka
 	./gradlew :libnavigation-ui:dokka
