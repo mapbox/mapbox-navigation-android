@@ -4,15 +4,18 @@
     <!-- Primary route colors -->
     <attr name="routeColor" format="color"/>
     <attr name="routeUnknownCongestionColor" format="color"/>
+    <attr name="routeLowCongestionColor" format="color"/>
     <attr name="routeModerateCongestionColor" format="color"/>
     <attr name="routeHeavyCongestionColor" format="color"/>
     <attr name="routeSevereCongestionColor" format="color"/>
     <attr name="routeShieldColor" format="color"/>
     <attr name="routeLineTraveledColor" format="color"/>
+    <attr name="routeLineShieldTraveledColor" format="color"/>
 
     <!-- Alternative route colors -->
     <attr name="alternativeRouteColor" format="color"/>
     <attr name="alternativeRouteUnknownCongestionColor" format="color"/>
+    <attr name="alternativeRouteLowCongestionColor" format="color"/>
     <attr name="alternativeRouteModerateCongestionColor" format="color"/>
     <attr name="alternativeRouteHeavyCongestionColor" format="color"/>
     <attr name="alternativeRouteSevereCongestionColor" format="color"/>
@@ -24,6 +27,7 @@
 
     <!-- Route Scales -->
     <attr name="routeScale" format="float"/>
+    <attr name="routeTrafficScale" format="float"/>
     <attr name="alternativeRouteScale" format="float"/>
 
     <attr name="upcomingManeuverArrowColor" format="color"/>

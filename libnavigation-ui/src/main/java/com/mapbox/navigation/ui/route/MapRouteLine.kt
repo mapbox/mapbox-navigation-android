@@ -31,6 +31,8 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_V
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
@@ -122,6 +124,7 @@ internal class MapRouteLine(
 
     private var wayPointSource: GeoJsonSource
     private val primaryRouteLineSource: GeoJsonSource
+    private val primaryRouteLineTrafficSource: GeoJsonSource
     private val alternativeRouteLineSource: GeoJsonSource
     private val routeLayerIds = mutableSetOf<String>()
     private val directionsRoutes = mutableListOf<DirectionsRoute>()
@@ -141,6 +144,15 @@ internal class MapRouteLine(
         )
     }
 
+    private val routeLineShieldTraveledColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_routeLineShieldTraveledColor,
+            R.color.mapbox_navigation_route_shield_line_traveled_color,
+            context,
+            styleRes
+        )
+    }
+
     private val routeUnknownColor: Int by lazy {
         getStyledColor(
             R.styleable.NavigationMapRoute_routeUnknownCongestionColor,
@@ -154,6 +166,15 @@ internal class MapRouteLine(
         getStyledColor(
             R.styleable.NavigationMapRoute_routeColor,
             R.color.mapbox_navigation_route_layer_blue,
+            context,
+            styleRes
+        )
+    }
+
+    private val routeLowCongestionColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_routeLowCongestionColor,
+            R.color.mapbox_navigation_route_traffic_layer_color,
             context,
             styleRes
         )
@@ -204,6 +225,15 @@ internal class MapRouteLine(
         )
     }
 
+    private val routeTrafficScale: Float by lazy {
+        getFloatStyledValue(
+            R.styleable.NavigationMapRoute_routeTrafficScale,
+            1.0f,
+            context,
+            styleRes
+        )
+    }
+
     private val roundedLineCap: Boolean by lazy {
         getBooleanStyledValue(
             R.styleable.NavigationMapRoute_roundedLineCap,
@@ -225,6 +255,15 @@ internal class MapRouteLine(
     private val alternativeRouteDefaultColor: Int by lazy {
         getStyledColor(
             R.styleable.NavigationMapRoute_alternativeRouteColor,
+            R.color.mapbox_navigation_route_alternative_color,
+            context,
+            styleRes
+        )
+    }
+
+    private val alternativeRouteLowColor: Int by lazy {
+        getStyledColor(
+            R.styleable.NavigationMapRoute_alternativeRouteLowCongestionColor,
             R.color.mapbox_navigation_route_alternative_color,
             context,
             styleRes
@@ -315,6 +354,14 @@ internal class MapRouteLine(
         )
         style.addSource(primaryRouteLineSource)
 
+        val routeLineTrafficGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
+        primaryRouteLineTrafficSource = mapRouteSourceProvider.build(
+            PRIMARY_ROUTE_TRAFFIC_SOURCE_ID,
+            drawnPrimaryRouteFeatureCollection,
+            routeLineTrafficGeoJsonOptions
+        )
+        style.addSource(primaryRouteLineTrafficSource)
+
         val alternativeRouteLineGeoJsonOptions =
             GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
         alternativeRouteLineSource = mapRouteSourceProvider.build(
@@ -347,12 +394,13 @@ internal class MapRouteLine(
 
         if (style.isFullyLoaded && routeFeatureData.isNotEmpty()) {
             val expression = getExpressionAtOffset(vanishPointOffset)
-            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
+            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
+            hideRouteLineAtOffset(vanishPointOffset)
             hideShieldLineAtOffset(vanishPointOffset)
         }
 
         routeLineInitializedCallback?.onInitialized(
-            RouteLineLayerIds(PRIMARY_ROUTE_LAYER_ID, ALTERNATIVE_ROUTE_LAYER_ID)
+            RouteLineLayerIds(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, PRIMARY_ROUTE_LAYER_ID, ALTERNATIVE_ROUTE_LAYER_ID)
         )
     }
 
@@ -383,6 +431,7 @@ internal class MapRouteLine(
             )
             routeFeatureData.addAll(newRouteFeatureData)
             drawRoutes(newRouteFeatureData)
+            hideRouteLineAtOffset(0f)
             hideShieldLineAtOffset(0f)
             drawWayPoints()
             updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
@@ -567,6 +616,20 @@ internal class MapRouteLine(
             routeLayerIds.add(this.id)
         }
 
+        layerProvider.initializePrimaryRouteTrafficLayer(
+            style,
+            roundedLineCap,
+            routeTrafficScale,
+            routeLowCongestionColor
+        ).apply {
+            MapUtils.addLayerToMap(
+                style,
+                this,
+                belowLayerId
+            )
+            routeLayerIds.add(this.id)
+        }
+
         layerProvider.initializeWayPointLayer(
             style, originIcon, destinationIcon
         ).apply {
@@ -601,7 +664,7 @@ internal class MapRouteLine(
 
             if (style.isFullyLoaded) {
                 val expression = getExpressionAtOffset(0f)
-                style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(lineGradient(expression))
+                style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
             }
         }
 
@@ -644,7 +707,7 @@ internal class MapRouteLine(
 
         return Expression.step(
             Expression.lineProgress(),
-            Expression.color(routeLineTraveledColor),
+            Expression.rgba(0, 0, 0, 0),
             *trafficExpressions.toTypedArray()
         )
     }
@@ -662,6 +725,7 @@ internal class MapRouteLine(
     private fun setPrimaryRoutesSource(featureCollection: FeatureCollection) {
         drawnPrimaryRouteFeatureCollection = featureCollection
         primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
+        primaryRouteLineTrafficSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
     }
 
     private fun setAlternativeRoutesSource(featureCollection: FeatureCollection) {
@@ -712,7 +776,7 @@ internal class MapRouteLine(
                 HEAVY_CONGESTION_VALUE -> routeHeavyColor
                 SEVERE_CONGESTION_VALUE -> routeSevereColor
                 UNKNOWN_CONGESTION_VALUE -> routeUnknownColor
-                else -> routeDefaultColor
+                else -> routeLowCongestionColor
             }
             false -> when (congestionValue) {
                 MODERATE_CONGESTION_VALUE -> alternativeRouteModerateColor
@@ -725,14 +789,14 @@ internal class MapRouteLine(
     }
 
     /**
-     * Hides the RouteShieldLayer
+     * Hides the RouteShield Layer
      *
      * @param offset the offset of the visibility in the expression
      */
     fun hideShieldLineAtOffset(offset: Float) {
         val expression = Expression.step(
             Expression.lineProgress(),
-            Expression.rgba(0, 0, 0, 0),
+            Expression.color(routeLineShieldTraveledColor),
             Expression.stop(
                 offset,
                 Expression.color(routeShieldColor)
@@ -745,13 +809,36 @@ internal class MapRouteLine(
     }
 
     /**
-     * Applies an Expression to the route line layer.
+     * Hides the Route Layer
+     *
+     * @param offset the offset of the visibility in the expression
+     */
+    fun hideRouteLineAtOffset(offset: Float) {
+        val expression = Expression.step(
+            Expression.lineProgress(),
+            Expression.color(routeLineTraveledColor),
+            Expression.stop(
+                offset,
+                Expression.color(routeDefaultColor)
+            )
+        )
+        if (style.isFullyLoaded) {
+            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(
+                lineGradient(
+                    expression
+                )
+            )
+        }
+    }
+
+    /**
+     * Applies an Expression to the route line traffic layer.
      *
      * @param expression the Expression to apply to the layer properties
      */
     fun decorateRouteLine(expression: Expression) {
         if (style.isFullyLoaded) {
-            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(
+            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(
                 lineGradient(
                     expression
                 )
@@ -1033,7 +1120,7 @@ internal class MapRouteLine(
          * @param index a value of 0 indicates a property value of origin
          * will be added to the Feature else a value of destination will be used.
          *
-         * @return a Feature represeting the waypoint from the RouteLog
+         * @return a Feature representing the waypoint from the RouteLog
          */
         fun buildWayPointFeatureFromLeg(leg: RouteLeg, index: Int): Feature? {
             return leg.steps()?.get(index)?.maneuver()?.location()?.run {

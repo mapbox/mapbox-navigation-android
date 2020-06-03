@@ -27,13 +27,15 @@
     <color name="navigation_maneuver_view_secondary">@android:color/holo_blue_light</color>
 
     <!-- Custom Route Colors -->
-    <color name="customRouteShieldColor">#4164FB</color>
-    <color name="customRouteColor">#AD80C2</color>
+    <color name="customRouteShieldColor">#000000</color>
+    <color name="customRouteColor">#ffffff</color>
+    <color name="customRouteLowCongestionColor">#00ff00</color>
     <color name="customRouteUnknownCongestionColor">#a8aaba</color>
     <color name="customRouteModerateCongestionColor">#CFAC00</color>
-    <color name="customRouteHeavyCongestionColor">#D19500</color>
-    <color name="customRouteSevereCongestionColor">#D16100</color>
-    <color name="customRouteLineTraveledColor">#3300B4D1</color>
+    <color name="customRouteHeavyCongestionColor">#D16100</color>
+    <color name="customRouteSevereCongestionColor">#FF0000</color>
+    <color name="customRouteLineTraveledColor">#a8aaba</color>
+    <color name="customRouteLineShieldTraveledColor">#6E707A</color>
 
     <color name="customAlternativeRouteColor">#7EC8CF</color>
     <color name="customAlternativeRouteUnknownCongestionColor">#7EC8CF</color>

@@ -36,6 +36,8 @@ import static com.mapbox.navigation.ui.internal.route.RouteConstants.ORIGIN_MARK
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE;
@@ -53,19 +55,19 @@ public class MapRouteLayerProvider {
     // fixme reduce all the duplicate code here
 
     primaryShieldLayer = new LineLayer(PRIMARY_ROUTE_SHIELD_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID).withProperties(
-       lineCap(Property.LINE_CAP_ROUND),
-       lineJoin(Property.LINE_JOIN_ROUND),
-       lineWidth(
-           interpolate(
-               exponential(1.5f), zoom(),
-                   stop(10f, 7f),
-                   stop(14f, product(literal(10.5f), literal(routeScale))),
-                   stop(16.5f, product(literal(15.5f), literal(routeScale))),
-                   stop(19f, product(literal(24f), literal(routeScale))),
-                   stop(22f, product(literal(29f), literal(routeScale)))
-               )
-       ),
-       lineColor(color(routeShieldColor))
+     lineCap(Property.LINE_CAP_ROUND),
+     lineJoin(Property.LINE_JOIN_ROUND),
+     lineWidth(
+       interpolate(
+          exponential(1.5f), zoom(),
+             stop(10f, 7f),
+             stop(14f, product(literal(10.5f), literal(routeScale))),
+             stop(16.5f, product(literal(15.5f), literal(routeScale))),
+             stop(19f, product(literal(24f), literal(routeScale))),
+             stop(22f, product(literal(29f), literal(routeScale)))
+          )
+     ),
+     lineColor(color(routeShieldColor))
    );
     return primaryShieldLayer;
   }
@@ -129,6 +131,41 @@ public class MapRouteLayerProvider {
                    stop(19f, product(literal(14f), literal(routeScale))),
                    stop(22f, product(literal(18f), literal(routeScale)))
            )
+       ),
+       lineColor(color(routeDefaultColor))
+       );
+    return primaryRouteLayer;
+  }
+
+  public LineLayer initializePrimaryRouteTrafficLayer(Style style,
+                                          boolean roundedLineCap,
+                                          float routeScale,
+                                          int routeDefaultColor) {
+    LineLayer primaryRouteLayer = style.getLayerAs(PRIMARY_ROUTE_TRAFFIC_LAYER_ID);
+    if (primaryRouteLayer != null) {
+      style.removeLayer(primaryRouteLayer);
+    }
+
+    String lineCap = Property.LINE_CAP_ROUND;
+    String lineJoin = Property.LINE_JOIN_ROUND;
+    if (!roundedLineCap) {
+      lineCap = Property.LINE_CAP_BUTT;
+      lineJoin = Property.LINE_JOIN_BEVEL;
+    }
+
+    primaryRouteLayer = new LineLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, PRIMARY_ROUTE_TRAFFIC_SOURCE_ID).withProperties(
+        lineCap(lineCap),
+        lineJoin(lineJoin),
+        lineWidth(
+            interpolate(
+                exponential(1.5f), zoom(),
+                    stop(4f, product(literal(3f), literal(routeScale))),
+                    stop(10f, product(literal(4f), literal(routeScale))),
+                    stop(13f, product(literal(6f), literal(routeScale))),
+                    stop(16f, product(literal(10f), literal(routeScale))),
+                    stop(19f, product(literal(14f), literal(routeScale))),
+                    stop(22f, product(literal(18f), literal(routeScale)))
+            )
        ),
        lineColor(color(routeDefaultColor))
        );

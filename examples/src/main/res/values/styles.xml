@@ -93,12 +93,14 @@
 
     <style name="CustomRouteStyle" parent="@style/NavigationMapRoute">
         <item name="routeColor">@color/customRouteColor</item>
+        <item name="routeLowCongestionColor">@color/customRouteLowCongestionColor</item>
         <item name="routeUnknownCongestionColor">@color/customRouteUnknownCongestionColor</item>
         <item name="routeModerateCongestionColor">@color/customRouteModerateCongestionColor</item>
         <item name="routeHeavyCongestionColor">@color/customRouteHeavyCongestionColor</item>
         <item name="routeSevereCongestionColor">@color/customRouteSevereCongestionColor</item>
         <item name="routeShieldColor">@color/customRouteShieldColor</item>
         <item name="routeLineTraveledColor">@color/customRouteLineTraveledColor</item>
+        <item name="routeLineShieldTraveledColor">@color/customRouteLineShieldTraveledColor</item>
         <item name="alternativeRouteColor">@color/customAlternativeRouteColor</item>
         <item name="alternativeRouteUnknownCongestionColor">
             @color/customAlternativeRouteUnknownCongestionColor
@@ -115,5 +117,6 @@
         <item name="alternativeRouteShieldColor">
             @color/customAlternativeRouteShieldColor
         </item>
+        <item name="routeTrafficScale">0.5</item>
     </style>
 </resources>

@@ -32,6 +32,7 @@ internal class MapRouteProgressChangeListener(
         if (animationDistanceValue > MINIMUM_ROUTE_LINE_OFFSET) {
             val expression = routeLine.getExpressionAtOffset(animationDistanceValue)
             routeLine.hideShieldLineAtOffset(animationDistanceValue)
+            routeLine.hideRouteLineAtOffset(animationDistanceValue)
             routeLine.decorateRouteLine(expression)
         }
     }
