@@ -24,6 +24,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SHIELD_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import io.mockk.every
 import io.mockk.mockk
@@ -45,6 +46,7 @@ class MapRouteLineTest {
     var styleRes: Int = 0
     lateinit var wayPointSource: GeoJsonSource
     lateinit var primaryRouteLineSource: GeoJsonSource
+    lateinit var primaryRouteLineTrafficSource: GeoJsonSource
     lateinit var alternativeRouteLineSource: GeoJsonSource
 
     lateinit var mapRouteSourceProvider: MapRouteSourceProvider
@@ -53,6 +55,7 @@ class MapRouteLineTest {
     lateinit var alternativeRouteLayer: LineLayer
     lateinit var primaryRouteShieldLayer: LineLayer
     lateinit var primaryRouteLayer: LineLayer
+    lateinit var primaryRouteTrafficLayer: LineLayer
     lateinit var waypointLayer: SymbolLayer
 
     lateinit var style: Style
@@ -84,10 +87,15 @@ class MapRouteLineTest {
             every { id } returns WAYPOINT_LAYER_ID
         }
 
+        primaryRouteTrafficLayer = mockk {
+            every { id } returns PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+        }
+
         style = mockk(relaxUnitFun = true) {
             every { getLayer(ALTERNATIVE_ROUTE_LAYER_ID) } returns alternativeRouteLayer
             every { getLayer(ALTERNATIVE_ROUTE_SHIELD_LAYER_ID) } returns alternativeRouteShieldLayer
             every { getLayer(PRIMARY_ROUTE_LAYER_ID) } returns primaryRouteLayer
+            every { getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns primaryRouteTrafficLayer
             every { getLayer(PRIMARY_ROUTE_SHIELD_LAYER_ID) } returns primaryRouteShieldLayer
             every { getLayer(WAYPOINT_LAYER_ID) } returns waypointLayer
             every { isFullyLoaded } returns false
@@ -95,24 +103,14 @@ class MapRouteLineTest {
 
         wayPointSource = mockk(relaxUnitFun = true)
         primaryRouteLineSource = mockk(relaxUnitFun = true)
+        primaryRouteLineTrafficSource = mockk(relaxUnitFun = true)
         alternativeRouteLineSource = mockk(relaxUnitFun = true)
 
         mapRouteSourceProvider = mockk {
             every { build(RouteConstants.WAYPOINT_SOURCE_ID, any(), any()) } returns wayPointSource
-            every {
-                build(
-                    RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
-                    any(),
-                    any()
-                )
-            } returns primaryRouteLineSource
-            every {
-                build(
-                    RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID,
-                    any(),
-                    any()
-                )
-            } returns alternativeRouteLineSource
+            every { build(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any()) } returns primaryRouteLineSource
+            every { build(RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID, any(), any()) } returns primaryRouteLineTrafficSource
+            every { build(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID, any(), any()) } returns alternativeRouteLineSource
         }
         layerProvider = mockk {
             every {
@@ -146,6 +144,7 @@ class MapRouteLineTest {
                 )
             } returns primaryRouteLayer
             every { initializeWayPointLayer(style, any(), any()) } returns waypointLayer
+            every { initializePrimaryRouteTrafficLayer(style, true, 1.0f, -11097861) } returns primaryRouteTrafficLayer
         }
     }
 
@@ -1029,14 +1028,11 @@ class MapRouteLineTest {
             callback
         )
 
-        verify {
-            callback.onInitialized(
-                RouteLineLayerIds(
-                    PRIMARY_ROUTE_LAYER_ID,
-                    ALTERNATIVE_ROUTE_LAYER_ID
-                )
-            )
-        }
+        verify { callback.onInitialized(RouteLineLayerIds(
+            PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+            PRIMARY_ROUTE_LAYER_ID,
+            ALTERNATIVE_ROUTE_LAYER_ID
+        )) }
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
