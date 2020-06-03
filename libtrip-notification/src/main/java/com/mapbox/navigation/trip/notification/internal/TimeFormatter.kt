@@ -1,6 +1,7 @@
 package com.mapbox.navigation.trip.notification.internal
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.SpannableStringBuilder
@@ -53,7 +54,11 @@ object TimeFormatter {
      * @return SpannableStringBuilder
      */
     @JvmStatic
-    fun formatTimeRemaining(context: Context, routeDuration: Double, locale: Locale?): SpannableStringBuilder {
+    fun formatTimeRemaining(
+        context: Context,
+        routeDuration: Double,
+        locale: Locale?
+    ): SpannableStringBuilder {
         var seconds = routeDuration.toLong()
 
         if (seconds < 0) {
@@ -86,7 +91,11 @@ object TimeFormatter {
         }
     }
 
-    private fun formatHours(resources: Resources, hours: Long, textSpanItems: MutableList<SpanItem>) {
+    private fun formatHours(
+        resources: Resources,
+        hours: Long,
+        textSpanItems: MutableList<SpanItem>
+    ) {
         if (hours != 0L) {
             val hourString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.hr))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), hours.toString()))
@@ -121,7 +130,7 @@ object TimeFormatter {
     }
 
     private fun Context.resourcesWithLocale(locale: Locale?): Resources {
-        val config = this.resources.configuration.also {
+        val config = Configuration(this.resources.configuration).also {
             it.setLocale(locale)
         }
         return this.createConfigurationContext(config).resources
