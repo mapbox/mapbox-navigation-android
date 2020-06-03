@@ -79,6 +79,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private CountDownTimer timer = null;
   private FeedbackItem selectedFeedbackItem;
   private Map<String, List<FeedbackSubTypeItem>> feedbackSubTypeMap;
+  private Class<? extends FeedbackBottomSheetListener> listenerClass;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
@@ -137,7 +138,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   @Override
   public void onDismiss(@NotNull DialogInterface dialog) {
     super.onDismiss(dialog);
-    feedbackBottomSheetListener.onFeedbackDismissed();
+    if (feedbackBottomSheetListener != null) {
+      feedbackBottomSheetListener.onFeedbackDismissed();
+    }
   }
 
   @Override
@@ -146,6 +149,14 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     removeDialogDismissMessage();
     cancelCountdownAnimation();
     super.onDestroyView();
+  }
+
+  @Override
+  public void onSaveInstanceState(@NonNull Bundle outState) {
+    super.onSaveInstanceState(outState);
+    if (feedbackBottomSheetListener != null) {
+      listenerClass = feedbackBottomSheetListener.getClass();
+    }
   }
 
   @Override
@@ -173,7 +184,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   //endregion
 
   public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
-    this.feedbackBottomSheetListener = feedbackBottomSheetListener;
+    if (listenerClass == null || listenerClass.isInstance(feedbackBottomSheetListener)) {
+      this.feedbackBottomSheetListener = feedbackBottomSheetListener;
+    }
   }
 
   /**
