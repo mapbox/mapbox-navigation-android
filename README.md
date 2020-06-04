@@ -3,10 +3,6 @@
 </div>
 <br>
 <p align="center">
-  <a href="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation">
-    <img src="https://maven-badges.herokuapp.com/maven-central/com.mapbox.mapboxsdk/mapbox-android-navigation/badge.svg"
-         alt="Maven Central">
-  </a>
   <a href="https://circleci.com/gh/mapbox/mapbox-navigation-android">
     <img src="https://circleci.com/gh/mapbox/mapbox-navigation-android.svg?style=shield&circle-token=:circle-token">
   </a>
@@ -21,37 +17,15 @@ The Mapbox Navigation SDK for Android is built on top of [the Mapbox Directions 
 
 The Mapbox Navigation SDK is a precise and flexible platform which enables your users to explore the world's streets. We are designing new maps specifically for navigation that highlight traffic conditions and helpful landmarks. The calculations use the user's current location and compare it to the current route that the user's traversing to provide critical information at any given moment. _You control the entire experience, from the time your user chooses a destination to when they arrive._
 
-
 ## Getting Started
 
-If you are looking to include this inside your project, please take a look at [the detailed instructions](https://www.mapbox.com/android-docs/navigation/overview/) found in our docs. If you are interested in building from source, read the contributing guide inside this project.
+**NOTE:** On June 3rd, 2020, Mapbox released the `1.0` version of the Navigation SDK. The Mapbox team recommends that you build your navigation project with a `1.0` version or higher.
 
-Add this snippet to your `build.gradle` file to use this SDK (`libandroid-navigation`):
+[Here are `1.0` installation instructions](https://docs.mapbox.com/android/beta/navigation/overview/#installation) and full documentation can be found along the sidebar sections of https://docs.mapbox.com/android/beta/navigation/overview.
 
-```gradle
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.6'
-```
+Along with the full documentation, [this migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) can help you transition your project from a "legacy" version of the Navigation SDK (`0.42.6` or below) to a `1.0` version or higher.
 
-And for `libandroid-navigation-ui`:
-
-```gradle
-implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.6'
-```
-**Note**:  When using the UI library, you _do not_ need to add both dependencies.  The UI library will automatically pull in `libandroid-navigation`.
-
-**Important Note**: You _must_ include the following snippet in your top project-level `build.gradle` file:
-```gradle
-repositories {
-    maven { url 'https://mapbox.bintray.com/mapbox' }
-}
-```
-
-This will ensure the `mapbox` dependency is properly downloaded.
-
-To run the [sample code](#sample-code) on a device or emulator, include your [developer access token](https://www.mapbox.com/help/define-access-token/) in `developer-config.xml` found in the project. 
-## Documentation
-
-You'll find all of the documentation for this SDK on [our Mapbox Navigation page](https://www.mapbox.com/android-docs/navigation/overview/). This includes information on installation, using the API, and links to the API reference.
+Please see [this documentation link](https://docs.mapbox.com/android/navigation/overview/) if you're looking for information on the "legacy" pre-`1.0.0` Navigation SDK and you don't plan on migrating your project to `1.0.0` or higher.
 
 ## Getting Help
 
@@ -61,7 +35,17 @@ You'll find all of the documentation for this SDK on [our Mapbox Navigation page
 
 ## Using Snapshots
 
-If you want to test recent bug fixes or features that have not been packaged in an official release yet, you can use a `-SNAPSHOT` release of the current development version of the Mapbox Navigation SDK via Gradle, available on [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/com/mapbox/mapboxsdk/).
+You can use a `-SNAPSHOT` release if you want to test recent bug fixes or features that have not been packaged in an official release yet.
+
+##### `1.0.0`+ versions of the Navigation SDK:
+
+SNAPSHOTs are currently unavailable, but the Mapbox team is working on setting up an infrastructure to provide them to you. Thank you for your patience.
+
+##### Pre-`1.0.0` versions of the Navigation SDK:
+
+SNAPSHOTs are available on [Sonatype](https://oss.sonatype.org/content/repositories/snapshots/com/mapbox/mapboxsdk/).
+
+Add the following code snippet to your project-level `build.gradle` file:
 
 ```gradle
 repositories {
@@ -76,7 +60,7 @@ dependencies {
 
 ## <a name="sample-code">Sample code
 
-[We've added several navigation examples to this repo's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/app/src/main/java/com/mapbox/services/android/navigation/testapp/activity) to help you get started with the SDK and to inspire you.
+[We've added several navigation examples to this repo's `examples` module's test app](https://github.com/mapbox/mapbox-navigation-android/tree/master/examples/src/main/java/com/mapbox/navigation/examples/core) to help you get started with the Navigation SDK and to inspire you.
 
 ## Contributing
 
@@ -84,4 +68,4 @@ We welcome feedback, translations, and code contributions! Please see [CONTRIBUT
 
 ## License of Dependencies
 
-This SDK uses [Mapbox Navigator](https://github.com/mapbox/mapbox-navigation-android/blob/45b2aeb5f21fe8d008f533d036774dbe891252d4/libandroid-navigation/build.gradle#L47), a private binary, as a dependency. The Mapbox Navigator binary may be used with a Mapbox account and under the [Mapbox TOS](https://www.mapbox.com/tos/). If you do not wish to use this binary, make sure you swap out this dependency in [libandroid-navigation/build.gradle](https://github.com/mapbox/mapbox-navigation-android/blob/master/libandroid-navigation/build.gradle). Code in this repo falls under the [MIT license](./LICENSE).
+This SDK uses [Mapbox Navigator](https://github.com/mapbox/mapbox-navigation-android/blob/master/libandroid-navigation/build.gradle#L61), a private binary, as a dependency. The Mapbox Navigator binary may be used with a Mapbox account and under the [Mapbox TOS](https://www.mapbox.com/tos/). If you do not wish to use this binary and are using a pre-`1.0` Navigation SDK version, make sure you swap out this dependency in [libandroid-navigation/build.gradle](https://github.com/mapbox/mapbox-navigation-android/blob/master/libandroid-navigation/build.gradle). Code in this repo falls under the [MIT license](./LICENSE).
