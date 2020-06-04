@@ -108,11 +108,13 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,
-      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager) {
+      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
+      NavigationViewOptions navigationViewOptions) {
     super(application);
     this.navigation = navigation;
     this.connectivityController = connectivityController;
     this.mapOfflineManager = mapOfflineManager;
+    this.navigationViewOptions = navigationViewOptions;
   }
 
   @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,

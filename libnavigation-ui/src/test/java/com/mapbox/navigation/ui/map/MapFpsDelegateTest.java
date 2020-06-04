@@ -1,15 +1,30 @@
 package com.mapbox.navigation.ui.map;
 
+import android.content.Context;
+import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.StepManeuver;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.navigation.base.trip.model.RouteLegProgress;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.base.trip.model.RouteStepProgress;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.ui.camera.NavigationCamera;
+import org.junit.Test;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 public class MapFpsDelegateTest {
 
-  /*@Test
+  @Test
   public void addProgressChangeListener_navigationReceivesListener() {
     MapboxNavigation navigation = mock(MapboxNavigation.class);
     MapFpsDelegate delegate = new MapFpsDelegate(mock(MapView.class), mock(MapBatteryMonitor.class));
 
     delegate.addProgressChangeListener(navigation);
 
-    verify(navigation).addProgressChangeListener(any(FpsDelegateProgressChangeListener.class));
+    verify(navigation).registerRouteProgressObserver(any(FpsDelegateProgressChangeListener.class));
   }
 
   @Test
@@ -40,7 +55,7 @@ public class MapFpsDelegateTest {
 
     delegate.onStop();
 
-    verify(navigation).removeProgressChangeListener(any(FpsDelegateProgressChangeListener.class));
+    verify(navigation).unregisterRouteProgressObserver(any(FpsDelegateProgressChangeListener.class));
   }
 
   @Test
@@ -86,12 +101,14 @@ public class MapFpsDelegateTest {
   private RouteProgress buildRouteProgressWith(String maneuverModifier) {
     RouteProgress routeProgress = mock(RouteProgress.class);
     RouteLegProgress routeLegProgress = mock(RouteLegProgress.class);
+    RouteStepProgress routeStepProgress = mock(RouteStepProgress.class);
     LegStep currentStep = mock(LegStep.class);
     StepManeuver currentManeuver = mock(StepManeuver.class);
     when(currentManeuver.modifier()).thenReturn(maneuverModifier);
     when(currentStep.maneuver()).thenReturn(currentManeuver);
-    when(routeLegProgress.currentStep()).thenReturn(currentStep);
-    when(routeProgress.currentLegProgress()).thenReturn(routeLegProgress);
+    when(routeLegProgress.getCurrentStepProgress()).thenReturn(routeStepProgress);
+    when(routeLegProgress.getCurrentStepProgress().getStep()).thenReturn(currentStep);
+    when(routeProgress.getCurrentLegProgress()).thenReturn(routeLegProgress);
     return routeProgress;
   }
 
@@ -103,11 +120,11 @@ public class MapFpsDelegateTest {
     when(currentManeuver.modifier()).thenReturn("left");
     LegStep currentStep = mock(LegStep.class);
     when(currentStep.duration()).thenReturn(totalDuration);
-    when(routeStepProgress.durationRemaining()).thenReturn(durationRemaining);
-    when(routeLegProgress.currentStepProgress()).thenReturn(routeStepProgress);
-    when(routeProgress.currentLegProgress()).thenReturn(routeLegProgress);
+    when(routeStepProgress.getDurationRemaining()).thenReturn(durationRemaining);
+    when(routeLegProgress.getCurrentStepProgress()).thenReturn(routeStepProgress);
+    when(routeProgress.getCurrentLegProgress()).thenReturn(routeLegProgress);
     when(currentStep.maneuver()).thenReturn(currentManeuver);
-    when(routeLegProgress.currentStep()).thenReturn(currentStep);
+    when(routeLegProgress.getCurrentStepProgress().getStep()).thenReturn(currentStep);
     return routeProgress;
-  }*/
+  }
 }
