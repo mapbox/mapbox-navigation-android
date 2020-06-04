@@ -69,6 +69,9 @@
     <string name="title_basic_navigation_kotlin" translatable="false">Basic navigation</string>
     <string name="description_basic_navigation_kotlin" translatable="false">Shows how to navigate from the device location to a destination using the MapboxNavigation class.</string>
 
+    <string name="title_basic_navigation_fragment" translatable="false">Basic navigation with Fragment</string>
+    <string name="description_basic_navigation_fragment" translatable="false">Shows how to navigate from the device location to a destination using the MapboxNavigation class from a Fragment.</string>
+
     <string name="title_basic_navigation_sdk_only_kotlin" translatable="false">Basic Navigation + Maps SDK integration</string>
     <string name="description_basic_navigation_sdk_only_kotlin" translatable="false">Shows how to combine the Maps SDK with only the Navigation SDK and no Navigation UI SDK code of any kind.</string>
 

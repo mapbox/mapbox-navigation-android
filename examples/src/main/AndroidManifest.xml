@@ -183,6 +183,14 @@
         </activity>
 
         <activity
+            android:name=".core.BasicNavigationFragmentActivity"
+            android:label="@string/title_basic_navigation_fragment">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity
             android:name=".core.BasicNavSdkOnlyActivity"
             android:label="@string/title_basic_navigation_sdk_only_kotlin">
             <meta-data

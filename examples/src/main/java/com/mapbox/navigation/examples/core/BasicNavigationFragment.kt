@@ -1,14 +1,16 @@
-package com.mapbox.navigation.examples.ui
+package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.ImageButton
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngineCallback
@@ -44,7 +46,6 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.core.InstructionViewActivity
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
@@ -66,17 +67,18 @@ import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
-import kotlinx.android.synthetic.main.activity_custom_ui_component_style.*
+import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import okhttp3.Cache
 import timber.log.Timber
 
 /**
- * This activity shows how to use your own colors
- * to style the UI SDK components including the InstructionView
- * and SummaryBottomSheet.
+ * This fragment shows how to use the UI SDK standalone components
+ * including the InstructionView and SummaryBottomSheet and voice to
+ * build the turn-by-turn navigation experience with Navigation Core SDK.
  */
-class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
-    FeedbackBottomSheetListener, OnWayNameChangedListener {
+class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSheetListener,
+    OnWayNameChangedListener {
+
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -94,10 +96,17 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("onCreate savedInstanceState=%s", savedInstanceState)
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_custom_ui_component_style)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_basic_navigation, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initViews()
 
         mapView.onCreate(savedInstanceState)
@@ -107,12 +116,12 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         initializeSpeechPlayer()
     }
 
-    public override fun onResume() {
+    override fun onResume() {
         super.onResume()
         mapView.onResume()
     }
 
-    public override fun onPause() {
+    override fun onPause() {
         super.onPause()
         mapView.onPause()
     }
@@ -132,8 +141,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         mapView.onLowMemory()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         mapView.onDestroy()
 
         mapboxReplayer.finish()
@@ -164,7 +173,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             locationComponent?.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation.requestRoutes(
                     RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                        .accessToken(Utils.getMapboxAccessToken(requireContext()))
                         .coordinates(originLocation.toPoint(), null, latLng.toPoint())
                         .alternatives(true)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
@@ -179,7 +188,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
                     LocationComponentActivationOptions.builder(
-                        this@CustomUIComponentStyleActivity, style
+                        requireContext(), style
                     ).build()
                 )
                 cameraMode = CameraMode.TRACKING
@@ -194,13 +203,13 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
             if (shouldSimulateRoute()) {
                 mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
-                mapboxReplayer.pushRealLocation(this, 0.0)
+                mapboxReplayer.pushRealLocation(requireContext(), 0.0)
                 mapboxReplayer.play()
             }
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
 
             Snackbar.make(
-                findViewById(R.id.navigationLayout),
+                requireView(),
                 R.string.msg_long_press_map_to_place_waypoint,
                 Snackbar.LENGTH_SHORT
             ).show()
@@ -258,13 +267,13 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             setBottomSheetCallback(bottomSheetCallback)
         }
 
-        routeOverviewButton = findViewById(R.id.routeOverviewBtn)
+        routeOverviewButton = requireView().findViewById(R.id.routeOverviewBtn)
         routeOverviewButton.setOnClickListener {
             navigationMapboxMap?.showRouteOverview(routeOverviewPadding)
             recenterBtn.show()
         }
 
-        cancelBtn = findViewById(R.id.cancelBtn)
+        cancelBtn = requireView().findViewById(R.id.cancelBtn)
         cancelBtn.setOnClickListener {
             mapboxNavigation.stopTripSession()
         }
@@ -359,10 +368,10 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun initNavigation() {
-        val accessToken = Utils.getMapboxAccessToken(this)
+        val accessToken = Utils.getMapboxAccessToken(requireContext())
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            MapboxNavigation.defaultNavigationOptions(this, accessToken),
+            requireContext(),
+            MapboxNavigation.defaultNavigationOptions(requireContext(), accessToken),
             ReplayLocationEngine(mapboxReplayer)
         )
         mapboxNavigation.apply {
@@ -376,18 +385,26 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun initializeSpeechPlayer() {
         val cache =
             Cache(
-                File(application.cacheDir, InstructionViewActivity.VOICE_INSTRUCTION_CACHE),
+                File(
+                    requireContext().cacheDir,
+                    InstructionViewActivity.VOICE_INSTRUCTION_CACHE
+                ),
                 10 * 1024 * 1024
             )
         val voiceInstructionLoader =
-            VoiceInstructionLoader(application, Mapbox.getAccessToken(), cache)
+            VoiceInstructionLoader(requireContext(), Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
-            SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
+            SpeechPlayerProvider(
+                requireContext(),
+                Locale.US.language,
+                true,
+                voiceInstructionLoader
+            )
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 
     private fun showFeedbackBottomSheet() {
-        supportFragmentManager.let {
+        requireFragmentManager().let {
             FeedbackBottomSheet.newInstance(
                 this,
                 NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
@@ -471,7 +488,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
 
-                    navigationMapboxMap?.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap?.addOnWayNameChangedListener(this@BasicNavigationFragment)
                     navigationMapboxMap?.updateWaynameQueryMap(true)
                 }
                 TripSessionState.STOPPED -> {
@@ -481,7 +498,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                         navigationMapboxMap?.removeRoute()
                     }
 
-                    navigationMapboxMap?.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap?.removeOnWayNameChangedListener(this@BasicNavigationFragment)
                     navigationMapboxMap?.updateWaynameQueryMap(false)
 
                     updateCameraOnNavigationStateChange(false)
@@ -535,15 +552,15 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
-    private class MyLocationEngineCallback(activity: CustomUIComponentStyleActivity) :
+    private class MyLocationEngineCallback(fragment: BasicNavigationFragment) :
         LocationEngineCallback<LocationEngineResult> {
 
-        private val activityRef = WeakReference(activity)
+        private val fragmentRef = WeakReference(fragment)
 
         override fun onSuccess(result: LocationEngineResult) {
             result.locations.firstOrNull()?.let { location ->
                 Timber.d("location engine callback -> onSuccess location:%s", location)
-                activityRef.get()?.locationComponent?.forceLocationUpdate(location)
+                fragmentRef.get()?.locationComponent?.forceLocationUpdate(location)
             }
         }
 
@@ -553,7 +570,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun shouldSimulateRoute(): Boolean {
-        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+        return PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getBoolean(this.getString(R.string.simulate_route_key), false)
     }
 }
