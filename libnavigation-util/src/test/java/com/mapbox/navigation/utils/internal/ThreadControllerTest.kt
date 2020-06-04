@@ -1,8 +1,8 @@
 package com.mapbox.navigation.utils.internal
 
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
@@ -15,12 +15,13 @@ class ThreadControllerTest {
 
     @Test
     fun jobCountValidationNonUIScope() {
-        val maxCoroutines = 10
-        val maxDelay = 100L
+        val maxCoroutines = 100
         val jobControl = ThreadController.getIOScopeAndRootJob()
-        (0 until maxCoroutines).forEach {
+        repeat(maxCoroutines) {
             jobControl.scope.launch {
-                delay(maxDelay)
+                suspendCoroutine {
+                    // do nothing. Just not to finish a coroutine
+                }
             }
         }
         assertTrue(jobControl.job.children.count() == maxCoroutines)
