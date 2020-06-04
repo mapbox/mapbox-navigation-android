@@ -497,9 +497,12 @@ jobs:
       - run-firebase-instrumentation:
           module_target: "examples"
           variant: "debug"
+      - build-module:
+          module_target: "examples"
+          variant: "Release"
       - run-firebase-robo:
           module_target: "examples"
-          variant: "debug"
+          variant: "release"
 
 # ------------------------------------------------------------------------------
   release:
