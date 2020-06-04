@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.internal.puck
+package com.mapbox.navigation.ui.puck
 
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.Lifecycle
@@ -9,7 +9,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
 
 /**
  * It listens for routeProgress events and applies the drawable returned by the puckDrawableSupplier
@@ -19,7 +18,7 @@ import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
  * @property mapboxMap instance of [com.mapbox.mapboxsdk.maps.MapboxMap]
  * @property puckDrawableSupplier provides different [com.mapbox.navigation.ui.puck.PuckDrawableSupplier]
  */
-class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupplier: PuckDrawableSupplier) : LifecycleObserver {
+internal class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupplier: PuckDrawableSupplier) : LifecycleObserver {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var observerRegistered = false

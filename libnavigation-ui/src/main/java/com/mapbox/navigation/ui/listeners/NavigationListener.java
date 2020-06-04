@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.internal.listeners;
+package com.mapbox.navigation.ui.listeners;
 
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.NavigationView;

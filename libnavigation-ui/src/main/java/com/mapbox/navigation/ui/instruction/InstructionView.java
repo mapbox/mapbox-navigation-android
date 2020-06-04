@@ -62,7 +62,7 @@ import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.navigation.ui.internal.junction.RouteJunction;
 import com.mapbox.navigation.ui.internal.junction.RouteJunctionModel;
 import com.mapbox.navigation.ui.NavigationConstants;
-import com.mapbox.navigation.ui.internal.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.squareup.picasso.Picasso;

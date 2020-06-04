@@ -13,8 +13,8 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
-import com.mapbox.navigation.ui.internal.listeners.BannerInstructionsListener
-import com.mapbox.navigation.ui.internal.listeners.NavigationListener
+import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
+import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_navigation_view.*

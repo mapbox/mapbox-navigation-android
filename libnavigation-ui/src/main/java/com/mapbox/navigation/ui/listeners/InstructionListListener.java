@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.internal.listeners;
+package com.mapbox.navigation.ui.listeners;
 
 /**
  * A listener that is triggered when the instruction list in InstructionView is shown or hidden.
