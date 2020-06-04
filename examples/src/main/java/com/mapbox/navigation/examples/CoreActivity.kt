@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.core.BasicNavSdkOnlyActivity
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
+import com.mapbox.navigation.examples.core.BasicNavigationFragmentActivity
 import com.mapbox.navigation.examples.core.CustomRouteStylingActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
@@ -113,6 +114,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_basic_navigation_kotlin),
                 getString(R.string.description_basic_navigation_kotlin),
                 BasicNavigationActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_basic_navigation_fragment),
+                getString(R.string.description_basic_navigation_fragment),
+                BasicNavigationFragmentActivity::class.java
             ),
             SampleItem(
                     getString(R.string.title_basic_navigation_sdk_only_kotlin),
