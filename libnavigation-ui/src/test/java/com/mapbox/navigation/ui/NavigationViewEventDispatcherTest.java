@@ -7,11 +7,11 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.navigation.ui.internal.listeners.BannerInstructionsListener;
-import com.mapbox.navigation.ui.internal.listeners.FeedbackListener;
-import com.mapbox.navigation.ui.internal.listeners.InstructionListListener;
-import com.mapbox.navigation.ui.internal.listeners.NavigationListener;
-import com.mapbox.navigation.ui.internal.listeners.SpeechAnnouncementListener;
+import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
+import com.mapbox.navigation.ui.listeners.FeedbackListener;
+import com.mapbox.navigation.ui.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.listeners.NavigationListener;
+import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
 
 import org.junit.Test;
 

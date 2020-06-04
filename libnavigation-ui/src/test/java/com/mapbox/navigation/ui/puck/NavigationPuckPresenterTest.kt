@@ -9,8 +9,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.ui.internal.puck.DefaultMapboxPuckDrawableSupplier
-import com.mapbox.navigation.ui.internal.puck.NavigationPuckPresenter
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

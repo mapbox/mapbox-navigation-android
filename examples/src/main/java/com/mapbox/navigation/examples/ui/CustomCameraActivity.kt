@@ -15,8 +15,8 @@ import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.camera.Camera
 import com.mapbox.navigation.ui.camera.RouteInformation
 import com.mapbox.navigation.ui.camera.SimpleCamera
-import com.mapbox.navigation.ui.internal.listeners.BannerInstructionsListener
-import com.mapbox.navigation.ui.internal.listeners.NavigationListener
+import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
+import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_navigation_view.navigationView
 

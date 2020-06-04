@@ -1,13 +1,12 @@
-package com.mapbox.navigation.ui.internal.puck
+package com.mapbox.navigation.ui.puck
 
 import com.mapbox.libnavigation.ui.R
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
 
 /**
  * Returns a default puck supplier associated with different RouteProgressState
  */
-class DefaultMapboxPuckDrawableSupplier : PuckDrawableSupplier {
+internal class DefaultMapboxPuckDrawableSupplier : PuckDrawableSupplier {
 
     /**
      * Returns drawable for puck depending on current [com.mapbox.navigation.base.trip.model.RouteProgressState]

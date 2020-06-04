@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui;
 
-import com.mapbox.navigation.ui.internal.listeners.InstructionListListener;
+import com.mapbox.navigation.ui.listeners.InstructionListListener;
 
 class NavigationInstructionListListener implements InstructionListListener {
 
