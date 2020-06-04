@@ -397,6 +397,20 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
+   * Can be used to automatically drive the map camera / route updates and arrow
+   * once navigation has started.
+   * <p>
+   * These will automatically be removed in {@link MapboxNavigation#onDestroy()}.
+   *
+   * @param navigation to add the progress listeners
+   * @param enableVanishingRouteLine determines if the route line should vanish behind the puck.
+   */
+  public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean enableVanishingRouteLine) {
+    this.vanishRouteLineEnabled = enableVanishingRouteLine;
+    addProgressChangeListener(navigation);
+  }
+
+  /**
    * Can be used to store the current state of the map in
    * {@link androidx.fragment.app.Fragment#onSaveInstanceState(Bundle)}.
    * <p>

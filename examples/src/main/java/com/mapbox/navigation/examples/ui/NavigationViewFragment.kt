@@ -102,6 +102,7 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
+                optionsBuilder.enableVanishingRouteLine(true)
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }

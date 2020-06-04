@@ -60,6 +60,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public abstract Integer roundingIncrement();
 
+  public abstract boolean enableVanishingRouteLine();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -94,6 +96,8 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract Builder speechPlayer(SpeechPlayer speechPlayer);
 
     public abstract Builder locationEngine(LocationEngine locationEngine);
+
+    public abstract Builder enableVanishingRouteLine(boolean enableVanishingRouteLine);
 
     /**
      * Add an {@link ArrivalObserver} to monitor the progress of arrival, include stop arrival and route arrival.
@@ -164,6 +168,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
             .navigationOptions(new NavigationOptions.Builder().build())
             .roundingIncrement(Rounding.INCREMENT_FIFTY)
             .shouldSimulateRoute(false)
-            .waynameChipEnabled(true);
+            .waynameChipEnabled(true)
+            .enableVanishingRouteLine(false);
   }
 }
