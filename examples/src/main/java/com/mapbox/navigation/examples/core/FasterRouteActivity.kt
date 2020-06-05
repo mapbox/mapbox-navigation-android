@@ -236,6 +236,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
             }
             mapboxNavigation.startTripSession()
+            navigationMapboxMap?.showAlternativeRoutes(false)
             stopLocationUpdates()
         }
         dismissLayout.setOnClickListener {
