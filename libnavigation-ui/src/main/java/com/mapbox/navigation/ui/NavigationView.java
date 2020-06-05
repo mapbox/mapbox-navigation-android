@@ -54,6 +54,8 @@ import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
@@ -99,7 +101,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationViewModel navigationViewModel;
   private NavigationMapboxMap navigationMap;
-  private OnNavigationReadyCallback onNavigationReadyCallback;
   private NavigationOnCameraTrackingChangedListener onTrackingChangedListener;
   private NavigationMapboxMapInstanceState mapInstanceState;
   private CameraPosition initialMapCameraPosition;
@@ -107,6 +108,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private boolean isSubscribed;
   private boolean logoAndAttributionShownForFirstTime;
   private LifecycleRegistry lifecycleRegistry;
+  private Set<OnNavigationReadyCallback> onNavigationReadyCallbacks = new CopyOnWriteArraySet<>();
 
   public NavigationView(Context context) {
     this(context, null);
@@ -121,6 +123,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     ThemeSwitcher.setTheme(context, attrs);
     initializeView();
     lifecycleRegistry = new LifecycleRegistry(this);
+    onNavigationReadyCallbacks.add(internalNavigationReadyCallback);
   }
 
   /**
@@ -251,7 +254,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
         moveMapboxAttributionAboveBottomSheet();
         logoAndAttributionShownForFirstTime = true;
         initializeWayNameListener();
-        onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+        updateNavigationReadyListeners(navigationViewModel.isRunning());
         isMapInitialized = true;
       }
     });
@@ -548,11 +551,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param onNavigationReadyCallback to be set to this view
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback) {
-    this.onNavigationReadyCallback = onNavigationReadyCallback;
+    onNavigationReadyCallbacks.add(onNavigationReadyCallback);
     if (!isMapInitialized) {
       mapView.getMapAsync(this);
     } else {
-      onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+      updateNavigationReadyListeners(navigationViewModel.isRunning());
     }
   }
 
@@ -570,14 +573,52 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback,
                          @NonNull CameraPosition initialMapCameraPosition) {
-    this.onNavigationReadyCallback = onNavigationReadyCallback;
     this.initialMapCameraPosition = initialMapCameraPosition;
+    onNavigationReadyCallbacks.add(onNavigationReadyCallback);
     if (!isMapInitialized) {
       mapView.getMapAsync(this);
     } else {
-      onNavigationReadyCallback.onNavigationReady(navigationViewModel.isRunning());
+      updateNavigationReadyListeners(navigationViewModel.isRunning());
     }
   }
+
+  private void updateNavigationReadyListeners(boolean isRunning) {
+    for (OnNavigationReadyCallback callback : onNavigationReadyCallbacks) {
+      callback.onNavigationReady(isRunning);
+    }
+  }
+
+  private OnNavigationReadyCallback internalNavigationReadyCallback = new OnNavigationReadyCallback() {
+    @Override
+    public void onNavigationReady(final boolean isRunning) {
+      if (isRunning) {
+        final NavigationViewOptions navigationViewOptions = navigationViewModel.getNavigationViewOptions();
+        if (navigationViewOptions != null) {
+          establish(navigationViewOptions);
+          if (navigationViewOptions.puckDrawableSupplier() == null) {
+            navigationMap.setPuckDrawableSupplier(new DefaultMapboxPuckDrawableSupplier());
+          } else {
+            navigationMap.setPuckDrawableSupplier(navigationViewOptions.puckDrawableSupplier());
+          }
+
+          if (navigationViewOptions.camera() == null) {
+            navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
+          } else {
+            navigationMap.setCamera(navigationViewOptions.camera());
+          }
+
+          initializeNavigationListeners(navigationViewOptions, navigationViewModel);
+          setupNavigationMapboxMap(navigationViewOptions);
+
+          if (!isSubscribed) {
+            initializeClickListeners();
+            initializeOnCameraTrackingChangedListener();
+            subscribeViewModels();
+          }
+        }
+      }
+    }
+  };
 
   /**
    * Gives the ability to manipulate the map directly for anything that might not currently be
