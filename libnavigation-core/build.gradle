@@ -5,6 +5,7 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
 apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
 dokka {
     outputDirectory = "$buildDir/kdoc"
@@ -34,7 +35,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
 
-        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.VERSION_NAME)
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
     }
 
     testOptions {
