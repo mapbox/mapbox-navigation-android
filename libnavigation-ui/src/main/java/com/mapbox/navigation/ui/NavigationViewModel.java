@@ -316,6 +316,10 @@ public class NavigationViewModel extends AndroidViewModel {
     return summaryModel;
   }
 
+  protected NavigationViewOptions getNavigationViewOptions() {
+    return navigationViewOptions;
+  }
+
   private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     language = ContextEx.inferDeviceLanguage(getApplication());
