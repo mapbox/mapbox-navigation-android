@@ -206,6 +206,12 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap?.setOnRouteSelectionChangeListener { route ->
+                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
+                    remove(route)
+                    add(0, route)
+                })
+            }
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
