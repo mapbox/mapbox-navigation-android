@@ -224,6 +224,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             if (routes.isNotEmpty()) {
                 initDynamicCamera(routes[0])
             }
+            navigationMapboxMap.showAlternativeRoutes(false)
         }
         dismissLayout.setOnClickListener {
             fasterRouteSelectionTimer.onFinish()

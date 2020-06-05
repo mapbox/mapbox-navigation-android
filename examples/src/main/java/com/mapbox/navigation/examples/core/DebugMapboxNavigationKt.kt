@@ -226,6 +226,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             if (routes.isNotEmpty()) {
                 initDynamicCamera(routes[0])
             }
+            navigationMapboxMap.showAlternativeRoutes(false)
         }
     }
 
