@@ -476,6 +476,38 @@ class MapboxReplayerTest {
         assertEquals(3, secondObserverEvents.flatten().size)
     }
 
+    @Test
+    fun `clearEvents should do nothing without events to clear`() = coroutineRule.runBlockingTest {
+        mapboxReplayer.clearEvents()
+
+        assertEquals(0.0, mapboxReplayer.durationSeconds(), 0.0)
+    }
+
+    @Test
+    fun `clearEvents should play second route after clearing first route`() = coroutineRule.runBlockingTest {
+        val firstRoute = List(20) { ReplayEventGetStatus(it.toDouble()) }
+        val secondRoute = List(10) { ReplayEventGetStatus(100.0 + it.toDouble()) }
+        val timeCapture = mutableListOf<Pair<ReplayEventBase, Long>>()
+        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
+            override fun replayEvents(events: List<ReplayEventBase>) {
+                events.forEach { timeCapture.add(Pair(it, currentTime)) }
+            }
+        })
+
+        mapboxReplayer.pushEvents(firstRoute)
+        mapboxReplayer.play()
+        advanceTimeMillis(20000)
+        mapboxReplayer.clearEvents()
+        mapboxReplayer.pushEvents(secondRoute)
+        mapboxReplayer.play()
+        advanceTimeMillis(10000)
+        mapboxReplayer.finish()
+
+        // Captures all 30 events
+        assertEquals(30, timeCapture.size)
+        assertEquals(105.0, timeCapture[25].first.eventTimestamp, 0.0)
+    }
+
     /**
      * Helpers for moving the simulation clock
      */

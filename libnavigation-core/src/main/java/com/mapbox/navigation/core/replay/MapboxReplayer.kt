@@ -36,9 +36,12 @@ class MapboxReplayer {
     }
 
     /**
-     * Clear all replay events.
+     * Stops the player, seeks to the beginning, and clears all replay events. In order
+     * to start playing a new route, [pushEvents] and then [play].
      */
     fun clearEvents() {
+        stop()
+        seekTo(0.0)
         replayEvents.events.clear()
     }
 
@@ -148,7 +151,8 @@ class MapboxReplayer {
      * @return the duration in seconds
      */
     fun durationSeconds(): Double {
-        val firstEvent = replayEvents.events.first()
+        val firstEvent = replayEvents.events.firstOrNull()
+            ?: return 0.0
         val lastEvent = replayEvents.events.last()
         return lastEvent.eventTimestamp - firstEvent.eventTimestamp
     }
@@ -159,7 +163,9 @@ class MapboxReplayer {
      * @param replayTime time in seconds between 0.0 to [durationSeconds]
      */
     fun seekTo(replayTime: Double) {
-        val offsetTime = replayTime + replayEvents.events.first().eventTimestamp
+        val firstEventTime = replayEvents.events.firstOrNull()?.eventTimestamp
+            ?: return
+        val offsetTime = replayTime + firstEventTime
         val indexOfEvent = replayEvents.events
             .indexOfFirst { offsetTime <= it.eventTimestamp }
         check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${durationSeconds()}: " }
