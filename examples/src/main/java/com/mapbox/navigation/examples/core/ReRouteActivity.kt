@@ -52,6 +52,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
+    private var directionRoute: DirectionsRoute? = null
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
     private val tripSessionStateObserver = object : TripSessionStateObserver {
@@ -87,6 +88,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
                 startNavigation.visibility = VISIBLE
+                directionRoute = routes[0]
             } else {
                 startNavigation.visibility = GONE
             }
@@ -123,8 +125,6 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             it.registerTripSessionStateObserver(tripSessionStateObserver)
         }
         initListeners()
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-            .show()
     }
 
     override fun onStart() {
@@ -170,7 +170,14 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
             mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+
+            directionRoute?.let {
+                navigationMapboxMap?.drawRoute(it)
+                mapboxNavigation?.setRoutes(listOf(it))
+                startNavigation.visibility = View.VISIBLE
+            }
         }
+
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
@@ -184,6 +191,11 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 )
             }
             true
+        }
+
+        if (directionRoute == null) {
+            Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -246,5 +258,21 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onFailure(exception: Exception) {
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        // This is not the most efficient way to preserve the route on a device rotation.
+        // This is here to demonstrate that this event needs to be handled in order to
+        // redraw the route line after a rotation.
+        directionRoute?.let {
+            outState.putString(Utils.PRIMARY_ROUTE_BUNDLE_KEY, it.toJson())
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        directionRoute = Utils.getRouteFromBundle(savedInstanceState)
     }
 }

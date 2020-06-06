@@ -47,6 +47,8 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
+import com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
 import com.mapbox.navigation.ui.NavigationConstants
@@ -95,6 +97,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
+    private var directionRoute: DirectionsRoute? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -160,6 +163,17 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+        // This is not the most efficient way to preserve the route on a device rotation.
+        // This is here to demonstrate that this event needs to be handled in order to
+        // redraw the route line after a rotation.
+        directionRoute?.let {
+            outState.putString(PRIMARY_ROUTE_BUNDLE_KEY, it.toJson())
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        directionRoute = getRouteFromBundle(savedInstanceState)
     }
 
     @SuppressLint("MissingPermission")
@@ -209,11 +223,19 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
             }
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
 
-            Snackbar.make(
-                requireView(),
-                R.string.msg_long_press_map_to_place_waypoint,
-                Snackbar.LENGTH_SHORT
-            ).show()
+            directionRoute?.let {
+                navigationMapboxMap?.drawRoute(it)
+                mapboxNavigation.setRoutes(listOf(it))
+                startNavigation.isEnabled = true
+            }
+
+            if (directionRoute == null) {
+                Snackbar.make(
+                    requireView(),
+                    R.string.msg_long_press_map_to_place_waypoint,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
@@ -466,6 +488,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             Timber.d("route request success %s", routes.toString())
             if (routes.isNotEmpty()) {
+                directionRoute = routes[0]
                 navigationMapboxMap?.drawRoute(routes[0])
                 startNavigation.visibility = View.VISIBLE
                 startNavigation.isEnabled = true

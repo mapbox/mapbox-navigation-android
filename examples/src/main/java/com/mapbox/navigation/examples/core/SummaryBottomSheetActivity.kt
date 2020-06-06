@@ -63,6 +63,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var routeOverviewButton: ImageButton
     private lateinit var cancelBtn: AppCompatImageButton
     private val mapboxReplayer = MapboxReplayer()
+    private var directionRoute: DirectionsRoute? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +88,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         initListeners()
-        Snackbar.make(navigationLayout, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-            .show()
     }
 
     override fun onStart() {
@@ -129,6 +128,18 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+
+        // This is not the most efficient way to preserve the route on a device rotation.
+        // This is here to demonstrate that this event needs to be handled in order to
+        // redraw the route line after a rotation.
+        directionRoute?.let {
+            outState.putString(Utils.PRIMARY_ROUTE_BUNDLE_KEY, it.toJson())
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        directionRoute = Utils.getRouteFromBundle(savedInstanceState)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -136,12 +147,19 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
-            if (shouldSimulateRoute()) {
-                mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
-                mapboxReplayer.pushRealLocation(this, 0.0)
-                mapboxReplayer.play()
+            when (directionRoute) {
+                null -> {
+                    if (shouldSimulateRoute()) {
+                        mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxReplayer.pushRealLocation(this, 0.0)
+                        mapboxReplayer.play()
+                    }
+                    mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+                    Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                        .show()
+                }
+                else -> restoreNavigation()
             }
-            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -270,6 +288,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
+                directionRoute = routes[0]
                 navigationMapboxMap?.drawRoute(routes[0])
                 startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = true
@@ -351,5 +370,16 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun restoreNavigation() {
+        directionRoute?.let {
+            mapboxNavigation?.setRoutes(listOf(it))
+            navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
+            navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
+            updateCameraOnNavigationStateChange(true)
+            mapboxNavigation?.startTripSession()
+        }
     }
 }

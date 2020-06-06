@@ -54,6 +54,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
+import static com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY;
+import static com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle;
 import static com.mapbox.navigation.ui.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 
 /**
@@ -126,7 +128,15 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
 
       mapboxNavigation.getLocationEngine().getLastLocation(locationEngineCallback);
       mapboxMap.addOnMapLongClickListener(this);
-      Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, Snackbar.LENGTH_SHORT).show();
+
+      if (activeRoute != null) {
+        final List<DirectionsRoute> routes = Arrays.asList(activeRoute);
+        navigationMapRoute.addRoutes(routes);
+        mapboxNavigation.setRoutes(routes);
+        startNavigationButton.setVisibility(View.VISIBLE);
+      } else {
+        Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, Snackbar.LENGTH_SHORT).show();
+      }
     });
   }
 
@@ -188,6 +198,19 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     mapView.onSaveInstanceState(outState);
+
+    // This is not the most efficient way to preserve the route on a device rotation.
+    // This is here to demonstrate that this event needs to be handled in order to
+    // redraw the route line after a rotation.
+    if (activeRoute != null) {
+      outState.putString(PRIMARY_ROUTE_BUNDLE_KEY, activeRoute.toJson());
+    }
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    activeRoute = getRouteFromBundle(savedInstanceState);
   }
 
   @SuppressWarnings("MissingPermission")
