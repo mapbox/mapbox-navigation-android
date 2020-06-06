@@ -53,6 +53,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
@@ -91,7 +92,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private var locationComponent: LocationComponent? = null
     private var symbolManager: SymbolManager? = null
     private var fasterRoutes: List<DirectionsRoute> = emptyList()
-    private lateinit var originalRoute: DirectionsRoute
+    private var originalRoute: DirectionsRoute? = null
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var localLocationEngine: LocationEngine
@@ -116,16 +117,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
         findViewById<Button>(R.id.btn_add_original_route)?.let { button ->
             button.setOnClickListener {
-                if (::originalRoute.isInitialized) {
+                originalRoute?.let {
                     val routes = mapboxNavigation.getRoutes()
-                    if (routes.isNotEmpty()) {
-                        mapboxNavigation.setRoutes(
+                    when (routes.isNotEmpty()) {
+                        true -> mapboxNavigation.setRoutes(
                             mapboxNavigation.getRoutes().toMutableList().apply {
                                 removeAt(0)
-                                add(0, originalRoute)
+                                add(0, it)
                             })
-                    } else {
-                        mapboxNavigation.setRoutes(listOf(originalRoute))
+                        false -> mapboxNavigation.setRoutes(listOf(it))
                     }
                 }
             }
@@ -194,11 +194,20 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     add(0, route)
                 })
             }
+
+            when (originalRoute) {
+                null -> {
+                    if (shouldSimulateRoute()) {
+                        mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxReplayer.pushRealLocation(this, 0.0)
+                        mapboxReplayer.play()
+                    }
+                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                        .show()
+                }
+                else -> restoreNavigation()
+            }
         }
-        Snackbar.make(
-            findViewById(R.id.container), getString(R.string.msg_long_press_map_to_place_waypoint),
-            LENGTH_SHORT
-        ).show()
         initializeSpeechPlayer()
     }
 
@@ -248,7 +257,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 locationEngineCallback,
                 Looper.getMainLooper()
             )
-            localLocationEngine.getLastLocation(locationEngineCallback)
+            if (originalRoute == null) {
+                localLocationEngine.getLastLocation(locationEngineCallback)
+            }
         } catch (exception: SecurityException) {
             Timber.e(exception)
         }
@@ -432,6 +443,18 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
+
+        // This is not the most efficient way to preserve the route on a device rotation.
+        // This is here to demonstrate that this event needs to be handled in order to
+        // redraw the route line after a rotation.
+        originalRoute?.let {
+            outState.putString(PRIMARY_ROUTE_BUNDLE_KEY, it.toJson())
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        originalRoute = Utils.getRouteFromBundle(savedInstanceState)
     }
 
     override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
@@ -463,8 +486,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 locationEngine = ReplayLocationEngine(mapboxReplayer)
             ).apply {
                 registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
-                mapboxReplayer.pushRealLocation(applicationContext, 0.0)
-                mapboxReplayer.play()
+                if (originalRoute == null) {
+                    mapboxReplayer.pushRealLocation(applicationContext, 0.0)
+                    mapboxReplayer.play()
+                }
             }
         } else {
             MapboxNavigation(
@@ -477,5 +502,16 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun restoreNavigation() {
+        originalRoute?.let {
+            mapboxNavigation.setRoutes(listOf(it))
+            navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
+            navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
+            updateCameraOnNavigationStateChange(true)
+            mapboxNavigation.startTripSession()
+        }
     }
 }

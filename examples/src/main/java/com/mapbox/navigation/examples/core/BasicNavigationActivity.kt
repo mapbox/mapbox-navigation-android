@@ -33,6 +33,8 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
+import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
+import com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
@@ -58,6 +60,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private var mapInstanceState: NavigationMapboxMapInstanceState? = null
     private val mapboxReplayer = MapboxReplayer()
+    private var directionRoute: DirectionsRoute? = null
 
     private val mapStyles = listOf(
         Style.MAPBOX_STREETS,
@@ -89,8 +92,6 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         initListeners()
-        Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-            .show()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -100,13 +101,20 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
-            // center the map at current location
-            if (shouldSimulateRoute()) {
-                mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
-                mapboxReplayer.pushRealLocation(this, 0.0)
-                mapboxReplayer.play()
+
+            when (directionRoute) {
+                null -> {
+                    if (shouldSimulateRoute()) {
+                        mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxReplayer.pushRealLocation(this, 0.0)
+                        mapboxReplayer.play()
+                    }
+                    mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                        .show()
+                }
+                else -> restoreNavigation()
             }
-            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -150,6 +158,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
+                directionRoute = routes[0]
                 navigationMapboxMap?.drawRoute(routes[0])
                 startNavigation.visibility = View.VISIBLE
             } else {
@@ -224,11 +233,19 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onSaveInstanceState(outState)
         navigationMapboxMap?.saveStateWith(MAP_INSTANCE_STATE_KEY, outState)
         mapView.onSaveInstanceState(outState)
+
+        // This is not the most efficient way to preserve the route on a device rotation.
+        // This is here to demonstrate that this event needs to be handled in order to
+        // redraw the route line after a rotation.
+        directionRoute?.let {
+            outState.putString(PRIMARY_ROUTE_BUNDLE_KEY, it.toJson())
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         mapInstanceState = savedInstanceState?.getParcelable(MAP_INSTANCE_STATE_KEY)
+        directionRoute = getRouteFromBundle(savedInstanceState)
     }
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
@@ -296,6 +313,17 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onFailure(exception: java.lang.Exception) {
             Timber.i(exception)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun restoreNavigation() {
+        directionRoute?.let {
+            mapboxNavigation?.setRoutes(listOf(it))
+            navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
+            navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
+            updateCameraOnNavigationStateChange(true)
+            mapboxNavigation?.startTripSession()
         }
     }
 }

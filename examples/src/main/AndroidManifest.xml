@@ -56,7 +56,8 @@
 
         <activity
             android:name=".core.OffboardRouterActivityKt"
-            android:label="@string/title_offboard_router_kotlin">
+            android:label="@string/title_offboard_router_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -64,7 +65,8 @@
 
         <activity
             android:name=".core.OffboardRouterActivityJava"
-            android:label="@string/title_offboard_router_java">
+            android:label="@string/title_offboard_router_java"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -72,7 +74,8 @@
 
         <activity
             android:name=".core.OnboardRouterActivityKt"
-            android:label="@string/title_onboard_router_kotlin">
+            android:label="@string/title_onboard_router_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -80,7 +83,8 @@
 
         <activity
             android:name=".core.OnboardRouterActivityJava"
-            android:label="@string/title_onboard_router_java">
+            android:label="@string/title_onboard_router_java"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -88,7 +92,8 @@
 
         <activity
             android:name=".core.HybridRouterActivityKt"
-            android:label="@string/title_hybrid_router_kotlin">
+            android:label="@string/title_hybrid_router_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -96,7 +101,8 @@
 
         <activity
             android:name=".core.HybridRouterActivityJava"
-            android:label="@string/title_hybrid_router_java">
+            android:label="@string/title_hybrid_router_java"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -104,7 +110,8 @@
 
         <activity
             android:name=".core.TripServiceActivityKt"
-            android:label="@string/title_trip_service_kotlin">
+            android:label="@string/title_trip_service_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -112,7 +119,8 @@
 
         <activity
             android:name=".core.TripSessionActivityKt"
-            android:label="@string/title_trip_session_kotlin">
+            android:label="@string/title_trip_session_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -128,7 +136,8 @@
 
         <activity
             android:name=".ui.BuildingFootprintHighlightActivityKt"
-            android:label="@string/title_building_highlight_kotlin">
+            android:label="@string/title_building_highlight_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -136,7 +145,8 @@
 
         <activity
             android:name=".ui.BuildingExtrusionActivity"
-            android:label="@string/title_ui_building_extrusions_kotlin">
+            android:label="@string/title_ui_building_extrusions_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -144,7 +154,8 @@
 
         <activity
             android:name=".core.GuidanceViewActivity"
-            android:label="@string/title_guidance_view">
+            android:label="@string/title_guidance_view"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -152,7 +163,8 @@
 
         <activity
             android:name=".core.ReplayWaypointsActivity"
-            android:label="@string/title_replay_route">
+            android:label="@string/title_replay_route"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -160,7 +172,8 @@
 
         <activity
             android:name=".core.ReplayActivity"
-            android:label="@string/title_replay_route">
+            android:label="@string/title_replay_route"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -168,7 +181,8 @@
 
         <activity
             android:name=".core.ReplayHistoryActivity"
-            android:label="@string/title_replay_route">
+            android:label="@string/title_replay_route"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -184,7 +198,8 @@
 
         <activity
             android:name=".core.BasicNavigationFragmentActivity"
-            android:label="@string/title_basic_navigation_fragment">
+            android:label="@string/title_basic_navigation_fragment"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -192,7 +207,8 @@
 
         <activity
             android:name=".core.BasicNavSdkOnlyActivity"
-            android:label="@string/title_basic_navigation_sdk_only_kotlin">
+            android:label="@string/title_basic_navigation_sdk_only_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -200,7 +216,8 @@
 
         <activity
             android:name=".core.FreeDriveNavigationActivity"
-            android:label="@string/title_free_drive_kotlin">
+            android:label="@string/title_free_drive_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -224,7 +241,8 @@
 
         <activity
             android:name=".core.ReRouteActivity"
-            android:label="@string/title_reroute_view">
+            android:label="@string/title_reroute_view"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -232,7 +250,8 @@
 
         <activity
             android:name=".core.SummaryBottomSheetActivity"
-            android:label="@string/title_summary_bottom_sheet">
+            android:label="@string/title_summary_bottom_sheet"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -240,7 +259,8 @@
 
         <activity
             android:name=".core.FeedbackButtonActivity"
-            android:label="@string/title_feedback_button">
+            android:label="@string/title_feedback_button"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -248,7 +268,8 @@
 
         <activity
             android:name=".ui.CustomPuckActivity"
-            android:label="@string/title_custom_puck_example">
+            android:label="@string/title_custom_puck_example"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -256,7 +277,8 @@
 
         <activity
             android:name=".core.DebugMapboxNavigationKt"
-            android:label="@string/title_debug_navigation_kotlin">
+            android:label="@string/title_debug_navigation_kotlin"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -264,7 +286,8 @@
 
         <activity
             android:name=".ui.CustomCameraActivity"
-            android:label="@string/title_custom_camera_example">
+            android:label="@string/title_custom_camera_example"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -272,7 +295,8 @@
 
         <activity
             android:name=".ui.CustomUIComponentStyleActivity"
-            android:label="@string/title_custom_ui_component_style">
+            android:label="@string/title_custom_ui_component_style"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
@@ -281,8 +305,8 @@
         <activity
             android:name=".core.CustomRouteStylingActivity"
             android:label="@string/title_custom_route_styling_kotlin"
-
-            android:theme="@style/CustomRouteTheme">
+            android:theme="@style/CustomRouteTheme"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
@@ -290,7 +314,8 @@
 
         <activity
             android:name=".core.NavigationMapRouteActivity"
-            android:label="@string/title_navigation_route_ui">
+            android:label="@string/title_navigation_route_ui"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />

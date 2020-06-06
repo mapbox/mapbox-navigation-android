@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.base.common.logger.model.Message;
 import com.mapbox.common.logger.MapboxLogger;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -17,6 +19,8 @@ import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.Random;
+
+import timber.log.Timber;
 
 public class Utils {
 
@@ -69,5 +73,25 @@ public class Utils {
     LatLng latLng = new LatLng(randomLat, randomLon);
     MapboxLogger.INSTANCE.d(new Message("getRandomLatLng: " + latLng.toString()));
     return latLng;
+  }
+
+  public static final String PRIMARY_ROUTE_BUNDLE_KEY = "myPrimaryRouteBundleKey";
+
+  /**
+   * Used by the example activities to get a DirectionsRoute from a bundle.
+   *
+   * @param bundle to get the DirectionsRoute from
+   * @return a DirectionsRoute or null
+   */
+  public static DirectionsRoute getRouteFromBundle(Bundle bundle) {
+    try {
+      if (bundle.containsKey(PRIMARY_ROUTE_BUNDLE_KEY)) {
+        String routeAsJson = bundle.getString(PRIMARY_ROUTE_BUNDLE_KEY);
+        return DirectionsRoute.fromJson(routeAsJson);
+      }
+    } catch (Exception ex) {
+      Timber.i(ex);
+    }
+    return null;
   }
 }
