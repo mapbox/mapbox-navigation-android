@@ -92,6 +92,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private static final String COMPONENT_TYPE_LANE = "lane";
   private static final long GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED = 900L;
   private static final long GUIDANCE_VIEW_HIDE_TRANSITION_SPEED = 900L;
+  private static final double MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE = 0.75;
 
   private ManeuverView maneuverView;
   private TextView stepDistanceText;
@@ -976,9 +977,15 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void loadPrimary(BannerText primaryBannerText) {
-    stepPrimaryText.setMaxLines(2);
+    if (!ViewUtils.isLandscape(getContext())) {
+      stepPrimaryText.setMaxLines(2);
+    }
     stepSecondaryText.setVisibility(GONE);
     adjustBannerTextVerticalBias(0.5f);
+
+    if (ViewUtils.isLandscape(getContext())) {
+      stepPrimaryText.setMaxWidth(instructionLayoutText.getWidth());
+    }
     loadTextWith(primaryBannerText, stepPrimaryText);
   }
 
@@ -986,8 +993,18 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     stepPrimaryText.setMaxLines(1);
     stepSecondaryText.setVisibility(VISIBLE);
     adjustBannerTextVerticalBias(0.65f);
+
+    if (ViewUtils.isLandscape(getContext())) {
+      int primaryTextMaxWidth = (int) (instructionLayoutText.getWidth()
+        * MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE);
+      stepPrimaryText.setMaxWidth(primaryTextMaxWidth);
+    }
     loadTextWith(primaryBannerText, stepPrimaryText);
 
+    if (ViewUtils.isLandscape(getContext())) {
+      int primaryTextWidth = (int) stepPrimaryText.getPaint().measureText(String.valueOf(stepPrimaryText.getText()));
+      stepSecondaryText.setMaxWidth(instructionLayoutText.getWidth() - primaryTextWidth);
+    }
     loadTextWith(secondaryBannerText, stepSecondaryText);
   }
 

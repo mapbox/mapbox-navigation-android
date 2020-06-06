@@ -18,7 +18,12 @@ class TextViewUtils {
   boolean textFits(TextView textView, String text) {
     Paint paint = new Paint(textView.getPaint());
     float width = paint.measureText(text);
-    return width < textView.getWidth();
+
+    if (textView.getMaxWidth() != Integer.MAX_VALUE) {
+      return width < textView.getMaxWidth();
+    } else {
+      return width < textView.getWidth();
+    }
   }
 
   Drawable createDrawable(TextView textView, Bitmap bitmap) {
