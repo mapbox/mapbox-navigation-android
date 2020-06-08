@@ -15,8 +15,10 @@ import kotlinx.coroutines.launch
  *
  * @param routeLine the route to represent on the map
  * @param routeArrow the arrow representing the next maneuver
- * @param vanishRouteLineEnabled determines if the route line will vanish behind the puck as the
- * route progresses
+ * @param vanishingLineAnimator the animator to use for altering the appearance of the route line
+ * behind the puck. Also determines if the route line will vanish behind the puck as the
+ * route progresses. If no animator is provided the route line will remain solid and not updated
+ * during the route progress.
  */
 internal class MapRouteProgressChangeListener(
     private val routeLine: MapRouteLine,
@@ -26,6 +28,26 @@ internal class MapRouteProgressChangeListener(
 
     private val jobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private var lastDistanceValue = 0f
+
+    /**
+     * Returns the percentage of the distance traveled that was last calculated. This is only
+     * calculated if the @param vanishingLineAnimator passed into the constructor was non-null.
+     *
+     * @return the value calculated during the last progress update event or 0 if not enabled.
+     */
+    fun getPercentDistanceTraveled(): Float {
+        return lastDistanceValue
+    }
+
+    /**
+     * Sets the value for the distance traveled which is used in animating the section of the route
+     * line behind the puck when the vanishing route line feature is enabled.
+     *
+     * @param distance a value representing the percentage of the distance traveled.
+     */
+    fun updatePercentDistanceTraveled(distance: Float) {
+        lastDistanceValue = distance
+    }
 
     private val routeLineAnimatorUpdateCallback = ValueAnimator.AnimatorUpdateListener {
         val animationDistanceValue = it.animatedValue as Float
@@ -56,6 +78,7 @@ internal class MapRouteProgressChangeListener(
         val hasGeometry = currentRoute?.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
             routeLine.draw(currentRoute!!)
+            this.lastDistanceValue = routeLine.vanishPointOffset
         } else {
             // if there is no geometry then the session is in free drive and the vanishing
             // route line code should not execute.
