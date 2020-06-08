@@ -97,7 +97,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
-    this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer);
+    this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer, routeLineInitializedCallback);
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
     this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
@@ -300,7 +300,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private MapRouteLine buildMapRouteLine(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
-      @StyleRes int styleRes, @Nullable String belowLayer) {
+                                         @StyleRes int styleRes, @Nullable String belowLayer,
+                                         MapRouteLineInitializedCallback routeLineInitializedCallback) {
     Context context = mapView.getContext();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
     return new MapRouteLine(
@@ -416,11 +417,31 @@ public class NavigationMapRoute implements LifecycleObserver {
       vanishingRouteLineAnimator = null;
     }
 
-    return new MapRouteProgressChangeListener(
-        this.routeLine,
-        routeArrow,
-        vanishingRouteLineAnimator
+    float vanishingPoint = (this.mapRouteProgressChangeListener != null)
+            ? this.mapRouteProgressChangeListener.getPercentDistanceTraveled() : 0f;
+    MapRouteProgressChangeListener newListener = new MapRouteProgressChangeListener(
+            this.routeLine,
+            routeArrow,
+            vanishingRouteLineAnimator
     );
+    newListener.updatePercentDistanceTraveled(vanishingPoint);
+    return newListener;
+  }
+
+  /**
+   * Returns the percentage of the distance traveled that was last calculated. This is only
+   * calculated if the vanishing route line feature is enabled.
+   *
+   * @return the value calculated during the last progress update event or 0 if not enabled.
+   */
+  public float getPercentDistanceTraveled() {
+    return mapRouteProgressChangeListener.getPercentDistanceTraveled();
+  }
+
+  public void updateRouteLineWithDistanceTraveled(float distanceTraveled) {
+    routeLine.hideShieldLineAtOffset(distanceTraveled);
+    routeLine.hideRouteLineAtOffset(distanceTraveled);
+    mapRouteProgressChangeListener.updatePercentDistanceTraveled(distanceTraveled);
   }
 
   /**

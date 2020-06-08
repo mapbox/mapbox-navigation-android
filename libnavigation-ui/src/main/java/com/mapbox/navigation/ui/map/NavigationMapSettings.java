@@ -16,6 +16,7 @@ class NavigationMapSettings implements Parcelable {
   private boolean maxFpsEnabled = true;
   private boolean mapWayNameEnabled;
   private boolean locationFpsEnabled = true;
+  private float percentDistanceTraveled;
 
   NavigationMapSettings() {
   }
@@ -73,6 +74,14 @@ class NavigationMapSettings implements Parcelable {
     this.locationFpsEnabled = locationFpsEnabled;
   }
 
+  void updatePercentDistanceTraveled(float distance) {
+    this.percentDistanceTraveled = distance;
+  }
+
+  float retrievePercentDistanceTraveled() {
+    return this.percentDistanceTraveled;
+  }
+
   boolean isLocationFpsEnabled() {
     return locationFpsEnabled;
   }
@@ -85,6 +94,7 @@ class NavigationMapSettings implements Parcelable {
     maxFpsEnabled = in.readByte() != 0;
     mapWayNameEnabled = in.readByte() != 0;
     locationFpsEnabled = in.readByte() != 0;
+    percentDistanceTraveled = in.readFloat();
   }
 
   @Override
@@ -96,6 +106,7 @@ class NavigationMapSettings implements Parcelable {
     dest.writeByte((byte) (maxFpsEnabled ? 1 : 0));
     dest.writeByte((byte) (mapWayNameEnabled ? 1 : 0));
     dest.writeByte((byte) (locationFpsEnabled ? 1 : 0));
+    dest.writeFloat(percentDistanceTraveled);
   }
 
   @Override
