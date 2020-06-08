@@ -838,6 +838,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         instructionLoader.loadInstruction();
       }
       showSubLayout();
+      hideTurnLanes();
       return;
     } else {
       hideSubLayout();
