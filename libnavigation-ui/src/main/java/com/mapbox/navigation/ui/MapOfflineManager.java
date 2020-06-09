@@ -21,8 +21,8 @@ class MapOfflineManager implements RouteProgressObserver {
   private MergeOfflineRegionsCallback mergeOfflineRegionsCallback;
 
   MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
-                    OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
-                    RegionDownloadCallback regionDownloadCallback) {
+      OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
+      RegionDownloadCallback regionDownloadCallback) {
     this.offlineManager = offlineManager;
     this.definitionProvider = definitionProvider;
     this.metadataProvider = metadataProvider;
@@ -32,9 +32,9 @@ class MapOfflineManager implements RouteProgressObserver {
 
   // Package private (no modifier) for testing purposes
   MapOfflineManager(OfflineManager offlineManager, OfflineRegionDefinitionProvider definitionProvider,
-                    OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
-                    RegionDownloadCallback regionDownloadCallback,
-                    MergeOfflineRegionsCallback mergeOfflineRegionsCallback) {
+      OfflineMetadataProvider metadataProvider, MapConnectivityController connectivityController,
+      RegionDownloadCallback regionDownloadCallback,
+      MergeOfflineRegionsCallback mergeOfflineRegionsCallback) {
     this.offlineManager = offlineManager;
     this.definitionProvider = definitionProvider;
     this.metadataProvider = metadataProvider;
@@ -43,6 +43,11 @@ class MapOfflineManager implements RouteProgressObserver {
     this.mergeOfflineRegionsCallback = mergeOfflineRegionsCallback;
   }
 
+  /**
+   * Invoked every time the {@link RouteProgress} is updated
+   *
+   * @param routeProgress RouteProgress
+   */
   @Override
   public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
     Geometry currentRouteGeometry = routeProgress.getRouteGeometryWithBuffer();
@@ -65,7 +70,7 @@ class MapOfflineManager implements RouteProgressObserver {
   }
 
   private void download(@NonNull String routeSummary, @NonNull Geometry routeGeometry,
-                        final OfflineRegionDownloadCallback callback) {
+      final OfflineRegionDownloadCallback callback) {
     OfflineGeometryRegionDefinition definition = definitionProvider.buildRegionFor(routeGeometry);
     byte[] metadata = metadataProvider.buildMetadataFor(routeSummary);
     connectivityController.assign(null);

@@ -110,7 +110,6 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
    * into the given {@link TextView}.
    *
    * @param textView target for the banner text
-   * @since 0.9.0
    */
   private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
     if (!hasImages()) {

@@ -23,9 +23,6 @@ public interface NavigationContract {
 
     String retrieveWayNameText();
 
-    @Deprecated
-    void updateWayNameVisibility(boolean isVisible);
-
     void updateWayNameView(@NonNull String wayName);
 
     void resetCameraPosition();

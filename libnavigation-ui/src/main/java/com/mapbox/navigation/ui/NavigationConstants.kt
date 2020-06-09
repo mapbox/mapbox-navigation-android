@@ -3,7 +3,6 @@ package com.mapbox.navigation.ui
 /**
  * Navigation constants
  *
- * @since 0.1.0
  */
 object NavigationConstants {
 
@@ -36,7 +35,6 @@ object NavigationConstants {
      * 125 seconds remaining is considered a low alert level when
      * navigating along a [com.mapbox.api.directions.v5.models.LegStep].
      *
-     * @since 0.9.0
      */
     const val NAVIGATION_LOW_ALERT_DURATION = 125
 
@@ -44,7 +42,6 @@ object NavigationConstants {
      * 70 seconds remaining is considered a medium alert level when
      * navigating along a [com.mapbox.api.directions.v5.models.LegStep].
      *
-     * @since 0.9.0
      */
     const val NAVIGATION_MEDIUM_ALERT_DURATION = 70
 
@@ -52,7 +49,6 @@ object NavigationConstants {
      * 15 seconds remaining is considered a high alert level when
      * navigating along a [com.mapbox.api.directions.v5.models.LegStep].
      *
-     * @since 0.10.1
      */
     const val NAVIGATION_HIGH_ALERT_DURATION = 15
 

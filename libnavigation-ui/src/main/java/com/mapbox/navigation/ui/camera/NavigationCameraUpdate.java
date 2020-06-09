@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.camera;
 
-
 import androidx.annotation.NonNull;
 
 import com.mapbox.mapboxsdk.camera.CameraUpdate;

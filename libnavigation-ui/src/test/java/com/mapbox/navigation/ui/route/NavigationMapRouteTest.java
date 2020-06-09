@@ -315,7 +315,7 @@ public class NavigationMapRouteTest {
             mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
-    theNavigationMapRoute.removeRoute();
+    theNavigationMapRoute.updateRouteVisibilityTo(false);
 
     verify(mockedMapRouteLine).updateVisibilityTo(false);
   }
@@ -337,7 +337,7 @@ public class NavigationMapRouteTest {
             mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
 
-    theNavigationMapRoute.removeRoute();
+    theNavigationMapRoute.updateRouteArrowVisibilityTo(false);
 
     verify(mockedMapRouteArrow).updateVisibilityTo(false);
   }

@@ -26,6 +26,7 @@ import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
@@ -74,12 +75,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
   private static final String STREETS_V8_ROAD_LABEL = "road";
   private static final String INCIDENTS_LAYER_ID = "closures";
   private static final String TRAFFIC_LAYER_ID = "traffic";
-  private static final int[] ZERO_MAP_PADDING = {0, 0, 0, 0};
+  private static final int[] ZERO_MAP_PADDING = { 0, 0, 0, 0 };
   private static final double NAVIGATION_MAXIMUM_MAP_ZOOM = 18d;
   private final CopyOnWriteArrayList<OnWayNameChangedListener> onWayNameChangedListeners
-    = new CopyOnWriteArrayList<>();
+      = new CopyOnWriteArrayList<>();
   private final MapWayNameChangedListener internalWayNameChangedListener
-    = new MapWayNameChangedListener(onWayNameChangedListeners);
+      = new MapWayNameChangedListener(onWayNameChangedListeners);
   private NavigationMapSettings settings = new NavigationMapSettings();
   @NonNull
   private MapView mapView;
@@ -107,13 +108,13 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView   for map size and Context
+   * @param mapView for map size and Context
    * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
-                             @NonNull MapboxMap mapboxMap,
-                             @NonNull LifecycleOwner lifecycleOwner) {
+      @NonNull MapboxMap mapboxMap,
+      @NonNull LifecycleOwner lifecycleOwner) {
     this(mapView, mapboxMap, lifecycleOwner, null);
   }
 
@@ -121,31 +122,31 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView   for map size and Context
+   * @param mapView for map size and Context
    * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
-                             @NonNull MapboxMap mapboxMap,
-                             @NonNull LifecycleOwner lifecycleOwner,
-                             boolean vanishRouteLineEnabled) {
-    this(mapView, mapboxMap, lifecycleOwner,null, vanishRouteLineEnabled, false);
+      @NonNull MapboxMap mapboxMap,
+      @NonNull LifecycleOwner lifecycleOwner,
+      boolean vanishRouteLineEnabled) {
+    this(mapView, mapboxMap, lifecycleOwner, null, vanishRouteLineEnabled, false);
   }
 
   /**
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView           for map size and Context
-   * @param mapboxMap         for APIs to interact with the map
+   * @param mapView for map size and Context
+   * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
-                             @NonNull MapboxMap mapboxMap,
-                             @NonNull LifecycleOwner lifecycleOwner,
-                             @Nullable String routeBelowLayerId) {
+      @NonNull MapboxMap mapboxMap,
+      @NonNull LifecycleOwner lifecycleOwner,
+      @Nullable String routeBelowLayerId) {
     this(mapView, mapboxMap, lifecycleOwner, routeBelowLayerId, false, false);
   }
 
@@ -153,19 +154,19 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * Constructor that can be used once {@link OnMapReadyCallback}
    * has been called via {@link MapView#getMapAsync(OnMapReadyCallback)}.
    *
-   * @param mapView           for map size and Context
-   * @param mapboxMap         for APIs to interact with the map
+   * @param mapView for map size and Context
+   * @param mapboxMap for APIs to interact with the map
    * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    * @param useSpecializedLocationLayer determines if the location puck should use a specialized render layer.
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
-                             @NonNull MapboxMap mapboxMap,
-                             @NonNull LifecycleOwner lifecycleOwner,
-                             @Nullable String routeBelowLayerId,
-                             boolean vanishRouteLineEnabled,
-                             boolean useSpecializedLocationLayer) {
+      @NonNull MapboxMap mapboxMap,
+      @NonNull LifecycleOwner lifecycleOwner,
+      @Nullable String routeBelowLayerId,
+      boolean vanishRouteLineEnabled,
+      boolean useSpecializedLocationLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
@@ -212,8 +213,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
 
   @TestOnly
   NavigationMapboxMap(@NonNull MapWayName mapWayName, @NonNull MapFpsDelegate mapFpsDelegate,
-                      NavigationMapRoute mapRoute, NavigationCamera mapCamera,
-                      LocationFpsDelegate locationFpsDelegate) {
+      NavigationMapRoute mapRoute, NavigationCamera mapCamera,
+      LocationFpsDelegate locationFpsDelegate) {
     this.mapWayName = mapWayName;
     this.mapFpsDelegate = mapFpsDelegate;
     this.mapRoute = mapRoute;
@@ -226,22 +227,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
     this.layerInteractor = layerInteractor;
     this.mapboxMap = mapboxMap;
     initializeWayName(mapboxMap, adjustor);
-  }
-
-  /**
-   * Adds a marker icon on the map at the given position.
-   * <p>
-   * The icon used for this method can be defined in your theme with
-   * the attribute <tt>navigationViewDestinationMarker</tt>.
-   *
-   * @param context  to retrieve the icon drawable from the theme
-   * @param position the point at which the marker will be placed
-   * @deprecated Use {@link NavigationMapboxMap#addDestinationMarker(Point)} instead.
-   * A {@link Context} is no longer needed.
-   */
-  @Deprecated
-  public void addMarker(Context context, Point position) {
-    navigationSymbolManager.addDestinationMarkerFor(position);
   }
 
   /**
@@ -419,7 +404,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * This method uses {@link NavigationMapboxMapInstanceState}, stored with the provided key.  This key
    * can also later be used to extract the {@link NavigationMapboxMapInstanceState}.
    *
-   * @param key      used to store the state
+   * @param key used to store the state
    * @param outState to store state variables
    */
   public void saveStateWith(String key, Bundle outState) {
@@ -479,8 +464,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * selected as their primary route.
    *
    * @param listener a listener which lets you know when the user has changed
-   *                 the primary route and provides the current direction
-   *                 route which the user has selected
+   * the primary route and provides the current direction
+   * route which the user has selected
    */
   public void setOnRouteSelectionChangeListener(@NonNull OnRouteSelectionChangeListener listener) {
     mapRoute.setOnRouteSelectionChangeListener(listener);
@@ -492,7 +477,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * anymore.
    *
    * @param alternativesVisible true if you'd like alternative routes to be displayed on the map,
-   *                            else false
+   * else false
    */
   public void showAlternativeRoutes(boolean alternativesVisible) {
     mapRoute.showAlternativeRoutes(alternativesVisible);
@@ -533,7 +518,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * Updates the {@link NavigationCamera.TrackingMode} that will be used when camera tracking is enabled.
    *
    * @param trackingMode the tracking mode
-   * @since 0.21.0
    */
   public void updateCameraTrackingMode(@NavigationCamera.TrackingMode int trackingMode) {
     mapCamera.updateCameraTrackingMode(trackingMode);
@@ -602,44 +586,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
       mapWayName.updateWayNameQueryMap(isEnabled);
     } else {
       settings.updateWayNameEnabled(isEnabled);
-    }
-  }
-
-  /**
-   * Called during the onStart event of the Lifecycle owner to initialize resources.
-   */
-  @OnLifecycleEvent(Lifecycle.Event.ON_START)
-  protected void onStart() {
-    mapCamera.onStart();
-    handleWayNameOnStart();
-    handleFpsOnStart();
-    locationFpsDelegate.onStart();
-
-    if (navigation != null) {
-      navigation.registerLocationObserver(locationObserver);
-    }
-
-    if (navigationPuckPresenter != null) {
-      navigationPuckPresenter.onStart();
-    }
-  }
-
-  /**
-   * Called during the onStop event of the Lifecycle owner to clean up resources.
-   */
-  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-  protected void onStop() {
-    mapCamera.onStop();
-    handleWayNameOnStop();
-    handleFpsOnStop();
-    locationFpsDelegate.onStop();
-
-    if (navigation != null) {
-      navigation.unregisterLocationObserver(locationObserver);
-    }
-
-    if (navigationPuckPresenter != null) {
-      navigationPuckPresenter.onStop();
     }
   }
 
@@ -757,8 +703,64 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapPaddingAdjustor.adjustLocationIconWith(customPadding);
   }
 
+  /**
+   * Set {@link Camera} which allows you to perform operations like zoom, tilt etc.
+   *
+   * @param camera Camera
+   */
+  public void setCamera(Camera camera) {
+    mapCamera.setCamera(camera);
+  }
+
+  /**
+   * Allows to pass in a custom implementation of {@link PuckDrawableSupplier}
+   *
+   * @param supplier PuckDrawableSupplier
+   */
+  public void setPuckDrawableSupplier(PuckDrawableSupplier supplier) {
+    this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
+  }
+
   public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
+  }
+
+  /**
+   * Called during the onStart event of the Lifecycle owner to initialize resources.
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_START)
+  protected void onStart() {
+    mapCamera.onStart();
+    handleWayNameOnStart();
+    handleFpsOnStart();
+    locationFpsDelegate.onStart();
+
+    if (navigation != null) {
+      navigation.registerLocationObserver(locationObserver);
+    }
+
+    if (navigationPuckPresenter != null) {
+      navigationPuckPresenter.onStart();
+    }
+  }
+
+  /**
+   * Called during the onStop event of the Lifecycle owner to clean up resources.
+   */
+  @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+  protected void onStop() {
+    mapCamera.onStop();
+    handleWayNameOnStop();
+    handleFpsOnStop();
+    locationFpsDelegate.onStop();
+
+    if (navigation != null) {
+      navigation.unregisterLocationObserver(locationObserver);
+    }
+
+    if (navigationPuckPresenter != null) {
+      navigationPuckPresenter.onStop();
+    }
   }
 
   @SuppressLint("MissingPermission")
@@ -768,7 +770,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     Context context = mapView.getContext();
     Style style = map.getStyle();
     int locationLayerStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
-      R.attr.navigationViewLocationLayerStyle, R.style.NavigationLocationLayerStyle);
+        R.attr.navigationViewLocationLayerStyle, R.style.NavigationLocationLayerStyle);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(options)
@@ -801,12 +803,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
   private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(
-            context, R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
+        context, R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
     );
     mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
-            .withStyle(routeStyleRes)
-            .withBelowLayer(routeBelowLayerId)
-            .build();
+        .withStyle(routeStyleRes)
+        .withBelowLayer(routeBelowLayerId)
+        .build();
   }
 
   private void initializeCamera(MapboxMap map) {
@@ -945,8 +947,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
 
     @Override
     public void onEnhancedLocationChanged(
-            @NotNull Location enhancedLocation,
-            @NotNull List<? extends Location> keyPoints
+        @NotNull Location enhancedLocation,
+        @NotNull List<? extends Location> keyPoints
     ) {
       if (keyPoints.isEmpty()) {
         updateLocation(enhancedLocation);
@@ -955,12 +957,4 @@ public class NavigationMapboxMap implements LifecycleObserver {
       }
     }
   };
-
-  public void setCamera(Camera camera) {
-    mapCamera.setCamera(camera);
-  }
-
-  public void setPuckDrawableSupplier(PuckDrawableSupplier supplier) {
-    this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
-  }
 }

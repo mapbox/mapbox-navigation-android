@@ -58,7 +58,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   /**
    * Construct an instance of {@link NavigationMapRoute}.
    *
-   * @param mapView   the MapView to apply the route to
+   * @param mapView the MapView to apply the route to
    * @param mapboxMap the MapboxMap to apply route with
    * @since 0.4.0
    */
@@ -69,13 +69,13 @@ public class NavigationMapRoute implements LifecycleObserver {
   /**
    * Construct an instance of {@link NavigationMapRoute}.
    *
-   * @param mapView    the MapView to apply the route to
-   * @param mapboxMap  the MapboxMap to apply route with
+   * @param mapView the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
    * @param belowLayer optionally pass in a layer id to place the route line below
    * @since 0.4.0
    */
   public NavigationMapRoute(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
-                            @Nullable String belowLayer) {
+      @Nullable String belowLayer) {
     this(null, mapView, mapboxMap, R.style.NavigationMapRoute, belowLayer);
   }
 
@@ -83,13 +83,13 @@ public class NavigationMapRoute implements LifecycleObserver {
    * Construct an instance of {@link NavigationMapRoute}.
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
-   *                   your route won't consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the route to
-   * @param mapboxMap  the MapboxMap to apply route with
+   * your route won't consider rerouting during a navigation session.
+   * @param mapView the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
    * @since 0.4.0
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                            @NonNull MapboxMap mapboxMap) {
+      @NonNull MapboxMap mapboxMap) {
     this(navigation, mapView, mapboxMap, R.style.NavigationMapRoute);
   }
 
@@ -97,14 +97,14 @@ public class NavigationMapRoute implements LifecycleObserver {
    * Construct an instance of {@link NavigationMapRoute}.
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
-   *                   your route won't consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the route to
-   * @param mapboxMap  the MapboxMap to apply route with
+   * your route won't consider rerouting during a navigation session.
+   * @param mapView the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
    * @param belowLayer optionally pass in a layer id to place the route line below
    * @since 0.4.0
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                            @NonNull MapboxMap mapboxMap, @Nullable String belowLayer) {
+      @NonNull MapboxMap mapboxMap, @Nullable String belowLayer) {
     this(navigation, mapView, mapboxMap, R.style.NavigationMapRoute, belowLayer);
   }
 
@@ -112,13 +112,13 @@ public class NavigationMapRoute implements LifecycleObserver {
    * Construct an instance of {@link NavigationMapRoute}.
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
-   *                   your route won't consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the route to
-   * @param mapboxMap  the MapboxMap to apply route with
-   * @param styleRes   a style resource with custom route colors, scale, etc.
+   * your route won't consider rerouting during a navigation session.
+   * @param mapView the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
+   * @param styleRes a style resource with custom route colors, scale, etc.
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                            @NonNull MapboxMap mapboxMap, @StyleRes int styleRes) {
+      @NonNull MapboxMap mapboxMap, @StyleRes int styleRes) {
     this(navigation, mapView, mapboxMap, styleRes, null);
   }
 
@@ -126,15 +126,15 @@ public class NavigationMapRoute implements LifecycleObserver {
    * Construct an instance of {@link NavigationMapRoute}.
    *
    * @param navigation an instance of the {@link MapboxNavigation} object. Passing in null means
-   *                   your route won't consider rerouting during a navigation session.
-   * @param mapView    the MapView to apply the route to
-   * @param mapboxMap  the MapboxMap to apply route with
-   * @param styleRes   a style resource with custom route colors, scale, etc.
+   * your route won't consider rerouting during a navigation session.
+   * @param mapView the MapView to apply the route to
+   * @param mapboxMap the MapboxMap to apply route with
+   * @param styleRes a style resource with custom route colors, scale, etc.
    * @param belowLayer optionally pass in a layer id to place the route line below
    */
   public NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                            @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
-                            @Nullable String belowLayer) {
+      @NonNull MapboxMap mapboxMap, @StyleRes int styleRes,
+      @Nullable String belowLayer) {
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
@@ -150,10 +150,10 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   // For testing only
   NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
-                     MapRouteClickListener mapClickListener,
-                     MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
-                     MapRouteProgressChangeListener progressChangeListener) {
+      @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
+      MapRouteClickListener mapClickListener,
+      MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
+      MapRouteProgressChangeListener progressChangeListener) {
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
@@ -167,12 +167,12 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   // For testing only
   NavigationMapRoute(@Nullable MapboxNavigation navigation, @NonNull MapView mapView,
-                     @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
-                     MapRouteClickListener mapClickListener,
-                     MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
-                     MapRouteProgressChangeListener progressChangeListener,
-                     MapRouteLine routeLine,
-                     MapRouteArrow routeArrow) {
+      @NonNull MapboxMap mapboxMap, @StyleRes int styleRes, @Nullable String belowLayer,
+      MapRouteClickListener mapClickListener,
+      MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener,
+      MapRouteProgressChangeListener progressChangeListener,
+      MapRouteLine routeLine,
+      MapRouteArrow routeArrow) {
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
@@ -204,7 +204,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * alternative route style.
    *
    * @param directionsRoutes a list of direction routes, first one being the primary and the rest of
-   *                         the routes are considered alternatives.
+   * the routes are considered alternatives.
    * @since 0.8.0
    */
   public void addRoutes(@NonNull @Size(min = 1) List<DirectionsRoute> directionsRoutes) {
@@ -233,7 +233,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     mapRouteProgressChangeListener.updateVisibility(isVisible);
   }
 
-
   /**
    * Hides the progress arrow on the map drawn by this class.
    *
@@ -248,12 +247,12 @@ public class NavigationMapRoute implements LifecycleObserver {
    * selected as their primary route.
    *
    * @param onRouteSelectionChangeListener a listener which lets you know when the user has changed
-   *                                       the primary route and provides the current direction
-   *                                       route which the user has selected
+   * the primary route and provides the current direction
+   * route which the user has selected
    * @since 0.8.0
    */
   public void setOnRouteSelectionChangeListener(
-          @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener
+      @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener
   ) {
     mapRouteClickListener.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
   }
@@ -264,7 +263,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * anymore.
    *
    * @param alternativesVisible true if you'd like alternative routes to be displayed on the map,
-   *                            else false
+   * else false
    * @since 0.8.0
    */
   public void showAlternativeRoutes(boolean alternativesVisible) {
@@ -286,7 +285,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     navigation.addProgressChangeListener(mapRouteProgressChangeListener);
   }
 
-
   /**
    * Should be called if {@link NavigationMapRoute#addProgressChangeListener(MapboxNavigation)} was
    * called to prevent leaking.
@@ -296,6 +294,12 @@ public class NavigationMapRoute implements LifecycleObserver {
   public void removeProgressChangeListener(MapboxNavigation navigation) {
     if (navigation != null) {
       navigation.removeProgressChangeListener(mapRouteProgressChangeListener);
+    }
+  }
+
+  public void onNewRouteProgress(RouteProgress routeProgress) {
+    if (mapRouteProgressChangeListener != null) {
+      mapRouteProgressChangeListener.onProgressChange(routeProgress);
     }
   }
 
@@ -320,14 +324,14 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private MapRouteLine buildMapRouteLine(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
-                                         @StyleRes int styleRes, @Nullable String belowLayer) {
+      @StyleRes int styleRes, @Nullable String belowLayer) {
     Context context = mapView.getContext();
     MapRouteDrawableProvider drawableProvider = new MapRouteDrawableProvider(context);
     MapRouteSourceProvider sourceProvider = new MapRouteSourceProvider();
     MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
     Handler handler = new Handler(context.getMainLooper());
     return new MapRouteLine(context, mapboxMap.getStyle(), styleRes, belowLayer,
-            drawableProvider, sourceProvider, layerProvider, handler
+        drawableProvider, sourceProvider, layerProvider, handler
     );
   }
 
@@ -387,22 +391,22 @@ public class NavigationMapRoute implements LifecycleObserver {
     Handler handler = new Handler(context.getMainLooper());
 
     routeLine = new MapRouteLine(
-            context,
-            style,
-            styleRes,
-            belowLayer,
-            drawableProvider,
-            sourceProvider,
-            layerProvider,
-            routeLine.retrieveDrawnRouteFeatureCollections(),
-            routeLine.retrieveDrawnWaypointsFeatureCollections(),
-            routeLine.retrieveDirectionsRoutes(),
-            routeLine.retrieveRouteFeatureCollections(),
-            routeLine.retrieveRouteLineStrings(),
-            routeLine.retrievePrimaryRouteIndex(),
-            routeLine.retrieveVisibility(),
-            routeLine.retrieveAlternativesVisible(),
-            handler
+        context,
+        style,
+        styleRes,
+        belowLayer,
+        drawableProvider,
+        sourceProvider,
+        layerProvider,
+        routeLine.retrieveDrawnRouteFeatureCollections(),
+        routeLine.retrieveDrawnWaypointsFeatureCollections(),
+        routeLine.retrieveDirectionsRoutes(),
+        routeLine.retrieveRouteFeatureCollections(),
+        routeLine.retrieveRouteLineStrings(),
+        routeLine.retrievePrimaryRouteIndex(),
+        routeLine.retrieveVisibility(),
+        routeLine.retrieveAlternativesVisible(),
+        handler
     );
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
     mapRouteClickListener = new MapRouteClickListener(routeLine);
@@ -416,12 +420,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     if (navigation != null) {
       navigation.addProgressChangeListener(mapRouteProgressChangeListener);
-    }
-  }
-
-  public void onNewRouteProgress(RouteProgress routeProgress) {
-    if (mapRouteProgressChangeListener != null) {
-      mapRouteProgressChangeListener.onProgressChange(routeProgress);
     }
   }
 }

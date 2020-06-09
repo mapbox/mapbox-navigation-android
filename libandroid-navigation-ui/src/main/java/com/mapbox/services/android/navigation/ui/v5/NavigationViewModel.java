@@ -102,8 +102,8 @@ public class NavigationViewModel extends AndroidViewModel {
   @TestOnly
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
-                      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
-                      NavigationViewRouter router) {
+      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
+      NavigationViewRouter router) {
     super(application);
     this.navigation = navigation;
     this.router = router;
@@ -114,20 +114,14 @@ public class NavigationViewModel extends AndroidViewModel {
   @TestOnly
   // Package private (no modifier) for testing purposes
   NavigationViewModel(Application application, MapboxNavigation navigation,
-                      LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
-                      VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
+      LocationEngineConductor conductor, NavigationViewEventDispatcher dispatcher,
+      VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
     super(application);
     this.navigation = navigation;
     this.locationEngineConductor = conductor;
     this.navigationViewEventDispatcher = dispatcher;
     this.voiceInstructionCache = cache;
     this.speechPlayer = speechPlayer;
-  }
-
-  @Override
-  protected void onCleared() {
-    super.onCleared();
-    destroyRouter();
   }
 
   public void onDestroy(boolean isChangingConfigurations) {
@@ -194,6 +188,12 @@ public class NavigationViewModel extends AndroidViewModel {
   @Nullable
   public MapboxNavigation retrieveNavigation() {
     return navigation;
+  }
+
+  @Override
+  protected void onCleared() {
+    super.onCleared();
+    destroyRouter();
   }
 
   void initializeEventDispatcher(NavigationViewEventDispatcher navigationViewEventDispatcher) {
@@ -368,13 +368,13 @@ public class NavigationViewModel extends AndroidViewModel {
     OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
     RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
     mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
-      connectivityController, regionDownloadCallback);
+        connectivityController, regionDownloadCallback);
     navigation.addProgressChangeListener(mapOfflineManager);
   }
 
   private void initializeVoiceInstructionLoader() {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
-      TEN_MEGABYTE_CACHE_SIZE);
+        TEN_MEGABYTE_CACHE_SIZE);
     voiceInstructionLoader = new VoiceInstructionLoader(getApplication(), accessToken, cache);
   }
 
@@ -505,9 +505,9 @@ public class NavigationViewModel extends AndroidViewModel {
       voiceInstructionsToAnnounce++;
       voiceInstructionCache.update(voiceInstructionsToAnnounce);
       VoiceInstructions announcement = VoiceInstructions.builder()
-        .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
-        .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
-        .build();
+          .announcement(((VoiceInstructionMilestone) milestone).getAnnouncement())
+          .ssmlAnnouncement(((VoiceInstructionMilestone) milestone).getSsmlAnnouncement())
+          .build();
       announcement = retrieveAnnouncementFromSpeechEvent(announcement);
       speechPlayer.play(announcement);
     }

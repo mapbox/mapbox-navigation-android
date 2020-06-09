@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -130,37 +129,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   public void setInstructionListListener(InstructionListListener instructionListListener) {
     this.instructionListListener = instructionListListener;
-  }
-
-  /**
-   * Once this view has finished inflating, it will bind the views.
-   * <p>
-   * It will also initialize the {@link RecyclerView} used to display the turn lanes
-   * and animations used to show / hide views.
-   */
-  @Override
-  protected void onFinishInflate() {
-    super.onFinishInflate();
-    bind();
-    initializeBackground();
-    initializeTurnLaneRecyclerView();
-    initializeInstructionListRecyclerView();
-    initializeAnimations();
-    initializeStepListClickListener();
-    initializeButtons();
-    ImageCreator.getInstance().initialize(getContext());
-  }
-
-  @Override
-  protected void onAttachedToWindow() {
-    super.onAttachedToWindow();
-    addBottomSheetListener();
-  }
-
-  @Override
-  protected void onDetachedFromWindow() {
-    super.onDetachedFromWindow();
-    cancelDelayedTransition();
   }
 
   @Override
@@ -285,15 +253,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
-      BannerText subBanner, String currentDrivingSide) {
-    if (primaryBanner != null) {
-      updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
-      updateDataFromBannerText(primaryBanner, secondaryBanner);
-      updateSubStep(subBanner, primaryBanner.modifier());
-    }
-  }
-
   /**
    * Shows {@link FeedbackBottomSheet} and adds a listener so
    * the proper feedback information is collected or the user dismisses the UI.
@@ -355,10 +314,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
     instructionListLayout.setVisibility(GONE);
     onInstructionListVisibilityChanged(false);
-  }
-
-  private boolean isLandscape() {
-    return getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
   }
 
   /**
@@ -425,6 +380,37 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   public NavigationAlertView retrieveAlertView() {
     return alertView;
+  }
+
+  /**
+   * Once this view has finished inflating, it will bind the views.
+   * <p>
+   * It will also initialize the {@link RecyclerView} used to display the turn lanes
+   * and animations used to show / hide views.
+   */
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
+    bind();
+    initializeBackground();
+    initializeTurnLaneRecyclerView();
+    initializeInstructionListRecyclerView();
+    initializeAnimations();
+    initializeStepListClickListener();
+    initializeButtons();
+    ImageCreator.getInstance().initialize(getContext());
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    addBottomSheetListener();
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    cancelDelayedTransition();
   }
 
   /**
@@ -517,6 +503,15 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     Context context = getContext();
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
+  }
+
+  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
+      BannerText subBanner, String currentDrivingSide) {
+    if (primaryBanner != null) {
+      updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
+      updateDataFromBannerText(primaryBanner, secondaryBanner);
+      updateSubStep(subBanner, primaryBanner.modifier());
+    }
   }
 
   private void onInstructionListVisibilityChanged(boolean visible) {
@@ -691,6 +686,10 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         && !subText.type().contains(COMPONENT_TYPE_LANE);
   }
 
+  private boolean isLandscape() {
+    return getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+  }
+
   private void showSubLayout() {
     if (!(subStepLayout.getVisibility() == VISIBLE)) {
       beginDelayedTransition();
@@ -702,20 +701,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (subStepLayout.getVisibility() == VISIBLE) {
       beginDelayedTransition();
       subStepLayout.setVisibility(GONE);
-    }
-  }
-
-  public void showGuidanceViewImage() {
-    if (guidanceViewImage.getVisibility() == GONE) {
-      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED, new DecelerateInterpolator());
-      guidanceViewImage.setVisibility(VISIBLE);
-    }
-  }
-
-  public void hideGuidanceViewImage() {
-    if (guidanceViewImage.getVisibility() == VISIBLE) {
-      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_HIDE_TRANSITION_SPEED, new DecelerateInterpolator());
-      guidanceViewImage.setVisibility(GONE);
     }
   }
 

@@ -96,7 +96,6 @@ public class AlertView extends CardView {
   /**
    * Hides the View with a slide up animation if the View is currently VISIBLE.
    *
-   * @since 0.7.0
    */
   public void hide() {
     if (getVisibility() == VISIBLE) {
@@ -130,7 +129,6 @@ public class AlertView extends CardView {
    * Returns the current text being shown by the {@link AlertView}.
    *
    * @return current text in alertText {@link TextView}
-   * @since 0.7.0
    */
   public String getAlertText() {
     return alertText.getText().toString();

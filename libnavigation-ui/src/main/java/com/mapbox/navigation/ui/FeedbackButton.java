@@ -69,16 +69,21 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
     setVisibility(VISIBLE);
   }
 
+  /**
+   * Use it to update the view style.
+   *
+   * @param styleRes style resource
+   */
   @Override
   public void updateStyle(@StyleRes int styleRes) {
     TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.FeedbackButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.FeedbackButton_feedbackButtonPrimaryColor, R.color.mapbox_feedback_button_primary));
+        typedArray.getResourceId(
+            R.styleable.FeedbackButton_feedbackButtonPrimaryColor, R.color.mapbox_feedback_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(
-        R.styleable.FeedbackButton_feedbackButtonSecondaryColor, R.color.mapbox_feedback_button_secondary));
+        typedArray.getResourceId(
+            R.styleable.FeedbackButton_feedbackButtonSecondaryColor, R.color.mapbox_feedback_button_secondary));
 
     typedArray.recycle();
 
@@ -103,7 +108,6 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
     super.onDetachedFromWindow();
     clearListeners();
   }
-
 
   private void setupOnClickListeners() {
     feedbackFab.setOnClickListener(multiOnClickListener);
@@ -132,13 +136,12 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
     TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.FeedbackButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonPrimaryColor,
-        R.color.mapbox_feedback_button_primary));
+        typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonPrimaryColor,
+            R.color.mapbox_feedback_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonSecondaryColor,
-        R.color.mapbox_feedback_button_secondary));
+        typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonSecondaryColor,
+            R.color.mapbox_feedback_button_secondary));
 
     typedArray.recycle();
   }
-
 }

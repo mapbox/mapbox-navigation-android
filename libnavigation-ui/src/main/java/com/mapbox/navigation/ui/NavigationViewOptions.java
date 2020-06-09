@@ -97,18 +97,25 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder locationEngine(LocationEngine locationEngine);
 
+    /**
+     * Set true to enable vanishing route line feature and false to disable
+     *
+     * @param enableVanishingRouteLine true or false
+     * @return this {@link Builder}
+     */
     public abstract Builder enableVanishingRouteLine(boolean enableVanishingRouteLine);
 
     /**
      * Add an {@link ArrivalObserver} to monitor the progress of arrival, include stop arrival and route arrival.
      *
      * @param arrivalObserver the observer instance to receive arrival callbacks
-     * @return this builder
+     * @return this {@link Builder}
      */
     public abstract Builder arrivalObserver(ArrivalObserver arrivalObserver);
 
     /**
      * Defines the increment displayed on the instruction view
+     *
      * @param roundingIncrement displayed on the instruction view
      * @return this builder
      */
@@ -165,10 +172,10 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
   public static Builder builder() {
     return new AutoValue_NavigationViewOptions.Builder()
-            .navigationOptions(new NavigationOptions.Builder().build())
-            .roundingIncrement(Rounding.INCREMENT_FIFTY)
-            .shouldSimulateRoute(false)
-            .waynameChipEnabled(true)
-            .enableVanishingRouteLine(false);
+        .navigationOptions(new NavigationOptions.Builder().build())
+        .roundingIncrement(Rounding.INCREMENT_FIFTY)
+        .shouldSimulateRoute(false)
+        .waynameChipEnabled(true)
+        .enableVanishingRouteLine(false);
   }
 }

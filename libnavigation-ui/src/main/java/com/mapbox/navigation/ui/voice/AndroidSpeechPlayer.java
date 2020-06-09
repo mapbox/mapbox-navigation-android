@@ -16,7 +16,6 @@ import timber.log.Timber;
  * <p>
  * This instruction player uses {@link TextToSpeech} to play voice instructions.
  *
- * @since 0.6.0
  */
 class AndroidSpeechPlayer implements SpeechPlayer {
 
@@ -32,7 +31,6 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    *
    * @param context  used to create an instance of {@link TextToSpeech}
    * @param language to initialize locale to set
-   * @since 0.6.0
    */
   AndroidSpeechPlayer(Context context, final String language, final VoiceListener voiceListener) {
     textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {

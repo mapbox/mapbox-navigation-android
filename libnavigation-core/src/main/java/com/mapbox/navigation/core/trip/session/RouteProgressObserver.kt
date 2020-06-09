@@ -9,7 +9,8 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  */
 interface RouteProgressObserver {
     /**
-     * Called every time RouteProgress changes
+     * Invoked every time the [RouteProgress] is updated
+     * @param routeProgress [RouteProgress]
      */
     fun onRouteProgressChanged(routeProgress: RouteProgress)
 }

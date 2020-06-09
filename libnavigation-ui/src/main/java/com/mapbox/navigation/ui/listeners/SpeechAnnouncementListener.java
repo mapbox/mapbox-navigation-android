@@ -8,7 +8,6 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
  * The listener gives you the option to override any values and pass as the return value,
  * which will be the value used for the voice announcement.
  *
- * @since 0.16.0
  */
 public interface SpeechAnnouncementListener {
 

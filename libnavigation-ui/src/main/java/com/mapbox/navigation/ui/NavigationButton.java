@@ -31,7 +31,9 @@ public interface NavigationButton {
   void show();
 
   /**
-   * Set customized style
+   * Use it to update the view style
+   *
+   * @param styleRes style resource
    */
   void updateStyle(@StyleRes int styleRes);
 }
