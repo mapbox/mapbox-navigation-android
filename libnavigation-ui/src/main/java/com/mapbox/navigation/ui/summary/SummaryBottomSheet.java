@@ -49,7 +49,6 @@ import static com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED;
  * Can be expanded / collapsed to show / hide the list of
  * directions.
  *
- * @since 0.6.0
  */
 public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver {
 
@@ -108,7 +107,6 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * Updates all views with fresh data / shows &amp; hides re-route state.
    *
    * @param navigationViewModel to which this View is subscribing
-   * @since 0.6.2
    */
   public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
@@ -158,7 +156,6 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * uses it to update the views.
    *
    * @param routeProgress used to provide navigation / routeProgress data
-   * @since 0.6.2
    */
   @SuppressWarnings("UnusedDeclaration")
   public void update(RouteProgress routeProgress) {
@@ -177,7 +174,6 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * Also sets boolean to rerouting state so views do not
    * continue to update while we are fetching a new route.
    *
-   * @since 0.6.0
    */
   public void showRerouteState() {
     rerouteProgressBar.setVisibility(VISIBLE);
@@ -188,7 +184,6 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * Hides the reroute progress bar and sets
    * rerouting state to false to text will begin updating again.
    *
-   * @since 0.6.0
    */
   public void hideRerouteState() {
     rerouteProgressBar.setVisibility(INVISIBLE);

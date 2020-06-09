@@ -7,7 +7,6 @@ import com.mapbox.navigation.ui.NavigationView;
  * Defines a contract for speech players
  * used in {@link NavigationView}.
  *
- * @since 0.6.0
  */
 public interface SpeechPlayer {
 
@@ -16,13 +15,11 @@ public interface SpeechPlayer {
    * other speechAnnouncement are already queued, the given speechAnnouncement will be queued to play after.
    *
    * @param speechAnnouncement with voice speechAnnouncement data.
-   * @since 0.15.1
    */
   void play(VoiceInstructions speechAnnouncement);
 
   /**
    * @return true if currently muted, false if not
-   * @since 0.6.0
    */
   boolean isMuted();
 
@@ -33,7 +30,6 @@ public interface SpeechPlayer {
    * announcements queued should be cleared.
    *
    * @param isMuted true if should be muted, false if should not
-   * @since 0.6.0
    */
   void setMuted(boolean isMuted);
 
@@ -41,14 +37,12 @@ public interface SpeechPlayer {
    * Used in off-route scenarios to stop current
    * announcement (if playing) and voice a rerouting cue.
    *
-   * @since 0.6.0
    */
   void onOffRoute();
 
   /**
    * Used to stop and release the media (if needed).
    *
-   * @since 0.6.0
    */
   void onDestroy();
 }

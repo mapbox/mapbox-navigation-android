@@ -121,7 +121,6 @@ package com.mapbox.navigation.ui {
     method public void takeScreenshot();
     method public void updateCameraRouteOverview();
     method public void updateWayNameView(String);
-    method @Deprecated public void updateWayNameVisibility(boolean);
   }
 
   public class NavigationViewModel extends androidx.lifecycle.AndroidViewModel {
@@ -462,7 +461,6 @@ package com.mapbox.navigation.ui.map {
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean, boolean);
     method public void addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
     method public void addDestinationMarker(com.mapbox.geojson.Point!);
-    method @Deprecated public void addMarker(android.content.Context!, com.mapbox.geojson.Point!);
     method public void addOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener!);
     method public boolean addOnWayNameChangedListener(com.mapbox.navigation.ui.map.OnWayNameChangedListener!);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation);
@@ -552,7 +550,6 @@ package com.mapbox.navigation.ui.route {
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START) protected void onStart();
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_STOP) protected void onStop();
     method public void removeProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
-    method @Deprecated public void removeRoute();
     method public void setOnRouteSelectionChangeListener(com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener?);
     method public void showAlternativeRoutes(boolean);
     method public void updateRouteArrowVisibilityTo(boolean);

@@ -14,7 +14,6 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions;
  * {@link MapboxSpeechPlayer} requires Internet connectivity.  In cases where a connection is not
  * available, the provider will fall back to the {@link AndroidSpeechPlayer}.
  *
- * @since 0.16.0
  */
 public class NavigationSpeechPlayer implements SpeechPlayer {
 
@@ -29,7 +28,6 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * Plays the given {@link VoiceInstructions}.
    *
    * @param voiceInstructions with SSML and normal announcement text
-   * @since 0.16.0
    */
   @Override
   public void play(VoiceInstructions voiceInstructions) {
@@ -40,7 +38,6 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * Returns the current muted state of the player.
    *
    * @return current muted state
-   * @since 0.16.0
    */
   @Override
   public boolean isMuted() {
@@ -54,7 +51,6 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * the announcement will be stopped immediately.
    *
    * @param isMuted true to mute, false to un-mute
-   * @since 0.16.0
    */
   @Override
   public void setMuted(boolean isMuted) {
@@ -68,7 +64,6 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * During an off-route scenario, you can use this method to cancel existing announcements without
    * completely muting the player.
    *
-   * @since 0.16.0
    */
   @Override
   public void onOffRoute() {
@@ -81,7 +76,6 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * <p>
    * Ensures the player is properly shutdown and finishes any running announcements.
    *
-   * @since 0.16.0
    */
   @Override
   public void onDestroy() {

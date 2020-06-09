@@ -105,7 +105,6 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    * Will toggle the view between muted and unmuted states.
    *
    * @return boolean true if muted, false if not
-   * @since 0.6.0
    */
   public boolean toggleMute() {
     return isMuted ? unmute() : mute();

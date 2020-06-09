@@ -170,7 +170,6 @@ class InstructionListPresenter {
    * @param currentStep holding the current banner instructions
    * @param stepDistanceRemaining to determine progress along the currentStep
    * @return the current banner instructions based on the current distance along the step
-   * @since 0.13.0
    */
   @Nullable
   BannerInstructions findCurrentBannerInstructions(@Nullable LegStep currentStep, double stepDistanceRemaining) {

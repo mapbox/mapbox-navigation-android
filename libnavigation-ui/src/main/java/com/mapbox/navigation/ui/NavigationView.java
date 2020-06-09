@@ -80,10 +80,9 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * <p>
  * A Mapbox access token must also be set by the developer (to initialize navigation).
  *
- * @since 0.7.0
  */
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
-  NavigationContract.View {
+    NavigationContract.View {
 
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
@@ -166,8 +165,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int bottomSheetBehaviorState = summaryBehavior == null ? INVALID_STATE : summaryBehavior.getState();
     boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
-      bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
-      isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
+        bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
+        isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
     outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
@@ -193,7 +192,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     updateInstructionMutedState(navigationViewInstanceState.isMuted());
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
   }
-
 
   public void onStart() {
     mapView.onStart();
@@ -242,7 +240,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * Also, we check for launch data (coordinates or route).
    *
    * @param mapboxMap used for route, camera, and location UI
-   * @since 0.6.0
    */
   @Override
   public void onMapReady(final MapboxMap mapboxMap) {
@@ -380,31 +377,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     return wayNameView.retrieveWayNameText();
   }
 
-  /**
-   * Updates the visibility of the way name view that is show below
-   * the navigation icon.
-   * <p>
-   * If you'd like to use this method without being overridden by the default visibility values
-   * values we provide, please disabled auto-query with
-   * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}.
-   *
-   * @param isVisible true to show, false to hide
-   * @deprecated This method sets the auto-query, by calling
-   * {@link NavigationMapboxMap#updateWaynameQueryMap(boolean)}, and updates
-   * the visibility of the way name view at the same time. We recommend to use {@link #setWayNameActive(boolean)}
-   * to enable auto-query or {@link #setWayNameVisibility(boolean)} to update the
-   * way name view visibility. Remember to check whether the way name view text is empty or not before
-   * set the auto-query. {@link #retrieveWayNameText()} could get the way name view text.
-   */
-  @Override
-  @Deprecated
-  public void updateWayNameVisibility(boolean isVisible) {
-    wayNameView.updateVisibility(isVisible);
-    if (navigationMap != null) {
-      navigationMap.updateWaynameQueryMap(isVisible);
-    }
-  }
-
   @Override
   public void takeScreenshot() {
     if (navigationMap != null) {
@@ -458,66 +430,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
 
     snackbar.getView().setBackgroundColor(
-      ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_secondary));
+        ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_secondary));
     snackbar.setTextColor(ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_primary_text));
 
     snackbar.show();
-  }
-
-  /**
-   * Updates the visibility of the Mapbox logo and attribution button
-   *
-   * @param isVisible what the new visibility should be. True makes
-   *                  them visible, false to hide.
-   */
-  private void updateLogoAndAttributionVisibility(boolean isVisible) {
-    if (navigationMap != null) {
-      if (navigationMap.retrieveMap() != null) {
-        UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
-        uiSettings.setLogoEnabled(isVisible);
-        uiSettings.setAttributionEnabled(isVisible);
-      }
-    }
-  }
-
-  private boolean mapboxLogoEnabled() {
-    return navigationMap.retrieveMap().getUiSettings().isLogoEnabled();
-  }
-
-  private boolean attributionEnabled() {
-    return navigationMap.retrieveMap().getUiSettings().isAttributionEnabled();
-  }
-
-  /**
-   * Set the margins of the Mapbox logo within the {@link NavigationView}.
-   *
-   * @param left margin in pixels
-   * @param top margin in pixels
-   * @param right margin in pixels
-   * @param bottom margin in pixels
-   */
-  private void updateMapboxLogoMargins(int left, int top, int right, int bottom) {
-    if (navigationMap != null) {
-      if (navigationMap.retrieveMap() != null) {
-        navigationMap.retrieveMap().getUiSettings().setLogoMargins(left, top, right, bottom);
-      }
-    }
-  }
-
-  /**
-   * Set the margins of the attribution icon within the {@link NavigationView}.
-   *
-   * @param left margin in pixels
-   * @param top margin in pixels
-   * @param right margin in pixels
-   * @param bottom margin in pixels
-   */
-  private void updateAttributionMargins(int left, int top, int right, int bottom) {
-    if (navigationMap != null) {
-      if (navigationMap.retrieveMap() != null) {
-        navigationMap.retrieveMap().getUiSettings().setAttributionMargins(left, top, right, bottom);
-      }
-    }
   }
 
   /**
@@ -535,7 +451,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   /**
    * Call this when the navigation session needs to end navigation without finishing the whole view
    *
-   * @since 0.16.0
    */
   public void stopNavigation() {
     navigationPresenter.onNavigationStopped();
@@ -569,10 +484,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * ready.  Note, this position is ignored during rotation in favor of the last known map position.
    *
    * @param onNavigationReadyCallback to be set to this view
-   * @param initialMapCameraPosition  to be shown once the map is ready
+   * @param initialMapCameraPosition to be shown once the map is ready
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback,
-                         @NonNull CameraPosition initialMapCameraPosition) {
+      @NonNull CameraPosition initialMapCameraPosition) {
     this.initialMapCameraPosition = initialMapCameraPosition;
     onNavigationReadyCallbacks.add(onNavigationReadyCallback);
     if (!isMapInitialized) {
@@ -581,44 +496,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       updateNavigationReadyListeners(navigationViewModel.isRunning());
     }
   }
-
-  private void updateNavigationReadyListeners(boolean isRunning) {
-    for (OnNavigationReadyCallback callback : onNavigationReadyCallbacks) {
-      callback.onNavigationReady(isRunning);
-    }
-  }
-
-  private OnNavigationReadyCallback internalNavigationReadyCallback = new OnNavigationReadyCallback() {
-    @Override
-    public void onNavigationReady(final boolean isRunning) {
-      if (isRunning) {
-        final NavigationViewOptions navigationViewOptions = navigationViewModel.getNavigationViewOptions();
-        if (navigationViewOptions != null) {
-          establish(navigationViewOptions);
-          if (navigationViewOptions.puckDrawableSupplier() == null) {
-            navigationMap.setPuckDrawableSupplier(new DefaultMapboxPuckDrawableSupplier());
-          } else {
-            navigationMap.setPuckDrawableSupplier(navigationViewOptions.puckDrawableSupplier());
-          }
-
-          if (navigationViewOptions.camera() == null) {
-            navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
-          } else {
-            navigationMap.setCamera(navigationViewOptions.camera());
-          }
-
-          initializeNavigationListeners(navigationViewOptions, navigationViewModel);
-          setupNavigationMapboxMap(navigationViewOptions);
-
-          if (!isSubscribed) {
-            initializeClickListeners();
-            initializeOnCameraTrackingChangedListener();
-            subscribeViewModels();
-          }
-        }
-      }
-    }
-  };
 
   /**
    * Gives the ability to manipulate the map directly for anything that might not currently be
@@ -682,6 +559,100 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     return instructionView.retrieveAlertView();
   }
 
+  /**
+   * Updates the visibility of the Mapbox logo and attribution button
+   *
+   * @param isVisible what the new visibility should be. True makes
+   * them visible, false to hide.
+   */
+  private void updateLogoAndAttributionVisibility(boolean isVisible) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
+        uiSettings.setLogoEnabled(isVisible);
+        uiSettings.setAttributionEnabled(isVisible);
+      }
+    }
+  }
+
+  private boolean mapboxLogoEnabled() {
+    return navigationMap.retrieveMap().getUiSettings().isLogoEnabled();
+  }
+
+  private boolean attributionEnabled() {
+    return navigationMap.retrieveMap().getUiSettings().isAttributionEnabled();
+  }
+
+  /**
+   * Set the margins of the Mapbox logo within the {@link NavigationView}.
+   *
+   * @param left margin in pixels
+   * @param top margin in pixels
+   * @param right margin in pixels
+   * @param bottom margin in pixels
+   */
+  private void updateMapboxLogoMargins(int left, int top, int right, int bottom) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        navigationMap.retrieveMap().getUiSettings().setLogoMargins(left, top, right, bottom);
+      }
+    }
+  }
+
+  /**
+   * Set the margins of the attribution icon within the {@link NavigationView}.
+   *
+   * @param left margin in pixels
+   * @param top margin in pixels
+   * @param right margin in pixels
+   * @param bottom margin in pixels
+   */
+  private void updateAttributionMargins(int left, int top, int right, int bottom) {
+    if (navigationMap != null) {
+      if (navigationMap.retrieveMap() != null) {
+        navigationMap.retrieveMap().getUiSettings().setAttributionMargins(left, top, right, bottom);
+      }
+    }
+  }
+
+  private void updateNavigationReadyListeners(boolean isRunning) {
+    for (OnNavigationReadyCallback callback : onNavigationReadyCallbacks) {
+      callback.onNavigationReady(isRunning);
+    }
+  }
+
+  private OnNavigationReadyCallback internalNavigationReadyCallback = new OnNavigationReadyCallback() {
+    @Override
+    public void onNavigationReady(final boolean isRunning) {
+      if (isRunning) {
+        final NavigationViewOptions navigationViewOptions = navigationViewModel.getNavigationViewOptions();
+        if (navigationViewOptions != null) {
+          establish(navigationViewOptions);
+          if (navigationViewOptions.puckDrawableSupplier() == null) {
+            navigationMap.setPuckDrawableSupplier(new DefaultMapboxPuckDrawableSupplier());
+          } else {
+            navigationMap.setPuckDrawableSupplier(navigationViewOptions.puckDrawableSupplier());
+          }
+
+          if (navigationViewOptions.camera() == null) {
+            navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
+          } else {
+            navigationMap.setCamera(navigationViewOptions.camera());
+          }
+
+          initializeNavigationListeners(navigationViewOptions, navigationViewModel);
+          setupNavigationMapboxMap(navigationViewOptions);
+
+          if (!isSubscribed) {
+            initializeClickListeners();
+            initializeOnCameraTrackingChangedListener();
+            subscribeViewModels();
+          }
+        }
+      }
+    }
+  };
+
   private void initializeView() {
     inflate(getContext(), R.layout.navigation_view_layout, this);
     bind();
@@ -715,7 +686,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
     summaryBehavior.setBottomSheetCallback(new SummaryBottomSheetCallback(navigationPresenter,
-      navigationViewEventDispatcher));
+        navigationViewEventDispatcher));
   }
 
   private void initializeNavigationEventDispatcher() {
@@ -813,7 +784,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
     int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
     int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
-    return new int[] {leftRightPadding, instructionHeight, leftRightPadding, summaryHeight};
+    return new int[] { leftRightPadding, instructionHeight, leftRightPadding, summaryHeight };
   }
 
   private boolean isChangingConfigurations() {
@@ -883,10 +854,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
     final int roundingIncrement = options.roundingIncrement();
     final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder()
-      .withRoundingIncrement(roundingIncrement)
-      .withUnitType(unitType)
-      .withLocale(language)
-      .build(getContext());
+        .withRoundingIncrement(roundingIncrement)
+        .withUnitType(unitType)
+        .withLocale(language)
+        .build(getContext());
     instructionView.setDistanceFormatter(distanceFormatter);
     summaryBottomSheet.setDistanceFormatter(distanceFormatter);
   }
@@ -905,8 +876,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeNavigationListeners(NavigationViewOptions options, NavigationViewModel navigationViewModel) {
     navigationMap.addProgressChangeListener(
-            navigationViewModel.retrieveNavigation(),
-            options.enableVanishingRouteLine()
+        navigationViewModel.retrieveNavigation(),
+        options.enableVanishingRouteLine()
     );
     navigationViewEventDispatcher.initializeListeners(options, navigationViewModel);
   }

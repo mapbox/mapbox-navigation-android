@@ -127,12 +127,6 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = speechPlayer;
   }
 
-  @Override
-  protected void onCleared() {
-    mapboxReplayer.finish();
-    super.onCleared();
-  }
-
   public void onDestroy(boolean isChangingConfigurations) {
     if (!isChangingConfigurations) {
       endNavigation();
@@ -155,7 +149,6 @@ public class NavigationViewModel extends AndroidViewModel {
    * Uses cached feedbackId to ensure the proper item is updated.
    *
    * @param feedbackItem item to be updated
-   * @since 0.7.0
    */
   public void updateFeedback(FeedbackItem feedbackItem) {
     this.feedbackItem = feedbackItem;
@@ -171,6 +164,12 @@ public class NavigationViewModel extends AndroidViewModel {
   @Nullable
   public MapboxNavigation retrieveNavigation() {
     return navigation;
+  }
+
+  @Override
+  protected void onCleared() {
+    mapboxReplayer.finish();
+    super.onCleared();
   }
 
   void initializeEventDispatcher(NavigationViewEventDispatcher navigationViewEventDispatcher) {

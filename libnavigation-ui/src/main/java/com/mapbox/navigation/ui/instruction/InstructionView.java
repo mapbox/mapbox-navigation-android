@@ -87,7 +87,6 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * {@link MapboxNavigation},
  * add the view as a {@link RouteProgressObserver} and / or {@link OffRouteObserver}
  *
- * @since 0.6.0
  */
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
@@ -165,37 +164,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     this.instructionListListener = instructionListListener;
   }
 
-  /**
-   * Once this view has finished inflating, it will bind the views.
-   * <p>
-   * It will also initialize the {@link RecyclerView} used to display the turn lanes
-   * and animations used to show / hide views.
-   */
-  @Override
-  protected void onFinishInflate() {
-    super.onFinishInflate();
-    bind();
-    applyAttributes();
-    initializeTurnLaneRecyclerView();
-    initializeInstructionListRecyclerView();
-    initializeAnimations();
-    initializeStepListClickListener();
-    initializeButtons();
-    ImageCreator.getInstance().initialize(getContext());
-  }
-
-  @Override
-  protected void onAttachedToWindow() {
-    super.onAttachedToWindow();
-    addBottomSheetListener();
-  }
-
-  @Override
-  protected void onDetachedFromWindow() {
-    super.onDetachedFromWindow();
-    cancelDelayedTransition();
-  }
-
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
     navigationViewModel.updateFeedback(feedbackItem);
@@ -212,7 +180,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Updates all views with fresh data / shows &amp; hides re-route state.
    *
    * @param navigationViewModel to which this View is subscribing
-   * @since 0.6.2
    */
   public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
@@ -288,41 +255,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     ImageCreator.getInstance().shutdown();
   }
 
-  ///////////////////////////////////////////////////////////////////
-  public void determineGuidanceView(RouteProgress routeProgress) {
-    if (routeProgress != null && !isRerouting) {
-      double currentStepTotalDistance = 0.0;
-      float currentStepDistanceTraveled = 0f;
-      String guidanceUrl = null;
-
-      RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
-      if (legProgress != null && legProgress.getCurrentStepProgress() != null) {
-        guidanceUrl = legProgress.getCurrentStepProgress().getGuidanceViewURL();
-        if (legProgress.getCurrentStepProgress().getStep() != null) {
-          currentStepTotalDistance = legProgress.getCurrentStepProgress().getStep().distance();
-          currentStepDistanceTraveled = legProgress.getCurrentStepProgress().getDistanceTraveled();
-        }
-      }
-      if (guidanceUrl != null && !this.guidanceImageUrl.equals(guidanceUrl)) {
-        guidanceImageUrl = guidanceUrl;
-      }
-      if (currentStepTotalDistance != 0.0) {
-        if (routeJunction != null) {
-          hideGuidanceView(currentStepTotalDistance);
-        } else {
-          showGuidanceView(currentStepDistanceTraveled, currentStepTotalDistance);
-        }
-      }
-    }
-  }
-
   /**
    * Use this method inside a {@link RouteProgressObserver} to update this view.
    * <p>
    * This includes the distance remaining, instruction list, turn lanes, and next step information.
    *
    * @param routeProgress for route data used to populate the views
-   * @since 0.20.0
    */
   public void updateDistanceWith(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
@@ -335,15 +273,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (instructions != null) {
       updateBannerInstructions(instructions.primary(),
           instructions.secondary(), instructions.sub(), currentStep.drivingSide());
-    }
-  }
-
-  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
-      BannerText subBanner, String currentDrivingSide) {
-    if (primaryBanner != null) {
-      updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
-      updateDataFromBannerText(primaryBanner, secondaryBanner);
-      updateSubStep(subBanner, primaryBanner.modifier());
     }
   }
 
@@ -364,7 +293,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Will slide the reroute view down from the top of the screen
    * and make it visible
    *
-   * @since 0.6.0
    */
   public void showRerouteState() {
     if (rerouteLayout.getVisibility() == INVISIBLE) {
@@ -377,7 +305,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Will slide the reroute view up to the top of the screen
    * and hide it
    *
-   * @since 0.6.0
    */
   public void hideRerouteState() {
     if (rerouteLayout.getVisibility() == VISIBLE) {
@@ -410,32 +337,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
     instructionListLayout.setVisibility(GONE);
     onInstructionListVisibilityChanged(false);
-  }
-
-  /////////////////////////////////////////
-  private void showGuidanceView(float currentStepDistanceTraveled, double currentStepTotalDistance) {
-    int metersBeforeShowGuidanceView = 200;
-    if (currentStepTotalDistance <= metersBeforeShowGuidanceView) {
-      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
-      animateShowGuidanceViewImage();
-      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
-    } else if (currentStepDistanceTraveled + metersBeforeShowGuidanceView >= currentStepTotalDistance) {
-      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
-      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
-      animateShowGuidanceViewImage();
-    }
-  }
-
-  private void hideGuidanceView(double currentStepTotalDistance) {
-    if (currentStepTotalDistance != routeJunction.getDistanceToHideView()) {
-      guidanceImageUrl = "";
-      routeJunction = null;
-      animateHideGuidanceViewImage();
-    }
-  }
-
-  private String appendTokenTo() {
-    return guidanceImageUrl + "&access_token=" + Mapbox.getAccessToken();
   }
 
   /**
@@ -503,6 +404,70 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   public NavigationAlertView retrieveAlertView() {
     return alertView;
+  }
+
+  /**
+   * The method determines if a junction is arriving and displays appropriate junction view image based
+   * on the distance remaining for the junction to arrive.
+   *
+   * @param routeProgress {@link RouteProgress}
+   */
+  public void determineGuidanceView(RouteProgress routeProgress) {
+    if (routeProgress != null && !isRerouting) {
+      double currentStepTotalDistance = 0.0;
+      float currentStepDistanceTraveled = 0f;
+      String guidanceUrl = null;
+
+      RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
+      if (legProgress != null && legProgress.getCurrentStepProgress() != null) {
+        guidanceUrl = legProgress.getCurrentStepProgress().getGuidanceViewURL();
+        if (legProgress.getCurrentStepProgress().getStep() != null) {
+          currentStepTotalDistance = legProgress.getCurrentStepProgress().getStep().distance();
+          currentStepDistanceTraveled = legProgress.getCurrentStepProgress().getDistanceTraveled();
+        }
+      }
+      if (guidanceUrl != null && !this.guidanceImageUrl.equals(guidanceUrl)) {
+        guidanceImageUrl = guidanceUrl;
+      }
+      if (currentStepTotalDistance != 0.0) {
+        if (routeJunction != null) {
+          hideGuidanceView(currentStepTotalDistance);
+        } else {
+          showGuidanceView(currentStepDistanceTraveled, currentStepTotalDistance);
+        }
+      }
+    }
+  }
+
+  /**
+   * Once this view has finished inflating, it will bind the views.
+   * <p>
+   * It will also initialize the {@link RecyclerView} used to display the turn lanes
+   * and animations used to show / hide views.
+   */
+  @Override
+  protected void onFinishInflate() {
+    super.onFinishInflate();
+    bind();
+    applyAttributes();
+    initializeTurnLaneRecyclerView();
+    initializeInstructionListRecyclerView();
+    initializeAnimations();
+    initializeStepListClickListener();
+    initializeButtons();
+    ImageCreator.getInstance().initialize(getContext());
+  }
+
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    addBottomSheetListener();
+  }
+
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    cancelDelayedTransition();
   }
 
   private void initAttributes(AttributeSet attributeSet) {
@@ -704,6 +669,40 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     Context context = getContext();
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
+  }
+
+  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
+      BannerText subBanner, String currentDrivingSide) {
+    if (primaryBanner != null) {
+      updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
+      updateDataFromBannerText(primaryBanner, secondaryBanner);
+      updateSubStep(subBanner, primaryBanner.modifier());
+    }
+  }
+
+  private void showGuidanceView(float currentStepDistanceTraveled, double currentStepTotalDistance) {
+    int metersBeforeShowGuidanceView = 200;
+    if (currentStepTotalDistance <= metersBeforeShowGuidanceView) {
+      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
+      animateShowGuidanceViewImage();
+      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+    } else if (currentStepDistanceTraveled + metersBeforeShowGuidanceView >= currentStepTotalDistance) {
+      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
+      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+      animateShowGuidanceViewImage();
+    }
+  }
+
+  private void hideGuidanceView(double currentStepTotalDistance) {
+    if (currentStepTotalDistance != routeJunction.getDistanceToHideView()) {
+      guidanceImageUrl = "";
+      routeJunction = null;
+      animateHideGuidanceViewImage();
+    }
+  }
+
+  private String appendTokenTo() {
+    return guidanceImageUrl + "&access_token=" + Mapbox.getAccessToken();
   }
 
   private void onInstructionListVisibilityChanged(boolean visible) {

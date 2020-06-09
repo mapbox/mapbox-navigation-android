@@ -31,7 +31,6 @@ import static com.mapbox.navigation.trip.notification.internal.maneuver.Maneuver
 /**
  * A view that draws a maneuver arrow indicating the upcoming maneuver.
  *
- * @since 0.6.0
  */
 public class ManeuverView extends View {
 
