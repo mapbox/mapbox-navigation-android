@@ -1,7 +1,6 @@
 ext {
 
   androidVersions = [
-      legacyMinSdkVersion     : 14,
       minSdkVersion           : 19,
       targetSdkVersion        : 28,
       compileSdkVersion       : 28,
@@ -14,7 +13,7 @@ ext {
       mapboxSdkDirectionsModels : '5.2.1',
       mapboxEvents              : '5.0.1',
       mapboxCore                : '2.0.1',
-      mapboxNavigator           : '13.0.2',
+      mapboxNavigator           : '13.1.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
