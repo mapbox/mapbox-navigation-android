@@ -168,6 +168,30 @@ navigation-fixtures:
 	./gradlew :libnavigation-util:generateDependencyGraphMapboxLibraries
 	./gradlew :libnavigation-core:generateDependencyGraphMapboxLibraries
 
+.PHONY: 1.0-core-check-api
+1.0-core-check-api:
+	./gradlew :libdirections-offboard:checkApi
+	./gradlew :libdirections-hybrid:checkApi
+	./gradlew :libdirections-onboard:checkApi
+	./gradlew :libnavigation-base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
+	./gradlew :libnavigation-metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
+	./gradlew :libnavigation-util:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
+	./gradlew :libnavigator:checkApi -PhidePackage=com.mapbox.navigation.navigator.internal
+	./gradlew :libtrip-notification:checkApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
+	./gradlew :libnavigation-core:checkApi -PhidePackage=com.mapbox.navigation.core.internal
+
+.PHONY: 1.0-core-update-api
+1.0-core-update-api:
+	./gradlew :libdirections-offboard:updateApi
+	./gradlew :libdirections-hybrid:updateApi
+	./gradlew :libdirections-onboard:updateApi
+	./gradlew :libnavigation-base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
+	./gradlew :libnavigation-metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
+	./gradlew :libnavigation-util:updateApi -PhidePackage=com.mapbox.navigation.utils.internal
+	./gradlew :libnavigator:updateApi -PhidePackage=com.mapbox.navigation.navigator.internal
+	./gradlew :libtrip-notification:updateApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
+	./gradlew :libnavigation-core:updateApi -PhidePackage=com.mapbox.navigation.core.internal
+
 .PHONY: 1.0-build-ui-debug
 1.0-build-ui-debug:
 	./gradlew :libnavigation-ui:assembleDebug
@@ -187,3 +211,16 @@ navigation-fixtures:
 .PHONY: 1.0-ui-publish-to-artifactory
 1.0-ui-publish-to-artifactory:
 	./gradlew :libnavigation-ui:artifactoryPublish
+
+.PHONY: 1.0-ui-check-api
+1.0-ui-check-api:
+	# TODO Remove -PhideId=ReferencesHidden after fixing errors
+	./gradlew :libnavigation-ui:checkApi -PhidePackage=com.mapbox.navigation.ui.internal -PhideId=ReferencesHidden
+
+.PHONY: 1.0-ui-update-api
+1.0-ui-update-api:
+	./gradlew :libnavigation-ui:updateApi -PhidePackage=com.mapbox.navigation.ui.internal
+
+.PHONY: update-metalava
+update-metalava:
+	sh ./scripts/update_metalava.sh

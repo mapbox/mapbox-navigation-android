@@ -1,0 +1,17 @@
+configurations {
+    metalava
+}
+
+dependencies {
+    // Metalava isn't released yet. Check in its jar and explicitly track its transitive deps.
+    metalava files('../metalava/metalava.jar')
+
+    metalava "com.android.tools.external.org-jetbrains:uast:27.1.0-alpha10"
+    metalava "com.android.tools.external.com-intellij:intellij-core:27.1.0-alpha10"
+    metalava "com.android.tools.lint:lint-api:27.1.0-alpha10"
+    metalava "com.android.tools.lint:lint-checks:27.1.0-alpha10"
+    metalava "com.android.tools.lint:lint-gradle:27.1.0-alpha10"
+    metalava "com.android.tools.lint:lint:27.1.0-alpha10"
+    metalava "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72"
+    metalava "org.jetbrains.kotlin:kotlin-reflect:1.3.72"
+}

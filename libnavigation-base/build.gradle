@@ -14,10 +14,6 @@ dokka {
             prefix = "com.mapbox.navigation.base.internal"
             suppress = true
         }
-        perPackageOption {
-            prefix = "com.mapbox.navigation.base.route.internal"
-            suppress = true
-        }
     }
 }
 
@@ -51,6 +47,8 @@ dependencies {
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
 }
+
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
 apply from: "${rootDir}/gradle/bintray-publish.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"

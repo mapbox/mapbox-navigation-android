@@ -34,7 +34,7 @@ class MapboxOffboardRouter(
     private val urlSkuTokenProvider: UrlSkuTokenProvider
 ) : Router {
 
-    companion object {
+    private companion object {
         private const val ERROR_FETCHING_ROUTE = "Error fetching route"
     }
 

@@ -47,7 +47,7 @@ class MapboxOnboardRouter(
     private val skuTokenProvider: SkuTokenProvider
 ) : Router {
 
-    companion object {
+    private companion object {
         private const val TAG = "MapboxOnboardRouter"
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
