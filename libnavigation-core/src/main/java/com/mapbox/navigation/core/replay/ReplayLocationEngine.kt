@@ -24,18 +24,8 @@ class ReplayLocationEngine(
     private val registeredCallbacks: MutableList<EngineCallback> = mutableListOf()
     private val lastLocationCallbacks: MutableList<EngineCallback> = mutableListOf()
     private var lastLocationEngineResult: LocationEngineResult? = null
-    private val myId: Int
-
-    companion object {
-        /**
-         * Counter of created instances
-         */
-        var instances = 0
-            get() { return field++ }
-    }
 
     init {
-        myId = instances
         mapboxReplayer.registerObserver(this)
     }
 
@@ -73,7 +63,7 @@ class ReplayLocationEngine(
      * Requests location updates with callback on the specified PendingIntent.
      */
     override fun requestLocationUpdates(request: LocationEngineRequest, pendingIntent: PendingIntent?) {
-        throw UnsupportedOperationException("$myId requestLocationUpdates with intents is unsupported")
+        throw UnsupportedOperationException("requestLocationUpdates with intents is unsupported")
     }
 
     /**
@@ -83,7 +73,7 @@ class ReplayLocationEngine(
      * stopped state, doing so helps battery performance.
      */
     override fun removeLocationUpdates(pendingIntent: PendingIntent?) {
-        throw UnsupportedOperationException("$myId removeLocationUpdates with intents is unsupported")
+        throw UnsupportedOperationException("removeLocationUpdates with intents is unsupported")
     }
 
     override fun replayEvents(replayEvents: List<ReplayEventBase>) {
