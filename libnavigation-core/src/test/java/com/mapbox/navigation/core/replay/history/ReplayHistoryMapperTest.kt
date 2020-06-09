@@ -1,7 +1,6 @@
 package com.mapbox.navigation.core.replay.history
 
 import com.google.gson.annotations.SerializedName
-import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.base.common.logger.Logger
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -75,7 +74,7 @@ class ReplayHistoryMapperTest {
     ) : ReplayEventBase
 
     private class ExampleCustomEventMapper : CustomEventMapper {
-        override fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase? {
+        override fun map(eventType: String, properties: Map<*, *>): ReplayEventBase? {
             return when (eventType) {
                 "end_transit" -> ExampleEndTransitEvent(
                     eventTimestamp = properties["event_timestamp"] as Double,

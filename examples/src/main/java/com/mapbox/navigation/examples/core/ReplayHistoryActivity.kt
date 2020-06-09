@@ -5,8 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
-import com.google.gson.internal.LinkedTreeMap
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -115,7 +113,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private suspend fun loadReplayHistory(): List<ReplayEventBase> = suspendCoroutine { cont ->
-        val replayHistoryMapper = ReplayHistoryMapper(Gson(), ReplayCustomEventMapper(), MapboxLogger)
+        val replayHistoryMapper = ReplayHistoryMapper(ReplayCustomEventMapper(), MapboxLogger)
         val rideHistoryExample = loadHistoryJsonFromAssets(this@ReplayHistoryActivity, "replay-history-activity.json")
         val replayEvents = replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
         cont.resume(replayEvents)
@@ -306,14 +304,14 @@ private fun loadHistoryJsonFromAssets(context: Context, fileName: String): Strin
 }
 
 private class ReplayCustomEventMapper : CustomEventMapper {
-    override fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase? {
+    override fun map(eventType: String, properties: Map<*, *>): ReplayEventBase? {
         return when (eventType) {
             "start_transit" -> ReplayEventStartTransit(
                 eventTimestamp = properties["event_timestamp"] as Double,
                 properties = properties["properties"] as Double)
             "initial_route" -> {
-                val eventProperties = properties["properties"] as LinkedTreeMap<*, *>
-                val routeOptions = eventProperties["routeOptions"] as LinkedTreeMap<*, *>
+                val eventProperties = properties["properties"] as Map<*, *>
+                val routeOptions = eventProperties["routeOptions"] as Map<*, *>
                 val coordinates = routeOptions["coordinates"] as List<List<Double>>
                 val coordinatesLatLng = coordinates.map { LatLng(it[1], it[0]) }
                 ReplayEventInitialRoute(
