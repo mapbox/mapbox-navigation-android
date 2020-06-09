@@ -1,0 +1,85 @@
+buildscript {
+    apply from: "${rootDir}/gradle/dependencies.gradle"
+
+    repositories {
+        jcenter()
+        google()
+    }
+
+    dependencies {
+        classpath pluginDependencies.gradle
+        classpath pluginDependencies.kotlin
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply from: "${rootDir}/gradle/metalava-dependencies.gradle"
+
+android.libraryVariants.all { variant ->
+    // TODO eliminate variants https://issuetracker.google.com/issues/62201427
+    if (variant.buildType.isDebuggable()) {
+        return
+    }
+    task updateApi(type: JavaExec) {
+        inputs.dir('src/main/java')
+        outputs.file('api/current.txt')
+
+        classpath = configurations.metalava
+        main = 'com.android.tools.metalava.Driver'
+
+        doFirst {
+            args = [
+                    '--no-banner',
+                    '--source-path', 'src/main/java',
+                    '--compatible-output=no',
+                    '--omit-common-packages=yes',
+                    '--output-kotlin-nulls=yes',
+                    '--hide', 'HiddenSuperclass',
+                    '--hide', 'DeprecationMismatch',
+                    '--classpath', (project.files(android.getBootClasspath()) + variant.javaCompile.classpath).join(File.pathSeparator),
+                    '--api', 'api/current.txt'
+            ]
+            if (project.hasProperty('hidePackage')) {
+                args += '--hide-package'
+                args += hidePackage
+            }
+            if (project.hasProperty('hideId')) {
+                args += '--hide'
+                args += hideId
+            }
+        }
+    }
+
+    task checkApi(type: JavaExec) {
+        inputs.file('api/current.txt')
+        inputs.dir('src/main/java')
+        outputs.file('api/current.txt')
+
+        classpath = configurations.metalava
+        main = 'com.android.tools.metalava.Driver'
+
+        doFirst {
+            args = [
+                    '--no-banner',
+                    '--source-path', 'src/main/java',
+                    '--compatible-output=no',
+                    '--omit-common-packages=yes',
+                    '--output-kotlin-nulls=yes',
+                    '--input-kotlin-nulls=yes',
+                    '--hide', 'HiddenSuperclass',
+                    '--hide', 'DeprecationMismatch',
+                    '--classpath', (project.files(android.getBootClasspath()) + variant.javaCompile.classpath).join(File.pathSeparator),
+                    '--check-compatibility:api:current', 'api/current.txt'
+            ]
+            if (project.hasProperty('hidePackage')) {
+                args += '--hide-package'
+                args += hidePackage
+            }
+            if (project.hasProperty('hideId')) {
+                args += '--hide'
+                args += hideId
+            }
+        }
+    }
+}

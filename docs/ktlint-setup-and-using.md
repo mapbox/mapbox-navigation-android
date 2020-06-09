@@ -1,7 +1,7 @@
 ## [Ktlint](https://github.com/pinterest/ktlint) setup
 
 1. On Mac OS or Linux: _brew install ktlint_
-1. Inside Project's root directory: _ktlint --android applyToIDEAProject_ 
+2. Inside Project's root directory: _ktlint --android applyToIDEAProject_
 (current root directories is _mapbox-navigation-android_)
 
 ### Gradle tasks

@@ -72,6 +72,7 @@ dependencies {
     testImplementation project(':libtrip-notification')
 }
 
+apply from: "${rootDir}/gradle/track-public-apis.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/bintray-publish.gradle"

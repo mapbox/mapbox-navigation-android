@@ -1,0 +1,435 @@
+// Signature format: 3.0
+package com.mapbox.navigation.core {
+
+  public final class MapboxNavigation {
+    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine, com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
+    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine);
+    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    method public void addHistoryEvent(String eventType, String eventJsonProperties);
+    method public void attachArrivalController(com.mapbox.navigation.core.arrival.ArrivalController arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
+    method public void attachArrivalController();
+    method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
+    method public static com.mapbox.navigation.base.options.NavigationOptions defaultNavigationOptions(android.content.Context context, String? accessToken);
+    method public void detachFasterRouteObserver();
+    method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
+    method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
+    method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
+    method public boolean navigateNextRouteLeg();
+    method public void onDestroy();
+    method public static void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
+    method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
+    method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
+    method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
+    method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
+    method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    method public void removeArrivalController();
+    method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback? routesRequestCallback = null);
+    method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public String retrieveHistory();
+    method public String? retrieveSsmlAnnouncementInstruction(int index);
+    method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
+    method public void stopTripSession();
+    method public void toggleHistory(boolean isEnabled);
+    method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
+    method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
+    method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
+    method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
+    method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
+    method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
+    method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent);
+    method public void useExtendedKalmanFilter(boolean useEKF);
+    field public static final com.mapbox.navigation.core.MapboxNavigation.Companion! Companion;
+  }
+
+  public static final class MapboxNavigation.Companion {
+    method public com.mapbox.navigation.base.options.NavigationOptions defaultNavigationOptions(android.content.Context context, String? accessToken);
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
+  }
+
+  public final class MapboxNavigationKt {
+  }
+
+  public final class Rounding {
+    field public static final int INCREMENT_FIFTY = 50; // 0x32
+    field public static final int INCREMENT_FIVE = 5; // 0x5
+    field public static final int INCREMENT_ONE_HUNDRED = 100; // 0x64
+    field public static final int INCREMENT_TEN = 10; // 0xa
+    field public static final int INCREMENT_TWENTY_FIVE = 25; // 0x19
+    field public static final com.mapbox.navigation.core.Rounding! INSTANCE;
+  }
+
+  @IntDef({com.mapbox.navigation.core.Rounding.INCREMENT_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_TEN, com.mapbox.navigation.core.Rounding.INCREMENT_TWENTY_FIVE, com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY, com.mapbox.navigation.core.Rounding.INCREMENT_ONE_HUNDRED}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface Rounding.Increment {
+  }
+
+}
+
+package com.mapbox.navigation.core.arrival {
+
+  public interface ArrivalController {
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions arrivalOptions();
+    method public boolean navigateNextRouteLeg(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
+  }
+
+  public interface ArrivalObserver {
+    method public void onFinalDestinationArrival(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void onNextRouteLegStart(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
+  }
+
+  public final class ArrivalOptions {
+    ctor public ArrivalOptions(Double? arrivalInSeconds, Double? arrivalInMeters, com.mapbox.navigation.core.arrival.ArrivalOptions.Builder builder);
+    method public Double? component1();
+    method public Double? component2();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder component3();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions copy(Double? arrivalInSeconds, Double? arrivalInMeters, com.mapbox.navigation.core.arrival.ArrivalOptions.Builder builder);
+    method public Double? getArrivalInMeters();
+    method public Double? getArrivalInSeconds();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder getBuilder();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder toBuilder();
+  }
+
+  public static final class ArrivalOptions.Builder {
+    ctor public ArrivalOptions.Builder();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder arriveInMeters(Double? arriveInMeters);
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions.Builder arriveInSeconds(Double? arriveInSeconds);
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions build();
+  }
+
+  public final class AutoArrivalController implements com.mapbox.navigation.core.arrival.ArrivalController {
+    ctor public AutoArrivalController();
+    method public com.mapbox.navigation.core.arrival.ArrivalOptions arrivalOptions();
+    method public boolean navigateNextRouteLeg(com.mapbox.navigation.base.trip.model.RouteLegProgress routeLegProgress);
+  }
+
+}
+
+package com.mapbox.navigation.core.directions.session {
+
+  public interface RoutesObserver {
+    method public void onRoutesChanged(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+  }
+
+  public interface RoutesRequestCallback {
+    method public void onRoutesReady(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method public void onRoutesRequestCanceled(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void onRoutesRequestFailure(Throwable throwable, com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+  }
+
+}
+
+package com.mapbox.navigation.core.fasterroute {
+
+  public interface FasterRouteObserver {
+    method public void onFasterRoute(com.mapbox.api.directions.v5.models.DirectionsRoute currentRoute, java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> alternatives, boolean isAlternativeFaster);
+    method public default long restartAfterMillis();
+    field public static final com.mapbox.navigation.core.fasterroute.FasterRouteObserver.Companion! Companion;
+  }
+
+  public static final class FasterRouteObserver.Companion {
+    method public long getDEFAULT_INTERVAL_MILLIS();
+    property public final long DEFAULT_INTERVAL_MILLIS;
+  }
+
+}
+
+package com.mapbox.navigation.core.replay {
+
+  public final class MapboxReplayer {
+    ctor public MapboxReplayer();
+    method public void clearEvents();
+    method public double durationSeconds();
+    method public void finish();
+    method public void play();
+    method public void playFirstLocation();
+    method public void playbackSpeed(double scale);
+    method public com.mapbox.navigation.core.replay.MapboxReplayer pushEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
+    method public void pushRealLocation(android.content.Context context, double eventTimestamp);
+    method public void registerObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
+    method public void seekTo(double replayTime);
+    method public void seekTo(com.mapbox.navigation.core.replay.history.ReplayEventBase replayEvent);
+    method public void stop();
+    method public boolean unregisterObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
+    method public void unregisterObservers();
+  }
+
+  public final class ReplayLocationEngine implements com.mapbox.android.core.location.LocationEngine com.mapbox.navigation.core.replay.history.ReplayEventsObserver {
+    ctor public ReplayLocationEngine(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
+    method public void getLastLocation(com.mapbox.android.core.location.LocationEngineCallback<com.mapbox.android.core.location.LocationEngineResult> callback);
+    method public void removeLocationUpdates(com.mapbox.android.core.location.LocationEngineCallback<com.mapbox.android.core.location.LocationEngineResult> callback);
+    method public void removeLocationUpdates(android.app.PendingIntent? pendingIntent);
+    method public void replayEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> replayEvents);
+    method public void requestLocationUpdates(com.mapbox.android.core.location.LocationEngineRequest request, com.mapbox.android.core.location.LocationEngineCallback<com.mapbox.android.core.location.LocationEngineResult> callback, android.os.Looper? looper);
+    method public void requestLocationUpdates(com.mapbox.android.core.location.LocationEngineRequest request, android.app.PendingIntent? pendingIntent);
+  }
+
+  public final class ReplayLocationEngineKt {
+  }
+
+}
+
+package com.mapbox.navigation.core.replay.history {
+
+  public interface CustomEventMapper {
+    method public com.mapbox.navigation.core.replay.history.ReplayEventBase? map(String eventType, java.util.Map<?,?> properties);
+  }
+
+  public interface ReplayEventBase {
+    method public double getEventTimestamp();
+    property public abstract double eventTimestamp;
+  }
+
+  public final class ReplayEventGetStatus implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
+    ctor public ReplayEventGetStatus(double eventTimestamp);
+    method public double component1();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventGetStatus copy(double eventTimestamp);
+    method public double getEventTimestamp();
+  }
+
+  public final class ReplayEventLocation {
+    ctor public ReplayEventLocation(double lon, double lat, String? provider, Double? time, Double? altitude, Double? accuracyHorizontal, Double? bearing, Double? speed);
+    method public double component1();
+    method public double component2();
+    method public String? component3();
+    method public Double? component4();
+    method public Double? component5();
+    method public Double? component6();
+    method public Double? component7();
+    method public Double? component8();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventLocation copy(double lon, double lat, String? provider, Double? time, Double? altitude, Double? accuracyHorizontal, Double? bearing, Double? speed);
+    method public Double? getAccuracyHorizontal();
+    method public Double? getAltitude();
+    method public Double? getBearing();
+    method public double getLat();
+    method public double getLon();
+    method public String? getProvider();
+    method public Double? getSpeed();
+    method public Double? getTime();
+  }
+
+  public final class ReplayEventUpdateLocation implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
+    ctor public ReplayEventUpdateLocation(double eventTimestamp, com.mapbox.navigation.core.replay.history.ReplayEventLocation location);
+    method public double component1();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventLocation component2();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation copy(double eventTimestamp, com.mapbox.navigation.core.replay.history.ReplayEventLocation location);
+    method public double getEventTimestamp();
+    method public com.mapbox.navigation.core.replay.history.ReplayEventLocation getLocation();
+  }
+
+  public final class ReplayEvents {
+    ctor public ReplayEvents(java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> component1();
+    method public com.mapbox.navigation.core.replay.history.ReplayEvents copy(java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> getEvents();
+  }
+
+  public interface ReplayEventsObserver {
+    method public void replayEvents(java.util.List<? extends com.mapbox.navigation.core.replay.history.ReplayEventBase> events);
+  }
+
+  public final class ReplayHistoryDTO {
+    ctor public ReplayHistoryDTO(String historyVersion, String version, java.util.List<?> events);
+    method public String component1();
+    method public String component2();
+    method public java.util.List<java.lang.Object> component3();
+    method public com.mapbox.navigation.core.replay.history.ReplayHistoryDTO copy(String historyVersion, String version, java.util.List<?> events);
+    method public java.util.List<java.lang.Object> getEvents();
+    method public String getHistoryVersion();
+    method public String getVersion();
+  }
+
+  public final class ReplayHistoryMapper {
+    ctor public ReplayHistoryMapper(com.mapbox.navigation.core.replay.history.CustomEventMapper? customEventMapper, com.mapbox.base.common.logger.Logger? logger);
+    ctor public ReplayHistoryMapper(com.mapbox.navigation.core.replay.history.CustomEventMapper? customEventMapper);
+    ctor public ReplayHistoryMapper();
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapToReplayEvents(String historyData);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapToReplayEvents(com.mapbox.navigation.core.replay.history.ReplayHistoryDTO historyDTO);
+  }
+
+}
+
+package com.mapbox.navigation.core.replay.route {
+
+  public final class ReplayProgressObserver implements com.mapbox.navigation.core.trip.session.RouteProgressObserver {
+    ctor public ReplayProgressObserver(com.mapbox.navigation.core.replay.MapboxReplayer mapboxReplayer);
+    method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public com.mapbox.navigation.core.replay.route.ReplayProgressObserver updateOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
+  }
+
+  public final class ReplayRouteMapper {
+    ctor public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
+    ctor public ReplayRouteMapper();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions getOptions();
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteGeometry(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteLegAnnotation(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapGeometry(String geometry);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapRouteLegAnnotation(com.mapbox.api.directions.v5.models.RouteLeg routeLeg);
+    method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapRouteLegGeometry(com.mapbox.api.directions.v5.models.RouteLeg routeLeg);
+    method public static com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation mapToUpdateLocation(double eventTimestamp, com.mapbox.geojson.Point point);
+    method public static com.mapbox.navigation.core.replay.history.ReplayEventBase mapToUpdateLocation(double eventTimestamp, android.location.Location location);
+    method public void setOptions(com.mapbox.navigation.core.replay.route.ReplayRouteOptions p);
+    field public static final com.mapbox.navigation.core.replay.route.ReplayRouteMapper.Companion! Companion;
+  }
+
+  public static final class ReplayRouteMapper.Companion {
+    method public com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation mapToUpdateLocation(double eventTimestamp, com.mapbox.geojson.Point point);
+    method public com.mapbox.navigation.core.replay.history.ReplayEventBase mapToUpdateLocation(double eventTimestamp, android.location.Location location);
+  }
+
+  public final class ReplayRouteOptions {
+    ctor public ReplayRouteOptions(double maxSpeedMps, double turnSpeedMps, double uTurnSpeedMps, double maxAcceleration, double minAcceleration, com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder builder);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder getBuilder();
+    method public double getMaxAcceleration();
+    method public double getMaxSpeedMps();
+    method public double getMinAcceleration();
+    method public double getTurnSpeedMps();
+    method public double getUTurnSpeedMps();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder toBuilder();
+  }
+
+  public static final class ReplayRouteOptions.Builder {
+    ctor public ReplayRouteOptions.Builder();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions build();
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder maxAcceleration(double maxAcceleration);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder maxSpeedMps(double maxSpeedMps);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder minAcceleration(double minAcceleration);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder turnSpeedMps(double minSpeedMps);
+    method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder uTurnSpeedMps(double uTurnSpeedMps);
+  }
+
+}
+
+package com.mapbox.navigation.core.sensors {
+
+  public final class SensorEventEmitter implements android.hardware.SensorEventListener {
+    ctor public SensorEventEmitter(android.hardware.SensorManager sensorManager);
+    method public void onAccuracyChanged(android.hardware.Sensor? sensor, int accuracy);
+    method public void onSensorChanged(android.hardware.SensorEvent event);
+    method public void start(com.mapbox.navigation.core.sensors.SensorOptions sensorOptions, kotlin.jvm.functions.Function1<? super android.hardware.SensorEvent,kotlin.Unit> eventEmitter);
+    method public void stop();
+  }
+
+  public final class SensorOptions {
+    ctor public SensorOptions(java.util.Set<java.lang.Integer> enabledSensorTypes, int signalsPerSecond, com.mapbox.navigation.core.sensors.SensorOptions.Builder builder);
+    method public java.util.Set<java.lang.Integer> component1();
+    method public int component2();
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder component3();
+    method public com.mapbox.navigation.core.sensors.SensorOptions copy(java.util.Set<java.lang.Integer> enabledSensorTypes, int signalsPerSecond, com.mapbox.navigation.core.sensors.SensorOptions.Builder builder);
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder getBuilder();
+    method public java.util.Set<java.lang.Integer> getEnabledSensorTypes();
+    method public int getSignalsPerSecond();
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder toBuilder();
+  }
+
+  public static final class SensorOptions.Builder {
+    ctor public SensorOptions.Builder();
+    method public com.mapbox.navigation.core.sensors.SensorOptions build();
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder enableAllSensors();
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder enableSensors(java.util.Set<java.lang.Integer> sensorTypes);
+    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder signalsPerSecond(int signalsPerSecond);
+  }
+
+}
+
+package com.mapbox.navigation.core.telemetry {
+
+  public final class TelemetryLocationAndProgressDispatcherKt {
+  }
+
+  public final class TelemetryUtilsKt {
+  }
+
+}
+
+package com.mapbox.navigation.core.telemetry.events {
+
+  public final class FeedbackEvent {
+    field public static final String ACCIDENT = "accident";
+    field public static final String ALTERNATIVE_ROUTE_NOT_EXPECTED = "alternative_route_not_expected";
+    field public static final String CARS_NOT_ALLOWED_ON_STREET = "cars_not_allowed_on_street";
+    field public static final String CONFUSING_INSTRUCTION = "confusing_instruction";
+    field public static final String EXIT_INFO_INCORRECT = "exit_info_incorrect";
+    field public static final String GENERAL_ISSUE = "general";
+    field public static final String GUIDANCE_TOO_EARLY = "guidance_too_early";
+    field public static final String GUIDANCE_TOO_LATE = "guidance_too_late";
+    field public static final String HAZARD = "hazard";
+    field public static final String INACCURATE_GPS = "inaccurate_gps";
+    field public static final String INCORRECT_AUDIO_GUIDANCE = "incorrect_audio_guidance";
+    field public static final String INCORRECT_VISUAL_GUIDANCE = "incorrect_visual_guidance";
+    field public static final com.mapbox.navigation.core.telemetry.events.FeedbackEvent! INSTANCE;
+    field public static final String INSTRUCTION_MISSING = "instruction_missing";
+    field public static final String INSTRUCTION_UNNECESSARY = "instruction_unnecessary";
+    field public static final String LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect";
+    field public static final String MANEUVER_INCORRECT = "maneuver_incorrect";
+    field public static final String MISSING_EXIT = "missing_exit";
+    field public static final String MISSING_ROAD = "missing_road";
+    field public static final String NOT_ALLOWED = "not_allowed";
+    field public static final String PRONUNCIATION_INCORRECT = "pronunciation_incorrect";
+    field public static final String REROUTE = "reroute";
+    field public static final String ROAD_CLOSED = "road_closed";
+    field public static final String ROAD_IS_MISSING_FROM_MAP = "road_is_missing_from_map";
+    field public static final String ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name";
+    field public static final String ROAD_NAME_REPEATED = "road_name_repeated";
+    field public static final String ROUTED_DOWN_A_ONE_WAY = "routed_down_a_one_way";
+    field public static final String ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS = "route_had_roads_too_narrow_to_pass";
+    field public static final String ROUTE_INCLUDED_MISSING_ROADS = "route_included_missing_roads";
+    field public static final String ROUTE_NOT_DRIVE_ABLE = "route_not_drive_able";
+    field public static final String ROUTE_NOT_PREFERRED = "route_not_preferred";
+    field public static final String ROUTING_ERROR = "routing_error";
+    field public static final String STREET_NAME_INCORRECT = "street_name_incorrect";
+    field public static final String STREET_PERMANENTLY_BLOCKED_OFF = "street_permanently_blocked_off";
+    field public static final String TURN_AT_INTERSECTION_WAS_UNPROTECTED = "turn_at_intersection_was_unprotected";
+    field public static final String TURN_ICON_INCORRECT = "turn_icon_incorrect";
+    field public static final String TURN_WAS_NOT_ALLOWED = "turn_was_not_allowed";
+    field public static final String UI = "user";
+  }
+
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_ICON_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_NAME_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_UNNECESSARY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INSTRUCTION_MISSING, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MANEUVER_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.EXIT_INFO_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.LANE_GUIDANCE_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_KNOW_BY_DIFFERENT_NAME, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_EARLY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GUIDANCE_TOO_LATE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.PRONUNCIATION_INCORRECT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_NAME_REPEATED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_DRIVE_ABLE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_NOT_PREFERRED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ALTERNATIVE_ROUTE_NOT_EXPECTED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_INCLUDED_MISSING_ROADS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTED_DOWN_A_ONE_WAY, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_WAS_NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CARS_NOT_ALLOWED_ON_STREET, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.TURN_AT_INTERSECTION_WAS_UNPROTECTED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.STREET_PERMANENTLY_BLOCKED_OFF, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_IS_MISSING_FROM_MAP}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Description {
+  }
+
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.REROUTE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Source {
+  }
+
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GENERAL_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ACCIDENT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.HAZARD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_CLOSED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTING_ERROR, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_ROAD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_EXIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CONFUSING_INSTRUCTION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INACCURATE_GPS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_AUDIO_GUIDANCE}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Type {
+  }
+
+}
+
+package com.mapbox.navigation.core.trip.session {
+
+  public interface BannerInstructionsObserver {
+    method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
+  }
+
+  public interface LocationObserver {
+    method public void onEnhancedLocationChanged(android.location.Location enhancedLocation, java.util.List<? extends android.location.Location> keyPoints);
+    method public void onRawLocationChanged(android.location.Location rawLocation);
+  }
+
+  public interface OffRouteObserver {
+    method public void onOffRouteStateChanged(boolean offRoute);
+  }
+
+  public interface RouteProgressObserver {
+    method public void onRouteProgressChanged(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+  }
+
+  public enum TripSessionState {
+    enum_constant public static final com.mapbox.navigation.core.trip.session.TripSessionState STARTED;
+    enum_constant public static final com.mapbox.navigation.core.trip.session.TripSessionState STOPPED;
+  }
+
+  public interface TripSessionStateObserver {
+    method public void onSessionStateChanged(com.mapbox.navigation.core.trip.session.TripSessionState tripSessionState);
+  }
+
+  public interface VoiceInstructionsObserver {
+    method public void onNewVoiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions voiceInstructions);
+  }
+
+}
+

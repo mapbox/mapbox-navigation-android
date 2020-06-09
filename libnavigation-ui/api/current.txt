@@ -1,0 +1,639 @@
+// Signature format: 3.0
+package com.mapbox.navigation.ui {
+
+  public final class DownloadTask extends android.os.AsyncTask<okhttp3.ResponseBody,java.lang.Void,java.io.File> {
+    ctor public DownloadTask(String destDirectory, String fileName, String extension, com.mapbox.navigation.ui.DownloadTask.DownloadListener downloadListener);
+    ctor public DownloadTask(String destDirectory, String extension, com.mapbox.navigation.ui.DownloadTask.DownloadListener downloadListener);
+    method protected java.io.File? doInBackground(okhttp3.ResponseBody... responseBodies);
+    method protected void onPostExecute(java.io.File? instructionFile);
+    field public static final com.mapbox.navigation.ui.DownloadTask.Companion! Companion;
+  }
+
+  public static final class DownloadTask.Companion {
+  }
+
+  public static interface DownloadTask.DownloadListener {
+    method public void onErrorDownloading();
+    method public void onFinishedDownloading(java.io.File file);
+  }
+
+  public class FeedbackButton extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.NavigationButton {
+    ctor public FeedbackButton(android.content.Context!);
+    ctor public FeedbackButton(android.content.Context!, android.util.AttributeSet!);
+    ctor public FeedbackButton(android.content.Context!, android.util.AttributeSet!, int);
+    method public void addOnClickListener(android.view.View.OnClickListener!);
+    method public void hide();
+    method public void removeOnClickListener(android.view.View.OnClickListener!);
+    method public void show();
+    method public void updateStyle(@StyleRes int);
+  }
+
+  public class MapOfflineOptions {
+    ctor public MapOfflineOptions(String, String);
+    method public String getDatabasePath();
+    method public String getStyleUrl();
+  }
+
+  public interface NavigationButton {
+    method public void addOnClickListener(android.view.View.OnClickListener!);
+    method public void hide();
+    method public void removeOnClickListener(android.view.View.OnClickListener!);
+    method public void show();
+    method public void updateStyle(@StyleRes int);
+  }
+
+  public final class NavigationConstants {
+    field public static final long ALERT_VIEW_PROBLEM_DURATION = 10000L; // 0x2710L
+    field public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000L; // 0x2710L
+    field public static final com.mapbox.navigation.ui.NavigationConstants! INSTANCE;
+    field public static final long MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE = 250L; // 0xfaL
+    field public static final int NAVIGATION_HIGH_ALERT_DURATION = 15; // 0xf
+    field public static final int NAVIGATION_LOW_ALERT_DURATION = 125; // 0x7d
+    field public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L; // 0x5dcL
+    field public static final int NAVIGATION_MEDIUM_ALERT_DURATION = 70; // 0x46
+    field public static final long NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L; // 0x2eeL
+    field public static final long NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION = 300L; // 0x12cL
+    field public static final String NAVIGATION_VIEW_DARK_THEME = "navigation_view_dark_theme";
+    field public static final String NAVIGATION_VIEW_LIGHT_THEME = "navigation_view_light_theme";
+    field public static final String NAVIGATION_VIEW_PREFERENCE_SET_THEME = "navigation_view_theme_preference";
+  }
+
+  public class NavigationSnapshotReadyCallback implements com.mapbox.mapboxsdk.maps.MapboxMap.SnapshotReadyCallback {
+    method public void onSnapshotReady(android.graphics.Bitmap!);
+  }
+
+  public abstract class NavigationUiOptions {
+    ctor public NavigationUiOptions();
+    method public abstract com.mapbox.navigation.ui.camera.Camera? camera();
+    method public abstract Integer? darkThemeResId();
+    method public abstract com.mapbox.api.directions.v5.models.DirectionsRoute! directionsRoute();
+    method public abstract Integer? lightThemeResId();
+    method public abstract com.mapbox.navigation.ui.MapOfflineOptions? offlineMapOptions();
+    method public abstract String? offlineRoutingTilesPath();
+    method public abstract String? offlineRoutingTilesVersion();
+    method public abstract com.mapbox.navigation.ui.puck.PuckDrawableSupplier? puckDrawableSupplier();
+    method public abstract boolean shouldSimulateRoute();
+    method public abstract boolean waynameChipEnabled();
+  }
+
+  public class NavigationView extends androidx.coordinatorlayout.widget.CoordinatorLayout implements androidx.lifecycle.LifecycleOwner com.mapbox.mapboxsdk.maps.OnMapReadyCallback {
+    ctor public NavigationView(android.content.Context!);
+    ctor public NavigationView(android.content.Context!, android.util.AttributeSet?);
+    ctor public NavigationView(android.content.Context!, android.util.AttributeSet?, int);
+    method public void addMarker(com.mapbox.geojson.Point!);
+    method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+    method public androidx.lifecycle.Lifecycle getLifecycle();
+    method public void hideRecenterBtn();
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!);
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition);
+    method public boolean isRecenterButtonVisible();
+    method public boolean isSummaryBottomSheetHidden();
+    method public boolean isWayNameVisible();
+    method public boolean onBackPressed();
+    method public void onCreate(android.os.Bundle?);
+    method public void onDestroy();
+    method public void onFeedbackSent();
+    method public void onLowMemory();
+    method public void onMapReady(com.mapbox.mapboxsdk.maps.MapboxMap!);
+    method public void onPause();
+    method public void onRestoreInstanceState(android.os.Bundle!);
+    method public void onResume();
+    method public void onSaveInstanceState(android.os.Bundle!);
+    method public void onStart();
+    method public void onStop();
+    method public void resetCameraPosition();
+    method public void resumeCamera(android.location.Location!);
+    method public com.mapbox.navigation.ui.instruction.NavigationAlertView! retrieveAlertView();
+    method public com.mapbox.navigation.ui.NavigationButton! retrieveFeedbackButton();
+    method public com.mapbox.navigation.core.MapboxNavigation? retrieveMapboxNavigation();
+    method public com.mapbox.navigation.ui.map.NavigationMapboxMap? retrieveNavigationMapboxMap();
+    method public com.mapbox.navigation.ui.NavigationButton! retrieveRecenterButton();
+    method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
+    method public String! retrieveWayNameText();
+    method public void setSummaryBehaviorHideable(boolean);
+    method public void setSummaryBehaviorState(int);
+    method public void setWayNameActive(boolean);
+    method public void setWayNameVisibility(boolean);
+    method public void showRecenterBtn();
+    method public void startCamera(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+    method public void startNavigation(com.mapbox.navigation.ui.NavigationViewOptions!);
+    method public void stopNavigation();
+    method public void takeScreenshot();
+    method public void updateCameraRouteOverview();
+    method public void updateWayNameView(String);
+    method @Deprecated public void updateWayNameVisibility(boolean);
+  }
+
+  public class NavigationViewModel extends androidx.lifecycle.AndroidViewModel {
+    ctor public NavigationViewModel(android.app.Application!);
+    method protected com.mapbox.navigation.ui.NavigationViewOptions! getNavigationViewOptions();
+    method public void onDestroy(boolean);
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel!>! retrieveBannerInstructionModel();
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.instruction.InstructionModel!>! retrieveInstructionModel();
+    method public androidx.lifecycle.LiveData<java.lang.Boolean!>! retrieveIsOffRoute();
+    method public com.mapbox.navigation.core.MapboxNavigation? retrieveNavigation();
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.junction.RouteJunctionModel!>! retrieveRouteJunctionModelUpdates();
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.summary.SummaryModel!>! retrieveSummaryModel();
+    method public void setMuted(boolean);
+    method public void updateFeedback(com.mapbox.navigation.ui.feedback.FeedbackItem!);
+  }
+
+  @com.google.auto.value.AutoValue public abstract class NavigationViewOptions extends com.mapbox.navigation.ui.NavigationUiOptions {
+    ctor public NavigationViewOptions();
+    method public abstract com.mapbox.navigation.core.arrival.ArrivalObserver? arrivalObserver();
+    method public abstract com.mapbox.navigation.ui.listeners.BannerInstructionsListener? bannerInstructionsListener();
+    method public abstract com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback? bottomSheetCallback();
+    method public static com.mapbox.navigation.ui.NavigationViewOptions.Builder! builder();
+    method public abstract boolean enableVanishingRouteLine();
+    method public abstract com.mapbox.navigation.ui.listeners.FeedbackListener? feedbackListener();
+    method public abstract com.mapbox.navigation.ui.listeners.InstructionListListener? instructionListListener();
+    method public abstract com.mapbox.android.core.location.LocationEngine? locationEngine();
+    method public abstract com.mapbox.navigation.core.trip.session.LocationObserver? locationObserver();
+    method public abstract com.mapbox.navigation.ui.listeners.NavigationListener? navigationListener();
+    method public abstract com.mapbox.navigation.base.options.NavigationOptions! navigationOptions();
+    method public abstract Integer! roundingIncrement();
+    method public abstract com.mapbox.navigation.core.trip.session.RouteProgressObserver? routeProgressObserver();
+    method public abstract com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener? speechAnnouncementListener();
+    method public abstract com.mapbox.navigation.ui.voice.SpeechPlayer? speechPlayer();
+  }
+
+  @com.google.auto.value.AutoValue.Builder public abstract static class NavigationViewOptions.Builder {
+    ctor public NavigationViewOptions.Builder();
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! arrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! bannerInstructionsListener(com.mapbox.navigation.ui.listeners.BannerInstructionsListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! bottomSheetCallback(com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions! build();
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! camera(com.mapbox.navigation.ui.camera.Camera!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! darkThemeResId(Integer!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! directionsRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! enableVanishingRouteLine(boolean);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! feedbackListener(com.mapbox.navigation.ui.listeners.FeedbackListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! instructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! lightThemeResId(Integer!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationEngine(com.mapbox.android.core.location.LocationEngine!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationObserver(com.mapbox.navigation.core.trip.session.LocationObserver!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationListener(com.mapbox.navigation.ui.listeners.NavigationListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationOptions(com.mapbox.navigation.base.options.NavigationOptions!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineMapOptions(com.mapbox.navigation.ui.MapOfflineOptions!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineRoutingTilesPath(String!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineRoutingTilesVersion(String!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! puckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! roundingIncrement(@com.mapbox.navigation.core.Rounding.Increment Integer!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! routeProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! shouldSimulateRoute(boolean);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! speechAnnouncementListener(com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! speechPlayer(com.mapbox.navigation.ui.voice.SpeechPlayer!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! waynameChipEnabled(boolean);
+  }
+
+  public interface OnNavigationReadyCallback {
+    method public void onNavigationReady(boolean);
+  }
+
+  public class RecenterButton extends androidx.cardview.widget.CardView implements com.mapbox.navigation.ui.NavigationButton {
+    ctor public RecenterButton(android.content.Context!);
+    ctor public RecenterButton(android.content.Context!, android.util.AttributeSet?);
+    ctor public RecenterButton(android.content.Context!, android.util.AttributeSet?, int);
+    method public void addOnClickListener(android.view.View.OnClickListener!);
+    method public void hide();
+    method public void removeOnClickListener(android.view.View.OnClickListener!);
+    method public void show();
+    method public void updateStyle(int);
+  }
+
+  public final class SdkVersionChecker {
+    ctor public SdkVersionChecker(int currentSdkVersion);
+    method public boolean isEqualOrGreaterThan(int sdkCode);
+  }
+
+  public class SoundButton extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.NavigationButton {
+    ctor public SoundButton(android.content.Context!);
+    ctor public SoundButton(android.content.Context!, android.util.AttributeSet!);
+    ctor public SoundButton(android.content.Context!, android.util.AttributeSet!, int);
+    method public void addOnClickListener(android.view.View.OnClickListener!);
+    method public void hide();
+    method public void removeOnClickListener(android.view.View.OnClickListener!);
+    method public void show();
+    method public boolean toggleMute();
+    method public void updateStyle(@StyleRes int);
+  }
+
+}
+
+package com.mapbox.navigation.ui.alert {
+
+  public class AlertView extends androidx.cardview.widget.CardView {
+    ctor public AlertView(android.content.Context!);
+    ctor public AlertView(android.content.Context!, android.util.AttributeSet?);
+    ctor public AlertView(android.content.Context!, android.util.AttributeSet?, int);
+    method public String! getAlertText();
+    method public void hide();
+    method public void show(String!, long, boolean);
+    method public void updateStyle(@StyleRes int);
+  }
+
+}
+
+package com.mapbox.navigation.ui.camera {
+
+  public abstract class Camera {
+    ctor public Camera();
+    method public abstract java.util.List<com.mapbox.geojson.Point> overview(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+    method public abstract double tilt(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+    method public abstract double zoom(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+  }
+
+  public enum CameraUpdateMode {
+    enum_constant public static final com.mapbox.navigation.ui.camera.CameraUpdateMode DEFAULT;
+    enum_constant public static final com.mapbox.navigation.ui.camera.CameraUpdateMode OVERRIDE;
+  }
+
+  public class DynamicCamera extends com.mapbox.navigation.ui.camera.SimpleCamera {
+    ctor public DynamicCamera(com.mapbox.mapboxsdk.maps.MapboxMap);
+    method public void clearMap();
+    method public void forceResetZoomLevel();
+  }
+
+  public class NavigationCamera {
+    ctor public NavigationCamera(com.mapbox.mapboxsdk.maps.MapboxMap, com.mapbox.navigation.core.MapboxNavigation, com.mapbox.mapboxsdk.location.LocationComponent);
+    ctor public NavigationCamera(com.mapbox.mapboxsdk.maps.MapboxMap, com.mapbox.mapboxsdk.location.LocationComponent!);
+    ctor public NavigationCamera(com.mapbox.mapboxsdk.maps.MapboxMap);
+    method public void addOnTrackingModeChangedListener(com.mapbox.navigation.ui.camera.OnTrackingModeChangedListener);
+    method public void addOnTrackingModeTransitionListener(com.mapbox.navigation.ui.camera.OnTrackingModeTransitionListener);
+    method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
+    method @com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode public int getCameraTrackingMode();
+    method public boolean isTrackingEnabled();
+    method public void onStart();
+    method public void onStop();
+    method public void removeOnTrackingModeChangedListener(com.mapbox.navigation.ui.camera.OnTrackingModeChangedListener);
+    method public void removeOnTrackingModeTransitionListener(com.mapbox.navigation.ui.camera.OnTrackingModeTransitionListener);
+    method public void resetCameraPositionWith(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+    method public void resume(android.location.Location!);
+    method public void setCamera(com.mapbox.navigation.ui.camera.Camera!);
+    method public void showRouteOverview(int[]!);
+    method public void start(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+    method public void update(com.mapbox.navigation.ui.camera.NavigationCameraUpdate!);
+    method public void update(com.mapbox.navigation.ui.camera.NavigationCameraUpdate!, int);
+    method public void update(com.mapbox.navigation.ui.camera.NavigationCameraUpdate!, int, com.mapbox.mapboxsdk.maps.MapboxMap.CancelableCallback?);
+    method public void updateCameraTrackingMode(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+    field public static final int NAVIGATION_TRACKING_MODE_GPS = 0; // 0x0
+    field public static final int NAVIGATION_TRACKING_MODE_NONE = 2; // 0x2
+    field public static final int NAVIGATION_TRACKING_MODE_NORTH = 1; // 0x1
+  }
+
+  @IntDef({com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_GPS, com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_NORTH, com.mapbox.navigation.ui.camera.NavigationCamera.NAVIGATION_TRACKING_MODE_NONE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface NavigationCamera.TrackingMode {
+  }
+
+  public class NavigationCameraUpdate {
+    ctor public NavigationCameraUpdate(com.mapbox.mapboxsdk.camera.CameraUpdate);
+    method public void setMode(com.mapbox.navigation.ui.camera.CameraUpdateMode!);
+  }
+
+  public interface OnTrackingModeChangedListener {
+    method public void onTrackingModeChanged(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+  }
+
+  public interface OnTrackingModeTransitionListener {
+    method public void onTransitionCancelled(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+    method public void onTransitionFinished(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+  }
+
+  public final class RouteInformation {
+    ctor public RouteInformation(com.mapbox.api.directions.v5.models.DirectionsRoute? route, android.location.Location? location, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress);
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute? component1();
+    method public android.location.Location? component2();
+    method public com.mapbox.navigation.base.trip.model.RouteProgress? component3();
+    method public com.mapbox.navigation.ui.camera.RouteInformation copy(com.mapbox.api.directions.v5.models.DirectionsRoute? route, android.location.Location? location, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress);
+    method public android.location.Location? getLocation();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute? getRoute();
+    method public com.mapbox.navigation.base.trip.model.RouteProgress? getRouteProgress();
+  }
+
+  public class SimpleCamera extends com.mapbox.navigation.ui.camera.Camera {
+    ctor public SimpleCamera();
+    method public java.util.List<com.mapbox.geojson.Point> overview(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+    method public double tilt(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+    method public double zoom(com.mapbox.navigation.ui.camera.RouteInformation routeInformation);
+    field public static final com.mapbox.navigation.ui.camera.SimpleCamera.Companion! Companion;
+    field protected static final int DEFAULT_TILT = 50; // 0x32
+    field protected static final double DEFAULT_ZOOM = 15.0;
+  }
+
+  public static final class SimpleCamera.Companion {
+  }
+
+}
+
+package com.mapbox.navigation.ui.feedback {
+
+  public class FeedbackBottomSheet extends com.google.android.material.bottomsheet.BottomSheetDialogFragment implements android.animation.Animator.AnimatorListener {
+    ctor public FeedbackBottomSheet();
+    method public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet! newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, long);
+    method public static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet! newInstance(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!, @com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FeedbackFlowType int, long);
+    method public void onAnimationCancel(android.animation.Animator!);
+    method public void onAnimationEnd(android.animation.Animator!);
+    method public void onAnimationRepeat(android.animation.Animator!);
+    method public void onAnimationStart(android.animation.Animator!);
+    method public void setDuration(long);
+    method public void setFeedbackBottomSheetListener(com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener!);
+    field public static final int FEEDBACK_DETAIL_FLOW = 1; // 0x1
+    field public static final int FEEDBACK_MAIN_FLOW = 0; // 0x0
+    field public static final String! TAG;
+  }
+
+  @IntDef({com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_MAIN_FLOW, com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface FeedbackBottomSheet.FeedbackFlowType {
+  }
+
+  public interface FeedbackBottomSheetListener {
+    method public void onFeedbackDismissed();
+    method public void onFeedbackSelected(com.mapbox.navigation.ui.feedback.FeedbackItem!);
+  }
+
+  public class FeedbackItem {
+    method public String! getDescription();
+    method public java.util.Set<java.lang.String!>! getFeedbackSubType();
+    method @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type public String! getFeedbackType();
+  }
+
+}
+
+package com.mapbox.navigation.ui.instruction {
+
+  public class InstructionView extends android.widget.RelativeLayout implements com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener androidx.lifecycle.LifecycleObserver {
+    ctor public InstructionView(android.content.Context!);
+    ctor public InstructionView(android.content.Context!, android.util.AttributeSet?);
+    ctor public InstructionView(android.content.Context!, android.util.AttributeSet?, int);
+    method public void determineGuidanceView(com.mapbox.navigation.base.trip.model.RouteProgress!);
+    method public boolean handleBackPressed();
+    method public void hideInstructionList();
+    method public void hideRerouteState();
+    method public boolean isShowingInstructionList();
+    method public void onFeedbackDismissed();
+    method public void onFeedbackSelected(com.mapbox.navigation.ui.feedback.FeedbackItem!);
+    method public com.mapbox.navigation.ui.instruction.NavigationAlertView! retrieveAlertView();
+    method public com.mapbox.navigation.ui.NavigationButton! retrieveFeedbackButton();
+    method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
+    method public void setDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter!);
+    method public void setInstructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
+    method public void showFeedbackBottomSheet();
+    method public void showInstructionList();
+    method public void showRerouteState();
+    method public void subscribe(androidx.lifecycle.LifecycleOwner!, com.mapbox.navigation.ui.NavigationViewModel!);
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_DESTROY) public void unsubscribe();
+    method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions!);
+    method public void updateDistanceWith(com.mapbox.navigation.base.trip.model.RouteProgress!);
+  }
+
+  public class NavigationAlertView extends com.mapbox.navigation.ui.alert.AlertView implements com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener {
+    ctor public NavigationAlertView(android.content.Context!);
+    ctor public NavigationAlertView(android.content.Context!, android.util.AttributeSet?);
+    ctor public NavigationAlertView(android.content.Context!, android.util.AttributeSet?, int);
+    method public void onFeedbackDismissed();
+    method public void onFeedbackSelected(com.mapbox.navigation.ui.feedback.FeedbackItem!);
+    method public void showFeedbackBottomSheet();
+    method public void showFeedbackSubmitted();
+    method public void showReportProblem();
+    method public void subscribe(com.mapbox.navigation.ui.NavigationViewModel!);
+    method public void updateEnabled(boolean);
+  }
+
+}
+
+package com.mapbox.navigation.ui.instruction.maneuver {
+
+  public class ManeuverView extends android.view.View {
+    ctor public ManeuverView(android.content.Context!);
+    ctor public ManeuverView(android.content.Context!, android.util.AttributeSet!);
+    ctor public ManeuverView(android.content.Context!, android.util.AttributeSet!, int);
+    method public void setDrivingSide(String!);
+    method public void setManeuverTypeAndModifier(String, String?);
+    method public void setPrimaryColor(@ColorInt int);
+    method public void setRoundaboutAngle(@FloatRange(from=60.0f, to=300.0f) float);
+    method public void setSecondaryColor(@ColorInt int);
+  }
+
+}
+
+package com.mapbox.navigation.ui.instruction.turnlane {
+
+  public class TurnLaneView extends androidx.appcompat.widget.AppCompatImageView {
+    ctor public TurnLaneView(android.content.Context!);
+    ctor public TurnLaneView(android.content.Context!, android.util.AttributeSet?);
+    ctor public TurnLaneView(android.content.Context!, android.util.AttributeSet?, int);
+    method public void updateLaneView(com.mapbox.api.directions.v5.models.BannerComponents, String);
+  }
+
+}
+
+package com.mapbox.navigation.ui.listeners {
+
+  public interface BannerInstructionsListener {
+    method public com.mapbox.api.directions.v5.models.BannerInstructions! willDisplay(com.mapbox.api.directions.v5.models.BannerInstructions!);
+  }
+
+  public interface FeedbackListener {
+    method public void onFeedbackCancelled();
+    method public void onFeedbackOpened();
+    method public void onFeedbackSent(com.mapbox.navigation.ui.feedback.FeedbackItem!);
+  }
+
+  public interface InstructionListListener {
+    method public void onInstructionListVisibilityChanged(boolean);
+  }
+
+  public interface NavigationListener {
+    method public void onCancelNavigation();
+    method public void onNavigationFinished();
+    method public void onNavigationRunning();
+  }
+
+  public interface SpeechAnnouncementListener {
+    method public com.mapbox.api.directions.v5.models.VoiceInstructions! willVoice(com.mapbox.api.directions.v5.models.VoiceInstructions!);
+  }
+
+}
+
+package com.mapbox.navigation.ui.map {
+
+  public class NavigationMapboxMap implements androidx.lifecycle.LifecycleObserver {
+    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
+    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, boolean);
+    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?);
+    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean);
+    method public void addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
+    method public void addDestinationMarker(com.mapbox.geojson.Point!);
+    method @Deprecated public void addMarker(android.content.Context!, com.mapbox.geojson.Point!);
+    method public void addOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener!);
+    method public boolean addOnWayNameChangedListener(com.mapbox.navigation.ui.map.OnWayNameChangedListener!);
+    method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation);
+    method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation, boolean);
+    method public void adjustLocationIconWith(int[]!);
+    method public void clearMarkers();
+    method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public void drawRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
+    method public boolean isIncidentsVisible();
+    method public boolean isTrafficVisible();
+    method public void onNewRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress!);
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START) protected void onStart();
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_STOP) protected void onStop();
+    method public void removeOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener!);
+    method public boolean removeOnWayNameChangedListener(com.mapbox.navigation.ui.map.OnWayNameChangedListener!);
+    method public void removeRoute();
+    method public void resetCameraPositionWith(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+    method public void resetPadding();
+    method public void restoreFrom(com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState!);
+    method public void resumeCamera(android.location.Location);
+    method public com.mapbox.navigation.ui.camera.NavigationCamera! retrieveCamera();
+    method public com.mapbox.mapboxsdk.maps.MapboxMap! retrieveMap();
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute! retrieveMapRoute();
+    method public void saveStateWith(String!, android.os.Bundle!);
+    method public void setCamera(com.mapbox.navigation.ui.camera.Camera!);
+    method public void setOnRouteSelectionChangeListener(com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener);
+    method public void setPuckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier!);
+    method public void showAlternativeRoutes(boolean);
+    method public void showRoute();
+    method public void showRouteOverview(int[]!);
+    method public void startCamera(com.mapbox.api.directions.v5.models.DirectionsRoute);
+    method public void takeScreenshot(com.mapbox.navigation.ui.NavigationSnapshotReadyCallback!);
+    method public void updateCameraTrackingMode(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
+    method public void updateIncidentsVisibility(boolean);
+    method public void updateLocation(android.location.Location?);
+    method public void updateLocation(java.util.List<android.location.Location!>);
+    method public void updateLocationFpsThrottleEnabled(boolean);
+    method public void updateLocationLayerRenderMode(@com.mapbox.mapboxsdk.location.modes.RenderMode.Mode int);
+    method public void updateLocationVisibilityTo(boolean);
+    method public void updateMapFpsThrottle(int);
+    method public void updateMapFpsThrottleEnabled(boolean);
+    method public void updateTrafficVisibility(boolean);
+    method public void updateWaynameQueryMap(boolean);
+  }
+
+  public class NavigationMapboxMapInstanceState implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel!, int);
+    field public static final android.os.Parcelable.Creator<com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState!>! CREATOR;
+  }
+
+  public interface OnWayNameChangedListener {
+    method public void onWayNameChanged(String);
+  }
+
+  public class WayNameView extends android.widget.FrameLayout {
+    ctor public WayNameView(android.content.Context!);
+    ctor public WayNameView(android.content.Context, android.util.AttributeSet?);
+    ctor public WayNameView(android.content.Context, android.util.AttributeSet?, int);
+    method public String! retrieveWayNameText();
+    method public void updateVisibility(boolean);
+    method public void updateWayNameText(String!);
+  }
+
+}
+
+package com.mapbox.navigation.ui.puck {
+
+  public interface PuckDrawableSupplier {
+    method public int getPuckDrawable(com.mapbox.navigation.base.trip.model.RouteProgressState routeProgressState);
+  }
+
+}
+
+package com.mapbox.navigation.ui.route {
+
+  public interface MapRouteLineInitializedCallback {
+    method public void onInitialized(com.mapbox.navigation.ui.route.RouteLineLayerIds routeLineLayerIds);
+  }
+
+  public class NavigationMapRoute implements androidx.lifecycle.LifecycleObserver {
+    method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
+    method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!, boolean);
+    method public void addRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+    method public void addRoutes(@Size(min=1) java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
+    method public void onNewRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress!);
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START) protected void onStart();
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_STOP) protected void onStop();
+    method public void removeProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
+    method @Deprecated public void removeRoute();
+    method public void setOnRouteSelectionChangeListener(com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener?);
+    method public void showAlternativeRoutes(boolean);
+    method public void updateRouteArrowVisibilityTo(boolean);
+    method public void updateRouteVisibilityTo(boolean);
+  }
+
+  public static class NavigationMapRoute.Builder {
+    ctor public NavigationMapRoute.Builder(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute! build();
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withBelowLayer(String?);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withMapboxNavigation(com.mapbox.navigation.core.MapboxNavigation?, boolean);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withRouteLineInitializedCallback(com.mapbox.navigation.ui.route.MapRouteLineInitializedCallback?);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withStyle(@StyleRes int);
+  }
+
+  public interface OnRouteSelectionChangeListener {
+    method public void onNewPrimaryRouteSelected(com.mapbox.api.directions.v5.models.DirectionsRoute!);
+  }
+
+  public final class RouteLineLayerIds {
+    ctor public RouteLineLayerIds(String primaryRouteTrafficLineLayerId, String primaryRouteLineLayerId, String alternativeRouteLineLayerId);
+    method public String component1();
+    method public String component2();
+    method public String component3();
+    method public com.mapbox.navigation.ui.route.RouteLineLayerIds copy(String primaryRouteTrafficLineLayerId, String primaryRouteLineLayerId, String alternativeRouteLineLayerId);
+    method public String getAlternativeRouteLineLayerId();
+    method public String getPrimaryRouteLineLayerId();
+    method public String getPrimaryRouteTrafficLineLayerId();
+  }
+
+}
+
+package com.mapbox.navigation.ui.summary {
+
+  public class SummaryBottomSheet extends android.widget.FrameLayout implements androidx.lifecycle.LifecycleObserver {
+    ctor public SummaryBottomSheet(android.content.Context!);
+    ctor public SummaryBottomSheet(android.content.Context!, android.util.AttributeSet!);
+    ctor public SummaryBottomSheet(android.content.Context!, android.util.AttributeSet!, int);
+    method public void hideRerouteState();
+    method public void setDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter!);
+    method public void setTimeFormat(@com.mapbox.navigation.base.TimeFormat.Type int);
+    method public void showRerouteState();
+    method public void subscribe(androidx.lifecycle.LifecycleOwner!, com.mapbox.navigation.ui.NavigationViewModel!);
+    method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_DESTROY) public void unsubscribe();
+    method public void update(com.mapbox.navigation.base.trip.model.RouteProgress!);
+  }
+
+  public class SummaryModel {
+    ctor public SummaryModel(android.content.Context!, com.mapbox.navigation.base.formatter.DistanceFormatter!, com.mapbox.navigation.base.trip.model.RouteProgress!, @com.mapbox.navigation.base.TimeFormat.Type int);
+  }
+
+}
+
+package com.mapbox.navigation.ui.voice {
+
+  public class NavigationSpeechPlayer implements com.mapbox.navigation.ui.voice.SpeechPlayer {
+    ctor public NavigationSpeechPlayer(com.mapbox.navigation.ui.voice.SpeechPlayerProvider!);
+    method public boolean isMuted();
+    method public void onDestroy();
+    method public void onOffRoute();
+    method public void play(com.mapbox.api.directions.v5.models.VoiceInstructions!);
+    method public void setMuted(boolean);
+  }
+
+  public interface SpeechPlayer {
+    method public boolean isMuted();
+    method public void onDestroy();
+    method public void onOffRoute();
+    method public void play(com.mapbox.api.directions.v5.models.VoiceInstructions!);
+    method public void setMuted(boolean);
+  }
+
+  public class SpeechPlayerProvider {
+    ctor public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader!);
+  }
+
+  public class VoiceInstructionLoader {
+    ctor public VoiceInstructionLoader(android.content.Context!, String!, okhttp3.Cache!);
+    method public void cacheInstructions(java.util.List<java.lang.String!>!);
+    method public java.util.List<java.lang.String!>! evictVoiceInstructions();
+  }
+
+}
+

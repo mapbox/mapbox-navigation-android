@@ -216,6 +216,22 @@ commands:
           name: Build Navigation UI SDK 1.0 (release)
           command: make 1.0-build-ui-release
 
+  check-api-core-1_0:
+    steps:
+      - run:
+          name: Check Navigation SDK 1.0 public API
+          command: |
+            make 1.0-build-core-release
+            make 1.0-core-check-api
+
+  check-api-ui-1_0:
+    steps:
+      - run:
+          name: Check Navigation UI SDK 1.0 public API
+          command: |
+            make 1.0-build-ui-release
+            make 1.0-ui-check-api
+
   unit-tests-core-1_0:
     steps:
       - run:
@@ -472,6 +488,8 @@ jobs:
       - restore-gradle-cache-1_0
       - static-code-analysis-kotlin
       - check-public-documentation
+      - check-api-core-1_0
+      - check-api-ui-1_0
       - build-core-debug-1_0
       - build-ui-debug-1_0
       - unit-tests-core-1_0
