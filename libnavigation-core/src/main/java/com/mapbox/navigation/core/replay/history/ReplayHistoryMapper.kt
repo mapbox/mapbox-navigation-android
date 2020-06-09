@@ -15,22 +15,21 @@ interface CustomEventMapper {
      * Override to map your own custom events from history files,
      * into [ReplayEventBase] for the [MapboxReplayer]
      */
-    fun map(eventType: String, properties: LinkedTreeMap<*, *>): ReplayEventBase?
+    fun map(eventType: String, properties: Map<*, *>): ReplayEventBase?
 }
 
 /**
  * This class is responsible for creating [ReplayEvents] from history data.
  *
- * @param gson Gson (optional)
  * @param customEventMapper if you have added custom events to the replay history, include your
  * own [CustomEventMapper] (optional)
  * @param logger interface for logging any events (optional)
  */
 class ReplayHistoryMapper @JvmOverloads constructor(
-    private val gson: Gson = Gson(),
     private val customEventMapper: CustomEventMapper? = null,
     private val logger: Logger? = null
 ) {
+    private val gson: Gson = Gson()
 
     /**
      * Given raw json string return [ReplayEvents] that can be given to a [MapboxReplayer]
@@ -74,7 +73,7 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                     eventTimestamp = eventTimestamp)
             }
             else -> {
-                val replayEvent = customEventMapper?.map(eventType, event)
+                val replayEvent = customEventMapper?.map(eventType, event.toMap())
                 if (replayEvent == null) {
                     logger?.e(msg = Message("Replay unsupported event $eventType"))
                 }
