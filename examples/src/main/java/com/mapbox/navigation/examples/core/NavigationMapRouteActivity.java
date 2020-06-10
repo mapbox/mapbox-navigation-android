@@ -229,13 +229,15 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     vibrate();
     hideRoute();
     Location currentLocation = mapboxMap.getLocationComponent().getLastKnownLocation();
-    Point originPoint = Point.fromLngLat(
-            currentLocation.getLongitude(),
-            currentLocation.getLatitude()
-    );
-    Point destinationPoint = Point.fromLngLat(touchLocation.getLongitude(), touchLocation.getLatitude());
-    findRoute(originPoint, destinationPoint);
-    routeLoading.setVisibility(View.VISIBLE);
+    if (currentLocation != null) {
+      Point originPoint = Point.fromLngLat(
+              currentLocation.getLongitude(),
+              currentLocation.getLatitude()
+      );
+      Point destinationPoint = Point.fromLngLat(touchLocation.getLongitude(), touchLocation.getLatitude());
+      findRoute(originPoint, destinationPoint);
+      routeLoading.setVisibility(View.VISIBLE);
+    }
   }
 
   @SuppressLint("MissingPermission")
