@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="NavigationViewLight">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -12,25 +12,44 @@
     <!-- Define your own style for each of the Mapbox Navigation UI SDK component -->
     <style name="CustomInstructionView" parent="InstructionView">
         <!-- Color of the banner view background -->
-        <item name="instructionViewPrimaryBackgroundColor">@color/navigation_instruction_view_primary_background</item>
+        <item name="instructionViewPrimaryBackgroundColor">
+            @color/navigation_instruction_view_primary_background
+        </item>
         <!-- Color of the banner reroute view background -->
-        <item name="instructionViewSecondaryBackgroundColor">@color/navigation_instruction_view_secondary_background</item>
+        <item name="instructionViewSecondaryBackgroundColor">
+            @color/navigation_instruction_view_secondary_background
+        </item>
         <!-- Alternate background color for the dropdown list of upcoming steps -->
-        <item name="instructionListViewBackgroundColor">@color/navigation_instruction_list_view_background</item>
+        <item name="instructionListViewBackgroundColor">
+            @color/navigation_instruction_list_view_background
+        </item>
         <!-- Color of the banner view primary label that displays the turn name -->
-        <item name="instructionViewPrimaryTextColor">@color/navigation_instruction_view_primary_text</item>
+        <item name="instructionViewPrimaryTextColor">
+            @color/navigation_instruction_view_primary_text
+        </item>
         <!-- Color for the secondary label that occasionally appears underneath the primary label -->
-        <item name="instructionViewSecondaryTextColor">@color/navigation_instruction_view_secondary_text</item>
-        <!-- Primary color for the turn arrow icons -->
-        <item name="instructionManeuverViewPrimaryColor">@color/navigation_maneuver_view_primary</item>
-        <!-- Secondary color for the turn arrow icons (e.g. the line segment that forks off) -->
-        <item name="instructionManeuverViewSecondaryColor">@color/navigation_maneuver_view_secondary</item>
+        <item name="instructionViewSecondaryTextColor">
+            @color/navigation_instruction_view_secondary_text
+        </item>
+        <!-- Style for the maneuver view -->
+        <item name="instructionViewManeuverViewStyle">@style/CustomManeuverView</item>
         <!-- Style for the sound button -->
         <item name="instructionViewSoundButtonStyle">@style/CustomSoundButton</item>
         <!-- Style for the feedback button -->
         <item name="instructionViewFeedbackButtonStyle">@style/CustomFeedbackButton</item>
         <!-- Style for the alert view -->
         <item name="instructionViewAlertViewStyle">@style/CustomAlertView</item>
+    </style>
+
+    <style name="CustomManeuverView">
+        <!-- Primary color for the turn arrow icons -->
+        <item name="maneuverViewPrimaryColor">
+            @color/navigation_maneuver_view_primary
+        </item>
+        <!-- Secondary color for the turn arrow icons (e.g. the line segment that forks off) -->
+        <item name="maneuverViewSecondaryColor">
+            @color/navigation_maneuver_view_secondary
+        </item>
     </style>
 
     <style name="CustomFeedbackButton">
@@ -51,7 +70,8 @@
         <!-- Alert view background color -->
         <item name="alertViewBackgroundColor">@color/navigation_primary_background</item>
         <!-- Alert view progress bar background color -->
-        <item name="alertViewProgressBarBackgroundColor">@color/navigation_progress_bar_background</item>
+        <item name="alertViewProgressBarBackgroundColor">@color/navigation_progress_bar_background
+        </item>
         <!-- Alert view progress bar color -->
         <item name="alertViewProgressBarColor">@color/navigation_progress_bar</item>
         <!-- Alert view message text color -->

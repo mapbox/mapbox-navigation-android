@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.instruction;
 
 import android.animation.TimeInterpolator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -135,6 +137,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private int secondaryTextColor;
   private int maneuverViewPrimaryColor;
   private int maneuverViewSecondaryColor;
+  private int maneuverViewStyle;
   private int soundButtonStyle;
   private int feedbackButtonStyle;
   private int alertViewStyle;
@@ -529,16 +532,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
             R.styleable.InstructionView_instructionViewSecondaryTextColor,
             R.color.mapbox_instruction_view_secondary_text));
 
-    maneuverViewPrimaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(
-            R.styleable.InstructionView_instructionManeuverViewPrimaryColor,
-            R.color.mapbox_instruction_maneuver_view_primary));
-
-    maneuverViewSecondaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(
-            R.styleable.InstructionView_instructionManeuverViewSecondaryColor,
-            R.color.mapbox_instruction_maneuver_view_secondary));
-
+    maneuverViewStyle = typedArray.getResourceId(
+        R.styleable.InstructionView_instructionViewManeuverViewStyle, R.style.ManeuverView);
     soundButtonStyle = typedArray.getResourceId(
         R.styleable.InstructionView_instructionViewSoundButtonStyle, -1);
     feedbackButtonStyle = typedArray.getResourceId(
@@ -547,6 +542,31 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         R.styleable.InstructionView_instructionViewAlertViewStyle, -1);
 
     typedArray.recycle();
+
+    initManeuverViewAttributes();
+  }
+
+  @SuppressLint("CustomViewStyleable")
+  private void initManeuverViewAttributes() {
+    TypedArray maneuverViewTypedArray =
+        getContext().obtainStyledAttributes(maneuverViewStyle, R.styleable.ManeuverView);
+    @ColorRes int maneuverViewPrimaryColorRes = maneuverViewTypedArray.getResourceId(
+        R.styleable.ManeuverView_maneuverViewPrimaryColor,
+        R.color.mapbox_instruction_maneuver_view_primary);
+    maneuverViewPrimaryColor = ContextCompat.getColor(getContext(), maneuverViewPrimaryColorRes);
+
+    @ColorRes int maneuverViewSecondaryColorRes = maneuverViewTypedArray.getResourceId(
+        R.styleable.ManeuverView_maneuverViewSecondaryColor,
+        R.color.mapbox_instruction_maneuver_view_secondary);
+    maneuverViewSecondaryColor = ContextCompat.getColor(getContext(), maneuverViewSecondaryColorRes);
+
+    if (maneuverViewPrimaryColorRes == R.color.mapbox_instruction_maneuver_view_primary) {
+      // Ref: https://github.com/mapbox/mapbox-navigation-android/issues/3133
+      // if using default MapboxManeuverView, need to assign MapboxManeuverView style for turnLane view use.
+      maneuverViewStyle = R.style.MapboxManeuverView;
+    }
+
+    maneuverViewTypedArray.recycle();
   }
 
   /**
@@ -658,7 +678,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Sets up the {@link RecyclerView} that is used to display the turn lanes.
    */
   private void initializeTurnLaneRecyclerView() {
-    turnLaneAdapter = new TurnLaneAdapter();
+    turnLaneAdapter = new TurnLaneAdapter(maneuverViewStyle);
     rvTurnLanes.setAdapter(turnLaneAdapter);
     rvTurnLanes.setHasFixedSize(true);
     rvTurnLanes.setLayoutManager(new LinearLayoutManager(getContext(),
@@ -997,7 +1017,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
     if (ViewUtils.isLandscape(getContext())) {
       int primaryTextMaxWidth = (int) (instructionLayoutText.getWidth()
-        * MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE);
+          * MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE);
       stepPrimaryText.setMaxWidth(primaryTextMaxWidth);
     }
     loadTextWith(primaryBannerText, stepPrimaryText);

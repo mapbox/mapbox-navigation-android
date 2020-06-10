@@ -6,6 +6,8 @@ import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
@@ -45,8 +47,10 @@ public class TurnLaneView extends AppCompatImageView {
    *
    * @param lane data {@link BannerComponents}
    * @param maneuverModifier for the given maneuver
+   * @param turnLaneViewStyle style to render the turn lane view vector
    */
-  public void updateLaneView(@NonNull BannerComponents lane, @NonNull String maneuverModifier) {
+  public void updateLaneView(@NonNull BannerComponents lane,
+      @NonNull String maneuverModifier, @StyleRes int turnLaneViewStyle) {
     if (hasInvalidData(lane)) {
       return;
     }
@@ -56,7 +60,7 @@ public class TurnLaneView extends AppCompatImageView {
     if (resId == null) {
       return;
     }
-    drawFor(lane, drawData, resId);
+    drawFor(lane, drawData, resId, turnLaneViewStyle);
   }
 
   private boolean hasInvalidData(@NonNull BannerComponents lane) {
@@ -83,9 +87,12 @@ public class TurnLaneView extends AppCompatImageView {
     return resId;
   }
 
-  private void drawFor(@NonNull BannerComponents lane, TurnLaneViewData drawData, Integer resId) {
+  private void drawFor(@NonNull BannerComponents lane,
+      TurnLaneViewData drawData, Integer resId, @StyleRes int turnLaneViewStyle) {
+    final ContextThemeWrapper contextThemeWrapper =
+        new ContextThemeWrapper(getContext(), turnLaneViewStyle);
     final Drawable turnLaneDrawable = VectorDrawableCompat.create(
-        getResources(), resId, getContext().getTheme()
+        getResources(), resId, contextThemeWrapper.getTheme()
     );
     setImageDrawable(turnLaneDrawable);
     setAlpha(!lane.active() ? HALF_OPACITY : FULL_OPACITY);
