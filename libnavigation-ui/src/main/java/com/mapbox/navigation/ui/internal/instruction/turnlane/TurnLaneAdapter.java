@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
@@ -18,6 +19,12 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   private static final String EMPTY_STRING = "";
   private String maneuverModifier = EMPTY_STRING;
   private List<BannerComponents> laneComponents = new ArrayList<>();
+  @StyleRes
+  private int turnLaneViewStyle;
+
+  public TurnLaneAdapter(@StyleRes int turnLaneViewStyle) {
+    this.turnLaneViewStyle = turnLaneViewStyle;
+  }
 
   @NonNull
   @Override
@@ -31,7 +38,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   @Override
   public void onBindViewHolder(@NonNull TurnLaneViewHolder holder, int position) {
     BannerComponents lane = laneComponents.get(position);
-    holder.turnLaneView.updateLaneView(lane, maneuverModifier);
+    holder.turnLaneView.updateLaneView(lane, maneuverModifier, turnLaneViewStyle);
   }
 
   @Override

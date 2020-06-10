@@ -20,7 +20,8 @@
         <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
         <item name="routeLineTraveledColor">@color/mapbox_navigation_route_line_traveled_color
         </item>
-        <item name="routeLineShieldTraveledColor">@color/mapbox_navigation_route_shield_line_traveled_color
+        <item name="routeLineShieldTraveledColor">
+            @color/mapbox_navigation_route_shield_line_traveled_color
         </item>
         <item name="alternativeRouteColor">@color/mapbox_navigation_route_alternative_color</item>
         <item name="alternativeRouteUnknownCongestionColor">
@@ -167,10 +168,23 @@
         <item name="instructionViewPrimaryTextColor">?attr/navigationViewBannerPrimaryText</item>
         <item name="instructionViewSecondaryTextColor">?attr/navigationViewBannerSecondaryText
         </item>
-        <item name="instructionManeuverViewPrimaryColor">?attr/navigationViewBannerManeuverPrimary
+    </style>
+
+    <style name="ManeuverView">
+        <item name="maneuverViewPrimaryColor">
+            ?attr/navigationViewBannerManeuverPrimary
         </item>
-        <item name="instructionManeuverViewSecondaryColor">
+        <item name="maneuverViewSecondaryColor">
             ?attr/navigationViewBannerManeuverSecondary
+        </item>
+    </style>
+
+    <style name="MapboxManeuverView">
+        <item name="maneuverViewPrimaryColor">
+            @color/mapbox_navigation_view_color_banner_maneuver_primary
+        </item>
+        <item name="maneuverViewSecondaryColor">
+            @color/mapbox_navigation_view_color_banner_maneuver_secondary
         </item>
     </style>
 

@@ -420,7 +420,7 @@ package com.mapbox.navigation.ui.instruction.turnlane {
     ctor public TurnLaneView(android.content.Context!);
     ctor public TurnLaneView(android.content.Context!, android.util.AttributeSet?);
     ctor public TurnLaneView(android.content.Context!, android.util.AttributeSet?, int);
-    method public void updateLaneView(com.mapbox.api.directions.v5.models.BannerComponents, String);
+    method public void updateLaneView(com.mapbox.api.directions.v5.models.BannerComponents, String, @StyleRes int);
   }
 
 }
