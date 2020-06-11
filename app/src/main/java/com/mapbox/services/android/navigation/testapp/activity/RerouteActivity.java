@@ -25,6 +25,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -152,7 +153,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.DARK, style -> {
       LocationComponent locationComponent = mapboxMap.getLocationComponent();
-      locationComponent.activateLocationComponent(this, style);
+      locationComponent.activateLocationComponent(
+              LocationComponentActivationOptions.builder(this, style).build());
       locationComponent.setLocationComponentEnabled(true);
       locationComponent.setRenderMode(RenderMode.GPS);
 

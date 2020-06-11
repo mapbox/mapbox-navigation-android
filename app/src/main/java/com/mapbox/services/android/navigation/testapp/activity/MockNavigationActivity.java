@@ -26,6 +26,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -191,7 +192,8 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       LocationComponent locationComponent = mapboxMap.getLocationComponent();
-      locationComponent.activateLocationComponent(this, style);
+      locationComponent.activateLocationComponent(
+              LocationComponentActivationOptions.builder(this, style).build());
       locationComponent.setRenderMode(RenderMode.GPS);
       locationComponent.setLocationComponentEnabled(false);
       navigationMapRoute = new NavigationMapRoute(navigation, mapView, mapboxMap);

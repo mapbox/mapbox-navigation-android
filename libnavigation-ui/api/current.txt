@@ -459,7 +459,7 @@ package com.mapbox.navigation.ui.map {
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, boolean);
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?);
-    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean);
+    ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean, boolean);
     method public void addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
     method public void addDestinationMarker(com.mapbox.geojson.Point!);
     method @Deprecated public void addMarker(android.content.Context!, com.mapbox.geojson.Point!);

@@ -130,7 +130,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
                              @NonNull MapboxMap mapboxMap,
                              @NonNull LifecycleOwner lifecycleOwner,
                              boolean vanishRouteLineEnabled) {
-    this(mapView, mapboxMap, lifecycleOwner,null, vanishRouteLineEnabled);
+    this(mapView, mapboxMap, lifecycleOwner,null, vanishRouteLineEnabled, false);
   }
 
   /**
@@ -146,7 +146,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
                              @NonNull MapboxMap mapboxMap,
                              @NonNull LifecycleOwner lifecycleOwner,
                              @Nullable String routeBelowLayerId) {
-    this(mapView, mapboxMap, lifecycleOwner, routeBelowLayerId, false);
+    this(mapView, mapboxMap, lifecycleOwner, routeBelowLayerId, false, false);
   }
 
   /**
@@ -158,12 +158,14 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param lifecycleOwner provides lifecycle for component
    * @param routeBelowLayerId optionally pass in a layer id to place the route line below
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
+   * @param useSpecializedLocationLayer determines if the location puck should use a specialized render layer.
    */
   public NavigationMapboxMap(@NonNull MapView mapView,
                              @NonNull MapboxMap mapboxMap,
                              @NonNull LifecycleOwner lifecycleOwner,
                              @Nullable String routeBelowLayerId,
-                             boolean vanishRouteLineEnabled) {
+                             boolean vanishRouteLineEnabled,
+                             boolean useSpecializedLocationLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
@@ -173,12 +175,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
     initializeMapLayerInteractor(mapboxMap);
     initializeRoute(mapView, mapboxMap, routeBelowLayerId);
     initializeCamera(mapboxMap);
-    initializeLocationComponent();
+    initializeLocationComponent(useSpecializedLocationLayer);
     registerLifecycleOwnerObserver();
   }
 
-  private void initializeLocationComponent() {
-    setupLocationComponent(mapView, mapboxMap);
+  private void initializeLocationComponent(boolean useSpecializedLocationLayer) {
+    setupLocationComponent(mapView, mapboxMap, useSpecializedLocationLayer);
     initializeLocationFpsDelegate(mapboxMap, locationComponent);
   }
 
@@ -760,7 +762,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @SuppressLint("MissingPermission")
-  private void setupLocationComponent(MapView mapView, MapboxMap map) {
+  private void setupLocationComponent(MapView mapView, MapboxMap map, boolean useSpecializedLocationLayer) {
     locationComponent = map.getLocationComponent();
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
@@ -771,6 +773,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(options)
       .useDefaultLocationEngine(false)
+      .useSpecializedLocationLayer(useSpecializedLocationLayer)
       .build();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setLocationComponentEnabled(true);
