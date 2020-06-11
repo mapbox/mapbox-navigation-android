@@ -11,7 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
+import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -363,7 +365,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation = MapboxNavigation(
             applicationContext,
             MapboxNavigation.defaultNavigationOptions(this, accessToken),
-            ReplayLocationEngine(mapboxReplayer)
+            getLocationEngine()
         )
         mapboxNavigation.apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
@@ -549,6 +551,16 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
         override fun onFailure(exception: Exception) {
             Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
+        }
+    }
+
+    // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
+    // for testing else a real location engine is used.
+    private fun getLocationEngine(): LocationEngine {
+        return if (shouldSimulateRoute()) {
+            ReplayLocationEngine(mapboxReplayer)
+        } else {
+            LocationEngineProvider.getBestLocationEngine(this)
         }
     }
 
