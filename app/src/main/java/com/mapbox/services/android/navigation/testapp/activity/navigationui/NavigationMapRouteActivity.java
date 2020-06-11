@@ -22,6 +22,7 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -169,7 +170,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   @SuppressWarnings("MissingPermission")
   private void initializeLocationComponent(MapboxMap mapboxMap) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, mapboxMap.getStyle());
+    locationComponent.activateLocationComponent(
+            LocationComponentActivationOptions.builder(this, mapboxMap.getStyle()).build());
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
     locationComponent.setCameraMode(CameraMode.TRACKING);

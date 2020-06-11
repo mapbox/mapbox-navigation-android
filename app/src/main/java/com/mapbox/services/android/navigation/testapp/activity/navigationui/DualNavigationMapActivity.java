@@ -27,6 +27,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -308,7 +309,11 @@ public class DualNavigationMapActivity extends AppCompatActivity implements OnNa
   @SuppressLint("MissingPermission")
   private void initializeLocationComponent(Style style) {
     LocationComponent locationComponent = mapboxMap.getLocationComponent();
-    locationComponent.activateLocationComponent(this, style, locationEngine);
+    locationComponent.activateLocationComponent(
+            LocationComponentActivationOptions.builder(this, style)
+            .locationEngine(locationEngine)
+                    .build()
+    );
     locationComponent.setLocationComponentEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
