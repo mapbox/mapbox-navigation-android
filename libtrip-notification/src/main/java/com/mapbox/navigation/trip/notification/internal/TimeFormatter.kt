@@ -67,10 +67,9 @@ object TimeFormatter {
 
         val days = TimeUnit.SECONDS.toDays(seconds)
         seconds -= TimeUnit.DAYS.toSeconds(days)
-        val hours = TimeUnit.SECONDS.toHours(seconds)
-        seconds -= TimeUnit.HOURS.toSeconds(hours)
-        val minutes =
-            TimeUnit.SECONDS.toMinutes(seconds + TimeUnit.MINUTES.toSeconds(1) / 2) // round it to next minute if seconds is more or equal than 30
+        val hoursAndMinutes = getHoursAndMinutes(seconds)
+        val hours = hoursAndMinutes.first
+        val minutes = hoursAndMinutes.second
 
         val textSpanItems = ArrayList<SpanItem>()
         val resources = context.resourcesWithLocale(locale)
@@ -134,5 +133,14 @@ object TimeFormatter {
             it.setLocale(locale)
         }
         return this.createConfigurationContext(config).resources
+    }
+
+    private fun getHoursAndMinutes(seconds: Long): Pair<Long, Long> {
+        val initialHoursValue = TimeUnit.SECONDS.toHours(seconds)
+        val leftOverSeconds = seconds - TimeUnit.HOURS.toSeconds(initialHoursValue)
+        val minutes =
+            TimeUnit.SECONDS.toMinutes(leftOverSeconds + TimeUnit.MINUTES.toSeconds(1) / 2)
+
+        return if (minutes == 60L) Pair(initialHoursValue + 1, 0) else Pair(initialHoursValue, minutes)
     }
 }
