@@ -173,4 +173,12 @@ class TimeFormatterTest {
 
         assertEquals("16:38", result)
     }
+
+    @Config(qualifiers = "en")
+    @Test
+    fun formatTimeRemainingDefaultLocaleFiveHours() {
+        val result = TimeFormatter.formatTimeRemaining(ctx, 17999.0, null)
+
+        assertEquals("5 hr ", result.toString())
+    }
 }
