@@ -63,11 +63,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun onInit_registerTripSessionStateObserver_called() {
-        onInit { verify(exactly = 1) { mapboxNavigation.registerTripSessionStateObserver(any()) } }
-    }
-
-    @Test
     fun onInit_registerLocationObserver_called() {
         onInit { verify(exactly = 1) { mapboxNavigation.registerLocationObserver(any()) } }
     }
@@ -93,11 +88,6 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
-    fun onUnregisterListeners_unregisterTripSessionStateObserver_called() {
-        onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterTripSessionStateObserver(any()) } }
-    }
-
-    @Test
     fun onUnregisterListener_unregisterLocationObserver_called() {
         onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterLocationObserver(any()) } }
     }
@@ -119,7 +109,6 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
 
         verify(exactly = 2) { mapboxNavigation.registerRouteProgressObserver(any()) }
-        verify(exactly = 2) { mapboxNavigation.registerTripSessionStateObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerLocationObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerRoutesObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerOffRouteObserver(any()) }
