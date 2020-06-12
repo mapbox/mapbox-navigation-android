@@ -1,11 +1,11 @@
 package com.mapbox.navigation.navigator
 
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.common.CancelRequestCallback
 import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpResponseCallback
+import com.mapbox.common.ResultCallback
 import com.mapbox.common.UserAgentComponents
 import com.mapbox.navigation.navigator.NavigationOkHttpService.Companion.GZIP
 import com.mapbox.navigation.navigator.NavigationOkHttpService.Companion.HEADER_ENCODING
@@ -25,7 +25,9 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
-import org.junit.Assert
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -62,7 +64,7 @@ class NavigationOkHttpServiceTest {
 
     @Test
     fun supportsKeepCompression() {
-        Assert.assertTrue(httpService.supportsKeepCompression())
+        assertTrue(httpService.supportsKeepCompression())
     }
 
     @Test
@@ -73,7 +75,7 @@ class NavigationOkHttpServiceTest {
         val id = httpService.request(nativeRequest, nativeCallback)
 
         verify { call.enqueue(any()) }
-        Assert.assertTrue(id > 0)
+        assertTrue(id > 0)
     }
 
     @Test
@@ -84,13 +86,13 @@ class NavigationOkHttpServiceTest {
         httpService.request(nativeRequest, nativeCallback)
 
         val request = requestSlot.captured
-        Assert.assertEquals(nativeRequest.url, request.url().toString())
-        Assert.assertEquals(nativeRequest.url.toLowerCase(Locale.US), request.tag())
+        assertEquals(nativeRequest.url, request.url().toString())
+        assertEquals(nativeRequest.url.toLowerCase(Locale.US), request.tag())
         val headers = Headers.Builder().addAll(nativeRequest.headers.toHeaders()).let {
             it.add(HEADER_ENCODING, GZIP)
             it.build()
         }
-        Assert.assertEquals(headers, request.headers())
+        assertEquals(headers, request.headers())
     }
 
     @Test
@@ -99,7 +101,7 @@ class NavigationOkHttpServiceTest {
         every { httpClient.newCall(any()) } returns call
 
         val id = httpService.request(nativeRequest, nativeCallback)
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
+        val cancelRequestCallback: ResultCallback = mockk(relaxUnitFun = true)
         httpService.cancelRequest(id, cancelRequestCallback)
 
         verify { call.cancel() }
@@ -121,7 +123,7 @@ class NavigationOkHttpServiceTest {
         callbackSlot.captured.onFailure(call, exception)
 
         verify { nativeCallback.run(capture(nativeResponseSlot)) }
-        Assert.assertTrue(nativeResponseSlot.captured.result.isError)
+        assertTrue(nativeResponseSlot.captured.result.isError)
     }
 
     @Test
@@ -149,10 +151,10 @@ class NavigationOkHttpServiceTest {
 
         val nativeResponseSlot = slot<HttpResponse>()
         verify { nativeCallback.run(capture(nativeResponseSlot)) }
-        Assert.assertTrue(nativeResponseSlot.captured.result.isValue)
-        Assert.assertEquals(200, nativeResponseSlot.captured.result.value!!.code)
-        Assert.assertArrayEquals(byteArray, nativeResponseSlot.captured.result.value!!.data)
-        Assert.assertEquals(headers.toHashMap(), nativeResponseSlot.captured.result.value!!.headers)
+        assertTrue(nativeResponseSlot.captured.result.isValue)
+        assertEquals(200, nativeResponseSlot.captured.result.value!!.code)
+        assertArrayEquals(byteArray, nativeResponseSlot.captured.result.value!!.data)
+        assertEquals(headers.toHashMap(), nativeResponseSlot.captured.result.value!!.headers)
     }
 
     @Test
@@ -175,7 +177,7 @@ class NavigationOkHttpServiceTest {
 
         val nativeResponseSlot = slot<HttpResponse>()
         verify { nativeCallback.run(capture(nativeResponseSlot)) }
-        Assert.assertTrue(nativeResponseSlot.captured.result.isError)
+        assertTrue(nativeResponseSlot.captured.result.isError)
     }
 
     @Test
@@ -198,8 +200,8 @@ class NavigationOkHttpServiceTest {
 
         val nativeResponseSlot = slot<HttpResponse>()
         verify { nativeCallback.run(capture(nativeResponseSlot)) }
-        Assert.assertTrue(nativeResponseSlot.captured.result.isValue)
-        Assert.assertEquals(304, nativeResponseSlot.captured.result.value!!.code)
+        assertTrue(nativeResponseSlot.captured.result.isValue)
+        assertEquals(304, nativeResponseSlot.captured.result.value!!.code)
     }
 
     @Test
@@ -212,7 +214,7 @@ class NavigationOkHttpServiceTest {
 
         val id = httpService.request(nativeRequest, nativeCallback)
         callbackSlot.captured.onFailure(call, IOException("exceptionMessage"))
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
+        val cancelRequestCallback: ResultCallback = mockk(relaxUnitFun = true)
         httpService.cancelRequest(id, cancelRequestCallback)
 
         verify(exactly = 0) { call.cancel() }
@@ -228,7 +230,7 @@ class NavigationOkHttpServiceTest {
         every { httpClient.newCall(capture(requestSlot)) } returns call
 
         val id = httpService.request(nativeRequest, nativeCallback)
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
+        val cancelRequestCallback: ResultCallback = mockk(relaxUnitFun = true)
         httpService.cancelRequest(id, cancelRequestCallback)
         callbackSlot.captured.onResponse(call, mockk(relaxed = true))
 

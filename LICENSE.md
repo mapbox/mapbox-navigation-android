@@ -202,15 +202,32 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the Hamcrest Core (This is the core API of hamcrest matcher framework to be used by third-party framework providers. This includes the a foundation set of matcher implementations for common operations.).
+License: [New BSD License](http://www.opensource.org/licenses/bsd-license.php)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the JetBrains Java Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/license/LICENSE-2.0.txt)
 
 ===========================================================================
 
+Mapbox Navigation uses portions of the JUnit (JUnit is a unit testing framework for Java, created by Erich Gamma and Kent Beck.).
+URL: [http://junit.org](http://junit.org)
+License: [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
+
+===========================================================================
+
 Mapbox Navigation uses portions of the Mapbox Accounts SDK for Android.
 URL: [https://github.com/mapbox/mapbox-accounts-android](https://github.com/mapbox/mapbox-accounts-android)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
+
+===========================================================================
+
+Mapbox Navigation uses portions of the Mapbox Android Commmon SDK.
+URL: [https://github.com/mapbox/mapbox-sdk](https://github.com/mapbox/mapbox-sdk)
+License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
 
 ===========================================================================
 

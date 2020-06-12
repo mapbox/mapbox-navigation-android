@@ -1,7 +1,6 @@
 ext {
 
   androidVersions = [
-      legacyMinSdkVersion     : 14,
       minSdkVersion           : 19,
       targetSdkVersion        : 28,
       compileSdkVersion       : 28,
@@ -14,7 +13,7 @@ ext {
       mapboxSdkDirectionsModels : '5.2.1',
       mapboxEvents              : '5.0.1',
       mapboxCore                : '2.0.1',
-      mapboxNavigator           : '13.0.2',
+      mapboxNavigator           : '14.0.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
@@ -22,8 +21,6 @@ ext {
       mapboxAnnotations         : '0.1.0',
       mapboxAnnotationsProcessor: '0.1.0',
       mapboxAndroidCommon       : '0.1.0',
-      mapboxCoreCommon          : '1.4.0',
-      mapboxBindgenSupport      : '1.0.0',
       mapboxLogger              : '0.1.0',
       androidXCoreVersion       : '1.2.0',
       androidXAppCompatVersion  : '1.1.0',
@@ -85,8 +82,6 @@ ext {
       mapboxAnnotationsProcessor: "com.mapbox.base:annotations-processor:${version.mapboxAnnotationsProcessor}",
       mapboxAndroidCommon       : "com.mapbox.base:common:${version.mapboxAndroidCommon}",
       mapboxLogger              : "com.mapbox.common:logger:${version.mapboxLogger}",
-      mapboxCoreCommon          : "com.mapbox.common:common:${version.mapboxCoreCommon}",
-      mapboxBindgenSupport      : "com.mapbox.bindgen:support:${version.mapboxBindgenSupport}",
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",
