@@ -74,9 +74,13 @@ internal class MapRouteProgressChangeListener(
     }
 
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
+        if (routeArrow.routeArrowIsVisible()) {
+            routeArrow.addUpcomingManeuverArrow(routeProgress)
+        }
         val currentRoute = routeProgress.route
         val hasGeometry = currentRoute?.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
+            vanishingLineAnimator?.cancel()
             routeLine.draw(currentRoute!!)
             this.lastDistanceValue = routeLine.vanishPointOffset
         } else {
@@ -91,9 +95,6 @@ internal class MapRouteProgressChangeListener(
                     }
                 }
             }
-        }
-        if (routeArrow.routeArrowIsVisible()) {
-            routeArrow.addUpcomingManeuverArrow(routeProgress)
         }
     }
 
