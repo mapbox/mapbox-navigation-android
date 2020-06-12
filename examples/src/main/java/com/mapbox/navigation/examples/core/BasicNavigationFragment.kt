@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.ImageButton
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
@@ -44,10 +46,9 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
-import com.mapbox.navigation.core.trip.session.TripSessionState
-import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
 import com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle
@@ -81,8 +82,11 @@ import timber.log.Timber
  * build the turn-by-turn navigation experience with Navigation Core SDK.
  */
 class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSheetListener,
-    OnWayNameChangedListener {
+        OnWayNameChangedListener {
 
+    private val CHANGE_SETTING_REQUEST_CODE = 1001
+
+    private val simulateRoute by lazy { shouldSimulateRoute() }
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -100,6 +104,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
     private var directionRoute: DirectionsRoute? = null
+    private var isActiveGuidance = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,7 +120,6 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         initViews()
 
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
 
         initNavigation()
         initializeSpeechPlayer()
@@ -151,10 +155,6 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         mapView.onDestroy()
 
         mapboxReplayer.finish()
-        mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
-        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
 
         mapboxNavigation.stopTripSession()
         mapboxNavigation.onDestroy()
@@ -186,17 +186,19 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
         mapboxMap.addOnMapLongClickListener { latLng ->
             Timber.d("onMapLongClickListener position=%s", latLng)
-            destination = latLng
-            locationComponent?.lastKnownLocation?.let { originLocation ->
-                mapboxNavigation.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(requireContext()))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .build(),
-                    routesReqCallback
-                )
+            if (!isActiveGuidance) {
+                destination = latLng
+                locationComponent?.lastKnownLocation?.let { originLocation ->
+                    mapboxNavigation.requestRoutes(
+                            RouteOptions.builder().applyDefaultParams()
+                                    .accessToken(Utils.getMapboxAccessToken(requireContext()))
+                                    .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                                    .alternatives(true)
+                                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                                    .build(),
+                            routesReqCallback
+                    )
+                }
             }
             true
         }
@@ -204,9 +206,9 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
-                    LocationComponentActivationOptions.builder(
-                        requireContext(), style
-                    ).build()
+                        LocationComponentActivationOptions.builder(
+                                requireContext(), style
+                        ).build()
                 )
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
@@ -218,10 +220,12 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                 setCamera(DynamicCamera(mapboxMap))
             }
 
-            if (shouldSimulateRoute()) {
+            if (simulateRoute) {
                 mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 mapboxReplayer.pushRealLocation(requireContext(), 0.0)
-                mapboxReplayer.play()
+                if (isActiveGuidance) {
+                    mapboxReplayer.play()
+                }
             }
             mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
 
@@ -233,11 +237,14 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
             if (directionRoute == null) {
                 Snackbar.make(
-                    requireView(),
-                    R.string.msg_long_press_map_to_place_waypoint,
-                    Snackbar.LENGTH_SHORT
+                        requireView(),
+                        R.string.msg_long_press_map_to_place_waypoint,
+                        Snackbar.LENGTH_SHORT
                 ).show()
             }
+
+            mapboxNavigation.startTripSession()
+            updateCameraOnNavigationStateChange(true)
         }
     }
 
@@ -245,13 +252,13 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
             mapboxMap?.snapshot { snapshot ->
-                alertView.showFeedbackSubmitted()
                 MapboxNavigation.postUserFeedback(
-                    feedback.feedbackType,
-                    feedback.description,
-                    FeedbackEvent.UI,
-                    encodeSnapshot(snapshot)
+                        feedback.feedbackType,
+                        feedback.description,
+                        FeedbackEvent.UI,
+                        encodeSnapshot(snapshot)
                 )
+                showFeedbackSent()
             }
         }
     }
@@ -272,16 +279,23 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     @Suppress("DEPRECATION")
     @SuppressLint("MissingPermission")
     private fun initViews() {
-        startNavigation.apply {
-            visibility = View.VISIBLE
-            isEnabled = false
-            setOnClickListener {
-                Timber.d("start navigation")
-                if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                    updateCameraOnNavigationStateChange(true)
-                    navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
+        settingsFab.setOnClickListener {
+            startActivityForResult(
+                    Intent(activity, NavigationSettingsActivity::class.java),
+                    CHANGE_SETTING_REQUEST_CODE
+            )
+        }
 
-                    mapboxNavigation.startTripSession()
+        startNavigation.apply {
+            visibility = View.GONE
+            setOnClickListener {
+                isActiveGuidance = true
+                updateViews()
+                registerNavigationObservers()
+                navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
+                it.visibility = View.GONE
+                if (simulateRoute) {
+                    mapboxReplayer.play()
                 }
             }
         }
@@ -300,7 +314,12 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
         cancelBtn = requireView().findViewById(R.id.cancelBtn)
         cancelBtn.setOnClickListener {
-            mapboxNavigation.stopTripSession()
+            isActiveGuidance = false
+            if (simulateRoute) {
+                mapboxReplayer.stop()
+            }
+            unregisterNavigationObservers()
+            updateViews()
         }
 
         recenterBtn.apply {
@@ -340,51 +359,94 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         }
     }
 
-    private fun updateViews(tripSessionState: TripSessionState) {
-        when (tripSessionState) {
-            TripSessionState.STARTED -> {
-                startNavigation.visibility = View.GONE
+    private fun updateViews() {
+        if (isActiveGuidance) {
+            updateCameraOnNavigationStateChange(true)
+            navigationMapboxMap?.addOnWayNameChangedListener(this@BasicNavigationFragment)
+            navigationMapboxMap?.updateWaynameQueryMap(true)
+            summaryBottomSheet.visibility = View.VISIBLE
+            recenterBtn.hide()
 
-                summaryBottomSheet.visibility = View.VISIBLE
-                recenterBtn.hide()
+            instructionView.visibility = View.VISIBLE
+            feedbackButton.show()
+            instructionSoundButton.show()
+        } else {
+            settingsFab.visibility = View.VISIBLE
 
-                instructionView.visibility = View.VISIBLE
-                feedbackButton.show()
-                instructionSoundButton.show()
-                showLogoAndAttribution()
+            summaryBottomSheet.visibility = View.GONE
+            recenterBtn.hide()
+            hideWayNameView()
+
+            instructionView.visibility = View.GONE
+            feedbackButton.hide()
+            instructionSoundButton.hide()
+            if (mapboxNavigation.getRoutes().isNotEmpty()) {
+                navigationMapboxMap?.removeRoute()
+                mapboxNavigation.setRoutes(emptyList())
             }
-            TripSessionState.STOPPED -> {
-                startNavigation.visibility = View.VISIBLE
-                startNavigation.isEnabled = false
-
-                summaryBottomSheet.visibility = View.GONE
-                recenterBtn.hide()
-                hideWayNameView()
-
-                instructionView.visibility = View.GONE
-                feedbackButton.hide()
-                instructionSoundButton.hide()
-            }
+            navigationMapboxMap?.removeOnWayNameChangedListener(this@BasicNavigationFragment)
+            navigationMapboxMap?.updateWaynameQueryMap(false)
         }
+        showLogoAndAttribution()
+    }
+
+    private fun registerNavigationObservers() {
+        mapboxNavigation.apply {
+            registerRouteProgressObserver(routeProgressObserver)
+            registerBannerInstructionsObserver(bannerInstructionObserver)
+            speechPlayer.isMuted = false
+            registerVoiceInstructionsObserver(voiceInstructionsObserver)
+        }
+    }
+
+    private fun unregisterNavigationObservers() {
+        mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
+        speechPlayer.isMuted = true
+        mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
+    }
+
+    private fun showFeedbackSent() {
+        val snackbar = Snackbar.make(
+                mapView,
+                com.mapbox.libnavigation.ui.R.string.feedback_reported,
+                Snackbar.LENGTH_SHORT
+        )
+
+        snackbar.view.setBackgroundColor(
+                ContextCompat.getColor(
+                        activity!!,
+                        com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
+                )
+        )
+        snackbar.setTextColor(
+                ContextCompat.getColor(
+                        activity!!,
+                        com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_primary_text
+                )
+        )
+        snackbar.anchorView = summaryBottomSheet
+
+        snackbar.show()
     }
 
     private fun showLogoAndAttribution() {
         summaryBottomSheet.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
+                ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 navigationMapboxMap?.retrieveMap()?.uiSettings?.apply {
                     val bottomMargin = summaryBottomSheet.measuredHeight
                     setLogoMargins(
-                        logoMarginLeft,
-                        logoMarginTop,
-                        logoMarginRight,
-                        bottomMargin
+                            logoMarginLeft,
+                            logoMarginTop,
+                            logoMarginRight,
+                            bottomMargin
                     )
                     setAttributionMargins(
-                        attributionMarginLeft,
-                        attributionMarginTop,
-                        attributionMarginRight,
-                        bottomMargin
+                            attributionMarginLeft,
+                            attributionMarginTop,
+                            attributionMarginRight,
+                            bottomMargin
                     )
                 }
                 summaryBottomSheet.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -395,46 +457,40 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(requireContext())
         mapboxNavigation = MapboxNavigation(
-            requireContext(),
-            MapboxNavigation.defaultNavigationOptions(requireContext(), accessToken),
-            getLocationEngine()
+                requireContext(),
+                MapboxNavigation.defaultNavigationOptions(requireContext(), accessToken),
+                getLocationEngine()
         )
-        mapboxNavigation.apply {
-            registerTripSessionStateObserver(tripSessionStateObserver)
-            registerRouteProgressObserver(routeProgressObserver)
-            registerBannerInstructionsObserver(bannerInstructionObserver)
-            registerVoiceInstructionsObserver(voiceInstructionsObserver)
-        }
     }
 
     private fun initializeSpeechPlayer() {
         val cache =
-            Cache(
-                File(
-                    requireContext().cacheDir,
-                    InstructionViewActivity.VOICE_INSTRUCTION_CACHE
-                ),
-                10 * 1024 * 1024
-            )
+                Cache(
+                        File(
+                                requireContext().cacheDir,
+                                InstructionViewActivity.VOICE_INSTRUCTION_CACHE
+                        ),
+                        10 * 1024 * 1024
+                )
         val voiceInstructionLoader =
-            VoiceInstructionLoader(requireContext(), Mapbox.getAccessToken(), cache)
+                VoiceInstructionLoader(requireContext(), Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
-            SpeechPlayerProvider(
-                requireContext(),
-                Locale.US.language,
-                true,
-                voiceInstructionLoader
-            )
+                SpeechPlayerProvider(
+                        requireContext(),
+                        Locale.US.language,
+                        true,
+                        voiceInstructionLoader
+                )
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 
     private fun showFeedbackBottomSheet() {
         requireFragmentManager().let {
             FeedbackBottomSheet.newInstance(
-                this,
-                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
+                    this,
+                    NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
             )
-                .show(it, FeedbackBottomSheet.TAG)
+                    .show(it, FeedbackBottomSheet.TAG)
         }
     }
 
@@ -458,16 +514,16 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
-                .toInt()
+                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
+                        .toInt()
         val paddingBuffer =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
-                .toInt()
+                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
+                        .toInt()
         val instructionHeight =
-            (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
+                (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
         val summaryHeight =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
-                .toInt()
+                resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
+                        .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }
 
@@ -492,9 +548,11 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
             if (routes.isNotEmpty()) {
                 directionRoute = routes[0]
                 navigationMapboxMap?.drawRoute(routes[0])
+                settingsFab.visibility = View.GONE
                 startNavigation.visibility = View.VISIBLE
                 startNavigation.isEnabled = true
             } else {
+                startNavigation.visibility = View.GONE
                 startNavigation.isEnabled = false
             }
         }
@@ -505,31 +563,6 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
             Timber.d("route request canceled")
-        }
-    }
-
-    private val tripSessionStateObserver = object : TripSessionStateObserver {
-        override fun onSessionStateChanged(tripSessionState: TripSessionState) {
-            when (tripSessionState) {
-                TripSessionState.STARTED -> {
-                    updateViews(TripSessionState.STARTED)
-
-                    navigationMapboxMap?.addOnWayNameChangedListener(this@BasicNavigationFragment)
-                    navigationMapboxMap?.updateWaynameQueryMap(true)
-                }
-                TripSessionState.STOPPED -> {
-                    updateViews(TripSessionState.STOPPED)
-
-                    if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                        navigationMapboxMap?.removeRoute()
-                    }
-
-                    navigationMapboxMap?.removeOnWayNameChangedListener(this@BasicNavigationFragment)
-                    navigationMapboxMap?.updateWaynameQueryMap(false)
-
-                    updateCameraOnNavigationStateChange(false)
-                }
-            }
         }
     }
 
@@ -557,7 +590,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         }
 
         override fun onCameraTrackingDismissed() {
-            if (mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+            if (isActiveGuidance) {
                 summaryBehavior.isHideable = true
                 summaryBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 hideWayNameView()
@@ -579,7 +612,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
     private class MyLocationEngineCallback(fragment: BasicNavigationFragment) :
-        LocationEngineCallback<LocationEngineResult> {
+            LocationEngineCallback<LocationEngineResult> {
 
         private val fragmentRef = WeakReference(fragment)
 
@@ -598,7 +631,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
     // for testing else a real location engine is used.
     private fun getLocationEngine(): LocationEngine {
-        return if (shouldSimulateRoute()) {
+        return if (simulateRoute) {
             ReplayLocationEngine(mapboxReplayer)
         } else {
             LocationEngineProvider.getBestLocationEngine(activity!!)
@@ -607,6 +640,17 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(requireContext())
-            .getBoolean(this.getString(R.string.simulate_route_key), false)
+                .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CHANGE_SETTING_REQUEST_CODE) {
+            Snackbar.make(view!!, resources.getString(R.string.settings_saved), Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        mapView.getMapAsync(this)
     }
 }

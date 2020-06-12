@@ -3,28 +3,11 @@ package com.mapbox.navigation.examples.settings;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
-import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
 import com.mapbox.navigation.examples.BuildConfig;
 import com.mapbox.navigation.examples.R;
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import timber.log.Timber;
 
 public class NavigationSettingsActivity extends PreferenceActivity {
 
@@ -46,7 +29,7 @@ public class NavigationSettingsActivity extends PreferenceActivity {
 
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
     getFragmentManager().beginTransaction().replace(
-      android.R.id.content, new NavigationViewPreferenceFragment()
+        android.R.id.content, new NavigationViewPreferenceFragment()
     ).commit();
   }
 
@@ -64,63 +47,13 @@ public class NavigationSettingsActivity extends PreferenceActivity {
 
       String gitHashTitle = String.format("Last Commit Hash: %s", BuildConfig.GIT_HASH);
       findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
-
-      findPreference(getString(R.string.nav_native_history_retrieve_key)).setOnPreferenceClickListener(preference -> {
-        String history = MapboxNativeNavigatorImpl.INSTANCE.getHistory();
-        File path = Environment.getExternalStoragePublicDirectory("navigation_debug");
-        if (!path.exists()) {
-          path.mkdirs();
-        }
-        File file = new File(
-            Environment.getExternalStoragePublicDirectory("navigation_debug"),
-            "history_" + System.currentTimeMillis() + ".json"
-        );
-        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file))) {
-          outputStreamWriter.write(history);
-          Toast.makeText(getActivity(), "Saved to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-          Timber.i("History file saved to %s", file.getAbsolutePath());
-        } catch (IOException ex) {
-          Timber.e("History file write failed: %s", ex.toString());
-        }
-        return true;
-      });
     }
 
     @Override
     public void onResume() {
       super.onResume();
 
-      getOfflineVersions();
       PreferenceManager.setDefaultValues(getActivity(), R.xml.fragment_navigation_preferences, false);
-    }
-
-    private void getOfflineVersions() {
-      File file = new File(Environment.getExternalStoragePublicDirectory("Offline"), "tiles");
-      if (!file.exists()) {
-        file.mkdirs();
-      }
-
-      ListPreference offlineVersions = (ListPreference) findPreference(getString(R.string.offline_version_key));
-      List<String> list = buildFileList(file);
-      if (!list.isEmpty()) {
-        String[] entries = list.toArray(new String[list.size() - 1]);
-        offlineVersions.setEntries(entries);
-        offlineVersions.setEntryValues(entries);
-        offlineVersions.setEnabled(true);
-      } else {
-        offlineVersions.setEnabled(false);
-      }
-    }
-
-    @NonNull
-    private List<String> buildFileList(File file) {
-      List<String> list;
-      if (file.list() != null && file.list().length != 0) {
-        list = new ArrayList<>(Arrays.asList(file.list()));
-      } else {
-        list = new ArrayList<>();
-      }
-      return list;
     }
   }
 }

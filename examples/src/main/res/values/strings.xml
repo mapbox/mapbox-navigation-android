@@ -109,6 +109,7 @@
     <string name="description_navigation_route_ui">An example using NavigationMapRoute</string>
 
     <string name="settings" translatable="false">Settings</string>
+    <string name="settings_saved" translatable="false">Please restart the app to apply the change.</string>
     <string name="simulate_route" translatable="false">Simulate Route</string>
     <string name="language" translatable="false">Language</string>
     <string name="unit_type" translatable="false">Unit Type</string>
