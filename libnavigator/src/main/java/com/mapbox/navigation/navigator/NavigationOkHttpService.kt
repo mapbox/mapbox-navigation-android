@@ -5,7 +5,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.CancelRequestCallback
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpRequestErrorType
@@ -96,15 +95,9 @@ internal class NavigationOkHttpService(
         return id
     }
 
-    override fun cancelRequest(id: Long, callback: CancelRequestCallback) {
+    override fun cancelRequest(id: Long) {
         lock.lock()
-        val call = callMap.remove(id)
-        if (call != null) {
-            call.cancel()
-            callback.run(false)
-        } else {
-            callback.run(true)
-        }
+        callMap.remove(id)?.cancel()
         lock.unlock()
     }
 
