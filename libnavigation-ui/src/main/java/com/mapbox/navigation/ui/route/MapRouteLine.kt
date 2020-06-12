@@ -620,7 +620,7 @@ internal class MapRouteLine(
             style,
             roundedLineCap,
             routeTrafficScale,
-            routeLowCongestionColor
+            routeDefaultColor
         ).apply {
             MapUtils.addLayerToMap(
                 style,

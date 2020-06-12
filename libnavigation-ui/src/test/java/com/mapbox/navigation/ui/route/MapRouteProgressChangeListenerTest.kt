@@ -103,6 +103,32 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
+    fun `should cancel animator when route progress has geometry`() {
+        val animator = mockk<ValueAnimator>(relaxUnitFun = true)
+        val routeProgressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
+
+        every { routeLine.retrieveDirectionsRoutes() } returns listOf(
+            mockk {
+                every { geometry() } returns null
+            }
+        )
+        val routeProgress: RouteProgress = mockk {
+            every { route } returns mockk {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+            }
+        }
+        val newRoute: DirectionsRoute = mockk {
+            every { geometry() } returns null
+        }
+
+        every { routeLine.getPrimaryRoute() } returns newRoute
+
+        routeProgressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify(exactly = 1) { animator.cancel() }
+    }
+
+    @Test
     fun `should only add maneuver arrow when visible`() {
         val routes = listOf(
             mockk<DirectionsRoute> {
