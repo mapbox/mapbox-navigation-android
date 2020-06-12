@@ -70,6 +70,11 @@ object FeedbackEvent {
     const val INCORRECT_AUDIO_GUIDANCE = "incorrect_audio_guidance"
 
     /**
+     * Feedback type *positioning issue*: wrong positioning
+     */
+    const val POSITIONING_ISSUE = "positioning_issue"
+
+    /**
      * Feedback source *reroute*: the user tapped a feedback button in response to a reroute
      */
     const val REROUTE = "reroute"
@@ -214,7 +219,8 @@ object FeedbackEvent {
         CONFUSING_INSTRUCTION,
         INACCURATE_GPS,
         INCORRECT_VISUAL_GUIDANCE,
-        INCORRECT_AUDIO_GUIDANCE
+        INCORRECT_AUDIO_GUIDANCE,
+        POSITIONING_ISSUE
     )
     annotation class Type
 
