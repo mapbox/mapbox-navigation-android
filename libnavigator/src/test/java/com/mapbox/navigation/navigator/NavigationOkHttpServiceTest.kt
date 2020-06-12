@@ -1,7 +1,6 @@
 package com.mapbox.navigation.navigator
 
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.common.CancelRequestCallback
 import com.mapbox.common.HttpMethod
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpResponse
@@ -99,11 +98,9 @@ class NavigationOkHttpServiceTest {
         every { httpClient.newCall(any()) } returns call
 
         val id = httpService.request(nativeRequest, nativeCallback)
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
-        httpService.cancelRequest(id, cancelRequestCallback)
+        httpService.cancelRequest(id)
 
         verify { call.cancel() }
-        verify(exactly = 1) { cancelRequestCallback.run(false) }
     }
 
     @Test
@@ -212,11 +209,9 @@ class NavigationOkHttpServiceTest {
 
         val id = httpService.request(nativeRequest, nativeCallback)
         callbackSlot.captured.onFailure(call, IOException("exceptionMessage"))
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
-        httpService.cancelRequest(id, cancelRequestCallback)
+        httpService.cancelRequest(id)
 
         verify(exactly = 0) { call.cancel() }
-        verify(exactly = 1) { cancelRequestCallback.run(true) }
     }
 
     @Test
@@ -228,11 +223,9 @@ class NavigationOkHttpServiceTest {
         every { httpClient.newCall(capture(requestSlot)) } returns call
 
         val id = httpService.request(nativeRequest, nativeCallback)
-        val cancelRequestCallback: CancelRequestCallback = mockk(relaxUnitFun = true)
-        httpService.cancelRequest(id, cancelRequestCallback)
+        httpService.cancelRequest(id)
         callbackSlot.captured.onResponse(call, mockk(relaxed = true))
 
         verify(exactly = 0) { nativeCallback.run(any()) }
-        verify(exactly = 1) { cancelRequestCallback.run(false) }
     }
 }
