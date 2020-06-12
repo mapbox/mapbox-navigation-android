@@ -24,6 +24,9 @@
     <!-- Feedback type for Confusing Audio -->
     <string name="feedback_type_confusing_audio">Confusing\nAudio</string>
 
+    <!-- Feedback type for Positioning Issue -->
+    <string name="feedback_type_positioning_issue">Positioning\nIssue</string>
+
     <!-- Feedback Navigation Issue -->
     <string name="feedback_navigation_issue">Navigation Issue</string>
 

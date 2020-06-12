@@ -57,7 +57,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private static final String EMPTY_FEEDBACK_DESCRIPTION = "";
   private static final long CLOSE_BOTTOM_SHEET_AFTER = 150L;
   private static final long TIMER_INTERVAL = 1L;
-  private static final int GRID_SPAN_GUIDANCE_LAYOUT = 2;
+  private static final int GRID_SPAN_GUIDANCE_LAYOUT = 3;
   private static final int GRID_SPAN_NAVIGATION_LAYOUT = 3;
 
   private FeedbackBottomSheetListener feedbackBottomSheetListener;
@@ -305,6 +305,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
       R.drawable.ic_feedback_confusing_audio,
       FeedbackEvent.INCORRECT_AUDIO_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
+    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_positioning_issue),
+        R.drawable.ic_feedback_positioning_issue,
+        FeedbackEvent.POSITIONING_ISSUE,
+        EMPTY_FEEDBACK_DESCRIPTION));
 
     return list;
   }
@@ -352,11 +356,12 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   };
 
   private void onFeedbackSelected(FeedbackItem feedbackItem) {
-    if (feedbackFlowType == FEEDBACK_DETAIL_FLOW) {
-      launchDetailFlow(feedbackItem);
-    } else {
+    if (feedbackFlowType == FEEDBACK_MAIN_FLOW
+        || feedbackItem.getFeedbackType().equals(FeedbackEvent.POSITIONING_ISSUE)) {
       feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
       startTimer();
+    } else {
+      launchDetailFlow(feedbackItem);
     }
   }
 

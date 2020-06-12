@@ -368,6 +368,7 @@ package com.mapbox.navigation.core.telemetry.events {
     field public static final String MISSING_EXIT = "missing_exit";
     field public static final String MISSING_ROAD = "missing_road";
     field public static final String NOT_ALLOWED = "not_allowed";
+    field public static final String POSITIONING_ISSUE = "positioning_issue";
     field public static final String PRONUNCIATION_INCORRECT = "pronunciation_incorrect";
     field public static final String REROUTE = "reroute";
     field public static final String ROAD_CLOSED = "road_closed";
@@ -394,7 +395,7 @@ package com.mapbox.navigation.core.telemetry.events {
   @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.REROUTE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Source {
   }
 
-  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GENERAL_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ACCIDENT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.HAZARD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_CLOSED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTING_ERROR, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_ROAD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_EXIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CONFUSING_INSTRUCTION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INACCURATE_GPS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_AUDIO_GUIDANCE}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Type {
+  @StringDef({com.mapbox.navigation.core.telemetry.events.FeedbackEvent.GENERAL_ISSUE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ACCIDENT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.HAZARD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROAD_CLOSED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.NOT_ALLOWED, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.ROUTING_ERROR, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_ROAD, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.MISSING_EXIT, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.CONFUSING_INSTRUCTION, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INACCURATE_GPS, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_VISUAL_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.INCORRECT_AUDIO_GUIDANCE, com.mapbox.navigation.core.telemetry.events.FeedbackEvent.POSITIONING_ISSUE}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface FeedbackEvent.Type {
   }
 
 }
