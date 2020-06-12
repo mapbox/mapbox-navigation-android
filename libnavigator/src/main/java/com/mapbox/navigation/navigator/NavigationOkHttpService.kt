@@ -5,7 +5,8 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.bindgen.Expected
 import com.mapbox.bindgen.ExpectedFactory
-import com.mapbox.common.CancelRequestCallback
+import com.mapbox.common.DownloadOptions
+import com.mapbox.common.DownloadStatusCallback
 import com.mapbox.common.HttpRequest
 import com.mapbox.common.HttpRequestError
 import com.mapbox.common.HttpRequestErrorType
@@ -13,6 +14,7 @@ import com.mapbox.common.HttpResponse
 import com.mapbox.common.HttpResponseCallback
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
+import com.mapbox.common.ResultCallback
 import java.io.IOException
 import java.util.HashMap
 import java.util.Locale
@@ -96,7 +98,7 @@ internal class NavigationOkHttpService(
         return id
     }
 
-    override fun cancelRequest(id: Long, callback: CancelRequestCallback) {
+    override fun cancelRequest(id: Long, callback: ResultCallback) {
         lock.lock()
         val call = callMap.remove(id)
         if (call != null) {
@@ -106,6 +108,18 @@ internal class NavigationOkHttpService(
             callback.run(true)
         }
         lock.unlock()
+    }
+
+    override fun download(options: DownloadOptions, callback: DownloadStatusCallback): Long {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun pauseRequest(id: Long, callback: ResultCallback) {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun resumeRequest(id: Long, callback: ResultCallback) {
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     internal inner class HttpCallback constructor(

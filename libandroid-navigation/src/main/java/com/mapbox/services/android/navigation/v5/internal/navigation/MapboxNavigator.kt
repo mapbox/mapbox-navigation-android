@@ -1,6 +1,7 @@
 package com.mapbox.services.android.navigation.v5.internal.navigation
 
 import android.location.Location
+import android.os.Build
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
@@ -101,7 +102,8 @@ internal class MapboxNavigator(val navigator: Navigator) {
 
     @Synchronized
     fun retrieveRouteGeometryWithBuffer(): Geometry? {
-        val routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION) ?: return null
+        val routeGeometryWithBuffer = navigator.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)
+            ?: return null
         return GeometryGeoJson.fromJson(routeGeometryWithBuffer)
     }
 
@@ -119,15 +121,27 @@ internal class MapboxNavigator(val navigator: Navigator) {
         val altitude = checkFor(location.altitude.toFloat())
         val horizontalAccuracy = checkFor(location.accuracy)
         val provider = location.provider
+        var bearingAccuracy: Float? = null
+        var speedAccuracy: Float? = null
+        var verticalAccuracy: Float? = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            bearingAccuracy = location.bearingAccuracyDegrees
+            speedAccuracy = location.speedAccuracyMetersPerSecond
+            verticalAccuracy = location.verticalAccuracyMeters
+        }
 
         return FixLocation(
-                rawPoint,
-                time,
-                speed,
-                bearing,
-                altitude,
-                horizontalAccuracy,
-                provider
+            rawPoint,
+            time,
+            speed,
+            bearing,
+            altitude,
+            horizontalAccuracy,
+            provider,
+            bearingAccuracy,
+            speedAccuracy,
+            verticalAccuracy
         )
     }
 
