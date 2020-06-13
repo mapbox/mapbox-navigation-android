@@ -396,7 +396,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private LocationEngine initializeLocationEngineFrom(final NavigationViewOptions options) {
-    if (options.shouldSimulateRoute()) {
+    if (options.locationEngine() != null) {
+      return options.locationEngine();
+    } else if (options.shouldSimulateRoute()) {
       ReplayLocationEngine replayLocationEngine = new ReplayLocationEngine(mapboxReplayer);
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
       ReplayEventBase replayEventOrigin = ReplayRouteMapper.mapToUpdateLocation(0.0, lastLocation);
@@ -404,7 +406,7 @@ public class NavigationViewModel extends AndroidViewModel {
       mapboxReplayer.play();
       return replayLocationEngine;
     } else {
-      return options.locationEngine();
+      return navigation.getLocationEngine();
     }
   }
 
