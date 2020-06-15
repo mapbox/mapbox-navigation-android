@@ -395,6 +395,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return new SpeechPlayerProvider(getApplication(), language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
+  @Nullable
   private LocationEngine initializeLocationEngineFrom(final NavigationViewOptions options) {
     if (options.locationEngine() != null) {
       return options.locationEngine();
@@ -406,12 +407,19 @@ public class NavigationViewModel extends AndroidViewModel {
       mapboxReplayer.play();
       return replayLocationEngine;
     } else {
-      return navigation.getLocationEngine();
+      return null;
     }
   }
 
-  private void initializeNavigation(Context context, NavigationOptions options, LocationEngine locationEngine) {
-    navigation = new MapboxNavigation(context, options, locationEngine);
+  private void initializeNavigation(
+          Context context,
+          NavigationOptions options,
+          @Nullable LocationEngine locationEngine) {
+    if (locationEngine == null) {
+      navigation = new MapboxNavigation(context, options);
+    } else {
+      navigation = new MapboxNavigation(context, options, locationEngine);
+    }
     addNavigationListeners();
   }
 
