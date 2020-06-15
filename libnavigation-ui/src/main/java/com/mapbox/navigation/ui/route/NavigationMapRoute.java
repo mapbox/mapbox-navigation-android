@@ -284,6 +284,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   protected void onStart() {
     addListeners();
+    updateProgressChangeListener();
   }
 
   /**
