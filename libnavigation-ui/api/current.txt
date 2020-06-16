@@ -478,6 +478,8 @@ package com.mapbox.navigation.ui.map {
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation, boolean);
     method public void adjustLocationIconWith(int[]!);
     method public void clearMarkers();
+    method public void drawIdentifiableRoute(com.mapbox.navigation.ui.route.IdentifiableRoute);
+    method public void drawIdentifiableRoutes(java.util.List<com.mapbox.navigation.ui.route.IdentifiableRoute!>);
     method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
     method public void drawRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
     method public boolean isIncidentsVisible();
@@ -591,6 +593,15 @@ package com.mapbox.navigation.ui.puck {
 
 package com.mapbox.navigation.ui.route {
 
+  public final class IdentifiableRoute {
+    ctor public IdentifiableRoute(com.mapbox.api.directions.v5.models.DirectionsRoute route, String routeIdentifier);
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute component1();
+    method public String component2();
+    method public com.mapbox.navigation.ui.route.IdentifiableRoute copy(com.mapbox.api.directions.v5.models.DirectionsRoute route, String routeIdentifier);
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
+    method public String getRouteIdentifier();
+  }
+
   public interface MapRouteLineInitializedCallback {
     method public void onInitialized(com.mapbox.navigation.ui.route.RouteLineLayerIds routeLineLayerIds);
   }
@@ -599,6 +610,8 @@ package com.mapbox.navigation.ui.route {
   }
 
   public class NavigationMapRoute implements androidx.lifecycle.LifecycleObserver {
+    method public void addIdentifiableRoute(com.mapbox.navigation.ui.route.IdentifiableRoute!);
+    method public void addIdentifiableRoutes(@Size(min=1) java.util.List<com.mapbox.navigation.ui.route.IdentifiableRoute!>);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!, boolean);
     method public void addRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
@@ -621,6 +634,7 @@ package com.mapbox.navigation.ui.route {
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withBelowLayer(String?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withMapboxNavigation(com.mapbox.navigation.core.MapboxNavigation?, boolean);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withRouteLineInitializedCallback(com.mapbox.navigation.ui.route.MapRouteLineInitializedCallback?);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.route.RouteStyleDescriptor!>!);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder! withStyle(@StyleRes int);
   }
 
@@ -637,6 +651,17 @@ package com.mapbox.navigation.ui.route {
     method public String getAlternativeRouteLineLayerId();
     method public String getPrimaryRouteLineLayerId();
     method public String getPrimaryRouteTrafficLineLayerId();
+  }
+
+  public final class RouteStyleDescriptor {
+    ctor public RouteStyleDescriptor(String routeIdentifier, int lineColorResourceId, int lineShieldColorResourceId);
+    method public String component1();
+    method public int component2();
+    method public int component3();
+    method public com.mapbox.navigation.ui.route.RouteStyleDescriptor copy(String routeIdentifier, int lineColorResourceId, int lineShieldColorResourceId);
+    method public int getLineColorResourceId();
+    method public int getLineShieldColorResourceId();
+    method public String getRouteIdentifier();
   }
 
 }
