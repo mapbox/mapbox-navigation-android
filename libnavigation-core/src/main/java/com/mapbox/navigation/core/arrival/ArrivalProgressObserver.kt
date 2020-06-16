@@ -48,6 +48,11 @@ internal class ArrivalProgressObserver(
     }
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        if (routeProgress.currentState != RouteProgressState.ROUTE_INITIALIZED &&
+            routeProgress.currentState != RouteProgressState.ROUTE_COMPLETE &&
+            routeProgress.currentState != RouteProgressState.LOCATION_TRACKING) {
+            return
+        }
         val routeLegProgress = routeProgress.currentLegProgress
             ?: return
 

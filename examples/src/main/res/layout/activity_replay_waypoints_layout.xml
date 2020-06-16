@@ -78,6 +78,7 @@
             android:textColor="@android:color/white"
             android:visibility="gone"
             />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

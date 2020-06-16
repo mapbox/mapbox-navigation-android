@@ -163,8 +163,8 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
-            if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
-                navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
+            mapboxNavigation?.getRoutes()?.firstOrNull()?.let {
+                navigationMapboxMap?.startCamera(it)
             }
             mapboxNavigation?.registerRouteProgressObserver(replayProgressObserver)
             mapboxNavigation?.startTripSession()
@@ -201,7 +201,9 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean {
             // This example shows you can use both time and distance.
             // Move to the next step when the distance is small
-            findViewById<Button>(R.id.navigateNextRouteLeg).visibility = View.VISIBLE
+            val hasNextStep = routeLegProgress.upcomingStep != null
+            val nextStepButtonVisibility = if (hasNextStep) View.VISIBLE else View.GONE
+            findViewById<Button>(R.id.navigateNextRouteLeg).visibility = nextStepButtonVisibility
             return false
         }
     }
@@ -213,6 +215,8 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
             findViewById<Button>(R.id.navigateNextRouteLeg).visibility = View.GONE
+            navigationMapboxMap?.removeRoute()
+            mapboxReplayer.clearEvents()
         }
     }
 

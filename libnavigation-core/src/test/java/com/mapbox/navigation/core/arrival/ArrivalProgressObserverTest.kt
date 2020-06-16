@@ -207,12 +207,47 @@ internal class ArrivalProgressObserverTest {
                 every { distanceRemaining } returns 15.0f
             }
         }
-        every { tripSession.getRouteProgress() } returns routeProgress
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
 
         assertTrue(onArrivalCalls.isCaptured)
+    }
+
+    @Test
+    fun `should not notify observers for invalid states`() {
+        val onArrivalCalls = slot<RouteLegProgress>()
+        val customArrivalController: ArrivalController = mockk {
+            every { navigateNextRouteLeg(capture(onArrivalCalls)) } returns false
+            every { arrivalOptions() } returns mockk {
+                every { arrivalInSeconds } returns 5.0
+                every { arrivalInMeters } returns null
+            }
+        }
+
+        arrivalProgressObserver.attach(customArrivalController)
+        arrivalProgressObserver.onRouteProgressChanged(mockk {
+            every { currentState } returns RouteProgressState.ROUTE_INVALID
+            every { durationRemaining } returns 1.0
+            every { distanceRemaining } returns 1.0f
+        })
+        arrivalProgressObserver.onRouteProgressChanged(mockk {
+            every { currentState } returns RouteProgressState.ROUTE_UNCERTAIN
+            every { durationRemaining } returns 1.0
+            every { distanceRemaining } returns 1.0f
+        })
+        arrivalProgressObserver.onRouteProgressChanged(mockk {
+            every { currentState } returns RouteProgressState.LOCATION_STALE
+            every { durationRemaining } returns 1.0
+            every { distanceRemaining } returns 1.0f
+        })
+        arrivalProgressObserver.onRouteProgressChanged(mockk {
+            every { currentState } returns RouteProgressState.OFF_ROUTE
+            every { durationRemaining } returns 1.0
+            every { distanceRemaining } returns 1.0f
+        })
+
+        assertFalse(onArrivalCalls.isCaptured)
     }
 
     @Test
