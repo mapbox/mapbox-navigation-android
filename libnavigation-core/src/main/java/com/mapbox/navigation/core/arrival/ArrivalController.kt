@@ -5,7 +5,7 @@ import com.mapbox.navigation.core.MapboxNavigation
 
 /**
  * When navigating to points of interest, you may want to control the arrival experience.
- * This interface gives you options to control arrival via [MapboxNavigation.attachArrivalController].
+ * This interface gives you options to control arrival via [MapboxNavigation.setArrivalController].
  *
  * To observe arrival, see [ArrivalObserver]
  */
@@ -89,7 +89,7 @@ data class ArrivalOptions(
         }
 
         /**
-         * Build the object. If you want to disable this feature use [MapboxNavigation.removeArrivalController].
+         * Build the object. If you want to disable this feature set *null* in [MapboxNavigation.setArrivalController].
          */
         fun build(): ArrivalOptions {
             check(arrivalInSeconds != null || arrivalInSeconds != null) {
