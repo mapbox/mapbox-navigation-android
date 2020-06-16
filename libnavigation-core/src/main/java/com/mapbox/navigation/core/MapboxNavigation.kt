@@ -28,7 +28,6 @@ import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.arrival.ArrivalProgressObserver
 import com.mapbox.navigation.core.arrival.AutoArrivalController
-import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -37,6 +36,10 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.trip.service.TripService
+import com.mapbox.navigation.core.reroute.MapboxRerouteController
+import com.mapbox.navigation.core.reroute.RerouteController
+import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -129,8 +132,8 @@ class MapboxNavigation(
     private val navigationSession: NavigationSession
     private val navigationAccountsSession = NavigationAccountsSession(navigationOptions.applicationContext)
     private val logger: Logger
-    private val internalRoutesObserver = createInternalRoutesObserver()
-    private val internalOffRouteObserver = createInternalOffRouteObserver()
+    private val internalRoutesObserver: RoutesObserver
+    private val internalOffRouteObserver: OffRouteObserver
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
@@ -140,15 +143,22 @@ class MapboxNavigation(
         "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
+    /**
+     * Reroute controller, by default uses [MapboxRerouteController].
+     */
+    private var rerouteController: RerouteController?
+
     init {
         ThreadController.init()
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
-        navigator = NavigationComponentProvider.createNativeNavigator(navigationOptions.deviceProfile, logger)
+        navigator = NavigationComponentProvider.createNativeNavigator(
+            navigationOptions.deviceProfile,
+            logger
+        )
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
         )
-        directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
         val notification: TripNotification = MapboxModuleProvider
             .createModule(MapboxModuleType.NavigationTripNotification, ::paramsProvider)
@@ -170,7 +180,6 @@ class MapboxNavigation(
             navigator = navigator,
             logger = logger
         )
-        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         tripSession.registerStateObserver(navigationSession)
         navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
         ifNonNull(accessToken) { token ->
@@ -195,12 +204,32 @@ class MapboxNavigation(
             )
         }
 
-        fasterRouteController = FasterRouteController(directionsSession, tripSession, logger)
+        val routeOptionsProvider = MapboxRouteOptionsProvider(logger)
+
+        fasterRouteController = FasterRouteController(
+            directionsSession,
+            tripSession,
+            routeOptionsProvider,
+            logger
+        )
         routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)
         routeRefreshController.start()
 
         arrivalProgressObserver = ArrivalProgressObserver(tripSession)
-        attachArrivalController()
+        setArrivalController()
+
+        rerouteController = MapboxRerouteController(
+            directionsSession,
+            tripSession,
+            routeOptionsProvider,
+            ThreadController,
+            logger
+        )
+
+        internalRoutesObserver = createInternalRoutesObserver()
+        internalOffRouteObserver = createInternalOffRouteObserver()
+        tripSession.registerOffRouteObserver(internalOffRouteObserver)
+        directionsSession.registerRoutesObserver(internalRoutesObserver)
     }
 
     /**
@@ -256,6 +285,7 @@ class MapboxNavigation(
         routeOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback? = null
     ) {
+        rerouteController?.interrupt()
         directionsSession.requestRoutes(routeOptions, routesRequestCallback)
     }
 
@@ -272,6 +302,7 @@ class MapboxNavigation(
      * @param routes a list of [DirectionsRoute]s
      */
     fun setRoutes(routes: List<DirectionsRoute>) {
+        rerouteController?.interrupt()
         directionsSession.routes = routes
     }
 
@@ -457,29 +488,50 @@ class MapboxNavigation(
     }
 
     /**
-     * Attach your own controller to determine when drivers arrived at stops via [ArrivalController]
+     * Set your own controller to determine when drivers arrived at stops via [ArrivalController].
      * Use [navigateNextRouteLeg] to manually move navigator to the next stop. To reset to the
-     * automatic arrival controller, call [attachArrivalController].
+     * automatic arrival controller, call [setArrivalController].
+     *
+     * By default uses [AutoArrivalController].
+     *
+     * Set *null* disables arrival at stops completely. Use this if you want to write your
+     * own mechanism for handling arrival at stops.
      *
      * @param arrivalController [ArrivalController]
      */
     @JvmOverloads
-    fun attachArrivalController(arrivalController: ArrivalController = AutoArrivalController()) {
-        arrivalProgressObserver.attach(arrivalController)
-        tripSession.registerRouteProgressObserver(arrivalProgressObserver)
+    fun setArrivalController(arrivalController: ArrivalController? = AutoArrivalController()) {
+        if (arrivalController == null) {
+            tripSession.unregisterRouteProgressObserver(arrivalProgressObserver)
+        } else {
+            arrivalProgressObserver.attach(arrivalController)
+            tripSession.registerRouteProgressObserver(arrivalProgressObserver)
+        }
     }
 
     /**
-     * Disable arrival at stops completely. Use this if you want to write your
-     * own mechanism for handling arrival at stops.
+     * Set [RerouteController]. By default uses [MapboxRerouteController].
+     *
+     * Set *null* disables auto-reroute.
      */
-    fun removeArrivalController() {
-        tripSession.unregisterRouteProgressObserver(arrivalProgressObserver)
+    fun setRerouteController(rerouteController: RerouteController?) {
+        val legacyRerouteController = this.rerouteController
+        this.rerouteController = rerouteController
+
+        if (legacyRerouteController?.state == RerouteState.FetchingRoute) {
+            legacyRerouteController.interrupt()
+            reroute()
+        }
     }
+
+    /**
+     * Get [RerouteController]
+     */
+    fun getRerouteController(): RerouteController? = rerouteController
 
     /**
      * Registers [ArrivalObserver]. Monitor arrival at stops and destinations. For more control
-     * of arrival at stops, see [attachArrivalController].
+     * of arrival at stops, see [setArrivalController].
      *
      * @see [unregisterArrivalObserver]
      */
@@ -551,22 +603,18 @@ class MapboxNavigation(
         override fun onOffRouteStateChanged(offRoute: Boolean) {
             if (offRoute) {
                 reroute()
+            } else {
+                rerouteController?.interrupt()
             }
         }
     }
 
     private fun reroute() {
-        ifNonNull(tripSession.getEnhancedLocation()) { location ->
-            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(
-                directionsSession,
-                tripSession,
-                location
-            ) ?: return
-            directionsSession.requestRoutes(
-                optionsRebuilt,
-                null
-            )
-        }
+        rerouteController?.reroute(object : RerouteController.RoutesCallback {
+            override fun onNewRoutes(routes: List<DirectionsRoute>) {
+                setRoutes(routes)
+            }
+        })
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {

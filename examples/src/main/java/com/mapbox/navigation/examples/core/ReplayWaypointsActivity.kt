@@ -153,7 +153,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun initListeners() {
-        mapboxNavigation?.attachArrivalController(arrivalController)
+        mapboxNavigation?.setArrivalController(arrivalController)
         mapboxNavigation?.registerArrivalObserver(arrivalObserver)
         setupReplayControls()
         startNavigation.setOnClickListener {

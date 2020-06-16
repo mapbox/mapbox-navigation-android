@@ -4,17 +4,17 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
-import com.mapbox.navigation.utils.internal.ifNonNull
 import java.util.concurrent.TimeUnit
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
+    private val routeOptionsProvider: RouteOptionsProvider,
     private val logger: Logger
 ) {
 
@@ -50,11 +50,22 @@ internal class FasterRouteController(
         }
 
         fasterRouteTimer.restartAfterMillis = restartAfterMillis
-        ifNonNull(tripSession.getEnhancedLocation()) { enhancedLocation ->
-            val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, enhancedLocation)
-                ?: return
-            directionsSession.requestFasterRoute(optionsRebuilt, fasterRouteRequestCallback)
-        }
+
+        routeOptionsProvider.update(
+            directionsSession.getRouteOptions(),
+            tripSession.getRouteProgress(),
+            tripSession.getEnhancedLocation()
+        )
+            .let { routeOptionsResult ->
+                when (routeOptionsResult) {
+                    is RouteOptionsProvider.RouteOptionsResult.Success ->
+                        directionsSession.requestFasterRoute(
+                            routeOptionsResult.routeOptions,
+                            fasterRouteRequestCallback
+                        )
+                    is RouteOptionsProvider.RouteOptionsResult.Error -> Unit
+                }
+            }
     }
 
     private val fasterRouteRequestCallback = object : RoutesRequestCallback {

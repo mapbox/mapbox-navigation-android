@@ -4,12 +4,11 @@ package com.mapbox.navigation.core {
   public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
-    method public void attachArrivalController(com.mapbox.navigation.core.arrival.ArrivalController arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
-    method public void attachArrivalController();
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
     method public static com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void detachFasterRouteObserver();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
+    method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public boolean navigateNextRouteLeg();
@@ -23,11 +22,13 @@ package com.mapbox.navigation.core {
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
-    method public void removeArrivalController();
     method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback? routesRequestCallback = null);
     method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
     method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
+    method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
+    method public void setArrivalController();
+    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
@@ -303,6 +304,55 @@ package com.mapbox.navigation.core.replay.route {
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder minAcceleration(double minAcceleration);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder turnSpeedMps(double minSpeedMps);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions.Builder uTurnSpeedMps(double uTurnSpeedMps);
+  }
+
+}
+
+package com.mapbox.navigation.core.reroute {
+
+  public interface RerouteController {
+    method public com.mapbox.navigation.core.reroute.RerouteState getState();
+    method public void interrupt();
+    method public boolean registerRerouteStateObserver(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver rerouteStateObserver);
+    method public void reroute(com.mapbox.navigation.core.reroute.RerouteController.RoutesCallback routesCallback);
+    method public boolean unregisterRerouteStateObserver(com.mapbox.navigation.core.reroute.RerouteController.RerouteStateObserver rerouteStateObserver);
+    property public abstract com.mapbox.navigation.core.reroute.RerouteState state;
+  }
+
+  public static interface RerouteController.RerouteStateObserver {
+    method public void onRerouteStateChanged(com.mapbox.navigation.core.reroute.RerouteState rerouteState);
+  }
+
+  public static interface RerouteController.RoutesCallback {
+    method public void onNewRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+  }
+
+  public abstract sealed class RerouteState {
+  }
+
+  public static final class RerouteState.Failed extends com.mapbox.navigation.core.reroute.RerouteState {
+    ctor public RerouteState.Failed(String message, Throwable? throwable);
+    method public String component1();
+    method public Throwable? component2();
+    method public com.mapbox.navigation.core.reroute.RerouteState.Failed copy(String message, Throwable? throwable);
+    method public String getMessage();
+    method public Throwable? getThrowable();
+  }
+
+  public static final class RerouteState.FetchingRoute extends com.mapbox.navigation.core.reroute.RerouteState {
+    field public static final com.mapbox.navigation.core.reroute.RerouteState.FetchingRoute! INSTANCE;
+  }
+
+  public static final class RerouteState.Idle extends com.mapbox.navigation.core.reroute.RerouteState {
+    field public static final com.mapbox.navigation.core.reroute.RerouteState.Idle! INSTANCE;
+  }
+
+  public static final class RerouteState.Interrupted extends com.mapbox.navigation.core.reroute.RerouteState {
+    field public static final com.mapbox.navigation.core.reroute.RerouteState.Interrupted! INSTANCE;
+  }
+
+  public static final class RerouteState.RouteFetched extends com.mapbox.navigation.core.reroute.RerouteState {
+    field public static final com.mapbox.navigation.core.reroute.RerouteState.RouteFetched! INSTANCE;
   }
 
 }
