@@ -29,6 +29,7 @@ import org.jetbrains.annotations.TestOnly;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DURATION;
 
@@ -98,7 +99,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
     this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer, routeLineInitializedCallback);
-    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
+    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
     this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     this.routeLineInitializedCallback = routeLineInitializedCallback;

@@ -51,4 +51,5 @@ public class RouteConstants {
   public static final double MINIMUM_ROUTE_LINE_OFFSET = .001;
   public static final long ROUTE_LINE_VANISH_ANIMATION_DURATION = 900;
   public static final long ROUTE_LINE_VANISH_ANIMATION_DELAY = 100;
+  public static final String LAYER_ABOVE_UPCOMING_MANEUVER_ARROW = "com.mapbox.annotations.points";
 }
