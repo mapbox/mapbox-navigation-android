@@ -21,6 +21,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:theme="@style/Theme.MaterialComponents.Light"
         app:layout_constraintBottom_toTopOf="@id/navigationLayout"
         app:cardElevation="3dp"
         app:cardUseCompatPadding="true">
@@ -62,7 +63,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/start_navigation"
-            style="@style/Widget.MaterialComponents.Button"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
             android:visibility="gone"
             />
 
@@ -72,7 +74,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/navigate_waypoints_next_stop"
-            style="@style/Widget.MaterialComponents.Button"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
             android:visibility="gone"
             />
     </LinearLayout>

@@ -33,6 +33,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:theme="@style/Theme.MaterialComponents.Light"
         app:layout_constraintBottom_toTopOf="@id/playReplay"
         app:cardElevation="3dp"
         app:cardUseCompatPadding="true">
