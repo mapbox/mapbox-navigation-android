@@ -1,21 +1,19 @@
 package com.mapbox.navigation.core.fasterroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.navigation.core.directions.session.AdjustedRouteOptionsProvider
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,21 +33,20 @@ class FasterRouteControllerTest {
     private val routesRequestCallbacks = slot<RoutesRequestCallback>()
 
     private val logger: Logger = mockk()
-    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, logger)
+    private val routeOptionsProvider: RouteOptionsProvider = mockk()
+    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsProvider, logger)
+
+    private val routeOptionsResultSuccess: RouteOptionsProvider.RouteOptionsResult.Success = mockk()
+    private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
+    private val routeOptionsResultError: RouteOptionsProvider.RouteOptionsResult.Error = mockk()
 
     @Before
     fun setup() {
-        mockkObject(AdjustedRouteOptionsProvider)
-        every { AdjustedRouteOptionsProvider.getRouteOptions(any(), any(), any()) } returns mockk()
+        every { routeOptionsResultSuccess.routeOptions } returns routeOptionsResultSuccessRouteOptions
 
         every { directionsSession.getRouteOptions() } returns mockk()
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
         every { tripSession.getRouteProgress() } returns mockk()
-    }
-
-    @After
-    fun teardown() {
-        unmockkObject(AdjustedRouteOptionsProvider)
     }
 
     @Test(expected = IllegalStateException::class)
@@ -74,6 +71,7 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should request every 5 minutes`() = coroutineRule.runBlockingTest {
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
         every { directionsSession.routes } returns listOf(
             mockk {
                 every { routeIndex() } returns "0"
@@ -111,6 +109,7 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should notify observer of a faster route`() = coroutineRule.runBlockingTest {
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
         val currentRoute: DirectionsRoute = mockk {
             every { routeIndex() } returns "0"
             every { duration() } returns 801.332
@@ -141,6 +140,7 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should notify observer if current route is fastest`() = coroutineRule.runBlockingTest {
+        mockRouteOptionsProvider(routeOptionsResultSuccess)
         val currentRoute: DirectionsRoute = mockk {
             every { routeIndex() } returns "0"
             every { duration() } returns 801.332
@@ -167,5 +167,9 @@ class FasterRouteControllerTest {
 
         fasterRouteController.stop()
         coroutineRule.testDispatcher.cleanupTestCoroutines()
+    }
+
+    private fun mockRouteOptionsProvider(routeOptionsResult: RouteOptionsProvider.RouteOptionsResult) {
+        every { routeOptionsProvider.update(any(), any(), any()) } returns routeOptionsResult
     }
 }

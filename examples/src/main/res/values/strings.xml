@@ -65,7 +65,7 @@
     <string name="description_replay_waypoints" translatable="false">Shows how to use navigate to waypoints.</string>
 
     <string name="title_reroute_view" translatable="false">Reroute events</string>
-    <string name="description_reroute_view" translatable="false">Shows how to observe reroute events.</string>
+    <string name="description_reroute_view" translatable="false">Shows how to observe off-route events and how to implement custom re-route logic.</string>
 
     <string name="title_basic_navigation_kotlin" translatable="false">Basic navigation</string>
     <string name="description_basic_navigation_kotlin" translatable="false">Shows how to navigate from the device location to a destination using the MapboxNavigation class.</string>
