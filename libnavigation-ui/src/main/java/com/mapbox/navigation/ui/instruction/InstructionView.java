@@ -39,6 +39,7 @@ import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
+import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
@@ -48,6 +49,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.Rounding;
+import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.FeedbackButton;
@@ -86,7 +88,6 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * To automatically have this view update with information from
  * {@link MapboxNavigation},
  * add the view as a {@link RouteProgressObserver} and / or {@link OffRouteObserver}
- *
  */
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
@@ -206,7 +207,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
                   model.retrieveDrivingSide()
               );
               updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-              updateSubStep(model.retrieveSubBannerText(), model.retrievePrimaryManeuverType());
+              updateSubStep(model.retrieveSubBannerText(),
+                  model.retrievePrimaryManeuverType(), model.retrieveDrivingSide());
             }
           }
         });
@@ -269,10 +271,31 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
+  /**
+   * Use this method inside a {@link BannerInstructionsObserver} to update banner instruction view.
+   * <p>
+   * This includes the maneuverView, banner text and sub step information.
+   * A default {@link ManeuverModifier#RIGHT} driving side will be used if driving side is unavailable.
+   *
+   * @param instructions for banner info used to populate the views
+   */
   public void updateBannerInstructionsWith(BannerInstructions instructions) {
+    updateBannerInstructionsWith(instructions, ManeuverModifier.RIGHT);
+  }
+
+  /**
+   * Use this method inside a {@link BannerInstructionsObserver} to update banner instruction view.
+   * <p>
+   * This includes the maneuverView, banner text and sub step information.
+   * The drivingSideFallback will be used when driving side is unavailable.
+   *
+   * @param instructions for banner info used to populate the views
+   * @param drivingSideFallback one of {@link ManeuverModifier#RIGHT} or {@link ManeuverModifier#LEFT}.
+   */
+  public void updateBannerInstructionsWith(BannerInstructions instructions, String drivingSideFallback) {
     if (instructions != null) {
       updateBannerInstructions(instructions.primary(),
-          instructions.secondary(), instructions.sub(), currentStep.drivingSide());
+          instructions.secondary(), instructions.sub(), getDrivingSide(drivingSideFallback));
     }
   }
 
@@ -292,7 +315,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   /**
    * Will slide the reroute view down from the top of the screen
    * and make it visible
-   *
    */
   public void showRerouteState() {
     if (rerouteLayout.getVisibility() == INVISIBLE) {
@@ -304,7 +326,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   /**
    * Will slide the reroute view up to the top of the screen
    * and hide it
-   *
    */
   public void hideRerouteState() {
     if (rerouteLayout.getVisibility() == VISIBLE) {
@@ -676,7 +697,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (primaryBanner != null) {
       updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
       updateDataFromBannerText(primaryBanner, secondaryBanner);
-      updateSubStep(subBanner, primaryBanner.modifier());
+      updateSubStep(subBanner, primaryBanner.modifier(), currentDrivingSide);
     }
   }
 
@@ -841,7 +862,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     return newStep;
   }
 
-  private void updateSubStep(BannerText subText, String primaryManeuverModifier) {
+  private void updateSubStep(BannerText subText, String primaryManeuverModifier, String drivingSide) {
     if (shouldShowSubStep(subText)) {
       String maneuverType = subText.type();
       String maneuverModifier = subText.modifier();
@@ -850,7 +871,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       if (roundaboutAngle != null) {
         subManeuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
       }
-      String drivingSide = currentStep.drivingSide();
       subManeuverView.setDrivingSide(drivingSide);
       InstructionLoader instructionLoader = createInstructionLoader(subStepText, subText);
       if (instructionLoader != null) {
@@ -1086,5 +1106,22 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     rvInstructions.stopScroll();
     instructionListAdapter.updateBannerListWith(routeProgress, isListShowing);
+  }
+
+  /**
+   * Get driving side.
+   * The drivingSide from {@link RouteProgress} has higher priority than user's fallback setting.
+   * Driving side right will be the default value if none of above is available.
+   *
+   * @return the driving side
+   */
+  private String getDrivingSide(String drivingSideFallback) {
+    if (currentStep != null) {
+      return currentStep.drivingSide();
+    } else if (drivingSideFallback != null) {
+      return drivingSideFallback;
+    } else {
+      return ManeuverModifier.RIGHT;
+    }
   }
 }
