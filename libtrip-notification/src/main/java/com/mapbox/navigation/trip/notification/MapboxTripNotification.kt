@@ -73,6 +73,10 @@ class MapboxTripNotification constructor(
          * Broadcast of [MapboxTripNotification] actions
          */
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
+
+        private const val MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION =
+            "You need to provide a DistanceFormatter in order to use the default TripNotification. " +
+                "Also see MapboxNavigation#defaultNavigationOptions"
     }
 
     @StepManeuverType
@@ -93,7 +97,7 @@ class MapboxTripNotification constructor(
     private val notificationReceiver = NotificationActionReceiver()
     private val distanceFormatter: DistanceFormatter =
         navigationOptions.distanceFormatter
-            ?: throw IllegalArgumentException("Distance formatter is required.")
+            ?: throw IllegalArgumentException(MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION)
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManager
 
@@ -101,7 +105,7 @@ class MapboxTripNotification constructor(
         applicationContext.getSystemService(Context.NOTIFICATION_SERVICE)
             ?.let { notificationService ->
                 notificationManager = notificationService as NotificationManager
-            } ?: throw (IllegalStateException("unable to create a NotificationManager"))
+            } ?: throw (IllegalStateException("Unable to create a NotificationManager"))
 
         pendingOpenIntent = createPendingOpenIntent(applicationContext)
         pendingCloseIntent = createPendingCloseIntent(applicationContext)
