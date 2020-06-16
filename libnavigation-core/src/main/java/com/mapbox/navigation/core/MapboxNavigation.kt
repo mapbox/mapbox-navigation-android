@@ -64,10 +64,16 @@ import kotlinx.coroutines.channels.ReceiveChannel
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
-    "You need to provide an token access in order to use the default OffboardRouter."
+    "You need to provide an access token in NavigationOptions in order to use the default OffboardRouter. " +
+        "Also see MapboxNavigation#defaultNavigationOptions"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
-    "You need to provide an token access in order to use the default OnboardRouter."
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "A valid token is required"
+    "You need to provide an access token in NavigationOptions in order to use the default OnboardRouter. " +
+        "Also see MapboxNavigation#defaultNavigationOptions"
+private const val MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER =
+    "You need to provide OnboardRouterOptions in NavigationOptions in order to use the default OnboardRouter. " +
+        "Also see MapboxNavigation#defaultNavigationOptions"
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access token in NavigationOptions " +
+    "Also see MapboxNavigation#defaultNavigationOptions"
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -624,7 +630,7 @@ constructor(
                     String::class.java to accessToken,
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                     OnboardRouterOptions::class.java to (navigationOptions.onboardRouterOptions
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER)),
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER)),
                     Logger::class.java to logger,
                     SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
                 )
