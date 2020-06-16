@@ -18,8 +18,8 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.ui.internal.route.MapRouteLayerProvider;
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
+import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.route.RouteConstants;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
@@ -27,10 +27,11 @@ import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
-
+import static com.mapbox.navigation.ui.internal.route.MapboxRouteLayerProviderFactory.getLayerProvider;
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
  * runtime styling. The route will automatically be placed below all labels independent of specific
@@ -68,6 +69,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   private boolean vanishRouteLineEnabled;
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
   private RouteLineValueAnimator vanishingRouteLineAnimator;
+  private List<RouteStyleDescriptor> routeStyleDescriptors;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -81,7 +83,9 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param belowLayer optionally pass in a layer id to place the route line below
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    * @param routeLineInitializedCallback indicates that the route line layer has been added to the current style
+   * @param routeStyleDescriptors optionally describes the styling of the route lines
    */
+
   private NavigationMapRoute(@Nullable MapboxNavigation navigation,
       @NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,
@@ -89,14 +93,23 @@ public class NavigationMapRoute implements LifecycleObserver {
       @StyleRes int styleRes,
       @Nullable String belowLayer,
       boolean vanishRouteLineEnabled,
-      @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback) {
+      @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback,
+      @Nullable List<RouteStyleDescriptor> routeStyleDescriptors) {
+    this.routeStyleDescriptors = routeStyleDescriptors;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.navigation = navigation;
-    this.routeLine = buildMapRouteLine(mapView, mapboxMap, styleRes, belowLayer, routeLineInitializedCallback);
+    this.routeLine = buildMapRouteLine(
+            mapView,
+            mapboxMap,
+            styleRes,
+            belowLayer,
+            routeStyleDescriptors,
+            routeLineInitializedCallback
+    );
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
     this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
@@ -181,6 +194,28 @@ public class NavigationMapRoute implements LifecycleObserver {
     ) {
       cancelVanishingRouteLineAnimator();
       routeLine.draw(directionsRoutes);
+    }
+  }
+
+  public void addIdentifiableRoute(IdentifiableRoute directionsRoute) {
+    List<IdentifiableRoute> routes = new ArrayList<>();
+    routes.add(directionsRoute);
+    addIdentifiableRoutes(routes);
+  }
+
+  public void addIdentifiableRoutes(@NonNull @Size(min = 1) List<IdentifiableRoute> directionsRoutes) {
+    List<DirectionsRoute> routeList = new ArrayList<>();
+    for (IdentifiableRoute identifiableRoute : directionsRoutes) {
+      routeList.add(identifiableRoute.getRoute());
+    }
+
+    if (directionsRoutes.isEmpty()) {
+      routeLine.drawIdentifiableRoutes(directionsRoutes);
+    } else if (!CompareUtils.areEqualContentsIgnoreOrder(
+            routeLine.retrieveDirectionsRoutes(),
+            routeList)
+    ) {
+      routeLine.drawIdentifiableRoutes(directionsRoutes);
     }
   }
 
@@ -301,11 +336,15 @@ public class NavigationMapRoute implements LifecycleObserver {
     lifecycleOwner.getLifecycle().addObserver(this);
   }
 
-  private MapRouteLine buildMapRouteLine(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap,
-                                         @StyleRes int styleRes, @Nullable String belowLayer,
-                                         MapRouteLineInitializedCallback routeLineInitializedCallback) {
-    Context context = mapView.getContext();
-    MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+  private MapRouteLine buildMapRouteLine(@NonNull final MapView mapView, @NonNull final MapboxMap mapboxMap,
+                                         @StyleRes final int styleRes, @Nullable final String belowLayer,
+                                         @Nullable final List<RouteStyleDescriptor> routeStyleDescriptors,
+                                         final MapRouteLineInitializedCallback routeLineInitializedCallback) {
+    final Context context = mapView.getContext();
+    final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
+            ? Collections.emptyList() : routeStyleDescriptors;
+    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse);
+
     return new MapRouteLine(
         context,
         mapboxMap.getStyle(),
@@ -380,9 +419,11 @@ public class NavigationMapRoute implements LifecycleObserver {
     updateProgressChangeListener();
   }
 
-  private void recreateRouteLine(Style style) {
+  private void recreateRouteLine(final Style style) {
     final Context context = mapView.getContext();
-    final MapRouteLayerProvider layerProvider = new MapRouteLayerProvider();
+    final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
+            ? Collections.emptyList() : routeStyleDescriptors;
+    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse);
 
     final float vanishingPointOffset = routeLine.getVanishPointOffset();
     routeLine = new MapRouteLine(
@@ -462,6 +503,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     @Nullable private String belowLayer;
     private boolean vanishRouteLineEnabled = false;
     @Nullable private MapRouteLineInitializedCallback routeLineInitializedCallback;
+    @Nullable private List<RouteStyleDescriptor> routeStyleDescriptors;
 
     /**
      * Instantiates a new Builder.
@@ -511,6 +553,16 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
 
     /**
+     * RouteStyleDescriptors can be used for programmatically styling the route lines.
+     *
+     * @return the builder
+     */
+    public Builder withRouteStyleDescriptors(List<RouteStyleDescriptor> routeStyleDescriptors) {
+      this.routeStyleDescriptors = routeStyleDescriptors;
+      return this;
+    }
+
+    /**
      * Indicate that the route line layer has been added to the current style
      *
      * @return the builder
@@ -534,7 +586,8 @@ public class NavigationMapRoute implements LifecycleObserver {
           styleRes,
           belowLayer,
           vanishRouteLineEnabled,
-          routeLineInitializedCallback
+          routeLineInitializedCallback,
+          routeStyleDescriptors
       );
     }
   }

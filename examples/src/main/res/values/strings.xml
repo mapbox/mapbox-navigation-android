@@ -82,6 +82,9 @@
     <string name="title_navigation_route_ui">Navigation Map Route</string>
     <string name="description_navigation_route_ui">An example using NavigationMapRoute</string>
 
+    <string name="title_runtime_styling">Runtime Route Styling</string>
+    <string name="description_runtime_styling">An example using RuntimeRouteStyling</string>
+
     <string name="settings" translatable="false">Settings</string>
     <string name="simulate_route" translatable="false">Simulate Route</string>
     <string name="language" translatable="false">Language</string>

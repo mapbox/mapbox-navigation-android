@@ -39,6 +39,7 @@ import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
+import com.mapbox.navigation.ui.route.IdentifiableRoute;
 import com.mapbox.navigation.ui.puck.NavigationPuckPresenter;
 import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
@@ -480,6 +481,14 @@ public class NavigationMapboxMap implements LifecycleObserver {
    */
   public void drawRoutes(@NonNull List<? extends DirectionsRoute> routes) {
     mapRoute.addRoutes(routes);
+  }
+
+  public void drawIdentifiableRoute(@NonNull IdentifiableRoute route) {
+    mapRoute.addIdentifiableRoute(route);
+  }
+
+  public void drawIdentifiableRoutes(@NonNull List<IdentifiableRoute> routes) {
+    mapRoute.addIdentifiableRoutes(routes);
   }
 
   public void onNewRouteProgress(RouteProgress routeProgress) {
