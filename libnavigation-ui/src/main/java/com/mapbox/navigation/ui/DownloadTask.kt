@@ -2,10 +2,12 @@ package com.mapbox.navigation.ui
 
 import android.os.AsyncTask
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import okhttp3.ResponseBody
+import timber.log.Timber
 
 /**
  * This class is an [AsyncTask] that downloads a file from a [ResponseBody].
@@ -52,30 +54,35 @@ constructor(
             return null
         }
 
-        val filePath = StringBuilder().append(destDirectory)
-            .append(File.separator)
-            .append(fileName)
-            .append(retrieveUniqueId())
-            .append(".")
-            .append(extension)
-            .toString()
-        val file = File(filePath)
-        val inputStream: InputStream = responseBody.byteStream()
-        val outputStream: OutputStream = FileOutputStream(file)
-        val buffer = ByteArray(BUFFER_SIZE)
+        try {
+            val filePath = StringBuilder().append(destDirectory)
+                    .append(File.separator)
+                    .append(fileName)
+                    .append(retrieveUniqueId())
+                    .append(".")
+                    .append(extension)
+                    .toString()
+            val file = File(filePath)
+            val inputStream: InputStream = responseBody.byteStream()
+            val outputStream: OutputStream = FileOutputStream(file)
+            val buffer = ByteArray(BUFFER_SIZE)
 
-        inputStream.use { input ->
-            outputStream.use { fileOut ->
-                while (true) {
-                    val length = input.read(buffer)
-                    if (length <= 0)
-                        break
-                    fileOut.write(buffer, 0, length)
+            inputStream.use { input ->
+                outputStream.use { fileOut ->
+                    while (true) {
+                        val length = input.read(buffer)
+                        if (length <= 0)
+                            break
+                        fileOut.write(buffer, 0, length)
+                    }
+                    fileOut.flush()
                 }
-                fileOut.flush()
             }
+            return file
+        } catch (e: FileNotFoundException) {
+            Timber.e(e, "There was an exception during saveAsFile.")
+            return null
         }
-        return file
     }
 
     private fun retrieveUniqueId(): String =
