@@ -216,7 +216,7 @@ package com.mapbox.navigation.base.trip.model {
   }
 
   public final class RouteProgress {
-    ctor public RouteProgress(com.mapbox.api.directions.v5.models.DirectionsRoute? route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState? currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
+    ctor public RouteProgress(com.mapbox.api.directions.v5.models.DirectionsRoute? route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
     method public com.mapbox.api.directions.v5.models.DirectionsRoute? component1();
     method public float component10();
     method public double component11();
@@ -225,15 +225,15 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.geojson.Geometry? component2();
     method public com.mapbox.api.directions.v5.models.BannerInstructions? component3();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? component4();
-    method public com.mapbox.navigation.base.trip.model.RouteProgressState? component5();
+    method public com.mapbox.navigation.base.trip.model.RouteProgressState component5();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? component6();
     method public java.util.List<com.mapbox.geojson.Point>? component7();
     method public boolean component8();
     method public float component9();
-    method public com.mapbox.navigation.base.trip.model.RouteProgress copy(com.mapbox.api.directions.v5.models.DirectionsRoute? route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState? currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
+    method public com.mapbox.navigation.base.trip.model.RouteProgress copy(com.mapbox.api.directions.v5.models.DirectionsRoute? route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
-    method public com.mapbox.navigation.base.trip.model.RouteProgressState? getCurrentState();
+    method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
     method public float getDistanceRemaining();
     method public float getDistanceTraveled();
     method public double getDurationRemaining();
@@ -267,7 +267,8 @@ package com.mapbox.navigation.base.trip.model {
   public enum RouteProgressState {
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState LOCATION_STALE;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState LOCATION_TRACKING;
-    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_ARRIVED;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState OFF_ROUTE;
+    enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_COMPLETE;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_INITIALIZED;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_INVALID;
     enum_constant public static final com.mapbox.navigation.base.trip.model.RouteProgressState ROUTE_UNCERTAIN;

@@ -63,7 +63,7 @@ internal class ArrivalProgressObserverTest {
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.ROUTE_ARRIVED
+            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
                 every { legs() } returns listOf(mockk(), mockk(), mockk())
             }
@@ -93,7 +93,7 @@ internal class ArrivalProgressObserverTest {
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.ROUTE_ARRIVED
+            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
                 every { legs() } returns listOf(mockk(), mockk(), mockk())
             }
@@ -121,7 +121,7 @@ internal class ArrivalProgressObserverTest {
         }
         every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
         val routeProgress: RouteProgress = mockk {
-            every { currentState } returns RouteProgressState.ROUTE_ARRIVED
+            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
                 every { legs() } returns listOf(mockk(), mockk(), mockk())
             }

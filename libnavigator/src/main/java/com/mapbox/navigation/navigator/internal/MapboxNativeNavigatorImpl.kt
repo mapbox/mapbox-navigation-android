@@ -384,7 +384,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                     stepProgressBuilder.distanceTraveled(distanceTraveled)
                     stepProgressBuilder.fractionTraveled(distanceTraveled / currentStep.distance().toFloat())
 
-                    routeState.convertState()?.also {
+                    routeState.convertState().let {
                         routeProgressBuilder.currentState(it)
 
                         var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
@@ -496,13 +496,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     }
 }
 
-private fun RouteState.convertState(): RouteProgressState? {
+private fun RouteState.convertState(): RouteProgressState {
     return when (this) {
         RouteState.INVALID -> RouteProgressState.ROUTE_INVALID
         RouteState.INITIALIZED -> RouteProgressState.ROUTE_INITIALIZED
         RouteState.TRACKING -> RouteProgressState.LOCATION_TRACKING
-        RouteState.COMPLETE -> RouteProgressState.ROUTE_ARRIVED
-        RouteState.OFF_ROUTE -> null // send in a callback instead
+        RouteState.COMPLETE -> RouteProgressState.ROUTE_COMPLETE
+        RouteState.OFF_ROUTE -> RouteProgressState.OFF_ROUTE
         RouteState.STALE -> RouteProgressState.LOCATION_STALE
         RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
     }

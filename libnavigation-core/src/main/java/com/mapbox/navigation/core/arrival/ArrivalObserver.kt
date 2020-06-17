@@ -18,7 +18,7 @@ interface ArrivalObserver {
     fun onNextRouteLegStart(routeLegProgress: RouteLegProgress)
 
     /**
-     * This will be called once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_ARRIVED].
+     * This will be called once the [RouteProgress.currentState] has reached [RouteProgressState.ROUTE_COMPLETE].
      * This means the device has reached the final destination on the route.
      */
     fun onFinalDestinationArrival(routeProgress: RouteProgress)
