@@ -32,7 +32,8 @@ internal abstract class NavigationEvent(
     val applicationState: String = phoneState.applicationState // Schema minLength 1
     val event: String = getEventName()
 
-    var startTimestamp: String? = null // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
+    // Schema pattern TelemetryUtils.obtainCurrentDate() - Timestamp when user started navigation
+    var startTimestamp: String? = null
     var sdkIdentifier: String? = null
     var sessionIdentifier: String? = null
     var geometry: String? = null

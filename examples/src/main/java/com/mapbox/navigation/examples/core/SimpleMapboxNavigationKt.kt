@@ -61,22 +61,24 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
-import java.io.File
-import java.lang.ref.WeakReference
-import java.util.Date
-import java.util.Locale
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
+import java.io.File
+import java.lang.ref.WeakReference
+import java.util.Date
+import java.util.Locale
 
 /**
  * This activity shows how to set up a basic turn-by-turn
  * navigation experience with many of the the Navigation SDK's
  * [MapboxNavigation] class' capabilities.
  */
-class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
+class SimpleMapboxNavigationKt :
+    AppCompatActivity(),
+    OnMapReadyCallback,
     VoiceInstructionsObserver {
 
     private val VOICE_INSTRUCTION_CACHE =
@@ -123,7 +125,8 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                             mapboxNavigation.getRoutes().toMutableList().apply {
                                 removeAt(0)
                                 add(0, it)
-                            })
+                            }
+                        )
                         false -> mapboxNavigation.setRoutes(listOf(it))
                     }
                 }
@@ -183,25 +186,38 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap(
+                mapView,
+                mapboxMap,
+                this,
+                true
+            )
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
-                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                    remove(route)
-                    add(0, route)
-                })
+                mapboxNavigation.setRoutes(
+                    mapboxNavigation.getRoutes().toMutableList().apply {
+                        remove(route)
+                        add(0, route)
+                    }
+                )
             }
             initNavigationButton()
 
             when (originalRoute) {
                 null -> {
                     if (shouldSimulateRoute()) {
-                        mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxNavigation
+                            .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    Snackbar
+                        .make(
+                            container,
+                            R.string.msg_long_press_map_to_place_waypoint,
+                            LENGTH_SHORT
+                        )
                         .show()
                 }
                 else -> restoreNavigation()
@@ -309,7 +325,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+        override fun onFasterRoute(
+            currentRoute: DirectionsRoute,
+            alternatives: List<DirectionsRoute>,
+            isAlternativeFaster: Boolean
+        ) {
             if (isAlternativeFaster) {
                 this@SimpleMapboxNavigationKt.fasterRoutes = alternatives
                 fasterRouteSelectionTimer.start()
@@ -412,7 +432,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         stopLocationUpdates()
 
         if (mapboxNavigation.getRoutes()
-                .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
+            .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
         ) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel

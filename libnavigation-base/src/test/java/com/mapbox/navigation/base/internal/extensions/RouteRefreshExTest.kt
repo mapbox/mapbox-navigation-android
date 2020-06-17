@@ -11,10 +11,12 @@ class RouteRefreshExTest {
 
     private val defaultOptionsBuilder = RouteOptions.builder()
         .accessToken("test_access_token")
-        .coordinates(listOf(
-            Point.fromLngLat(-121.470162, 38.563121),
-            Point.fromLngLat(-121.483304, 38.583313)
-        ))
+        .coordinates(
+            listOf(
+                Point.fromLngLat(-121.470162, 38.563121),
+                Point.fromLngLat(-121.483304, 38.583313)
+            )
+        )
         .applyDefaultParams()
 
     @Test
@@ -54,7 +56,9 @@ class RouteRefreshExTest {
     fun `should disable route refresh when annotations does not have maxspeed`() {
         val routeOptions = defaultOptionsBuilder
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .annotationsList(listOf(DirectionsCriteria.ANNOTATION_SPEED, DirectionsCriteria.ANNOTATION_DISTANCE))
+            .annotationsList(
+                listOf(DirectionsCriteria.ANNOTATION_SPEED, DirectionsCriteria.ANNOTATION_DISTANCE)
+            )
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .build()
 
@@ -65,7 +69,9 @@ class RouteRefreshExTest {
     fun `should disable route refresh when profile is not driving-traffic`() {
         val routeOptions = defaultOptionsBuilder
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-            .annotationsList(listOf(DirectionsCriteria.ANNOTATION_SPEED, DirectionsCriteria.ANNOTATION_DISTANCE))
+            .annotationsList(
+                listOf(DirectionsCriteria.ANNOTATION_SPEED, DirectionsCriteria.ANNOTATION_DISTANCE)
+            )
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .build()
 

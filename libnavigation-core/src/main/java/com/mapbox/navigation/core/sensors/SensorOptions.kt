@@ -47,7 +47,10 @@ class SensorOptions private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "SensorOptions(enableSensorTypes=$enableSensorTypes, signalsPerSecond=$signalsPerSecond)"
+        return "SensorOptions(" +
+            "enableSensorTypes=$enableSensorTypes, " +
+            "signalsPerSecond=$signalsPerSecond" +
+            ")"
     }
 
     /**

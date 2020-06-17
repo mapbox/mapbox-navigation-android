@@ -2,7 +2,6 @@ package com.mapbox.navigation.utils.internal
 
 import io.mockk.mockk
 import io.mockk.verify
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +17,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.coroutines.suspendCoroutine
 
 class ThreadControllerTest {
 
@@ -111,7 +111,10 @@ class ThreadControllerTest {
         val ioJobController = ThreadController.getIOScopeAndRootJob()
 
         assertEquals(ioRootJob.children.first(), ioJobController.job)
-        assertEquals(CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(), ioJobController.scope.toString())
+        assertEquals(
+            CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(),
+            ioJobController.scope.toString()
+        )
     }
 
     @Test
@@ -122,6 +125,9 @@ class ThreadControllerTest {
         val mainJobController = ThreadController.getMainScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
-        assertEquals(CoroutineScope(mainJobController.job + Dispatchers.Main).toString(), mainJobController.scope.toString())
+        assertEquals(
+            CoroutineScope(mainJobController.job + Dispatchers.Main).toString(),
+            mainJobController.scope.toString()
+        )
     }
 }

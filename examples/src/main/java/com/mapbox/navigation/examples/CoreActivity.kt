@@ -75,9 +75,9 @@ class CoreActivity : AppCompatActivity() {
                 BasicNavigationFragmentActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_basic_navigation_sdk_only_kotlin),
-                    getString(R.string.description_basic_navigation_sdk_only_kotlin),
-                    BasicNavSdkOnlyActivity::class.java
+                getString(R.string.title_basic_navigation_sdk_only_kotlin),
+                getString(R.string.description_basic_navigation_sdk_only_kotlin),
+                BasicNavSdkOnlyActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_free_drive_kotlin),

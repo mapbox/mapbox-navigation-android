@@ -55,11 +55,18 @@ class NavigationApplication : MultiDexApplication() {
 
     private fun setupMapbox() {
         val mapboxAccessToken = Utils.getMapboxAccessToken(applicationContext)
-        if (TextUtils.isEmpty(mapboxAccessToken) || mapboxAccessToken == DEFAULT_MAPBOX_ACCESS_TOKEN) {
+        if (TextUtils.isEmpty(mapboxAccessToken) ||
+            mapboxAccessToken == DEFAULT_MAPBOX_ACCESS_TOKEN
+        ) {
             MapboxLogger.w(Message("Mapbox access token isn't set!"))
         }
 
         Mapbox.getInstance(applicationContext, mapboxAccessToken)
-        MapboxNavigationProvider.create(MapboxNavigation.defaultNavigationOptionsBuilder(this, mapboxAccessToken).build())
+        MapboxNavigationProvider
+            .create(
+                MapboxNavigation
+                    .defaultNavigationOptionsBuilder(this, mapboxAccessToken)
+                    .build()
+            )
     }
 }

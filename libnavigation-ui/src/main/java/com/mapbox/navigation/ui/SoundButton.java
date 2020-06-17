@@ -103,7 +103,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   /**
-   * Will toggle the view between muted and unmuted states.
+   * Will traffic_toggle_activity the view between muted and unmuted states.
    *
    * @return boolean true if muted, false if not
    */

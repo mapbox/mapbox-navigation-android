@@ -16,7 +16,10 @@ internal class FasterRouteDetector(
         val alternativeDuration = alternativeRoute.duration() ?: return@withContext false
         val weightedDuration = routeProgress.durationRemaining * PERCENTAGE_THRESHOLD
         val isRouteFaster = alternativeDuration < weightedDuration
-        return@withContext isRouteFaster && routeComparator.isRouteDescriptionDifferent(routeProgress, alternativeRoute)
+        return@withContext isRouteFaster && routeComparator.isRouteDescriptionDifferent(
+            routeProgress,
+            alternativeRoute
+        )
     }
 
     companion object {

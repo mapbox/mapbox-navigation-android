@@ -16,10 +16,12 @@ class MapboxDirectionsUtilsTest {
     fun `should create mapbox directions from options`() {
         val routeOptions = RouteOptions.builder()
             .accessToken("test_access_token")
-            .coordinates(listOf(
-                Point.fromLngLat(-121.470162, 38.563121),
-                Point.fromLngLat(-121.483304, 38.583313)
-            ))
+            .coordinates(
+                listOf(
+                    Point.fromLngLat(-121.470162, 38.563121),
+                    Point.fromLngLat(-121.483304, 38.583313)
+                )
+            )
             .applyDefaultParams()
             .build()
 

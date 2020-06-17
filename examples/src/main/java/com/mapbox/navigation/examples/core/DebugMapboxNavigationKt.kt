@@ -59,21 +59,23 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
+import kotlinx.coroutines.channels.Channel
+import okhttp3.Cache
+import timber.log.Timber
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URI
 import java.util.Date
 import java.util.Locale
-import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
-import kotlinx.coroutines.channels.Channel
-import okhttp3.Cache
-import timber.log.Timber
 
 /**
  * This activity shows debug points for raw(red) and
  * enhanced(blue) location updates.
  */
-class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
+class DebugMapboxNavigationKt :
+    AppCompatActivity(),
+    OnMapReadyCallback,
     VoiceInstructionsObserver {
 
     companion object {
@@ -115,10 +117,13 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 originalRoute?.let {
                     val routes = mapboxNavigation.getRoutes()
                     if (routes.isNotEmpty()) {
-                        mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                            removeAt(0)
-                            add(0, it)
-                        })
+                        mapboxNavigation
+                            .setRoutes(
+                                mapboxNavigation.getRoutes().toMutableList().apply {
+                                    removeAt(0)
+                                    add(0, it)
+                                }
+                            )
                     } else {
                         mapboxNavigation.setRoutes(listOf(it))
                     }
@@ -142,10 +147,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-            .onboardRouterOptions(OnboardRouterOptions.Builder()
-                .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
-                .tilesVersion("2020_02_02-03_00_00")
-                .build())
+            .onboardRouterOptions(
+                OnboardRouterOptions.Builder()
+                    .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
+                    .tilesVersion("2020_02_02-03_00_00")
+                    .build()
+            )
             .navigatorPredictionMillis(1000L)
 
         mapboxNavigation = getMapboxNavigation(optionsBuilder)
@@ -196,10 +203,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
-                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                    remove(route)
-                    add(0, route)
-                })
+                mapboxNavigation.setRoutes(
+                    mapboxNavigation.getRoutes().toMutableList().apply {
+                        remove(route)
+                        add(0, route)
+                    }
+                )
             }
 
             originalRoute?.let {
@@ -211,7 +220,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         if (originalRoute == null) {
             Snackbar.make(
-                findViewById(R.id.container), R.string.msg_long_press_map_to_place_waypoint,
+                findViewById(R.id.container),
+                R.string.msg_long_press_map_to_place_waypoint,
                 LENGTH_SHORT
             ).show()
         }
@@ -357,7 +367,9 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
-        if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+        if (mapboxNavigation.getRoutes()
+            .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
+        ) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
             mapboxNavigation.unregisterVoiceInstructionsObserver(this)

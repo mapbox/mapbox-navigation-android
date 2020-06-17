@@ -15,13 +15,13 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import java.util.Locale
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import java.util.Locale
 
 class NavigationRouteTest {
 
@@ -46,7 +46,9 @@ class NavigationRouteTest {
     fun setup() {
         MockKAnnotations.init(this)
         every { context.inferDeviceLocale() } returns Locale.US
-        every { mockSkuTokenProvider.obtainUrlWithSkuToken("/mock", 1) } returns ("/mock&sku=102jaksdhfj")
+        every {
+            mockSkuTokenProvider.obtainUrlWithSkuToken("/mock", 1)
+        } returns ("/mock&sku=102jaksdhfj")
     }
 
     @Test
@@ -90,7 +92,10 @@ class NavigationRouteTest {
                     .accessToken(ACESS_TOKEN)
                     .coordinates(listOf(origin, destination))
                     .profile(DirectionsCriteria.PROFILE_CYCLING)
-                    .approaches("${DirectionsCriteria.APPROACH_CURB};${DirectionsCriteria.APPROACH_UNRESTRICTED}")
+                    .approaches(
+                        "${DirectionsCriteria.APPROACH_CURB}" +
+                            ";${DirectionsCriteria.APPROACH_UNRESTRICTED}"
+                    )
                     .build()
             )
             .build()
@@ -194,7 +199,14 @@ class NavigationRouteTest {
                         listOf(Point.fromLngLat(3.0, 4.0), Point.fromLngLat(5.0, 6.0)),
                         Point.fromLngLat(7.0, 8.0)
                     )
-                    .bearingsList(listOf(listOf(10.0, 10.0), listOf(20.0, 20.0), listOf(30.0, 30.0), listOf(40.0, 40.0)))
+                    .bearingsList(
+                        listOf(
+                            listOf(10.0, 10.0),
+                            listOf(20.0, 20.0),
+                            listOf(30.0, 30.0),
+                            listOf(40.0, 40.0)
+                        )
+                    )
                     .build()
             )
             .build()

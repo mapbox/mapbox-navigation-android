@@ -38,8 +38,12 @@ class MapboxOffboardRouterTest : BaseTest() {
         val listener = slot<Callback<DirectionsResponse>>()
 
         mockkObject(RouteBuilderProvider)
-        every { mockSkuTokenProvider.obtainUrlWithSkuToken("/mock", 1) } returns ("/mock&sku=102jaksdhfj")
-        every { RouteBuilderProvider.getBuilder(accessToken, context, mockSkuTokenProvider) } returns mapboxDirectionsBuilder
+        every {
+            mockSkuTokenProvider.obtainUrlWithSkuToken("/mock", 1)
+        } returns ("/mock&sku=102jaksdhfj")
+        every {
+            RouteBuilderProvider.getBuilder(accessToken, context, mockSkuTokenProvider)
+        } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.interceptor(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.enableRefresh(any()) } returns mapboxDirectionsBuilder
         every { mapboxDirectionsBuilder.build() } returns mapboxDirections

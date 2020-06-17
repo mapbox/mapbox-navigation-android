@@ -5,8 +5,9 @@ import com.mapbox.navigation.ui.instruction.GuidanceViewListener
 /**
  * Internal callback for NavigationView to handle Guidance view visibility changing event.
  */
-internal class NavigationGuidanceViewListener(private val navigationPresenter: NavigationPresenter) :
-        GuidanceViewListener {
+internal class NavigationGuidanceViewListener(
+    private val navigationPresenter: NavigationPresenter
+) : GuidanceViewListener {
     override fun onShownAt(left: Int, top: Int, width: Int, height: Int) {
         navigationPresenter.onGuidanceViewChange(left, top, width, height)
     }

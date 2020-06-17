@@ -83,7 +83,9 @@ class MapboxDirectionsSessionTest {
         session.registerRoutesObserver(observer)
         session.requestRoutes(routeOptions, routesRequestCallback)
         callback.onFailure(throwable)
-        verify(exactly = 1) { routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions) }
+        verify(exactly = 1) {
+            routesRequestCallback.onRoutesRequestFailure(throwable, routeOptions)
+        }
         verify(exactly = 0) { observer.onRoutesChanged(any()) }
     }
 

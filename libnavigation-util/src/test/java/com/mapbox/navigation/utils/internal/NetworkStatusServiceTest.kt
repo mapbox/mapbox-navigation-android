@@ -15,7 +15,7 @@ class NetworkStatusServiceTest {
     @Test
     fun cleanup() {
         val ctx = mockk<Context>(relaxUnitFun = true)
-        val connectivityManager = mockk< ConnectivityManager>()
+        val connectivityManager = mockk<ConnectivityManager>()
         val receiverIntent = mockk<Intent>()
         val receiverSlot = slot<BroadcastReceiver>()
 

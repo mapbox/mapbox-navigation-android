@@ -22,7 +22,13 @@ internal class OnboardRouterFiles(
             logger.i(loggerTag, Message("Initial size is ${tileDir.length()} bytes"))
             tileDir.absolutePath
         } else {
-            logger.e(loggerTag, Message("Unable to create a file, check the OnboardRouterOptions ${tileDir.absolutePath}"))
+            logger.e(
+                loggerTag,
+                Message(
+                    "Unable to create a file, check the OnboardRouterOptions " +
+                        tileDir.absolutePath
+                )
+            )
             null
         }
     }

@@ -76,8 +76,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
         mapView.getMapAsync { map ->
             map.getStyle { style ->
                 val drawingLayerSource = style.getSourceAs<GeoJsonSource>(
-                LINE_LAYER_SOURCE_ID
-            )
+                    LINE_LAYER_SOURCE_ID
+                )
                 if (drawingLayerSource == null) {
                     style.addSource(GeoJsonSource(LINE_LAYER_SOURCE_ID))
                 }
@@ -106,14 +106,16 @@ class RouteDrawingUtil(private val mapView: MapView) {
 
                 val lineEndLayer = style.getLayerAs<CircleLayer>(LINE_END_LAYER_ID)
                 if (lineEndLayer == null) {
-                    style.addLayer(CircleLayer(
-                        LINE_END_LAYER_ID,
-                        LINE_END_SOURCE_ID
-                    ).withProperties(
-                        circleRadius(5f),
-                        circleOpacity(1f),
-                        circleColor(Color.BLACK)
-                    ))
+                    style.addLayer(
+                        CircleLayer(
+                            LINE_END_LAYER_ID,
+                            LINE_END_SOURCE_ID
+                        ).withProperties(
+                            circleRadius(5f),
+                            circleOpacity(1f),
+                            circleColor(Color.BLACK)
+                        )
+                    )
                 }
             }
         }
@@ -150,7 +152,8 @@ class RouteDrawingUtil(private val mapView: MapView) {
         mapView.getMapAsync { map ->
             map.getStyle { style ->
                 when (touchPoints.size) {
-                    0 -> {}
+                    0 -> {
+                    }
                     1 -> {
                         style.getSourceAs<GeoJsonSource>(LINE_END_SOURCE_ID)
                             ?.setGeoJson(touchPoints.first())
@@ -205,29 +208,35 @@ class RouteDrawingUtil(private val mapView: MapView) {
             .profile(DirectionsCriteria.PROFILE_DRIVING)
             .build()
 
-        mapMatching.enqueueCall(object : Callback<MapMatchingResponse> {
-            override fun onFailure(call: Call<MapMatchingResponse>, t: Throwable) {
-                Timber.e("MapMatching request failure %s", t.toString())
-            }
+        mapMatching.enqueueCall(
+            object : Callback<MapMatchingResponse> {
+                override fun onFailure(call: Call<MapMatchingResponse>, t: Throwable) {
+                    Timber.e("MapMatching request failure %s", t.toString())
+                }
 
-            override fun onResponse(
-                call: Call<MapMatchingResponse>,
-                response: Response<MapMatchingResponse>
-            ) {
-                val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()
-                if (route == null) {
-                    Timber.e("Failed to get a route with message ${response.code()} ${response.message()}")
-                    Toast.makeText(
-                        mapView.context,
-                        "Failed to get a route with message ${response.code()} ${response.message()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    clear()
-                    enable()
-                } else {
-                    routeReadyCallback.onRoutesReady(listOf(route))
+                override fun onResponse(
+                    call: Call<MapMatchingResponse>,
+                    response: Response<MapMatchingResponse>
+                ) {
+                    val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()
+                    if (route == null) {
+                        Timber.e(
+                            "Failed to get a route with " +
+                                "message ${response.code()} ${response.message()}"
+                        )
+                        Toast.makeText(
+                            mapView.context,
+                            "Failed to get a route with " +
+                                "message ${response.code()} ${response.message()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        clear()
+                        enable()
+                    } else {
+                        routeReadyCallback.onRoutesReady(listOf(route))
+                    }
                 }
             }
-        })
+        )
     }
 }

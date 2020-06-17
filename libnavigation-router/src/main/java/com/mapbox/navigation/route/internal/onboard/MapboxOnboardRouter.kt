@@ -114,7 +114,11 @@ class MapboxOnboardRouter(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         // Does nothing
     }
 
@@ -131,7 +135,9 @@ class MapboxOnboardRouter(
 
                 when {
                     !routes.isNullOrEmpty() -> callback.onResponse(routes)
-                    else -> callback.onFailure(NavigationException(generateErrorMessage(routerResult.json)))
+                    else ->
+                        callback
+                            .onFailure(NavigationException(generateErrorMessage(routerResult.json)))
                 }
             } catch (e: CancellationException) {
                 callback.onCanceled()

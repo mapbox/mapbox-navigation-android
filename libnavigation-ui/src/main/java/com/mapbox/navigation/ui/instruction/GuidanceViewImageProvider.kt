@@ -7,8 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.io.IOException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,6 +16,8 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.IOException
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * The class serves as a medium to emit bitmaps for the respective guidance view URL embedded in
@@ -79,24 +79,26 @@ class GuidanceViewImageProvider {
         withContext(ThreadController.IODispatcher) {
             suspendCoroutine<GuidanceViewImageResponse> {
                 val req = Request.Builder().url(url).build()
-                okHttpClient.newCall(req).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        resumeCoroutine(GuidanceViewImageResponse(error = e.message))
-                    }
+                okHttpClient.newCall(req).enqueue(
+                    object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            resumeCoroutine(GuidanceViewImageResponse(error = e.message))
+                        }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        resumeCoroutine(
-                            GuidanceViewImageResponse(
-                                BitmapFactory.decodeStream(response.body()?.byteStream()),
-                                response.message()
+                        override fun onResponse(call: Call, response: Response) {
+                            resumeCoroutine(
+                                GuidanceViewImageResponse(
+                                    BitmapFactory.decodeStream(response.body()?.byteStream()),
+                                    response.message()
+                                )
                             )
-                        )
-                    }
+                        }
 
-                    private fun resumeCoroutine(result: GuidanceViewImageResponse) {
-                        it.resumeWith(Result.success(result))
+                        private fun resumeCoroutine(result: GuidanceViewImageResponse) {
+                            it.resumeWith(Result.success(result))
+                        }
                     }
-                })
+                )
             }
         }
 

@@ -81,11 +81,14 @@ internal class ApplicationLifecycleMonitor(
 
     fun obtainPortraitPercentage(): Int {
         // If no changes to landscape
-        if (currentOrientation.get() == Configuration.ORIENTATION_PORTRAIT && portraitTimeInMillis.get() == 0.0) {
+        if (currentOrientation.get() == Configuration.ORIENTATION_PORTRAIT &&
+            portraitTimeInMillis.get() == 0.0
+        ) {
             return ONE_HUNDRED_PERCENT
         }
         // Calculate given the time spent in portrait
-        val portraitFraction = portraitTimeInMillis.get() / (System.currentTimeMillis() - startSessionTime)
+        val portraitFraction =
+            portraitTimeInMillis.get() / (System.currentTimeMillis() - startSessionTime)
         return (ONE_HUNDRED_PERCENT * portraitFraction).toInt()
     }
 

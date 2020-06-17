@@ -41,12 +41,12 @@ import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to fetch DirectionsRoute with MapMatching
@@ -140,37 +140,41 @@ class MapMatchingActivity : AppCompatActivity(), OnMapReadyCallback {
             .origin(origin)
             .destination(destination)
             .build()
-            .enqueueCall(object : Callback<DirectionsResponse> {
-                override fun onResponse(
-                    call: Call<DirectionsResponse>,
-                    response: Response<DirectionsResponse>
-                ) {
-                    Timber.d("DirectionsAPI request succeeded")
-                    response.body()?.routes()?.let { routes ->
-                        if (routes.isNotEmpty()) {
-                            val coordinates = mutableListOf<Point>()
-                            routes[0].legs()?.forEach { leg ->
-                                leg.steps()?.forEach { step ->
-                                    step.maneuver().location().run {
-                                        coordinates.add(Point.fromLngLat(longitude(), latitude()))
+            .enqueueCall(
+                object : Callback<DirectionsResponse> {
+                    override fun onResponse(
+                        call: Call<DirectionsResponse>,
+                        response: Response<DirectionsResponse>
+                    ) {
+                        Timber.d("DirectionsAPI request succeeded")
+                        response.body()?.routes()?.let { routes ->
+                            if (routes.isNotEmpty()) {
+                                val coordinates = mutableListOf<Point>()
+                                routes[0].legs()?.forEach { leg ->
+                                    leg.steps()?.forEach { step ->
+                                        step.maneuver().location().run {
+                                            coordinates.add(
+                                                Point.fromLngLat(longitude(), latitude())
+                                            )
+                                        }
                                     }
                                 }
-                            }
 
-                            locationComponent?.lastKnownLocation?.let {
-                                coordinates.add(0, origin)
-                                coordinates.add(destination)
+                                locationComponent?.lastKnownLocation?.let {
+                                    coordinates.add(0, origin)
+                                    coordinates.add(destination)
 
-                                fetchRoute(coordinates)
+                                    fetchRoute(coordinates)
+                                }
                             }
                         }
                     }
-                }
 
-                override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                    Timber.e("DirectionsAPI route request failure %s", t.toString())
+                    override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                        Timber.e("DirectionsAPI route request failure %s", t.toString())
+                    }
                 }
-            })
+            )
     }
 
     private fun fetchRoute(coordinates: List<Point>) {
@@ -186,30 +190,32 @@ class MapMatchingActivity : AppCompatActivity(), OnMapReadyCallback {
             .profile(DirectionsCriteria.PROFILE_DRIVING)
             .build()
 
-        mapMatching.enqueueCall(object : Callback<MapMatchingResponse> {
-            override fun onFailure(call: Call<MapMatchingResponse>, t: Throwable) {
-                Timber.e("MapMatching request failure %s", t.toString())
-            }
+        mapMatching.enqueueCall(
+            object : Callback<MapMatchingResponse> {
+                override fun onFailure(call: Call<MapMatchingResponse>, t: Throwable) {
+                    Timber.e("MapMatching request failure %s", t.toString())
+                }
 
-            override fun onResponse(
-                call: Call<MapMatchingResponse>,
-                response: Response<MapMatchingResponse>
-            ) {
-                Timber.d("MapMatching request succeeded")
+                override fun onResponse(
+                    call: Call<MapMatchingResponse>,
+                    response: Response<MapMatchingResponse>
+                ) {
+                    Timber.d("MapMatching request succeeded")
 
-                val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()
-                if (route != null) {
-                    if (directionsRoute == null) {
-                        startNavigation.visibility = View.VISIBLE
+                    val route = response.body()?.matchings()?.get(0)?.toDirectionRoute()
+                    if (route != null) {
+                        if (directionsRoute == null) {
+                            startNavigation.visibility = View.VISIBLE
+                        }
+                        directionsRoute = route
+                        mapboxNavigation?.setRoutes(listOf(route))
+                        navigationMapboxMap?.drawRoute(route)
+                    } else {
+                        startNavigation.visibility = View.GONE
                     }
-                    directionsRoute = route
-                    mapboxNavigation?.setRoutes(listOf(route))
-                    navigationMapboxMap?.drawRoute(route)
-                } else {
-                    startNavigation.visibility = View.GONE
                 }
             }
-        })
+        )
     }
 
     fun initListeners() {
@@ -361,11 +367,15 @@ class MapMatchingActivity : AppCompatActivity(), OnMapReadyCallback {
             // do nothing
         }
 
-        override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun registerRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             throw Exception("Not yet implemented")
         }
 
-        override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun unregisterRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             throw Exception("Not yet implemented")
         }
     }

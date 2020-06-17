@@ -8,10 +8,10 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.concurrent.TimeUnit
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 class RouteRefreshControllerTest {
 
@@ -23,7 +23,9 @@ class RouteRefreshControllerTest {
     private val logger: Logger = mockk()
 
     private val routeRefreshController = RouteRefreshController(
-        directionsSession, tripSession, logger
+        directionsSession,
+        tripSession,
+        logger
     )
 
     @Before
@@ -71,19 +73,22 @@ class RouteRefreshControllerTest {
     }
 
     @Test
-    fun `should not refresh route without maxspeed or congestion annotation`() = coroutineRule.runBlockingTest {
-        every { tripSession.route } returns mockk {
-            every { routeOptions() } returns mockk {
-                every { profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
-                every { overview() } returns DirectionsCriteria.OVERVIEW_FULL
-                every { annotationsList() } returns listOf(DirectionsCriteria.ANNOTATION_DISTANCE)
+    fun `should not refresh route without maxspeed or congestion annotation`() =
+        coroutineRule.runBlockingTest {
+            every { tripSession.route } returns mockk {
+                every { routeOptions() } returns mockk {
+                    every { profile() } returns DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+                    every { overview() } returns DirectionsCriteria.OVERVIEW_FULL
+                    every {
+                        annotationsList()
+                    } returns listOf(DirectionsCriteria.ANNOTATION_DISTANCE)
+                }
             }
+
+            routeRefreshController.start()
+            coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
+            routeRefreshController.stop()
+
+            verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
         }
-
-        routeRefreshController.start()
-        coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        routeRefreshController.stop()
-
-        verify(exactly = 0) { directionsSession.requestRouteRefresh(any(), any(), any()) }
-    }
 }

@@ -22,8 +22,12 @@ internal object RouteBuilderProvider {
             .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
             .overview(DirectionsCriteria.OVERVIEW_FULL)
             .steps(true)
-            .annotations(listOf(DirectionsCriteria.ANNOTATION_CONGESTION,
-                DirectionsCriteria.ANNOTATION_DISTANCE))
+            .annotations(
+                listOf(
+                    DirectionsCriteria.ANNOTATION_CONGESTION,
+                    DirectionsCriteria.ANNOTATION_DISTANCE
+                )
+            )
             .accessToken(accessToken)
             .voiceInstructions(true)
             .bannerInstructions(true)
@@ -31,7 +35,10 @@ internal object RouteBuilderProvider {
             .interceptor {
                 val httpUrl = it.request().url()
                 val skuUrl =
-                    urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                    urlSkuTokenProvider.obtainUrlWithSkuToken(
+                        httpUrl.toString(),
+                        httpUrl.querySize()
+                    )
                 it.proceed(it.request().newBuilder().url(skuUrl).build())
             }
 }

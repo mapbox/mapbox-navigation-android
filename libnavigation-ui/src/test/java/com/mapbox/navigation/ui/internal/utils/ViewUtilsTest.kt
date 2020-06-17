@@ -126,7 +126,14 @@ class ViewUtilsTest {
         every { scaledBitmap.compress(any(), any(), any()) }.returns(true)
         mockkStatic(Bitmap::class)
         val widthSlot = slot<Int>()
-        every { Bitmap.createScaledBitmap(any(), capture(widthSlot), any(), any()) } answers { scaledBitmap }
+        every {
+            Bitmap.createScaledBitmap(
+                any(),
+                capture(widthSlot),
+                any(),
+                any()
+            )
+        } answers { scaledBitmap }
 
         return BitmapWithSlot(aBitmap = aBitmap, slot = widthSlot)
     }

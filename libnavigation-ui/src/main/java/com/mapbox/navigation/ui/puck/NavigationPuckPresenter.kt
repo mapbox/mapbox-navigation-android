@@ -18,7 +18,10 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
  * @property mapboxMap instance of [com.mapbox.mapboxsdk.maps.MapboxMap]
  * @property puckDrawableSupplier provides different [com.mapbox.navigation.ui.puck.PuckDrawableSupplier]
  */
-internal class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDrawableSupplier: PuckDrawableSupplier) : LifecycleObserver {
+internal class NavigationPuckPresenter(
+    private val mapboxMap: MapboxMap,
+    puckDrawableSupplier: PuckDrawableSupplier
+) : LifecycleObserver {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var observerRegistered = false

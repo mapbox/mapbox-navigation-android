@@ -19,6 +19,7 @@ object MapboxMetricsReporter : MetricsReporter {
 
     private val gson = Gson()
     private lateinit var mapboxTelemetry: MapboxTelemetry
+
     @Volatile
     private var metricsObserver: MetricsObserver? = null
     private var ioJobController: JobControl = ThreadController.getIOScopeAndRootJob()

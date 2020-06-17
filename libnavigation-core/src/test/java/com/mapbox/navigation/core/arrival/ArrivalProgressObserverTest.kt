@@ -35,7 +35,9 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns null
                 every { currentLegProgress } returns mockk {
@@ -62,17 +64,19 @@ internal class ArrivalProgressObserverTest {
         }
 
         arrivalProgressObserver.attach(customArrivalController)
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
-            every { route } returns mockk {
-                every { legs() } returns listOf(mockk(), mockk(), mockk())
+        arrivalProgressObserver.onRouteProgressChanged(
+            mockk {
+                every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+                every { route } returns mockk {
+                    every { legs() } returns listOf(mockk(), mockk(), mockk())
+                }
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 1
+                    every { durationRemaining } returns 2.0
+                    every { distanceRemaining } returns 8.0f
+                }
             }
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 1
-                every { durationRemaining } returns 2.0
-                every { distanceRemaining } returns 8.0f
-            }
-        })
+        )
 
         assertTrue(onNextRouteLegStartCalls.isCaptured)
         assertFalse(onFinalDestinationArrivalCalls.isCaptured)
@@ -89,20 +93,24 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
-            every { route } returns mockk {
-                every { legs() } returns listOf(mockk(), mockk(), mockk())
+        arrivalProgressObserver.onRouteProgressChanged(
+            mockk {
+                every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+                every { route } returns mockk {
+                    every { legs() } returns listOf(mockk(), mockk(), mockk())
+                }
+                every { currentLegProgress } returns mockk {
+                    every { legIndex } returns 2
+                    every { durationRemaining } returns 2.0
+                    every { distanceRemaining } returns 8.0f
+                }
             }
-            every { currentLegProgress } returns mockk {
-                every { legIndex } returns 2
-                every { durationRemaining } returns 2.0
-                every { distanceRemaining } returns 8.0f
-            }
-        })
+        )
 
         assertFalse(onNextRouteLegStartCalls.isCaptured)
         assertTrue(onFinalDestinationArrivalCalls.isCaptured)
@@ -119,7 +127,9 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
         val routeProgress: RouteProgress = mockk {
             every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
@@ -154,19 +164,23 @@ internal class ArrivalProgressObserverTest {
         }
 
         arrivalProgressObserver.attach(customArrivalController)
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
-            every { currentLegProgress } returns mockk {
-                every { durationRemaining } returns 1.0
-                every { distanceRemaining } returns 15.0f
-                every { legIndex } returns 0
+        arrivalProgressObserver.onRouteProgressChanged(
+            mockk {
+                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentLegProgress } returns mockk {
+                    every { durationRemaining } returns 1.0
+                    every { distanceRemaining } returns 15.0f
+                    every { legIndex } returns 0
+                }
+                every { route } returns mockk {
+                    every { legs() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockk() // This route has three legs
+                    )
+                }
             }
-            every { route } returns mockk {
-                every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
-                )
-            }
-        })
+        )
 
         assertTrue(onArrivalCalls.isCaptured)
         assertEquals(onArrivalCalls.captured.durationRemaining, 1.0, 0.001)
@@ -184,19 +198,23 @@ internal class ArrivalProgressObserverTest {
         }
 
         arrivalProgressObserver.attach(customArrivalController)
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
-            every { currentLegProgress } returns mockk {
-                every { durationRemaining } returns 2.0
-                every { distanceRemaining } returns 8.0f
-                every { legIndex } returns 0
+        arrivalProgressObserver.onRouteProgressChanged(
+            mockk {
+                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentLegProgress } returns mockk {
+                    every { durationRemaining } returns 2.0
+                    every { distanceRemaining } returns 8.0f
+                    every { legIndex } returns 0
+                }
+                every { route } returns mockk {
+                    every { legs() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockk() // This route has three legs
+                    )
+                }
             }
-            every { route } returns mockk {
-                every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
-                )
-            }
-        })
+        )
 
         assertEquals(onArrivalCalls.captured.distanceRemaining, 8.0f, 0.001f)
         verify(exactly = 0) { arrivalObserver.onFinalDestinationArrival(any()) }
@@ -221,7 +239,9 @@ internal class ArrivalProgressObserverTest {
             }
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
             }
         }
@@ -245,19 +265,23 @@ internal class ArrivalProgressObserverTest {
         }
 
         arrivalProgressObserver.attach(customArrivalController)
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
-            every { currentLegProgress } returns mockk {
-                every { durationRemaining } returns 360.0
-                every { distanceRemaining } returns 80.0f
-                every { legIndex } returns 0
+        arrivalProgressObserver.onRouteProgressChanged(
+            mockk {
+                every { currentState } returns RouteProgressState.LOCATION_TRACKING
+                every { currentLegProgress } returns mockk {
+                    every { durationRemaining } returns 360.0
+                    every { distanceRemaining } returns 80.0f
+                    every { legIndex } returns 0
+                }
+                every { route } returns mockk {
+                    every { legs() } returns listOf(
+                        mockk(),
+                        mockk(),
+                        mockk() // This route has three legs
+                    )
+                }
             }
-            every { route } returns mockk {
-                every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
-                )
-            }
-        })
+        )
 
         assertFalse(onArrivalCalls.isCaptured)
     }
@@ -268,7 +292,9 @@ internal class ArrivalProgressObserverTest {
             every { route } returns mockk {
                 every { currentState } returns RouteProgressState.LOCATION_TRACKING
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
@@ -295,7 +321,9 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
@@ -330,7 +358,9 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
@@ -359,7 +389,9 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
@@ -382,7 +414,9 @@ internal class ArrivalProgressObserverTest {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
@@ -403,13 +437,19 @@ internal class ArrivalProgressObserverTest {
     fun `navigateNextRouteLeg should notify next route leg start`() {
         val onNavigateNextRouteLegCalls = slot<RouteLegProgress>()
         val onFinalDestinationArrivalCalls = slot<RouteProgress>()
-        every { arrivalObserver.onNextRouteLegStart(capture(onNavigateNextRouteLegCalls)) } returns Unit
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onNextRouteLegStart(capture(onNavigateNextRouteLegCalls))
+        } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {
                 every { legs() } returns listOf(
-                    mockk(), mockk(), mockk() // This route has three legs
+                    mockk(),
+                    mockk(),
+                    mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {

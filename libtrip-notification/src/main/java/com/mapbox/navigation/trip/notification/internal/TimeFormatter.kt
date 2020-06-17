@@ -96,7 +96,8 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (hours != 0L) {
-            val hourString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_hr))
+            val hourString =
+                String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_hr))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), hours.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), hourString))
         }
@@ -108,7 +109,8 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (minutes != 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
+            val minuteString =
+                String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), minutes.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
@@ -122,7 +124,8 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (days == 0L && hours == 0L && minutes == 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
+            val minuteString =
+                String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), 1.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
@@ -141,6 +144,9 @@ object TimeFormatter {
         val minutes =
             TimeUnit.SECONDS.toMinutes(leftOverSeconds + TimeUnit.MINUTES.toSeconds(1) / 2)
 
-        return if (minutes == 60L) Pair(initialHoursValue + 1, 0) else Pair(initialHoursValue, minutes)
+        return if (minutes == 60L) Pair(initialHoursValue + 1, 0) else Pair(
+            initialHoursValue,
+            minutes
+        )
     }
 }

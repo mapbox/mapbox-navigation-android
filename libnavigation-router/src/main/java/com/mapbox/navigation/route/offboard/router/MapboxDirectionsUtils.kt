@@ -14,7 +14,9 @@ private val EVENT_LISTENER = NavigationRouteEventListener()
  * @param options RouteOptions
  * @return MapboxDirections.Builder
  */
-internal fun MapboxDirections.Builder.routeOptions(options: RouteOptions): MapboxDirections.Builder {
+internal fun MapboxDirections.Builder.routeOptions(
+    options: RouteOptions
+): MapboxDirections.Builder {
     check(options.coordinates().size >= 2) { "At least 2 coordinates should be provided." }
 
     baseUrl(options.baseUrl())

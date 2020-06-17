@@ -83,7 +83,8 @@ internal class MapRouteProgressChangeListener(
             routeLine.reinitializeWithRoutes(listOf(currentRoute))
             shouldReInitializePrimaryRoute = true
 
-            restoreRouteArrowVisibilityFun = getRestoreArrowVisibilityFun(routeArrow.routeArrowIsVisible())
+            restoreRouteArrowVisibilityFun =
+                getRestoreArrowVisibilityFun(routeArrow.routeArrowIsVisible())
             routeArrow.updateVisibilityTo(false)
 
             this.lastDistanceValue = routeLine.vanishPointOffset
@@ -103,12 +104,12 @@ internal class MapRouteProgressChangeListener(
                 }
 
                 if (vanishingLineAnimator != null)
-                jobControl.scope.launch {
-                    val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
-                    if (percentDistanceTraveled > 0) {
-                        vanishingLineAnimator.start(lastDistanceValue, percentDistanceTraveled)
+                    jobControl.scope.launch {
+                        val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
+                        if (percentDistanceTraveled > 0) {
+                            vanishingLineAnimator.start(lastDistanceValue, percentDistanceTraveled)
+                        }
                     }
-                }
             }
         }
     }

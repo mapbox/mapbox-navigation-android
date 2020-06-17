@@ -18,19 +18,19 @@ internal class Billing private constructor() {
         private var billingType = BillingModel.MAU
 
         fun getInstance(context: Context): Billing =
-                INSTANCE ?: synchronized(this) {
-                    Billing().also { billing ->
-                        INSTANCE = billing
-                        init(context)
-                    }
+            INSTANCE ?: synchronized(this) {
+                Billing().also { billing ->
+                    INSTANCE = billing
+                    init(context)
                 }
+            }
 
         private fun getApplicationInfo(context: Context): ApplicationInfo? {
             var applicationInfo: ApplicationInfo? = null
             try {
                 applicationInfo = context
-                        .packageManager
-                        .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                    .packageManager
+                    .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
             } catch (exception: PackageManager.NameNotFoundException) {
             }
             return applicationInfo
@@ -39,7 +39,12 @@ internal class Billing private constructor() {
         private fun setBillingType(context: Context) {
             getApplicationInfo(context)?.let { appInfo ->
                 appInfo.metaData?.let { metadata ->
-                    billingType = when (metadata.getBoolean(KEY_META_DATA_MANAGE_SKU, DEFAULT_TOKEN_MANAGE_SKU)) {
+                    billingType = when (
+                        metadata.getBoolean(
+                            KEY_META_DATA_MANAGE_SKU,
+                            DEFAULT_TOKEN_MANAGE_SKU
+                        )
+                    ) {
                         true -> BillingModel.NO_SKU
                         else -> BillingModel.MAU
                     }

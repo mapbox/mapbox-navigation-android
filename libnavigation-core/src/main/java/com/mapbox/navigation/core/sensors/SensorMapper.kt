@@ -50,7 +50,9 @@ internal object SensorMapper {
             Sensor.TYPE_GRAVITY -> SensorType.GRAVITY
             Sensor.TYPE_PRESSURE -> SensorType.PRESSURE
             else -> {
-                logger.e(msg = Message("This type of sensor event is not supported: ${sensor.name}"))
+                logger.e(
+                    msg = Message("This type of sensor event is not supported: ${sensor.name}")
+                )
                 null
             }
         }

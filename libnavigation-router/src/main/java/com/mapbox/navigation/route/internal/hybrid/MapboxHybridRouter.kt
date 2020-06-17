@@ -16,9 +16,9 @@ import com.mapbox.navigation.utils.internal.NetworkStatus
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import kotlinx.coroutines.Job
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
-import kotlinx.coroutines.Job
 
 /**
  * MapboxHybridRouter combines onboard and offboard Routers.
@@ -116,7 +116,8 @@ class MapboxHybridRouter(
         private lateinit var options: RouteOptions
         private lateinit var callback: Router.Callback
         private var fetchingInProgress = false
-        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> = CopyOnWriteArrayList()
+        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> =
+            CopyOnWriteArrayList()
 
         override fun onResponse(routes: List<DirectionsRoute>) {
             fetchingInProgress = false
@@ -159,11 +160,18 @@ class MapboxHybridRouter(
             handleRouteRequest(routeOptions, clientCallback)
         }
 
-        override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+        override fun getRouteRefresh(
+            route: DirectionsRoute,
+            legIndex: Int,
+            callback: RouteRefreshCallback
+        ) {
             mainRouter.getRouteRefresh(route, legIndex, callback)
         }
 
-        private fun handleRouteRequest(routeOptions: RouteOptions, clientCallback: Router.Callback) {
+        private fun handleRouteRequest(
+            routeOptions: RouteOptions,
+            clientCallback: Router.Callback
+        ) {
             if (fetchingInProgress) {
                 pendingRequests.add(Pair(routeOptions, clientCallback))
             } else {
@@ -204,7 +212,11 @@ class MapboxHybridRouter(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         routeDispatchHandler.get().getRouteRefresh(route, legIndex, callback)
     }
 

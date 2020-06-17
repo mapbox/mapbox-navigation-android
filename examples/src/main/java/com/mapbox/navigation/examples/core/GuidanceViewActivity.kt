@@ -33,10 +33,10 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.util.Collections
 import kotlinx.android.synthetic.main.activity_guidance_view.*
 import kotlinx.android.synthetic.main.activity_guidance_view.mapView
 import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
+import java.util.Collections
 
 /**
  * This activity shows how to display Mapbox's guidance view images,

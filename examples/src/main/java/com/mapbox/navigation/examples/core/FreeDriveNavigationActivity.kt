@@ -21,10 +21,10 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
-import java.net.URI
 import kotlinx.android.synthetic.main.free_drive_navigation_layout.*
 import timber.log.Timber
+import java.lang.ref.WeakReference
+import java.net.URI
 
 /**
  * This activity shows how to enable the Navigation SDK's "free-drive"
@@ -56,14 +56,16 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-            .onboardRouterOptions(OnboardRouterOptions.Builder()
-                .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
-                .tilesVersion("2020_02_02-03_00_00")
-                .build())
+            .onboardRouterOptions(
+                OnboardRouterOptions.Builder()
+                    .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
+                    .tilesVersion("2020_02_02-03_00_00")
+                    .build()
+            )
             .build()
 
         mapboxNavigation = MapboxNavigation(
-                mapboxNavigationOptions
+            mapboxNavigationOptions
         )
         initListeners()
     }
@@ -76,21 +78,23 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.restoreStateFrom(state)
             }
             // center the map at current location
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            LocationEngineProvider
+                .getBestLocationEngine(this)
+                .getLastLocation(locationListenerCallback)
         }
     }
 
     fun startLocationUpdates() {
         val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                        .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                        .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                        .build()
+            LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
+                .build()
 
         mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
+            requestLocationUpdateRequest,
+            locationListenerCallback,
+            mainLooper
         )
     }
 
@@ -170,7 +174,9 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
-    private class MyLocationEngineCallback(activity: FreeDriveNavigationActivity) : LocationEngineCallback<LocationEngineResult> {
+    private class MyLocationEngineCallback(
+        activity: FreeDriveNavigationActivity
+    ) : LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
@@ -184,7 +190,10 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation
+            ?.navigationOptions
+            ?.locationEngine
+            ?.removeLocationUpdates(locationListenerCallback)
     }
 
     private val tripSessionStateObserver = object : TripSessionStateObserver {

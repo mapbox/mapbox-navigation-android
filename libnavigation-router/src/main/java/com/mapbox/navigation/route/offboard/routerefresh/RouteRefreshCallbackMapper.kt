@@ -14,7 +14,10 @@ internal class RouteRefreshCallbackMapper(
     private val callback: RouteRefreshCallback
 ) : Callback<DirectionsRefreshResponse> {
 
-    override fun onResponse(call: Call<DirectionsRefreshResponse>, response: Response<DirectionsRefreshResponse>) {
+    override fun onResponse(
+        call: Call<DirectionsRefreshResponse>,
+        response: Response<DirectionsRefreshResponse>
+    ) {
         val routeAnnotations = response.body()?.route()
         var errorThrowable: Throwable? = null
         val refreshedDirectionsRoute = try {
@@ -26,9 +29,12 @@ internal class RouteRefreshCallbackMapper(
         if (refreshedDirectionsRoute != null) {
             callback.onRefresh(refreshedDirectionsRoute)
         } else {
-            callback.onError(RouteRefreshError(
-                message = "Failed to read refresh response",
-                throwable = errorThrowable))
+            callback.onError(
+                RouteRefreshError(
+                    message = "Failed to read refresh response",
+                    throwable = errorThrowable
+                )
+            )
         }
     }
 
@@ -42,7 +48,8 @@ internal class RouteRefreshCallbackMapper(
             val legs = oldRouteLegsList.toMutableList()
             for (i in currentLegIndex until legs.size) {
                 validRouteAnnotations.legs()?.let { annotationHolderRouteLegsList ->
-                    val updatedAnnotation = annotationHolderRouteLegsList[i - currentLegIndex].annotation()
+                    val updatedAnnotation =
+                        annotationHolderRouteLegsList[i - currentLegIndex].annotation()
                     legs[i] = legs[i].toBuilder().annotation(updatedAnnotation).build()
                 }
             }

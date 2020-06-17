@@ -2,8 +2,6 @@ package com.mapbox.navigation.examples.history
 
 import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -14,6 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 data class ReplayPath(
     @SerializedName("title")
@@ -48,45 +48,57 @@ class HistoryFilesClient {
     private suspend fun requestHistoryCall(): List<ReplayPath> = suspendCoroutine { cont ->
         val historyDrives = retrofit.create(LocalhostFiles::class.java)
 
-        historyDrives.drives().enqueue(object : Callback<List<ReplayPath>> {
-            override fun onFailure(call: Call<List<ReplayPath>>, t: Throwable) {
-                Timber.e(t, "requestHistory onFailure")
-                cont.resume(emptyList())
-            }
-
-            override fun onResponse(call: Call<List<ReplayPath>>, response: Response<List<ReplayPath>>) {
-                Timber.i("requestHistory onResponse")
-                val drives = if (response.isSuccessful) {
-                    response.body() ?: emptyList()
-                } else {
-                    emptyList()
+        historyDrives.drives().enqueue(
+            object : Callback<List<ReplayPath>> {
+                override fun onFailure(call: Call<List<ReplayPath>>, t: Throwable) {
+                    Timber.e(t, "requestHistory onFailure")
+                    cont.resume(emptyList())
                 }
-                cont.resume(drives)
+
+                override fun onResponse(
+                    call: Call<List<ReplayPath>>,
+                    response: Response<List<ReplayPath>>
+                ) {
+                    Timber.i("requestHistory onResponse")
+                    val drives = if (response.isSuccessful) {
+                        response.body() ?: emptyList()
+                    } else {
+                        emptyList()
+                    }
+                    cont.resume(drives)
+                }
             }
-        })
+        )
     }
 
     suspend fun requestJsonFile(filename: String): ReplayHistoryDTO? =
         withContext(Dispatchers.IO) { requestJsonFileCall(filename) }
 
-    private suspend fun requestJsonFileCall(filename: String): ReplayHistoryDTO? = suspendCoroutine { cont ->
+    private suspend fun requestJsonFileCall(
+        filename: String
+    ): ReplayHistoryDTO? = suspendCoroutine { cont ->
         val historyDrives = retrofit.create(LocalhostFiles::class.java)
 
-        historyDrives.jsonFile(filename).enqueue(object : Callback<ReplayHistoryDTO> {
-            override fun onFailure(call: Call<ReplayHistoryDTO>, t: Throwable) {
-                Timber.e(t, "requestData onFailure")
-                cont.resume(null)
-            }
-
-            override fun onResponse(call: Call<ReplayHistoryDTO>, response: Response<ReplayHistoryDTO>) {
-                Timber.i("requestData onResponse")
-                val data = if (response.isSuccessful) {
-                    response.body()
-                } else {
-                    null
+        historyDrives.jsonFile(filename).enqueue(
+            object : Callback<ReplayHistoryDTO> {
+                override fun onFailure(call: Call<ReplayHistoryDTO>, t: Throwable) {
+                    Timber.e(t, "requestData onFailure")
+                    cont.resume(null)
                 }
-                cont.resume(data)
+
+                override fun onResponse(
+                    call: Call<ReplayHistoryDTO>,
+                    response: Response<ReplayHistoryDTO>
+                ) {
+                    Timber.i("requestData onResponse")
+                    val data = if (response.isSuccessful) {
+                        response.body()
+                    } else {
+                        null
+                    }
+                    cont.resume(data)
+                }
             }
-        })
+        )
     }
 }

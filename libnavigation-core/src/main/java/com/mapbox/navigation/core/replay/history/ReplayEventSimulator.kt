@@ -3,13 +3,13 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.utils.internal.ThreadController
-import kotlin.math.max
-import kotlin.math.roundToLong
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.roundToLong
 
 /**
  * This class keeps track of a forward playing replay. As time moves forward, it captures

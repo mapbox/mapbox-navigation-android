@@ -57,21 +57,37 @@ class NavigationFeedbackEventTest {
         every { phoneState.feedbackId } returns STATE_FEEDBACK_ID
         every { phoneState.userId } returns STATE_USER_ID
 
-        every { metricsRouteProgress.directionsRouteDistance } returns PROGRESS_DIRECTIONS_ROUTE_DISTANCE
-        every { metricsRouteProgress.directionsRouteDuration } returns PROGRESS_DIRECTIONS_ROUTE_DURATION
-        every { metricsRouteProgress.directionsRouteProfile } returns PROGRESS_DIRECTIONS_ROUTE_PROFILE
+        every {
+            metricsRouteProgress.directionsRouteDistance
+        } returns PROGRESS_DIRECTIONS_ROUTE_DISTANCE
+        every {
+            metricsRouteProgress.directionsRouteDuration
+        } returns PROGRESS_DIRECTIONS_ROUTE_DURATION
+        every {
+            metricsRouteProgress.directionsRouteProfile
+        } returns PROGRESS_DIRECTIONS_ROUTE_PROFILE
         every { metricsRouteProgress.distanceRemaining } returns PROGRESS_DISTANCE_REMAINING
         every { metricsRouteProgress.durationRemaining } returns PROGRESS_DURATION_REMAINING
         every { metricsRouteProgress.distanceTraveled } returns PROGRESS_DISTANCE_TRAVELED
         every { metricsRouteProgress.currentStepDistance } returns PROGRESS_CURRENT_STEP_DISTANCE
         every { metricsRouteProgress.currentStepDuration } returns PROGRESS_CURRENT_STEP_DURATION
-        every { metricsRouteProgress.currentStepDistanceRemaining } returns PROGRESS_CURRENT_STEP_DISTANCE_REMAINING
-        every { metricsRouteProgress.currentStepDurationRemaining } returns PROGRESS_CURRENT_STEP_DURATION_REMAINING
-        every { metricsRouteProgress.upcomingStepInstruction } returns PROGRESS_UPCOMING_STEP_INSTRUCTION
-        every { metricsRouteProgress.upcomingStepModifier } returns PROGRESS_UPCOMING_STEP_MODIFIER
+        every {
+            metricsRouteProgress.currentStepDistanceRemaining
+        } returns PROGRESS_CURRENT_STEP_DISTANCE_REMAINING
+        every {
+            metricsRouteProgress.currentStepDurationRemaining
+        } returns PROGRESS_CURRENT_STEP_DURATION_REMAINING
+        every {
+            metricsRouteProgress.upcomingStepInstruction
+        } returns PROGRESS_UPCOMING_STEP_INSTRUCTION
+        every {
+            metricsRouteProgress.upcomingStepModifier
+        } returns PROGRESS_UPCOMING_STEP_MODIFIER
         every { metricsRouteProgress.upcomingStepType } returns PROGRESS_UPCOMING_STEP_TYPE
         every { metricsRouteProgress.upcomingStepName } returns PROGRESS_UPCOMING_STEP_NAME
-        every { metricsRouteProgress.previousStepInstruction } returns PROGRESS_PREVIOUS_STEP_INSTRUCTION
+        every {
+            metricsRouteProgress.previousStepInstruction
+        } returns PROGRESS_PREVIOUS_STEP_INSTRUCTION
         every { metricsRouteProgress.previousStepModifier } returns PROGRESS_PREVIOUS_STEP_MODIFIER
         every { metricsRouteProgress.previousStepType } returns PROGRESS_PREVIOUS_STEP_TYPE
         every { metricsRouteProgress.previousStepName } returns PROGRESS_PREVIOUS_STEP_NAME

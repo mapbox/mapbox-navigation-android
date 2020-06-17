@@ -13,11 +13,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
 class FasterRouteControllerTest {
@@ -41,14 +41,27 @@ class FasterRouteControllerTest {
     private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
     private val fasterRouteDetector: FasterRouteDetector = mockk()
 
-    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsUpdater, fasterRouteDetector, logger)
+    private val fasterRouteController = FasterRouteController(
+        directionsSession,
+        tripSession,
+        routeOptionsUpdater,
+        fasterRouteDetector,
+        logger
+    )
 
     @Before
     fun setup() {
-        every { routeOptionsResultSuccess.routeOptions } returns routeOptionsResultSuccessRouteOptions
+        every {
+            routeOptionsResultSuccess.routeOptions
+        } returns routeOptionsResultSuccessRouteOptions
 
         every { directionsSession.getRouteOptions() } returns mockk()
-        every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
+        every {
+            directionsSession.requestFasterRoute(
+                any(),
+                capture(routesRequestCallbacks)
+            )
+        } returns mockk()
         every { tripSession.getRouteProgress() } returns mockk()
     }
 
@@ -122,13 +135,20 @@ class FasterRouteControllerTest {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
         }
-        every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
+        every {
+            directionsSession.requestFasterRoute(
+                any(),
+                capture(routesRequestCallbacks)
+            )
+        } returns mockk()
 
         fasterRouteController.attach(fasterRouteObserver)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        val routes = listOf<DirectionsRoute>(mockk {
+        val routes = listOf<DirectionsRoute>(
+            mockk {
                 every { routeIndex() } returns "0"
-            })
+            }
+        )
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
         verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes, true) }
@@ -149,13 +169,20 @@ class FasterRouteControllerTest {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
         }
-        every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
+        every {
+            directionsSession.requestFasterRoute(
+                any(),
+                capture(routesRequestCallbacks)
+            )
+        } returns mockk()
 
         fasterRouteController.attach(fasterRouteObserver)
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
-        val routes = listOf<DirectionsRoute>(mockk {
-            every { routeIndex() } returns "0"
-        })
+        val routes = listOf<DirectionsRoute>(
+            mockk {
+                every { routeIndex() } returns "0"
+            }
+        )
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
         verify(exactly = 1) { fasterRouteObserver.onFasterRoute(currentRoute, routes, false) }
@@ -164,7 +191,9 @@ class FasterRouteControllerTest {
         coroutineRule.testDispatcher.cleanupTestCoroutines()
     }
 
-    private fun mockRouteOptionsProvider(routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult) {
+    private fun mockRouteOptionsProvider(
+        routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
+    ) {
         every { routeOptionsUpdater.update(any(), any(), any()) } returns routeOptionsResult
     }
 }

@@ -51,10 +51,10 @@ import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.internal.ifChannelException
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.util.Calendar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import java.util.Calendar
 
 /**
  * Default implementation of [TripNotification] interface
@@ -76,8 +76,8 @@ class MapboxTripNotification constructor(
         var notificationActionButtonChannel = Channel<NotificationAction>(1)
 
         private const val MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION =
-            "You need to provide a DistanceFormatter in order to use the default TripNotification. " +
-                "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
+            "You need to provide a DistanceFormatter in order to use the default " +
+                "TripNotification. Also see MapboxNavigation#defaultNavigationOptionsBuilder"
     }
 
     private val applicationContext = navigationOptions.applicationContext
@@ -362,7 +362,12 @@ class MapboxTripNotification constructor(
     private fun updateEndNavigationBtnText(isFreeDriveMode: Boolean) {
         expandedNotificationRemoteViews?.setTextViewText(
             R.id.endNavigationBtnText,
-            applicationContext.getString(if (isFreeDriveMode) R.string.mapbox_stop_session else R.string.mapbox_end_navigation)
+            applicationContext.getString(
+                if (isFreeDriveMode)
+                    R.string.mapbox_stop_session
+                else
+                    R.string.mapbox_end_navigation
+            )
         )
     }
 
@@ -397,7 +402,8 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
-        val distanceRemaining = routeProgress.currentLegProgress?.currentStepProgress?.distanceRemaining
+        val distanceRemaining =
+            routeProgress.currentLegProgress?.currentStepProgress?.distanceRemaining
         val formattedDistance = distanceRemaining?.let { distanceRemaining ->
             distanceFormatter.formatDistance(distanceRemaining.toDouble())
         } ?: return
@@ -447,7 +453,9 @@ class MapboxTripNotification constructor(
     private fun updateManeuverImage(drivingSide: String) {
         getManeuverBitmap(
             currentManeuverType ?: "",
-            currentManeuverModifier, drivingSide, currentRoundaboutAngle
+            currentManeuverModifier,
+            drivingSide,
+            currentRoundaboutAngle
         )?.let { bitmap ->
             collapsedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
             expandedNotificationRemoteViews?.setImageViewBitmap(R.id.maneuverImage, bitmap)
@@ -493,9 +501,13 @@ class MapboxTripNotification constructor(
         }
 
         val width =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_width)
+            applicationContext
+                .resources
+                .getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_width)
         val height =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_height)
+            applicationContext
+                .resources
+                .getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_height)
 
         val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val maneuverCanvas = Canvas(maneuverImage)
@@ -516,11 +528,8 @@ class MapboxTripNotification constructor(
 
         maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
 
-        return if (isManeuverIconNeedFlip(
-                currentManeuverType,
-                currentManeuverModifier,
-                drivingSide
-            )
+        return if (
+            isManeuverIconNeedFlip(currentManeuverType, currentManeuverModifier, drivingSide)
         ) {
             Bitmap.createBitmap(
                 maneuverImage,

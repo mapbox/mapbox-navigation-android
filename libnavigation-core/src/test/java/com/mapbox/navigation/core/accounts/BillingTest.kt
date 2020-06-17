@@ -53,7 +53,12 @@ class BillingTest {
     fun verifyNoneBillingType() {
         every { appContext.packageManager } returns packageManager
         every { metadata.getBoolean(any()) } returns AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
-        every { metadata.getBoolean(any(), any()) } returns AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
+        every {
+            metadata.getBoolean(
+                any(),
+                any()
+            )
+        } returns AccountsConstants.DEFAULT_TOKEN_MANAGE_SKU
         applicationInfo.metaData = metadata
         every { packageManager.getApplicationInfo(any(), any()) } returns applicationInfo
 

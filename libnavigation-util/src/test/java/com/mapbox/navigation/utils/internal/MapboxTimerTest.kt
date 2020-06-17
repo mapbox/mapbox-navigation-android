@@ -4,11 +4,11 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
 class MapboxTimerTest {

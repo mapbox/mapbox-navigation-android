@@ -39,9 +39,13 @@ class HistoryFilesActivity : AppCompatActivity() {
         filesViewController = HistoryFilesViewController()
         filesViewController.attach(this, viewAdapter) { historyDataResponse ->
             if (historyDataResponse == null) {
-                Snackbar.make(recyclerView,
+                Snackbar.make(
+                    recyclerView,
                     getString(R.string.history_failed_to_load_item),
-                    Snackbar.LENGTH_LONG).setAction("Action", null
+                    Snackbar.LENGTH_LONG
+                ).setAction(
+                    "Action",
+                    null
                 ).show()
             } else {
                 selectedHistory = historyDataResponse
@@ -63,9 +67,13 @@ class HistoryFilesActivity : AppCompatActivity() {
         fab.visibility = GONE
         filesViewController.requestHistoryFiles(this) { connected ->
             if (!connected) {
-                Snackbar.make(recyclerView,
+                Snackbar.make(
+                    recyclerView,
                     getString(R.string.history_failed_to_load_list),
-                    Snackbar.LENGTH_LONG).setAction("Action", null
+                    Snackbar.LENGTH_LONG
+                ).setAction(
+                    "Action",
+                    null
                 ).show()
                 fab.visibility = VISIBLE
             }

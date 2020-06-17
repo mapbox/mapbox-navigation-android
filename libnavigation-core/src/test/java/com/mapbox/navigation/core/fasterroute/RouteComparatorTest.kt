@@ -30,13 +30,15 @@ class RouteComparatorTest {
             }
         }
         val directionsRoute: DirectionsRoute = mockk {
-            every { legs() } returns listOf(mockk {
-                every { steps() } returns listOf(
-                    mockk { every { name() } returns "Pennsylvania Avenue" },
-                    mockk { every { name() } returns "20th Street" },
-                    mockk { every { name() } returns "Arkansas Street" }
-                )
-            })
+            every { legs() } returns listOf(
+                mockk {
+                    every { steps() } returns listOf(
+                        mockk { every { name() } returns "Pennsylvania Avenue" },
+                        mockk { every { name() } returns "20th Street" },
+                        mockk { every { name() } returns "Arkansas Street" }
+                    )
+                }
+            )
         }
 
         val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)
@@ -62,13 +64,15 @@ class RouteComparatorTest {
             }
         }
         val directionsRoute: DirectionsRoute = mockk {
-            every { legs() } returns listOf(mockk {
-                every { steps() } returns listOf(
-                    mockk { every { name() } returns "Pennsylvania Avenue" },
-                    mockk { every { name() } returns "20th Street" },
-                    mockk { every { name() } returns "De Haro Street" }
-                )
-            })
+            every { legs() } returns listOf(
+                mockk {
+                    every { steps() } returns listOf(
+                        mockk { every { name() } returns "Pennsylvania Avenue" },
+                        mockk { every { name() } returns "20th Street" },
+                        mockk { every { name() } returns "De Haro Street" }
+                    )
+                }
+            )
         }
 
         val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)
@@ -98,13 +102,15 @@ class RouteComparatorTest {
             }
         }
         val directionsRoute: DirectionsRoute = mockk {
-            every { legs() } returns listOf(mockk {
-                every { steps() } returns listOf(
-                    mockk { every { name() } returns "Alabama Street" },
-                    mockk { every { name() } returns "Bradford Street" },
-                    mockk { every { name() } returns "Nevada Street" }
-                )
-            })
+            every { legs() } returns listOf(
+                mockk {
+                    every { steps() } returns listOf(
+                        mockk { every { name() } returns "Alabama Street" },
+                        mockk { every { name() } returns "Bradford Street" },
+                        mockk { every { name() } returns "Nevada Street" }
+                    )
+                }
+            )
         }
 
         val isNewRoute = routeComparator.isRouteDescriptionDifferent(routeProgress, directionsRoute)

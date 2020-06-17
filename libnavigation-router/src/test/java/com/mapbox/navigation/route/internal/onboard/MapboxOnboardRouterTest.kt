@@ -20,8 +20,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,6 +40,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -320,7 +320,8 @@ class MapboxOnboardRouterTest {
         private const val VOICE_INSTRUCTIONS_ANNOUNCEMENT =
             "Head east on East Fulton Street, then turn right onto North Ann Street"
         private const val VOICE_INSTRUCTIONS_SSML_ANNOUNCEMENT =
-            "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Head east on East Fulton Street, then turn right onto North Ann Street</prosody></amazon:effect></speak>"
+            "<speak><amazon:effect name=\"drc\"><prosody rate=\"1.08\">Head east on East Fulton" +
+                " Street, then turn right onto North Ann Street</prosody></amazon:effect></speak>"
 
         private const val BANNER_INSTRUCTIONS_SIZE = 1
         private const val BANNER_INSTRUCTIONS_DISTANCE = 293.2
@@ -345,7 +346,8 @@ class MapboxOnboardRouterTest {
         private const val ERROR_MESSAGE =
             "Error occurred fetching offline route: No suitable edges near location - Code: 171"
         private const val FAILURE_RESPONSE =
-            "{\"status\": \"Bad Request\", \"status_code\": 400, \"error\": \"No suitable edges near location\", \"error_code\": 171}"
+            "{\"status\": \"Bad Request\", \"status_code\": 400, \"error\": \"No suitable " +
+                "edges near location\", \"error_code\": 171}"
         private const val SUCCESS_RESPONSE = "{\n" +
             "  \"routes\": [\n" +
             "    {\n" +
@@ -431,13 +433,20 @@ class MapboxOnboardRouterTest {
             "              \"voiceInstructions\": [\n" +
             "                {\n" +
             "                  \"distanceAlongGeometry\": 293.2,\n" +
-            "                  \"announcement\": \"Head east on East Fulton Street, then turn right onto North Ann Street\",\n" +
-            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\"><prosody rate=\\\"1.08\\\">Head east on East Fulton Street, then turn right onto North Ann Street</prosody></amazon:effect></speak>\"\n" +
+            "                  \"announcement\": \"Head east on East Fulton Street, then turn " +
+            "right onto North Ann Street\",\n" +
+            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\">" +
+            "<prosody rate=\\\"1.08\\\">Head east on East Fulton Street, then turn right onto " +
+            "North Ann Street</prosody></amazon:effect></speak>\"\n" +
             "                },\n" +
             "                {\n" +
             "                  \"distanceAlongGeometry\": 86.6,\n" +
-            "                  \"announcement\": \"Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA 23 East)\",\n" +
-            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\"><prosody rate=\\\"1.08\\\">Turn right onto North Ann Street, then turn left onto East Chestnut Street (PA <say-as interpret-as=\\\"address\\\">23</say-as> East)</prosody></amazon:effect></speak>\"\n" +
+            "                  \"announcement\": \"Turn right onto North Ann Street, then turn " +
+            "left onto East Chestnut Street (PA 23 East)\",\n" +
+            "                  \"ssmlAnnouncement\": \"<speak><amazon:effect name=\\\"drc\\\">" +
+            "<prosody rate=\\\"1.08\\\">Turn right onto North Ann Street, then turn left onto " +
+            "East Chestnut Street (PA <say-as interpret-as=\\\"address\\\">23</say-as> " +
+            "East)</prosody></amazon:effect></speak>\"\n" +
             "                }\n" +
             "              ],\n" +
             "              \"bannerInstructions\": [\n" +

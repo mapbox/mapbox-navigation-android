@@ -24,13 +24,13 @@ import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CopyOnWriteArraySet
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Default implementation of [TripSession]
@@ -297,7 +297,9 @@ internal class MapboxTripSession(
     /**
      * Register [BannerInstructionsObserver]
      */
-    override fun registerBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    override fun registerBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
         routeProgress?.let {
             checkBannerInstructionEvent(it) { bannerInstruction ->
@@ -318,14 +320,18 @@ internal class MapboxTripSession(
     /**
      * Unregister [BannerInstructionsObserver]
      */
-    override fun unregisterBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    override fun unregisterBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         bannerInstructionsObservers.remove(bannerInstructionsObserver)
     }
 
     /**
      * Register [VoiceInstructionsObserver]
      */
-    override fun registerVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
+    override fun registerVoiceInstructionsObserver(
+        voiceInstructionsObserver: VoiceInstructionsObserver
+    ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
         routeProgress?.let {
             checkVoiceInstructionEvent(it) { voiceInstruction ->
@@ -337,7 +343,9 @@ internal class MapboxTripSession(
     /**
      * Unregister [VoiceInstructionsObserver]
      */
-    override fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
+    override fun unregisterVoiceInstructionsObserver(
+        voiceInstructionsObserver: VoiceInstructionsObserver
+    ) {
         voiceInstructionsObservers.remove(voiceInstructionsObserver)
     }
 

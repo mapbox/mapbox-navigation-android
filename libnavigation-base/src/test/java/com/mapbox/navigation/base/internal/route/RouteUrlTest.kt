@@ -3,7 +3,6 @@ package com.mapbox.navigation.base.internal.route
 import android.net.Uri
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.geojson.Point
-import java.net.URLDecoder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -11,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.net.URLDecoder
 
 // Test doesn't check if fields are valid! It checks URL, params in URL, where they locate and if has right query keys
 @RunWith(RobolectricTestRunner::class)
@@ -20,7 +20,11 @@ class RouteUrlTest {
     @Test
     fun checkBaseUrl() {
         setupRouteUrl()
-            .checkContain("${RouteUrl.BASE_URL}/${RouteUrl.BASE_URL_API_NAME}/${RouteUrl.BASE_URL_API_VERSION}/")
+            .checkContain(
+                RouteUrl.BASE_URL +
+                    "/${RouteUrl.BASE_URL_API_NAME}" +
+                    "/${RouteUrl.BASE_URL_API_VERSION}/"
+            )
     }
 
     @Test
@@ -105,11 +109,12 @@ class RouteUrlTest {
     }
 
     private fun Uri.checkContain(string: String, decode: String? = "UTF-8") =
-        assertTrue(this.toString()
-            .let { url ->
-                decode?.let { decode -> URLDecoder.decode(url, decode) } ?: url
-            }
-            .contains(string)
+        assertTrue(
+            this.toString()
+                .let { url ->
+                    decode?.let { decode -> URLDecoder.decode(url, decode) } ?: url
+                }
+                .contains(string)
         )
 
     private fun setupRouteUrl(

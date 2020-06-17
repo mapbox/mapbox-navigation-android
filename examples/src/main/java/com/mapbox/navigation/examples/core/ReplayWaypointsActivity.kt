@@ -41,14 +41,14 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
-import java.util.Collections
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.container
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.mapView
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.seekBar
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.seekBarText
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.startNavigation
 import timber.log.Timber
+import java.lang.ref.WeakReference
+import java.util.Collections
 
 /**
  * This activity shows how to use navigate to various waypoints
@@ -98,7 +98,9 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // Center the map at current location. Using LocationEngineProvider because the
             // replay engine won't have your last location.
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(firstLocationCallback)
+            LocationEngineProvider
+                .getBestLocationEngine(this)
+                .getLastLocation(firstLocationCallback)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             stopsController.add(latLng)
@@ -117,9 +119,12 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .coordinates(stopsController.coordinates(originLocation))
                 .alternatives(true)
                 .overview(DirectionsCriteria.OVERVIEW_FULL)
-                .annotationsList(listOf(
-                    DirectionsCriteria.ANNOTATION_SPEED,
-                    DirectionsCriteria.ANNOTATION_DISTANCE))
+                .annotationsList(
+                    listOf(
+                        DirectionsCriteria.ANNOTATION_SPEED,
+                        DirectionsCriteria.ANNOTATION_DISTANCE
+                    )
+                )
                 .profile(DirectionsCriteria.PROFILE_DRIVING)
                 .build(),
             routesReqCallback
@@ -168,15 +173,17 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         seekBar.max = 4
         seekBar.progress = 1
         seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                mapboxReplayer.playbackSpeed(progress.toDouble())
-                seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
-            }
+        seekBar.setOnSeekBarChangeListener(
+            object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                    mapboxReplayer.playbackSpeed(progress.toDouble())
+                    seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
+                }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) { }
-            override fun onStopTrackingTouch(seekBar: SeekBar) { }
-        })
+                override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar) {}
+            }
+        )
 
         findViewById<Button>(R.id.navigateNextRouteLeg).setOnClickListener {
             mapboxNavigation?.navigateNextRouteLeg()
@@ -187,6 +194,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         val arrivalOptions = ArrivalOptions.Builder()
             .arrivalInSeconds(5.0)
             .build()
+
         override fun arrivalOptions(): ArrivalOptions = arrivalOptions
 
         override fun navigateNextRouteLeg(routeLegProgress: RouteLegProgress): Boolean {

@@ -34,8 +34,8 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_replay_route_layout.*
+import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to use the MapboxNavigation
@@ -79,12 +79,18 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             initializeFirstLocation()
 
-            mapboxNavigation?.attachFasterRouteObserver(object : FasterRouteObserver {
-                override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
-                    navigationMapboxMap?.drawRoutes(alternatives)
-                    mapboxNavigation?.setRoutes(alternatives)
+            mapboxNavigation?.attachFasterRouteObserver(
+                object : FasterRouteObserver {
+                    override fun onFasterRoute(
+                        currentRoute: DirectionsRoute,
+                        alternatives: List<DirectionsRoute>,
+                        isAlternativeFaster: Boolean
+                    ) {
+                        navigationMapboxMap?.drawRoutes(alternatives)
+                        mapboxNavigation?.setRoutes(alternatives)
+                    }
                 }
-            })
+            )
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -95,10 +101,12 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                         .alternatives(true)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .overview(DirectionsCriteria.OVERVIEW_FULL)
-                        .annotationsList(listOf(
-                            DirectionsCriteria.ANNOTATION_SPEED,
-                            DirectionsCriteria.ANNOTATION_DISTANCE,
-                            DirectionsCriteria.ANNOTATION_CONGESTION)
+                        .annotationsList(
+                            listOf(
+                                DirectionsCriteria.ANNOTATION_SPEED,
+                                DirectionsCriteria.ANNOTATION_DISTANCE,
+                                DirectionsCriteria.ANNOTATION_CONGESTION
+                            )
                         )
                         .build(),
                     routesReqCallback

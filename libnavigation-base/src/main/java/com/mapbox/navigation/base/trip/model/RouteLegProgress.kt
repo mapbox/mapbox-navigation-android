@@ -89,7 +89,16 @@ class RouteLegProgress private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RouteLegProgress(legIndex=$legIndex, routeLeg=$routeLeg, distanceTraveled=$distanceTraveled, distanceRemaining=$distanceRemaining, durationRemaining=$durationRemaining, fractionTraveled=$fractionTraveled, currentStepProgress=$currentStepProgress, upcomingStep=$upcomingStep)"
+        return "RouteLegProgress(" +
+            "legIndex=$legIndex, " +
+            "routeLeg=$routeLeg, " +
+            "distanceTraveled=$distanceTraveled, " +
+            "distanceRemaining=$distanceRemaining, " +
+            "durationRemaining=$durationRemaining, " +
+            "fractionTraveled=$fractionTraveled, " +
+            "currentStepProgress=$currentStepProgress, " +
+            "upcomingStep=$upcomingStep" +
+            ")"
     }
 
     /**
@@ -170,7 +179,7 @@ class RouteLegProgress private constructor(
          * @return Builder
          */
         fun upcomingStep(upcomingStep: LegStep?): Builder =
-                apply { this.upcomingStep = upcomingStep }
+            apply { this.upcomingStep = upcomingStep }
 
         /**
          * Build new instance of [RouteLegProgress]

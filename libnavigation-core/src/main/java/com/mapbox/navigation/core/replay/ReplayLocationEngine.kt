@@ -33,7 +33,11 @@ class ReplayLocationEngine(
     /**
      * Requests location updates with a callback on the specified Looper thread.
      */
-    override fun requestLocationUpdates(request: LocationEngineRequest, callback: EngineCallback, looper: Looper?) {
+    override fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        callback: EngineCallback,
+        looper: Looper?
+    ) {
         registeredCallbacks.add(callback)
     }
 
@@ -63,7 +67,10 @@ class ReplayLocationEngine(
     /**
      * Requests location updates with callback on the specified PendingIntent.
      */
-    override fun requestLocationUpdates(request: LocationEngineRequest, pendingIntent: PendingIntent?) {
+    override fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        pendingIntent: PendingIntent?
+    ) {
         throw UnsupportedOperationException("requestLocationUpdates with intents is unsupported")
     }
 

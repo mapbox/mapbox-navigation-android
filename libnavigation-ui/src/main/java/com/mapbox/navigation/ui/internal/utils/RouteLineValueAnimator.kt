@@ -8,7 +8,10 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 typealias RouteLineValueAnimatorHandler = (Float) -> Unit
-internal class RouteLineValueAnimator(private val animatorFrequency: AnimatorFrequency = AnimatorFrequency.ThirtyFramesPerSecond) {
+
+internal class RouteLineValueAnimator(
+    private val animatorFrequency: AnimatorFrequency = AnimatorFrequency.ThirtyFramesPerSecond
+) {
     var valueAnimatorHandler: RouteLineValueAnimatorHandler? = null
     private var animationJob: Job? = null
     private var jobControl: JobControl

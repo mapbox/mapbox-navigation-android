@@ -76,7 +76,9 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
     ) {
         if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
             listener?.let {
-                val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                val granted =
+                    grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
                 it.onPermissionResult(granted)
             }
         }
@@ -84,9 +86,11 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
 
     companion object {
 
-        private fun isPermissionGranted(context: Context, permission: String): Boolean {
-            return (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED)
-        }
+        private fun isPermissionGranted(context: Context, permission: String): Boolean =
+            ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
 
         private fun isCoarseLocationPermissionGranted(context: Context): Boolean {
             return isPermissionGranted(context, COARSE_LOCATION_PERMISSION)
@@ -101,8 +105,12 @@ class LocationPermissionsHelper(private val listener: PermissionsListener?) {
         }
 
         fun areLocationPermissionsGranted(context: Context): Boolean {
-            return isCoarseLocationPermissionGranted(context) || isFineLocationPermissionGranted(context) ||
-                    ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) && isBackgroundLocationPermissionGranted(context))
+            return isCoarseLocationPermissionGranted(context) ||
+                isFineLocationPermissionGranted(context) ||
+                (
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) &&
+                        isBackgroundLocationPermissionGranted(context)
+                    )
         }
 
         fun areRuntimePermissionsRequired(): Boolean {
