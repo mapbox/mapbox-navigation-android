@@ -140,9 +140,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
-        val mapboxNavigationOptions = MapboxNavigation
+        val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-        mapboxNavigation = getMapboxNavigation(mapboxNavigationOptions)
+        mapboxNavigation = getMapboxNavigation(optionsBuilder)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -227,7 +227,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
-            mapboxNavigation.startTripSession()
+            mapboxNavigation.startActiveGuidance()
             val routes = mapboxNavigation.getRoutes()
             if (routes.isNotEmpty()) {
                 initDynamicCamera(routes[0])
@@ -388,7 +388,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         restartSessionEventChannel.poll()?.also {
             mapboxNavigation.registerVoiceInstructionsObserver(this)
-            mapboxNavigation.startTripSession()
+            mapboxNavigation.startActiveGuidance()
         }
 
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
@@ -413,7 +413,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
             mapboxNavigation.unregisterVoiceInstructionsObserver(this)
-            mapboxNavigation.stopTripSession()
+            mapboxNavigation.stopActiveGuidance()
             restartSessionEventChannel.offer(RestartTripSessionAction)
         }
     }
@@ -429,7 +429,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxReplayer.finish()
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
-        mapboxNavigation.stopTripSession()
+        mapboxNavigation.stopActiveGuidance()
         mapboxNavigation.onDestroy()
 
         restartSessionEventChannel.cancel()
@@ -477,8 +477,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private fun getMapboxNavigation(optionsBuilder: NavigationOptions.Builder): MapboxNavigation {
         return if (shouldSimulateRoute()) {
-            optionsBuilder.locationEngine(ReplayLocationEngine(mapboxReplayer))
-            MapboxNavigation(optionsBuilder.build()).apply {
+            MapboxNavigation(optionsBuilder
+                .locationEngine(ReplayLocationEngine())
+                .build()
+            ).apply {
                 registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 if (originalRoute == null) {
                     mapboxReplayer.pushRealLocation(applicationContext, 0.0)
@@ -502,7 +504,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
             updateCameraOnNavigationStateChange(true)
-            mapboxNavigation.startTripSession()
+            mapboxNavigation.startActiveGuidance()
         }
     }
 }

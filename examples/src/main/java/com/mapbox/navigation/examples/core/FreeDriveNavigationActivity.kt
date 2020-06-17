@@ -4,10 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -22,9 +18,7 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.free_drive_navigation_layout.*
-import timber.log.Timber
 
 /**
  * This activity shows how to enable the Navigation SDK's "free-drive"
@@ -40,8 +34,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         const val MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state"
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
-        const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
     }
 
     private var mapboxNavigation: MapboxNavigation? = null
@@ -55,7 +47,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val mapboxNavigationOptions = MapboxNavigation
+        val navigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
                 .tilesUri("https://api-routing-tiles-staging.tilestream.net")
@@ -64,9 +56,8 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 .build())
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-                mapboxNavigationOptions
-        )
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
         initListeners()
     }
 
@@ -77,23 +68,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
-            // center the map at current location
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
         }
-    }
-
-    fun startLocationUpdates() {
-        val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                        .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                        .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
-                        .build()
-
-        mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
-        )
     }
 
     @SuppressLint("MissingPermission")
@@ -104,8 +79,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
-            mapboxNavigation?.startTripSession()
-            stopLocationUpdates()
+            mapboxNavigation?.startActiveGuidance()
             startNavigation.visibility = View.GONE
         }
     }
@@ -128,14 +102,13 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapView.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mapboxNavigation?.stopTripSession()
+        mapboxNavigation?.stopActiveGuidance()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
     }
@@ -170,35 +143,11 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
-    private class MyLocationEngineCallback(activity: FreeDriveNavigationActivity) : LocationEngineCallback<LocationEngineResult> {
-
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            activityRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
-        }
-
-        override fun onFailure(exception: Exception) {
-            Timber.i(exception)
-        }
-    }
-
-    private fun stopLocationUpdates() {
-        mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-    }
-
     private val tripSessionStateObserver = object : TripSessionStateObserver {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
-                TripSessionState.STARTED -> {
-                    startNavigation.visibility = View.GONE
-                    stopLocationUpdates()
-                }
                 TripSessionState.STOPPED -> {
                     startNavigation.visibility = View.VISIBLE
-                    startLocationUpdates()
                     updateCameraOnNavigationStateChange(false)
                 }
             }

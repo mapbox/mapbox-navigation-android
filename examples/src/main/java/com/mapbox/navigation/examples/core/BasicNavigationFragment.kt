@@ -14,9 +14,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -69,7 +67,6 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
-import java.lang.ref.WeakReference
 import java.util.Locale
 import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import okhttp3.Cache
@@ -156,7 +153,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
 
-        mapboxNavigation.stopTripSession()
+        mapboxNavigation.stopActiveGuidance()
         mapboxNavigation.onDestroy()
 
         speechPlayer.onDestroy()
@@ -223,7 +220,6 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                 mapboxReplayer.pushRealLocation(requireContext(), 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)
@@ -281,7 +277,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                     updateCameraOnNavigationStateChange(true)
                     navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
 
-                    mapboxNavigation.startTripSession()
+                    mapboxNavigation.startActiveGuidance()
                 }
             }
         }
@@ -300,7 +296,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
         cancelBtn = requireView().findViewById(R.id.cancelBtn)
         cancelBtn.setOnClickListener {
-            mapboxNavigation.stopTripSession()
+            mapboxNavigation.stopActiveGuidance()
         }
 
         recenterBtn.apply {
@@ -576,30 +572,11 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
         }
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
-    private class MyLocationEngineCallback(fragment: BasicNavigationFragment) :
-        LocationEngineCallback<LocationEngineResult> {
-
-        private val fragmentRef = WeakReference(fragment)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            result.locations.firstOrNull()?.let { location ->
-                Timber.d("location engine callback -> onSuccess location:%s", location)
-                fragmentRef.get()?.locationComponent?.forceLocationUpdate(location)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
-        }
-    }
-
     // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
     // for testing else a real location engine is used.
     private fun getLocationEngine(): LocationEngine {
         return if (shouldSimulateRoute()) {
-            ReplayLocationEngine(mapboxReplayer)
+            ReplayLocationEngine()
         } else {
             LocationEngineProvider.getBestLocationEngine(activity!!)
         }

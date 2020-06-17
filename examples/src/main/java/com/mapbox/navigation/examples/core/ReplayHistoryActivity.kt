@@ -82,7 +82,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 .pushEvents(replayEvents)
             if (!isActive) return@launch
 
-            val locationEngine = ReplayLocationEngine(mapboxReplay)
+            val locationEngine = ReplayLocationEngine()
 
             // Await the map and we're ready for navigation
             val mapboxNavigation = createMapboxNavigation(locationEngine)
@@ -120,10 +120,12 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private fun createMapboxNavigation(locationEngine: LocationEngine): MapboxNavigation {
+        val accessToken = Utils.getMapboxAccessToken(this)
         val mapboxNavigationOptions = MapboxNavigation
-            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .defaultNavigationOptionsBuilder(this, accessToken)
             .locationEngine(locationEngine)
             .build()
+
         return MapboxNavigation(mapboxNavigationOptions)
     }
 
@@ -196,7 +198,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
             navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
         }
-        mapboxNavigation.startTripSession()
+        mapboxNavigation.startActiveGuidance()
     }
 
     @SuppressLint("RestrictedApi")
@@ -261,7 +263,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         loadNavigationJob?.cancelChildren()
         navigationContext?.apply {
             mapboxReplayer.finish()
-            mapboxNavigation.stopTripSession()
+            mapboxNavigation.stopActiveGuidance()
             mapboxNavigation.onDestroy()
         }
         mapView.onDestroy()

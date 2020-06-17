@@ -112,14 +112,12 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
                 val optionsBuilder = NavigationViewOptions.builder(this)
-                optionsBuilder.navigationListener(this)
+                    .navigationListener(this)
+                    .arrivalObserver(this)
+                    .directionsRoute(route)
+                    .shouldSimulateRoute(true)
+                    .bannerInstructionsListener(this)
 
-                // Pass the ArrivalObserver interface (this activity)
-                optionsBuilder.arrivalObserver(this)
-
-                optionsBuilder.directionsRoute(route)
-                optionsBuilder.shouldSimulateRoute(true)
-                optionsBuilder.bannerInstructionsListener(this)
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Nav UI SDK's BuildingFootprintHighlightLayer class.

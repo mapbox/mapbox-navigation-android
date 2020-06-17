@@ -17,17 +17,11 @@ private typealias EngineCallback = LocationEngineCallback<LocationEngineResult>
 /**
  * Location Engine for replaying route history.
  */
-class ReplayLocationEngine(
-    mapboxReplayer: MapboxReplayer
-) : LocationEngine, ReplayEventsObserver {
+class ReplayLocationEngine : LocationEngine, ReplayEventsObserver {
 
     private val registeredCallbacks: MutableList<EngineCallback> = mutableListOf()
     private val lastLocationCallbacks: MutableList<EngineCallback> = mutableListOf()
     private var lastLocationEngineResult: LocationEngineResult? = null
-
-    init {
-        mapboxReplayer.registerObserver(this)
-    }
 
     /**
      * Requests location updates with a callback on the specified Looper thread.

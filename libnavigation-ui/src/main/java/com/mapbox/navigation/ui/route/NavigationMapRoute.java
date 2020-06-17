@@ -235,7 +235,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * This method will allow this class to listen to new routes based on
    * the progress updates from {@link MapboxNavigation}.
    * <p>
-   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
+   * If a new route is given to {@link MapboxNavigation#startActiveGuidance()}, this
    * class will automatically draw the new route.
    *
    * @param navigation to add the progress change listener
@@ -249,7 +249,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * This method will allow this class to listen to new routes based on
    * the progress updates from {@link MapboxNavigation}.
    * <p>
-   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
+   * If a new route is given to {@link MapboxNavigation#startActiveGuidance()}, this
    * class will automatically draw the new route.
    *
    * @param navigation to add the progress change listener

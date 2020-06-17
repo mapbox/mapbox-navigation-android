@@ -15,8 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.mapbox.android.core.location.LocationEngineCallback;
-import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
@@ -45,7 +43,6 @@ import com.mapbox.navigation.ui.route.NavigationMapRoute;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 
@@ -96,7 +93,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     mapboxMap.getLocationComponent().setRenderMode(RenderMode.GPS);
     mapCamera.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
     mapCamera.start(activeRoute);
-    mapboxNavigation.startTripSession();
+    mapboxNavigation.startActiveGuidance();
     startNavigationButton.setVisibility(View.GONE);
   }
 
@@ -107,7 +104,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       initializeLocationComponent(mapboxMap, style);
       NavigationOptions navigationOptions = MapboxNavigation
               .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-              .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+              .locationEngine(new ReplayLocationEngine())
               .build();
       mapboxNavigation = new MapboxNavigation(navigationOptions);
       mapboxNavigation.registerLocationObserver(locationObserver);
@@ -121,7 +118,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
               .withMapboxNavigation(mapboxNavigation, true)
               .build();
 
-      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       mapboxMap.addOnMapLongClickListener(this);
 
       if (activeRoute != null) {
@@ -184,7 +180,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   protected void onDestroy() {
     super.onDestroy();
     mapboxNavigation.unregisterRouteProgressObserver(replayProgressObserver);
-    mapboxNavigation.stopTripSession();
+    mapboxNavigation.stopActiveGuidance();
     mapboxNavigation.onDestroy();
     mapView.onDestroy();
   }
@@ -292,29 +288,6 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
         Timber.d("route request canceled");
       }
   };
-
-
-  private MyLocationEngineCallback locationEngineCallback = new MyLocationEngineCallback(this);
-
-  private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
-
-    private WeakReference<NavigationMapRouteActivity> activityRef;
-
-    MyLocationEngineCallback(NavigationMapRouteActivity activity) {
-      this.activityRef = new WeakReference<>(activity);
-    }
-
-
-    @Override
-    public void onSuccess(LocationEngineResult result) {
-      activityRef.get().updateLocation(result.getLocations());
-    }
-
-    @Override
-    public void onFailure(@NonNull Exception exception) {
-      Timber.i(exception);
-    }
-  }
 
   private void updateLocation(Location location) {
     updateLocation(Arrays.asList(location));

@@ -221,7 +221,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeMapOfflineManager(options);
     }
     navigation.setRoutes(Arrays.asList(options.directionsRoute()));
-    navigation.startTripSession();
+    navigation.startActiveGuidance();
     voiceInstructionCache.initCache(options.directionsRoute());
   }
 
@@ -257,7 +257,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
-    navigation.stopTripSession();
+    navigation.stopActiveGuidance();
   }
 
   void updateRouteProgress(RouteProgress routeProgress) {
@@ -405,9 +405,10 @@ public class NavigationViewModel extends AndroidViewModel {
     if (options.locationEngine() != null) {
       return options.locationEngine();
     } else if (options.shouldSimulateRoute()) {
-      ReplayLocationEngine replayLocationEngine = new ReplayLocationEngine(mapboxReplayer);
+      ReplayLocationEngine replayLocationEngine = new ReplayLocationEngine();
       final Point lastLocation = getOriginOfRoute(options.directionsRoute());
       ReplayEventBase replayEventOrigin = ReplayRouteMapper.mapToUpdateLocation(0.0, lastLocation);
+      mapboxReplayer.registerObserver(replayLocationEngine);
       mapboxReplayer.pushEvents(Collections.singletonList(replayEventOrigin));
       mapboxReplayer.play();
       return replayLocationEngine;

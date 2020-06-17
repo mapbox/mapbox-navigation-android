@@ -80,7 +80,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         private const val PRIMARY_ROUTE_BUNDLE_KEY = "myPrimaryRouteBundleKey"
     }
 
-    private val locationEngineCallback = MyLocationEngineCallback(this)
     private val restartSessionEventChannel = Channel<RestartTripSessionAction>(1)
 
     private var mapboxMap: MapboxMap? = null
@@ -89,7 +88,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private var originalRoute: DirectionsRoute? = null
 
     private lateinit var mapboxNavigation: MapboxNavigation
-    private lateinit var localLocationEngine: LocationEngine
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var speechPlayer: NavigationSpeechPlayer
 
@@ -137,7 +135,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         initViews()
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
-        localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
         val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
@@ -233,34 +230,13 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
-            mapboxNavigation.startTripSession()
+            mapboxNavigation.startActiveGuidance()
             val routes = mapboxNavigation.getRoutes()
             if (routes.isNotEmpty()) {
                 initDynamicCamera(routes[0])
             }
             navigationMapboxMap.showAlternativeRoutes(false)
         }
-    }
-
-    private fun startLocationUpdates() {
-        val request = LocationEngineRequest.Builder(1000L)
-            .setFastestInterval(500L)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
-        try {
-            localLocationEngine.requestLocationUpdates(
-                request,
-                locationEngineCallback,
-                Looper.getMainLooper()
-            )
-            localLocationEngine.getLastLocation(locationEngineCallback)
-        } catch (exception: SecurityException) {
-            Timber.e(exception)
-        }
-    }
-
-    private fun stopLocationUpdates() {
-        localLocationEngine.removeLocationUpdates(locationEngineCallback)
     }
 
     private val routeProgressObserver = object : RouteProgressObserver {
@@ -306,11 +282,9 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
-                    stopLocationUpdates()
                     startNavigation.visibility = GONE
                 }
                 TripSessionState.STOPPED -> {
-                    startLocationUpdates()
                     startNavigation.visibility = VISIBLE
                     updateCameraOnNavigationStateChange(false)
                 }
@@ -339,7 +313,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         restartSessionEventChannel.poll()?.also {
             mapboxNavigation.registerVoiceInstructionsObserver(this)
-            mapboxNavigation.startTripSession()
+            mapboxNavigation.startActiveGuidance()
         }
 
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
@@ -355,13 +329,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.detachFasterRouteObserver()
-        stopLocationUpdates()
 
         if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
             mapboxNavigation.unregisterVoiceInstructionsObserver(this)
-            mapboxNavigation.stopTripSession()
+            mapboxNavigation.stopActiveGuidance()
             restartSessionEventChannel.offer(RestartTripSessionAction)
         }
     }
@@ -377,7 +350,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxReplayer.finish()
         mapboxNavigation.unregisterVoiceInstructionsObserver(this)
-        mapboxNavigation.stopTripSession()
+        mapboxNavigation.stopActiveGuidance()
         mapboxNavigation.onDestroy()
 
         restartSessionEventChannel.cancel()
@@ -425,7 +398,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private fun getMapboxNavigation(optionsBuilder: NavigationOptions.Builder): MapboxNavigation {
         return if (shouldSimulateRoute()) {
-            optionsBuilder.locationEngine(ReplayLocationEngine(mapboxReplayer))
+            optionsBuilder.locationEngine(ReplayLocationEngine())
             return MapboxNavigation(optionsBuilder.build()).apply {
                 registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 mapboxReplayer.pushRealLocation(this@DebugMapboxNavigationKt, 0.0)

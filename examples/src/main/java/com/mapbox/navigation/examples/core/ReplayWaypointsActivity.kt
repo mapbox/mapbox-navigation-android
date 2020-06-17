@@ -79,7 +79,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-            .locationEngine(ReplayLocationEngine(mapboxReplayer))
+            .locationEngine(ReplayLocationEngine())
             .build()
 
         mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
@@ -163,7 +163,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.registerRouteProgressObserver(replayProgressObserver)
-            mapboxNavigation?.startTripSession()
+            mapboxNavigation?.startActiveGuidance()
             startNavigation.visibility = View.GONE
             mapboxReplayer.play()
         }
@@ -236,7 +236,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         mapboxReplayer.finish()
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
-        mapboxNavigation?.stopTripSession()
+        mapboxNavigation?.stopActiveGuidance()
         mapboxNavigation?.onDestroy()
         mapView.onDestroy()
     }

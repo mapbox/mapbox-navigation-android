@@ -11,10 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -59,7 +56,6 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
-import java.lang.ref.WeakReference
 import java.util.Locale
 import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
 import okhttp3.Cache
@@ -125,7 +121,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
         mapView.onStop()
     }
 
@@ -142,7 +137,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             unregisterRouteProgressObserver(routeProgressObserver)
             unregisterBannerInstructionsObserver(bannerInstructionObserver)
             unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
-            stopTripSession()
+            stopActiveGuidance()
             onDestroy()
         }
 
@@ -180,7 +175,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
                     Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
                         .show()
                 }
@@ -232,7 +226,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
-            mapboxNavigation?.startTripSession()
+            mapboxNavigation?.startActiveGuidance()
         }
     }
 
@@ -244,28 +238,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         val speechPlayerProvider =
             SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
-    }
-
-    private fun startLocationUpdates() {
-        if (!shouldSimulateRoute()) {
-            val requestLocationUpdateRequest =
-                LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
-                    .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
-                    .setMaxWaitTime(BasicNavigationActivity.DEFAULT_MAX_WAIT_TIME)
-                    .build()
-
-            mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
-                requestLocationUpdateRequest,
-                locationListenerCallback,
-                mainLooper
-            )
-        }
-    }
-
-    private fun stopLocationUpdates() {
-        if (!shouldSimulateRoute()) {
-            mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-        }
     }
 
     private fun showFeedbackBottomSheet() {
@@ -366,18 +338,14 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
     private val tripSessionStateObserver = object : TripSessionStateObserver {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             when (tripSessionState) {
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
-                    stopLocationUpdates()
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
-                    startLocationUpdates()
                     navigationMapboxMap?.removeRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
@@ -414,28 +382,14 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     // for testing else a real location engine is used.
     private fun getLocationEngine(): LocationEngine {
         return if (shouldSimulateRoute()) {
-            ReplayLocationEngine(mapboxReplayer)
+            ReplayLocationEngine()
         } else {
             LocationEngineProvider.getBestLocationEngine(this)
         }
     }
 
-    private class MyLocationEngineCallback(activity: InstructionViewActivity) :
-        LocationEngineCallback<LocationEngineResult> {
-
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            activityRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
-        }
-
-        override fun onFailure(exception: Exception) {
-        }
-    }
-
     companion object {
         const val VOICE_INSTRUCTION_CACHE = "voice-instruction-cache"
-        const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
     }
 
     @SuppressLint("MissingPermission")
@@ -445,7 +399,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
             navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             updateCameraOnNavigationStateChange(true)
-            mapboxNavigation?.startTripSession()
+            mapboxNavigation?.startActiveGuidance()
         }
     }
 }

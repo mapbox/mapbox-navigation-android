@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.replay.route
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -49,6 +50,7 @@ class ReplayProgressObserver(
         if (routeProgressRouteLeg != null) {
             val replayEvents = replayRouteMapper.mapRouteLegGeometry(routeProgressRouteLeg)
             if (replayEvents.isNotEmpty()) {
+                Log.i("location_debug", "location_debug onRouteLegChanged replayEvents:${replayEvents.size}")
                 mapboxReplayer.pushEvents(replayEvents)
                 mapboxReplayer.seekTo(replayEvents.first())
             }

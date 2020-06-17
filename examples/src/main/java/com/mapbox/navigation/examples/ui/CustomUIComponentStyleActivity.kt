@@ -12,9 +12,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -66,7 +64,6 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
-import java.lang.ref.WeakReference
 import java.util.Locale
 import kotlinx.android.synthetic.main.activity_custom_ui_component_style.*
 import okhttp3.Cache
@@ -144,7 +141,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.unregisterBannerInstructionsObserver(bannerInstructionObserver)
         mapboxNavigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver)
 
-        mapboxNavigation.stopTripSession()
+        mapboxNavigation.stopActiveGuidance()
         mapboxNavigation.onDestroy()
 
         speechPlayer.onDestroy()
@@ -199,7 +196,6 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 mapboxReplayer.pushRealLocation(this, 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
 
             Snackbar.make(
                 findViewById(R.id.navigationLayout),
@@ -249,7 +245,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                     updateCameraOnNavigationStateChange(true)
                     navigationMapboxMap?.startCamera(mapboxNavigation.getRoutes()[0])
 
-                    mapboxNavigation.startTripSession()
+                    mapboxNavigation.startActiveGuidance()
                 }
             }
         }
@@ -268,7 +264,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
         cancelBtn = findViewById(R.id.cancelBtn)
         cancelBtn.setOnClickListener {
-            mapboxNavigation.stopTripSession()
+            mapboxNavigation.stopActiveGuidance()
         }
 
         recenterBtn.apply {
@@ -362,12 +358,12 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(this)
-        mapboxNavigation = MapboxNavigation(
-            MapboxNavigation.defaultNavigationOptionsBuilder(this, accessToken)
-                .locationEngine(getLocationEngine())
-                .build()
-        )
-        mapboxNavigation.apply {
+
+        val options = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, accessToken)
+            .locationEngine(getLocationEngine())
+            .build()
+        mapboxNavigation = MapboxNavigation(options).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
             registerBannerInstructionsObserver(bannerInstructionObserver)
@@ -535,30 +531,11 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private val locationListenerCallback = MyLocationEngineCallback(this)
-
-    private class MyLocationEngineCallback(activity: CustomUIComponentStyleActivity) :
-        LocationEngineCallback<LocationEngineResult> {
-
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: LocationEngineResult) {
-            result.locations.firstOrNull()?.let { location ->
-                Timber.d("location engine callback -> onSuccess location:%s", location)
-                activityRef.get()?.locationComponent?.forceLocationUpdate(location)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            Timber.e("location engine callback -> onFailure(%s)", exception.localizedMessage)
-        }
-    }
-
     // If shouldSimulateRoute is true a ReplayRouteLocationEngine will be used which is intended
     // for testing else a real location engine is used.
     private fun getLocationEngine(): LocationEngine {
         return if (shouldSimulateRoute()) {
-            ReplayLocationEngine(mapboxReplayer)
+            ReplayLocationEngine()
         } else {
             LocationEngineProvider.getBestLocationEngine(this)
         }

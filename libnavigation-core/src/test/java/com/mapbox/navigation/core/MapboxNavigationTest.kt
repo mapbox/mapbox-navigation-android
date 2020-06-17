@@ -216,7 +216,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsTripSessionStop() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.stop() }
+        verify(exactly = 1) { tripSession.stopTripSession() }
     }
 
     @Test
