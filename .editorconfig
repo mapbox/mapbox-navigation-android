@@ -1,0 +1,10 @@
+root = true
+
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+
+insert_final_newline=true
+
+# should be limit 100 or 120 symbols
+max_line_length=off
