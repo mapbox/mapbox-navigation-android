@@ -131,7 +131,8 @@ class ReplayRouteSmootherTest {
     @Test
     fun `should keep points for wide freeway turns`() {
         val routeSmoother = ReplayRouteSmoother()
-        val geometry = """u{l~fA|kenhF`]vChRl@hRL`Wk@fN_@~HMnILfINvI\dJjAdJzAvIxBnIhC~HvCfIvDfIrEpHrF~HbG~H`H~I~IrJhLvIfNd@|@nDrF~CrFfDpG~CrGpC`GxGtPnCpGhCpGnCrGdj@xjAxLdYhCrGvC`HhCpGfC`HhC`HhC`HxB`H`C`HxBnHpB`HhB`IbB`HzK|gAt@tOd@rP?vN?bp@WpRsAzi@?hCMxa@"""
+        val geometry =
+            """u{l~fA|kenhF`]vChRl@hRL`Wk@fN_@~HMnILfINvI\dJjAdJzAvIxBnIhC~HvCfIvDfIrEpHrF~HbG~H`H~I~IrJhLvIfNd@|@nDrF~CrFfDpG~CrGpC`GxGtPnCpGhCpGnCrGdj@xjAxLdYhCrGvC`HhCpGfC`HhC`HhC`HxB`H`C`HxBnHpB`HhB`IbB`HzK|gAt@tOd@rP?vN?bp@WpRsAzi@?hCMxa@"""
         val coordinates = LineString.fromPolyline(geometry, 6).coordinates()
 
         val smoothedRoutes = routeSmoother.smoothRoute(coordinates, 3.0)
@@ -147,7 +148,8 @@ class ReplayRouteSmootherTest {
             Point.fromLngLat(-121.46991, 38.550876),
             Point.fromLngLat(-121.470231, 38.550964),
             Point.fromLngLat(-121.470002, 38.551483),
-            Point.fromLngLat(-121.469918, 38.551677))
+            Point.fromLngLat(-121.469918, 38.551677)
+        )
 
         val segment = routeSmoother.segmentRoute(coordinates, startIndex = 0, endIndex = 1)
 

@@ -26,9 +26,12 @@ internal class RouteRefreshCallbackMapper(
         if (refreshedDirectionsRoute != null) {
             callback.onRefresh(refreshedDirectionsRoute)
         } else {
-            callback.onError(RouteRefreshError(
-                message = "Failed to read refresh response",
-                throwable = errorThrowable))
+            callback.onError(
+                RouteRefreshError(
+                    message = "Failed to read refresh response",
+                    throwable = errorThrowable
+                )
+            )
         }
     }
 

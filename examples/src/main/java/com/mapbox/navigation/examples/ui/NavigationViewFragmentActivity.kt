@@ -13,13 +13,21 @@ class NavigationViewFragmentActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
-                .add(R.id.rootLayout, NavigationViewFragment.newInstance(), "navigationViewFragment")
+                .add(
+                    R.id.rootLayout, NavigationViewFragment.newInstance(),
+                    "navigationViewFragment"
+                )
                 .commit()
         }
     }
 
     override fun onBackPressed() {
-        if (!(supportFragmentManager.findFragmentByTag("navigationViewFragment") as NavigationViewFragment).navigationViewBackPressed()) {
+        val fragment =
+            (
+                supportFragmentManager.findFragmentByTag("navigationViewFragment")
+                    as NavigationViewFragment
+                )
+        if (!fragment.navigationViewBackPressed()) {
             super.onBackPressed()
         }
     }

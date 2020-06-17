@@ -15,13 +15,13 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import java.util.Locale
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import java.util.Locale
 
 class NavigationRouteTest {
 

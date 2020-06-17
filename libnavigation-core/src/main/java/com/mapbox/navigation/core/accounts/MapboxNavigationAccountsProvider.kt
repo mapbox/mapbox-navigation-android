@@ -57,7 +57,8 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
         checkNotNull(info) { throw IllegalStateException("$TAG: ProviderInfo cannot be null.") }
         check(EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY != info.authority) {
             throw IllegalStateException(
-                "Incorrect provider authority in manifest. Most likely due to a missing " + "applicationId variable in application's build.gradle.")
+                "Incorrect provider authority in manifest. Most likely due to a missing " + "applicationId variable in application's build.gradle."
+            )
         }
     }
 }

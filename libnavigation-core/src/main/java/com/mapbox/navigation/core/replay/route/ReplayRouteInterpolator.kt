@@ -32,11 +32,13 @@ internal class ReplayRouteInterpolator {
      */
     fun interpolateSpeed(options: ReplayRouteOptions, startSpeed: Double, endSpeed: Double, distance: Double): ReplayRouteSegment {
         val speedSteps = mutableListOf<ReplayRouteStep>()
-        speedSteps.add(ReplayRouteStep(
-            acceleration = 0.0,
-            speedMps = startSpeed,
-            positionMeters = 0.0
-        ))
+        speedSteps.add(
+            ReplayRouteStep(
+                acceleration = 0.0,
+                speedMps = startSpeed,
+                positionMeters = 0.0
+            )
+        )
 
         while (speedSteps.last().positionMeters < distance) {
             estimateSpeedStep(options, speedSteps, endSpeed, distance)
@@ -46,7 +48,8 @@ internal class ReplayRouteInterpolator {
             startSpeedMps = startSpeed,
             endSpeedMps = endSpeed,
             distanceMeters = distance,
-            steps = speedSteps)
+            steps = speedSteps
+        )
     }
 
     /**
@@ -145,11 +148,13 @@ internal class ReplayRouteInterpolator {
         val positionSpeed = targetDistance / remainingSteps
         for (i in 0 until remainingSteps) {
             previous = steps.last()
-            steps.add(ReplayRouteStep(
-                acceleration = acceleration,
-                speedMps = previous.speedMps + acceleration,
-                positionMeters = previous.positionMeters + positionSpeed
-            ))
+            steps.add(
+                ReplayRouteStep(
+                    acceleration = acceleration,
+                    speedMps = previous.speedMps + acceleration,
+                    positionMeters = previous.positionMeters + positionSpeed
+                )
+            )
         }
         steps[steps.lastIndex] = ReplayRouteStep(steps.last().acceleration, endSpeed, distance)
     }

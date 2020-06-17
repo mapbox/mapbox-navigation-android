@@ -51,10 +51,10 @@ import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.internal.ifChannelException
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.util.Calendar
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import java.util.Calendar
 
 /**
  * Default implementation of [TripNotification] interface
@@ -517,10 +517,10 @@ class MapboxTripNotification constructor(
         maneuverCanvas.restoreToCount(maneuverCanvas.saveCount)
 
         return if (isManeuverIconNeedFlip(
-                currentManeuverType,
-                currentManeuverModifier,
-                drivingSide
-            )
+            currentManeuverType,
+            currentManeuverModifier,
+            drivingSide
+        )
         ) {
             Bitmap.createBitmap(
                 maneuverImage,

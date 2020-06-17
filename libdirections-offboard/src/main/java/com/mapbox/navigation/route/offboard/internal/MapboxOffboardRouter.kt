@@ -119,9 +119,12 @@ class MapboxOffboardRouter(
             mapboxDirectionsRefresh = refreshBuilder.build()
             mapboxDirectionsRefresh?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
         } catch (throwable: Throwable) {
-            callback.onError(RouteRefreshError(
-                message = "Route refresh call failed",
-                throwable = throwable))
+            callback.onError(
+                RouteRefreshError(
+                    message = "Route refresh call failed",
+                    throwable = throwable
+                )
+            )
         }
     }
 }

@@ -1009,9 +1009,10 @@ internal class MapRouteLine(
         fun getBelowLayer(layerId: String?, style: Style): String {
             return when (layerId.isNullOrEmpty()) {
                 false -> style.layers.firstOrNull { it.id == layerId }?.id
-                true -> style.layers.reversed().filter { it !is SymbolLayer }
-                    .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
-                    ?.id
+                true ->
+                    style.layers.reversed().filter { it !is SymbolLayer }
+                        .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
+                        ?.id
             } ?: LocationComponentConstants.SHADOW_LAYER
         }
 
@@ -1123,10 +1124,12 @@ internal class MapRouteLine(
             var distanceTraveled = 0.0
             for (i in 0 until numCongestionPoints) {
                 if (i + 1 < lineString.coordinates().size) {
-                    distanceTraveled += (TurfMeasurement.distance(
-                        lineString.coordinates()[i],
-                        lineString.coordinates()[i + 1]
-                    ) * 1000)
+                    distanceTraveled += (
+                        TurfMeasurement.distance(
+                            lineString.coordinates()[i],
+                            lineString.coordinates()[i + 1]
+                        ) * 1000
+                        )
 
                     if (congestionSections[i] == previousCongestion) {
                         continue

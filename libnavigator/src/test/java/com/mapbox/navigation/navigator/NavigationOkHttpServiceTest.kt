@@ -15,8 +15,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import java.io.IOException
-import java.util.Locale
 import okhttp3.Call
 import okhttp3.Dispatcher
 import okhttp3.Headers
@@ -30,6 +28,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
+import java.util.Locale
 
 class NavigationOkHttpServiceTest {
     private val logger: Logger = mockk(relaxUnitFun = true)

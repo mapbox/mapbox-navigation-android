@@ -1,11 +1,11 @@
 package com.mapbox.navigation.utils.internal
 
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 /**
  * Schedules a delay of [restartAfterMillis] milliseconds and then restarts.

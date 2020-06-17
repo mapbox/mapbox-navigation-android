@@ -70,7 +70,8 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                     event["timestamp"]
                 } as Double
                 ReplayEventGetStatus(
-                    eventTimestamp = eventTimestamp)
+                    eventTimestamp = eventTimestamp
+                )
             }
             else -> {
                 val replayEvent = customEventMapper?.map(eventType, event.toMap())

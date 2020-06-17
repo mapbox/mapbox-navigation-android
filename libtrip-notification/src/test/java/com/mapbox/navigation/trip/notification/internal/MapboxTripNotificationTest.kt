@@ -30,12 +30,12 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import java.util.Locale
 
 private const val STOP_SESSION = "Stop session"
 private const val END_NAVIGATION = "End Navigation"

@@ -45,8 +45,8 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_feedback_button.*
+import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to integrate the [com.mapbox.navigation.ui.FeedbackButton]'s
@@ -54,7 +54,9 @@ import kotlinx.android.synthetic.main.activity_feedback_button.*
  * traffic incidents are just two of the several types of live navigation
  * feedback that can be reported.
  */
-class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
+class FeedbackButtonActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
     FeedbackBottomSheetListener {
 
     private var mapboxMap: MapboxMap? = null

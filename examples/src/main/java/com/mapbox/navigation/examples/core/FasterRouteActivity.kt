@@ -37,10 +37,10 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to use the Navigation SDK's [FasterRouteObserver]
@@ -207,15 +207,21 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             navigationMapboxMap?.setOnRouteSelectionChangeListener { route ->
-                mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                    remove(route)
-                    add(0, route)
-                })
+                mapboxNavigation.setRoutes(
+                    mapboxNavigation.getRoutes().toMutableList().apply {
+                        remove(route)
+                        add(0, route)
+                    }
+                )
             }
 
             when (directionRoute) {
                 null -> {
-                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    Snackbar.make(
+                        container,
+                        R.string.msg_long_press_map_to_place_waypoint,
+                        LENGTH_SHORT
+                    )
                         .show()
                 }
                 else -> restoreNavigation()
@@ -308,8 +314,9 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                if (activityRef.get()?.mapboxMap?.locationComponent?.isLocationComponentActivated == true) {
-                    activityRef.get()?.mapboxMap?.locationComponent?.forceLocationUpdate(it)
+                val locationComponent = activityRef.get()?.mapboxMap?.locationComponent
+                if (locationComponent?.isLocationComponentActivated == true) {
+                    locationComponent.forceLocationUpdate(it)
                 }
             }
         }

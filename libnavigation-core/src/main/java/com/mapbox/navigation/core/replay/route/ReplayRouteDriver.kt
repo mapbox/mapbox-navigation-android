@@ -106,7 +106,8 @@ internal class ReplayRouteDriver {
             val segmentRoute = routeSmoother.segmentRoute(
                 distinctPoints,
                 segmentStart.routeIndex!!,
-                segmentEnd.routeIndex!!)
+                segmentEnd.routeIndex!!
+            )
             replayRouteLocations.addInterpolatedLocations(options, segmentRoute, segmentStart, segmentEnd)
         }
 

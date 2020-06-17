@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkObject
 import io.mockk.verify
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,6 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 @ExperimentalCoroutinesApi
 class MapboxReplayerTest {
@@ -32,20 +32,24 @@ class MapboxReplayerTest {
 
     @Test
     fun `should play start transit and location in order`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1580777612.853),
-            ReplayEventUpdateLocation(1580777612.89,
-                ReplayEventLocation(
-                    lat = 49.2492411,
-                    lon = 8.8512315,
-                    provider = "fused",
-                    time = 1580777612.892,
-                    altitude = 212.4732666015625,
-                    accuracyHorizontal = 4.288000106811523,
-                    bearing = 243.31265258789063,
-                    speed = 0.5585000514984131)
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventUpdateLocation(
+                    1580777612.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = 1580777612.892,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131
+                    )
+                )
             )
-        ))
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
         mapboxReplayer.play()
@@ -62,38 +66,49 @@ class MapboxReplayerTest {
 
     @Test
     fun `should play 2 of 3 locations that include time window`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventUpdateLocation(1580777820.952,
-                ReplayEventLocation(
-                    lat = 49.2450478,
-                    lon = 8.8682922,
-                    time = 1580777820.952,
-                    speed = 30.239412307739259,
-                    bearing = 108.00135040283203,
-                    altitude = 222.47210693359376,
-                    accuracyHorizontal = 3.9000000953674318,
-                    provider = "fused")),
-            ReplayEventUpdateLocation(1580777822.959,
-                ReplayEventLocation(
-                    lat = 49.2448858,
-                    lon = 8.8690847,
-                    time = 1580777822.958,
-                    speed = 29.931121826171876,
-                    bearing = 106.001953125,
-                    altitude = 221.9241943359375,
-                    accuracyHorizontal = 3.9000000953674318,
-                    provider = "fused")),
-            ReplayEventUpdateLocation(1580777824.953,
-                ReplayEventLocation(
-                    lat = 49.2447354,
-                    lon = 8.8698759,
-                    time = 1580777824.89,
-                    speed = 29.96711540222168,
-                    bearing = 106.00138092041016,
-                    altitude = 221.253662109375,
-                    accuracyHorizontal = 3.9000000953674318,
-                    provider = "fused"))
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventUpdateLocation(
+                    1580777820.952,
+                    ReplayEventLocation(
+                        lat = 49.2450478,
+                        lon = 8.8682922,
+                        time = 1580777820.952,
+                        speed = 30.239412307739259,
+                        bearing = 108.00135040283203,
+                        altitude = 222.47210693359376,
+                        accuracyHorizontal = 3.9000000953674318,
+                        provider = "fused"
+                    )
+                ),
+                ReplayEventUpdateLocation(
+                    1580777822.959,
+                    ReplayEventLocation(
+                        lat = 49.2448858,
+                        lon = 8.8690847,
+                        time = 1580777822.958,
+                        speed = 29.931121826171876,
+                        bearing = 106.001953125,
+                        altitude = 221.9241943359375,
+                        accuracyHorizontal = 3.9000000953674318,
+                        provider = "fused"
+                    )
+                ),
+                ReplayEventUpdateLocation(
+                    1580777824.953,
+                    ReplayEventLocation(
+                        lat = 49.2447354,
+                        lon = 8.8698759,
+                        time = 1580777824.89,
+                        speed = 29.96711540222168,
+                        bearing = 106.00138092041016,
+                        altitude = 221.253662109375,
+                        accuracyHorizontal = 3.9000000953674318,
+                        provider = "fused"
+                    )
+                )
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
         mapboxReplayer.play()
@@ -136,11 +151,13 @@ class MapboxReplayerTest {
 
     @Test
     fun `should not delay player when consumer takes time`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1000.000),
-            ReplayEventGetStatus(1001.000),
-            ReplayEventGetStatus(1003.000)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1000.000),
+                ReplayEventGetStatus(1001.000),
+                ReplayEventGetStatus(1003.000)
+            )
+        )
         val timeCapture = mutableListOf<Long>()
         mapboxReplayer.registerObserver(object : ReplayEventsObserver {
             override fun replayEvents(events: List<ReplayEventBase>) {
@@ -169,19 +186,24 @@ class MapboxReplayerTest {
             override val eventTimestamp: Double,
             val customValue: String
         ) : ReplayEventBase
-        mapboxReplayer.pushEvents(listOf(
-            CustomReplayEvent(1580777612.853, "custom value"),
-            ReplayEventUpdateLocation(1580777613.89,
-                ReplayEventLocation(
-                    lat = 49.2492411,
-                    lon = 8.8512315,
-                    time = null,
-                    provider = null,
-                    altitude = null,
-                    accuracyHorizontal = null,
-                    bearing = null,
-                    speed = null))
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                CustomReplayEvent(1580777612.853, "custom value"),
+                ReplayEventUpdateLocation(
+                    1580777613.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        time = null,
+                        provider = null,
+                        altitude = null,
+                        accuracyHorizontal = null,
+                        bearing = null,
+                        speed = null
+                    )
+                )
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
         mapboxReplayer.play()
@@ -205,19 +227,24 @@ class MapboxReplayerTest {
 
     @Test
     fun `playFirstLocation should ignore events before the first location`() {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1580777612.853),
-            ReplayEventUpdateLocation(1580777612.89,
-                ReplayEventLocation(
-                    lat = 49.2492411,
-                    lon = 8.8512315,
-                    provider = "fused",
-                    time = 1580777612.892,
-                    altitude = 212.4732666015625,
-                    accuracyHorizontal = 4.288000106811523,
-                    bearing = 243.31265258789063,
-                    speed = 0.5585000514984131))
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventUpdateLocation(
+                    1580777612.89,
+                    ReplayEventLocation(
+                        lat = 49.2492411,
+                        lon = 8.8512315,
+                        provider = "fused",
+                        time = 1580777612.892,
+                        altitude = 212.4732666015625,
+                        accuracyHorizontal = 4.288000106811523,
+                        bearing = 243.31265258789063,
+                        speed = 0.5585000514984131
+                    )
+                )
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
         mapboxReplayer.playFirstLocation()
@@ -231,11 +258,13 @@ class MapboxReplayerTest {
 
     @Test
     fun `playFirstLocation should handle history events without locations`() {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1580777612.853),
-            ReplayEventGetStatus(1580777613.452),
-            ReplayEventGetStatus(1580777614.085)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777612.853),
+                ReplayEventGetStatus(1580777613.452),
+                ReplayEventGetStatus(1580777614.085)
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
 
         mapboxReplayer.playFirstLocation()
@@ -246,11 +275,13 @@ class MapboxReplayerTest {
     @Test
     fun `should seekTo an event`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1.853),
-            seekToEvent,
-            ReplayEventGetStatus(3.085)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.853),
+                seekToEvent,
+                ReplayEventGetStatus(3.085)
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(seekToEvent)
 
@@ -269,21 +300,25 @@ class MapboxReplayerTest {
     @Test(expected = Exception::class)
     fun `should crash when seekTo event is missing`() = coroutineRule.runBlockingTest {
         val seekToEvent = ReplayEventGetStatus(2.452)
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1.853),
-            ReplayEventGetStatus(3.085)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.853),
+                ReplayEventGetStatus(3.085)
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(seekToEvent)
     }
 
     @Test
     fun `should seekTo an event time`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(0.0),
-            ReplayEventGetStatus(2.0),
-            ReplayEventGetStatus(4.0)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(0.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(4.0)
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(1.0)
 
@@ -301,11 +336,13 @@ class MapboxReplayerTest {
 
     @Test
     fun `should seekTo a time relative to total time`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1580777611.853),
-            ReplayEventGetStatus(1580777613.452),
-            ReplayEventGetStatus(1580777614.085)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1580777611.853),
+                ReplayEventGetStatus(1580777613.452),
+                ReplayEventGetStatus(1580777614.085)
+            )
+        )
         mapboxReplayer.registerObserver(replayEventsObserver)
         mapboxReplayer.seekTo(1.0)
 
@@ -426,11 +463,13 @@ class MapboxReplayerTest {
 
     @Test
     fun `should register multiple observers`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1.0),
-            ReplayEventGetStatus(2.0),
-            ReplayEventGetStatus(3.0)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
         mapboxReplayer.registerObserver(firstObserver)
@@ -452,11 +491,13 @@ class MapboxReplayerTest {
 
     @Test
     fun `should unregister single observers`() = coroutineRule.runBlockingTest {
-        mapboxReplayer.pushEvents(listOf(
-            ReplayEventGetStatus(1.0),
-            ReplayEventGetStatus(2.0),
-            ReplayEventGetStatus(3.0)
-        ))
+        mapboxReplayer.pushEvents(
+            listOf(
+                ReplayEventGetStatus(1.0),
+                ReplayEventGetStatus(2.0),
+                ReplayEventGetStatus(3.0)
+            )
+        )
         val firstObserver: ReplayEventsObserver = mockk(relaxed = true)
         val secondObserver: ReplayEventsObserver = mockk(relaxed = true)
         mapboxReplayer.registerObserver(firstObserver)

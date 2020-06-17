@@ -14,15 +14,15 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
-import java.util.Collections
-import java.util.Date
-import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
+import java.util.Collections
+import java.util.Date
+import java.util.concurrent.atomic.AtomicReference
 
 private typealias RouteProgressReference = (RouteProgress) -> Unit
 
@@ -113,10 +113,13 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
 
     init {
         // Unconditionally update the contents of the pre-event buffer
-        accumulationJob = jobControl.monitorChannelWithException(channelLocationReceived, { location ->
-            accumulateLocationAsync(location, currentLocationBuffer)
-            processLocationBuffer(location)
-        })
+        accumulationJob = jobControl.monitorChannelWithException(
+            channelLocationReceived,
+            { location ->
+                accumulateLocationAsync(location, currentLocationBuffer)
+                processLocationBuffer(location)
+            }
+        )
     }
 
     /**
