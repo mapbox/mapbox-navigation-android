@@ -25,7 +25,7 @@ enum class RouteProgressState {
     /**
      * The user has arrived at the destination of the given [com.mapbox.api.directions.v5.models.RouteLeg].
      */
-    ROUTE_ARRIVED,
+    ROUTE_COMPLETE,
 
     /**
      * [com.mapbox.navigation.core.MapboxNavigation] is now confidently tracking the
@@ -38,6 +38,11 @@ enum class RouteProgressState {
      * progress updates being sent.
      */
     LOCATION_STALE,
+
+    /**
+     * State when we detect an off-route.
+     */
+    OFF_ROUTE,
 
     /**
      * State when we start following a route.

@@ -137,7 +137,7 @@ class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback,
             RouteProgressState.ROUTE_INVALID -> R.drawable.custom_puck_icon_uncertain_location
             RouteProgressState.ROUTE_INITIALIZED -> R.drawable.custom_user_puck_icon
             RouteProgressState.LOCATION_TRACKING -> R.drawable.custom_user_puck_icon
-            RouteProgressState.ROUTE_ARRIVED -> R.drawable.custom_puck_icon_uncertain_location
+            RouteProgressState.ROUTE_COMPLETE -> R.drawable.custom_puck_icon_uncertain_location
             RouteProgressState.LOCATION_STALE -> R.drawable.custom_user_puck_icon
             else -> R.drawable.custom_puck_icon_uncertain_location
         }

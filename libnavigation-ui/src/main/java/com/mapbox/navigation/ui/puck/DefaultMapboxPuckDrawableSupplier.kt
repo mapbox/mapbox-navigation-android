@@ -18,7 +18,7 @@ internal class DefaultMapboxPuckDrawableSupplier : PuckDrawableSupplier {
         RouteProgressState.ROUTE_INVALID -> R.drawable.user_puck_icon_uncertain_location
         RouteProgressState.ROUTE_INITIALIZED -> R.drawable.user_puck_icon
         RouteProgressState.LOCATION_TRACKING -> R.drawable.user_puck_icon
-        RouteProgressState.ROUTE_ARRIVED -> R.drawable.user_puck_icon_uncertain_location
+        RouteProgressState.ROUTE_COMPLETE -> R.drawable.user_puck_icon_uncertain_location
         RouteProgressState.LOCATION_STALE -> R.drawable.user_puck_icon
         else -> R.drawable.user_puck_icon_uncertain_location
     }

@@ -42,7 +42,7 @@ data class RouteProgress(
     val routeGeometryWithBuffer: Geometry?,
     val bannerInstructions: BannerInstructions?,
     val voiceInstructions: VoiceInstructions?,
-    val currentState: RouteProgressState?,
+    val currentState: RouteProgressState,
     val currentLegProgress: RouteLegProgress?,
     val upcomingStepPoints: List<Point>?,
     val inTunnel: Boolean,
@@ -60,7 +60,7 @@ data class RouteProgress(
         private var routeGeometryWithBuffer: Geometry? = null
         private var bannerInstructions: BannerInstructions? = null
         private var voiceInstructions: VoiceInstructions? = null
-        private var currentState: RouteProgressState? = null
+        private var currentState: RouteProgressState = RouteProgressState.ROUTE_INVALID
         private var currentLegProgress: RouteLegProgress? = null
         private var upcomingStepPoints: List<Point>? = null
         private var inTunnel: Boolean = false

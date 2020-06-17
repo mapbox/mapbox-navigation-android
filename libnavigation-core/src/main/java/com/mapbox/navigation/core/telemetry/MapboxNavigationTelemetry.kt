@@ -536,7 +536,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     }
 
     /**
-     * This method waits for an [RouteProgressState.ROUTE_ARRIVED] event. Once received, it terminates the wait-loop and
+     * This method waits for an [RouteProgressState.ROUTE_COMPLETE] event. Once received, it terminates the wait-loop and
      * sends the telemetry data to the servers.
      */
     private suspend fun monitorSession() {
@@ -549,7 +549,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 dynamicValues.distanceRemaining.set(routeData.routeProgress.distanceRemaining.toLong())
                 dynamicValues.durationRemaining.set(routeData.routeProgress.durationRemaining.toInt())
                 when (routeData.routeProgress.currentState) {
-                    RouteProgressState.ROUTE_ARRIVED -> {
+                    RouteProgressState.ROUTE_COMPLETE -> {
                         when (dynamicValues.sessionStarted.get()) {
                             true -> {
                                 processArrival()

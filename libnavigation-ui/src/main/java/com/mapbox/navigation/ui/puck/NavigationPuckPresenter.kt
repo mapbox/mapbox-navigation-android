@@ -25,7 +25,7 @@ internal class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDra
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-            routeProgress.currentState?.let {
+            routeProgress.currentState.let {
                 val drawable = puckDrawableSupplier.getPuckDrawable(it)
                 updateCurrentLocationDrawable(drawable)
             }
