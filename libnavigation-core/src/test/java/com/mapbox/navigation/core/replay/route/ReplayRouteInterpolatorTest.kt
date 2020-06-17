@@ -20,7 +20,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             maxSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         var currentSpeed = 0.0
         segment.steps.forEach {
@@ -43,7 +44,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             maxSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         segment.steps.forEach {
             assertTrue(it.acceleration <= defaultOptions.maxAcceleration)
@@ -60,7 +62,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         segment.steps.apply {
             assertTrue(size > 5)
@@ -80,7 +83,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         segment.steps.apply {
             assertTrue(first().speedMps <= startSpeedMps)
@@ -99,7 +103,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         segment.steps.apply {
             assertTrue(first().speedMps <= startSpeedMps)
@@ -118,7 +123,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         segment.steps.apply {
             assertTrue(size > 5)
@@ -137,7 +143,8 @@ class ReplayRouteInterpolatorTest {
             defaultOptions,
             startSpeedMps,
             endSpeedMps,
-            distanceMeters)
+            distanceMeters
+        )
 
         assertEquals(223.96630390737917, segment.steps.last().positionMeters, 0.00001)
         assertEquals(3.0, segment.endSpeedMps, 0.0001)

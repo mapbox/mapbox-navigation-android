@@ -4,14 +4,14 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
-import java.io.UnsupportedEncodingException
-import java.net.URLDecoder
-import kotlin.reflect.KClass
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.UnsupportedEncodingException
+import java.net.URLDecoder
+import kotlin.reflect.KClass
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)

@@ -62,7 +62,10 @@ class ReplayHistoryMapper @JvmOverloads constructor(
 
     private fun mapToEvent(eventType: String, event: LinkedTreeMap<*, *>): ReplayEventBase? {
         return when (eventType) {
-            "updateLocation" -> gson.fromJson(event.toString(), ReplayEventUpdateLocation::class.java)
+            "updateLocation" -> gson.fromJson(
+                event.toString(),
+                ReplayEventUpdateLocation::class.java
+            )
             "getStatus" -> {
                 val eventTimestamp = if (event.contains("event_timestamp")) {
                     event["event_timestamp"]
@@ -70,7 +73,8 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                     event["timestamp"]
                 } as Double
                 ReplayEventGetStatus(
-                    eventTimestamp = eventTimestamp)
+                    eventTimestamp = eventTimestamp
+                )
             }
             else -> {
                 val replayEvent = customEventMapper?.map(eventType, event.toMap())

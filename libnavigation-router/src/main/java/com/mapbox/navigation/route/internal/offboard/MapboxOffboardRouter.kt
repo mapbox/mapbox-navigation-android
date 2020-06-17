@@ -48,31 +48,36 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, urlSkuTokenProvider)
+        mapboxDirections = RouteBuilderProvider
+            .getBuilder(accessToken, context, urlSkuTokenProvider)
             .routeOptions(routeOptions)
             .build()
-        mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
+        mapboxDirections?.enqueueCall(
+            object : Callback<DirectionsResponse> {
 
-            override fun onResponse(
-                call: Call<DirectionsResponse>,
-                response: Response<DirectionsResponse>
-            ) {
-                val routes = response.body()?.routes()
-                when {
-                    call.isCanceled -> callback.onCanceled()
-                    response.isSuccessful && !routes.isNullOrEmpty() -> callback.onResponse(routes)
-                    else -> callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
+                override fun onResponse(
+                    call: Call<DirectionsResponse>,
+                    response: Response<DirectionsResponse>
+                ) {
+                    val routes = response.body()?.routes()
+                    when {
+                        call.isCanceled -> callback.onCanceled()
+                        response.isSuccessful && !routes.isNullOrEmpty() -> {
+                            callback.onResponse(routes)
+                        }
+                        else -> callback.onFailure(NavigationException(ERROR_FETCHING_ROUTE))
+                    }
+                }
+
+                override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                    if (call.isCanceled) {
+                        callback.onCanceled()
+                    } else {
+                        callback.onFailure(t)
+                    }
                 }
             }
-
-            override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                if (call.isCanceled) {
-                    callback.onCanceled()
-                } else {
-                    callback.onFailure(t)
-                }
-            }
-        })
+        )
     }
 
     /**
@@ -100,7 +105,11 @@ class MapboxOffboardRouter(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         try {
             val refreshBuilder = MapboxDirectionsRefresh.builder()
                 .accessToken(accessToken)
@@ -109,16 +118,23 @@ class MapboxOffboardRouter(
                 .interceptor {
                     val httpUrl = it.request().url()
                     val skuUrl =
-                        urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                        urlSkuTokenProvider.obtainUrlWithSkuToken(
+                            httpUrl.toString(),
+                            httpUrl.querySize()
+                        )
                     it.proceed(it.request().newBuilder().url(skuUrl).build())
                 }
 
             mapboxDirectionsRefresh = refreshBuilder.build()
-            mapboxDirectionsRefresh?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
+            mapboxDirectionsRefresh
+                ?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
         } catch (throwable: Throwable) {
-            callback.onError(RouteRefreshError(
-                message = "Route refresh call failed",
-                throwable = throwable))
+            callback.onError(
+                RouteRefreshError(
+                    message = "Route refresh call failed",
+                    throwable = throwable
+                )
+            )
         }
     }
 }

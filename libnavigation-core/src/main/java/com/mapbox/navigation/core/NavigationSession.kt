@@ -6,7 +6,8 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import java.util.concurrent.CopyOnWriteArraySet
 
-internal class NavigationSession : RoutesObserver,
+internal class NavigationSession :
+    RoutesObserver,
     TripSessionStateObserver {
 
     private val stateObservers = CopyOnWriteArraySet<NavigationSessionStateObserver>()
@@ -45,12 +46,16 @@ internal class NavigationSession : RoutesObserver,
         }
     }
 
-    internal fun registerNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun registerNavigationSessionStateObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         stateObservers.add(navigationSessionStateObserver)
         navigationSessionStateObserver.onNavigationSessionStateChanged(state)
     }
 
-    internal fun unregisterNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun unregisterNavigationSessionStateObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         stateObservers.remove(navigationSessionStateObserver)
     }
 

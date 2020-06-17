@@ -22,7 +22,11 @@ internal object NavigationComponentProvider {
     ): DirectionsSession =
         MapboxDirectionsSession(router)
 
-    fun createNativeNavigator(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator =
+    fun createNativeNavigator(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        logger: Logger?
+    ): MapboxNativeNavigator =
         MapboxNativeNavigatorImpl.create(deviceProfile, navigatorConfig, logger)
 
     fun createTripService(

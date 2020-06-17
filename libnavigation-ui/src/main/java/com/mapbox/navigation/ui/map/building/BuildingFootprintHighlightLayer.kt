@@ -33,10 +33,13 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
             field = value
             value?.let { newLatLng ->
                 mapboxMap.getStyle { style ->
-                    val buildingFootprintLayer = style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
+                    val buildingFootprintLayer =
+                        style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
                     buildingFootprintLayer?.setFilter(
-                            buildingLayerSupport.getBuildingFilterExpression(
-                                    buildingLayerSupport.getBuildingId(mapboxMap, newLatLng)))
+                        buildingLayerSupport.getBuildingFilterExpression(
+                            buildingLayerSupport.getBuildingId(mapboxMap, newLatLng)
+                        )
+                    )
                 }
             }
         }
@@ -54,7 +57,11 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
          */
         set(value) {
             field = value
-            buildingLayerSupport.updateLayerProperty(fillColor(value), mapboxMap, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
+            buildingLayerSupport.updateLayerProperty(
+                fillColor(value),
+                mapboxMap,
+                HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID
+            )
         }
 
     /**
@@ -70,7 +77,11 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
          */
         set(value) {
             field = value
-            buildingLayerSupport.updateLayerProperty(fillOpacity(value), mapboxMap, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
+            buildingLayerSupport.updateLayerProperty(
+                fillOpacity(value),
+                mapboxMap,
+                HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID
+            )
         }
 
     /**
@@ -80,10 +91,17 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
      */
     fun updateVisibility(visible: Boolean) {
         mapboxMap.getStyle { style ->
-            if (style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID) == null && visible) {
+            if (style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID) == null &&
+                visible
+            ) {
                 addFootprintHighlightFillLayerToMap(queryLatLng)
-            } else buildingLayerSupport.updateLayerProperty(visibility(
-                    if (visible) VISIBLE else NONE), mapboxMap, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
+            } else buildingLayerSupport.updateLayerProperty(
+                visibility(
+                    if (visible) VISIBLE else NONE
+                ),
+                mapboxMap,
+                HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID
+            )
         }
     }
 
@@ -94,16 +112,21 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
     private fun addFootprintHighlightFillLayerToMap(queryLatLng: LatLng?) {
         mapboxMap.getStyle { style ->
             val buildingFootprintFillLayer = FillLayer(
-                    HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID, BuildingLayerSupport.COMPOSITE_SOURCE_ID)
+                HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID,
+                BuildingLayerSupport.COMPOSITE_SOURCE_ID
+            )
             buildingFootprintFillLayer.apply {
                 sourceLayer = BuildingLayerSupport.BUILDING_LAYER_ID
                 queryLatLng?.let {
-                    setFilter(buildingLayerSupport.getBuildingFilterExpression(
-                            buildingLayerSupport.getBuildingId(mapboxMap, queryLatLng)))
+                    setFilter(
+                        buildingLayerSupport.getBuildingFilterExpression(
+                            buildingLayerSupport.getBuildingId(mapboxMap, queryLatLng)
+                        )
+                    )
                 }
                 withProperties(
-                        fillColor(color),
-                        fillOpacity(opacity)
+                    fillColor(color),
+                    fillOpacity(opacity)
                 )
                 MapUtils.addLayerToMapAbove(style, this, BuildingLayerSupport.BUILDING_LAYER_ID)
             }
@@ -117,6 +140,7 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
          * A constant String that serves as a layer id for the [FillLayer] that
          * this class adds to the [MapboxMap]'s Style object.
          */
-        const val HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID = "highlighted-building-footprint-layer-id"
+        const val HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID =
+            "highlighted-building-footprint-layer-id"
     }
 }

@@ -38,7 +38,9 @@ class ReplayRouteMapper @JvmOverloads constructor(
         val geometries = directionsRoute.routeOptions()?.geometries()
         val usesPolyline6 = geometries?.contains(DirectionsCriteria.GEOMETRY_POLYLINE6) ?: false
         if (!usesPolyline6) {
-            throw IllegalStateException("Add .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6) to your directions request")
+            throw IllegalStateException(
+                "Add .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6) to your directions request"
+            )
         }
         val geometry = directionsRoute.geometry() ?: return emptyList()
         return mapGeometry(geometry)
@@ -146,7 +148,11 @@ class ReplayRouteMapper @JvmOverloads constructor(
                     provider = location.provider,
                     time = eventTimestamp,
                     altitude = if (location.hasAltitude()) location.altitude else null,
-                    accuracyHorizontal = if (location.hasAccuracy()) location.accuracy.toDouble() else null,
+                    accuracyHorizontal = if (location.hasAccuracy()) {
+                        location.accuracy.toDouble()
+                    } else {
+                        null
+                    },
                     bearing = if (location.hasBearing()) location.bearing.toDouble() else null,
                     speed = if (location.hasSpeed()) location.speed.toDouble() else null
                 )

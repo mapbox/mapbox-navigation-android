@@ -29,11 +29,19 @@ internal class ReplayRouteTraffic {
      * will be the index of the [distinctRoutePoints]. The [ReplayRouteDriver] uses these indices
      * to interpolate the speed.
      */
-    fun trafficLocations(distinctRoutePoints: List<Point>, distances: List<Double>, speeds: List<Double>): List<ReplayRouteLocation> {
+    fun trafficLocations(
+        distinctRoutePoints: List<Point>,
+        distances: List<Double>,
+        speeds: List<Double>
+    ): List<ReplayRouteLocation> {
         return findTrafficLocations(distinctRoutePoints, distances, speeds)
     }
 
-    private fun findTrafficLocations(points: List<Point>, distances: List<Double>, speeds: List<Double>): List<ReplayRouteLocation> {
+    private fun findTrafficLocations(
+        points: List<Point>,
+        distances: List<Double>,
+        speeds: List<Double>
+    ): List<ReplayRouteLocation> {
         val trafficLocations = mutableListOf<ReplayRouteLocation>()
         var annotationIndex = 0
         var segmentDistance = 0.0

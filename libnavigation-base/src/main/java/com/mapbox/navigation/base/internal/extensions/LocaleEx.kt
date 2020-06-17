@@ -23,14 +23,14 @@ object LocaleEx {
     @JvmStatic
     @VoiceUnit.Type
     fun Locale.getUnitTypeForLocale(): String =
-            when (this.country.toUpperCase(this)) {
-                "US", // US
-                "LR", // Liberia
-                "MM" -> // Burma
-                    VoiceUnit.IMPERIAL
-                else ->
-                    VoiceUnit.METRIC
-            }
+        when (this.country.toUpperCase(this)) {
+            "US", // US
+            "LR", // Liberia
+            "MM" -> // Burma
+                VoiceUnit.IMPERIAL
+            else ->
+                VoiceUnit.METRIC
+        }
 
     /**
      * Provide [Locale] based on voice language of [DirectionsRoute] or default device's location if

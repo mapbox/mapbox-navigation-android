@@ -33,11 +33,11 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -65,7 +65,11 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Create or reset resources. This must be called before calling any
      * functions within [MapboxNativeNavigatorImpl]
      */
-    override fun create(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator {
+    override fun create(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        logger: Logger?
+    ): MapboxNativeNavigator {
         navigator = NavigatorLoader.createNavigator(deviceProfile, navigatorConfig, logger)
         route = null
         routeBufferGeoJson = null
@@ -111,7 +115,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override suspend fun getStatus(navigatorPredictionMillis: Long): TripStatus =
         withContext(NavigatorDispatcher) {
-            val nanos = SystemClock.elapsedRealtimeNanos() + TimeUnit.MILLISECONDS.toNanos(navigatorPredictionMillis)
+            val nanos = SystemClock.elapsedRealtimeNanos() + TimeUnit.MILLISECONDS.toNanos(
+                navigatorPredictionMillis
+            )
             val status = navigator!!.getStatus(nanos)
             TripStatus(
                 status.location.toLocation(),
@@ -140,8 +146,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     ): NavigationStatus =
         withContext(NavigatorDispatcher) {
             MapboxNativeNavigatorImpl.route = route
-            val result = navigator!!.setRoute(route?.toJson()
-                ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
+            val result = navigator!!.setRoute(
+                route?.toJson()
+                    ?: "{}",
+                PRIMARY_ROUTE_INDEX,
+                legIndex
+            )
             navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
             }
@@ -218,7 +228,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return number of tiles founded in the directory
      */
-    override fun configureRouter(routerParams: RouterParams) = navigator!!.configureRouter(routerParams)
+    override fun configureRouter(routerParams: RouterParams) =
+        navigator!!.configureRouter(routerParams)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
@@ -368,17 +379,19 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                         val distanceTraveled =
                             currentStep.distance().toFloat() - remainingStepDistance
                         stepProgressBuilder.distanceTraveled(distanceTraveled)
-                        stepProgressBuilder.fractionTraveled(distanceTraveled / currentStep.distance().toFloat())
+                        stepProgressBuilder.fractionTraveled(
+                            distanceTraveled / currentStep.distance().toFloat()
+                        )
 
                         routeState.convertState().let {
                             routeProgressBuilder.currentState(it)
 
-                            var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
+                            var bannerInstructions =
+                                bannerInstruction?.mapToDirectionsApi(currentStep)
                             if (it == RouteProgressState.ROUTE_INITIALIZED) {
                                 bannerInstructions =
-                                    getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi(
-                                        currentStep
-                                    )
+                                    getBannerInstruction(FIRST_BANNER_INSTRUCTION)
+                                        ?.mapToDirectionsApi(currentStep)
                             }
                             routeProgressBuilder.bannerInstructions(bannerInstructions)
                         }
@@ -402,7 +415,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             }
 
             stepProgressBuilder.distanceRemaining(remainingStepDistance)
-            stepProgressBuilder.durationRemaining(remainingStepDuration / ONE_SECOND_IN_MILLISECONDS)
+            stepProgressBuilder.durationRemaining(
+                remainingStepDuration / ONE_SECOND_IN_MILLISECONDS
+            )
 
             legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
             legProgressBuilder.distanceRemaining(remainingLegDistance)

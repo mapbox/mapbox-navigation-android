@@ -26,7 +26,10 @@ internal interface DirectionsSession {
      * @param routeOptions RouteOptions
      * @param routesRequestCallback Callback that gets notified with the results of the request
      */
-    fun requestRoutes(routeOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback? = null)
+    fun requestRoutes(
+        routeOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback? = null
+    )
 
     /**
      * Requests a route using the provided [Router] implementation.
@@ -36,7 +39,10 @@ internal interface DirectionsSession {
      * @param adjustedRouteOptions: RouteOptions with adjusted parameters
      * @param routesRequestCallback Callback that gets notified when request state changes
      */
-    fun requestFasterRoute(adjustedRouteOptions: RouteOptions, routesRequestCallback: RoutesRequestCallback)
+    fun requestFasterRoute(
+        adjustedRouteOptions: RouteOptions,
+        routesRequestCallback: RoutesRequestCallback
+    )
 
     /**
      * Refresh the traffic annotations for a given [DirectionsRoute]

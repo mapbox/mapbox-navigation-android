@@ -20,7 +20,11 @@ interface FasterRouteObserver {
      * @param alternatives the routes where alternatives[0] may be faster
      * @param isAlternativeFaster true if the alternatives[0] is faster, false otherwise
      */
-    fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean)
+    fun onFasterRoute(
+        currentRoute: DirectionsRoute,
+        alternatives: List<DirectionsRoute>,
+        isAlternativeFaster: Boolean
+    )
 
     companion object {
         /**

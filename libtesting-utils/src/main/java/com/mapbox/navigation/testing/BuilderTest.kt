@@ -257,7 +257,7 @@ abstract class BuilderTest<Implementation : Any, Builder> {
 
         val optionalFieldValues = mutableListOf<Pair<KProperty<*>, Any>>()
         val optionalFields =
-        builderClass.members.filter { it is KProperty && it is KMutableProperty } as List<KProperty<*>>
+            builderClass.members.filter { it is KProperty && it is KMutableProperty } as List<KProperty<*>>
         optionalFields.forEach { kProperty ->
             kProperty.isAccessible = true
             optionalFieldValues.add(Pair(kProperty, kProperty.getter.call(builderInstance)!!))

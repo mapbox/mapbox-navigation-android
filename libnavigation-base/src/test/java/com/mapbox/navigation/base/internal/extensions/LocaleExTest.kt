@@ -8,10 +8,10 @@ import com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLoc
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
+import java.util.Locale
 
 class LocaleExTest {
 

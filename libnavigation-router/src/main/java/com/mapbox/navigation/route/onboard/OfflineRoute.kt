@@ -56,11 +56,15 @@ internal class OfflineRoute private constructor(
             null
         } else {
             formatWaypointTypes(waypointTypes)
-                ?: throw IllegalStateException("All waypoint types values must be one of break, through or null")
+                ?: throw IllegalStateException(
+                    "All waypoint types values must be one of break, through or null"
+                )
         }
     }
 
-    private fun formatWaypointTypes(waypointTypesToFormat: List<OfflineCriteria.WaypointType?>): String? {
+    private fun formatWaypointTypes(
+        waypointTypesToFormat: List<OfflineCriteria.WaypointType?>
+    ): String? {
         val waypointTypes = waypointTypesToFormat.map { it?.type ?: "" }.toTypedArray()
         return waypointTypes.joinTo(StringBuilder(), ";").toString()
     }
@@ -68,7 +72,8 @@ internal class OfflineRoute private constructor(
     private fun buildOfflineUrl(url: Uri): String {
         val offlineUrlBuilder = url.buildUpon()
 
-        offlineUrlBuilder.appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType?.type)
+        offlineUrlBuilder
+            .appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType?.type)
         offlineUrlBuilder.appendQueryParamIfNonNull(CYCLING_SPEED_QUERY_PARAMETER, cyclingSpeed)
         offlineUrlBuilder.appendQueryParamIfNonNull(CYCLEWAY_BIAS_QUERY_PARAMETER, cyclewayBias)
         offlineUrlBuilder.appendQueryParamIfNonNull(HILL_BIAS_QUERY_PARAMETER, hillBias)
@@ -77,7 +82,10 @@ internal class OfflineRoute private constructor(
             ROUGH_SURFACE_BIAS_QUERY_PARAMETER,
             roughSurfaceBias
         )
-        offlineUrlBuilder.appendQueryParamIfNonNull(WAYPOINT_TYPES_QUERY_PARAMETER, checkWaypointTypes(waypointTypes))
+        offlineUrlBuilder.appendQueryParamIfNonNull(
+            WAYPOINT_TYPES_QUERY_PARAMETER,
+            checkWaypointTypes(waypointTypes)
+        )
 
         return offlineUrlBuilder.build().toString()
     }
@@ -121,7 +129,16 @@ internal class OfflineRoute private constructor(
     }
 
     override fun toString(): String {
-        return "OfflineRoute(routeUrl=$routeUrl, bicycleType=$bicycleType, cyclingSpeed=$cyclingSpeed, cyclewayBias=$cyclewayBias, hillBias=$hillBias, ferryBias=$ferryBias, roughSurfaceBias=$roughSurfaceBias, waypointTypes=$waypointTypes)"
+        return "OfflineRoute(" +
+            "routeUrl=$routeUrl, " +
+            "bicycleType=$bicycleType, " +
+            "cyclingSpeed=$cyclingSpeed, " +
+            "cyclewayBias=$cyclewayBias, " +
+            "hillBias=$hillBias, " +
+            "ferryBias=$ferryBias, " +
+            "roughSurfaceBias=$roughSurfaceBias, " +
+            "waypointTypes=$waypointTypes" +
+            ")"
     }
 
     class Builder internal constructor(private val routeUrl: RouteUrl) {

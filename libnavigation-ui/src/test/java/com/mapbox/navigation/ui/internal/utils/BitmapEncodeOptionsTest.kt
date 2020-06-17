@@ -1,8 +1,8 @@
 package com.mapbox.navigation.ui.internal.utils
 
 import com.mapbox.navigation.testing.BuilderTest
-import kotlin.reflect.KClass
 import org.junit.Test
+import kotlin.reflect.KClass
 
 class BitmapEncodeOptionsTest : BuilderTest<BitmapEncodeOptions, BitmapEncodeOptions.Builder>() {
     override fun getImplementationClass(): KClass<BitmapEncodeOptions> = BitmapEncodeOptions::class

@@ -40,9 +40,9 @@ class UIActivity : AppCompatActivity() {
         // Return list of all activities demonstrating UI SDK capabilities
         return listOf(
             SampleItem(
-                    getString(R.string.title_navigation_view),
-                    getString(R.string.description_navigation_view),
-                    NavigationViewActivity::class.java
+                getString(R.string.title_navigation_view),
+                getString(R.string.description_navigation_view),
+                NavigationViewActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_navigation_view_fragment),
@@ -50,14 +50,14 @@ class UIActivity : AppCompatActivity() {
                 NavigationViewFragmentActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_building_highlight_kotlin),
-                    getString(R.string.description_building_highlight_kotlin),
-                    BuildingFootprintHighlightActivity::class.java
+                getString(R.string.title_building_highlight_kotlin),
+                getString(R.string.description_building_highlight_kotlin),
+                BuildingFootprintHighlightActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_ui_building_extrusions_kotlin),
-                    getString(R.string.description_ui_building_extrusions_kotlin),
-                    BuildingExtrusionHighlightActivity::class.java
+                getString(R.string.title_ui_building_extrusions_kotlin),
+                getString(R.string.description_ui_building_extrusions_kotlin),
+                BuildingExtrusionHighlightActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_custom_puck_example),
@@ -75,9 +75,9 @@ class UIActivity : AppCompatActivity() {
                 CustomUIComponentStyleActivity::class.java
             ),
             SampleItem(
-                    getString(R.string.title_traffic_toggle),
-                    getString(R.string.description_traffic_toggle),
-                    TrafficToggleActivity::class.java
+                getString(R.string.title_traffic_toggle),
+                getString(R.string.description_traffic_toggle),
+                TrafficToggleActivity::class.java
             )
         )
     }

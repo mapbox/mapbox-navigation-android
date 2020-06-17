@@ -1,13 +1,13 @@
 package com.mapbox.navigation.ui.voice
 
 import android.os.AsyncTask
+import okhttp3.ResponseBody
+import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import okhttp3.ResponseBody
-import timber.log.Timber
 
 /**
  * This class is an [AsyncTask] that downloads a file from a [ResponseBody].
@@ -56,12 +56,12 @@ constructor(
 
         try {
             val filePath = StringBuilder().append(destDirectory)
-                    .append(File.separator)
-                    .append(fileName)
-                    .append(retrieveUniqueId())
-                    .append(".")
-                    .append(extension)
-                    .toString()
+                .append(File.separator)
+                .append(fileName)
+                .append(retrieveUniqueId())
+                .append(".")
+                .append(extension)
+                .toString()
             val file = File(filePath)
             val inputStream: InputStream = responseBody.byteStream()
             val outputStream: OutputStream = FileOutputStream(file)

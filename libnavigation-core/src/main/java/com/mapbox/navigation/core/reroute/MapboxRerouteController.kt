@@ -12,8 +12,8 @@ import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import java.util.concurrent.CopyOnWriteArraySet
 import kotlinx.coroutines.launch
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Default implementation of [RerouteController]
@@ -60,7 +60,8 @@ internal class MapboxRerouteController(
                     is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
-                                "Cannot combine route options", routeOptionsResult.error
+                                "Cannot combine route options",
+                                routeOptionsResult.error
                             )
                             state = RerouteState.Idle
                         }
@@ -72,7 +73,8 @@ internal class MapboxRerouteController(
     @MainThread
     override fun interrupt() {
         if (state == RerouteState.FetchingRoute) {
-            directionsSession.cancel() // do not change state here because it's changed into onRoutesRequestCanceled callback
+            // do not change state here because it's changed into onRoutesRequestCanceled callback
+            directionsSession.cancel()
             logger.d(
                 Tag(TAG),
                 Message("Route request interrupted")
@@ -80,58 +82,65 @@ internal class MapboxRerouteController(
         }
     }
 
-    override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+    override fun registerRerouteStateObserver(
+        rerouteStateObserver: RerouteController.RerouteStateObserver
+    ): Boolean {
         mainJobController.scope.launch {
             rerouteStateObserver.onRerouteStateChanged(state)
         }
         return observers.add(rerouteStateObserver)
     }
 
-    override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+    override fun unregisterRerouteStateObserver(
+        rerouteStateObserver: RerouteController.RerouteStateObserver
+    ): Boolean {
         return observers.remove(rerouteStateObserver)
     }
 
     private fun request(routeOptions: RouteOptions) {
-        directionsSession.requestRoutes(routeOptions, object : RoutesRequestCallback {
-            // ignore result, DirectionsSession sets routes internally
-            override fun onRoutesReady(routes: List<DirectionsRoute>) {
-                logger.d(
-                    Tag(TAG),
-                    Message("Route fetched")
-                )
-                mainJobController.scope.launch {
-                    state = RerouteState.RouteFetched
-                    state = RerouteState.Idle
+        directionsSession.requestRoutes(
+            routeOptions,
+            object : RoutesRequestCallback {
+                // ignore result, DirectionsSession sets routes internally
+                override fun onRoutesReady(routes: List<DirectionsRoute>) {
+                    logger.d(
+                        Tag(TAG),
+                        Message("Route fetched")
+                    )
+                    mainJobController.scope.launch {
+                        state = RerouteState.RouteFetched
+                        state = RerouteState.Idle
+                    }
+                }
+
+                override fun onRoutesRequestFailure(
+                    throwable: Throwable,
+                    routeOptions: RouteOptions
+                ) {
+                    logger.e(
+                        Tag(TAG),
+                        Message("Route request failed"),
+                        throwable
+                    )
+
+                    mainJobController.scope.launch {
+                        state = RerouteState.Failed("Route request failed", throwable)
+                        state = RerouteState.Idle
+                    }
+                }
+
+                override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+                    logger.d(
+                        Tag(TAG),
+                        Message("Route request canceled")
+                    )
+                    mainJobController.scope.launch {
+                        state = RerouteState.Interrupted
+                        state = RerouteState.Idle
+                    }
                 }
             }
-
-            override fun onRoutesRequestFailure(
-                throwable: Throwable,
-                routeOptions: RouteOptions
-            ) {
-                logger.e(
-                    Tag(TAG),
-                    Message("Route request failed"),
-                    throwable
-                )
-
-                mainJobController.scope.launch {
-                    state = RerouteState.Failed("Route request failed", throwable)
-                    state = RerouteState.Idle
-                }
-            }
-
-            override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
-                logger.d(
-                    Tag(TAG),
-                    Message("Route request canceled")
-                )
-                mainJobController.scope.launch {
-                    state = RerouteState.Interrupted
-                    state = RerouteState.Idle
-                }
-            }
-        })
+        )
     }
 
     private companion object {

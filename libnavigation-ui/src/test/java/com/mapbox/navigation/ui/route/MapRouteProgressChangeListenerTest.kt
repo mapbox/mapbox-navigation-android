@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [ Build.VERSION_CODES.M])
+@Config(sdk = [Build.VERSION_CODES.M])
 class MapRouteProgressChangeListenerTest {
 
     @get:Rule
@@ -102,7 +102,8 @@ class MapRouteProgressChangeListenerTest {
     @Test
     fun `should cancel animator when route progress has geometry`() {
         val animator = mockk<RouteLineValueAnimator>(relaxUnitFun = true)
-        val routeProgressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
+        val routeProgressChangeListener =
+            MapRouteProgressChangeListener(routeLine, routeArrow, animator)
 
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
             mockk {

@@ -27,7 +27,11 @@ class RemoveTilesTaskTest {
     private val southwest = Point.fromLngLat(1.0, 2.0)
     private val northeast = Point.fromLngLat(3.0, 4.0)
     private val theRemoveTilesTask = RemoveTilesTask(
-        navigator, tilePath, southwest, northeast, callback
+        navigator,
+        tilePath,
+        southwest,
+        northeast,
+        callback
     )
 
     @get:Rule

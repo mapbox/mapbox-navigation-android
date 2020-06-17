@@ -130,18 +130,20 @@ class MapboxReplayer {
      */
     fun pushRealLocation(context: Context, eventTimestamp: Double) {
         LocationEngineProvider.getBestLocationEngine(context.applicationContext)
-            .getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    result?.lastLocation?.let {
-                        val event = ReplayRouteMapper.mapToUpdateLocation(eventTimestamp, it)
-                        pushEvents(singletonList(event))
+            .getLastLocation(
+                object : LocationEngineCallback<LocationEngineResult> {
+                    override fun onSuccess(result: LocationEngineResult?) {
+                        result?.lastLocation?.let {
+                            val event = ReplayRouteMapper.mapToUpdateLocation(eventTimestamp, it)
+                            pushEvents(singletonList(event))
+                        }
+                    }
+
+                    override fun onFailure(exception: Exception) {
+                        // Intentionally empty
                     }
                 }
-
-                override fun onFailure(exception: Exception) {
-                    // Intentionally empty
-                }
-            })
+            )
     }
 
     /**
@@ -167,7 +169,10 @@ class MapboxReplayer {
         val offsetTime = replayTime + firstEventTime
         val indexOfEvent = replayEvents.events
             .indexOfFirst { offsetTime <= it.eventTimestamp }
-        check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${durationSeconds()}: " }
+        check(indexOfEvent >= 0) {
+            "Make sure your replayTime is less than replayDurationSeconds " +
+                "$replayTime > ${durationSeconds()}: "
+        }
 
         replayEventSimulator.seekTo(indexOfEvent)
     }

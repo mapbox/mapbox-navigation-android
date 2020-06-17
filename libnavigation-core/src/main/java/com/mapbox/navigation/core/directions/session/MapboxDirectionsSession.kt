@@ -58,7 +58,11 @@ internal class MapboxDirectionsSession(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun requestRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun requestRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         router.getRouteRefresh(route, legIndex, callback)
     }
 
@@ -73,23 +77,26 @@ internal class MapboxDirectionsSession(
         routeOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback?
     ) {
-        router.getRoute(routeOptions, object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
-                this@MapboxDirectionsSession.routes = routes
-                routesRequestCallback?.onRoutesReady(routes)
-                // todo log in the future
-            }
+        router.getRoute(
+            routeOptions,
+            object : Router.Callback {
+                override fun onResponse(routes: List<DirectionsRoute>) {
+                    this@MapboxDirectionsSession.routes = routes
+                    routesRequestCallback?.onRoutesReady(routes)
+                    // todo log in the future
+                }
 
-            override fun onFailure(throwable: Throwable) {
-                routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
-                // todo log in the future
-            }
+                override fun onFailure(throwable: Throwable) {
+                    routesRequestCallback?.onRoutesRequestFailure(throwable, routeOptions)
+                    // todo log in the future
+                }
 
-            override fun onCanceled() {
-                routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
-                // todo log in the future
+                override fun onCanceled() {
+                    routesRequestCallback?.onRoutesRequestCanceled(routeOptions)
+                    // todo log in the future
+                }
             }
-        })
+        )
     }
 
     /**
@@ -104,23 +111,26 @@ internal class MapboxDirectionsSession(
         adjustedRouteOptions: RouteOptions,
         routesRequestCallback: RoutesRequestCallback
     ) {
-        router.getRoute(adjustedRouteOptions, object : Router.Callback {
-            override fun onResponse(routes: List<DirectionsRoute>) {
-                routesRequestCallback.onRoutesReady(routes)
-            }
+        router.getRoute(
+            adjustedRouteOptions,
+            object : Router.Callback {
+                override fun onResponse(routes: List<DirectionsRoute>) {
+                    routesRequestCallback.onRoutesReady(routes)
+                }
 
-            override fun onFailure(throwable: Throwable) {
-                ifNonNull(routeOptions) { options ->
-                    routesRequestCallback.onRoutesRequestFailure(throwable, options)
+                override fun onFailure(throwable: Throwable) {
+                    ifNonNull(routeOptions) { options ->
+                        routesRequestCallback.onRoutesRequestFailure(throwable, options)
+                    }
+                }
+
+                override fun onCanceled() {
+                    ifNonNull(routeOptions) { options ->
+                        routesRequestCallback.onRoutesRequestCanceled(options)
+                    }
                 }
             }
-
-            override fun onCanceled() {
-                ifNonNull(routeOptions) { options ->
-                    routesRequestCallback.onRoutesRequestCanceled(options)
-                }
-            }
-        })
+        )
     }
 
     /**

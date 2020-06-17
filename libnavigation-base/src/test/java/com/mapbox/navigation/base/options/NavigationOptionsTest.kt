@@ -12,13 +12,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import kotlin.reflect.KClass
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import kotlin.reflect.KClass
 
 class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 

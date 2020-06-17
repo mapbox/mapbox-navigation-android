@@ -20,7 +20,8 @@ open class NotificationTestRule<A : AppCompatActivity>(activityClass: Class<A>) 
 
     protected fun UiDevice.waitForNotification() {
         this.openNotification()
-        this.wait(Until.hasObject(By.textStartsWith(appName)),
+        this.wait(
+            Until.hasObject(By.textStartsWith(appName)),
             TIMEOUT
         )
     }

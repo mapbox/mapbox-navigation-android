@@ -41,7 +41,6 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
-import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.junit.After
@@ -50,6 +49,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
@@ -77,7 +77,9 @@ class MapboxNavigationTest {
 
     private val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
-        every { getSystemService(Context.NOTIFICATION_SERVICE) } returns mockk<NotificationManager>()
+        every {
+            getSystemService(Context.NOTIFICATION_SERVICE)
+        } returns mockk<NotificationManager>()
         every { getSystemService(Context.ALARM_SERVICE) } returns mockk<AlarmManager>()
         every {
             getSharedPreferences(
@@ -166,7 +168,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun init_registerRoutesObservers_internalRoutesObserver_navigationSession_and_TelemetryLocationAndProgressDispatcher() {
+    fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDisptchr() {
         verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
 
         mapboxNavigation.onDestroy()

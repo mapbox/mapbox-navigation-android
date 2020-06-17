@@ -65,14 +65,14 @@ import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
-import java.lang.reflect.Field
 import kotlinx.coroutines.channels.ReceiveChannel
+import java.lang.reflect.Field
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
-    "You need to provide an access token in NavigationOptions in order to use the default Router. " +
-        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
+    "You need to provide an access token in NavigationOptions in order to use the default " +
+        "Router. Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
     "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
 private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
@@ -131,7 +131,8 @@ class MapboxNavigation(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
-    private val navigationAccountsSession = NavigationAccountsSession(navigationOptions.applicationContext)
+    private val navigationAccountsSession =
+        NavigationAccountsSession(navigationOptions.applicationContext)
     private val logger: Logger
     private val internalRoutesObserver: RoutesObserver
     private val internalOffRouteObserver: OffRouteObserver
@@ -452,14 +453,18 @@ class MapboxNavigation(
      * Registers [BannerInstructionsObserver]. The updates are available whenever SDK is in an `Active Guidance` state.
      * The SDK will push this event only once per route step.
      */
-    fun registerBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    fun registerBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         tripSession.registerBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
     /**
      * Unregisters [BannerInstructionsObserver].
      */
-    fun unregisterBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    fun unregisterBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         tripSession.unregisterBannerInstructionsObserver(bannerInstructionsObserver)
     }
 
@@ -589,14 +594,18 @@ class MapboxNavigation(
     /**
      * Register a [NavigationSessionStateObserver] to be notified of the various Session states. Not publicly available
      */
-    internal fun registerNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun registerNavigationSessionObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         navigationSession.registerNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
     /**
      * Unregisters a [NavigationSessionStateObserver]. Not publicly available
      */
-    internal fun unregisterNavigationSessionObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun unregisterNavigationSessionObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         navigationSession.unregisterNavigationSessionStateObserver(navigationSessionStateObserver)
     }
 
@@ -619,11 +628,13 @@ class MapboxNavigation(
     }
 
     private fun reroute() {
-        rerouteController?.reroute(object : RerouteController.RoutesCallback {
-            override fun onNewRoutes(routes: List<DirectionsRoute>) {
-                setRoutes(routes)
+        rerouteController?.reroute(
+            object : RerouteController.RoutesCallback {
+                override fun onNewRoutes(routes: List<DirectionsRoute>) {
+                    setRoutes(routes)
+                }
             }
-        })
+        )
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {
@@ -635,11 +646,14 @@ class MapboxNavigation(
     }
 
     private fun monitorNotificationActionButton(channel: ReceiveChannel<NotificationAction>) {
-        mainJobController.scope.monitorChannelWithException(channel, { notificationAction ->
-            when (notificationAction) {
-                NotificationAction.END_NAVIGATION -> tripSession.stop()
+        mainJobController.scope.monitorChannelWithException(
+            channel,
+            { notificationAction ->
+                when (notificationAction) {
+                    NotificationAction.END_NAVIGATION -> tripSession.stop()
+                }
             }
-        })
+        )
     }
 
     /**
@@ -648,23 +662,32 @@ class MapboxNavigation(
     private fun paramsProvider(type: MapboxModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
             MapboxModuleType.NavigationRouter -> arrayOf(
-                String::class.java to (accessToken
-                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)),
+                String::class.java to (
+                    accessToken
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)
+                    ),
                 Context::class.java to navigationOptions.applicationContext,
-                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext),
+                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(
+                    navigationOptions.applicationContext
+                ),
                 MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
                 Logger::class.java to logger,
-                NetworkStatusService::class.java to NetworkStatusService(navigationOptions.applicationContext)
+                NetworkStatusService::class.java
+                    to NetworkStatusService(navigationOptions.applicationContext)
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 NavigationOptions::class.java to navigationOptions
             )
             MapboxModuleType.CommonLogger -> arrayOf()
-            MapboxModuleType.CommonLibraryLoader -> throw IllegalArgumentException("not supported: $type")
-            MapboxModuleType.CommonHttpClient -> throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.CommonLibraryLoader ->
+                throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.CommonHttpClient ->
+                throw IllegalArgumentException("not supported: $type")
             // to be removed with the upcoming common lib version
-            MapboxModuleType.NavigationOffboardRouter -> throw IllegalArgumentException("not supported: $type")
-            MapboxModuleType.NavigationOnboardRouter -> throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.NavigationOffboardRouter ->
+                throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.NavigationOnboardRouter ->
+                throw IllegalArgumentException("not supported: $type")
         }
     }
 
@@ -694,7 +717,9 @@ class MapboxNavigation(
                         accessToken ?: "",
                         USER_AGENT,
                         "",
-                        NativeSkuTokenProvider(MapboxNavigationAccounts.getInstance(applicationContext))
+                        NativeSkuTokenProvider(
+                            MapboxNavigationAccounts.getInstance(applicationContext)
+                        )
                     )
                 )
                 navigator.configureRouter(routerParams)
@@ -745,7 +770,10 @@ class MapboxNavigation(
          * @return default [NavigationOptions]
          */
         @JvmStatic
-        fun defaultNavigationOptionsBuilder(context: Context, accessToken: String?): NavigationOptions.Builder {
+        fun defaultNavigationOptionsBuilder(
+            context: Context,
+            accessToken: String?
+        ): NavigationOptions.Builder {
             val distanceFormatter = MapboxDistanceFormatter.Builder(context)
                 .unitType(VoiceUnit.UNDEFINED)
                 .roundingIncrement(Rounding.INCREMENT_FIFTY)

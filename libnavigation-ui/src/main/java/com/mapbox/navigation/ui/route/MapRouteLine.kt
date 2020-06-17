@@ -393,7 +393,11 @@ internal class MapRouteLine(
         }
 
         routeLineInitializedCallback?.onInitialized(
-            RouteLineLayerIds(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, PRIMARY_ROUTE_LAYER_ID, listOf(ALTERNATIVE_ROUTE_LAYER_ID))
+            RouteLineLayerIds(
+                PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                PRIMARY_ROUTE_LAYER_ID,
+                listOf(ALTERNATIVE_ROUTE_LAYER_ID)
+            )
         )
     }
 
@@ -432,7 +436,10 @@ internal class MapRouteLine(
         reinitializeWithRoutes(directionsRoutes, featureDataProvider)
     }
 
-    private fun reinitializeWithRoutes(directionsRoutes: List<DirectionsRoute>, getRouteFeatureData: () -> List<RouteFeatureData>) {
+    private fun reinitializeWithRoutes(
+        directionsRoutes: List<DirectionsRoute>,
+        getRouteFeatureData: () -> List<RouteFeatureData>
+    ) {
         if (directionsRoutes.isNotEmpty()) {
             clearRouteData()
             this.directionsRoutes.addAll(directionsRoutes)
@@ -566,14 +573,18 @@ internal class MapRouteLine(
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
     }
 
-    private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>): () -> List<RouteFeatureData> = {
+    private fun getIdentifiableRouteFeatureDataProvider(
+        directionsRoutes: List<IdentifiableRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
         )
     }
 
-    private fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>): () -> List<RouteFeatureData> = {
+    private fun getRouteFeatureDataProvider(
+        directionsRoutes: List<DirectionsRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
@@ -667,7 +678,9 @@ internal class MapRouteLine(
         }
 
         layerProvider.initializeWayPointLayer(
-            style, originIcon, destinationIcon
+            style,
+            originIcon,
+            destinationIcon
         ).apply {
             MapUtils.addLayerToMap(
                 style,
@@ -1000,9 +1013,10 @@ internal class MapRouteLine(
         fun getBelowLayer(layerId: String?, style: Style): String {
             return when (layerId.isNullOrEmpty()) {
                 false -> style.layers.firstOrNull { it.id == layerId }?.id
-                true -> style.layers.reversed().filter { it !is SymbolLayer }
-                    .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
-                    ?.id
+                true ->
+                    style.layers.reversed().filter { it !is SymbolLayer }
+                        .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
+                        ?.id
             } ?: LocationComponentConstants.SHADOW_LAYER
         }
 
@@ -1026,7 +1040,10 @@ internal class MapRouteLine(
         fun generateFeatureCollection(routeData: IdentifiableRoute): RouteFeatureData =
             generateFeatureCollection(routeData.route, routeData.routeIdentifier)
 
-        private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?): RouteFeatureData {
+        private fun generateFeatureCollection(
+            route: DirectionsRoute,
+            identifier: String?
+        ): RouteFeatureData {
             val routeGeometry = LineString.fromPolyline(
                 route.geometry() ?: "",
                 Constants.PRECISION_6
@@ -1114,10 +1131,12 @@ internal class MapRouteLine(
             var distanceTraveled = 0.0
             for (i in 0 until numCongestionPoints) {
                 if (i + 1 < lineString.coordinates().size) {
-                    distanceTraveled += (TurfMeasurement.distance(
-                        lineString.coordinates()[i],
-                        lineString.coordinates()[i + 1]
-                    ) * 1000)
+                    distanceTraveled += (
+                        TurfMeasurement.distance(
+                            lineString.coordinates()[i],
+                            lineString.coordinates()[i + 1]
+                        ) * 1000
+                        )
 
                     if (congestionSections[i] == previousCongestion) {
                         continue

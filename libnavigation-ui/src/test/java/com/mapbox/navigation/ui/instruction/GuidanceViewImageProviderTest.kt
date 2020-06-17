@@ -12,7 +12,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -21,6 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
 
 @ExperimentalCoroutinesApi
 class GuidanceViewImageProviderTest {
@@ -67,7 +67,9 @@ class GuidanceViewImageProviderTest {
     @Test
     fun `when guidance view url is null`() {
         val messageSlot = slot<String>()
-        every { bannerView.components() } returns mutableListOf(bannerComponentsWithNullGuidanceUrl())
+        every {
+            bannerView.components()
+        } returns mutableListOf(bannerComponentsWithNullGuidanceUrl())
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
 

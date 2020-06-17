@@ -36,12 +36,6 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.io.IOException
-import java.io.InputStream
-import java.lang.ref.WeakReference
-import java.nio.charset.Charset.forName
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.android.synthetic.main.activity_replay_history_layout.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +45,12 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.io.InputStream
+import java.lang.ref.WeakReference
+import java.nio.charset.Charset.forName
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * This activity shows how to use replay ride history.
@@ -78,7 +78,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
             it.onNavigationReady()
 
             it.mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            it.navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            it.navigationMapboxMap
+                .updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             it.locationEngine.getLastLocation(FirstLocationCallback(it))
         }
     }
@@ -100,7 +101,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
             val (mapboxMap, style) = deferredMapboxWithStyle.await()
             if (!isActive) return@launch
 
-            val navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this@ReplayHistoryActivity, true)
+            val navigationMapboxMap =
+                NavigationMapboxMap(mapView, mapboxMap, this@ReplayHistoryActivity, true)
             val navigationContext = ReplayNavigationContext(
                 locationEngine,
                 mapboxMap,
@@ -128,11 +130,16 @@ class ReplayHistoryActivity : AppCompatActivity() {
         } ?: loadDefaultReplayHistory()
     }
 
-    private suspend fun loadDefaultReplayHistory(): List<ReplayEventBase> = withContext(Dispatchers.IO) {
-        val replayHistoryMapper = ReplayHistoryMapper(ReplayCustomEventMapper(), MapboxLogger)
-        val rideHistoryExample = loadHistoryJsonFromAssets(this@ReplayHistoryActivity, "replay-history-activity.json")
-        replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
-    }
+    private suspend fun loadDefaultReplayHistory(): List<ReplayEventBase> =
+        withContext(Dispatchers.IO) {
+            val replayHistoryMapper = ReplayHistoryMapper(ReplayCustomEventMapper(), MapboxLogger)
+            val rideHistoryExample =
+                loadHistoryJsonFromAssets(
+                    this@ReplayHistoryActivity,
+                    "replay-history-activity.json"
+                )
+            replayHistoryMapper.mapToReplayEvents(rideHistoryExample)
+        }
 
     private fun createMapboxNavigation(locationEngine: LocationEngine): MapboxNavigation {
         val mapboxNavigationOptions = MapboxNavigation
@@ -157,26 +164,34 @@ class ReplayHistoryActivity : AppCompatActivity() {
             true
         }
 
-        mapboxReplayer.registerObserver(object : ReplayEventsObserver {
-            override fun replayEvents(events: List<ReplayEventBase>) {
-                events.forEach { event ->
-                    when (event) {
-                        is ReplayEventInitialRoute -> {
-                            event.coordinates.lastOrNull()?.let { latLng ->
-                                selectMapLocation(latLng)
+        mapboxReplayer.registerObserver(
+            object : ReplayEventsObserver {
+                override fun replayEvents(events: List<ReplayEventBase>) {
+                    events.forEach { event ->
+                        when (event) {
+                            is ReplayEventInitialRoute -> {
+                                event.coordinates.lastOrNull()?.let { latLng ->
+                                    selectMapLocation(latLng)
+                                }
                             }
                         }
                     }
                 }
             }
-        })
+        )
 
-        mapboxNavigation.attachFasterRouteObserver(object : FasterRouteObserver {
-            override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
-                navigationContext?.navigationMapboxMap?.drawRoutes(alternatives)
-                navigationContext?.mapboxNavigation?.setRoutes(alternatives)
+        mapboxNavigation.attachFasterRouteObserver(
+            object : FasterRouteObserver {
+                override fun onFasterRoute(
+                    currentRoute: DirectionsRoute,
+                    alternatives: List<DirectionsRoute>,
+                    isAlternativeFaster: Boolean
+                ) {
+                    navigationContext?.navigationMapboxMap?.drawRoutes(alternatives)
+                    navigationContext?.mapboxNavigation?.setRoutes(alternatives)
+                }
             }
-        })
+        )
 
         playReplay.setOnClickListener {
             mapboxReplayer.play()
@@ -188,15 +203,17 @@ class ReplayHistoryActivity : AppCompatActivity() {
         seekBar.max = 8
         seekBar.progress = 1
         seekBarText.text = getString(R.string.replay_playback_speed_seekbar, seekBar.progress)
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                mapboxReplayer.playbackSpeed(progress.toDouble())
-                seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
-            }
+        seekBar.setOnSeekBarChangeListener(
+            object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                    mapboxReplayer.playbackSpeed(progress.toDouble())
+                    seekBarText.text = getString(R.string.replay_playback_speed_seekbar, progress)
+                }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) { }
-            override fun onStopTrackingTouch(seekBar: SeekBar) { }
-        })
+                override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar) {}
+            }
+        )
     }
 
     private fun ReplayNavigationContext.selectMapLocation(latLng: LatLng) {
@@ -217,7 +234,8 @@ class ReplayHistoryActivity : AppCompatActivity() {
     private fun ReplayNavigationContext.startNavigation() {
         if (mapboxNavigation.getRoutes().isNotEmpty()) {
             navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.GPS)
-            navigationMapboxMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap
+                .updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             navigationMapboxMap.startCamera(mapboxNavigation.getRoutes()[0])
         }
         mapboxNavigation.startTripSession()
@@ -230,7 +248,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.firstOrNull()?.let {
-                navigationContextRef.get()?.navigationMapboxMap?.updateLocation(result.lastLocation)
+                navigationContextRef
+                    .get()
+                    ?.navigationMapboxMap
+                    ?.updateLocation(result.lastLocation)
             }
         }
 
@@ -327,7 +348,8 @@ private class ReplayCustomEventMapper : CustomEventMapper {
         return when (eventType) {
             "start_transit" -> ReplayEventStartTransit(
                 eventTimestamp = properties["event_timestamp"] as Double,
-                properties = properties["properties"] as Double)
+                properties = properties["properties"] as Double
+            )
             "initial_route" -> {
                 val eventProperties = properties["properties"] as Map<*, *>
                 val routeOptions = eventProperties["routeOptions"] as Map<*, *>

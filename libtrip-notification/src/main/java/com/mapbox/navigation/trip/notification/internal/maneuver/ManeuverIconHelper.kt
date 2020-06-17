@@ -26,7 +26,8 @@ object ManeuverIconHelper {
     val MANEUVER_ICON_DRAWER_MAP: Map<Pair<String, String>, ManeuverIconDrawer> =
         object : HashMap<Pair<String, String>, ManeuverIconDrawer>() {
             init {
-                put(Pair(StepManeuver.MERGE, null),
+                put(
+                    Pair(StepManeuver.MERGE, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -37,8 +38,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawMerge(canvas, primaryColor, secondaryColor, size)
                         }
-                    })
-                put(Pair(StepManeuver.OFF_RAMP, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.OFF_RAMP, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -54,8 +57,10 @@ object ManeuverIconHelper {
                                 size
                             )
                         }
-                    })
-                put(Pair(StepManeuver.FORK, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.FORK, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -66,8 +71,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawFork(canvas, primaryColor, secondaryColor, size)
                         }
-                    })
-                put(Pair(StepManeuver.ROUNDABOUT, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ROUNDABOUT, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -84,8 +91,10 @@ object ManeuverIconHelper {
                                 roundaboutAngle
                             )
                         }
-                    })
-                put(Pair(StepManeuver.ROUNDABOUT_TURN, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ROUNDABOUT_TURN, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -102,8 +111,10 @@ object ManeuverIconHelper {
                                 roundaboutAngle
                             )
                         }
-                    })
-                put(Pair(StepManeuver.EXIT_ROUNDABOUT, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.EXIT_ROUNDABOUT, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -120,8 +131,10 @@ object ManeuverIconHelper {
                                 roundaboutAngle
                             )
                         }
-                    })
-                put(Pair(StepManeuver.ROTARY, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ROTARY, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -138,8 +151,10 @@ object ManeuverIconHelper {
                                 roundaboutAngle
                             )
                         }
-                    })
-                put(Pair(StepManeuver.EXIT_ROTARY, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.EXIT_ROTARY, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -156,8 +171,10 @@ object ManeuverIconHelper {
                                 roundaboutAngle
                             )
                         }
-                    })
-                put(Pair(StepManeuver.ARRIVE, null),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ARRIVE, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -168,8 +185,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrive(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(StepManeuver.ARRIVE, ManeuverModifier.STRAIGHT),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ARRIVE, ManeuverModifier.STRAIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -180,8 +199,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrive(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(StepManeuver.ARRIVE, ManeuverModifier.RIGHT),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ARRIVE, ManeuverModifier.RIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -192,8 +213,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArriveRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(StepManeuver.ARRIVE, ManeuverModifier.LEFT),
+                    }
+                )
+                put(
+                    Pair(StepManeuver.ARRIVE, ManeuverModifier.LEFT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -204,8 +227,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArriveRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.SLIGHT_RIGHT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.SLIGHT_RIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -216,8 +241,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowSlightRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.RIGHT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.RIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -228,8 +255,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.SHARP_RIGHT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.SHARP_RIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -240,8 +269,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowSharpRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.SLIGHT_LEFT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.SLIGHT_LEFT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -252,8 +283,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowSlightRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.LEFT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.LEFT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -264,8 +297,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.SHARP_LEFT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.SHARP_LEFT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -276,8 +311,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowSharpRight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.UTURN),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.UTURN),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -288,8 +325,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrow180Right(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, ManeuverModifier.STRAIGHT),
+                    }
+                )
+                put(
+                    Pair(null, ManeuverModifier.STRAIGHT),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -300,8 +339,10 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowStraight(canvas, primaryColor, size)
                         }
-                    })
-                put(Pair(null, null),
+                    }
+                )
+                put(
+                    Pair(null, null),
                     object : ManeuverIconDrawer {
                         override fun drawManeuverIcon(
                             canvas: Canvas,
@@ -312,7 +353,8 @@ object ManeuverIconHelper {
                         ) {
                             ManeuversStyleKit.drawArrowStraight(canvas, primaryColor, size)
                         }
-                    })
+                    }
+                )
             }
         }
 

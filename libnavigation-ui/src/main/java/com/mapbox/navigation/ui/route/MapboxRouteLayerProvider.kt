@@ -65,7 +65,8 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     fun getRouteLineWidthExpressions(scale: Float): Expression {
         return interpolate(
-            exponential(1.5f), zoom(),
+            exponential(1.5f),
+            zoom(),
             stop(4f, product(literal(3f), literal(scale))),
             stop(10f, product(literal(4f), literal(scale))),
             stop(13f, product(literal(6f), literal(scale))),
@@ -77,7 +78,8 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     fun getCasingLineWidthExpression(scale: Float): Expression {
         return interpolate(
-            exponential(1.5f), zoom(),
+            exponential(1.5f),
+            zoom(),
             stop(10f, 7f),
             stop(14f, product(literal(10.5f), literal(scale))),
             stop(16.5f, product(literal(15.5f), literal(scale))),
@@ -93,14 +95,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
             PRIMARY_ROUTE_LAYER_ID,
             PRIMARY_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
-            routeLineColorExpressions)
+            routeLineColorExpressions
+        )
     }
 
     override fun initializePrimaryRouteTrafficLayer(
@@ -110,14 +114,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
             PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
             PRIMARY_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
-            routeLineColorExpressions)
+            routeLineColorExpressions
+        )
     }
 
     override fun initializePrimaryRouteCasingLayer(
@@ -126,14 +132,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(
             style,
             true,
             PRIMARY_ROUTE_CASING_LAYER_ID,
             PRIMARY_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
-            routeLineColorExpressions)
+            routeLineColorExpressions
+        )
     }
 
     override fun initializeAlternativeRouteLayer(
@@ -143,14 +151,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
             ALTERNATIVE_ROUTE_LAYER_ID,
             ALTERNATIVE_ROUTE_SOURCE_ID,
             lineWidthExpression,
-            routeLineColorExpressions)
+            routeLineColorExpressions
+        )
     }
 
     override fun initializeAlternativeRouteCasingLayer(
@@ -159,14 +169,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
+        val routeLineColorExpressions =
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(
             style,
             true,
             ALTERNATIVE_ROUTE_CASING_LAYER_ID,
             ALTERNATIVE_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
-            routeLineColorExpressions)
+            routeLineColorExpressions
+        )
     }
 
     override fun initializeWayPointLayer(
@@ -189,13 +201,16 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         return SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
             iconImage(
                 match(
-                    Expression.toString(get(WAYPOINT_PROPERTY_KEY)), literal(ORIGIN_MARKER_NAME),
+                    Expression.toString(get(WAYPOINT_PROPERTY_KEY)),
+                    literal(ORIGIN_MARKER_NAME),
                     stop(WAYPOINT_ORIGIN_VALUE, literal(ORIGIN_MARKER_NAME)),
                     stop(WAYPOINT_DESTINATION_VALUE, literal(DESTINATION_MARKER_NAME))
-                )),
+                )
+            ),
             iconSize(
                 interpolate(
-                    exponential(1.5f), zoom(),
+                    exponential(1.5f),
+                    zoom(),
                     stop(0f, 0.6f),
                     stop(10f, 0.8f),
                     stop(12f, 1.3f),
@@ -237,7 +252,8 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             lineColor(
                 switchCase(
                     *colorExpressions.toTypedArray()
-            ))
+                )
+            )
         )
     }
 }

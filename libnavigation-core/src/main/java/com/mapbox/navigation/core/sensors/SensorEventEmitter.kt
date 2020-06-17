@@ -29,9 +29,11 @@ class SensorEventEmitter(
         val enabledSensors = enabledSensors(sensorOptions)
         val samplingPeriodUs = toSamplingPeriodUs(sensorOptions.signalsPerSecond)
         enabledSensors.forEach { sensorType ->
-            sensorManager.registerListener(this,
+            sensorManager.registerListener(
+                this,
                 sensorType,
-                samplingPeriodUs)
+                samplingPeriodUs
+            )
         }
     }
 

@@ -68,20 +68,23 @@ import com.mapbox.navigation.ui.summary.SummaryBottomSheet
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
-import java.io.File
-import java.lang.ref.WeakReference
-import java.util.Locale
 import kotlinx.android.synthetic.main.activity_custom_ui_component_style.*
 import okhttp3.Cache
 import timber.log.Timber
+import java.io.File
+import java.lang.ref.WeakReference
+import java.util.Locale
 
 /**
  * This activity shows how to use your own colors
  * to style the UI SDK components including the InstructionView
  * and SummaryBottomSheet.
  */
-class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
-    FeedbackBottomSheetListener, OnWayNameChangedListener {
+class CustomUIComponentStyleActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    FeedbackBottomSheetListener,
+    OnWayNameChangedListener {
     private val routeOverviewPadding by lazy { buildRouteOverviewPadding() }
 
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -187,21 +190,28 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             locationComponent = mapboxMap.locationComponent.apply {
                 activateLocationComponent(
                     LocationComponentActivationOptions.builder(
-                        this@CustomUIComponentStyleActivity, style
+                        this@CustomUIComponentStyleActivity,
+                        style
                     ).build()
                 )
                 cameraMode = CameraMode.TRACKING
                 isLocationComponentEnabled = true
             }
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).apply {
+            navigationMapboxMap = NavigationMapboxMap(
+                mapView,
+                mapboxMap,
+                this,
+                true
+            ).apply {
                 addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
                 addProgressChangeListener(mapboxNavigation)
                 setCamera(DynamicCamera(mapboxMap))
             }
 
             if (shouldSimulateRoute()) {
-                mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxNavigation
+                    .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 mapboxReplayer.pushRealLocation(this, 0.0)
                 mapboxReplayer.play()
             }
@@ -280,7 +290,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 showWayNameView()
                 navigationMapboxMap?.resetPadding()
-                navigationMapboxMap?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                navigationMapboxMap
+                    ?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             }
         }
 
@@ -338,27 +349,29 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun showLogoAndAttribution() {
-        summaryBottomSheet.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                navigationMapboxMap?.retrieveMap()?.uiSettings?.apply {
-                    val bottomMargin = summaryBottomSheet.measuredHeight
-                    setLogoMargins(
-                        logoMarginLeft,
-                        logoMarginTop,
-                        logoMarginRight,
-                        bottomMargin
-                    )
-                    setAttributionMargins(
-                        attributionMarginLeft,
-                        attributionMarginTop,
-                        attributionMarginRight,
-                        bottomMargin
-                    )
+        summaryBottomSheet.viewTreeObserver.addOnGlobalLayoutListener(
+            object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    navigationMapboxMap?.retrieveMap()?.uiSettings?.apply {
+                        val bottomMargin = summaryBottomSheet.measuredHeight
+                        setLogoMargins(
+                            logoMarginLeft,
+                            logoMarginTop,
+                            logoMarginRight,
+                            bottomMargin
+                        )
+                        setAttributionMargins(
+                            attributionMarginLeft,
+                            attributionMarginTop,
+                            attributionMarginRight,
+                            bottomMargin
+                        )
+                    }
+                    summaryBottomSheet.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
-                summaryBottomSheet.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
-        })
+        )
     }
 
     private fun initNavigation() {
@@ -415,7 +428,11 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
             )
             showFeedbackSentSnackBar(
                 context = this,
-                view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) recenterBtn else summaryBottomSheet,
+                view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                    recenterBtn
+                } else {
+                    summaryBottomSheet
+                },
                 setAnchorView = true
             )
         }
@@ -442,15 +459,28 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding
+                )
                 .toInt()
         val paddingBuffer =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding
+                )
                 .toInt()
         val instructionHeight =
-            (resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height) + paddingBuffer).toInt()
+            (
+                resources
+                    .getDimension(
+                        com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height
+                    ) + paddingBuffer
+                )
+                .toInt()
         val summaryHeight =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
+            resources
+                .getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
                 .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }
@@ -497,7 +527,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
 
-                    navigationMapboxMap?.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap
+                        ?.addOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
                     navigationMapboxMap?.updateWaynameQueryMap(true)
                 }
                 TripSessionState.STOPPED -> {
@@ -507,7 +538,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                         navigationMapboxMap?.hideRoute()
                     }
 
-                    navigationMapboxMap?.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
+                    navigationMapboxMap
+                        ?.removeOnWayNameChangedListener(this@CustomUIComponentStyleActivity)
                     navigationMapboxMap?.updateWaynameQueryMap(false)
 
                     updateCameraOnNavigationStateChange(false)

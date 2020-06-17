@@ -53,7 +53,10 @@ import timber.log.Timber
  * ONLY the Navigation SDK. There is no Navigation UI SDK code
  * of any kind in this example.
  */
-class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxMap.OnMapLongClickListener {
+class BasicNavSdkOnlyActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    MapboxMap.OnMapLongClickListener {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var mapboxMap: MapboxMap? = null
@@ -83,35 +86,56 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
 
             // Add the click and route sources
             it.addSource(GeoJsonSource("CLICK_SOURCE"))
-            it.addSource(GeoJsonSource("ROUTE_LINE_SOURCE_ID", GeoJsonOptions().withLineMetrics(true)))
+            it.addSource(
+                GeoJsonSource(
+                    "ROUTE_LINE_SOURCE_ID",
+                    GeoJsonOptions().withLineMetrics(true)
+                )
+            )
 
             // Add the destination marker image
-            it.addImage("ICON_ID", BitmapUtils.getBitmapFromDrawable(
-                    ContextCompat.getDrawable(this,
-                            R.drawable.mapbox_marker_icon_default))!!)
+            it.addImage(
+                "ICON_ID",
+                BitmapUtils.getBitmapFromDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.mapbox_marker_icon_default
+                    )
+                )!!
+            )
 
             // Add the LineLayer below the LocationComponent's bottom layer, which is the
             // circular accuracy layer. The LineLayer will display the directions route.
-            it.addLayerBelow(LineLayer("ROUTE_LAYER_ID", "ROUTE_LINE_SOURCE_ID")
+            it.addLayerBelow(
+                LineLayer("ROUTE_LAYER_ID", "ROUTE_LINE_SOURCE_ID")
                     .withProperties(
-                            lineCap(LINE_CAP_ROUND),
-                            lineJoin(LINE_JOIN_ROUND),
-                            lineWidth(6f),
-                            lineGradient(interpolate(
-                                    linear(), lineProgress(),
-                                    stop(0f, color(parseColor(ORIGIN_COLOR))),
-                                    stop(1f, color(parseColor(DESTINATION_COLOR)))
-                            ))), "mapbox-location-shadow-layer")
+                        lineCap(LINE_CAP_ROUND),
+                        lineJoin(LINE_JOIN_ROUND),
+                        lineWidth(6f),
+                        lineGradient(
+                            interpolate(
+                                linear(),
+                                lineProgress(),
+                                stop(0f, color(parseColor(ORIGIN_COLOR))),
+                                stop(1f, color(parseColor(DESTINATION_COLOR)))
+                            )
+                        )
+                    ),
+                "mapbox-location-shadow-layer"
+            )
 
             // Add the SymbolLayer to show the destination marker
-            it.addLayerAbove(SymbolLayer("CLICK_LAYER", "CLICK_SOURCE")
+            it.addLayerAbove(
+                SymbolLayer("CLICK_LAYER", "CLICK_SOURCE")
                     .withProperties(
-                            iconImage("ICON_ID")
-                    ), "ROUTE_LAYER_ID")
+                        iconImage("ICON_ID")
+                    ),
+                "ROUTE_LAYER_ID"
+            )
 
             mapboxMap.addOnMapLongClickListener(this)
             Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
-                    .show()
+                .show()
         }
     }
 
@@ -124,13 +148,13 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
         }
         mapboxMap?.locationComponent?.lastKnownLocation?.let { originLocation ->
             mapboxNavigation?.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                            .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                            .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                            .alternatives(true)
-                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                            .build(),
-                    routesReqCallback
+                RouteOptions.builder().applyDefaultParams()
+                    .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                    .coordinates(originLocation.toPoint(), null, latLng.toPoint())
+                    .alternatives(true)
+                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .build(),
+                routesReqCallback
             )
         }
         return true
@@ -139,16 +163,24 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
-                Snackbar.make(container, String.format(getString(R.string.steps_in_route),
-                        routes[0].legs()?.get(0)?.steps()?.size), LENGTH_SHORT).show()
+                Snackbar.make(
+                    container,
+                    String.format(
+                        getString(R.string.steps_in_route),
+                        routes[0].legs()?.get(0)?.steps()?.size
+                    ),
+                    LENGTH_SHORT
+                ).show()
 
                 // Update a gradient route LineLayer's source with the Maps SDK. This will
                 // visually add/update the line on the map. All of this is being done
                 // directly with Maps SDK code and NOT the Navigation UI SDK.
                 mapboxMap?.getStyle {
                     val clickPointSource = it.getSourceAs<GeoJsonSource>("ROUTE_LINE_SOURCE_ID")
-                    val routeLineString = LineString.fromPolyline(routes[0].geometry()!!,
-                            6)
+                    val routeLineString = LineString.fromPolyline(
+                        routes[0].geometry()!!,
+                        6
+                    )
                     clickPointSource?.setGeoJson(routeLineString)
                 }
                 route_retrieval_progress_spinner.visibility = INVISIBLE
@@ -174,9 +206,12 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
         mapboxMap?.getStyle {
             mapboxMap?.locationComponent?.apply {
                 activateLocationComponent(
-                        LocationComponentActivationOptions.builder(
-                                this@BasicNavSdkOnlyActivity, it)
-                                .build())
+                    LocationComponentActivationOptions.builder(
+                        this@BasicNavSdkOnlyActivity,
+                        it
+                    )
+                        .build()
+                )
                 isLocationComponentEnabled = true
                 cameraMode = CameraMode.TRACKING
                 renderMode = RenderMode.COMPASS

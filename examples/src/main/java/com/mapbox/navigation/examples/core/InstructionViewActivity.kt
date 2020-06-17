@@ -59,18 +59,20 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
+import okhttp3.Cache
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
-import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
-import okhttp3.Cache
 
 /**
  * This activity shows how to integrate the Navigation UI SDK's
  * InstructionView, FeedbackButton, and SoundButton with
  * the Navigation SDK.
  */
-class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
+class InstructionViewActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
     FeedbackBottomSheetListener {
 
     private var mapboxNavigation: MapboxNavigation? = null

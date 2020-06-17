@@ -44,19 +44,22 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_reroute_layout.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
+import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to:
  * - observe reroute events with the Navigation SDK's [RoutesObserver];
  * - replace default [RerouteController] and handle re-route events.
  */
-class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserver,
+class ReRouteActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    OffRouteObserver,
     RerouteController.RerouteStateObserver {
 
     companion object {
@@ -360,40 +363,42 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
                 .steps(true)
                 .build()
 
-            mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
-                override fun onResponse(
-                    call: Call<DirectionsResponse>,
-                    response: Response<DirectionsResponse>
-                ) {
-                    mainHandler.post {
-                        val routes = response.body()?.routes()
-                        when {
-                            call.isCanceled -> {
-                                state = RerouteState.Interrupted
+            mapboxDirections?.enqueueCall(
+                object : Callback<DirectionsResponse> {
+                    override fun onResponse(
+                        call: Call<DirectionsResponse>,
+                        response: Response<DirectionsResponse>
+                    ) {
+                        mainHandler.post {
+                            val routes = response.body()?.routes()
+                            when {
+                                call.isCanceled -> {
+                                    state = RerouteState.Interrupted
+                                }
+                                response.isSuccessful && !routes.isNullOrEmpty() -> {
+                                    state = RerouteState.RouteFetched
+                                    routesCallback.onNewRoutes(routes)
+                                }
+                                else -> {
+                                    state = RerouteState.Failed("Reroute request is empty")
+                                }
                             }
-                            response.isSuccessful && !routes.isNullOrEmpty() -> {
-                                state = RerouteState.RouteFetched
-                                routesCallback.onNewRoutes(routes)
-                            }
-                            else -> {
-                                state = RerouteState.Failed("Reroute request is empty")
-                            }
+                            state = RerouteState.Idle
                         }
-                        state = RerouteState.Idle
                     }
-                }
 
-                override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
-                    mainHandler.post {
-                        state = if (call.isCanceled) {
-                            RerouteState.Interrupted
-                        } else {
-                            RerouteState.Failed("Reroute request failed", t)
+                    override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                        mainHandler.post {
+                            state = if (call.isCanceled) {
+                                RerouteState.Interrupted
+                            } else {
+                                RerouteState.Failed("Reroute request failed", t)
+                            }
+                            state = RerouteState.Idle
                         }
-                        state = RerouteState.Idle
                     }
                 }
-            })
+            )
         }
 
         override fun interrupt() {
@@ -403,12 +408,16 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
             }
         }
 
-        override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun registerRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             rerouteStateObserver.onRerouteStateChanged(state)
             return stateObservers.add(rerouteStateObserver)
         }
 
-        override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun unregisterRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             return stateObservers.remove(rerouteStateObserver)
         }
     }

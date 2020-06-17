@@ -54,7 +54,9 @@ class OnboardRouterOptions private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "OnboardRouterOptions(tilesUri=$tilesUri, tilesVersion='$tilesVersion', filePath=$filePath)"
+        return "OnboardRouterOptions(" +
+            "tilesUri=$tilesUri, tilesVersion='$tilesVersion', filePath=$filePath" +
+            ")"
     }
 
     /**

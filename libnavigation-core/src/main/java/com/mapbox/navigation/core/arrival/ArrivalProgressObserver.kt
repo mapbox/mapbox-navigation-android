@@ -63,7 +63,8 @@ internal class ArrivalProgressObserver(
             checkWaypointArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
         }
         if (!hasMoreLegs) {
-            finalDestinationArrived = routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
+            finalDestinationArrived =
+                routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
         }
     }
 
@@ -73,13 +74,19 @@ internal class ArrivalProgressObserver(
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
-    private fun checkWaypointArrivalTime(arrivalInSeconds: Double, routeLegProgress: RouteLegProgress) {
+    private fun checkWaypointArrivalTime(
+        arrivalInSeconds: Double,
+        routeLegProgress: RouteLegProgress
+    ) {
         if (routeLegProgress.durationRemaining <= arrivalInSeconds) {
             doOnWaypointArrival(routeLegProgress)
         }
     }
 
-    private fun checkWaypointArrivalDistance(arrivalInMeters: Double, routeLegProgress: RouteLegProgress) {
+    private fun checkWaypointArrivalDistance(
+        arrivalInMeters: Double,
+        routeLegProgress: RouteLegProgress
+    ) {
         if (routeLegProgress.distanceRemaining <= arrivalInMeters) {
             doOnWaypointArrival(routeLegProgress)
         }

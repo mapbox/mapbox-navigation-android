@@ -32,9 +32,9 @@ internal class BuildingLayerSupport {
      */
     fun getBuildingFilterExpression(buildingString: String): Expression {
         return all(
-                eq(get("extrude"), "true"),
-                eq(get("underground"), "false"),
-                eq(toString(id()), toString(literal(buildingString)))
+            eq(get("extrude"), "true"),
+            eq(get("underground"), "false"),
+            eq(toString(id()), toString(literal(buildingString)))
         )
     }
 
@@ -50,7 +50,11 @@ internal class BuildingLayerSupport {
      */
     fun getBuildingId(mapboxMap: MapboxMap, queryLatLng: LatLng?): String {
         queryLatLng?.let { queryCoordinate ->
-            val renderedBuildingFootprintFeatures = mapboxMap.queryRenderedFeatures(mapboxMap.projection.toScreenLocation(queryCoordinate), BUILDING_LAYER_ID)
+            val renderedBuildingFootprintFeatures =
+                mapboxMap.queryRenderedFeatures(
+                    mapboxMap.projection.toScreenLocation(queryCoordinate),
+                    BUILDING_LAYER_ID
+                )
             if (renderedBuildingFootprintFeatures.isNotEmpty()) {
                 renderedBuildingFootprintFeatures[0].id()?.let {
                     return it
@@ -63,7 +67,11 @@ internal class BuildingLayerSupport {
     /**
      * Sets a new property on a specified layer
      */
-    fun updateLayerProperty(propertyValueToSet: PropertyValue<*>?, mapboxMap: MapboxMap, layerId: String) {
+    fun updateLayerProperty(
+        propertyValueToSet: PropertyValue<*>?,
+        mapboxMap: MapboxMap,
+        layerId: String
+    ) {
         mapboxMap.getStyle { style ->
             val mapLayer = style.getLayerAs<Layer>(layerId)
             mapLayer?.setProperties(propertyValueToSet)

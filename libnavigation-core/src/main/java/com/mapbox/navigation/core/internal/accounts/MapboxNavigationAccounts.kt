@@ -13,7 +13,8 @@ import com.mapbox.navigation.core.accounts.Billing
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */
-class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider,
+class MapboxNavigationAccounts private constructor() :
+    UrlSkuTokenProvider,
     SkuTokenProvider {
 
     companion object {
