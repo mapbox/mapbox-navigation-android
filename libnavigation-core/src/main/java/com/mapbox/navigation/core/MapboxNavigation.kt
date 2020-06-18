@@ -681,7 +681,8 @@ constructor(
             @FeedbackEvent.Source feedbackSource: String,
             screenshot: String?,
             feedbackSubType: Array<String>? = emptyArray()
-        ) { MapboxNavigationTelemetry.postUserFeedback(
+        ) {
+            MapboxNavigationTelemetry.postUserFeedback(
                 feedbackType,
                 description,
                 feedbackSource,

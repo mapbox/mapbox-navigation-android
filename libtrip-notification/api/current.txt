@@ -9,7 +9,7 @@ package com.mapbox.navigation.trip.notification {
     method public int getNotificationId();
     method public void onTripSessionStarted();
     method public void onTripSessionStopped();
-    method public void updateNotification(com.mapbox.navigation.base.trip.model.RouteProgress routeProgress);
+    method public void updateNotification(com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress);
     property public final String? currentManeuverModifier;
     property public final String? currentManeuverType;
     field public static final com.mapbox.navigation.trip.notification.MapboxTripNotification.Companion! Companion;

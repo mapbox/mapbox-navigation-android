@@ -53,6 +53,7 @@ class MapOfflineManager implements RouteProgressObserver {
     Geometry currentRouteGeometry = routeProgress.getRouteGeometryWithBuffer();
     if (previousRouteGeometry == null || !previousRouteGeometry.equals(currentRouteGeometry)) {
       previousRouteGeometry = currentRouteGeometry;
+      // TODO Method invocation 'requestUuid' may produce 'NullPointerException'
       String routeSummary = routeProgress.getRoute().routeOptions().requestUuid();
       download(routeSummary, previousRouteGeometry, regionDownloadCallback);
     }

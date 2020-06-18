@@ -78,10 +78,10 @@ internal class MapRouteProgressChangeListener(
             routeArrow.addUpcomingManeuverArrow(routeProgress)
         }
         val currentRoute = routeProgress.route
-        val hasGeometry = currentRoute?.geometry()?.isNotEmpty() ?: false
+        val hasGeometry = currentRoute.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
             vanishingLineAnimator?.cancel()
-            routeLine.draw(currentRoute!!)
+            routeLine.draw(currentRoute)
             this.lastDistanceValue = routeLine.vanishPointOffset
         } else {
             // if there is no geometry then the session is in free drive and the vanishing

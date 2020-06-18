@@ -329,12 +329,11 @@ class MapboxTripNotificationTest {
 
     @Test
     fun whenFreeDrive() {
-        val routeProgress = mockk<RouteProgress>(relaxed = true)
-        every { routeProgress.route } returns null
+        val nullRouteProgress = null
         mockUpdateNotificationAndroidInteractions()
 
         notification.onTripSessionStarted()
-        notification.updateNotification(routeProgress)
+        notification.updateNotification(nullRouteProgress)
 
         verify(exactly = 0) { expandedViews.setTextViewText(any(), END_NAVIGATION) }
         verify(exactly = 1) { expandedViews.setTextViewText(any(), STOP_SESSION) }

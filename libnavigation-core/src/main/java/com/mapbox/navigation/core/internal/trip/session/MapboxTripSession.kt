@@ -448,18 +448,20 @@ class MapboxTripSession(
         locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
     }
 
-    private fun updateRouteProgress(progress: RouteProgress) {
+    private fun updateRouteProgress(progress: RouteProgress?) {
         routeProgress = progress
         tripService.updateNotification(progress)
-        routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
-        checkBannerInstructionEvent(progress) { bannerInstruction ->
-            bannerInstructionsObservers.forEach {
-                it.onNewBannerInstructions(bannerInstruction)
+        progress?.let {
+            routeProgressObservers.forEach { it.onRouteProgressChanged(progress) }
+            checkBannerInstructionEvent(progress) { bannerInstruction ->
+                bannerInstructionsObservers.forEach {
+                    it.onNewBannerInstructions(bannerInstruction)
+                }
             }
-        }
-        checkVoiceInstructionEvent(progress) { voiceInstruction ->
-            voiceInstructionsObservers.forEach {
-                it.onNewVoiceInstructions(voiceInstruction)
+            checkVoiceInstructionEvent(progress) { voiceInstruction ->
+                voiceInstructionsObservers.forEach {
+                    it.onNewVoiceInstructions(voiceInstruction)
+                }
             }
         }
     }

@@ -35,7 +35,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import java.lang.Exception
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -43,6 +42,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -266,6 +266,28 @@ class MapboxTripSessionTest {
 
         verify { observer.onRouteProgressChanged(routeProgress) }
         assertEquals(routeProgress, tripSession.getRouteProgress())
+        tripSession.stop()
+    }
+
+    @Test
+    fun routeProgressObserverNotCalledWhenInFreeDrive() = coroutineRule.runBlockingTest {
+        every { tripStatus.routeProgress } returns null
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            locationEngineRequest,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger
+        )
+        tripSession.start()
+        val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
+        tripSession.registerRouteProgressObserver(observer)
+        updateLocationAndJoin()
+
+        verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
+        assertNull(tripSession.getRouteProgress())
         tripSession.stop()
     }
 

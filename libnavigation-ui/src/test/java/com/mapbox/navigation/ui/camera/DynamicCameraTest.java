@@ -25,9 +25,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,7 +49,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double zoom = cameraEngine.zoom(routeInformation);
 
-    assertEquals(15d, zoom);
+    assertEquals(15d, zoom, 0.1);
   }
 
   @Test
@@ -61,7 +60,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double defaultZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(15d, defaultZoom);
+    assertEquals(15d, defaultZoom, 0.1);
   }
 
   @Test
@@ -77,7 +76,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(16d, maxCameraZoom);
+    assertEquals(16d, maxCameraZoom, 0.1);
   }
 
   @Test
@@ -93,7 +92,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(12d, maxCameraZoom);
+    assertEquals(12d, maxCameraZoom, 0.1);
   }
 
   @Test
@@ -109,7 +108,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double maxCameraZoom = theCameraEngine.zoom(anyRouteInformation);
 
-    assertEquals(14d, maxCameraZoom);
+    assertEquals(14d, maxCameraZoom, 0.1);
   }
 
   @Test
@@ -120,7 +119,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double zoom = cameraEngine.zoom(routeInformation);
 
-    assertEquals(15d, zoom);
+    assertEquals(15d, zoom, 0.1);
   }
 
   @Test
@@ -130,7 +129,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(50d, tilt);
+    assertEquals(50d, tilt, 0.1);
   }
 
   @Test
@@ -141,7 +140,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(60d, tilt);
+    assertEquals(60d, tilt, 0.1);
   }
 
   @Test
@@ -152,7 +151,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt);
+    assertEquals(45d, tilt, 0.1);
   }
 
   @Test
@@ -163,7 +162,7 @@ public class DynamicCameraTest extends BaseTest {
 
     double tilt = cameraEngine.tilt(routeInformation);
 
-    assertEquals(45d, tilt);
+    assertEquals(45d, tilt, 0.1);
   }
 
   @Test
@@ -197,7 +196,7 @@ public class DynamicCameraTest extends BaseTest {
 
     List<Point> overviewPoints = cameraEngine.overview(routeInformation);
 
-    assertTrue(overviewPoints.isEmpty());
+    assertEquals(true, overviewPoints.isEmpty());
   }
 
   @Nullable
@@ -241,7 +240,7 @@ public class DynamicCameraTest extends BaseTest {
   }
 
   private List<Point> generateRouteCoordinates(DirectionsRoute route) {
-    if (route == null) {
+    if (route.geometry() == null) {
       return Collections.emptyList();
     }
     LineString lineString = LineString.fromPolyline(route.geometry(), Constants.PRECISION_6);

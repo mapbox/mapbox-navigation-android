@@ -145,7 +145,7 @@ class MapboxTripNotification constructor(
      *
      * @param routeProgress with the latest progress data
      */
-    override fun updateNotification(routeProgress: RouteProgress) {
+    override fun updateNotification(routeProgress: RouteProgress?) {
         // RemoteView has an internal mActions, which stores every change and cannot be cleared.
         // As we set new bitmaps, the mActions parcelable size will grow and eventually cause a crash.
         // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
@@ -296,8 +296,8 @@ class MapboxTripNotification constructor(
         }
     }
 
-    private fun updateNotificationViews(routeProgress: RouteProgress) {
-        routeProgress.route?.let {
+    private fun updateNotificationViews(routeProgress: RouteProgress?) {
+        routeProgress?.let {
             updateInstructionText(routeProgress.bannerInstructions)
             updateDistanceText(routeProgress)
             generateArrivalTime(routeProgress)?.let { formattedTime ->

@@ -64,7 +64,7 @@ internal class ArrivalProgressObserver(
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
         val currentLegIndex = routeProgress.currentLegProgress?.legIndex
-        val lastLegIndex = routeProgress.route?.legs()?.lastIndex
+        val lastLegIndex = routeProgress.route.legs()?.lastIndex
         return (currentLegIndex != null && lastLegIndex != null) && currentLegIndex < lastLegIndex
     }
 
