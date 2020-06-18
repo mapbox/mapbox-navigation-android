@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.internal
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Typeface
 import android.text.SpannableString
@@ -208,7 +209,7 @@ class MapboxDistanceFormatter private constructor(
     }
 
     private fun Context.resourcesWithLocale(locale: Locale?): Resources {
-        val config = this.resources.configuration.also {
+        val config = Configuration(this.resources.configuration).also {
             it.setLocale(locale)
         }
         return this.createConfigurationContext(config).resources
