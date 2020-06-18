@@ -52,6 +52,7 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.instruction.NavigationAlertView
+import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
@@ -285,7 +286,9 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         screenshotView.visibility = VISIBLE
         screenshotView.setImageBitmap(snapshot)
         mapView.visibility = View.INVISIBLE
-        val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
+        val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView),
+                BitmapEncodeOptions.Builder()
+                        .width(400).compressQuality(40).build())
         screenshotView.visibility = View.INVISIBLE
         mapView.visibility = VISIBLE
         return encodedSnapshot
