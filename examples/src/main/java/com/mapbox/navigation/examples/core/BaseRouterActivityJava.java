@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +13,8 @@ import androidx.core.content.ContextCompat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -117,6 +120,9 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   @BindView(R.id.mapView)
   MapView mapView;
 
+  @BindView(R.id.newLocationFab)
+  FloatingActionButton newLocationFab;
+
   abstract Router setupRouter();
 
   @Override
@@ -141,12 +147,10 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
   }
 
   private void newOrigin() {
-    if (mapboxMap != null) {
-      clearMap();
-      LatLng latLng = Utils.getRandomLatLng(new double[] { -77.1825, 38.7825, -76.9790, 39.0157 });
-      origin = Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-    }
+    clearMap();
+    LatLng latLng = Utils.getRandomLatLng(new double[] { -77.1825, 38.7825, -76.9790, 39.0157 });
+    origin = Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
+    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
   }
 
   @Override
@@ -155,6 +159,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
     MapboxLogger.INSTANCE.d(new Message("Map is ready"));
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       MapboxLogger.INSTANCE.d(new Message("Style setting finished"));
+      newLocationFab.setVisibility(View.VISIBLE);
       Drawable image = ContextCompat.getDrawable(this, R.drawable.mapbox_marker_icon_default);
       style.addImage(MARKER_ROUTE, image);
       navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this).build();
