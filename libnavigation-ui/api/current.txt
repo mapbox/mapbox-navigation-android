@@ -46,7 +46,6 @@ package com.mapbox.navigation.ui {
     field public static final long ALERT_VIEW_PROBLEM_DURATION = 10000L; // 0x2710L
     field public static final long FEEDBACK_BOTTOM_SHEET_DURATION = 10000L; // 0x2710L
     field public static final com.mapbox.navigation.ui.NavigationConstants! INSTANCE;
-    field public static final long MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE = 250L; // 0xfaL
     field public static final int NAVIGATION_HIGH_ALERT_DURATION = 15; // 0xf
     field public static final int NAVIGATION_LOW_ALERT_DURATION = 125; // 0x7d
     field public static final long NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L; // 0x5dcL
