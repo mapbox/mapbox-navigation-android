@@ -1023,7 +1023,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     stepSecondaryText.setVisibility(GONE);
     adjustBannerTextVerticalBias(0.5f);
 
-    if (ViewUtils.isLandscape(getContext())) {
+    if (ViewUtils.isLandscape(getContext()) && instructionLayoutText.getWidth() > 0) {
       stepPrimaryText.setMaxWidth(instructionLayoutText.getWidth());
     }
     loadTextWith(primaryBannerText, stepPrimaryText);
@@ -1037,13 +1037,18 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (ViewUtils.isLandscape(getContext())) {
       int primaryTextMaxWidth = (int) (instructionLayoutText.getWidth()
           * MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE);
-      stepPrimaryText.setMaxWidth(primaryTextMaxWidth);
+      if (primaryTextMaxWidth > 0) {
+        stepPrimaryText.setMaxWidth(primaryTextMaxWidth);
+      }
     }
     loadTextWith(primaryBannerText, stepPrimaryText);
 
     if (ViewUtils.isLandscape(getContext())) {
-      int primaryTextWidth = (int) stepPrimaryText.getPaint().measureText(String.valueOf(stepPrimaryText.getText()));
-      stepSecondaryText.setMaxWidth(instructionLayoutText.getWidth() - primaryTextWidth);
+      int secondaryTextMaxWidth = instructionLayoutText.getWidth()
+          - (int) stepPrimaryText.getPaint().measureText(String.valueOf(stepPrimaryText.getText()));
+      if (secondaryTextMaxWidth > 0) {
+        stepSecondaryText.setMaxWidth(secondaryTextMaxWidth);
+      }
     }
     loadTextWith(secondaryBannerText, stepSecondaryText);
   }
