@@ -24,7 +24,7 @@ interface TripService {
     /**
      * Update the trip's information in the notification bar
      */
-    fun updateNotification(routeProgress: RouteProgress)
+    fun updateNotification(routeProgress: RouteProgress?)
 
     /**
      * Return *true* if service is started

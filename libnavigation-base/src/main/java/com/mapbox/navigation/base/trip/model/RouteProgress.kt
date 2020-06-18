@@ -38,7 +38,7 @@ import com.mapbox.geojson.Point
  * @param remainingWaypoints [Int] number of waypoints remaining on the current route.
  */
 data class RouteProgress(
-    val route: DirectionsRoute?,
+    val route: DirectionsRoute,
     val routeGeometryWithBuffer: Geometry?,
     val bannerInstructions: BannerInstructions?,
     val voiceInstructions: VoiceInstructions?,
@@ -72,6 +72,8 @@ data class RouteProgress(
 
         /**
          * [DirectionsRoute] currently is used for the navigation session
+         *
+         * This is required in order to build a [RouteProgress]
          *
          * @return Builder
          */
@@ -184,10 +186,11 @@ data class RouteProgress(
          * Build new instance of [RouteProgress]
          *
          * @return RouteProgress
+         * @throws IllegalStateException if [DirectionsRoute] is not provided
          */
         fun build(): RouteProgress {
             return RouteProgress(
-                directionsRoute,
+                requireNotNull(directionsRoute) { "DirectionsRoute is required to build a RouteProgress." },
                 routeGeometryWithBuffer,
                 bannerInstructions,
                 voiceInstructions,

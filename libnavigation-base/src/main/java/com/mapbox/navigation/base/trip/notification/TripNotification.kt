@@ -36,7 +36,7 @@ interface TripNotification {
      *
      * @param routeProgress with the latest progress data
      */
-    fun updateNotification(routeProgress: RouteProgress)
+    fun updateNotification(routeProgress: RouteProgress?)
 
     /**
      * Callback for when trip session is started via [TripSession.start].

@@ -628,7 +628,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             sessionIdentifier = dynamicValues.sessionId
             tripIdentifier = dynamicValues.tripIdentifier.get()
             originalRequestIdentifier = callbackDispatcher.getOriginalRouteReadOnly()?.route?.routeOptions()?.requestUuid()
-            requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.requestUuid()
+            requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route.routeOptions()?.requestUuid()
             mockLocation = locationEngineName == MOCK_PROVIDER
             rerouteCount = dynamicValues.rerouteCount.get()
             startTimestamp = dynamicValues.sessionStartTime
@@ -645,10 +645,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         navigationEvent.startTimestamp = TelemetryUtils.generateCreateDateFormatted(dynamicValues.sessionStartTime)
         navigationEvent.sdkIdentifier = generateSdkIdentifier()
         navigationEvent.sessionIdentifier = dynamicValues.sessionId
-        navigationEvent.geometry = callbackDispatcher.getRouteProgress().routeProgress.route?.geometry()
-        navigationEvent.profile = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.profile()
+        navigationEvent.geometry = callbackDispatcher.getRouteProgress().routeProgress.route.geometry()
+        navigationEvent.profile = callbackDispatcher.getRouteProgress().routeProgress.route.routeOptions()?.profile()
         navigationEvent.originalRequestIdentifier = callbackDispatcher.getOriginalRouteReadOnly()?.route?.routeOptions()?.requestUuid()
-        navigationEvent.requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route?.routeOptions()?.requestUuid()
+        navigationEvent.requestIdentifier = callbackDispatcher.getRouteProgress().routeProgress.route.routeOptions()?.requestUuid()
         navigationEvent.originalGeometry = callbackDispatcher.getOriginalRouteReadOnly()?.route?.geometry()
         navigationEvent.locationEngine = locationEngineNameExternal
         navigationEvent.tripIdentifier = TelemetryUtils.obtainUniversalUniqueIdentifier()
@@ -669,8 +669,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         navigationEvent.originalEstimatedDuration = callbackDispatcher.getOriginalRouteReadOnly()?.route?.duration()?.toInt() ?: 0
         navigationEvent.stepCount = obtainStepCount(callbackDispatcher.getRouteProgress().routeProgress.route)
         navigationEvent.originalStepCount = obtainStepCount(callbackDispatcher.getOriginalRouteReadOnly()?.route)
-        navigationEvent.legIndex = callbackDispatcher.getRouteProgress().routeProgress.route?.routeIndex()?.toInt() ?: 0
-        navigationEvent.legCount = callbackDispatcher.getRouteProgress().routeProgress.route?.legs()?.size ?: 0
+        navigationEvent.legIndex = callbackDispatcher.getRouteProgress().routeProgress.route.routeIndex()?.toInt() ?: 0
+        navigationEvent.legCount = callbackDispatcher.getRouteProgress().routeProgress.route.legs()?.size ?: 0
         navigationEvent.stepIndex = callbackDispatcher.getRouteProgress().routeProgress.currentLegProgress?.currentStepProgress?.stepIndex ?: 0
 
         // TODO:OZ voiceIndex is not available in SDK 1.0 and was not set in the legacy telemetry        navigationEvent.voiceIndex

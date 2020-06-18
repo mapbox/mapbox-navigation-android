@@ -317,126 +317,127 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
      */
-    private fun NavigationStatus.getRouteProgress(): RouteProgress {
-        val upcomingStepIndex = stepIndex + ONE_INDEX
+    private fun NavigationStatus.getRouteProgress(): RouteProgress? {
+        route?.let { route ->
+            val upcomingStepIndex = stepIndex + ONE_INDEX
 
-        val routeProgressBuilder = RouteProgress.Builder()
-        val legProgressBuilder = RouteLegProgress.Builder()
-        val stepProgressBuilder = RouteStepProgress.Builder()
+            val routeProgressBuilder = RouteProgress.Builder()
+            val legProgressBuilder = RouteLegProgress.Builder()
+            val stepProgressBuilder = RouteStepProgress.Builder()
 
-        ifNonNull(route?.legs()) { legs ->
-            var currentLeg: RouteLeg? = null
-            if (legIndex < legs.size) {
-                currentLeg = legs[legIndex]
-                legProgressBuilder.legIndex(legIndex)
-                legProgressBuilder.routeLeg(currentLeg)
+            ifNonNull(route.legs()) { legs ->
+                var currentLeg: RouteLeg? = null
+                if (legIndex < legs.size) {
+                    currentLeg = legs[legIndex]
+                    legProgressBuilder.legIndex(legIndex)
+                    legProgressBuilder.routeLeg(currentLeg)
 
-                // todo mapbox java issue - leg distance is nullable
-                val distanceTraveled =
-                    (currentLeg.distance()?.toFloat() ?: 0f) - remainingLegDistance
-                legProgressBuilder.distanceTraveled(distanceTraveled)
-                legProgressBuilder.fractionTraveled(
-                    distanceTraveled / (currentLeg.distance()?.toFloat() ?: 0f)
-                )
-
-                var routeDistanceRemaining = remainingLegDistance
-                var routeDurationRemaining = remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
-                if (legs.size >= TWO_LEGS) {
-                    for (i in legIndex + ONE_INDEX until legs.size) {
-                        routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
-                        routeDurationRemaining += legs[i].duration() ?: 0.0
-                    }
-                }
-                routeProgressBuilder.distanceRemaining(routeDistanceRemaining)
-                routeProgressBuilder.durationRemaining(routeDurationRemaining)
-
-                var routeDistance = 0f
-                for (leg in legs) {
-                    routeDistance += leg.distance()?.toFloat() ?: 0f
-                }
-                val routeDistanceTraveled = routeDistance - routeDistanceRemaining
-                routeProgressBuilder.distanceTraveled(routeDistanceTraveled)
-                routeProgressBuilder.fractionTraveled(routeDistanceTraveled / routeDistance)
-
-                routeProgressBuilder.remainingWaypoints(legs.size - (legIndex + 1))
-            }
-
-            ifNonNull(currentLeg?.steps()) { steps ->
-                val currentStep: LegStep?
-                if (stepIndex < steps.size) {
-                    currentStep = steps[stepIndex]
-                    stepProgressBuilder.stepIndex(stepIndex)
-                    stepProgressBuilder.step(currentStep)
-
-                    currentStep?.distance()
-                    val stepGeometry = currentStep.geometry()
-                    stepGeometry?.let {
-                        stepProgressBuilder.stepPoints(
-                            PolylineUtils.decode(
-                                stepGeometry, /* todo add core dependency PRECISION_6*/
-                                6
-                            )
-                        )
-                    }
-
+                    // todo mapbox java issue - leg distance is nullable
                     val distanceTraveled =
-                        currentStep.distance().toFloat() - remainingStepDistance
-                    stepProgressBuilder.distanceTraveled(distanceTraveled)
-                    stepProgressBuilder.fractionTraveled(distanceTraveled / currentStep.distance().toFloat())
+                        (currentLeg.distance()?.toFloat() ?: 0f) - remainingLegDistance
+                    legProgressBuilder.distanceTraveled(distanceTraveled)
+                    legProgressBuilder.fractionTraveled(
+                        distanceTraveled / (currentLeg.distance()?.toFloat() ?: 0f)
+                    )
 
-                    routeState.convertState().let {
-                        routeProgressBuilder.currentState(it)
-
-                        var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
-                        if (it == RouteProgressState.ROUTE_INITIALIZED) {
-                            bannerInstructions =
-                                getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi(
-                                    currentStep
-                                )
+                    var routeDistanceRemaining = remainingLegDistance
+                    var routeDurationRemaining = remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
+                    if (legs.size >= TWO_LEGS) {
+                        for (i in legIndex + ONE_INDEX until legs.size) {
+                            routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
+                            routeDurationRemaining += legs[i].duration() ?: 0.0
                         }
-                        routeProgressBuilder.bannerInstructions(bannerInstructions)
                     }
-                    ifNonNull(currentStep.bannerInstructions()) {
-                        stepProgressBuilder.guidanceViewURL(getGuidanceViewUrl(it))
+                    routeProgressBuilder.distanceRemaining(routeDistanceRemaining)
+                    routeProgressBuilder.durationRemaining(routeDurationRemaining)
+
+                    var routeDistance = 0f
+                    for (leg in legs) {
+                        routeDistance += leg.distance()?.toFloat() ?: 0f
                     }
+                    val routeDistanceTraveled = routeDistance - routeDistanceRemaining
+                    routeProgressBuilder.distanceTraveled(routeDistanceTraveled)
+                    routeProgressBuilder.fractionTraveled(routeDistanceTraveled / routeDistance)
+
+                    routeProgressBuilder.remainingWaypoints(legs.size - (legIndex + 1))
                 }
 
-                if (upcomingStepIndex < steps.size) {
-                    val upcomingStep = steps[upcomingStepIndex]
-                    legProgressBuilder.upcomingStep(upcomingStep)
+                ifNonNull(currentLeg?.steps()) { steps ->
+                    val currentStep: LegStep?
+                    if (stepIndex < steps.size) {
+                        currentStep = steps[stepIndex]
+                        stepProgressBuilder.stepIndex(stepIndex)
+                        stepProgressBuilder.step(currentStep)
 
-                    val stepGeometry = upcomingStep.geometry()
-                    stepGeometry?.let {
-                        routeProgressBuilder.upcomingStepPoints(
-                            PolylineUtils.decode(
-                                stepGeometry, /* todo add core dependency PRECISION_6*/
-                                6
+                        currentStep?.distance()
+                        val stepGeometry = currentStep.geometry()
+                        stepGeometry?.let {
+                            stepProgressBuilder.stepPoints(
+                                PolylineUtils.decode(
+                                    stepGeometry, /* todo add core dependency PRECISION_6*/
+                                    6
+                                )
                             )
-                        )
+                        }
+
+                        val distanceTraveled =
+                            currentStep.distance().toFloat() - remainingStepDistance
+                        stepProgressBuilder.distanceTraveled(distanceTraveled)
+                        stepProgressBuilder.fractionTraveled(distanceTraveled / currentStep.distance().toFloat())
+
+                        routeState.convertState().let {
+                            routeProgressBuilder.currentState(it)
+
+                            var bannerInstructions = bannerInstruction?.mapToDirectionsApi(currentStep)
+                            if (it == RouteProgressState.ROUTE_INITIALIZED) {
+                                bannerInstructions =
+                                    getBannerInstruction(FIRST_BANNER_INSTRUCTION)?.mapToDirectionsApi(
+                                        currentStep
+                                    )
+                            }
+                            routeProgressBuilder.bannerInstructions(bannerInstructions)
+                        }
+                        ifNonNull(currentStep.bannerInstructions()) {
+                            stepProgressBuilder.guidanceViewURL(getGuidanceViewUrl(it))
+                        }
+                    }
+
+                    if (upcomingStepIndex < steps.size) {
+                        val upcomingStep = steps[upcomingStepIndex]
+                        legProgressBuilder.upcomingStep(upcomingStep)
+
+                        val stepGeometry = upcomingStep.geometry()
+                        stepGeometry?.let {
+                            routeProgressBuilder.upcomingStepPoints(
+                                PolylineUtils.decode(
+                                    stepGeometry, /* todo add core dependency PRECISION_6*/
+                                    6
+                                )
+                            )
+                        }
                     }
                 }
             }
+
+            stepProgressBuilder.distanceRemaining(remainingStepDistance)
+            stepProgressBuilder.durationRemaining(remainingStepDuration / ONE_SECOND_IN_MILLISECONDS)
+
+            legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
+            legProgressBuilder.distanceRemaining(remainingLegDistance)
+            legProgressBuilder.durationRemaining(remainingLegDuration / ONE_SECOND_IN_MILLISECONDS)
+
+            routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
+
+            routeProgressBuilder.inTunnel(inTunnel)
+            routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
+
+            routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
+
+            routeProgressBuilder.route(route)
+
+            return routeProgressBuilder.build()
         }
-
-        stepProgressBuilder.distanceRemaining(remainingStepDistance)
-        stepProgressBuilder.durationRemaining(remainingStepDuration / ONE_SECOND_IN_MILLISECONDS)
-
-        legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
-        legProgressBuilder.distanceRemaining(remainingLegDistance)
-        legProgressBuilder.durationRemaining(remainingLegDuration / ONE_SECOND_IN_MILLISECONDS)
-
-        routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
-
-        routeProgressBuilder.inTunnel(inTunnel)
-        routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
-
-        routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
-
-        ifNonNull(route) {
-            routeProgressBuilder.route(it)
-        }
-
-        return routeProgressBuilder.build()
+        return null
     }
 
     private fun getGuidanceViewUrl(bannerInstructions: List<BannerInstructions>): String? {

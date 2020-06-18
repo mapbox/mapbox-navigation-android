@@ -14,9 +14,6 @@ import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
-import com.mapbox.navigation.base.trip.model.RouteLegProgress
-import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.core.Rounding
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
@@ -183,17 +180,7 @@ class TripServiceActivityKt : AppCompatActivity(), OnMapReadyCallback {
             while (isActive) {
                 val text = "Time elapsed: + ${SystemClock.elapsedRealtime()}"
                 notifyTextView.text = text
-                mapboxTripService.updateNotification(
-                    RouteProgress.Builder()
-                        .currentLegProgress(
-                            RouteLegProgress.Builder()
-                                .currentStepProgress(
-                                    RouteStepProgress.Builder()
-                                        .distanceRemaining(100f)
-                                        .build()
-                                ).build()
-                        ).build()
-                )
+                mapboxTripService.updateNotification(null)
                 Timber.i(text)
                 delay(1000L)
             }

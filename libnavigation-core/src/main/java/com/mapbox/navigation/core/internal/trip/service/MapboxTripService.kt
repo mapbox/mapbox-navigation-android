@@ -132,7 +132,7 @@ class MapboxTripService(
     /**
      * Update the trip's information in the notification bar
      */
-    override fun updateNotification(routeProgress: RouteProgress) {
+    override fun updateNotification(routeProgress: RouteProgress?) {
         tripNotification.updateNotification(routeProgress)
     }
 
