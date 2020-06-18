@@ -85,6 +85,9 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   @BindView(R.id.startRouteButton)
   Button startRouteButton;
 
+  @BindView(R.id.newLocationFab)
+  Button newLocationFab;
+
   private MapboxMap mapboxMap;
 
   // Navigation related variables
@@ -176,13 +179,11 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void newOrigin() {
-    if (mapboxMap != null) {
-      LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
-      ((ReplayRouteLocationEngine) locationEngine).assignLastLocation(
-        Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
-      );
-      mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-    }
+    LatLng latLng = Utils.getRandomLatLng(new double[] {-77.1825, 38.7825, -76.9790, 39.0157});
+    ((ReplayRouteLocationEngine) locationEngine).assignLastLocation(
+      Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())
+    );
+    mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
   }
 
   @SuppressLint("MissingPermission")
@@ -191,6 +192,7 @@ public class MockNavigationActivity extends AppCompatActivity implements OnMapRe
     this.mapboxMap = mapboxMap;
     this.mapboxMap.addOnMapClickListener(this);
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      newLocationFab.setVisibility(View.VISIBLE);
       LocationComponent locationComponent = mapboxMap.getLocationComponent();
       locationComponent.activateLocationComponent(
               LocationComponentActivationOptions.builder(this, style).build());

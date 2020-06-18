@@ -3,6 +3,7 @@ package com.mapbox.navigation.examples.core
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -102,6 +103,7 @@ abstract class BaseRouterActivityKt :
         MapboxLogger.d(Message("Map is ready"))
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             MapboxLogger.d(Message("Style setting finished"))
+            newLocationFab.visibility = View.VISIBLE
             style.addImage(MARKER_ROUTE, R.drawable.mapbox_marker_icon_default)
             navigationMapRoute = NavigationMapRoute.Builder(mapView, mapboxMap, this).build()
             symbolManager = SymbolManager(mapView, mapboxMap, style)
