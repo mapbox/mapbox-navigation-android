@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewTreeObserver
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
@@ -57,11 +59,18 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.container
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.instructionView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.mapView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.screenshotView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.startNavigation
+import okhttp3.Cache
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.Locale
-import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
-import okhttp3.Cache
+
+private var lastProgress: RouteProgress? = null
+private var lastInstructions: BannerInstructions? = null
 
 /**
  * This activity shows how to integrate the Navigation UI SDK's
@@ -86,7 +95,22 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_instruction_view_layout)
+
+        val layoutObserver = object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                Log.d("INSTRUCTIONS", "onGlobalLayout")
+                instructionView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        }
+        instructionView.viewTreeObserver.addOnGlobalLayoutListener(layoutObserver)
+
         initViews()
+
+        if (lastProgress != null) {
+            Log.d("INSTRUCTIONS", "updateBannerInstructionsWith")
+            instructionView.updateDistanceWith(lastProgress)
+            instructionView.updateBannerInstructionsWith(lastInstructions)
+        }
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
@@ -327,7 +351,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             TripSessionState.STOPPED -> {
                 startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = false
-                instructionView.visibility = GONE
+//                instructionView.visibility = GONE
                 feedbackButton?.hide()
                 instructionSoundButton?.hide()
             }
@@ -388,12 +412,14 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+            lastProgress = routeProgress
             instructionView.updateDistanceWith(routeProgress)
         }
     }
 
     private val bannerInstructionObserver = object : BannerInstructionsObserver {
         override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
+            lastInstructions = bannerInstructions
             instructionView.updateBannerInstructionsWith(bannerInstructions)
         }
     }
