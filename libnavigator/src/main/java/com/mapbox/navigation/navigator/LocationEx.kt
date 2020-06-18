@@ -28,19 +28,19 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
     var verticalAccuracy: Float? = null
 
     if (isCurrentSdkVersionEqualOrGreaterThan(Build.VERSION_CODES.O)) {
-        bearingAccuracy = this.bearingAccuracyDegrees
-        speedAccuracy = this.speedAccuracyMetersPerSecond
-        verticalAccuracy = this.verticalAccuracyMeters
+        bearingAccuracy = if (hasBearingAccuracy()) this.bearingAccuracyDegrees else null
+        speedAccuracy = if (hasSpeedAccuracy()) this.speedAccuracyMetersPerSecond else null
+        verticalAccuracy = if (hasVerticalAccuracy()) this.verticalAccuracyMeters else null
     }
 
     return FixLocation(
-        Point.fromLngLat(this.longitude, this.latitude),
+        Point.fromLngLat(longitude, latitude),
         date,
-        this.speed,
-        this.bearing,
-        this.altitude.toFloat(),
-        this.accuracy,
-        this.provider,
+        if (hasSpeed()) speed else null,
+        if (hasBearing()) bearing else null,
+        if (hasAltitude()) altitude.toFloat() else null,
+        if (hasAccuracy()) accuracy else null,
+        provider,
         bearingAccuracy,
         speedAccuracy,
         verticalAccuracy
