@@ -4,6 +4,8 @@ root = true
 indent_style = space
 indent_size = 4
 
+kotlin_imports_layout=idea
+
 insert_final_newline=true
 
 # should be limit 100 or 120 symbols
