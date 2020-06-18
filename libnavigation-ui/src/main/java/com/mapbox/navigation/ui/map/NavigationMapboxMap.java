@@ -35,7 +35,6 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.ui.NavigationConstants;
 import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
@@ -54,7 +53,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
-import static com.mapbox.navigation.ui.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
 
 /**
@@ -282,19 +280,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * and the rest are intermediate points used as the animation path.
    * The puck and the camera will be animated between each of the points linearly until reaching the target.
    *
-   * If the timestamp of the last location in the list is in the future by more than
-   * {@link NavigationConstants#MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE},
-   * the "lookahead animation" will be executed,
-   * which aims to position the puck at the desired location without a typical animation delay.
-   *
    * @param locations the path to update the location icon
    */
   public void updateLocation(@NonNull List<Location> locations) {
     if (locations.size() > 0) {
       Location targetLocation = locations.get(0);
-      long minimalRequiredLookAheadTimestamp = System.currentTimeMillis() + MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
-      boolean lookahead = targetLocation.getTime() > minimalRequiredLookAheadTimestamp;
-      locationComponent.forceLocationUpdate(locations, lookahead);
+      locationComponent.forceLocationUpdate(locations, false);
       updateMapWayNameWithLocation(targetLocation);
     }
   }

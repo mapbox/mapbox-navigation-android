@@ -56,7 +56,6 @@ import timber.log.Timber;
 
 import static com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY;
 import static com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle;
-import static com.mapbox.navigation.ui.NavigationConstants.MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
 
 /**
  * This activity demonstrates turn by turn navigation using the NavigationMapRoute class. This can
@@ -326,9 +325,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
   }
 
   private void updateLocation(List<Location> locations) {
-    long minimalRequiredLookAheadTimestamp = System.currentTimeMillis() + MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE;
-    boolean lookahead = locations.get(0).getTime() > minimalRequiredLookAheadTimestamp;
-    mapboxMap.getLocationComponent().forceLocationUpdate(locations, lookahead);
+    mapboxMap.getLocationComponent().forceLocationUpdate(locations, false);
   }
 
   private LocationObserver locationObserver = new LocationObserver() {

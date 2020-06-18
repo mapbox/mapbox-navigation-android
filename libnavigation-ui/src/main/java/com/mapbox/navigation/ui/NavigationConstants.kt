@@ -66,9 +66,4 @@ object NavigationConstants {
      * Minimum duration of the tilt adjustment animation while tracking.
      */
     const val NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L
-
-    /**
-     * The minimal lookahead value in milliseconds required to perform a lookahead animation.
-     */
-    const val MINIMAL_LOOKAHEAD_LOCATION_TIME_VALUE = 250L
 }
