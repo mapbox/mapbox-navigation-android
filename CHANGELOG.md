@@ -2,11 +2,24 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.43.0 -
+### Mapbox Navigation Core SDK 1.0.0-rc.x series
 
-* Fix Javadoc Kotlin issues [#2103](https://github.com/mapbox/mapbox-navigation-android/pull/2103)
-* Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
-* Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
+This upgrade features a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses, free-drive mode which enables accurate location positioning even without an active route for daily commuting, a new modular architecture that allows developers to customize the navigation experience for their use case, and MAUs-based billing that provides predictability in costs to developers.
+
+Please review the [developer documentation](https://docs.mapbox.com/android/beta/navigation/overview/#installation) to start building with the Mapbox Navigation SDK v1.0 for Android.
+
+Already use an older version of the Navigation SDK? Check out [the migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) to transition your project from the "legacy" core Navigation SDK to the 1.0 version.
+
+Let us know if you have any questions or run into issues and please open tickets in https://github.com/mapbox/mapbox-navigation-android/issues/new and we will take it from there! We would love your feedback.
+
+Thank you!
+
+- Mapbox Navigation Core SDK 1.0.0-rc.4 - August 6, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.3 - July 27, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.2 - June 17, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.1 - June 3, 2020
+
+- v1.0.0-beta.1 - January 24, 2020
 
 ### v0.42.6 - March 16, 2020
 
