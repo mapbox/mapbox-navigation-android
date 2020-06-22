@@ -105,6 +105,11 @@ public class NavigationHelper {
     List<LegStep> steps = directionsRoute.legs().get(legIndex).steps();
     Point nextManeuverPosition = nextManeuverPosition(stepIndex, steps, coordinates);
 
+    // When the coordinates are empty, no distance can be calculated
+    if(nextManeuverPosition == null) {
+      return 0;
+    }
+
     LineString lineString = LineString.fromPolyline(steps.get(stepIndex).geometry(),
       Constants.PRECISION_6);
     // If the users snapped position equals the next maneuver
@@ -489,12 +494,13 @@ public class NavigationHelper {
    * Retrieves the next steps maneuver position if one exist, otherwise it decodes the current steps
    * geometry and uses the last coordinate in the position list.
    */
+  @Nullable
   static Point nextManeuverPosition(int stepIndex, List<LegStep> steps, List<Point> coords) {
     // If there is an upcoming step, use it's maneuver as the position.
     if (steps.size() > (stepIndex + 1)) {
       return steps.get(stepIndex + 1).maneuver().location();
     }
-    return !coords.isEmpty() ? coords.get(coords.size() - 1) : coords.get(coords.size());
+    return !coords.isEmpty() ? coords.get(coords.size() - 1) : null;
   }
 
   private static int findAnnotationIndex(CurrentLegAnnotation currentLegAnnotation,
