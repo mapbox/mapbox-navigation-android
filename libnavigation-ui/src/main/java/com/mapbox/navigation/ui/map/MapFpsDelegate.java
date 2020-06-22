@@ -57,6 +57,15 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     navigation.registerRouteProgressObserver(fpsProgressListener);
   }
 
+  /**
+   * Removes the previously registered progress change listener.
+   */
+  void removeProgressChangeListener() {
+    if (navigation != null) {
+      navigation.unregisterRouteProgressObserver(fpsProgressListener);
+    }
+  }
+
   void onStart() {
     if (navigation != null) {
       navigation.registerRouteProgressObserver(fpsProgressListener);

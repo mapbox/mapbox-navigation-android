@@ -340,6 +340,15 @@ public class NavigationCamera {
   }
 
   /**
+   * Removes the previously registered progress change listener.
+   */
+  public void removeProgressChangeListener() {
+    if (navigation != null) {
+      navigation.unregisterRouteProgressObserver(routeProgressObserver);
+    }
+  }
+
+  /**
    * Adds given tracking mode transition listener for receiving notification of camera
    * transition updates.
    *
