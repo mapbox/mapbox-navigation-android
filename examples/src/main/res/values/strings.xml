@@ -8,30 +8,6 @@
     <string name="navigation_ui_sdk_title" translatable="false">Navigation UI SDK</string>
     <string name="navigation_ui_sdk_description" translatable="false">Hosts examples to demonstrate the use of the Navigation UI SDK.</string>
 
-    <string name="title_offboard_router_kotlin" translatable="false">Offboard Router Kotlin</string>
-    <string name="description_offboard_router_kotlin" translatable="false">Shows routes using offboard routing api in Kotlin code.</string>
-
-    <string name="title_offboard_router_java" translatable="false">Offboard router Java</string>
-    <string name="description_offboard_router_java" translatable="false">Shows routes using offboard routing api in Java code.</string>
-
-    <string name="title_onboard_router_kotlin" translatable="false">Onboard router Kotlin</string>
-    <string name="description_onboard_router_kotlin" translatable="false">Shows routes using onboard routing api in Kotlin code.</string>
-
-    <string name="title_onboard_router_java" translatable="false">Onboard router Java</string>
-    <string name="description_onboard_router_java" translatable="false">Shows routes using onboard routing api in Java code.</string>
-
-    <string name="title_hybrid_router_kotlin" translatable="false">Hybrid router Kotlin</string>
-    <string name="description_hybrid_router_kotlin" translatable="false">Shows routes using hybrid routing api in Kotlin code.</string>
-
-    <string name="title_hybrid_router_java" translatable="false">Hybrid router Java</string>
-    <string name="description_hybrid_router_java" translatable="false">Shows routes using hybrid routing api in Java code.</string>
-
-    <string name="title_trip_service_kotlin" translatable="false">TripService Kotlin</string>
-    <string name="description_trip_service_kotlin" translatable="false">Shows how to use the TripService to push notifications in Kotlin code.</string>
-
-    <string name="title_trip_session_kotlin" translatable="false">TripSession Kotlin</string>
-    <string name="description_trip_session_kotlin" translatable="false">Shows how to use the TripSession in Kotlin code.</string>
-
     <string name="title_simple_navigation_kotlin" translatable="false">Simple MapboxNavigation Kotlin</string>
     <string name="description_simple_navigation_kotlin" translatable="false">Shows how to use the MapboxNavigation class in Kotlin code.</string>
 

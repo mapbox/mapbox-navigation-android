@@ -11,11 +11,12 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.internal.trip.service.TripService
-import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_INTERVAL
-import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_PATIENCE
+import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.MapboxTripSession
+import com.mapbox.navigation.core.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_INTERVAL
+import com.mapbox.navigation.core.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_PATIENCE
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -265,16 +266,17 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun noLocationUpdateLongerThanAPatienceUnconditionallyGetStatus() = coroutineRule.runBlockingTest {
-        tripSession.start()
+    fun noLocationUpdateLongerThanAPatienceUnconditionallyGetStatus() =
+        coroutineRule.runBlockingTest {
+            tripSession.start()
 
-        locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
-        parentJob.cancelAndJoin()
+            locationCallbackSlot.captured.onSuccess(locationEngineResult)
+            advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
+            parentJob.cancelAndJoin()
 
-        coVerify(exactly = 2) { navigator.getStatus(any()) }
-        tripSession.stop()
-    }
+            coVerify(exactly = 2) { navigator.getStatus(any()) }
+            tripSession.stop()
+        }
 
     @Test
     fun unconditionallGetStatusRepeated() = coroutineRule.runBlockingTest {

@@ -501,15 +501,17 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache-1_0
-      - build-module:
-          module_target: "examples"
-          variant: "Debug"
-      - build-instrumentation-test:
-          module_target: "examples"
+# Commented out because there are no Instrumentation tests at the moment.
+# Uncomment if necessary. See https://github.com/mapbox/mapbox-navigation-android/pull/3209#issuecomment-658837053
+#      - build-module:
+#          module_target: "examples"
+#          variant: "Debug"
+#      - build-instrumentation-test:
+#          module_target: "examples"
       - login-google-cloud-platform
-      - run-firebase-instrumentation:
-          module_target: "examples"
-          variant: "debug"
+#      - run-firebase-instrumentation:
+#          module_target: "examples"
+#          variant: "debug"
       - build-module:
           module_target: "examples"
           variant: "Release"

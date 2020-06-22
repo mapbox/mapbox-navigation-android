@@ -15,22 +15,14 @@ import com.mapbox.navigation.examples.core.FasterRouteActivity
 import com.mapbox.navigation.examples.core.FeedbackButtonActivity
 import com.mapbox.navigation.examples.core.FreeDriveNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
-import com.mapbox.navigation.examples.core.HybridRouterActivityJava
-import com.mapbox.navigation.examples.core.HybridRouterActivityKt
 import com.mapbox.navigation.examples.core.InstructionViewActivity
 import com.mapbox.navigation.examples.core.NavigationMapRouteActivity
-import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
-import com.mapbox.navigation.examples.core.OnboardRouterActivityJava
-import com.mapbox.navigation.examples.core.OnboardRouterActivityKt
 import com.mapbox.navigation.examples.core.ReRouteActivity
 import com.mapbox.navigation.examples.core.ReplayActivity
 import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import com.mapbox.navigation.examples.core.ReplayWaypointsActivity
 import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
 import com.mapbox.navigation.examples.core.SummaryBottomSheetActivity
-import com.mapbox.navigation.examples.core.TripServiceActivityKt
-import com.mapbox.navigation.examples.core.TripSessionActivityKt
 import kotlinx.android.synthetic.main.activity_core.*
 
 class CoreActivity : AppCompatActivity() {
@@ -59,46 +51,6 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_simple_navigation_kotlin),
                 getString(R.string.description_simple_navigation_kotlin),
                 SimpleMapboxNavigationKt::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_offboard_router_java),
-                getString(R.string.description_offboard_router_java),
-                OffboardRouterActivityJava::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_offboard_router_kotlin),
-                getString(R.string.description_offboard_router_kotlin),
-                OffboardRouterActivityKt::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_onboard_router_java),
-                getString(R.string.description_onboard_router_java),
-                OnboardRouterActivityJava::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_onboard_router_kotlin),
-                getString(R.string.description_onboard_router_kotlin),
-                OnboardRouterActivityKt::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_hybrid_router_java),
-                getString(R.string.description_hybrid_router_java),
-                HybridRouterActivityJava::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_hybrid_router_kotlin),
-                getString(R.string.description_hybrid_router_kotlin),
-                HybridRouterActivityKt::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_trip_service_kotlin),
-                getString(R.string.description_trip_service_kotlin),
-                TripServiceActivityKt::class.java
-            ),
-            SampleItem(
-                getString(R.string.title_trip_session_kotlin),
-                getString(R.string.description_trip_session_kotlin),
-                TripSessionActivityKt::class.java
             ),
             SampleItem(
                 getString(R.string.title_guidance_view),
