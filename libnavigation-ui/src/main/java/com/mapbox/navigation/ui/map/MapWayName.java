@@ -70,6 +70,10 @@ class MapWayName {
     registerObservers();
   }
 
+  void removeProgressChangeListener() {
+    unregisterObservers();
+  }
+
   boolean addOnWayNameChangedListener(OnWayNameChangedListener listener) {
     return onWayNameChangedListeners.add(listener);
   }

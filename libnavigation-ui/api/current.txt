@@ -265,6 +265,7 @@ package com.mapbox.navigation.ui.camera {
     method public void onStop();
     method public void removeOnTrackingModeChangedListener(com.mapbox.navigation.ui.camera.OnTrackingModeChangedListener);
     method public void removeOnTrackingModeTransitionListener(com.mapbox.navigation.ui.camera.OnTrackingModeTransitionListener);
+    method public void removeProgressChangeListener();
     method public void resetCameraPositionWith(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
     method public void resume(android.location.Location!);
     method public void setCamera(com.mapbox.navigation.ui.camera.Camera!);
@@ -476,6 +477,7 @@ package com.mapbox.navigation.ui.map {
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_STOP) protected void onStop();
     method public void removeOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener!);
     method public boolean removeOnWayNameChangedListener(com.mapbox.navigation.ui.map.OnWayNameChangedListener!);
+    method public void removeProgressChangeListener();
     method public void removeRoute();
     method public void resetCameraPositionWith(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
     method public void resetPadding();

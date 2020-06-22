@@ -46,6 +46,15 @@ internal class NavigationPuckPresenter(private val mapboxMap: MapboxMap, puckDra
     }
 
     /**
+     * Removes the previously registered progress change listener.
+     */
+    fun removeProgressChangeListener() {
+        mapboxNavigation?.unregisterRouteProgressObserver(routeProgressObserver).also {
+            observerRegistered = false
+        }
+    }
+
+    /**
      * Call in {@link FragmentActivity#onStart()} to properly add the {@link RouteProgressObserver}
      * for the puck updating and prevent any leaks or further updates.
      */

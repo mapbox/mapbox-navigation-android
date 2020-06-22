@@ -361,11 +361,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    */
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
-    initializeWayName(mapboxMap, mapPaddingAdjustor);
     initializeFpsDelegate(mapView);
     mapRoute.addProgressChangeListener(navigation, vanishRouteLineEnabled);
     mapCamera.addProgressChangeListener(navigation);
-    mapWayName.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
     navigation.registerLocationObserver(locationObserver);
 
@@ -386,6 +384,42 @@ public class NavigationMapboxMap implements LifecycleObserver {
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean enableVanishingRouteLine) {
     this.vanishRouteLineEnabled = enableVanishingRouteLine;
     addProgressChangeListener(navigation);
+  }
+
+  /**
+   * Removes the previously registered progress change listener.
+   */
+  public void removeProgressChangeListener() {
+    if (navigation != null) {
+      if (mapRoute != null) {
+        mapRoute.removeProgressChangeListener(navigation);
+      }
+
+      if (mapCamera != null) {
+        mapCamera.removeProgressChangeListener();
+      }
+
+      if (mapWayName != null) {
+        mapWayName.removeProgressChangeListener();
+        mapWayName.removeOnWayNameChangedListener(internalWayNameChangedListener);
+        mapWayName.updateWayNameQueryMap(!settings.isMapWayNameEnabled());
+        mapWayName = null;
+      }
+
+      if (mapFpsDelegate != null) {
+        mapFpsDelegate.removeProgressChangeListener();
+        removeFpsListenersFromCamera();
+        mapFpsDelegate = null;
+      }
+
+      if (navigation != null) {
+        navigation.unregisterLocationObserver(locationObserver);
+      }
+
+      if (navigationPuckPresenter != null) {
+        navigationPuckPresenter.removeProgressChangeListener();
+      }
+    }
   }
 
   /**
@@ -522,6 +556,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param directionsRoute to update the camera position
    */
   public void startCamera(@NonNull DirectionsRoute directionsRoute) {
+    initializeWayName(mapboxMap, mapPaddingAdjustor);
+    mapWayName.addProgressChangeListener(navigation);
     mapCamera.start(directionsRoute);
   }
 
