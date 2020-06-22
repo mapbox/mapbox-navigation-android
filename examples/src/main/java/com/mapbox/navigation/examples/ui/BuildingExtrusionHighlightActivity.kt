@@ -1,46 +1,38 @@
 package com.mapbox.navigation.examples.ui
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory.zoomTo
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
-import com.mapbox.navigation.ui.internal.building.BuildingFootprintHighlightLayer
-import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
+import com.mapbox.navigation.ui.map.building.BuildingExtrusionHighlightLayer
+import com.mapbox.navigation.ui.map.building.BuildingFootprintHighlightLayer
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_final_destination_arrival_building_highlight.*
 
 /**
- * This activity shows how to use the Navigation UI SDK's [BuildingFootprintHighlightLayer]
- * class to highlight a building footprint. The final destination arrival callback is from
- * [ArrivalObserver.onFinalDestinationArrival].
+ * This activity shows how to use the Navigation UI SDK's
+ * [BuildingExtrusionHighlightLayer] to show and customize 3D building
+ * extrusions on the [com.mapbox.navigation.ui.NavigationView]'s map.
  */
-class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationReadyCallback,
-    NavigationListener,
-    BannerInstructionsListener, ArrivalObserver {
+class BuildingExtrusionHighlightActivity : AppCompatActivity(), OnNavigationReadyCallback,
+        NavigationListener, ArrivalObserver {
 
     private lateinit var mapboxMap: MapboxMap
     private lateinit var navigationMapboxMap: NavigationMapboxMap
-    private lateinit var mapboxNavigation: MapboxNavigation
-    private var colorList = listOf(Color.BLUE, Color.MAGENTA, Color.parseColor("#32a88f"))
-    private var opacityList = listOf(.5f, .2f, .8f)
-    private var adjustFootprintHighlightStyleButtonIndex = 0
-    private lateinit var buildingFootprintHighlightLayer: BuildingFootprintHighlightLayer
     private val route by lazy { getDirectionsRoute() }
+    private val highlightQueryLatLng = LatLng(37.79115, -122.41376)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,7 +99,6 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 this.navigationMapboxMap = navMapboxMap
                 this.navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.NORMAL)
                 this.mapboxMap = navMapboxMap.retrieveMap()
-                navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
                 val optionsBuilder = NavigationViewOptions.builder(this)
                 optionsBuilder.navigationListener(this)
@@ -117,32 +108,9 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
 
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
-                optionsBuilder.bannerInstructionsListener(this)
                 navigationView.startNavigation(optionsBuilder.build())
-
-                // Initialize the Nav UI SDK's BuildingFootprintHighlightLayer class.
-                buildingFootprintHighlightLayer =
-                    BuildingFootprintHighlightLayer(
-                        mapboxMap
-                    )
-                adjust_highlight_color_and_opacity.show()
-
-                adjust_highlight_color_and_opacity.setOnClickListener {
-                    if (adjustFootprintHighlightStyleButtonIndex == opacityList.size) {
-                        adjustFootprintHighlightStyleButtonIndex = 0
-                    }
-                    buildingFootprintHighlightLayer.opacity =
-                        opacityList[adjustFootprintHighlightStyleButtonIndex]
-                    buildingFootprintHighlightLayer.color =
-                        colorList[adjustFootprintHighlightStyleButtonIndex]
-                    adjustFootprintHighlightStyleButtonIndex++
-                }
             }
         }
-    }
-
-    override fun willDisplay(instructions: BannerInstructions?): BannerInstructions {
-        return instructions!!
     }
 
     override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
@@ -150,24 +118,35 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
     }
 
     override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
-        mapboxMap.easeCamera(zoomTo(18.0), 1800)
+        mapboxMap.easeCamera(CameraUpdateFactory.zoomTo(18.0), 1800)
 
-        // Adjust the visibility of the building footprint highlight layer
-        buildingFootprintHighlightLayer.updateVisibility(true)
+        mapboxMap.getStyle {
 
-        /**
-         * Set the [LatLng] to be used by the [BuildingFootprintHighlightLayer].
-         * The LatLng would fall within a building polygon footprint. If not, the
-         * [BuildingFootprintHighlightLayer] class won't highlight a footprint.
-         * The LatLng passed through below is different than the coordinate used as the
-         * final destination coordinate in this example's [DirectionsRoute].
-         */
-        buildingFootprintHighlightLayer.setBuildingFootprintLocation(
-            LatLng(
-                37.790932,
-                -122.414279
-            )
-        )
+            /**
+             * Set the [LatLng] to be used by the [BuildingFootprintHighlightLayer].
+             * The footprint or extrusion that's shown is whatever is a maximum of 1 meter
+             * away from the query [LatLng].
+             *
+             * The LatLng passed through below is different than the coordinate used as the
+             * final destination coordinate in this example's [DirectionsRoute].
+             *
+             * This LatLng should be set before the visibility of either the extrusion
+             * or footprint is set to true.
+             */
+
+            // Initialize the Nav UI SDK's BuildingExtrusionHighlightLayer class.
+            val buildingExtrusionHighlightLayer = BuildingExtrusionHighlightLayer(mapboxMap)
+
+            buildingExtrusionHighlightLayer.queryLatLng = highlightQueryLatLng
+
+            buildingExtrusionHighlightLayer.updateVisibility(true)
+
+            // Click on a building footprint to move the highlighted footprint
+            mapboxMap.addOnMapClickListener {
+                buildingExtrusionHighlightLayer.queryLatLng = it
+                true
+            }
+        }
     }
 
     override fun onNavigationRunning() {
@@ -186,9 +165,9 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
     private fun getInitialCameraPosition(): CameraPosition {
         val originCoordinate = route.routeOptions()?.coordinates()?.get(0)
         return CameraPosition.Builder()
-            .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
-            .zoom(15.0)
-            .build()
+                .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
+                .zoom(15.0)
+                .build()
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {

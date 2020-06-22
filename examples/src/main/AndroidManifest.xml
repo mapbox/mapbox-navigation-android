@@ -63,7 +63,7 @@
         </activity>
 
         <activity
-            android:name=".ui.BuildingFootprintHighlightActivityKt"
+            android:name=".ui.BuildingFootprintHighlightActivity"
             android:label="@string/title_building_highlight_kotlin"
             android:screenOrientation="portrait">
             <meta-data
@@ -72,7 +72,7 @@
         </activity>
 
         <activity
-            android:name=".ui.BuildingExtrusionActivity"
+            android:name=".ui.BuildingExtrusionHighlightActivity"
             android:label="@string/title_ui_building_extrusions_kotlin"
             android:screenOrientation="portrait">
             <meta-data
