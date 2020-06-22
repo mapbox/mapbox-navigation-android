@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal.accounts
+package com.mapbox.navigation.core.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
@@ -8,15 +8,12 @@ import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCE
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
-import com.mapbox.navigation.core.accounts.Billing
-import java.lang.IllegalStateException
 
-// TODO: make the class internal
-//  Currently under internal package because it's been used by Router examples in the test app
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */
-class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuTokenProvider {
+internal class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider,
+    SkuTokenProvider {
 
     companion object {
         private const val SKU_KEY = "sku"
@@ -31,13 +28,12 @@ class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuT
          */
         @JvmStatic
         fun getInstance(context: Context): MapboxNavigationAccounts =
-            INSTANCE
-                ?: synchronized(this) {
-                    MapboxNavigationAccounts().also { mapboxNavigationAccount ->
-                        INSTANCE = mapboxNavigationAccount
-                        init(context)
-                    }
+            INSTANCE ?: synchronized(this) {
+                MapboxNavigationAccounts().also { mapboxNavigationAccount ->
+                    INSTANCE = mapboxNavigationAccount
+                    init(context)
                 }
+            }
 
         private fun init(context: Context) {
             val preferences =

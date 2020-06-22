@@ -2,15 +2,25 @@ package com.mapbox.navigation.core.internal.trip.service
 
 import android.app.Notification
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.trip.service.MapboxTripService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class MapboxTripServiceTest {
 
     private lateinit var service: MapboxTripService
@@ -23,8 +33,13 @@ class MapboxTripServiceTest {
     @Before
     fun setUp() {
         service = MapboxTripService(tripNotification, initializeLambda, terminateLambda, logger)
-        every { tripNotification.getNotificationId() } answers { 1234 }
+        every { tripNotification.getNotificationId() } answers { NOTIFICATION_ID }
         every { tripNotification.getNotification() } answers { notification }
+    }
+
+    @After
+    fun cleanUp() {
+        service.stopService()
     }
 
     @Test
@@ -53,6 +68,7 @@ class MapboxTripServiceTest {
         service.startService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStarted() }
+        verify(exactly = 1) { logger.i(msg = Message("service already started")) }
     }
 
     @Test
@@ -85,6 +101,7 @@ class MapboxTripServiceTest {
         service.stopService()
 
         verify(exactly = 1) { tripNotification.onTripSessionStopped() }
+        verify(exactly = 1) { logger.i(msg = Message("Service is not started yet")) }
     }
 
     @Test
@@ -111,5 +128,39 @@ class MapboxTripServiceTest {
         service.updateNotification(routeProgress)
 
         verify(exactly = 1) { tripNotification.updateNotification(routeProgress) }
+    }
+
+    @Test
+    fun notificationDataPostToChannelOnServiceStarted() {
+        runBlocking {
+            service.startService()
+
+            val notificationData = MapboxTripService.getNotificationDataChannel().receive()
+
+            assertEquals(NOTIFICATION_ID, notificationData.notificationId)
+            assertEquals(notification, notificationData.notification)
+        }
+    }
+
+    @Test
+    fun channelClosedOnServiceStopped() {
+        runBlocking {
+            service.startService()
+            service.stopService()
+
+            // channel in MapboxTripService is private and static. Can't be mocked with Mockk.
+            // To check that the channel is closed after stopService we try to receive a new value
+            // and catch an exception.
+            try {
+                MapboxTripService.getNotificationDataChannel().receive()
+                fail()
+            } catch (e: Exception) {
+                assertTrue(e is CancellationException)
+            }
+        }
+    }
+
+    companion object {
+        private const val NOTIFICATION_ID = 1234
     }
 }
