@@ -545,6 +545,48 @@ package com.mapbox.navigation.ui.map {
 
 }
 
+package com.mapbox.navigation.ui.map.building {
+
+  public final class BuildingExtrusionHighlightLayer {
+    ctor public BuildingExtrusionHighlightLayer(com.mapbox.mapboxsdk.maps.MapboxMap mapboxMap);
+    method public int getColor();
+    method public float getOpacity();
+    method public com.mapbox.mapboxsdk.geometry.LatLng? getQueryLatLng();
+    method public void setColor(int value);
+    method public void setOpacity(float value);
+    method public void setQueryLatLng(com.mapbox.mapboxsdk.geometry.LatLng? value);
+    method public void updateVisibility(boolean visible);
+    property public final int color;
+    property public final float opacity;
+    property public final com.mapbox.mapboxsdk.geometry.LatLng? queryLatLng;
+    field public static final com.mapbox.navigation.ui.map.building.BuildingExtrusionHighlightLayer.Companion! Companion;
+    field public static final String HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID = "highlighted-building-extrusion-layer-id";
+  }
+
+  public static final class BuildingExtrusionHighlightLayer.Companion {
+  }
+
+  public final class BuildingFootprintHighlightLayer {
+    ctor public BuildingFootprintHighlightLayer(com.mapbox.mapboxsdk.maps.MapboxMap mapboxMap);
+    method public int getColor();
+    method public float getOpacity();
+    method public com.mapbox.mapboxsdk.geometry.LatLng? getQueryLatLng();
+    method public void setColor(int value);
+    method public void setOpacity(float value);
+    method public void setQueryLatLng(com.mapbox.mapboxsdk.geometry.LatLng? value);
+    method public void updateVisibility(boolean visible);
+    property public final int color;
+    property public final float opacity;
+    property public final com.mapbox.mapboxsdk.geometry.LatLng? queryLatLng;
+    field public static final com.mapbox.navigation.ui.map.building.BuildingFootprintHighlightLayer.Companion! Companion;
+    field public static final String HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID = "highlighted-building-footprint-layer-id";
+  }
+
+  public static final class BuildingFootprintHighlightLayer.Companion {
+  }
+
+}
+
 package com.mapbox.navigation.ui.puck {
 
   public interface PuckDrawableSupplier {
