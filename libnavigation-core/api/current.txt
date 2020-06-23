@@ -55,6 +55,14 @@ package com.mapbox.navigation.core {
   public final class MapboxNavigationKt {
   }
 
+  public final class MapboxNavigationProvider {
+    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext), com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest = LocationEngineRequest.<init>(1000).setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build());
+    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext));
+    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
+    field public static final com.mapbox.navigation.core.MapboxNavigationProvider! INSTANCE;
+  }
+
   public final class Rounding {
     field public static final int INCREMENT_FIFTY = 50; // 0x32
     field public static final int INCREMENT_FIVE = 5; // 0x5
