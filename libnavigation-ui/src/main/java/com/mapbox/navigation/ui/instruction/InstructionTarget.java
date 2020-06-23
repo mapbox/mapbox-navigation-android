@@ -25,13 +25,13 @@ class InstructionTarget implements Target {
   private TextViewUtils textViewUtils;
 
   InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
-                    BannerShield shield, InstructionLoadedCallback instructionLoadedCallback) {
+      BannerShield shield, InstructionLoadedCallback instructionLoadedCallback) {
     this(textView, instructionSpannable, shields, shield, new TextViewUtils(), instructionLoadedCallback);
   }
 
   private InstructionTarget(TextView textView, Spannable instructionSpannable, List<BannerShield> shields,
-                            BannerShield shield, TextViewUtils textViewUtils,
-                            InstructionLoadedCallback instructionLoadedCallback) {
+      BannerShield shield, TextViewUtils textViewUtils,
+      InstructionLoadedCallback instructionLoadedCallback) {
     this.textView = textView;
     this.instructionSpannable = instructionSpannable;
     this.shields = shields;
@@ -53,7 +53,6 @@ class InstructionTarget implements Target {
 
   @Override
   public void onBitmapFailed(Exception exception, Drawable errorDrawable) {
-    setBackupText();
     sendInstructionLoadedCallback();
     Timber.e(exception);
   }
@@ -67,13 +66,9 @@ class InstructionTarget implements Target {
     void onInstructionLoaded(InstructionTarget target);
   }
 
-  private void setBackupText() {
-    textView.setText(shield.getText());
-  }
-
   private void createAndSetImageSpan(Drawable drawable) {
     instructionSpannable.setSpan(new ImageSpan(drawable),
-      shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
     if (shields.indexOf(shield) == shields.size() - 1) {
       CharSequence truncatedSequence = truncateImageSpan(instructionSpannable, textView);
