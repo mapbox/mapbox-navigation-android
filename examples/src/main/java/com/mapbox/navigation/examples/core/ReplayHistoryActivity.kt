@@ -120,12 +120,10 @@ class ReplayHistoryActivity : AppCompatActivity() {
     }
 
     private fun createMapboxNavigation(locationEngine: LocationEngine): MapboxNavigation {
-        val accessToken = Utils.getMapboxAccessToken(this)
-        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-            this, accessToken)
-
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .build()
         return MapboxNavigation(
-            applicationContext,
             mapboxNavigationOptions,
             locationEngine
         )

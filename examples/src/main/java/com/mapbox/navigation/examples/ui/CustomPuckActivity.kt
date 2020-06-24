@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
@@ -95,12 +94,11 @@ class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback,
                 this.navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.NORMAL)
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
-                val optionsBuilder = NavigationViewOptions.builder()
+                val optionsBuilder = NavigationViewOptions.builder(this)
                 optionsBuilder.navigationListener(this)
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 optionsBuilder.puckDrawableSupplier(CustomPuckDrawableSupplier())
                 navigationView.startNavigation(optionsBuilder.build())
             }

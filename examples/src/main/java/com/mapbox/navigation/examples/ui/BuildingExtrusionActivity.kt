@@ -8,7 +8,6 @@ import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
@@ -101,12 +100,11 @@ class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback
 
                 this.mapboxMap = navMapboxMap.retrieveMap()
 
-                val optionsBuilder = NavigationViewOptions.builder()
+                val optionsBuilder = NavigationViewOptions.builder(this)
                 optionsBuilder.navigationListener(this)
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.routeProgressObserver(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Navigation UI SDK's BuildingExtrusionLayer class.

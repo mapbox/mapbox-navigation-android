@@ -3,7 +3,6 @@ package com.mapbox.navigation.core
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -58,8 +57,6 @@ class MapboxNavigationTest {
     var coroutineRule = MainCoroutineRule()
 
     private val accessToken = "pk.1234"
-    private val context: Context = mockk(relaxed = true)
-    private val applicationContext: Context = mockk(relaxed = true)
     private val locationEngine: LocationEngine = mockk()
     private val locationEngineRequest: LocationEngineRequest = mockk(relaxUnitFun = true)
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
@@ -75,15 +72,16 @@ class MapboxNavigationTest {
     private val routeProgress: RouteProgress = mockk(relaxed = true)
     private val navigationSession: NavigationSession = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
-
-    private val navigationOptions = NavigationOptions
-        .Builder()
-        .accessToken(accessToken)
-        .distanceFormatter(distanceFormatter)
-        .navigatorPredictionMillis(1500L)
-        .onboardRouterOptions(onBoardRouterOptions)
-        .timeFormatType(NONE_SPECIFIED)
-        .build()
+    private val applicationContext: Context = mockk(relaxed = true) {
+        every { inferDeviceLocale() } returns Locale.US
+        every { getSystemService(Context.NOTIFICATION_SERVICE) } returns mockk<NotificationManager>()
+        every { getSystemService(Context.ALARM_SERVICE) } returns mockk<AlarmManager>()
+        every { getSharedPreferences(MAPBOX_SHARED_PREFERENCES, Context.MODE_PRIVATE) } returns mockk(relaxed = true) {
+            every { getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
+        }
+        every { packageManager } returns mockk(relaxed = true)
+        every { packageName } returns "com.mapbox.navigation.core.MapboxNavigationTest"
+    }
 
     private lateinit var mapboxNavigation: MapboxNavigation
 
@@ -117,20 +115,7 @@ class MapboxNavigationTest {
 
         mockkObject(NavigationComponentProvider)
 
-        every { context.inferDeviceLocale() } returns Locale.US
-        every { context.applicationContext } returns applicationContext
-        val notificationManager = mockk<NotificationManager>()
-        every { applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
-        val alarmManager = mockk<AlarmManager>()
-        every { applicationContext.getSystemService(Context.ALARM_SERVICE) } returns alarmManager
-        val sharedPreferences = mockk<SharedPreferences>(relaxed = true)
-        every {
-            applicationContext.getSharedPreferences(
-                MAPBOX_SHARED_PREFERENCES,
-                Context.MODE_PRIVATE
-            )
-        } returns sharedPreferences
-        every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
+        every { applicationContext.applicationContext } returns applicationContext
 
         mockLocation()
         mockNativeNavigator()
@@ -141,9 +126,17 @@ class MapboxNavigationTest {
 
         every { navigator.create(any(), logger) } returns navigator
 
+        val navigationOptions = NavigationOptions
+            .Builder(applicationContext)
+            .accessToken(accessToken)
+            .distanceFormatter(distanceFormatter)
+            .navigatorPredictionMillis(1500L)
+            .onboardRouterOptions(onBoardRouterOptions)
+            .timeFormatType(NONE_SPECIFIED)
+            .build()
+
         mapboxNavigation =
             MapboxNavigation(
-                context,
                 navigationOptions,
                 locationEngine,
                 locationEngineRequest
@@ -236,7 +229,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsNativeNavigatorReset() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.create(navigationOptions.deviceProfile, logger) }
+        verify(exactly = 1) { navigator.create(any(), logger) }
     }
 
     @Test

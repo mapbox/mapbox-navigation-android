@@ -139,10 +139,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
-        val options =
-            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
-
-        val newOptions = options.toBuilder()
+        val options = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
                 .tilesUri("https://api-routing-tiles-staging.tilestream.net")
                 .tilesVersion("2020_02_02-03_00_00")
@@ -151,7 +149,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             .navigatorPredictionMillis(1000L)
             .build()
 
-        mapboxNavigation = getMapboxNavigation(newOptions)
+        mapboxNavigation = getMapboxNavigation(options)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -429,7 +427,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
         return if (shouldSimulateRoute()) {
             return MapboxNavigation(
-                applicationContext,
                 navigationOptions = options,
                 locationEngine = ReplayLocationEngine(mapboxReplayer)
             ).apply {
@@ -439,7 +436,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             }
         } else {
             MapboxNavigation(
-                applicationContext,
                 navigationOptions = options
             )
         }

@@ -81,18 +81,20 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class NavigationOptions {
-    ctor public NavigationOptions(String? accessToken, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
-    method public String? component1();
-    method public int component2();
-    method public long component3();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter? component4();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions? component5();
-    method public boolean component6();
+    ctor public NavigationOptions(android.content.Context applicationContext, String? accessToken, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
+    method public android.content.Context component1();
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder component10();
+    method public String? component2();
+    method public int component3();
+    method public long component4();
+    method public com.mapbox.navigation.base.formatter.DistanceFormatter? component5();
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions? component6();
     method public boolean component7();
-    method public com.mapbox.navigation.base.options.DeviceProfile component8();
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder component9();
-    method public com.mapbox.navigation.base.options.NavigationOptions copy(String? accessToken, int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
+    method public boolean component8();
+    method public com.mapbox.navigation.base.options.DeviceProfile component9();
+    method public com.mapbox.navigation.base.options.NavigationOptions copy(android.content.Context applicationContext, String? accessToken, int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
     method public String? getAccessToken();
+    method public android.content.Context getApplicationContext();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder getBuilder();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
@@ -105,7 +107,7 @@ package com.mapbox.navigation.base.options {
   }
 
   public static final class NavigationOptions.Builder {
-    ctor public NavigationOptions.Builder();
+    ctor public NavigationOptions.Builder(android.content.Context context);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.base.options.NavigationOptions build();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);

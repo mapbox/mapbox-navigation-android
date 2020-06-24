@@ -153,11 +153,11 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-            this,
-            Mapbox.getAccessToken()
-        )
-        mapboxNavigation = MapboxNavigation(applicationContext, mapboxNavigationOptions).also {
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Mapbox.getAccessToken())
+            .build()
+
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).also {
             it.registerRoutesObserver(routesObserver)
         }
 

@@ -10,7 +10,6 @@ import com.mapbox.mapboxsdk.camera.CameraUpdateFactory.zoomTo
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
@@ -107,7 +106,7 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 this.mapboxMap = navMapboxMap.retrieveMap()
                 navigationView.retrieveMapboxNavigation()?.let { this.mapboxNavigation = it }
 
-                val optionsBuilder = NavigationViewOptions.builder()
+                val optionsBuilder = NavigationViewOptions.builder(this)
                 optionsBuilder.navigationListener(this)
 
                 // Pass the ArrivalObserver interface (this activity)
@@ -116,7 +115,6 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
-                optionsBuilder.navigationOptions(NavigationOptions.Builder().build())
                 navigationView.startNavigation(optionsBuilder.build())
 
                 // Initialize the Nav UI SDK's BuildingFootprintHighlightLayer class.

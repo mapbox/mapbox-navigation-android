@@ -395,8 +395,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(requireContext())
         mapboxNavigation = MapboxNavigation(
-            requireContext(),
-            MapboxNavigation.defaultNavigationOptions(requireContext(), accessToken),
+            MapboxNavigation.defaultNavigationOptionsBuilder(requireContext(), accessToken).build(),
             getLocationEngine()
         )
         mapboxNavigation.apply {

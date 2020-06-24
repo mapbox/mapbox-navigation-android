@@ -140,10 +140,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
-        val options =
-            MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
-
-        mapboxNavigation = getMapboxNavigation(options)
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .build()
+        mapboxNavigation = getMapboxNavigation(mapboxNavigationOptions)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -479,7 +479,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
         return if (shouldSimulateRoute()) {
             MapboxNavigation(
-                applicationContext,
                 navigationOptions = options,
                 locationEngine = ReplayLocationEngine(mapboxReplayer)
             ).apply {
@@ -491,7 +490,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             }
         } else {
             MapboxNavigation(
-                applicationContext,
                 navigationOptions = options
             )
         }

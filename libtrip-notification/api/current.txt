@@ -2,7 +2,7 @@
 package com.mapbox.navigation.trip.notification {
 
   @com.mapbox.annotation.module.MapboxModule(type=MapboxModuleType.NavigationTripNotification) public final class MapboxTripNotification implements com.mapbox.navigation.base.trip.notification.TripNotification {
-    ctor public MapboxTripNotification(android.content.Context applicationContext, com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    ctor public MapboxTripNotification(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public String? getCurrentManeuverModifier();
     method public String? getCurrentManeuverType();
     method public android.app.Notification getNotification();
