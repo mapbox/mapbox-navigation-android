@@ -9,6 +9,8 @@ import com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.ui.BaseTest
+import io.mockk.every
+import io.mockk.mockkStatic
 import java.util.Calendar
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -69,7 +71,12 @@ class SummaryModelTest : BaseTest() {
             .withUnitType(METRIC)
             .withRoundingIncrement(INCREMENT_FIFTY)
             .build(ctx)
-        val time = Calendar.getInstance()
+        val time = Calendar.getInstance().also {
+            it.set(2020, 2, 20, 20, 20, 20)
+        }
+        mockkStatic(Calendar::class)
+        every { Calendar.getInstance() } returns time
+
         val legDurationRemaining: Double = routeProgress!!
             .currentLegProgress!!
             .durationRemaining
