@@ -2,17 +2,16 @@ ext {
 
   androidVersions = [
       minSdkVersion           : 19,
-      targetSdkVersion        : 28,
-      compileSdkVersion       : 28,
-      buildToolsVersion       : '28.0.3'
+      targetSdkVersion        : 29,
+      compileSdkVersion       : 29
   ]
 
   version = [
       mapboxMapSdk              : '9.2.1',
       mapboxSdkServices         : '5.2.1',
       mapboxSdkDirectionsModels : '5.2.1',
-      mapboxEvents              : '5.0.1',
-      mapboxCore                : '2.0.1',
+      mapboxEvents              : '6.0.0',
+      mapboxCore                : '3.0.0',
       mapboxNavigator           : '14.1.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
@@ -41,7 +40,7 @@ ext {
       espressoVersion           : '3.1.0',
       spoonRunner               : '1.6.2',
       commonsIO                 : '2.6',
-      robolectric               : '4.1',
+      robolectric               : '4.3.1',
       mockwebserver             : '3.12.0',
       lifecycle                 : '2.0.0-rc01',
       lifecycleViewModelKtx     : '2.2.0',

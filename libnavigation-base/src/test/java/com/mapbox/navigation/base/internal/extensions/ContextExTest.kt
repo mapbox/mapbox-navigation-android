@@ -28,7 +28,7 @@ class ContextExTest {
     @Test
     fun inferDeviceLocale() {
         val locale = Locale("en")
-        context.resources.configuration.locales = LocaleList(locale)
+        context.resources.configuration.setLocales(LocaleList(locale))
 
         val result = context.inferDeviceLocale()
 
@@ -39,7 +39,7 @@ class ContextExTest {
     @Test
     fun inferDeviceLocaleWhenLocalListEmpty() {
         val locale = Locale("ja")
-        context.resources.configuration.locales = LocaleList.getEmptyLocaleList()
+        context.resources.configuration.setLocales(LocaleList.getEmptyLocaleList())
 
         val result = context.inferDeviceLocale()
 

@@ -16,12 +16,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
 class RemoveTilesTaskTest {
 
     private val navigator = mockk<MapboxNativeNavigator>(relaxed = true)
