@@ -363,8 +363,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(this)
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
-            MapboxNavigation.defaultNavigationOptions(this, accessToken),
+            MapboxNavigation.defaultNavigationOptionsBuilder(this, accessToken).build(),
             getLocationEngine()
         )
         mapboxNavigation.apply {

@@ -141,7 +141,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.core.arrival.ArrivalObserver? arrivalObserver();
     method public abstract com.mapbox.navigation.ui.listeners.BannerInstructionsListener? bannerInstructionsListener();
     method public abstract com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback? bottomSheetCallback();
-    method public static com.mapbox.navigation.ui.NavigationViewOptions.Builder! builder();
+    method public static com.mapbox.navigation.ui.NavigationViewOptions.Builder! builder(android.content.Context!);
     method public abstract boolean enableVanishingRouteLine();
     method public abstract com.mapbox.navigation.ui.listeners.FeedbackListener? feedbackListener();
     method public abstract com.mapbox.navigation.ui.listeners.InstructionListListener? instructionListListener();

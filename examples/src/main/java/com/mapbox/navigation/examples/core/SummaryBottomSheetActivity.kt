@@ -73,13 +73,11 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-            this,
-            Utils.getMapboxAccessToken(this)
-        )
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .build()
 
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
             mapboxNavigationOptions,
             getLocationEngine()
         ).apply {

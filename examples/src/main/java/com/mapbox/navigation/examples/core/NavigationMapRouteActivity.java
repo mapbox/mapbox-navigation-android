@@ -105,12 +105,10 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
     this.mapboxMap = mapboxMap;
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
       initializeLocationComponent(mapboxMap, style);
-      NavigationOptions navigationOptions = MapboxNavigation.defaultNavigationOptions(
-              this,
-              Utils.getMapboxAccessToken(this)
-      );
+      NavigationOptions navigationOptions = MapboxNavigation
+              .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+              .build();
       mapboxNavigation = new MapboxNavigation(
-              this.getApplicationContext(),
               navigationOptions,
               new ReplayLocationEngine(mapboxReplayer)
       );

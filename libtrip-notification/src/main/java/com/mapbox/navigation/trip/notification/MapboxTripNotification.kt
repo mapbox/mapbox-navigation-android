@@ -56,7 +56,6 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 /**
  * Default implementation of [TripNotification] interface
  *
- * @param applicationContext the application's [Context]
  * @param navigationOptions is [NavigationOptions] used here to format distance and time
  *
  * @property currentManeuverType This indicates the type of current maneuver. The same [BannerText.type] of primary [BannerInstructions]
@@ -64,7 +63,6 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
  */
 @MapboxModule(MapboxModuleType.NavigationTripNotification)
 class MapboxTripNotification constructor(
-    private val applicationContext: Context,
     private val navigationOptions: NavigationOptions
 ) : TripNotification {
 
@@ -76,8 +74,10 @@ class MapboxTripNotification constructor(
 
         private const val MAPBOX_NAVIGATION_NOTIFICATION_FORMATTER_EXCEPTION =
             "You need to provide a DistanceFormatter in order to use the default TripNotification. " +
-                "Also see MapboxNavigation#defaultNavigationOptions"
+                "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
     }
+
+    private val applicationContext = navigationOptions.applicationContext
 
     @StepManeuverType
     var currentManeuverType: String? = null

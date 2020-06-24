@@ -63,9 +63,10 @@ class MapboxTripNotificationTest {
         mockkStatic(DateFormat::class)
         mockkStatic(PendingIntent::class)
         mockedContext = createContext()
+        every { mockedContext.applicationContext } returns mockedContext
+        every { navigationOptions.applicationContext } returns mockedContext
         mockRemoteViews()
         notification = MapboxTripNotification(
-            mockedContext,
             navigationOptions
         )
     }

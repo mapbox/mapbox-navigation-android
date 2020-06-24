@@ -2,14 +2,14 @@
 package com.mapbox.navigation.core {
 
   public final class MapboxNavigation {
-    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine, com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
-    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine);
-    ctor public MapboxNavigation(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine, com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
+    ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine);
+    ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachArrivalController(com.mapbox.navigation.core.arrival.ArrivalController arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void attachArrivalController();
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
-    method public static com.mapbox.navigation.base.options.NavigationOptions defaultNavigationOptions(android.content.Context context, String? accessToken);
+    method public static com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void detachFasterRouteObserver();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
@@ -48,7 +48,7 @@ package com.mapbox.navigation.core {
   }
 
   public static final class MapboxNavigation.Companion {
-    method public com.mapbox.navigation.base.options.NavigationOptions defaultNavigationOptions(android.content.Context context, String? accessToken);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray());
   }
 
@@ -56,9 +56,9 @@ package com.mapbox.navigation.core {
   }
 
   public final class MapboxNavigationProvider {
-    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext), com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest = LocationEngineRequest.<init>(1000).setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build());
-    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext));
-    method public static com.mapbox.navigation.core.MapboxNavigation create(android.content.Context context, com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    method public static com.mapbox.navigation.core.MapboxNavigation create(com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(navigationOptions.applicationContext), com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest = LocationEngineRequest.<init>(1000).setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build());
+    method public static com.mapbox.navigation.core.MapboxNavigation create(com.mapbox.navigation.base.options.NavigationOptions navigationOptions, com.mapbox.android.core.location.LocationEngine locationEngine = LocationEngineProvider.getBestLocationEngine(navigationOptions.applicationContext));
+    method public static com.mapbox.navigation.core.MapboxNavigation create(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field public static final com.mapbox.navigation.core.MapboxNavigationProvider! INSTANCE;
   }

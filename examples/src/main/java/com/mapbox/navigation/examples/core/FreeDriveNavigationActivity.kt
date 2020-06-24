@@ -55,12 +55,8 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
-        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-                this,
-                Utils.getMapboxAccessToken(this)
-        )
-
-        val updatedOptions = mapboxNavigationOptions.toBuilder()
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
                 .tilesUri("https://api-routing-tiles-staging.tilestream.net")
                 .tilesVersion("2020_02_02-03_00_00")
@@ -69,8 +65,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             .build()
 
         mapboxNavigation = MapboxNavigation(
-                applicationContext,
-                updatedOptions
+                mapboxNavigationOptions
         )
         initListeners()
     }

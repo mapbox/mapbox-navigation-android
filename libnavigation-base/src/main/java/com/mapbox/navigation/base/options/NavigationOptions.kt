@@ -1,5 +1,6 @@
 package com.mapbox.navigation.base.options
 
+import android.content.Context
 import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 
@@ -22,6 +23,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * in such a way as to project the location forward along the current trajectory so as to
  * appear more in sync with the users ground-truth location
  *
+ * @param applicationContext the Context of the Android Application
  * @param accessToken [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
  * @param distanceFormatter [DistanceFormatter] for format distances showing in notification during navigation
  * @param onboardRouterOptions [OnboardRouterOptions] defines configuration for the default on-board router
@@ -31,6 +33,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param builder [Builder] used the create the [NavigationOptions]
  */
 data class NavigationOptions(
+    val applicationContext: Context,
     val accessToken: String?,
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
@@ -50,8 +53,9 @@ data class NavigationOptions(
     /**
      * Build a new [NavigationOptions]
      */
-    class Builder {
-        private var _accessToken: String? = null
+    class Builder(context: Context) {
+        private val applicationContext = context.applicationContext
+        private var accessToken: String? = null
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
@@ -64,7 +68,7 @@ data class NavigationOptions(
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
          */
         fun accessToken(accessToken: String?) =
-            apply { this._accessToken = accessToken }
+            apply { this.accessToken = accessToken }
 
         /**
          * Defines the type of device creating localization data
@@ -114,7 +118,8 @@ data class NavigationOptions(
          */
         fun build(): NavigationOptions {
             return NavigationOptions(
-                accessToken = _accessToken,
+                applicationContext = applicationContext,
+                accessToken = accessToken,
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,

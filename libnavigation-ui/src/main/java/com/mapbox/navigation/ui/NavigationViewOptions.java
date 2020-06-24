@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui;
 
+import android.content.Context;
+
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -170,9 +172,9 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
     public abstract NavigationViewOptions build();
   }
 
-  public static Builder builder() {
+  public static Builder builder(Context context) {
     return new AutoValue_NavigationViewOptions.Builder()
-        .navigationOptions(new NavigationOptions.Builder().build())
+        .navigationOptions(new NavigationOptions.Builder(context).build())
         .roundingIncrement(Rounding.INCREMENT_FIFTY)
         .shouldSimulateRoute(false)
         .waynameChipEnabled(true)

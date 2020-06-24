@@ -58,13 +58,11 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_replay_route_layout)
         mapView.onCreate(savedInstanceState)
 
-        val mapboxNavigationOptions = MapboxNavigation.defaultNavigationOptions(
-            this,
-            Utils.getMapboxAccessToken(this)
-        )
+        val mapboxNavigationOptions = MapboxNavigation
+            .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .build()
 
         mapboxNavigation = MapboxNavigation(
-            applicationContext,
             mapboxNavigationOptions,
             locationEngine = ReplayLocationEngine(mapboxReplayer)
         ).apply {

@@ -1,18 +1,25 @@
 package com.mapbox.navigation.base.options
 
+import android.content.Context
 import android.text.SpannableString
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NavigationOptionsTest {
 
+    val context: Context = mockk {
+        every { applicationContext } returns mockk()
+    }
+
     @Test
     fun whenBuilderBuildWithNoValuesCalledThenDefaultValuesUsed() {
-        val options = NavigationOptions.Builder().build()
+        val options = NavigationOptions.Builder(context).build()
 
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
@@ -30,7 +37,7 @@ class NavigationOptionsTest {
             }
         }
 
-        val options = NavigationOptions.Builder()
+        val options = NavigationOptions.Builder(context)
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)
@@ -51,7 +58,7 @@ class NavigationOptionsTest {
             }
         }
 
-        var options = NavigationOptions.Builder()
+        var options = NavigationOptions.Builder(context)
             .timeFormatType(timeFormat)
             .navigatorPredictionMillis(navigatorPredictionMillis)
             .distanceFormatter(distanceFormatter)

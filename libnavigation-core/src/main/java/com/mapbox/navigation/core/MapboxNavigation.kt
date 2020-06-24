@@ -26,6 +26,7 @@ import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -65,15 +66,15 @@ private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default OffboardRouter. " +
-        "Also see MapboxNavigation#defaultNavigationOptions"
+        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default OnboardRouter. " +
-        "Also see MapboxNavigation#defaultNavigationOptions"
+        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER =
     "You need to provide OnboardRouterOptions in NavigationOptions in order to use the default OnboardRouter. " +
-        "Also see MapboxNavigation#defaultNavigationOptions"
+        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access token in NavigationOptions " +
-    "Also see MapboxNavigation#defaultNavigationOptions"
+    "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 
 /**
  * ## Mapbox Navigation Core SDK
@@ -117,18 +118,16 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an ac
  * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
  * todo should we expose a "primaryRouteIndex" field instead of relying on the list's order?
  *
- * @param context activity/fragment's context
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
- * Use [defaultNavigationOptions] to set default options
+ * Use [defaultNavigationOptionsBuilder] to set default options
  * @param locationEngine used to listen for raw location updates
  * @param locationEngineRequest used to request raw location updates
  */
 class MapboxNavigation
 @JvmOverloads
 constructor(
-    private val context: Context,
     private val navigationOptions: NavigationOptions,
-    val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(context.applicationContext),
+    val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(navigationOptions.applicationContext),
     locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
         .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
         .build()
@@ -141,7 +140,7 @@ constructor(
     private val tripService: TripService
     private val tripSession: TripSession
     private val navigationSession: NavigationSession
-    private val navigationAccountsSession = NavigationAccountsSession(context)
+    private val navigationAccountsSession = NavigationAccountsSession(navigationOptions.applicationContext)
     private val logger: Logger
     private val internalRoutesObserver = createInternalRoutesObserver()
     private val internalOffRouteObserver = createInternalOffRouteObserver()
@@ -164,10 +163,8 @@ constructor(
         )
         directionsSession.registerRoutesObserver(internalRoutesObserver)
         directionsSession.registerRoutesObserver(navigationSession)
-        val notification: TripNotification = MapboxModuleProvider.createModule(
-            MapboxModuleType.NavigationTripNotification,
-            ::paramsProvider
-        )
+        val notification: TripNotification = MapboxModuleProvider
+            .createModule(MapboxModuleType.NavigationTripNotification, ::paramsProvider)
         if (notification.javaClass.name == MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME) {
             notificationChannelField =
                 notification.javaClass.getDeclaredField(MAPBOX_NOTIFICATION_ACTION_CHANNEL).apply {
@@ -175,7 +172,7 @@ constructor(
                 }
         }
         tripService = NavigationComponentProvider.createTripService(
-            context.applicationContext,
+            navigationOptions.applicationContext,
             notification,
             logger
         )
@@ -196,13 +193,13 @@ constructor(
                 Message("MapboxMetricsReporter.init from MapboxNavigation main")
             )
             MapboxMetricsReporter.init(
-                context,
+                navigationOptions.applicationContext,
                 accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
                 obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
             MapboxNavigationTelemetry.initialize(
-                context.applicationContext,
+                navigationOptions.applicationContext,
                 this,
                 MapboxMetricsReporter,
                 locationEngine.javaClass.name,
@@ -616,13 +613,13 @@ constructor(
                     MapboxModuleType.NavigationOffboardRouter,
                     ::paramsProvider
                 ),
-                NetworkStatusService::class.java to NetworkStatusService(context.applicationContext)
+                NetworkStatusService::class.java to NetworkStatusService(navigationOptions.applicationContext)
             )
             MapboxModuleType.NavigationOffboardRouter -> arrayOf(
                 String::class.java to (accessToken
                     ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
-                Context::class.java to context,
-                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
+                Context::class.java to navigationOptions.applicationContext,
+                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
             )
             MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
@@ -632,11 +629,10 @@ constructor(
                     OnboardRouterOptions::class.java to (navigationOptions.onboardRouterOptions
                         ?: throw RuntimeException(MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER)),
                     Logger::class.java to logger,
-                    SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(context)
+                    SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
                 )
             }
             MapboxModuleType.NavigationTripNotification -> arrayOf(
-                Context::class.java to context.applicationContext,
                 NavigationOptions::class.java to navigationOptions
             )
             MapboxModuleType.CommonLogger -> arrayOf()
@@ -701,12 +697,12 @@ constructor(
          * @return default [NavigationOptions]
          */
         @JvmStatic
-        fun defaultNavigationOptions(context: Context, accessToken: String?): NavigationOptions {
+        fun defaultNavigationOptionsBuilder(context: Context, accessToken: String?): NavigationOptions.Builder {
             val distanceFormatter = MapboxDistanceFormatter.builder()
                 .withUnitType(VoiceUnit.UNDEFINED)
                 .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
                 .build(context)
-            val builder = NavigationOptions.Builder()
+            val builder = NavigationOptions.Builder(context)
                 .accessToken(accessToken)
                 .timeFormatType(TimeFormat.NONE_SPECIFIED)
                 .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
@@ -717,7 +713,7 @@ constructor(
                 .build()
             builder.onboardRouterOptions(onboardRouterOptions)
 
-            return builder.build()
+            return builder
         }
     }
 }
