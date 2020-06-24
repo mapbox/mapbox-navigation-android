@@ -25,6 +25,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
 
   private boolean isMuted;
   private boolean languageSupported = false;
+  private VoiceListener voiceListener;
 
   /**
    * Creates an instance of {@link AndroidSpeechPlayer}.
@@ -33,17 +34,14 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    * @param language to initialize locale to set
    */
   AndroidSpeechPlayer(Context context, final String language, final VoiceListener voiceListener) {
-    textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
-      @Override
-      public void onInit(int status) {
-        boolean ableToInitialize = status == TextToSpeech.SUCCESS && language != null;
-        if (!ableToInitialize) {
-          Timber.e("There was an error initializing native TTS");
-          return;
-        }
-        setVoiceListener(voiceListener);
-        initializeWithLanguage(new Locale(language));
+    this.voiceListener = voiceListener;
+    textToSpeech = new TextToSpeech(context, status -> {
+      boolean ableToInitialize = status == TextToSpeech.SUCCESS && language != null;
+      if (!ableToInitialize) {
+        return;
       }
+      setVoiceListener(voiceListener);
+      initializeWithLanguage(new Locale(language));
     });
   }
 
@@ -58,6 +56,9 @@ class AndroidSpeechPlayer implements SpeechPlayer {
       && !TextUtils.isEmpty(voiceInstructions.announcement());
     boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;
     if (!canPlay) {
+      if (voiceListener != null) {
+        voiceListener.onDone();
+      }
       return;
     }
 

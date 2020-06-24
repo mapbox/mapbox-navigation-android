@@ -11,7 +11,7 @@ class UtteranceListener extends UtteranceProgressListener {
 
   @Override
   public void onStart(String utteranceId) {
-    voiceListener.onStart();
+    voiceListener.onStart(SpeechPlayerState.OFFLINE_PLAYING);
   }
 
   @Override
@@ -22,5 +22,6 @@ class UtteranceListener extends UtteranceProgressListener {
   @Override
   public void onError(String utteranceId) {
     // Intentionally empty
+    voiceListener.onDone();
   }
 }

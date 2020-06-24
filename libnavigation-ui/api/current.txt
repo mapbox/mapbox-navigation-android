@@ -634,6 +634,16 @@ package com.mapbox.navigation.ui.voice {
     ctor public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader!);
   }
 
+  public enum SpeechPlayerState {
+    enum_constant public static final com.mapbox.navigation.ui.voice.SpeechPlayerState IDLE;
+    enum_constant public static final com.mapbox.navigation.ui.voice.SpeechPlayerState OFFLINE_PLAYING;
+    enum_constant public static final com.mapbox.navigation.ui.voice.SpeechPlayerState ONLINE_PLAYING;
+  }
+
+  public interface SpeechPlayerStateChangeObserver {
+    method public void onStateChange(com.mapbox.navigation.ui.voice.SpeechPlayerState state);
+  }
+
   public class VoiceInstructionLoader {
     ctor public VoiceInstructionLoader(android.content.Context!, String!, okhttp3.Cache!);
     method public void cacheInstructions(java.util.List<java.lang.String!>!);
