@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.map;
 import android.content.Context;
 import android.content.res.Resources;
 
+import android.util.Log;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -62,6 +63,7 @@ class MapPaddingAdjustor {
     Resources resources = mapView.getContext().getResources();
     int waynameLayoutHeight = (int) resources.getDimension(R.dimen.wayname_view_height);
     int topPadding = defaultTopPadding - (waynameLayoutHeight * WAYNAME_PADDING_MULTIPLIER);
+    Log.d("MapPaddingAdjustor", "topPadding:" + topPadding);
     return new int[] {0, topPadding, 0, 0};
   }
 

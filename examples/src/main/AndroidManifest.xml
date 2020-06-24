@@ -251,7 +251,7 @@
         <activity
             android:name=".core.SummaryBottomSheetActivity"
             android:label="@string/title_summary_bottom_sheet"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />

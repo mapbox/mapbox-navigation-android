@@ -3,7 +3,6 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageButton
@@ -21,7 +20,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener
 import com.mapbox.mapboxsdk.location.modes.CameraMode
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -44,8 +42,11 @@ import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.mapView
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.recenterBtn
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.startNavigation
+import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.summaryBottomSheet
 import java.lang.ref.WeakReference
-import kotlinx.android.synthetic.main.activity_summary_bottom_sheet.*
 
 /**
  * This activity shows how to integrate the
@@ -192,9 +193,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         startNavigation.visibility = VISIBLE
         startNavigation.isEnabled = false
         summaryBottomSheet.visibility = GONE
-        summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet).apply {
-            isHideable = false
-        }
         recenterBtn.hide()
         routeOverviewButton = findViewById(R.id.routeOverviewBtn)
         cancelBtn = findViewById(R.id.cancelBtn)
@@ -222,14 +220,11 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
             navigationMapboxMap?.addProgressChangeListener(mapboxNavigation!!)
-            navigationMapboxMap?.addOnCameraTrackingChangedListener(cameraTrackingChangedListener)
             if (mapboxNavigation?.getRoutes()?.isNotEmpty() == true) {
                 navigationMapboxMap?.startCamera(mapboxNavigation?.getRoutes()!![0])
             }
             mapboxNavigation?.startTripSession()
         }
-
-        summaryBehavior.setBottomSheetCallback(bottomSheetCallback)
 
         routeOverviewButton.setOnClickListener {
             navigationMapboxMap?.showRouteOverview(routeOverviewPadding)
@@ -265,9 +260,9 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun isLocationTracking(cameraMode: Int): Boolean {
         return cameraMode == CameraMode.TRACKING ||
-            cameraMode == CameraMode.TRACKING_COMPASS ||
-            cameraMode == CameraMode.TRACKING_GPS ||
-            cameraMode == CameraMode.TRACKING_GPS_NORTH
+                cameraMode == CameraMode.TRACKING_COMPASS ||
+                cameraMode == CameraMode.TRACKING_GPS ||
+                cameraMode == CameraMode.TRACKING_GPS_NORTH
     }
 
     private fun updateCameraOnNavigationStateChange(
@@ -322,33 +317,6 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             summaryBottomSheet.update(routeProgress)
-        }
-    }
-
-    private val cameraTrackingChangedListener = object : OnCameraTrackingChangedListener {
-        override fun onCameraTrackingChanged(currentMode: Int) {
-            if (isLocationTracking(currentMode)) {
-                summaryBehavior.isHideable = false
-                summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
-        override fun onCameraTrackingDismissed() {
-            if (mapboxNavigation?.getTripSessionState() == TripSessionState.STARTED) {
-                summaryBehavior.isHideable = true
-                summaryBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
-        }
-    }
-
-    private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
-        override fun onStateChanged(bottomSheet: View, newState: Int) {
-            if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
-                recenterBtn.show()
-            }
-        }
-
-        override fun onSlide(bottomSheet: View, slideOffset: Float) {
         }
     }
 
