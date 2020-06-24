@@ -169,7 +169,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     private fun retrieveOfflineVersionFromPreferences(): String {
         val context = getApplication<Application>()
         return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(context.getString(R.string.offline_version_key), "")
+            .getString(context.getString(R.string.offline_version_key), "") ?: ""
     }
 
     private fun retrieveProfileFromPreferences(): String {
@@ -181,7 +181,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
                         R.string
                             .default_route_profile
                     )
-                )
+                ) ?: context.getString(R.string.default_route_profile)
         )
     }
 
