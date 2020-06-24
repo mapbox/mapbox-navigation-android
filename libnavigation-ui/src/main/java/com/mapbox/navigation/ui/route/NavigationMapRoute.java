@@ -175,11 +175,13 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
     if (directionsRoutes.isEmpty()) {
+      cancelVanishingRouteLineAnimator();
       routeLine.draw(directionsRoutes);
     } else if (!CompareUtils.areEqualContentsIgnoreOrder(
         routeLine.retrieveDirectionsRoutes(),
         directionsRoutes)
     ) {
+      cancelVanishingRouteLineAnimator();
       routeLine.draw(directionsRoutes);
     }
   }
@@ -362,6 +364,12 @@ public class NavigationMapRoute implements LifecycleObserver {
   private void shutdownVanishingRouteLineAnimator() {
     if (this.vanishingRouteLineAnimator != null) {
       this.vanishingRouteLineAnimator.removeAllUpdateListeners();
+      cancelVanishingRouteLineAnimator();
+    }
+  }
+
+  private void cancelVanishingRouteLineAnimator() {
+    if (this.vanishingRouteLineAnimator != null) {
       this.vanishingRouteLineAnimator.cancel();
     }
   }
