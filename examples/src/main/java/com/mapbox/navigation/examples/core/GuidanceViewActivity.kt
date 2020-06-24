@@ -80,25 +80,28 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             val cameraPosition = CameraPosition.Builder()
-                    .target(LatLng(destination.latitude(), destination.longitude()))
-                    .zoom(16.5)
-                    .build()
+                .target(LatLng(destination.latitude(), destination.longitude()))
+                .zoom(16.5)
+                .build()
             mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true).also {
                 it.addProgressChangeListener(mapboxNavigation)
             }
 
+            // Use the same token, you are using to fetch directionsRoute
+            instructionView.setAccessToken(Utils.getMapboxAccessToken(this))
+
             // Ideally we should use Mapbox.getAccessToken(), but to show GuidanceView we need a
             // specific access token for route request.
             mapboxNavigation.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                            .accessToken(Utils.getMapboxAccessToken(this))
-                            .coordinates(origin, null, destination)
-                            .alternatives(true)
-                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                            .bannerInstructions(true)
-                            .build(),
-                    routesReqCallback
+                RouteOptions.builder().applyDefaultParams()
+                    .accessToken(Utils.getMapboxAccessToken(this))
+                    .coordinates(origin, null, destination)
+                    .alternatives(true)
+                    .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                    .bannerInstructions(true)
+                    .build(),
+                routesReqCallback
             )
 
             mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
