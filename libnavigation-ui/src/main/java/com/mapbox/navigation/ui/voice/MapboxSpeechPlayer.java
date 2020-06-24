@@ -50,7 +50,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
    * @param voiceInstructionLoader voice instruction loader
    */
   MapboxSpeechPlayer(Context context, @NonNull VoiceListener voiceListener,
-                     VoiceInstructionLoader voiceInstructionLoader) {
+      VoiceInstructionLoader voiceInstructionLoader) {
     this.voiceListener = voiceListener;
     this.voiceInstructionLoader = voiceInstructionLoader;
     setupCaches(context);
@@ -191,7 +191,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mp) {
-        voiceListener.onStart();
+        voiceListener.onStart(SpeechPlayerState.ONLINE_PLAYING);
         isPlaying = true;
         mp.start();
       }

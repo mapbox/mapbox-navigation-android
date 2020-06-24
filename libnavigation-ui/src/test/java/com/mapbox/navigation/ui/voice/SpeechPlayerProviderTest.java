@@ -9,8 +9,11 @@ import org.junit.Test;
 import java.util.Locale;
 
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SpeechPlayerProviderTest {
@@ -95,6 +98,45 @@ public class SpeechPlayerProviderTest {
     SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
 
     assertTrue(speechPlayer instanceof MapboxSpeechPlayer);
+  }
+
+  @Test
+  public void offLinePlaying_alwaysReturnsNullSpeechPlayer() {
+    SpeechPlayerProvider provider = buildSpeechPlayerProvider(true);
+    provider.onSpeechPlayerStateChanged(SpeechPlayerState.OFFLINE_PLAYING);
+
+    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+
+    assertNull(speechPlayer);
+  }
+
+  @Test
+  public void noCacheNoConnectivityOnlinePlaying_alwaysReturnsNullSpeechPlayer() {
+    Context context = mock(Context.class);
+    String language = Locale.US.getLanguage();
+    VoiceInstructionLoader voiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    when(voiceInstructionLoader.hasCache()).thenReturn(false);
+    ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(connectivityStatus.isConnectedFast()).thenReturn(false);
+    SpeechPlayerProvider provider = new SpeechPlayerProvider(context, language, true,
+            voiceInstructionLoader, connectivityStatus);
+    provider.onSpeechPlayerStateChanged(SpeechPlayerState.ONLINE_PLAYING);
+
+    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+
+    assertNull(speechPlayer);
+  }
+
+  @Test
+  public void speechPlayerStateChanged_observerCalled() {
+    SpeechPlayerProvider provider = buildSpeechPlayerProvider(true);
+    SpeechPlayerStateChangeObserver observer = mock(SpeechPlayerStateChangeObserver.class);
+    provider.setSpeechPlayerStateChangeObserver(observer);
+    SpeechPlayerState state = mock(SpeechPlayerState.class);
+
+    provider.onSpeechPlayerStateChanged(state);
+
+    verify(observer).onStateChange(state);
   }
 
   private SpeechPlayerProvider buildSpeechPlayerProvider(boolean voiceLanguageSupported) {

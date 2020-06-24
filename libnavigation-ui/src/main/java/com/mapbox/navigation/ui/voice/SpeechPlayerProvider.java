@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
@@ -31,6 +32,10 @@ public class SpeechPlayerProvider {
   private List<SpeechPlayer> speechPlayers = new ArrayList<>(2);
   private VoiceInstructionLoader voiceInstructionLoader;
   private ConnectivityStatusProvider connectivityStatus;
+  @NonNull
+  private SpeechPlayerState speechPlayerState = SpeechPlayerState.IDLE;
+  @Nullable
+  private SpeechPlayerStateChangeObserver observer = null;
 
   /**
    * Constructed when creating an instance of {@link NavigationSpeechPlayer}.
@@ -54,10 +59,18 @@ public class SpeechPlayerProvider {
   }
 
   SpeechPlayer retrieveSpeechPlayer() {
+    if (speechPlayerState == SpeechPlayerState.OFFLINE_PLAYING) {
+      return null;
+    }
+
     if (voiceInstructionLoader.hasCache() || connectivityStatus.isConnectedFast()) {
+      speechPlayerState = SpeechPlayerState.ONLINE_PLAYING;
       return speechPlayers.get(FIRST_PLAYER);
-    } else {
+    } else if (speechPlayerState == SpeechPlayerState.IDLE) {
+      speechPlayerState = SpeechPlayerState.OFFLINE_PLAYING;
       return androidSpeechPlayer;
+    } else {
+      return null;
     }
   }
 
@@ -81,6 +94,17 @@ public class SpeechPlayerProvider {
     for (SpeechPlayer player : speechPlayers) {
       player.onDestroy();
     }
+  }
+
+  void onSpeechPlayerStateChanged(@NonNull SpeechPlayerState speechPlayerState) {
+    this.speechPlayerState = speechPlayerState;
+    if (observer != null) {
+      observer.onStateChange(speechPlayerState);
+    }
+  }
+
+  void setSpeechPlayerStateChangeObserver(SpeechPlayerStateChangeObserver observer) {
+    this.observer = observer;
   }
 
   private void initialize(@NonNull Context context, String language,
