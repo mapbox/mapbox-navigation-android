@@ -15,6 +15,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.internal.building.BuildingFootprintHighlightLayer
@@ -47,7 +48,11 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
         setContentView(R.layout.activity_final_destination_arrival_building_highlight)
 
         navigationView.onCreate(savedInstanceState)
-        navigationView.initialize(this, getInitialCameraPosition())
+        navigationView.initialize(
+            this,
+            getInitialCameraPosition(),
+            Utils.getMapboxAccessToken(this)
+        )
     }
 
     override fun onLowMemory() {
@@ -183,9 +188,9 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
     private fun getInitialCameraPosition(): CameraPosition {
         val originCoordinate = route.routeOptions()?.coordinates()?.get(0)
         return CameraPosition.Builder()
-                .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
-                .zoom(15.0)
-                .build()
+            .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
+            .zoom(15.0)
+            .build()
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {

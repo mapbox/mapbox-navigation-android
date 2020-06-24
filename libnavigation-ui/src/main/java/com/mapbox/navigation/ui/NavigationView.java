@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageButton;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -20,7 +19,6 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelProviders;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -35,11 +33,11 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.UiSettings;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
+import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
-import com.mapbox.navigation.base.TimeFormat;
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
@@ -79,7 +77,6 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  * and ACCESS_COARSE_LOCATION have already been granted.
  * <p>
  * A Mapbox access token must also be set by the developer (to initialize navigation).
- *
  */
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
     NavigationContract.View {
@@ -450,7 +447,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   /**
    * Call this when the navigation session needs to end navigation without finishing the whole view
-   *
    */
   public void stopNavigation() {
     navigationPresenter.onNavigationStopped();
@@ -464,9 +460,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * which will fire the ready events for this view.
    *
    * @param onNavigationReadyCallback to be set to this view
+   * @param accessToken access token used to make  Directions API/Map Matching request
    */
-  public void initialize(OnNavigationReadyCallback onNavigationReadyCallback) {
+  public void initialize(OnNavigationReadyCallback onNavigationReadyCallback, String accessToken) {
     onNavigationReadyCallbacks.add(onNavigationReadyCallback);
+    instructionView.setAccessToken(accessToken);
     if (!isMapInitialized) {
       mapView.getMapAsync(this);
     } else {
@@ -485,9 +483,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param onNavigationReadyCallback to be set to this view
    * @param initialMapCameraPosition to be shown once the map is ready
+   * @param accessToken access token used to make Directions API/Map Matching request
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback,
-      @NonNull CameraPosition initialMapCameraPosition) {
+      @NonNull CameraPosition initialMapCameraPosition, String accessToken) {
+    instructionView.setAccessToken(accessToken);
     this.initialMapCameraPosition = initialMapCameraPosition;
     onNavigationReadyCallbacks.add(onNavigationReadyCallback);
     if (!isMapInitialized) {

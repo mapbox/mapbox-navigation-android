@@ -9,6 +9,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
@@ -22,8 +23,8 @@ import kotlinx.android.synthetic.main.activity_navigation_view.*
  * to implement a basic turn-by-turn navigation experience.
  */
 class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback,
-        NavigationListener,
-        BannerInstructionsListener {
+    NavigationListener,
+    BannerInstructionsListener {
 
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
@@ -34,7 +35,11 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback,
         setContentView(R.layout.activity_navigation_view)
 
         navigationView.onCreate(savedInstanceState)
-        navigationView.initialize(this, getInitialCameraPosition())
+        navigationView.initialize(
+            this,
+            getInitialCameraPosition(),
+            Utils.getMapboxAccessToken(this)
+        )
     }
 
     override fun onLowMemory() {
@@ -121,9 +126,9 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback,
     private fun getInitialCameraPosition(): CameraPosition {
         val originCoordinate = route.routeOptions()?.coordinates()?.get(0)
         return CameraPosition.Builder()
-                .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
-                .zoom(15.0)
-                .build()
+            .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
+            .zoom(15.0)
+            .build()
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {

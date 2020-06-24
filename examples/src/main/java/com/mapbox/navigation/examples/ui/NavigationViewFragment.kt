@@ -11,6 +11,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.NavigationListener
@@ -41,7 +42,13 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navigationView.onCreate(savedInstanceState)
-        navigationView.initialize(this, getInitialCameraPosition())
+        activity?.let {
+            navigationView.initialize(
+                this,
+                getInitialCameraPosition(),
+                Utils.getMapboxAccessToken(it)
+            )
+        }
     }
 
     override fun onLowMemory() {
@@ -121,9 +128,9 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
     private fun getInitialCameraPosition(): CameraPosition {
         val originCoordinate = route.routeOptions()?.coordinates()?.get(0)
         return CameraPosition.Builder()
-                .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
-                .zoom(15.0)
-                .build()
+            .target(LatLng(originCoordinate!!.latitude(), originCoordinate.longitude()))
+            .zoom(15.0)
+            .build()
     }
 
     private fun getDirectionsRoute(): DirectionsRoute {

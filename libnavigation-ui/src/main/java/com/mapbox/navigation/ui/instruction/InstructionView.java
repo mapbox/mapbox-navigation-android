@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,27 +27,24 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
-
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.libnavigation.ui.R;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.Rounding;
+import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
@@ -59,23 +55,23 @@ import com.mapbox.navigation.ui.SoundButton;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel;
-import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
+import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
 import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.navigation.ui.internal.junction.RouteJunction;
-import com.mapbox.navigation.ui.internal.junction.RouteJunctionModel;
-import com.mapbox.navigation.ui.NavigationConstants;
-import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
+import com.mapbox.navigation.ui.listeners.InstructionListListener;
+import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
+
+import okhttp3.OkHttpClient;
+import timber.log.Timber;
 
 import java.util.Locale;
 
-import timber.log.Timber;
-
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
+import static com.mapbox.navigation.ui.NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
 
 /**
  * A view that can be used to display upcoming maneuver information and control
@@ -91,6 +87,8 @@ import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTyp
  */
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
+  private static final String USER_AGENT_KEY = "User-Agent";
+  private static final String USER_AGENT_VALUE = "MapboxJava/";
   private static final String COMPONENT_TYPE_LANE = "lane";
   private static final long GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED = 900L;
   private static final long GUIDANCE_VIEW_HIDE_TRANSITION_SPEED = 900L;
@@ -127,6 +125,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private FeedbackButton feedbackButton;
   private LifecycleOwner lifecycleOwner;
 
+  private String accessToken;
   private String guidanceImageUrl = "";
   private RouteJunction routeJunction = null;
 
@@ -175,6 +174,15 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
+   * Set the access token used to make Directions API/Map matching request
+   *
+   * @param accessToken access token
+   */
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  /**
    * Subscribes to a {@link NavigationViewModel} for
    * updates from {@link androidx.lifecycle.LiveData}.
    * <p>
@@ -187,53 +195,41 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.retrieveInstructionModel().observe(lifecycleOwner, new Observer<InstructionModel>() {
-      @Override
-      public void onChanged(@Nullable InstructionModel model) {
-        if (model != null) {
-          updateDataFromInstruction(model);
-        }
+    navigationViewModel.retrieveInstructionModel().observe(lifecycleOwner, model -> {
+      if (model != null) {
+        updateDataFromInstruction(model);
       }
     });
     navigationViewModel.retrieveBannerInstructionModel()
-        .observe(lifecycleOwner, new Observer<BannerInstructionModel>() {
-          @Override
-          public void onChanged(@Nullable BannerInstructionModel model) {
-            if (model != null) {
-              updateManeuverView(
-                  model.retrievePrimaryManeuverType(),
-                  model.retrievePrimaryManeuverModifier(),
-                  model.retrievePrimaryRoundaboutAngle(),
-                  model.retrieveDrivingSide()
-              );
-              updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-              updateSubStep(model.retrieveSubBannerText(),
-                  model.retrievePrimaryManeuverType(), model.retrieveDrivingSide());
-            }
+        .observe(lifecycleOwner, model -> {
+          if (model != null) {
+            updateManeuverView(
+                model.retrievePrimaryManeuverType(),
+                model.retrievePrimaryManeuverModifier(),
+                model.retrievePrimaryRoundaboutAngle(),
+                model.retrieveDrivingSide()
+            );
+            updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
+            updateSubStep(model.retrieveSubBannerText(),
+                model.retrievePrimaryManeuverType(), model.retrieveDrivingSide());
           }
         });
-    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean isOffRoute) {
-        if (isOffRoute != null) {
-          if (isOffRoute) {
-            showRerouteState();
-          } else if (isRerouting) {
-            hideRerouteState();
-            alertView.showReportProblem();
-          }
-          isRerouting = isOffRoute;
+    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, isOffRoute -> {
+      if (isOffRoute != null) {
+        if (isOffRoute) {
+          showRerouteState();
+        } else if (isRerouting) {
+          hideRerouteState();
+          alertView.showReportProblem();
         }
+        isRerouting = isOffRoute;
       }
     });
-    navigationViewModel.retrieveRouteJunctionModelUpdates().observe(lifecycleOwner, new Observer<RouteJunctionModel>() {
-      @Override
-      public void onChanged(RouteJunctionModel routeJunctionModel) {
-        if (routeJunctionModel != null) {
-          determineGuidanceView(routeJunctionModel.getRouteProgress());
-        } else {
-          animateHideGuidanceViewImage();
-        }
+    navigationViewModel.retrieveRouteJunctionModelUpdates().observe(lifecycleOwner, routeJunctionModel -> {
+      if (routeJunctionModel != null) {
+        determineGuidanceView(routeJunctionModel.getRouteProgress());
+      } else {
+        animateHideGuidanceViewImage();
       }
     });
     subscribeAlertView();
@@ -306,7 +302,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void showFeedbackBottomSheet() {
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
-      long duration = NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
+      long duration = FEEDBACK_BOTTOM_SHEET_DURATION;
       FeedbackBottomSheet.newInstance(this, duration)
           .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
@@ -706,10 +702,20 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (currentStepTotalDistance <= metersBeforeShowGuidanceView) {
       routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
       animateShowGuidanceViewImage();
-      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+      new Picasso
+          .Builder(getContext())
+          .downloader(new OkHttp3Downloader(getClient()))
+          .build()
+          .load(routeJunction.getGuidanceImageUrl())
+          .into(guidanceViewImage);
     } else if (currentStepDistanceTraveled + metersBeforeShowGuidanceView >= currentStepTotalDistance) {
       routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
-      new Picasso.Builder(getContext()).build().load(routeJunction.getGuidanceImageUrl()).into(guidanceViewImage);
+      new Picasso
+          .Builder(getContext())
+          .downloader(new OkHttp3Downloader(getClient()))
+          .build()
+          .load(routeJunction.getGuidanceImageUrl())
+          .into(guidanceViewImage);
       animateShowGuidanceViewImage();
     }
   }
@@ -723,7 +729,14 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private String appendTokenTo() {
-    return guidanceImageUrl + "&access_token=" + Mapbox.getAccessToken();
+    return guidanceImageUrl + "&access_token=" + accessToken;
+  }
+
+  private OkHttpClient getClient() {
+    return new OkHttpClient.Builder().addInterceptor(chain ->
+        chain.proceed(
+          chain.request().newBuilder().addHeader(USER_AGENT_KEY, USER_AGENT_VALUE).build())
+    ).build();
   }
 
   private void onInstructionListVisibilityChanged(boolean visible) {
@@ -748,18 +761,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void initializeButtonListeners() {
-    feedbackButton.addOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        showFeedbackBottomSheet();
-      }
-    });
-    soundButton.addOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationViewModel.setMuted(soundButton.toggleMute());
-      }
-    });
+    feedbackButton.addOnClickListener(view -> showFeedbackBottomSheet());
+    soundButton.addOnClickListener(view -> navigationViewModel.setMuted(soundButton.toggleMute()));
   }
 
   private void showButtons() {
@@ -785,15 +788,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * and use custom animations to hide and show the instructions /sound layout
    */
   private void initializePortraitListListener() {
-    instructionLayout.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View instructionView) {
-        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
-        if (!instructionsVisible) {
-          showInstructionList();
-        } else {
-          hideInstructionList();
-        }
+    instructionLayout.setOnClickListener(instructionView -> {
+      boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+      if (!instructionsVisible) {
+        showInstructionList();
+      } else {
+        hideInstructionList();
       }
     });
   }
@@ -803,15 +803,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * the instruction text layout and the constraints are adjusted before animating
    */
   private void initializeLandscapeListListener() {
-    instructionLayoutText.setOnClickListener(new OnClickListener() {
-      @Override
-      public void onClick(View instructionLayoutText) {
-        boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
-        if (!instructionsVisible) {
-          showInstructionList();
-        } else {
-          hideInstructionList();
-        }
+    instructionLayoutText.setOnClickListener(instructionLayoutText -> {
+      boolean instructionsVisible = instructionListLayout.getVisibility() == VISIBLE;
+      if (!instructionsVisible) {
+        showInstructionList();
+      } else {
+        hideInstructionList();
       }
     });
   }

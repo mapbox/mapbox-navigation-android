@@ -83,8 +83,8 @@ package com.mapbox.navigation.ui {
     method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
     method public androidx.lifecycle.Lifecycle getLifecycle();
     method public void hideRecenterBtn();
-    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!);
-    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition);
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, String!);
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition, String!);
     method public boolean isRecenterButtonVisible();
     method public boolean isSummaryBottomSheetHidden();
     method public boolean isWayNameVisible();
@@ -372,6 +372,7 @@ package com.mapbox.navigation.ui.instruction {
     method public com.mapbox.navigation.ui.instruction.NavigationAlertView! retrieveAlertView();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveFeedbackButton();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
+    method public void setAccessToken(String!);
     method public void setDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter!);
     method public void setInstructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
     method public void showFeedbackBottomSheet();
