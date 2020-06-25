@@ -159,6 +159,12 @@ internal class ArrivalProgressObserverTest {
             every { currentLegProgress } returns mockk {
                 every { durationRemaining } returns 1.0
                 every { distanceRemaining } returns 15.0f
+                every { legIndex } returns 0
+            }
+            every { route } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
             }
         })
 
@@ -183,6 +189,12 @@ internal class ArrivalProgressObserverTest {
             every { currentLegProgress } returns mockk {
                 every { durationRemaining } returns 2.0
                 every { distanceRemaining } returns 8.0f
+                every { legIndex } returns 0
+            }
+            every { route } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
             }
         })
 
@@ -205,6 +217,12 @@ internal class ArrivalProgressObserverTest {
             every { currentLegProgress } returns mockk {
                 every { durationRemaining } returns 1.0
                 every { distanceRemaining } returns 15.0f
+                every { legIndex } returns 0
+            }
+            every { route } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
             }
         }
         every { tripSession.getRouteProgress() } returns routeProgress
@@ -232,6 +250,12 @@ internal class ArrivalProgressObserverTest {
             every { currentLegProgress } returns mockk {
                 every { durationRemaining } returns 360.0
                 every { distanceRemaining } returns 80.0f
+                every { legIndex } returns 0
+            }
+            every { route } returns mockk {
+                every { legs() } returns listOf(
+                    mockk(), mockk(), mockk() // This route has three legs
+                )
             }
         })
 
@@ -240,28 +264,26 @@ internal class ArrivalProgressObserverTest {
 
     @Test
     fun `should navigate to next waypoint automatically by default`() {
-        every { tripSession.getRouteProgress() } returns mockk {
+        val routeProgress: RouteProgress = mockk {
             every { route } returns mockk {
+                every { currentState } returns RouteProgressState.LOCATION_TRACKING
                 every { legs() } returns listOf(
                     mockk(), mockk(), mockk() // This route has three legs
                 )
                 every { routeIndex() } returns "0"
                 every { currentLegProgress } returns mockk {
+                    every { durationRemaining } returns 0.0
+                    every { distanceRemaining } returns 0.0f
                     every { legIndex } returns 1
                 }
             }
         }
+        every { tripSession.getRouteProgress() } returns routeProgress
         every { tripSession.updateLegIndex(2) } returns mockk {
             every { legIndex } returns 2
         }
 
-        arrivalProgressObserver.onRouteProgressChanged(mockk {
-            every { currentState } returns RouteProgressState.LOCATION_TRACKING
-            every { currentLegProgress } returns mockk {
-                every { durationRemaining } returns 0.0
-                every { distanceRemaining } returns 0.0f
-            }
-        })
+        arrivalProgressObserver.onRouteProgressChanged(routeProgress)
 
         verify { tripSession.updateLegIndex(2) }
     }

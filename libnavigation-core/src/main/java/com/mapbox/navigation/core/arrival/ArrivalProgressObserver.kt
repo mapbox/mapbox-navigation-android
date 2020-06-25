@@ -52,14 +52,19 @@ internal class ArrivalProgressObserver(
             ?: return
 
         val arrivalOptions = arrivalController.arrivalOptions()
-        if (routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE && !hasMoreLegs(routeProgress)) {
+        val hasMoreLegs = hasMoreLegs(routeProgress)
+        if (routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE && !hasMoreLegs) {
             doOnFinalDestinationArrival(routeProgress)
-        } else if (arrivalOptions.arrivalInSeconds != null) {
+        } else if (routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE && hasMoreLegs) {
+            doOnWaypointArrival(routeLegProgress)
+        } else if (arrivalOptions.arrivalInSeconds != null && hasMoreLegs) {
             checkWaypointArrivalTime(arrivalOptions.arrivalInSeconds, routeLegProgress)
-        } else if (arrivalOptions.arrivalInMeters != null) {
+        } else if (arrivalOptions.arrivalInMeters != null && hasMoreLegs) {
             checkWaypointArrivalDistance(arrivalOptions.arrivalInMeters, routeLegProgress)
         }
-        finalDestinationArrived = routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
+        if (!hasMoreLegs) {
+            finalDestinationArrived = routeProgress.currentState == RouteProgressState.ROUTE_COMPLETE
+        }
     }
 
     private fun hasMoreLegs(routeProgress: RouteProgress): Boolean {
