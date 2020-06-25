@@ -12,7 +12,7 @@ ext {
       mapboxSdkDirectionsModels : '5.2.1',
       mapboxEvents              : '6.0.0',
       mapboxCore                : '3.0.0',
-      mapboxNavigator           : '14.1.1',
+      mapboxNavigator           : '14.1.2',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
