@@ -40,7 +40,7 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
         if (hasBearing()) bearing else null,
         if (hasAltitude()) altitude.toFloat() else null,
         if (hasAccuracy()) accuracy else null,
-        provider,
+        "$time|$elapsedRealtimeNanos",
         bearingAccuracy,
         speedAccuracy,
         verticalAccuracy
