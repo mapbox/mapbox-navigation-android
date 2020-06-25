@@ -35,7 +35,8 @@ class MapboxHybridRouterTest {
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
     private val internalCallback = slot<Router.Callback>()
-    private lateinit var networkStatusService: NetworkStatusService
+    private val networkStatusService: NetworkStatusService = mockk(relaxUnitFun = true)
+    private val channel = Channel<NetworkStatus>(Channel.CONFLATED)
 
     @Before
     fun setUp() {
@@ -44,8 +45,8 @@ class MapboxHybridRouterTest {
         every { onboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
         every { offboardRouter.getRoute(routerOptions, capture(internalCallback)) } answers {}
         every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivityManager
+        every { networkStatusService.getNetworkStatusChannel() } returns channel
 
-        networkStatusService = NetworkStatusService(context)
         hybridRouter = MapboxHybridRouter(onboardRouter, offboardRouter, networkStatusService)
     }
 
@@ -181,11 +182,11 @@ class MapboxHybridRouterTest {
 
     @Test
     fun networkStatusService_cleanup_calledOnChannelClose() = runBlocking {
-        (networkStatusService.getNetworkStatusChannel() as Channel).close()
+        channel.close()
 
         hybridRouter.networkStatusJob.join()
 
-        verify { context.unregisterReceiver(any()) }
+        verify(exactly = 1) { networkStatusService.cleanup() }
     }
 
     @Test
@@ -223,9 +224,7 @@ class MapboxHybridRouterTest {
     private suspend fun disableNetworkConnection() = networkConnected(false)
 
     private suspend fun networkConnected(networkConnected: Boolean) {
-        (networkStatusService.getNetworkStatusChannel() as Channel).offer(
-            NetworkStatus(networkConnected)
-        )
+        channel.offer(NetworkStatus(networkConnected))
         // channel is listened with a coroutine. When channel is empty, coroutine suspends
         // until channel has a new value. Need some small delay to give coroutine time to wake up
         // and handle a value.
