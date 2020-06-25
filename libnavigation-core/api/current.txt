@@ -29,7 +29,9 @@ package com.mapbox.navigation.core {
     method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startLocationUpdates();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
+    method public void stopLocationUpdates();
     method public void stopTripSession();
     method public void toggleHistory(boolean isEnabled);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);

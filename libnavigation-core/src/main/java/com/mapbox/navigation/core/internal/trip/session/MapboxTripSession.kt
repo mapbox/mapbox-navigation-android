@@ -2,16 +2,12 @@ package com.mapbox.navigation.core.internal.trip.session
 
 import android.hardware.SensorEvent
 import android.location.Location
-import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
-import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
-import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.trip.service.TripService
@@ -35,6 +31,8 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -122,6 +120,7 @@ class MapboxTripSession(
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
+    private val rawLocationProvider = MapboxRawLocationProvider(locationEngine, locationEngineRequest, logger)
 
     /**
      * Return raw location
@@ -144,43 +143,57 @@ class MapboxTripSession(
     override fun getState(): TripSessionState = state
 
     /**
-     * Start MapboxTripSession
+     * Starts map matching with a foreground service. This mode starts
+     * Active Guidance when there is a route and Free Drive when no route is set.
      */
-    override fun start() {
+    override fun startTripSession() {
         if (state == TripSessionState.STARTED) {
             return
         }
         tripService.startService()
-        startLocationUpdates()
+        rawLocationProvider.requestTripSessionUpdates { rawLocation ->
+            mapMatchLocation(rawLocation)
+        }
         state = TripSessionState.STARTED
     }
 
-    private fun startLocationUpdates() {
-        locationEngine.requestLocationUpdates(
-            locationEngineRequest,
-            locationEngineCallback,
-            Looper.getMainLooper()
-        )
-        locationEngine.getLastLocation(locationEngineCallback)
-    }
-
     /**
-     * Stop MapboxTripSession
+     * Stop [startTripSession]
      */
-    override fun stop() {
+    override fun stopTripSession() {
         if (state == TripSessionState.STOPPED) {
             return
         }
         tripService.stopService()
-        stopLocationUpdates()
+        rawLocationProvider.stopTripSessionUpdates()
         ioJobController.job.cancelChildren()
         mainJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED
     }
 
-    private fun stopLocationUpdates() {
-        locationEngine.removeLocationUpdates(locationEngineCallback)
+    /**
+     * Start location updates without a service. Location updates and a trip session
+     * can be both be started, trip session will take priority. When a trip session is stopped
+     * the location updates will resume until [stopLocationUpdates] is called.
+     */
+    override fun startLocationUpdates() {
+        rawLocationProvider.requestLocationUpdates { rawLocation ->
+            locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
+            CoroutineScope(Dispatchers.IO).launch {
+                val currentDate = Date()
+                navigator.updateLocation(rawLocation, currentDate)
+                val status = navigator.getStatus(currentDate)
+                updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
+            }
+        }
+    }
+
+    /**
+     * Stop [startLocationUpdates]
+     */
+    override fun stopLocationUpdates() {
+        rawLocationProvider.stopLocationUpdates()
     }
 
     private fun reset() {
@@ -383,22 +396,7 @@ class MapboxTripSession(
         }
     }
 
-    private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-        override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.lastOrNull()?.let {
-                updateRawLocation(it)
-            }
-        }
-
-        override fun onFailure(exception: Exception) {
-            logger.d(
-                msg = Message("location on failure"),
-                tr = exception
-            )
-        }
-    }
-
-    private fun updateRawLocation(rawLocation: Location) {
+    private fun mapMatchLocation(rawLocation: Location) {
         unconditionalStatusPollingJob?.cancel()
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
@@ -436,10 +434,11 @@ class MapboxTripSession(
             navigator.getStatus(date)
         }
 
-    private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
-        enhancedLocation = location
-        locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
-    }
+    private suspend fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) =
+        withContext(Dispatchers.Main) {
+            enhancedLocation = location
+            locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
+        }
 
     private fun updateRouteProgress(progress: RouteProgress?) {
         routeProgress = progress

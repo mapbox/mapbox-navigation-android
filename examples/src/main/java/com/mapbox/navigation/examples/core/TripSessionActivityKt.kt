@@ -60,7 +60,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                     true -> {
                         mapboxMap.locationComponent.isLocationComponentEnabled = false
                         tripSession.unregisterLocationObserver(locationObserver)
-                        tripSession.stop()
+                        tripSession.stopTripSession()
                         toggleSession.text = "Start"
                         isActive = false
                     }
@@ -74,7 +74,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                         mapboxMap.locationComponent.cameraMode = CameraMode.TRACKING_GPS
                         mapboxMap.locationComponent.renderMode = RenderMode.GPS
                         tripSession.registerLocationObserver(locationObserver)
-                        tripSession.start()
+                        tripSession.startTripSession()
                         mapboxMap.locationComponent.isLocationComponentEnabled = true
                         toggleSession.text = "Stop"
                         isActive = true
@@ -144,7 +144,7 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
         mapView.onDestroy()
         if (::tripSession.isInitialized) {
             tripSession.unregisterLocationObserver(locationObserver)
-            tripSession.stop()
+            tripSession.stopTripSession()
         }
     }
 
