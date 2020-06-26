@@ -74,7 +74,7 @@ class MapboxDistanceFormatter private constructor(
     class Builder {
         private var unitType: String? = null
         private var locale: Locale? = null
-        private var roundingIncrement = 0
+        private var roundingIncrement = Rounding.INCREMENT_FIFTY
 
         /**
          * Policy for the various units of measurement, UNDEFINED uses default for locale country
