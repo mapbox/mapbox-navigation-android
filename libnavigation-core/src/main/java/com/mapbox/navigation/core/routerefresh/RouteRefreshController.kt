@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.routerefresh
 
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.route.RouteRefreshCallback
@@ -36,7 +37,7 @@ internal class RouteRefreshController(
     fun start(): Job {
         stop()
         return routerRefreshTimer.startTimer {
-            val route = tripSession.route?.takeIf { supportsRefresh(it) }
+            val route = tripSession.route?.takeIf { it.routeOptions().supportsRefresh() }
             route?.let {
                 val legIndex = tripSession.getRouteProgress()?.currentLegProgress?.legIndex ?: 0
                 directionsSession.requestRouteRefresh(
@@ -51,10 +52,16 @@ internal class RouteRefreshController(
         routerRefreshTimer.stopJobs()
     }
 
-    private fun supportsRefresh(route: DirectionsRoute?): Boolean {
-        val isTrafficProfile = route?.routeOptions()
-            ?.profile()?.equals(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-        return isTrafficProfile == true
+    private fun RouteOptions?.supportsRefresh(): Boolean {
+        if (this == null) {
+            return false
+        }
+        val isTrafficProfile = profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
+        val isOverviewFull = overview() == DirectionsCriteria.OVERVIEW_FULL
+        val hasCongestionOrMaxSpeed = annotationsList()?.any {
+            it == DirectionsCriteria.ANNOTATION_CONGESTION || it == DirectionsCriteria.ANNOTATION_MAXSPEED
+        } ?: false
+        return isTrafficProfile && isOverviewFull && hasCongestionOrMaxSpeed
     }
 
     private val routeRefreshCallback = object : RouteRefreshCallback {
