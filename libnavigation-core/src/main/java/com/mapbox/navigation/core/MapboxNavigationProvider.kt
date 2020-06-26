@@ -1,8 +1,5 @@
 package com.mapbox.navigation.core
 
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.navigation.base.options.NavigationOptions
 
 /**
@@ -17,24 +14,13 @@ object MapboxNavigationProvider {
      * Should be called before [retrieve]
      *
      * @param navigationOptions
-     * @param locationEngine
-     * @param locationEngineRequest
      */
-    @JvmOverloads
     @JvmStatic
-    fun create(
-        navigationOptions: NavigationOptions,
-        locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(navigationOptions.applicationContext),
-        locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
-    ): MapboxNavigation {
+    fun create(navigationOptions: NavigationOptions): MapboxNavigation {
         synchronized(MapboxNavigationProvider::class.java) {
             mapboxNavigation?.onDestroy()
             mapboxNavigation = MapboxNavigation(
-                navigationOptions,
-                locationEngine,
-                locationEngineRequest
+                navigationOptions
             )
 
             return mapboxNavigation!!

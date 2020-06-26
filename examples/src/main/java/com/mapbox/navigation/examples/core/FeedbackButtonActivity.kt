@@ -70,12 +70,10 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-            mapboxNavigationOptions,
-            ReplayLocationEngine(mapboxReplayer)
-        ).apply {
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
         }
 
@@ -143,7 +141,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
             mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
             mapboxReplayer.pushRealLocation(this, 0.0)
             mapboxReplayer.play()
-            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+            mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)

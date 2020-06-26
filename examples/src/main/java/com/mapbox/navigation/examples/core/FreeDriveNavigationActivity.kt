@@ -89,7 +89,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                         .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME)
                         .build()
 
-        mapboxNavigation?.locationEngine?.requestLocationUpdates(
+        mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
                 requestLocationUpdateRequest,
                 locationListenerCallback,
                 mainLooper
@@ -186,7 +186,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 
     private val tripSessionStateObserver = object : TripSessionStateObserver {

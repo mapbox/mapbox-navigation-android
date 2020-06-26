@@ -2,19 +2,35 @@ package com.mapbox.navigation.base.options
 
 import android.content.Context
 import android.text.SpannableString
+import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 class NavigationOptionsTest {
 
-    val context: Context = mockk {
-        every { applicationContext } returns mockk()
+    val context: Context = mockk()
+
+    @Before
+    fun setup() {
+        every { context.applicationContext } returns context
+
+        mockkStatic(LocationEngineProvider::class)
+        every { LocationEngineProvider.getBestLocationEngine(context) } returns mockk()
+    }
+
+    @After
+    fun teardown() {
+        unmockkStatic(LocationEngineProvider::class)
     }
 
     @Test

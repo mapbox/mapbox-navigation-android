@@ -95,7 +95,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             logger = logger
@@ -129,7 +128,7 @@ class MapboxTripSessionTest {
         verify { tripService.startService() }
         verify {
             locationEngine.requestLocationUpdates(
-                locationEngineRequest,
+                any(),
                 any(),
                 Looper.getMainLooper()
             )
@@ -253,7 +252,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -275,7 +273,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -296,7 +293,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -317,7 +313,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -338,7 +333,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -360,7 +354,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -381,7 +374,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -402,7 +394,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -421,11 +412,6 @@ class MapboxTripSessionTest {
     @Test
     fun getTripService() {
         assertEquals(tripService, tripSession.tripService)
-    }
-
-    @Test
-    fun getLocationEngine() {
-        assertEquals(locationEngine, tripSession.locationEngine)
     }
 
     @Test
@@ -526,7 +512,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -548,7 +533,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -595,7 +579,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,
@@ -629,7 +612,6 @@ class MapboxTripSessionTest {
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
-            locationEngineRequest,
             navigatorPredictionMillis,
             navigator,
             ThreadController,

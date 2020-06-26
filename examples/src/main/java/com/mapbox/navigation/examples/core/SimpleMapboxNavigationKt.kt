@@ -142,7 +142,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-            .build()
         mapboxNavigation = getMapboxNavigation(mapboxNavigationOptions)
     }
 
@@ -476,12 +475,10 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private object RestartTripSessionAction
 
-    private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
+    private fun getMapboxNavigation(optionsBuilder: NavigationOptions.Builder): MapboxNavigation {
         return if (shouldSimulateRoute()) {
-            MapboxNavigation(
-                navigationOptions = options,
-                locationEngine = ReplayLocationEngine(mapboxReplayer)
-            ).apply {
+            optionsBuilder.locationEngine(ReplayLocationEngine(mapboxReplayer))
+            MapboxNavigation(optionsBuilder.build()).apply {
                 registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 if (originalRoute == null) {
                     mapboxReplayer.pushRealLocation(applicationContext, 0.0)
@@ -489,9 +486,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 }
             }
         } else {
-            MapboxNavigation(
-                navigationOptions = options
-            )
+            MapboxNavigation(optionsBuilder.build())
         }
     }
 

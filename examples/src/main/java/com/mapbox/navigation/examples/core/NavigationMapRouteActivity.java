@@ -107,11 +107,9 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       initializeLocationComponent(mapboxMap, style);
       NavigationOptions navigationOptions = MapboxNavigation
               .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+              .locationEngine(new ReplayLocationEngine(mapboxReplayer))
               .build();
-      mapboxNavigation = new MapboxNavigation(
-              navigationOptions,
-              new ReplayLocationEngine(mapboxReplayer)
-      );
+      mapboxNavigation = new MapboxNavigation(navigationOptions);
       mapboxNavigation.registerLocationObserver(locationObserver);
       mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
       mapboxReplayer.pushRealLocation(this, 0.0);
@@ -123,7 +121,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
               .withMapboxNavigation(mapboxNavigation, true)
               .build();
 
-      mapboxNavigation.getLocationEngine().getLastLocation(locationEngineCallback);
+      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
       mapboxMap.addOnMapLongClickListener(this);
 
       if (activeRoute != null) {

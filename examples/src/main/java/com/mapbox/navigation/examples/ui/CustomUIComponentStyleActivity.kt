@@ -199,7 +199,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 mapboxReplayer.pushRealLocation(this, 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
+            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
 
             Snackbar.make(
                 findViewById(R.id.navigationLayout),
@@ -363,8 +363,9 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(this)
         mapboxNavigation = MapboxNavigation(
-            MapboxNavigation.defaultNavigationOptionsBuilder(this, accessToken).build(),
-            getLocationEngine()
+            MapboxNavigation.defaultNavigationOptionsBuilder(this, accessToken)
+                .locationEngine(getLocationEngine())
+                .build()
         )
         mapboxNavigation.apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
