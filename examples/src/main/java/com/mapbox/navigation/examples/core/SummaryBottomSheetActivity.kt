@@ -75,12 +75,10 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .locationEngine(getLocationEngine())
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-            mapboxNavigationOptions,
-            getLocationEngine()
-        ).apply {
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
         }
@@ -152,7 +150,7 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
                     Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
                         .show()
                 }

@@ -5,7 +5,6 @@ import android.location.Location
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions
 import com.mapbox.mapboxsdk.location.modes.CameraMode
@@ -27,8 +26,6 @@ import com.mapbox.navigation.trip.notification.internal.MapboxTripNotification
 import kotlinx.android.synthetic.main.activity_trip_session.*
 import timber.log.Timber
 
-const val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 1000
-const val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 500
 private const val NAVIGATOR_POLLING_DELAY = 1500L
 
 /**
@@ -112,10 +109,6 @@ class TripSessionActivityKt : AppCompatActivity(), OnMapReadyCallback {
                 MapboxLogger
             ),
             LocationEngineProvider.getBestLocationEngine(applicationContext),
-            LocationEngineRequest.Builder(UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
-                .build(),
             NAVIGATOR_POLLING_DELAY,
             logger = MapboxLogger
         )

@@ -2,7 +2,6 @@ package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.route.Router
@@ -38,14 +37,12 @@ internal object NavigationComponentProvider {
     fun createTripSession(
         tripService: TripService,
         locationEngine: LocationEngine,
-        locationEngineRequest: LocationEngineRequest,
         navigatorPredictionMillis: Long,
         navigator: MapboxNativeNavigator,
         logger: Logger
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
-        locationEngineRequest,
         navigatorPredictionMillis,
         navigator = navigator,
         logger = logger

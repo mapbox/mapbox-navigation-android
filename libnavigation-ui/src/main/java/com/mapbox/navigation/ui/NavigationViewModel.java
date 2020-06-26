@@ -211,7 +211,10 @@ public class NavigationViewModel extends AndroidViewModel {
     initializeTimeFormat(updatedOptions);
     if (!isRunning()) {
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
-      initializeNavigation(updatedOptions, locationEngine);
+      if (locationEngine != null) {
+        updatedOptions = updatedOptions.toBuilder().locationEngine(locationEngine).build();
+      }
+      initializeNavigation(updatedOptions);
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
@@ -413,14 +416,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initializeNavigation(
-          NavigationOptions options,
-          @Nullable LocationEngine locationEngine) {
-    if (locationEngine == null) {
-      navigation = new MapboxNavigation(options);
-    } else {
-      navigation = new MapboxNavigation(options, locationEngine);
-    }
+  private void initializeNavigation(NavigationOptions options) {
+    navigation = new MapboxNavigation(options);
     addNavigationListeners();
   }
 

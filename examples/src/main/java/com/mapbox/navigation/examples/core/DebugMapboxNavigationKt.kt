@@ -139,7 +139,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
 
-        val options = MapboxNavigation
+        val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
                 .tilesUri("https://api-routing-tiles-staging.tilestream.net")
@@ -147,9 +147,8 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 .internalFilePath(this)
                 .build())
             .navigatorPredictionMillis(1000L)
-            .build()
 
-        mapboxNavigation = getMapboxNavigation(options)
+        mapboxNavigation = getMapboxNavigation(optionsBuilder)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -424,20 +423,16 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private object RestartTripSessionAction
 
-    private fun getMapboxNavigation(options: NavigationOptions): MapboxNavigation {
+    private fun getMapboxNavigation(optionsBuilder: NavigationOptions.Builder): MapboxNavigation {
         return if (shouldSimulateRoute()) {
-            return MapboxNavigation(
-                navigationOptions = options,
-                locationEngine = ReplayLocationEngine(mapboxReplayer)
-            ).apply {
+            optionsBuilder.locationEngine(ReplayLocationEngine(mapboxReplayer))
+            return MapboxNavigation(optionsBuilder.build()).apply {
                 registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 mapboxReplayer.pushRealLocation(this@DebugMapboxNavigationKt, 0.0)
                 mapboxReplayer.play()
             }
         } else {
-            MapboxNavigation(
-                navigationOptions = options
-            )
+            MapboxNavigation(optionsBuilder.build())
         }
     }
 

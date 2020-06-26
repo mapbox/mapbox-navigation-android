@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -72,10 +71,7 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-                mapboxNavigationOptions,
-                LocationEngineProvider.getBestLocationEngine(this)
-        )
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions)
         Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT).show()
     }
 

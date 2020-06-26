@@ -6,8 +6,6 @@ import android.content.Context
 import android.hardware.SensorEvent
 import androidx.annotation.RequiresPermission
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -120,19 +118,11 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an ac
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  * Use [defaultNavigationOptionsBuilder] to set default options
- * @param locationEngine used to listen for raw location updates
- * @param locationEngineRequest used to request raw location updates
  */
 class MapboxNavigation
-@JvmOverloads
 constructor(
-    private val navigationOptions: NavigationOptions,
-    val locationEngine: LocationEngine = LocationEngineProvider.getBestLocationEngine(navigationOptions.applicationContext),
-    locationEngineRequest: LocationEngineRequest = LocationEngineRequest.Builder(1000L)
-        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-        .build()
+    val navigationOptions: NavigationOptions
 ) {
-
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
@@ -177,10 +167,9 @@ constructor(
             logger
         )
         tripSession = NavigationComponentProvider.createTripSession(
-            tripService,
-            locationEngine,
-            locationEngineRequest,
-            navigationOptions.navigatorPredictionMillis,
+            tripService = tripService,
+            locationEngine = navigationOptions.locationEngine,
+            navigatorPredictionMillis = navigationOptions.navigatorPredictionMillis,
             navigator = navigator,
             logger = logger
         )
@@ -202,7 +191,7 @@ constructor(
                 navigationOptions.applicationContext,
                 this,
                 MapboxMetricsReporter,
-                locationEngine.javaClass.name,
+                navigationOptions.locationEngine.javaClass.name,
                 ThreadController.getMainScopeAndRootJob(),
                 navigationOptions,
                 obtainUserAgent(navigationOptions.isFromNavigationUi)

@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -114,13 +113,10 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-            mapboxNavigationOptions,
-            locationEngine = LocationEngineProvider.getBestLocationEngine(this)
-        ).also {
-            it.registerRoutesObserver(routeObserver)
-            it.registerRouteProgressObserver(routeProgressObserver)
-            it.registerTripSessionStateObserver(tripSessionStateObserver)
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
+            registerRoutesObserver(routeObserver)
+            registerRouteProgressObserver(routeProgressObserver)
+            registerTripSessionStateObserver(tripSessionStateObserver)
         }
         initListeners()
     }
@@ -167,7 +163,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
-            mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+            mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)
@@ -218,7 +214,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                 .build()
 
-        mapboxNavigation?.locationEngine?.requestLocationUpdates(
+        mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
             requestLocationUpdateRequest,
             locationListenerCallback,
             mainLooper
@@ -226,7 +222,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
     }
 
     private fun updateCameraOnNavigationStateChange(

@@ -223,7 +223,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                 mapboxReplayer.pushRealLocation(requireContext(), 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.locationEngine.getLastLocation(locationListenerCallback)
+            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)
@@ -395,8 +395,9 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
     private fun initNavigation() {
         val accessToken = Utils.getMapboxAccessToken(requireContext())
         mapboxNavigation = MapboxNavigation(
-            MapboxNavigation.defaultNavigationOptionsBuilder(requireContext(), accessToken).build(),
-            getLocationEngine()
+            MapboxNavigation.defaultNavigationOptionsBuilder(requireContext(), accessToken)
+                .locationEngine(getLocationEngine())
+                .build()
         )
         mapboxNavigation.apply {
             registerTripSessionStateObserver(tripSessionStateObserver)

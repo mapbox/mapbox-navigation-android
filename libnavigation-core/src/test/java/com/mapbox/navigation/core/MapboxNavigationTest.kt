@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.location.Location
 import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.telemetry.MapboxTelemetryConstants.MAPBOX_SHARED_PREFERENCES
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -58,7 +57,6 @@ class MapboxNavigationTest {
 
     private val accessToken = "pk.1234"
     private val locationEngine: LocationEngine = mockk()
-    private val locationEngineRequest: LocationEngineRequest = mockk(relaxUnitFun = true)
     private val directionsSession: DirectionsSession = mockk(relaxUnitFun = true)
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val tripService: TripService = mockk(relaxUnitFun = true)
@@ -133,14 +131,10 @@ class MapboxNavigationTest {
             .navigatorPredictionMillis(1500L)
             .onboardRouterOptions(onBoardRouterOptions)
             .timeFormatType(NONE_SPECIFIED)
+            .locationEngine(locationEngine)
             .build()
 
-        mapboxNavigation =
-            MapboxNavigation(
-                navigationOptions,
-                locationEngine,
-                locationEngineRequest
-            )
+        mapboxNavigation = MapboxNavigation(navigationOptions)
     }
 
     @Test
@@ -414,7 +408,6 @@ class MapboxNavigationTest {
             NavigationComponentProvider.createTripSession(
                 tripService,
                 locationEngine,
-                locationEngineRequest,
                 any(),
                 navigator = navigator,
                 logger = logger

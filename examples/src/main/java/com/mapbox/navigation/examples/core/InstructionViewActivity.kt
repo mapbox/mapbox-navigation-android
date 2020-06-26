@@ -94,12 +94,10 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
+            .locationEngine(getLocationEngine())
             .build()
 
-        mapboxNavigation = MapboxNavigation(
-            mapboxNavigationOptions,
-            locationEngine = getLocationEngine()
-        ).apply {
+        mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRouteProgressObserver(routeProgressObserver)
             registerBannerInstructionsObserver(bannerInstructionObserver)
@@ -182,7 +180,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.locationEngine?.getLastLocation(locationListenerCallback)
+                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
                     Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
                         .show()
                 }
@@ -256,7 +254,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                     .setMaxWaitTime(BasicNavigationActivity.DEFAULT_MAX_WAIT_TIME)
                     .build()
 
-            mapboxNavigation?.locationEngine?.requestLocationUpdates(
+            mapboxNavigation?.navigationOptions?.locationEngine?.requestLocationUpdates(
                 requestLocationUpdateRequest,
                 locationListenerCallback,
                 mainLooper
@@ -266,7 +264,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun stopLocationUpdates() {
         if (!shouldSimulateRoute()) {
-            mapboxNavigation?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+            mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
         }
     }
 
