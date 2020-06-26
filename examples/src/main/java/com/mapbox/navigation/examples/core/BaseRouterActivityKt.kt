@@ -44,9 +44,9 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
-import com.mapbox.navigation.route.hybrid.MapboxHybridRouter
-import com.mapbox.navigation.route.offboard.MapboxOffboardRouter
-import com.mapbox.navigation.route.onboard.MapboxOnboardRouter
+import com.mapbox.navigation.route.hybrid.internal.MapboxHybridRouter
+import com.mapbox.navigation.route.offboard.internal.MapboxOffboardRouter
+import com.mapbox.navigation.route.onboard.internal.MapboxOnboardRouter
 import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ifNonNull

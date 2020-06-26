@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.hybrid
+package com.mapbox.navigation.route.hybrid.internal
 
 import android.content.Context
 import android.content.Intent

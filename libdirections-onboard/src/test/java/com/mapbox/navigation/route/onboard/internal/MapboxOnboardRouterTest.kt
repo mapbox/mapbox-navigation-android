@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard
+package com.mapbox.navigation.route.onboard.internal
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions

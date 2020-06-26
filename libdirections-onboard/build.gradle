@@ -10,6 +10,11 @@ dokka {
     configuration {
         moduleName = 'libdirections-onboard'
         reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.route.onboard.internal"
+            suppress = true
+        }
     }
 }
 

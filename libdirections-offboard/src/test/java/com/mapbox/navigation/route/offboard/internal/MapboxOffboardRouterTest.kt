@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.offboard
+package com.mapbox.navigation.route.offboard.internal
 
 import android.content.Context
 import com.mapbox.api.directions.v5.MapboxDirections
@@ -7,6 +7,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.base.BaseTest
 import io.mockk.every
 import io.mockk.mockk

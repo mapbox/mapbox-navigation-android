@@ -150,7 +150,7 @@ constructor(
 
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
-        "com.mapbox.navigation.trip.notification.MapboxTripNotification"
+        "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
     private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     init {

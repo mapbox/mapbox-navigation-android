@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.offboard
+package com.mapbox.navigation.route.offboard.internal
 
 import android.content.Context
 import com.mapbox.annotation.module.MapboxModule
@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.route.offboard.RouteBuilderProvider
 import com.mapbox.navigation.route.offboard.router.routeOptions
 import com.mapbox.navigation.route.offboard.routerefresh.RouteRefreshCallbackMapper
 import com.mapbox.navigation.utils.NavigationException

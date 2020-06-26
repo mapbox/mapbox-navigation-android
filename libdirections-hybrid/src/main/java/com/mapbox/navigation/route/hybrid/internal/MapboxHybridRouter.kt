@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.hybrid
+package com.mapbox.navigation.route.hybrid.internal
 
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
