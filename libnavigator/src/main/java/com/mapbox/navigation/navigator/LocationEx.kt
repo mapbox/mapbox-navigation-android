@@ -2,6 +2,7 @@ package com.mapbox.navigation.navigator
 
 import android.location.Location
 import android.os.Build
+import android.os.SystemClock
 import com.mapbox.geojson.Point
 import com.mapbox.navigator.FixLocation
 import java.util.Date
@@ -33,6 +34,8 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
         verticalAccuracy = if (hasVerticalAccuracy()) this.verticalAccuracyMeters else null
     }
 
+    var elapsed = SystemClock.elapsedRealtimeNanos();
+
     return FixLocation(
         Point.fromLngLat(longitude, latitude),
         date,
@@ -40,7 +43,7 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
         if (hasBearing()) bearing else null,
         if (hasAltitude()) altitude.toFloat() else null,
         if (hasAccuracy()) accuracy else null,
-        "$time|$elapsedRealtimeNanos",
+        "$time|$elapsedRealtimeNanos|$elapsed",
         bearingAccuracy,
         speedAccuracy,
         verticalAccuracy
