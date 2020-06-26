@@ -1,17 +1,4 @@
 // Signature format: 3.0
-package com.mapbox.navigation.route.offboard {
-
-  @com.mapbox.annotation.module.MapboxModule(type=MapboxModuleType.NavigationOffboardRouter) public final class MapboxOffboardRouter implements com.mapbox.navigation.base.route.Router {
-    ctor public MapboxOffboardRouter(String accessToken, android.content.Context context, com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider urlSkuTokenProvider);
-    method public void cancel();
-    method public void getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.Router.Callback callback);
-    method public void getRouteRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.navigation.base.route.RouteRefreshCallback callback);
-    method public void shutdown();
-    field @Deprecated public static final com.mapbox.navigation.route.offboard.MapboxOffboardRouter.Companion! Companion;
-  }
-
-}
-
 package com.mapbox.navigation.route.offboard.router {
 
   public final class MapboxDirectionsUtilsKt {

@@ -170,9 +170,9 @@ navigation-fixtures:
 
 .PHONY: 1.0-core-check-api
 1.0-core-check-api:
-	./gradlew :libdirections-offboard:checkApi
-	./gradlew :libdirections-hybrid:checkApi
-	./gradlew :libdirections-onboard:checkApi
+	./gradlew :libdirections-offboard:checkApi -PhidePackage=com.mapbox.navigation.route.offboard.internal
+	./gradlew :libdirections-hybrid:checkApi -PhidePackage=com.mapbox.navigation.route.hybrid.internal
+	./gradlew :libdirections-onboard:checkApi -PhidePackage=com.mapbox.navigation.route.onboard.internal
 	./gradlew :libnavigation-base:checkApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:checkApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :libnavigation-util:checkApi -PhidePackage=com.mapbox.navigation.utils.internal
@@ -182,9 +182,9 @@ navigation-fixtures:
 
 .PHONY: 1.0-core-update-api
 1.0-core-update-api:
-	./gradlew :libdirections-offboard:updateApi
-	./gradlew :libdirections-hybrid:updateApi
-	./gradlew :libdirections-onboard:updateApi
+	./gradlew :libdirections-offboard:updateApi -PhidePackage=com.mapbox.navigation.route.offboard.internal
+	./gradlew :libdirections-hybrid:updateApi -PhidePackage=com.mapbox.navigation.route.hybrid.internal
+	./gradlew :libdirections-onboard:updateApi -PhidePackage=com.mapbox.navigation.route.onboard.internal
 	./gradlew :libnavigation-base:updateApi -PhidePackage=com.mapbox.navigation.base.internal
 	./gradlew :libnavigation-metrics:updateApi -PhidePackage=com.mapbox.navigation.metrics.internal
 	./gradlew :libnavigation-util:updateApi -PhidePackage=com.mapbox.navigation.utils.internal

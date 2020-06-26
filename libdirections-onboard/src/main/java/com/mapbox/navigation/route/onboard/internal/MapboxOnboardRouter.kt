@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard
+package com.mapbox.navigation.route.onboard.internal
 
 import com.google.gson.Gson
 import com.mapbox.annotation.module.MapboxModule
@@ -15,6 +15,8 @@ import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
+import com.mapbox.navigation.route.onboard.NativeSkuTokenProvider
+import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -70,14 +72,14 @@ class MapboxOnboardRouter(
                 null,
                 THREADS_COUNT,
                 TileEndpointConfiguration(
-                        options.tilesUri.toString(),
-                        options.tilesVersion,
-                        accessToken,
-                        USER_AGENT,
-                        "",
-                        NativeSkuTokenProvider(skuTokenProvider)
-                    )
+                    options.tilesUri.toString(),
+                    options.tilesVersion,
+                    accessToken,
+                    USER_AGENT,
+                    "",
+                    NativeSkuTokenProvider(skuTokenProvider)
                 )
+            )
             navigatorNative.configureRouter(routerParams)
         }
     }

@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification
+package com.mapbox.navigation.trip.notification.internal
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -18,7 +18,9 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.trip.notification.internal.TimeFormatter
+import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
+import com.mapbox.navigation.trip.notification.R
+import com.mapbox.navigation.trip.notification.RemoteViewsProvider
 import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import io.mockk.Runs
 import io.mockk.every

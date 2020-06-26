@@ -1,13 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.route.hybrid {
-
-  @com.mapbox.annotation.module.MapboxModule(type=MapboxModuleType.NavigationRouter) public final class MapboxHybridRouter implements com.mapbox.navigation.base.route.Router {
-    ctor public MapboxHybridRouter(com.mapbox.navigation.base.route.Router onboardRouter, com.mapbox.navigation.base.route.Router offboardRouter, com.mapbox.navigation.utils.internal.NetworkStatusService networkStatusService);
-    method public void cancel();
-    method public void getRoute(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.base.route.Router.Callback callback);
-    method public void getRouteRefresh(com.mapbox.api.directions.v5.models.DirectionsRoute route, int legIndex, com.mapbox.navigation.base.route.RouteRefreshCallback callback);
-    method public void shutdown();
-  }
-
-}
-

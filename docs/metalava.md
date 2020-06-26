@@ -5,8 +5,8 @@ Use `$> make 1.0-core-check-api` / `$> make 1.0-core-update-api` (Core) `$> make
 ```
 $> make 1.0-build-core-release
 $> make 1.0-build-ui-release
-$> make 1.0-core-update-api
-$> make 1.0-ui-update-api
+$> make 1.0-core-check-api / make 1.0-core-update-api
+$> make 1.0-ui-check-api / make 1.0-ui-update-api
 ```
 
 :warning: Noting that we might need to update / push `api/current.txt` files after running `$> make 1.0-core-update-api` (Core) / `$> make 1.0-ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀

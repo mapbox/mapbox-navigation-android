@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification
+package com.mapbox.navigation.trip.notification.internal
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -34,6 +34,9 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
+import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
+import com.mapbox.navigation.trip.notification.R
+import com.mapbox.navigation.trip.notification.RemoteViewsProvider
 import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
@@ -93,7 +96,6 @@ class MapboxTripNotification constructor(
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
     private val etaFormat: String = applicationContext.getString(R.string.eta_format)
-    private val navigationNotificationProvider = NavigationNotificationProvider
     private val notificationReceiver = NotificationActionReceiver()
     private val distanceFormatter: DistanceFormatter =
         navigationOptions.distanceFormatter
@@ -123,7 +125,7 @@ class MapboxTripNotification constructor(
     override fun getNotification(): Notification {
         if (!::notification.isInitialized) {
             this.notification =
-                navigationNotificationProvider.buildNotification(getNotificationBuilder())
+                NavigationNotificationProvider.buildNotification(getNotificationBuilder())
         }
         return this.notification
     }
@@ -151,7 +153,7 @@ class MapboxTripNotification constructor(
         // buildRemoteViews() will rebuild the RemoteViews and clear the stored mActions.
         buildRemoteViews()
         updateNotificationViews(routeProgress)
-        notification = navigationNotificationProvider.buildNotification(getNotificationBuilder())
+        notification = NavigationNotificationProvider.buildNotification(getNotificationBuilder())
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 

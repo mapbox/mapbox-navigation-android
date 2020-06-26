@@ -2,10 +2,10 @@
 -keep class com.mapbox.navigation.core.telemetry.events.** {*;}
 
 # --- Navigation SDK configurable modules provided via reflection ---
--keep class com.mapbox.navigation.route.hybrid.MapboxHybridRouter {*;}
--keep class com.mapbox.navigation.route.onboard.MapboxOnboardRouter {*;}
--keep class com.mapbox.navigation.route.offboard.MapboxOffboardRouter {*;}
--keep class com.mapbox.navigation.trip.notification.MapboxTripNotification {*;}
+-keep class com.mapbox.navigation.route.hybrid.internal.MapboxHybridRouter {*;}
+-keep class com.mapbox.navigation.route.onboard.internal.MapboxOnboardRouter {*;}
+-keep class com.mapbox.navigation.route.offboard.internal.MapboxOffboardRouter {*;}
+-keep class com.mapbox.navigation.trip.notification.internal.MapboxTripNotification {*;}
 
 # --- OkHttp ---
 -dontwarn okhttp3.**
