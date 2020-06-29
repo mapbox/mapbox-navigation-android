@@ -17,7 +17,8 @@
         android:clickable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" >
+        app:layout_constraintStart_toStartOf="parent"
+        android:foreground="?android:attr/selectableItemBackground" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,7 +56,8 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardCore" >
+        app:layout_constraintTop_toBottomOf="@id/cardCore"
+        android:foreground="?android:attr/selectableItemBackground" >
 
         <LinearLayout
             android:layout_width="match_parent"
