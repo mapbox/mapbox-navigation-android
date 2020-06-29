@@ -119,8 +119,7 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an ac
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  * Use [defaultNavigationOptionsBuilder] to set default options
  */
-class MapboxNavigation
-constructor(
+class MapboxNavigation(
     val navigationOptions: NavigationOptions
 ) {
     private val accessToken: String? = navigationOptions.accessToken

@@ -70,11 +70,8 @@ class MapboxTripSession(
 
     companion object {
         private const val STATUS_POLLING_INTERVAL = 1000L
-
         private const val LOCATION_POLLING_INTERVAL = 1000L
-
         private const val LOCATION_FASTEST_INTERVAL = 500L
-
         private val locationEngineRequest: LocationEngineRequest = LocationEngineRequest
             .Builder(LOCATION_POLLING_INTERVAL)
             .setFastestInterval(LOCATION_FASTEST_INTERVAL)
