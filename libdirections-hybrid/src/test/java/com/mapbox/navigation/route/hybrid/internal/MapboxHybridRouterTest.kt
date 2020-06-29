@@ -18,7 +18,6 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -224,11 +223,7 @@ class MapboxHybridRouterTest {
     private suspend fun disableNetworkConnection() = networkConnected(false)
 
     private suspend fun networkConnected(networkConnected: Boolean) {
-        channel.offer(NetworkStatus(networkConnected))
-        // channel is listened with a coroutine. When channel is empty, coroutine suspends
-        // until channel has a new value. Need some small delay to give coroutine time to wake up
-        // and handle a value.
-        delay(10)
+        hybridRouter.onNetworkStatusChanged(NetworkStatus(networkConnected))
     }
 
     private fun provideDefaultRouteOptions(): RouteOptions {

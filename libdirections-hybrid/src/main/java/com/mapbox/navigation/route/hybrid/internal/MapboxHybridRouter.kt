@@ -6,6 +6,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
+import com.mapbox.navigation.utils.internal.NetworkStatus
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
@@ -48,16 +49,18 @@ class MapboxHybridRouter(
      * on that state we use either the off-board or on-board router.
      */
     init {
-        networkStatusJob = jobControl.scope.monitorChannelWithException(networkStatusService.getNetworkStatusChannel(), { networkStatus ->
-            when (networkStatus.isNetworkAvailable) {
-                true -> {
-                    routeDispatchHandler.set(offboardRouterHandler)
-                }
-                false -> {
-                    routeDispatchHandler.set(onboardRouterHandler)
-                }
-            }
-        }, networkStatusService::cleanup)
+        networkStatusJob = jobControl.scope.monitorChannelWithException(
+            networkStatusService.getNetworkStatusChannel(),
+            ::onNetworkStatusChanged,
+            networkStatusService::cleanup
+        )
+    }
+
+    internal suspend fun onNetworkStatusChanged(networkStatus: NetworkStatus) {
+        when (networkStatus.isNetworkAvailable) {
+            true -> routeDispatchHandler.set(offboardRouterHandler)
+            false -> routeDispatchHandler.set(onboardRouterHandler)
+        }
     }
 
     /**
