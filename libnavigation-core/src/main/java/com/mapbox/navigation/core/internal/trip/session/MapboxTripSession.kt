@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.internal.trip.session
 import android.hardware.SensorEvent
 import android.location.Location
 import android.os.Looper
-import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -36,7 +35,7 @@ import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -69,7 +68,8 @@ class MapboxTripSession(
 ) : TripSession {
 
     companion object {
-        private const val STATUS_POLLING_INTERVAL = 1000L
+        internal const val UNCONDITIONAL_STATUS_POLLING_PATIENCE = 2000L
+        internal const val UNCONDITIONAL_STATUS_POLLING_INTERVAL = 1000L
         private const val LOCATION_POLLING_INTERVAL = 1000L
         private const val LOCATION_FASTEST_INTERVAL = 500L
         private val locationEngineRequest: LocationEngineRequest = LocationEngineRequest
@@ -89,6 +89,7 @@ class MapboxTripSession(
 
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
+    private var unconditionalStatusPollingJob: Job? = null
 
     private val locationObservers = CopyOnWriteArraySet<LocationObserver>()
     private val routeProgressObservers = CopyOnWriteArraySet<RouteProgressObserver>()
@@ -99,9 +100,6 @@ class MapboxTripSession(
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
-
-    private val minTimeBetweenGetStatusCallsMillis = TimeUnit.SECONDS.toMillis(1)
-    private var lastStatusUpdateTimeMillis: Long = 0
 
     private var state: TripSessionState = TripSessionState.STOPPED
         set(value) {
@@ -401,35 +399,24 @@ class MapboxTripSession(
     }
 
     private fun updateRawLocation(rawLocation: Location) {
+        unconditionalStatusPollingJob?.cancel()
+        this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
         ioJobController.scope.launch {
             val currentDate = Date()
-            lastStatusUpdateTimeMillis = SystemClock.elapsedRealtime()
             navigator.updateLocation(rawLocation, currentDate)
             updateDataFromNavigatorStatus(currentDate)
         }
 
-        if (this.rawLocation == null) {
-            ioJobController.scope.launch {
-                while (isActive) {
-                    delay(STATUS_POLLING_INTERVAL)
-                    launch {
-                        emitUnconditionallyGetStatus()
-                    }
+        unconditionalStatusPollingJob = ioJobController.scope.launch {
+            delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
+            while (isActive) {
+                launch {
+                    updateDataFromNavigatorStatus(Date())
                 }
+                delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
             }
         }
-
-        this.rawLocation = rawLocation
-    }
-
-    private fun emitUnconditionallyGetStatus() {
-        val currentTimeMillis = SystemClock.elapsedRealtime()
-        val deltaTime = currentTimeMillis - lastStatusUpdateTimeMillis
-        if (deltaTime < minTimeBetweenGetStatusCallsMillis) return
-
-        lastStatusUpdateTimeMillis = currentTimeMillis
-        updateDataFromNavigatorStatus(Date())
     }
 
     private fun updateDataFromNavigatorStatus(date: Date) {
