@@ -397,15 +397,13 @@ class MapboxTripNotification constructor(
     }
 
     private fun updateDistanceText(routeProgress: RouteProgress) {
-        if (currentDistanceText == null || newDistanceText(routeProgress)) {
-            currentDistanceText = ifNonNull(
-                distanceFormatter,
-                routeProgress.currentLegProgress
-            ) { distanceFormatter, routeLegProgress ->
-                routeLegProgress.currentStepProgress?.distanceRemaining?.let {
-                    distanceFormatter.formatDistance(it.toDouble())
-                }
-            }
+        val distanceRemaining = routeProgress.currentLegProgress?.currentStepProgress?.distanceRemaining
+        val formattedDistance = distanceRemaining?.let { distanceRemaining ->
+            distanceFormatter.formatDistance(distanceRemaining.toDouble())
+        } ?: return
+
+        if (currentDistanceText != formattedDistance) {
+            currentDistanceText = formattedDistance
             collapsedNotificationRemoteViews?.setTextViewText(
                 R.id.notificationDistanceText,
                 currentDistanceText.toString()
@@ -426,7 +424,7 @@ class MapboxTripNotification constructor(
             val timeFormatType = navigationOptions.timeFormatType
             val arrivalTime = formatTime(
                 time,
-                legDurationRemaining.toDouble(),
+                legDurationRemaining,
                 timeFormatType,
                 DateFormat.is24HourFormat(applicationContext)
             )
@@ -445,24 +443,6 @@ class MapboxTripNotification constructor(
             currentRoundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE
         }
     }
-
-    private fun newDistanceText(routeProgress: RouteProgress) =
-        ifNonNull(
-            distanceFormatter,
-            routeProgress.currentLegProgress,
-            currentDistanceText
-        ) { distanceFormatter, currentLegProgress, currentDistanceText ->
-            val item = currentLegProgress.currentStepProgress?.distanceRemaining
-            // The call below can return an empty spannable string. toString() will cause a NPE and ?. will not catch it.
-            val str = item?.let {
-                distanceFormatter.formatDistance(it.toDouble())
-            }
-            if (str != null) {
-                val formattedDistance = str.toString()
-                currentDistanceText.toString() != formattedDistance
-            } else
-                false
-        } ?: false
 
     private fun updateManeuverImage(drivingSide: String) {
         getManeuverBitmap(
