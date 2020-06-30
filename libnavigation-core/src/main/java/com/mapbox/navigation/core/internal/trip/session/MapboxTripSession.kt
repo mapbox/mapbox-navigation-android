@@ -387,7 +387,7 @@ class MapboxTripSession(
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
-            result?.locations?.firstOrNull()?.let {
+            result?.locations?.lastOrNull()?.let {
                 updateRawLocation(it)
             }
         }
