@@ -122,6 +122,9 @@ class FasterRouteControllerTest {
         }
         every { tripSession.getRouteProgress() } returns mockk {
             every { durationRemaining } returns 601.334
+            every { route } returns mockk {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+            }
         }
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
 
@@ -130,6 +133,7 @@ class FasterRouteControllerTest {
         val routes = listOf<DirectionsRoute>(mockk {
                 every { routeIndex() } returns "0"
                 every { duration() } returns 351.013
+                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
             })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 

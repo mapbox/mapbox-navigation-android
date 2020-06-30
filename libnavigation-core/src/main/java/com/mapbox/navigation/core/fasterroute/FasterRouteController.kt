@@ -19,7 +19,7 @@ internal class FasterRouteController(
 ) {
 
     private val fasterRouteTimer = MapboxTimer()
-    private val fasterRouteDetector = FasterRouteDetector()
+    private val fasterRouteDetector = FasterRouteDetector(RouteComparator())
     private var fasterRouteObserver: FasterRouteObserver? = null
 
     fun attach(fasterRouteObserver: FasterRouteObserver) {

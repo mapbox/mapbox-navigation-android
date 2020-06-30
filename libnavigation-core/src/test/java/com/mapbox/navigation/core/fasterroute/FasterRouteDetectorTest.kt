@@ -10,10 +10,14 @@ import org.junit.Test
 
 class FasterRouteDetectorTest {
 
-    private val fasterRouteDetector = FasterRouteDetector()
+    private val routeComparator: RouteComparator = mockk {
+        every { isNewRoute(any(), any()) } returns true
+    }
+    private val fasterRouteDetector = FasterRouteDetector(routeComparator)
 
     @Test
     fun shouldDetectWhenRouteIsFaster() {
+        every { routeComparator.isNewRoute(any(), any()) } returns true
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 402.6
         val routeProgress: RouteProgress = mockk()
@@ -22,6 +26,19 @@ class FasterRouteDetectorTest {
         val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
 
         assertTrue(isFasterRoute)
+    }
+
+    @Test
+    fun shouldDetectWhenRouteIsFasterOnlyIfDifferent() {
+        every { routeComparator.isNewRoute(any(), any()) } returns false
+        val newRoute: DirectionsRoute = mockk()
+        every { newRoute.duration() } returns 402.6
+        val routeProgress: RouteProgress = mockk()
+        every { routeProgress.durationRemaining } returns 797.447
+
+        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
+
+        assertFalse(isFasterRoute)
     }
 
     @Test

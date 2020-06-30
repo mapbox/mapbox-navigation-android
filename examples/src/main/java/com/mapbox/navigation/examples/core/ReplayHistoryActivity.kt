@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.history.CustomEventMapper
@@ -171,6 +172,13 @@ class ReplayHistoryActivity : AppCompatActivity() {
             }
         })
 
+        mapboxNavigation.attachFasterRouteObserver(object : FasterRouteObserver {
+            override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+                navigationContext?.navigationMapboxMap?.drawRoutes(alternatives)
+                navigationContext?.mapboxNavigation?.setRoutes(alternatives)
+            }
+        })
+
         playReplay.setOnClickListener {
             mapboxReplayer.play()
             mapboxNavigation.startTripSession()
@@ -235,7 +243,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             MapboxLogger.d(Message("route request success $routes"))
             if (routes.isNotEmpty()) {
-                navigationContext?.navigationMapboxMap?.drawRoute(routes[0])
+                navigationContext?.navigationMapboxMap?.drawRoutes(routes)
                 navigationContext?.startNavigation()
             }
         }
