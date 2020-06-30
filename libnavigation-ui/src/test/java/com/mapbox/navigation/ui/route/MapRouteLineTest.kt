@@ -1002,6 +1002,86 @@ class MapRouteLineTest {
         assertEquals(-7957339, result)
     }
 
+    @Test
+    fun reinitializeWithRoutes() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val route = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        )
+
+        mapRouteLine.reinitializeWithRoutes(listOf(route))
+
+        assertEquals(route, mapRouteLine.getPrimaryRoute())
+    }
+
+    @Test
+    fun reinitializePrimaryRoute() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        every { style.isFullyLoaded } returns true
+        every { style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns primaryRouteLayer
+        every { primaryRouteLayer.setFilter(any()) } returns Unit
+        every { primaryRouteShieldLayer.setFilter(any()) } returns Unit
+        every { alternativeRouteLayer.setFilter(any()) } returns Unit
+        every { alternativeRouteShieldLayer.setFilter(any()) } returns Unit
+        every { primaryRouteTrafficLayer.setFilter(any()) } returns Unit
+        every { waypointLayer.setFilter(any()) } returns Unit
+        every { primaryRouteLayer.setProperties(any()) } returns Unit
+        every { primaryRouteShieldLayer.setProperties(any()) } returns Unit
+        every { alternativeRouteLayer.setProperties(any()) } returns Unit
+        every { alternativeRouteShieldLayer.setProperties(any()) } returns Unit
+        every { primaryRouteTrafficLayer.setProperties(any()) } returns Unit
+        every { waypointLayer.setProperties(any()) } returns Unit
+        every { style.getLayerAs<LineLayer>("mapbox-navigation-route-shield-layer") } returns primaryRouteShieldLayer
+
+        val route = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        )
+
+        mapRouteLine.reinitializeWithRoutes(listOf(route))
+        mapRouteLine.reinitializePrimaryRoute()
+
+        verify { primaryRouteLayer.setProperties(any()) }
+    }
+
+    @Test
+    fun getExpressionAtOffsetWhenExpressionDataEmpty() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val route = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            listOf<RouteFeatureData>(),
+            listOf<RouteLineExpressionData>(),
+            true,
+            false,
+            mapRouteSourceProvider,
+            0f,
+            null
+        )
+
+        val expression = mapRouteLine.getExpressionAtOffset(.2f)
+
+        assertEquals(expectedExpression, expression.toString())
+    }
+
     private fun getDirectionsRoute(includeCongestion: Boolean): DirectionsRoute {
         val congestion = when (includeCongestion) {
             true -> "\"unknown\",\"heavy\",\"low\""
