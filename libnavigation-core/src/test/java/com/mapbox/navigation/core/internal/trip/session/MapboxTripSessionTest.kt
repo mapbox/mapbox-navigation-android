@@ -181,6 +181,21 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun locationObserverSuccessWhenMultipleSamples() = coroutineRule.runBlockingTest {
+        every { locationEngineResult.locations } returns listOf(mockk(), location)
+        tripSession.start()
+        val observer: LocationObserver = mockk(relaxUnitFun = true)
+        tripSession.registerLocationObserver(observer)
+
+        updateLocationAndJoin()
+
+        verify { observer.onRawLocationChanged(location) }
+        assertEquals(location, tripSession.getRawLocation())
+
+        tripSession.stop()
+    }
+
+    @Test
     fun locationObserverOnFailure() {
         tripSession.start()
 
@@ -218,6 +233,15 @@ class MapboxTripSessionTest {
 
     @Test
     fun locationPush() = coroutineRule.runBlockingTest {
+        tripSession.start()
+        updateLocationAndJoin()
+        coVerify { navigator.updateLocation(location, any()) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun locationPushWhenMultipleSamples() = coroutineRule.runBlockingTest {
+        every { locationEngineResult.locations } returns listOf(mockk(), location)
         tripSession.start()
         updateLocationAndJoin()
         coVerify { navigator.updateLocation(location, any()) }
