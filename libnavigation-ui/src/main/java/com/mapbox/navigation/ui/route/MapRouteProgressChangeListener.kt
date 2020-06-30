@@ -28,7 +28,8 @@ internal class MapRouteProgressChangeListener(
 
     private val jobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private var lastDistanceValue = 0f
-
+    private var restoreRouteArrowVisibilityFun: DeferredRouteUpdateFun? = null
+    private var shouldReInitializePrimaryRoute = false
     /**
      * Returns the percentage of the distance traveled that was last calculated. This is only
      * calculated if the @param vanishingLineAnimator passed into the constructor was non-null.
@@ -75,19 +76,33 @@ internal class MapRouteProgressChangeListener(
     }
 
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
-        if (routeArrow.routeArrowIsVisible()) {
-            routeArrow.addUpcomingManeuverArrow(routeProgress)
-        }
+        vanishingLineAnimator?.cancel()
         val currentRoute = routeProgress.route
         val hasGeometry = currentRoute.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
-            vanishingLineAnimator?.cancel()
-            routeLine.draw(currentRoute)
+            routeLine.reinitializeWithRoutes(listOf(currentRoute))
+            shouldReInitializePrimaryRoute = true
+
+            restoreRouteArrowVisibilityFun = getRestoreArrowVisibilityFun(routeArrow.routeArrowIsVisible())
+            routeArrow.updateVisibilityTo(false)
+
             this.lastDistanceValue = routeLine.vanishPointOffset
         } else {
+            restoreRouteArrowVisibilityFun?.invoke()
+            restoreRouteArrowVisibilityFun = null
+
+            if (routeArrow.routeArrowIsVisible()) {
+                routeArrow.addUpcomingManeuverArrow(routeProgress)
+            }
             // if there is no geometry then the session is in free drive and the vanishing
             // route line code should not execute.
-            if (vanishingLineAnimator != null && hasGeometry) {
+            if (hasGeometry) {
+                if (shouldReInitializePrimaryRoute) {
+                    routeLine.reinitializePrimaryRoute()
+                    shouldReInitializePrimaryRoute = false
+                }
+
+                if (vanishingLineAnimator != null)
                 jobControl.scope.launch {
                     val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
                     if (percentDistanceTraveled > 0) {
@@ -116,4 +131,9 @@ internal class MapRouteProgressChangeListener(
             (routeProgress.distanceRemaining + routeProgress.distanceTraveled)
         return routeProgress.distanceTraveled / totalDist
     }
+
+    private fun getRestoreArrowVisibilityFun(isVisible: Boolean): DeferredRouteUpdateFun = {
+        routeArrow.updateVisibilityTo(isVisible)
+    }
 }
+internal typealias DeferredRouteUpdateFun = () -> Unit

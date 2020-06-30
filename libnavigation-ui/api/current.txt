@@ -544,6 +544,9 @@ package com.mapbox.navigation.ui.route {
     method public void onInitialized(com.mapbox.navigation.ui.route.RouteLineLayerIds routeLineLayerIds);
   }
 
+  public final class MapRouteProgressChangeListenerKt {
+  }
+
   public class NavigationMapRoute implements androidx.lifecycle.LifecycleObserver {
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation!, boolean);
