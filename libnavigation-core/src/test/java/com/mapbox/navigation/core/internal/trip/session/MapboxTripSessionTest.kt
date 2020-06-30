@@ -2,7 +2,6 @@ package com.mapbox.navigation.core.internal.trip.session
 
 import android.location.Location
 import android.os.Looper
-import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -13,6 +12,8 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.internal.trip.service.TripService
+import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_INTERVAL
+import com.mapbox.navigation.core.internal.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_PATIENCE
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
@@ -35,6 +36,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -43,6 +45,7 @@ import kotlinx.coroutines.cancelAndJoin
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -227,23 +230,52 @@ class MapboxTripSessionTest {
     @Test
     fun getStatusImmediatelyAfterUpdateLocation() = coroutineRule.runBlockingTest {
         tripSession.start()
+        val currentDate = Date()
 
         updateLocationAndJoin()
 
-        coVerify { navigator.getStatus(any()) }
+        val slot = slot<Date>()
+        coVerify { navigator.getStatus(capture(slot)) }
+        assertTrue(slot.captured.time >= currentDate.time + navigatorPredictionMillis)
         tripSession.stop()
     }
 
     @Test
-    fun noLocationUpdateLongerThanASecondUnconditionallyGetStatus() = coroutineRule.runBlockingTest {
+    fun noLocationUpdateLongerThanAPatienceUnconditionallyGetStatus() = coroutineRule.runBlockingTest {
         tripSession.start()
 
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
-        SystemClock.setCurrentTimeMillis(1100)
-        advanceTimeBy(1100)
-        updateLocationAndJoin()
+        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
+        parentJob.cancelAndJoin()
+
+        coVerify(exactly = 2) { navigator.getStatus(any()) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun unconditionallGetStatusRepeated() = coroutineRule.runBlockingTest {
+        tripSession.start()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
+        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
+        parentJob.cancelAndJoin()
 
         coVerify(exactly = 3) { navigator.getStatus(any()) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun rawLocationCancelsUnconditionalGetStatusRepetition() = coroutineRule.runBlockingTest {
+        tripSession.start()
+
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_PATIENCE - 100)
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+        advanceTimeBy(UNCONDITIONAL_STATUS_POLLING_INTERVAL - 100)
+        parentJob.cancelAndJoin()
+
+        coVerify(exactly = 2) { navigator.getStatus(any()) }
         tripSession.stop()
     }
 
