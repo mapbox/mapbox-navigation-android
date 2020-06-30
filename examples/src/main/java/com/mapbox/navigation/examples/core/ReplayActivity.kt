@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
+import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
@@ -39,7 +40,7 @@ import kotlinx.android.synthetic.main.activity_replay_route_layout.*
 
 /**
  * This activity shows how to use the MapboxNavigation
- * class with the Navigation SDK's [ReplayHistoryLocationEngine].
+ * class with the Navigation SDK's [MapboxReplayer] and [ReplayLocationEngine].
  */
 class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -82,6 +83,13 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.restoreFrom(state)
             }
             initializeFirstLocation()
+
+            mapboxNavigation?.attachFasterRouteObserver(object : FasterRouteObserver {
+                override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+                    navigationMapboxMap?.drawRoutes(alternatives)
+                    mapboxNavigation?.setRoutes(alternatives)
+                }
+            })
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
@@ -110,7 +118,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             MapboxLogger.d(Message("route request success $routes"))
             if (routes.isNotEmpty()) {
-                navigationMapboxMap?.drawRoute(routes[0])
+                navigationMapboxMap?.drawRoutes(routes)
 
                 val replayEvents = replayRouteMapper.mapGeometry(routes[0].geometry()!!)
                 mapboxReplayer.pushEvents(replayEvents)

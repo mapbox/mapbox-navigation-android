@@ -32,7 +32,9 @@ import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.fasterroute.FasterRouteController
+import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
+import com.mapbox.navigation.core.fasterroute.RouteComparator
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.internal.trip.service.TripService
@@ -207,6 +209,7 @@ class MapboxNavigation(
             directionsSession,
             tripSession,
             routeOptionsProvider,
+            FasterRouteDetector(RouteComparator()),
             logger
         )
         routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)

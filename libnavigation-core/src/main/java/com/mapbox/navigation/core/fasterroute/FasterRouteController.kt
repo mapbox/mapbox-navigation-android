@@ -9,17 +9,22 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
+import com.mapbox.navigation.utils.internal.ThreadController
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
     private val routeOptionsProvider: RouteOptionsProvider,
+    private val fasterRouteDetector: FasterRouteDetector,
     private val logger: Logger
 ) {
 
+    private val jobControl = ThreadController.getMainScopeAndRootJob()
+
     private val fasterRouteTimer = MapboxTimer()
-    private val fasterRouteDetector = FasterRouteDetector()
     private var fasterRouteObserver: FasterRouteObserver? = null
 
     fun attach(fasterRouteObserver: FasterRouteObserver) {
@@ -40,6 +45,7 @@ internal class FasterRouteController(
     fun stop() {
         this.fasterRouteObserver = null
         fasterRouteTimer.stopJobs()
+        jobControl.job.cancelChildren()
     }
 
     private fun requestFasterRoute() {
@@ -72,8 +78,10 @@ internal class FasterRouteController(
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             val currentRoute = directionsSession.routes.firstOrNull()
                 ?: return
-            tripSession.getRouteProgress()?.let { progress ->
-                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], progress)
+            val routeProgress = tripSession.getRouteProgress()
+                ?: return
+            jobControl.scope.launch {
+                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], routeProgress)
                 fasterRouteObserver?.onFasterRoute(currentRoute, routes, isAlternativeFaster)
             }
         }
