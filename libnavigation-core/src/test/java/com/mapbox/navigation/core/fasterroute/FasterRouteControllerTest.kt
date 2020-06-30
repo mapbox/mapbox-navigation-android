@@ -8,6 +8,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -25,20 +26,22 @@ class FasterRouteControllerTest {
     val coroutineRule = MainCoroutineRule()
 
     private val directionsSession: DirectionsSession = mockk()
-    private val tripSession: TripSession = mockk()
+    private val tripSession: TripSession = mockk {
+        every { getRouteProgress() } returns mockk()
+    }
     private val fasterRouteObserver: FasterRouteObserver = mockk {
         every { restartAfterMillis() } returns FasterRouteObserver.DEFAULT_INTERVAL_MILLIS
         every { onFasterRoute(any(), any(), any()) } returns Unit
     }
     private val routesRequestCallbacks = slot<RoutesRequestCallback>()
-
     private val logger: Logger = mockk()
     private val routeOptionsProvider: RouteOptionsProvider = mockk()
-    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsProvider, logger)
 
     private val routeOptionsResultSuccess: RouteOptionsProvider.RouteOptionsResult.Success = mockk()
     private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
-    private val routeOptionsResultError: RouteOptionsProvider.RouteOptionsResult.Error = mockk()
+    private val fasterRouteDetector: FasterRouteDetector = mockk()
+
+    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsProvider, fasterRouteDetector, logger)
 
     @Before
     fun setup() {
@@ -109,18 +112,15 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should notify observer of a faster route`() = coroutineRule.runBlockingTest {
+        coEvery { fasterRouteDetector.isRouteFaster(any(), any()) } returns true
         mockRouteOptionsProvider(routeOptionsResultSuccess)
         val currentRoute: DirectionsRoute = mockk {
             every { routeIndex() } returns "0"
-            every { duration() } returns 801.332
         }
         every { directionsSession.routes } returns listOf(currentRoute)
         every { tripSession.getEnhancedLocation() } returns mockk {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
-        }
-        every { tripSession.getRouteProgress() } returns mockk {
-            every { durationRemaining } returns 601.334
         }
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
 
@@ -128,7 +128,6 @@ class FasterRouteControllerTest {
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         val routes = listOf<DirectionsRoute>(mockk {
                 every { routeIndex() } returns "0"
-                every { duration() } returns 351.013
             })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
@@ -140,18 +139,15 @@ class FasterRouteControllerTest {
 
     @Test
     fun `should notify observer if current route is fastest`() = coroutineRule.runBlockingTest {
+        coEvery { fasterRouteDetector.isRouteFaster(any(), any()) } returns false
         mockRouteOptionsProvider(routeOptionsResultSuccess)
         val currentRoute: DirectionsRoute = mockk {
             every { routeIndex() } returns "0"
-            every { duration() } returns 801.332
         }
         every { directionsSession.routes } returns listOf(currentRoute)
         every { tripSession.getEnhancedLocation() } returns mockk {
             every { latitude } returns -33.874308
             every { longitude } returns 151.206087
-        }
-        every { tripSession.getRouteProgress() } returns mockk {
-            every { durationRemaining } returns 751.334
         }
         every { directionsSession.requestFasterRoute(any(), capture(routesRequestCallbacks)) } returns mockk()
 
@@ -159,7 +155,6 @@ class FasterRouteControllerTest {
         coroutineRule.testDispatcher.advanceTimeBy(TimeUnit.MINUTES.toMillis(6))
         val routes = listOf<DirectionsRoute>(mockk {
             every { routeIndex() } returns "0"
-            every { duration() } returns 951.013
         })
         routesRequestCallbacks.captured.onRoutesReady(routes)
 
