@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -32,12 +31,10 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.UiSettings;
-import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
@@ -51,12 +48,8 @@ import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
-import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 
 /**
  * View that creates the drop-in UI.
@@ -808,8 +801,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void initializeNavigation(NavigationViewOptions options) {
-    establish(options);
     navigationViewModel.initialize(options);
+    establish(options);
 
     if (options.puckDrawableSupplier() == null) {
       navigationMap.setPuckDrawableSupplier(new DefaultMapboxPuckDrawableSupplier());
@@ -846,27 +839,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   private void establish(NavigationViewOptions options) {
-    establishDistanceFormatter(options);
+    establishDistanceFormatter();
     establishTimeFormat(options);
   }
 
-  private void establishDistanceFormatter(final NavigationViewOptions options) {
-    final String unitType = establishUnitType(options);
-    final Locale language = getLocaleDirectionsRoute(options.directionsRoute(), getContext());
-    final int roundingIncrement = options.roundingIncrement();
-    final DistanceFormatter distanceFormatter = MapboxDistanceFormatter.builder()
-        .withRoundingIncrement(roundingIncrement)
-        .withUnitType(unitType)
-        .withLocale(language)
-        .build(getContext());
-    instructionView.setDistanceFormatter(distanceFormatter);
-    summaryBottomSheet.setDistanceFormatter(distanceFormatter);
-  }
-
-  private String establishUnitType(NavigationViewOptions options) {
-    RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    String voiceUnits = routeOptions == null ? null : routeOptions.voiceUnits();
-    return voiceUnits != null ? voiceUnits : getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
+  private void establishDistanceFormatter() {
+    final DistanceFormatter formatter = navigationViewModel.getDistanceFormatter();
+    instructionView.setDistanceFormatter(formatter);
+    summaryBottomSheet.setDistanceFormatter(formatter);
   }
 
   private void establishTimeFormat(NavigationViewOptions options) {

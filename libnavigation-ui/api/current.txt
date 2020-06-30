@@ -124,14 +124,10 @@ package com.mapbox.navigation.ui {
 
   public class NavigationViewModel extends androidx.lifecycle.AndroidViewModel {
     ctor public NavigationViewModel(android.app.Application!);
-    method protected com.mapbox.navigation.ui.NavigationViewOptions! getNavigationViewOptions();
     method public void onDestroy(boolean);
-    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel!>! retrieveBannerInstructionModel();
-    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.instruction.InstructionModel!>! retrieveInstructionModel();
+    method public androidx.lifecycle.LiveData<com.mapbox.api.directions.v5.models.BannerInstructions!>! retrieveBannerInstructions();
     method public androidx.lifecycle.LiveData<java.lang.Boolean!>! retrieveIsOffRoute();
-    method public com.mapbox.navigation.core.MapboxNavigation? retrieveNavigation();
-    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.internal.junction.RouteJunctionModel!>! retrieveRouteJunctionModelUpdates();
-    method public androidx.lifecycle.LiveData<com.mapbox.navigation.ui.summary.SummaryModel!>! retrieveSummaryModel();
+    method public androidx.lifecycle.LiveData<com.mapbox.navigation.base.trip.model.RouteProgress!>! retrieveRouteProgress();
     method public void setMuted(boolean);
     method public void updateFeedback(com.mapbox.navigation.ui.feedback.FeedbackItem!);
   }

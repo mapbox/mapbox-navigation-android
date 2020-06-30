@@ -195,25 +195,16 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.retrieveInstructionModel().observe(lifecycleOwner, model -> {
-      if (model != null) {
-        updateDataFromInstruction(model);
+    navigationViewModel.retrieveRouteProgress().observe(lifecycleOwner, routeProgress -> {
+      if (routeProgress != null) {
+        updateDistanceWith(routeProgress);
+        determineGuidanceView(routeProgress);
+      } else {
+        animateHideGuidanceViewImage();
       }
     });
-    navigationViewModel.retrieveBannerInstructionModel()
-        .observe(lifecycleOwner, model -> {
-          if (model != null) {
-            updateManeuverView(
-                model.retrievePrimaryManeuverType(),
-                model.retrievePrimaryManeuverModifier(),
-                model.retrievePrimaryRoundaboutAngle(),
-                model.retrieveDrivingSide()
-            );
-            updateDataFromBannerText(model.retrievePrimaryBannerText(), model.retrieveSecondaryBannerText());
-            updateSubStep(model.retrieveSubBannerText(),
-                model.retrievePrimaryManeuverType(), model.retrieveDrivingSide());
-          }
-        });
+    navigationViewModel.retrieveBannerInstructions()
+            .observe(lifecycleOwner, this::updateBannerInstructionsWith);
     navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, isOffRoute -> {
       if (isOffRoute != null) {
         if (isOffRoute) {
@@ -225,13 +216,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         isRerouting = isOffRoute;
       }
     });
-    navigationViewModel.retrieveRouteJunctionModelUpdates().observe(lifecycleOwner, routeJunctionModel -> {
-      if (routeJunctionModel != null) {
-        determineGuidanceView(routeJunctionModel.getRouteProgress());
-      } else {
-        animateHideGuidanceViewImage();
-      }
-    });
+
     subscribeAlertView();
     initializeButtonListeners();
     showButtons();
@@ -245,10 +230,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void unsubscribe() {
     if (navigationViewModel != null) {
-      navigationViewModel.retrieveInstructionModel().removeObservers(lifecycleOwner);
-      navigationViewModel.retrieveBannerInstructionModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveRouteProgress().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveBannerInstructions().removeObservers(lifecycleOwner);
       navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
-      navigationViewModel.retrieveRouteJunctionModelUpdates().removeObservers(lifecycleOwner);
     }
     ImageCreator.getInstance().shutdown();
   }
@@ -302,8 +286,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void showFeedbackBottomSheet() {
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
-      long duration = FEEDBACK_BOTTOM_SHEET_DURATION;
-      FeedbackBottomSheet.newInstance(this, duration)
+      FeedbackBottomSheet.newInstance(this, FEEDBACK_BOTTOM_SHEET_DURATION)
           .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
