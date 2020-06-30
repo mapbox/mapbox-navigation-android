@@ -25,7 +25,6 @@ import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.OnboardRouterOptions;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -42,11 +41,7 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
-import com.mapbox.navigation.ui.internal.instruction.BannerInstructionModel;
-import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
 import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
-import com.mapbox.navigation.ui.internal.junction.RouteJunctionModel;
-import com.mapbox.navigation.ui.summary.SummaryModel;
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
@@ -58,7 +53,6 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
@@ -70,11 +64,9 @@ public class NavigationViewModel extends AndroidViewModel {
   private static final String OKHTTP_INSTRUCTION_CACHE = "okhttp-instruction-cache";
   private static final long TEN_MEGABYTE_CACHE_SIZE = 10 * 1024 * 1024;
 
-  private final MutableLiveData<InstructionModel> instructionModel = new MutableLiveData<>();
-  private final MutableLiveData<BannerInstructionModel> bannerInstructionModel = new MutableLiveData<>();
-  private final MutableLiveData<SummaryModel> summaryModel = new MutableLiveData<>();
+  private final MutableLiveData<RouteProgress> routeProgress = new MutableLiveData<>();
+  private final MutableLiveData<BannerInstructions> bannerInstructions = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
-  private final MutableLiveData<RouteJunctionModel> routeJunctionModel = new MutableLiveData<>();
   private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -87,14 +79,11 @@ public class NavigationViewModel extends AndroidViewModel {
   private VoiceInstructionLoader voiceInstructionLoader;
   private VoiceInstructionCache voiceInstructionCache;
   private int voiceInstructionsToAnnounce = 0;
-  private RouteProgress routeProgress;
   private FeedbackItem feedbackItem;
   private String feedbackEncodedScreenShot;
   private String language;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
-  @TimeFormat.Type
-  private int timeFormatType;
   private boolean isRunning;
   private MapConnectivityController connectivityController;
   private MapOfflineManager mapOfflineManager;
@@ -163,7 +152,7 @@ public class NavigationViewModel extends AndroidViewModel {
    * Will be null if navigation has not been initialized.
    */
   @Nullable
-  public MapboxNavigation retrieveNavigation() {
+  MapboxNavigation retrieveNavigation() {
     return navigation;
   }
 
@@ -187,34 +176,28 @@ public class NavigationViewModel extends AndroidViewModel {
   void initialize(NavigationViewOptions options) {
     this.navigationViewOptions = options;
 
+    initializeDistanceFormatter(options);
     initializeLanguage(options);
-    NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
-        .toBuilder()
-        .accessToken(accessToken)
-        .isFromNavigationUi(true);
 
-    if (options.navigationOptions().getDistanceFormatter() == null) {
-      this.distanceFormatter = buildDistanceFormatter(options);
-      updatedOptionsBuilder.distanceFormatter(distanceFormatter);
-    } else {
-      this.distanceFormatter = options.navigationOptions().getDistanceFormatter();
-    }
-
-    if (options.navigationOptions().getOnboardRouterOptions() == null) {
-      OnboardRouterOptions onboardRouterOptions = MapboxNavigation
-              .defaultNavigationOptionsBuilder(getApplication(), accessToken)
-              .build()
-              .getOnboardRouterOptions();
-      updatedOptionsBuilder.onboardRouterOptions(onboardRouterOptions);
-    }
-
-    NavigationOptions updatedOptions = updatedOptionsBuilder.build();
-    initializeTimeFormat(updatedOptions);
     if (!isRunning()) {
+      NavigationOptions.Builder updatedOptionsBuilder = options.navigationOptions()
+              .toBuilder()
+              .accessToken(accessToken)
+              .isFromNavigationUi(true)
+              .distanceFormatter(distanceFormatter);
+
+      if (options.navigationOptions().getOnboardRouterOptions() == null) {
+        OnboardRouterOptions onboardRouterOptions = new OnboardRouterOptions.Builder()
+                .internalFilePath(getApplication()).build();
+        updatedOptionsBuilder.onboardRouterOptions(onboardRouterOptions);
+      }
+
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
       if (locationEngine != null) {
-        updatedOptions = updatedOptions.toBuilder().locationEngine(locationEngine).build();
+        updatedOptionsBuilder.locationEngine(locationEngine);
       }
+
+      NavigationOptions updatedOptions = updatedOptionsBuilder.build();
       initializeNavigation(updatedOptions);
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
@@ -254,11 +237,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void updateRouteProgress(RouteProgress routeProgress) {
-    this.routeProgress = routeProgress;
-
-    instructionModel.setValue(new InstructionModel(distanceFormatter, routeProgress));
-    summaryModel.setValue(new SummaryModel(getApplication(), distanceFormatter, routeProgress, timeFormatType));
-    routeJunctionModel.setValue(new RouteJunctionModel(routeProgress));
+    this.routeProgress.setValue(routeProgress);
   }
 
   void updateLocation(Location location) {
@@ -269,14 +248,6 @@ public class NavigationViewModel extends AndroidViewModel {
     clearFeedback();
 
     shouldRecordScreenshot.setValue(true);
-  }
-
-  private void updateBannerInstruction(BannerInstructions bannerInstructions) {
-    BannerInstructions instructions = retrieveInstructionsFromBannerEvent(bannerInstructions);
-    if (instructions != null) {
-      BannerInstructionModel model = new BannerInstructionModel(distanceFormatter, routeProgress, instructions);
-      bannerInstructionModel.setValue(model);
-    }
   }
 
   LiveData<Location> retrieveNavigationLocation() {
@@ -299,35 +270,45 @@ public class NavigationViewModel extends AndroidViewModel {
     return isFeedbackSentSuccess;
   }
 
-  public LiveData<InstructionModel> retrieveInstructionModel() {
-    return instructionModel;
+  public LiveData<RouteProgress> retrieveRouteProgress() {
+    return routeProgress;
   }
 
-  public LiveData<RouteJunctionModel> retrieveRouteJunctionModelUpdates() {
-    return routeJunctionModel;
-  }
-
-  public LiveData<BannerInstructionModel> retrieveBannerInstructionModel() {
-    return bannerInstructionModel;
+  public LiveData<BannerInstructions> retrieveBannerInstructions() {
+    return bannerInstructions;
   }
 
   public LiveData<Boolean> retrieveIsOffRoute() {
     return isOffRoute;
   }
 
-  public LiveData<SummaryModel> retrieveSummaryModel() {
-    return summaryModel;
+  NavigationViewOptions getNavigationViewOptions() {
+    return navigationViewOptions;
   }
 
-  protected NavigationViewOptions getNavigationViewOptions() {
-    return navigationViewOptions;
+  DistanceFormatter getDistanceFormatter() {
+    if (distanceFormatter == null && navigationViewOptions != null) {
+      initializeDistanceFormatter(navigationViewOptions);
+    }
+    return distanceFormatter;
+  }
+
+  private void initializeDistanceFormatter(NavigationViewOptions options) {
+    RouteOptions routeOptions = options.directionsRoute().routeOptions();
+    if ((routeOptions == null || TextUtils.isEmpty(routeOptions.voiceUnits()))
+      && options.navigationOptions().getDistanceFormatter() != null) {
+      distanceFormatter = options.navigationOptions().getDistanceFormatter();
+    } else {
+      distanceFormatter = buildDistanceFormatter(options);
+    }
   }
 
   private void initializeLanguage(NavigationUiOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
-    language = ContextEx.inferDeviceLanguage(getApplication());
     if (routeOptions != null) {
       language = routeOptions.language();
+    } else {
+      language = ContextEx.inferDeviceLanguage(getApplication());
     }
   }
 
@@ -338,10 +319,6 @@ public class NavigationViewModel extends AndroidViewModel {
       unitType = routeOptions.voiceUnits();
     }
     return unitType;
-  }
-
-  private void initializeTimeFormat(NavigationOptions options) {
-    timeFormatType = options.getTimeFormatType();
   }
 
   private DistanceFormatter buildDistanceFormatter(final NavigationViewOptions options) {
@@ -473,12 +450,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private BannerInstructionsObserver bannerInstructionsObserver = new BannerInstructionsObserver() {
-    @Override
-    public void onNewBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
-      updateBannerInstruction(bannerInstructions);
-    }
-  };
+  private BannerInstructionsObserver bannerInstructionsObserver = bannerInstructions ->
+          this.bannerInstructions.setValue(retrieveInstructionsFromBannerEvent(bannerInstructions));
 
   private TripSessionStateObserver tripSessionStateObserver = new TripSessionStateObserver() {
     @Override
@@ -492,12 +465,9 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private RoutesObserver routesObserver = new RoutesObserver() {
-    @Override
-    public void onRoutesChanged(@NotNull List<? extends DirectionsRoute> routes) {
-      if (routes.size() > 0) {
-        route.setValue(routes.get(0));
-      }
+  private RoutesObserver routesObserver = routes -> {
+    if (routes.size() > 0) {
+      route.setValue(routes.get(0));
     }
   };
 

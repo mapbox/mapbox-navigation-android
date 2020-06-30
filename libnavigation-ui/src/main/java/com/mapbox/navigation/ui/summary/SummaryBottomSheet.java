@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.content.ContextCompat;
@@ -21,7 +20,6 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -113,26 +111,14 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
-    navigationViewModel.retrieveSummaryModel().observe(lifecycleOwner, new Observer<SummaryModel>() {
-      @Override
-      public void onChanged(@Nullable SummaryModel summaryModel) {
-        if (summaryModel != null && !isRerouting) {
-          arrivalTimeText.setText(summaryModel.getArrivalTime());
-          timeRemainingText.setText(summaryModel.getTimeRemaining());
-          distanceRemainingText.setText(summaryModel.getDistanceRemaining());
-        }
-      }
-    });
-    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean isOffRoute) {
-        if (isOffRoute != null) {
-          isRerouting = isOffRoute;
-          if (isRerouting) {
-            showRerouteState();
-          } else {
-            hideRerouteState();
-          }
+    navigationViewModel.retrieveRouteProgress().observe(lifecycleOwner, this::update);
+    navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, isOffRoute -> {
+      if (isOffRoute != null) {
+        isRerouting = isOffRoute;
+        if (isRerouting) {
+          showRerouteState();
+        } else {
+          hideRerouteState();
         }
       }
     });
@@ -146,7 +132,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
   public void unsubscribe() {
     if (navigationViewModel != null) {
-      navigationViewModel.retrieveSummaryModel().removeObservers(lifecycleOwner);
+      navigationViewModel.retrieveRouteProgress().removeObservers(lifecycleOwner);
       navigationViewModel.retrieveIsOffRoute().removeObservers(lifecycleOwner);
     }
   }
