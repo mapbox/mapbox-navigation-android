@@ -420,6 +420,11 @@ internal class MapRouteLine(
      * @param directionsRoutes the routes to be represented on the map.
      */
     fun draw(directionsRoutes: List<DirectionsRoute>) {
+        reinitializeWithRoutes(directionsRoutes)
+        drawRoutes(routeFeatureData)
+    }
+
+    internal fun reinitializeWithRoutes(directionsRoutes: List<DirectionsRoute>) {
         if (directionsRoutes.isNotEmpty()) {
             clearRouteData()
             this.directionsRoutes.addAll(directionsRoutes)
@@ -431,12 +436,20 @@ internal class MapRouteLine(
                 ThreadController.getMainScopeAndRootJob().scope
             )
             routeFeatureData.addAll(newRouteFeatureData)
-            drawRoutes(newRouteFeatureData)
-            hideRouteLineAtOffset(0f)
-            hideShieldLineAtOffset(0f)
+            if (newRouteFeatureData.isNotEmpty()) {
+                updateRouteTrafficSegments(newRouteFeatureData.first())
+            }
             drawWayPoints()
             updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
             updateAllLayersVisibility(allLayersAreVisible)
+        }
+    }
+
+    internal fun reinitializePrimaryRoute() {
+        this.routeFeatureData.firstOrNull { it.route == primaryRoute }?.let {
+            drawPrimaryRoute(it)
+            hideRouteLineAtOffset(vanishPointOffset)
+            hideShieldLineAtOffset(vanishPointOffset)
         }
     }
 
@@ -652,24 +665,36 @@ internal class MapRouteLine(
     private fun drawRoutes(routeData: List<RouteFeatureData>) {
         val partitionedRoutes = routeData.partition { it.route == primaryRoute }
         partitionedRoutes.first.firstOrNull()?.let {
-            setPrimaryRoutesSource(it.featureCollection)
-            val lineString: LineString = getLineStringForRoute(it.route)
-            val segments = calculateRouteLineSegments(
-                it.route,
-                lineString,
-                true,
-                ::getRouteColorForCongestion
-            )
-            routeLineExpressionData.clear()
-            routeLineExpressionData.addAll(segments)
-
-            if (style.isFullyLoaded) {
-                val expression = getExpressionAtOffset(0f)
-                style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
-            }
+            drawPrimaryRoute(it)
+            hideRouteLineAtOffset(vanishPointOffset)
+            hideShieldLineAtOffset(vanishPointOffset)
         }
+        drawAlternativeRoutes(partitionedRoutes.second)
+    }
 
-        partitionedRoutes.second.mapNotNull {
+    private fun drawPrimaryRoute(routeData: RouteFeatureData) {
+        setPrimaryRoutesSource(routeData.featureCollection)
+        updateRouteTrafficSegments(routeData)
+        if (style.isFullyLoaded) {
+            val expression = getExpressionAtOffset(0f)
+            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
+        }
+    }
+
+    private fun updateRouteTrafficSegments(routeData: RouteFeatureData) {
+        val lineString: LineString = getLineStringForRoute(routeData.route)
+        val segments = calculateRouteLineSegments(
+            routeData.route,
+            lineString,
+            true,
+            ::getRouteColorForCongestion
+        )
+        routeLineExpressionData.clear()
+        routeLineExpressionData.addAll(segments)
+    }
+
+    private fun drawAlternativeRoutes(routeData: List<RouteFeatureData>) {
+        routeData.mapNotNull {
             it.featureCollection.features()
         }.flatten().let {
             setAlternativeRoutesSource(FeatureCollection.fromFeatures(it))
@@ -689,7 +714,10 @@ internal class MapRouteLine(
         vanishPointOffset = distanceOffset
         val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
         val trafficExpressions = when (filteredItems.isEmpty()) {
-            true -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
+            true -> when (routeLineExpressionData.isEmpty()) {
+                true -> listOf(RouteLineExpressionData(distanceOffset, routeUnknownColor))
+                false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
+            }
             false -> {
                 val firstItemIndex = routeLineExpressionData.indexOf(filteredItems.first())
                 val fillerItem = if (firstItemIndex == 0) {

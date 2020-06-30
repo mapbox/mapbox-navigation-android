@@ -9,6 +9,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -26,7 +27,7 @@ class MapRouteProgressChangeListenerTest {
     var coroutineRule = MainCoroutineRule()
 
     private val routeLine: MapRouteLine = mockk(relaxUnitFun = true)
-    private val routeArrow: MapRouteArrow = mockk()
+    private val routeArrow: MapRouteArrow = mockk(relaxUnitFun = true)
     private val animator: ValueAnimator by lazy {
         ValueAnimator.ofFloat().apply {
             duration = 0
@@ -36,6 +37,7 @@ class MapRouteProgressChangeListenerTest {
 
     private val drawDirections = mutableListOf<DirectionsRoute>()
     private val addRouteProgress = mutableListOf<RouteProgress>()
+    private val routeListSlot = slot<List<DirectionsRoute>>()
 
     private val progressChangeListener by lazy {
         MapRouteProgressChangeListener(routeLine, routeArrow, null)
@@ -45,6 +47,7 @@ class MapRouteProgressChangeListenerTest {
     fun setup() {
         every { routeLine.retrieveDirectionsRoutes() } returns emptyList()
         every { routeLine.draw(capture(drawDirections)) } returns Unit
+        every { routeLine.reinitializeWithRoutes(capture(routeListSlot)) } returns Unit
         every { routeLine.vanishPointOffset } returns 0f
         every { routeArrow.addUpcomingManeuverArrow(capture(addRouteProgress)) } returns Unit
         every { routeArrow.routeArrowIsVisible() } returns true
@@ -95,12 +98,11 @@ class MapRouteProgressChangeListenerTest {
         val newRoute: DirectionsRoute = mockk {
             every { geometry() } returns null
         }
-
         every { routeLine.getPrimaryRoute() } returns newRoute
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
+        verify(exactly = 1) { routeLine.reinitializeWithRoutes(any<List<DirectionsRoute>>()) }
     }
 
     @Test
@@ -121,7 +123,6 @@ class MapRouteProgressChangeListenerTest {
         val newRoute: DirectionsRoute = mockk {
             every { geometry() } returns null
         }
-
         every { routeLine.getPrimaryRoute() } returns newRoute
 
         routeProgressChangeListener.onRouteProgressChanged(routeProgress)
@@ -139,9 +140,7 @@ class MapRouteProgressChangeListenerTest {
         every { routeLine.getPrimaryRoute() } returns routes[0]
         every { routeLine.retrieveDirectionsRoutes() } returns routes
         val routeProgress: RouteProgress = mockk {
-            every { route } returns mockk {
-                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
-            }
+            every { route } returns routes[0]
         }
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
@@ -186,9 +185,9 @@ class MapRouteProgressChangeListenerTest {
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
-        assertEquals(1, drawDirections.size)
-        assertEquals("{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB", drawDirections[0].geometry())
+        verify(exactly = 1) { routeLine.reinitializeWithRoutes(any<List<DirectionsRoute>>()) }
+        assertEquals(1, routeListSlot.captured.size)
+        assertEquals("{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB", routeListSlot.captured[0].geometry())
     }
 
     @Test
@@ -209,36 +208,9 @@ class MapRouteProgressChangeListenerTest {
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { routeLine.draw(any<DirectionsRoute>()) }
-        assertEquals(1, drawDirections.size)
-        assertEquals(100.0, drawDirections[0].distance()!!, 0.001)
-    }
-
-    @Test
-    fun `decorates route line when route progress route has geometry`() {
-        val expression: Expression = mockk()
-        val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
-        val routes = listOf(
-            mockk<DirectionsRoute> {
-                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
-            }
-        )
-        val routeProgress: RouteProgress = mockk {
-            every { route } returns mockk {
-                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
-                every { distanceRemaining } returns 1000f
-                every { distanceTraveled } returns 500f
-            }
-        }
-        every { routeLine.getPrimaryRoute() } returns routeProgress.route
-        every { routeLine.retrieveDirectionsRoutes() } returns routes
-        every { routeLine.getExpressionAtOffset(any()) } returns expression
-
-        coroutineRule.runBlockingTest {
-            progressChangeListener.onRouteProgressChanged(routeProgress)
-        }
-
-        verify { routeLine.decorateRouteLine(expression) }
+        verify(exactly = 1) { routeLine.reinitializeWithRoutes(any<List<DirectionsRoute>>()) }
+        assertEquals(1, routeListSlot.captured.size)
+        assertEquals(100.0, routeListSlot.captured[0].distance()!!, 0.001)
     }
 
     @Test
@@ -345,5 +317,33 @@ class MapRouteProgressChangeListenerTest {
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify { routeArrow.addUpcomingManeuverArrow(routeProgress) }
+    }
+
+    @Test
+    fun `calls reinitializePrimaryRoute function`() {
+        val expression: Expression = mockk()
+        val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
+        val routes = listOf(
+            mockk<DirectionsRoute> {
+                every { geometry() } returns "y{v|bA{}diiGOuDpBiMhM{k@~Syj@bLuZlEiM"
+            }
+        )
+        val routeProgress: RouteProgress = mockk {
+            every { route } returns mockk {
+                every { geometry() } returns "{au|bAqtiiiG|TnI`B\\dEzAl_@hMxGxB"
+                every { distanceRemaining } returns 1000f
+                every { distanceTraveled } returns 500f
+            }
+        }
+        every { routeLine.getPrimaryRoute() } returns routes[0] andThen routeProgress.route
+        every { routeLine.retrieveDirectionsRoutes() } returns routes
+        every { routeLine.getExpressionAtOffset(any()) } returns expression
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+        coroutineRule.runBlockingTest {
+            progressChangeListener.onRouteProgressChanged(routeProgress)
+        }
+
+        verify { routeLine.reinitializePrimaryRoute() }
     }
 }
