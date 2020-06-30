@@ -13,11 +13,9 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
-import com.mapbox.navigation.base.TimeFormat
 import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
-import com.mapbox.navigation.base.options.DEFAULT_NAVIGATOR_PREDICTION_MILLIS
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
@@ -692,8 +690,6 @@ class MapboxNavigation(
                 .build(context)
             val builder = NavigationOptions.Builder(context)
                 .accessToken(accessToken)
-                .timeFormatType(TimeFormat.NONE_SPECIFIED)
-                .navigatorPredictionMillis(DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
                 .distanceFormatter(distanceFormatter)
 
             val onboardRouterOptions = OnboardRouterOptions.Builder()

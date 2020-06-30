@@ -72,7 +72,7 @@ class MapboxDistanceFormatter private constructor(
      * Builder of [MapboxDistanceFormatter]
      */
     class Builder {
-        private var unitType: String? = null
+        private var unitType: String = VoiceUnit.UNDEFINED
         private var locale: Locale? = null
         private var roundingIncrement = Rounding.INCREMENT_FIFTY
 
@@ -112,9 +112,8 @@ class MapboxDistanceFormatter private constructor(
         fun build(context: Context): MapboxDistanceFormatter {
             val localeToUse: Locale = locale ?: context.applicationContext.inferDeviceLocale()
             val unitTypeToUse: String = when (unitType) {
-                null -> localeToUse.getUnitTypeForLocale()
                 VoiceUnit.UNDEFINED -> localeToUse.getUnitTypeForLocale()
-                else -> unitType!!
+                else -> unitType
             }
 
             return MapboxDistanceFormatter(
