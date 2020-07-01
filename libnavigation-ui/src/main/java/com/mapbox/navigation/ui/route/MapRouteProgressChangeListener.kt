@@ -52,6 +52,7 @@ internal class MapRouteProgressChangeListener(
     private val routeLineAnimatorUpdateCallback = ValueAnimator.AnimatorUpdateListener {
         val animationDistanceValue = it.animatedValue as Float
         if (animationDistanceValue > MINIMUM_ROUTE_LINE_OFFSET) {
+            lastDistanceValue = animationDistanceValue
             val expression = routeLine.getExpressionAtOffset(animationDistanceValue)
             routeLine.hideShieldLineAtOffset(animationDistanceValue)
             routeLine.hideRouteLineAtOffset(animationDistanceValue)
@@ -90,8 +91,8 @@ internal class MapRouteProgressChangeListener(
                 jobControl.scope.launch {
                     val percentDistanceTraveled = getPercentDistanceTraveled(routeProgress)
                     if (percentDistanceTraveled > 0) {
+                        vanishingLineAnimator.cancel()
                         animateVanishRouteLineUpdate(lastDistanceValue, percentDistanceTraveled)
-                        lastDistanceValue = percentDistanceTraveled
                     }
                 }
             }
