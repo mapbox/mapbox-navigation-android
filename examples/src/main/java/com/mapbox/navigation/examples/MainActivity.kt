@@ -10,23 +10,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.mapbox.android.core.permissions.PermissionsListener
-import com.mapbox.android.core.permissions.PermissionsManager
 import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import java.util.ArrayList
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.cardCore
+import kotlinx.android.synthetic.main.activity_main.cardUI
+import kotlinx.android.synthetic.main.activity_main.settingsFab
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
-    private val permissionsManager = PermissionsManager(this)
+    private val permissionsHelper = PermissionsHelper(this)
     private val CHANGE_SETTING_REQUEST_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        when (PermissionsManager.areLocationPermissionsGranted(this)) {
+        when (PermissionsHelper.areLocationPermissionsGranted(this)) {
             true -> requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE)
-            else -> permissionsManager.requestLocationPermissions(this)
+            else -> permissionsHelper.requestLocationPermissions(this)
         }
 
         settingsFab.setOnClickListener {
@@ -70,8 +71,8 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == 0) {
-            permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
+            permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
         } else {
             when (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 true -> {
@@ -79,7 +80,11 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
                 }
                 else -> {
                     cardCore.isClickable = false
-                    Toast.makeText(this, "You didn't grant storage permissions.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "You didn't grant storage or location permissions.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
