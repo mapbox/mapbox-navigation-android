@@ -554,11 +554,6 @@ License: [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the JaCoCo :: Agent (JaCoCo Agent).
-License: [Eclipse Public License v1.0](http://www.eclipse.org/legal/epl-v10.html)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the JetBrains Java Annotations (A set of annotations used for code inspection support and code documentation.).
 URL: [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
 License: [The Apache Software License, Version 2.0](http://www.apache.org/license/LICENSE-2.0.txt)
