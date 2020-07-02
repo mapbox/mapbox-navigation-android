@@ -226,14 +226,16 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void stopNavigation() {
-    navigation.unregisterRouteProgressObserver(navigationProgressObserver);
-    navigation.unregisterLocationObserver(navigationProgressObserver);
-    navigation.unregisterRoutesObserver(routesObserver);
-    navigation.unregisterOffRouteObserver(offRouteObserver);
-    navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
-    navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
-    navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
-    navigation.stopTripSession();
+    if (navigation != null) {
+      navigation.unregisterRouteProgressObserver(navigationProgressObserver);
+      navigation.unregisterLocationObserver(navigationProgressObserver);
+      navigation.unregisterRoutesObserver(routesObserver);
+      navigation.unregisterOffRouteObserver(offRouteObserver);
+      navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
+      navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
+      navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
+      navigation.stopTripSession();
+    }
   }
 
   void updateRouteProgress(RouteProgress routeProgress) {

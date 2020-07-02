@@ -169,6 +169,14 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      */
     public abstract Builder puckDrawableSupplier(PuckDrawableSupplier puckDrawableSupplier);
 
+    /**
+     * Set true to mute the voice guidance when the Navigation starts
+     *
+     * @param muteVoiceGuidance true or false
+     * @return this {@link Builder}
+     */
+    public abstract Builder muteVoiceGuidance(boolean muteVoiceGuidance);
+
     public abstract NavigationViewOptions build();
   }
 

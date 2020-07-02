@@ -101,6 +101,7 @@ class NavigationViewActivity : AppCompatActivity(), OnNavigationReadyCallback,
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.bannerInstructionsListener(this)
+                optionsBuilder.muteVoiceGuidance(true)
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }

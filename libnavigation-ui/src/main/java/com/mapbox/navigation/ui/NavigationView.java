@@ -553,6 +553,29 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   /**
+   * Returns the state of speech player whether it is muted or unmuted
+   * @return true if speech player is mute else false
+   */
+  public boolean isVoiceGuidanceMuted() {
+    return navigationViewModel.isMuted();
+  }
+
+  /**
+   * This method toggles the mute state of speech player. It also updates the UI
+   * to reflect the new state of speech player.
+   * <p>
+   * Should be called after {@link NavigationView#startNavigation}.
+   * Otherwise, it does nothing.
+   * <p>
+   * Can check the current mute state by calling {@link NavigationView#isVoiceGuidanceMuted()}
+   */
+  public void toggleMute() {
+    if (isSubscribed) {
+      navigationViewModel.setMuted(((SoundButton) retrieveSoundButton()).toggleMute());
+    }
+  }
+
+  /**
    * Updates the visibility of the Mapbox logo and attribution button
    *
    * @param isVisible what the new visibility should be. True makes
@@ -816,6 +839,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       navigationMap.setCamera(options.camera());
     }
 
+    initializeVoiceGuidanceMuteState(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
 
@@ -823,6 +847,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       initializeClickListeners();
       initializeOnCameraTrackingChangedListener();
       subscribeViewModels();
+    }
+  }
+
+  private void initializeVoiceGuidanceMuteState(final NavigationViewOptions options) {
+    if (options.muteVoiceGuidance() && !isVoiceGuidanceMuted()) {
+      navigationViewModel.setMuted(((SoundButton) retrieveSoundButton()).toggleMute());
     }
   }
 
