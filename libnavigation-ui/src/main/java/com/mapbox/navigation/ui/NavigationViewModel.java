@@ -15,6 +15,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -88,6 +89,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private int voiceInstructionsToAnnounce = 0;
   private RouteProgress routeProgress;
   private FeedbackItem feedbackItem;
+  private String feedbackEncodedScreenShot;
   private String language;
   private DistanceFormatter distanceFormatter;
   private String accessToken;
@@ -152,8 +154,7 @@ public class NavigationViewModel extends AndroidViewModel {
    */
   public void updateFeedback(FeedbackItem feedbackItem) {
     this.feedbackItem = feedbackItem;
-    isFeedbackSentSuccess.setValue(false);
-    shouldRecordScreenshot.setValue(true);
+    sendFeedback();
   }
 
   /**
@@ -226,16 +227,8 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void updateFeedbackScreenshot(String screenshot) {
-    if (feedbackItem != null) {
-      MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
-          feedbackItem.getDescription(), UI, screenshot,
-          feedbackItem.getFeedbackSubType().toArray(new String[0]));
-      sendEventFeedback(feedbackItem);
-      isFeedbackSentSuccess.setValue(true);
-      feedbackItem = null;
-    }
-
-    shouldRecordScreenshot.setValue(false);
+    feedbackEncodedScreenShot = screenshot;
+    sendFeedback();
   }
 
   boolean isRunning() {
@@ -270,6 +263,12 @@ public class NavigationViewModel extends AndroidViewModel {
 
   void updateLocation(Location location) {
     navigationLocation.setValue(location);
+  }
+
+  void takeScreenshot() {
+    clearFeedback();
+
+    shouldRecordScreenshot.setValue(true);
   }
 
   private void updateBannerInstruction(BannerInstructions bannerInstructions) {
@@ -434,6 +433,26 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  private void sendFeedback() {
+    if (feedbackItem != null && !TextUtils.isEmpty(feedbackEncodedScreenShot)) {
+      MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
+              feedbackItem.getDescription(), UI, feedbackEncodedScreenShot,
+              feedbackItem.getFeedbackSubType().toArray(new String[0]));
+
+      onFeedbackSent(feedbackItem);
+      isFeedbackSentSuccess.setValue(true);
+
+      clearFeedback();
+    }
+  }
+
+  private void clearFeedback() {
+    feedbackItem = null;
+    feedbackEncodedScreenShot = null;
+    isFeedbackSentSuccess.setValue(false);
+    shouldRecordScreenshot.setValue(false);
+  }
+
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
     @Override
     public void onNewVoiceInstructions(@NotNull VoiceInstructions voiceInstructions) {
@@ -511,7 +530,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void sendEventFeedback(FeedbackItem feedbackItem) {
+  private void onFeedbackSent(FeedbackItem feedbackItem) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
     }

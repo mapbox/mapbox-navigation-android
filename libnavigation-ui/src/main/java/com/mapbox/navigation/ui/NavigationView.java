@@ -837,6 +837,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
     recenterBtn.addOnClickListener(new RecenterBtnClickListener(navigationPresenter));
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
+    retrieveFeedbackButton().addOnClickListener(view -> navigationViewModel.takeScreenshot());
   }
 
   private void initializeOnCameraTrackingChangedListener() {
