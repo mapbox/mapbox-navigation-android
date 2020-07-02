@@ -1,16 +1,9 @@
 package com.mapbox.navigation.ui;
 
-import android.location.Location;
-
-import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.OnLifecycleEvent;
-
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.geojson.Point;
 
 class NavigationViewSubscriber implements LifecycleObserver {
 
@@ -27,48 +20,33 @@ class NavigationViewSubscriber implements LifecycleObserver {
   }
 
   void subscribe() {
-    navigationViewModel.retrieveRoute().observe(lifecycleOwner, new Observer<DirectionsRoute>() {
-      @Override
-      public void onChanged(@Nullable DirectionsRoute directionsRoute) {
-        if (directionsRoute != null) {
-          navigationPresenter.onRouteUpdate(directionsRoute);
-        }
+    navigationViewModel.retrieveRoute().observe(lifecycleOwner, directionsRoute -> {
+      if (directionsRoute != null) {
+        navigationPresenter.onRouteUpdate(directionsRoute);
       }
     });
 
-    navigationViewModel.retrieveDestination().observe(lifecycleOwner, new Observer<Point>() {
-      @Override
-      public void onChanged(@Nullable Point point) {
-        if (point != null) {
-          navigationPresenter.onDestinationUpdate(point);
-        }
+    navigationViewModel.retrieveDestination().observe(lifecycleOwner, point -> {
+      if (point != null) {
+        navigationPresenter.onDestinationUpdate(point);
       }
     });
 
-    navigationViewModel.retrieveNavigationLocation().observe(lifecycleOwner, new Observer<Location>() {
-      @Override
-      public void onChanged(@Nullable Location location) {
-        if (location != null) {
-          navigationPresenter.onNavigationLocationUpdate(location);
-        }
+    navigationViewModel.retrieveNavigationLocation().observe(lifecycleOwner, location -> {
+      if (location != null) {
+        navigationPresenter.onNavigationLocationUpdate(location);
       }
     });
 
-    navigationViewModel.retrieveShouldRecordScreenshot().observe(lifecycleOwner, new Observer<Boolean>() {
-      @Override
-      public void onChanged(@Nullable Boolean shouldRecordScreenshot) {
-        if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
-          navigationPresenter.onShouldRecordScreenshot();
-        }
+    navigationViewModel.retrieveShouldRecordScreenshot().observe(lifecycleOwner, shouldRecordScreenshot -> {
+      if (shouldRecordScreenshot != null && shouldRecordScreenshot) {
+        navigationPresenter.onShouldRecordScreenshot();
       }
     });
 
-    navigationViewModel.retrieveIsFeedbackSentSuccess().observe(lifecycleOwner, new Observer<Boolean>() {
-      @Override
-      public void onChanged(Boolean isFeedbackSentSuccess) {
-        if (isFeedbackSentSuccess != null && isFeedbackSentSuccess) {
-          navigationPresenter.onFeedbackSent();
-        }
+    navigationViewModel.retrieveIsFeedbackSentSuccess().observe(lifecycleOwner, isFeedbackSentSuccess -> {
+      if (isFeedbackSentSuccess != null && isFeedbackSentSuccess) {
+        navigationPresenter.onFeedbackSent();
       }
     });
   }

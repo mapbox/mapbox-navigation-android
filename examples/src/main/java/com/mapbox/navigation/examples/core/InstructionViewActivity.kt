@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
@@ -51,7 +53,6 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
-import com.mapbox.navigation.ui.instruction.NavigationAlertView
 import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
@@ -81,8 +82,10 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     private var mapboxMap: MapboxMap? = null
     private var feedbackButton: NavigationButton? = null
     private var instructionSoundButton: NavigationButton? = null
-    private var alertView: NavigationAlertView? = null
     private var directionRoute: DirectionsRoute? = null
+
+    private var feedbackItem: FeedbackItem? = null
+    private var feedbackEncodedScreenShot: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -162,7 +165,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         directionRoute = Utils.getRouteFromBundle(savedInstanceState)
     }
@@ -176,12 +179,22 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
             when (directionRoute) {
                 null -> {
                     if (shouldSimulateRoute()) {
-                        mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxNavigation?.registerRouteProgressObserver(
+                            ReplayProgressObserver(
+                                mapboxReplayer
+                            )
+                        )
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
-                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(
+                        locationListenerCallback
+                    )
+                    Snackbar.make(
+                        container,
+                        R.string.msg_long_press_map_to_place_waypoint,
+                        LENGTH_SHORT
+                    )
                         .show()
                 }
                 else -> restoreNavigation()
@@ -206,22 +219,45 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     // InstructionView Feedback Bottom Sheet listener
+    override fun onFeedbackDismissed() {
+        // do nothing
+    }
+
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
-            mapboxMap?.snapshot { snapshot ->
-                alertView?.showFeedbackSubmitted()
-                MapboxNavigation.postUserFeedback(
-                    feedback.feedbackType,
-                    feedback.description,
-                    UI,
-                    encodeSnapshot(snapshot)
-                )
-            }
+            this.feedbackItem = feedback
+            sendFeedback()
         }
     }
 
-    override fun onFeedbackDismissed() {
-        // do nothing
+    private fun encodeSnapshot(snapshot: Bitmap) {
+        screenshotView.visibility = VISIBLE
+        screenshotView.setImageBitmap(snapshot)
+        mapView.visibility = View.INVISIBLE
+        feedbackEncodedScreenShot = ViewUtils.encodeView(
+            ViewUtils.captureView(mapView),
+            BitmapEncodeOptions.Builder()
+                .width(400).compressQuality(40).build()
+        )
+        screenshotView.visibility = View.INVISIBLE
+        mapView.visibility = VISIBLE
+
+        sendFeedback()
+    }
+
+    private fun sendFeedback() {
+        val feedback = feedbackItem
+        val screenShot = feedbackEncodedScreenShot
+        if (feedback != null && !screenShot.isNullOrEmpty()) {
+            MapboxNavigation.postUserFeedback(
+                feedback.feedbackType,
+                feedback.description,
+                UI,
+                screenShot,
+                feedback.feedbackSubType.toTypedArray()
+            )
+            showFeedbackSentSnackBar(context = this, view = mapView)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -264,30 +300,10 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun stopLocationUpdates() {
         if (!shouldSimulateRoute()) {
-            mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
-        }
-    }
-
-    private fun showFeedbackBottomSheet() {
-        supportFragmentManager.let {
-            FeedbackBottomSheet.newInstance(
-                this,
-                NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
+            mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(
+                locationListenerCallback
             )
-                .show(it, FeedbackBottomSheet.TAG)
         }
-    }
-
-    private fun encodeSnapshot(snapshot: Bitmap): String {
-        screenshotView.visibility = VISIBLE
-        screenshotView.setImageBitmap(snapshot)
-        mapView.visibility = View.INVISIBLE
-        val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView),
-                BitmapEncodeOptions.Builder()
-                        .width(400).compressQuality(40).build())
-        screenshotView.visibility = View.INVISIBLE
-        mapView.visibility = VISIBLE
-        return encodedSnapshot
     }
 
     private fun initViews() {
@@ -297,7 +313,16 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         feedbackButton = instructionView.retrieveFeedbackButton().apply {
             hide()
             addOnClickListener {
-                showFeedbackBottomSheet()
+                feedbackItem = null
+                feedbackEncodedScreenShot = null
+                supportFragmentManager.let {
+                    mapboxMap?.snapshot(this@InstructionViewActivity::encodeSnapshot)
+                    FeedbackBottomSheet.newInstance(
+                        this@InstructionViewActivity,
+                        NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
+                    )
+                        .show(it, FeedbackBottomSheet.TAG)
+                }
             }
         }
         instructionSoundButton = instructionView.retrieveSoundButton().apply {
@@ -308,10 +333,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                     speechPlayer.isMuted = soundButton.toggleMute()
                 }
             }
-        }
-
-        alertView = instructionView.retrieveAlertView().apply {
-            hide()
         }
     }
 

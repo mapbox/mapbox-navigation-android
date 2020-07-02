@@ -1,11 +1,13 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -59,6 +61,9 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var destination: LatLng
     private val mapboxReplayer = MapboxReplayer()
     private var directionRoute: DirectionsRoute? = null
+
+    private var feedbackItem: FeedbackItem? = null
+    private var feedbackEncodedScreenShot: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,7 +131,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         directionRoute = Utils.getRouteFromBundle(savedInstanceState)
     }
@@ -141,12 +146,14 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
             mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
             mapboxReplayer.pushRealLocation(this, 0.0)
             mapboxReplayer.play()
-            mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
+            mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(
+                locationListenerCallback
+            )
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)
                 mapboxNavigation?.setRoutes(listOf(it))
-                startNavigation.visibility = View.VISIBLE
+                startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = true
             }
         }
@@ -207,8 +214,11 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         feedbackButton.addOnClickListener {
+            feedbackItem = null
+            feedbackEncodedScreenShot = null
             feedbackButton.hide()
             supportFragmentManager.let {
+                mapboxMap?.snapshot(this::encodeSnapshot)
                 FeedbackBottomSheet.newInstance(
                     this,
                     FeedbackBottomSheet.FEEDBACK_DETAIL_FLOW,
@@ -274,50 +284,35 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
-            mapboxMap?.snapshot { snapshot ->
-                MapboxNavigation.postUserFeedback(
-                    feedback.feedbackType,
-                    feedback.description,
-                    UI,
-                    encodeSnapshot(snapshot),
-                    feedback.feedbackSubType.toTypedArray()
-                )
-                showFeedbackSent()
-            }
+            this.feedbackItem = feedback
+            sendFeedback()
         }
     }
 
-    private fun encodeSnapshot(snapshot: Bitmap): String {
+    private fun sendFeedback() {
+        val feedback = feedbackItem
+        val screenShot = feedbackEncodedScreenShot
+        if (feedback != null && !screenShot.isNullOrEmpty()) {
+            MapboxNavigation.postUserFeedback(
+                feedback.feedbackType,
+                feedback.description,
+                UI,
+                screenShot,
+                feedback.feedbackSubType.toTypedArray()
+            )
+            showFeedbackSentSnackBar(context = this, view = mapView)
+        }
+    }
+
+    private fun encodeSnapshot(snapshot: Bitmap) {
         screenshotView.visibility = VISIBLE
         screenshotView.setImageBitmap(snapshot)
         mapView.visibility = View.INVISIBLE
-        val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
+        feedbackEncodedScreenShot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
         screenshotView.visibility = View.INVISIBLE
         mapView.visibility = VISIBLE
-        return encodedSnapshot
-    }
 
-    private fun showFeedbackSent() {
-        val snackbar = Snackbar.make(
-            mapView,
-            com.mapbox.libnavigation.ui.R.string.feedback_reported,
-            LENGTH_SHORT
-        )
-
-        snackbar.view.setBackgroundColor(
-            ContextCompat.getColor(
-                this,
-                com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
-            )
-        )
-        snackbar.setTextColor(
-            ContextCompat.getColor(
-                this,
-                com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_primary_text
-            )
-        )
-
-        snackbar.show()
+        sendFeedback()
     }
 
     private fun updateCameraOnNavigationStateChange(
@@ -333,4 +328,37 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
             }
         }
     }
+}
+
+fun showFeedbackSentSnackBar(
+    context: Context,
+    view: View,
+    @StringRes message: Int = R.string.feedback_reported,
+    length: Int = LENGTH_SHORT,
+    setAnchorView: Boolean = false
+) {
+    val snackBar = Snackbar.make(
+        view,
+        message,
+        length
+    )
+
+    if (setAnchorView) {
+        snackBar.anchorView = view
+    }
+
+    snackBar.view.setBackgroundColor(
+        ContextCompat.getColor(
+            context,
+            com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
+        )
+    )
+    snackBar.setTextColor(
+        ContextCompat.getColor(
+            context,
+            com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_primary_text
+        )
+    )
+
+    snackBar.show()
 }
