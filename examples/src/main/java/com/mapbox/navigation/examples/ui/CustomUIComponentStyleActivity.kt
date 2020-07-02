@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.mapbox.navigation.examples.ui
 
 import android.annotation.SuppressLint
@@ -39,7 +41,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
-import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -47,6 +49,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.core.InstructionViewActivity
+import com.mapbox.navigation.examples.core.showFeedbackSentSnackBar
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationButton
@@ -95,6 +98,9 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private var mapboxMap: MapboxMap? = null
     private var locationComponent: LocationComponent? = null
+
+    private var feedbackItem: FeedbackItem? = null
+    private var feedbackEncodedScreenShot: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Timber.d("onCreate savedInstanceState=%s", savedInstanceState)
@@ -199,7 +205,9 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
                 mapboxReplayer.pushRealLocation(this, 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
+            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(
+                locationListenerCallback
+            )
 
             Snackbar.make(
                 findViewById(R.id.navigationLayout),
@@ -212,15 +220,8 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     // InstructionView Feedback Bottom Sheet listener
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
-            mapboxMap?.snapshot { snapshot ->
-                alertView.showFeedbackSubmitted()
-                MapboxNavigation.postUserFeedback(
-                    feedback.feedbackType,
-                    feedback.description,
-                    FeedbackEvent.UI,
-                    encodeSnapshot(snapshot)
-                )
-            }
+            this.feedbackItem = feedback
+            sendFeedback()
         }
     }
 
@@ -389,7 +390,10 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun showFeedbackBottomSheet() {
+        feedbackItem = null
+        feedbackEncodedScreenShot = null
         supportFragmentManager.let {
+            mapboxMap?.snapshot(this::encodeSnapshot)
             FeedbackBottomSheet.newInstance(
                 this,
                 NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
@@ -398,14 +402,34 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private fun encodeSnapshot(snapshot: Bitmap): String {
+    private fun sendFeedback() {
+        val feedback = feedbackItem
+        val screenShot = feedbackEncodedScreenShot
+        if (feedback != null && !screenShot.isNullOrEmpty()) {
+            MapboxNavigation.postUserFeedback(
+                feedback.feedbackType,
+                feedback.description,
+                UI,
+                screenShot,
+                feedback.feedbackSubType.toTypedArray()
+            )
+            showFeedbackSentSnackBar(
+                context = this,
+                view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) recenterBtn else summaryBottomSheet,
+                setAnchorView = true
+            )
+        }
+    }
+
+    private fun encodeSnapshot(snapshot: Bitmap) {
         screenshotView.visibility = View.VISIBLE
         screenshotView.setImageBitmap(snapshot)
         mapView.visibility = View.INVISIBLE
-        val encodedSnapshot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
+        feedbackEncodedScreenShot = ViewUtils.encodeView(ViewUtils.captureView(mapView))
         screenshotView.visibility = View.INVISIBLE
         mapView.visibility = View.VISIBLE
-        return encodedSnapshot
+
+        sendFeedback()
     }
 
     private fun showWayNameView() {
