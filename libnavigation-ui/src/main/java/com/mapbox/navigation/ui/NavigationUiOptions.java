@@ -34,4 +34,6 @@ public abstract class NavigationUiOptions {
 
   @Nullable
   public abstract PuckDrawableSupplier puckDrawableSupplier();
+
+  public abstract boolean muteVoiceGuidance();
 }

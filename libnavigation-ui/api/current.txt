@@ -67,6 +67,7 @@ package com.mapbox.navigation.ui {
     method public abstract Integer? darkThemeResId();
     method public abstract com.mapbox.api.directions.v5.models.DirectionsRoute! directionsRoute();
     method public abstract Integer? lightThemeResId();
+    method public abstract boolean muteVoiceGuidance();
     method public abstract com.mapbox.navigation.ui.MapOfflineOptions? offlineMapOptions();
     method public abstract String? offlineRoutingTilesPath();
     method public abstract String? offlineRoutingTilesVersion();
@@ -87,6 +88,7 @@ package com.mapbox.navigation.ui {
     method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition, String!);
     method public boolean isRecenterButtonVisible();
     method public boolean isSummaryBottomSheetHidden();
+    method public boolean isVoiceGuidanceMuted();
     method public boolean isWayNameVisible();
     method public boolean onBackPressed();
     method public void onCreate(android.os.Bundle?);
@@ -118,6 +120,7 @@ package com.mapbox.navigation.ui {
     method public void startNavigation(com.mapbox.navigation.ui.NavigationViewOptions!);
     method public void stopNavigation();
     method public void takeScreenshot();
+    method public void toggleMute();
     method public void updateCameraRouteOverview();
     method public void updateWayNameView(String);
   }
@@ -166,6 +169,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! lightThemeResId(Integer!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationEngine(com.mapbox.android.core.location.LocationEngine!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationObserver(com.mapbox.navigation.core.trip.session.LocationObserver!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! muteVoiceGuidance(boolean);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationListener(com.mapbox.navigation.ui.listeners.NavigationListener!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationOptions(com.mapbox.navigation.base.options.NavigationOptions!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineMapOptions(com.mapbox.navigation.ui.MapOfflineOptions!);
