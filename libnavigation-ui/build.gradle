@@ -76,8 +76,6 @@ dependencies {
 
   // Mapbox Maps SDK
   api dependenciesList.mapboxMapSdk
-  // workaround for a missing transitive artifact
-  implementation "com.mapbox.mapboxsdk:mapbox-android-sdk-gl-core:1.7.0"
   implementation dependenciesList.mapboxAnnotationPlugin
 
   // Support libraries

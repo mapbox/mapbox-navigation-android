@@ -596,12 +596,6 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the Mapbox Maps GL Core SDK for Android.
-URL: [https://github.com/mapbox/mapbox-gl-native-android](https://github.com/mapbox/mapbox-gl-native-android)
-License: [BSD](https://opensource.org/licenses/BSD-2-Clause)
-
-===========================================================================
-
 Mapbox Navigation uses portions of the Mapbox Maps SDK for Android.
 URL: [https://github.com/mapbox/mapbox-gl-native](https://github.com/mapbox/mapbox-gl-native)
 License: [BSD](https://opensource.org/licenses/BSD-2-Clause)

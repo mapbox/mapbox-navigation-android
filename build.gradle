@@ -42,16 +42,6 @@ allprojects {
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
     maven {
-      url 'https://api.mapbox.com/downloads/v2/releases/maven'
-      authentication {
-        basic(BasicAuthentication)
-      }
-      credentials {
-        username = "mapbox"
-        password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
-      }
-    }
-    maven {
       url 'https://mapbox.bintray.com/mapbox_internal'
       credentials {
         username = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
