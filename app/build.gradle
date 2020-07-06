@@ -105,8 +105,7 @@ dependencies {
 
   implementation dependenciesList.gmsLocation
 
-  implementation dependenciesList.firebaseCore
-  implementation dependenciesList.crashlytics
+  implementation dependenciesList.firebaseCrashlytics
 
   implementation dependenciesList.multidex
 

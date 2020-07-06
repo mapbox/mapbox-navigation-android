@@ -20,11 +20,11 @@ workflows:
             branches:
               only:
                 - master
-#      - release-ui-1_0-snapshot:
-#          filters:
-#            branches:
-#              only:
-#                - master
+      - release-ui-1_0-snapshot:
+          filters:
+            branches:
+              only:
+                - master
       - release-core-1_0:
           filters:
             tags:
@@ -366,7 +366,7 @@ commands:
   publish-artifacts:
     parameters:
       repository:
-        description: artifactory or bintray
+        description: artifactory, bintray or sdk-registry
         type: string
       artifact-type:
         description: core or ui
@@ -375,12 +375,7 @@ commands:
       - deploy:
           name: Publish Navigation SDK 1.0 to << parameters.repository >>
           command: |
-            version=$(cat gradle/artifact-settings.gradle | grep "versionName")
-            if [[ $version != *"SNAPSHOT"* ]]; then
-              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
-            else
-              make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
-            fi
+            make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
 
   check-public-documentation:
     steps:
@@ -567,11 +562,11 @@ jobs:
       - image: << pipeline.parameters.docker-image-tag >>
     steps:
       - checkout
-      - build-release-core-1_0
+      - generate-core-version-name
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "artifactory"
+          repository: "sdk-registry"
           artifact-type: "core"
       - track-performance
 
@@ -628,12 +623,12 @@ jobs:
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     steps:
+      - generate-ui-version-name
       - checkout
-      - build-release-ui-1_0
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "artifactory"
+          repository: "sdk-registry"
           artifact-type: "ui"
       - track-performance
 
@@ -717,8 +712,8 @@ jobs:
           name: Crashlytics setup
           command: |
             #!/bin/bash
-            echo "apply plugin: 'io.fabric'" >> /root/code/app/build.gradle
             echo "apply plugin: 'com.google.gms.google-services'" >> /root/code/app/build.gradle
+            echo "apply plugin: 'com.google.firebase.crashlytics'" >> /root/code/app/build.gradle
             echo "${GOOGLE_SERVICES_JSON}" > /root/code/app/google-services.json
       - run:
           name: Release to Google Play

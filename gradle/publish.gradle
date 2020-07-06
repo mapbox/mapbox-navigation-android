@@ -1,0 +1,122 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.jfrog.artifactory'
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId project.ext.mapboxArtifactGroupId
+                artifactId project.ext.mapboxArtifactId
+                version project.ext.versionName
+
+                artifact(androidSourcesJar)
+                artifact(androidJavadocsJar)
+
+                pom.withXml {
+                    final mainNode = asNode()
+                    mainNode.appendNode('name', project.ext.mapboxArtifactTitle)
+                    mainNode.appendNode('description', project.ext.mapboxArtifactDescription)
+                    mainNode.appendNode('url', project.ext.mapboxArtifactUrl)
+
+                    final licenseNode = mainNode.appendNode('licenses').appendNode('license')
+                    licenseNode.appendNode('name', project.ext.mapboxArtifactLicenseName)
+                    licenseNode.appendNode('url', project.ext.mapboxArtifactLicenseUrl)
+                    licenseNode.appendNode('distribution', "repo")
+
+                    final developerNode = mainNode.appendNode('developers').appendNode('developer')
+                    developerNode.appendNode('id', project.ext.mapboxDeveloperId)
+                    developerNode.appendNode('name', project.ext.mapboxDeveloperName)
+
+                    final scmNode = mainNode.appendNode("scm")
+                    scmNode.appendNode("connection", project.ext.mapboxArtifactScmUrl)
+                    scmNode.appendNode("developerConnection", project.ext.mapboxArtifactScmUrl)
+                    scmNode.appendNode("url", project.ext.mapboxArtifactUrl)
+                }
+            }
+            debug(MavenPublication) {
+                from components.debug
+                groupId project.ext.mapboxArtifactGroupId
+                artifactId project.ext.mapboxArtifactId
+                version project.ext.versionName
+
+                artifact(androidSourcesJar)
+                artifact(androidJavadocsJar)
+            }
+        }
+    }
+}
+
+bintray {
+    user = mapboxBintrayUser
+    key = mapboxBintrayApiKey
+    publications('release')
+    pkg {
+        repo = project.ext.mapboxBintrayRepoName
+        name = mapboxArtifactGroupId + ":" + project.ext.mapboxArtifactId
+        userOrg = project.ext.mapboxBintrayUserOrg
+        licenses = [project.ext.mapboxArtifactLicenseName]
+        vcsUrl = project.ext.mapboxArtifactVcsUrl
+        publish = false
+        version {
+            name = project.ext.versionName
+            desc = project.ext.mapboxArtifactDescription
+            released = new Date()
+            gpg {
+                sign = true
+                passphrase = mapboxGpgPassphrase
+            }
+            mavenCentralSync {
+                sync = false
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'http://oss.jfrog.org'
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = mapboxBintrayUser
+            password = mapboxBintrayApiKey
+        }
+        defaults {
+            publications('release')
+        }
+    }
+}
+
+task sdkRegistryPublishDebug(type: Exec) {
+    afterEvaluate {
+        dependsOn(assembleDebug)
+        dependsOn(generatePomFileForDebugPublication)
+        dependsOn(androidJavadocsJar)
+        dependsOn(androidSourcesJar)
+        workingDir = "$rootDir"
+        commandLine("./scripts/publish_release_to_aws.sh", "${project.name}", "${project.ext.mapboxArtifactId}", "${project.ext.versionName}", "debug")
+    }
+}
+
+task sdkRegistryPublishRelease(type: Exec) {
+    afterEvaluate {
+        dependsOn(assembleRelease)
+        dependsOn(generatePomFileForReleasePublication)
+        dependsOn(androidJavadocsJar)
+        dependsOn(androidSourcesJar)
+        workingDir = "$rootDir"
+        commandLine("./scripts/publish_release_to_aws.sh", "${project.name}", "${project.ext.mapboxArtifactId}", "${project.ext.versionName}", "release")
+    }
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.kotlin
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}

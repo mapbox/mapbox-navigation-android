@@ -9,7 +9,6 @@ buildscript {
     mavenCentral()
     jcenter()
     maven { url 'https://plugins.gradle.org/m2' }
-    maven { url 'https://maven.fabric.io/public' }
   }
   dependencies {
     classpath pluginDependencies.gradle
@@ -20,10 +19,9 @@ buildscript {
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.playPublisher
     classpath pluginDependencies.googleServices
-    classpath pluginDependencies.crashlytics
+    classpath pluginDependencies.firebaseCrashlytics
     classpath pluginDependencies.license
     classpath pluginDependencies.mapboxSdkVersions
-    classpath pluginDependencies.mavenPublish
     classpath pluginDependencies.bintray
     classpath pluginDependencies.artifactory
     classpath pluginDependencies.dokka
@@ -75,9 +73,6 @@ allprojects {
     maven { url 'https://mapbox.bintray.com/mapbox' }
     maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
-
-  group = GROUP
-  version = VERSION_NAME
 }
 
 subprojects {

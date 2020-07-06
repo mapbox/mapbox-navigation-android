@@ -34,7 +34,7 @@ i=0
 while read path
 do
 	file_size=$(wc -c <"$path" | sed -e 's/^[[:space:]]*//')
-	"$scripts_path"/publish_to_sizechecker.js "${file_size}" "${labels[${i}]}" "$repo_name"
+	"$scripts_path"/publish_metrics_to_sizechecker.js "${file_size}" "${labels[${i}]}" "$repo_name"
 	i=$(($i + 1))
 done <"$paths_file"
 
@@ -56,4 +56,4 @@ done <"$paths_file"
 gzip -f "$json_name" > "$json_gz"
 
 # Publish to aws
-"$scripts_path"/publish_to_aws.sh $source $date $json_gz
+"$scripts_path"/publish_metrics_to_aws.sh $source $date $json_gz
