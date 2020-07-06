@@ -179,7 +179,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     wayNameView.updateWayNameText(navigationViewInstanceState.getWayNameText());
     resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
     updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
-    updateInstructionMutedState(navigationViewInstanceState.isMuted());
+    restoreInstructionMutedState(navigationViewInstanceState.isMuted());
     mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
   }
 
@@ -570,9 +570,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * Can check the current mute state by calling {@link NavigationView#isVoiceGuidanceMuted()}
    */
   public void toggleMute() {
-    if (isSubscribed) {
-      navigationViewModel.setMuted(((SoundButton) retrieveSoundButton()).toggleMute());
-    }
+    navigationViewModel.setMuted(((SoundButton) retrieveSoundButton()).toggleMute());
   }
 
   /**
@@ -788,10 +786,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
-  private void updateInstructionMutedState(boolean isMuted) {
-    if (isMuted) {
-      ((SoundButton) instructionView.retrieveSoundButton()).soundFabOff();
-    }
+  private void restoreInstructionMutedState(boolean isMuted) {
+    navigationViewModel.setMuted(isMuted);
+    ((SoundButton) instructionView.retrieveSoundButton()).onRestoreInstanceState(isMuted);
   }
 
   private int[] buildRouteOverviewPadding(Context context) {

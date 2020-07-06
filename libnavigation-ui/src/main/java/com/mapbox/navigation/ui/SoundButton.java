@@ -131,11 +131,16 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   /**
-   * Changes sound {@link FloatingActionButton}
-   * {@link Drawable} to denote sound is off.
+   * Restore state
+   * @param isMuted true to show muted icon
    */
-  void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
+  void onRestoreInstanceState(boolean isMuted) {
+    this.isMuted = isMuted;
+    if (isMuted) {
+      soundFabOff();
+    } else {
+      soundFabOn();
+    }
   }
 
   private void setupOnClickListeners() {
@@ -253,5 +258,13 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    */
   private void soundFabOn() {
     soundFab.setImageResource(R.drawable.ic_sound_on);
+  }
+
+  /**
+   * Changes sound {@link FloatingActionButton}
+   * {@link Drawable} to denote sound is off.
+   */
+  private void soundFabOff() {
+    soundFab.setImageResource(R.drawable.ic_sound_off);
   }
 }

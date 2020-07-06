@@ -107,6 +107,7 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
                 optionsBuilder.directionsRoute(route)
                 optionsBuilder.shouldSimulateRoute(true)
                 optionsBuilder.enableVanishingRouteLine(true)
+                optionsBuilder.muteVoiceGuidance(true)
                 navigationView.startNavigation(optionsBuilder.build())
             }
         }

@@ -130,7 +130,9 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   public void setMuted(boolean isMuted) {
-    speechPlayer.setMuted(isMuted);
+    if (speechPlayer != null) {
+      speechPlayer.setMuted(isMuted);
+    }
   }
 
   /**
