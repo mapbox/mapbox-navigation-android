@@ -186,6 +186,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
         .roundingIncrement(Rounding.INCREMENT_FIFTY)
         .shouldSimulateRoute(false)
         .waynameChipEnabled(true)
+        .muteVoiceGuidance(false)
         .enableVanishingRouteLine(false);
   }
 }
