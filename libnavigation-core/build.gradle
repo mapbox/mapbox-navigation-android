@@ -7,6 +7,9 @@ apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
 dokka {
     outputDirectory = "$buildDir/kdoc"
     configuration {
@@ -74,5 +77,5 @@ dependencies {
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"
-apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
 apply from: "${rootDir}/gradle/download-schema.gradle"

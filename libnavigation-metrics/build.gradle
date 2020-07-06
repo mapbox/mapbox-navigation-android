@@ -51,6 +51,6 @@ dependencies {
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/bintray-publish.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/dependencies-graph.gradle"

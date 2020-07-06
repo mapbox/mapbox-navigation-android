@@ -1,3 +1,23 @@
+CORE_MODULES = \
+libdirections-offboard \
+libdirections-hybrid \
+libdirections-onboard \
+libnavigation-base \
+libnavigation-metrics \
+libnavigation-util \
+libnavigator \
+libtrip-notification \
+libnavigation-core \
+
+UI_MODULES = \
+libnavigation-ui \
+
+define run-gradle-tasks
+	for module in $(1) ; do \
+		./gradlew $$module:$(2) ; \
+	done
+endef
+
 checkstyle:
 	./gradlew checkstyle
 
@@ -22,16 +42,8 @@ javadoc:
 	./gradlew :libandroid-navigation-ui:javadocrelease
 
 javadoc-dokka:
-	./gradlew :libnavigation-base:dokka
-	./gradlew :libnavigator:dokka
-	./gradlew :libdirections-onboard:dokka
-	./gradlew :libdirections-offboard:dokka
-	./gradlew :libdirections-hybrid:dokka
-	./gradlew :libnavigation-metrics:dokka
-	./gradlew :libnavigation-util:dokka
-	./gradlew :libtrip-notification:dokka
-	./gradlew :libnavigation-core:dokka
-	./gradlew :libnavigation-ui:dokka
+	$(call run-gradle-tasks,$(CORE_MODULES),dokka)
+	$(call run-gradle-tasks,$(UI_MODULES),dokka)
 
 publish:
 	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
@@ -82,91 +94,39 @@ navigation-fixtures:
 
 .PHONY: 1.0-core-publish-local
 1.0-core-publish-local:
-	./gradlew :libdirections-offboard:publishToMavenLocal
-	./gradlew :libdirections-hybrid:publishToMavenLocal
-	./gradlew :libdirections-onboard:publishToMavenLocal
-	./gradlew :libnavigation-base:publishToMavenLocal
-	./gradlew :libnavigation-metrics:publishToMavenLocal
-	./gradlew :libnavigation-util:publishToMavenLocal
-	./gradlew :libnavigator:publishToMavenLocal
-	./gradlew :libtrip-notification:publishToMavenLocal
-	./gradlew :libnavigation-core:publishToMavenLocal
+	$(call run-gradle-tasks,$(CORE_MODULES),publishToMavenLocal)
 
 .PHONY: 1.0-ui-publish-local
 1.0-ui-publish-local:
-	./gradlew :libnavigation-ui:publishToMavenLocal
+	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal)
 
 .PHONY: 1.0-build-core-debug
 1.0-build-core-debug:
-	./gradlew :libdirections-offboard:assembleDebug
-	./gradlew :libdirections-hybrid:assembleDebug
-	./gradlew :libdirections-onboard:assembleDebug
-	./gradlew :libnavigation-base:assembleDebug
-	./gradlew :libnavigation-metrics:assembleDebug
-	./gradlew :libnavigation-util:assembleDebug
-	./gradlew :libnavigator:assembleDebug
-	./gradlew :libtrip-notification:assembleDebug
-	./gradlew :libnavigation-core:assembleDebug
+	$(call run-gradle-tasks,$(CORE_MODULES),assembleDebug)
 
 .PHONY: 1.0-build-core-release
 1.0-build-core-release:
-	./gradlew :libdirections-offboard:assembleRelease
-	./gradlew :libdirections-hybrid:assembleRelease
-	./gradlew :libdirections-onboard:assembleRelease
-	./gradlew :libnavigation-base:assembleRelease
-	./gradlew :libnavigation-metrics:assembleRelease
-	./gradlew :libnavigation-util:assembleRelease
-	./gradlew :libnavigator:assembleRelease
-	./gradlew :libtrip-notification:assembleRelease
-	./gradlew :libnavigation-core:assembleRelease
+	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease)
 
 .PHONY: 1.0-core-unit-tests
 1.0-core-unit-tests:
-	./gradlew :libdirections-hybrid:test
-	./gradlew :libdirections-offboard:test
-	./gradlew :libdirections-onboard:test
-	./gradlew :libnavigation-base:test
-	./gradlew :libnavigation-metrics:test
-	./gradlew :libnavigation-util:test
-	./gradlew :libnavigator:test
-	./gradlew :libtrip-notification:test
-	./gradlew :libnavigation-core:test
+	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
 .PHONY: 1.0-core-publish-to-bintray
 1.0-core-publish-to-bintray:
-	./gradlew :libdirections-offboard:bintrayUpload
-	./gradlew :libdirections-hybrid:bintrayUpload
-	./gradlew :libdirections-onboard:bintrayUpload
-	./gradlew :libnavigation-base:bintrayUpload
-	./gradlew :libnavigation-metrics:bintrayUpload
-	./gradlew :libnavigation-util:bintrayUpload
-	./gradlew :libnavigator:bintrayUpload
-	./gradlew :libtrip-notification:bintrayUpload
-	./gradlew :libnavigation-core:bintrayUpload
+	$(call run-gradle-tasks,$(CORE_MODULES),bintrayUpload)
 
 .PHONY: 1.0-core-publish-to-artifactory
 1.0-core-publish-to-artifactory:
-	./gradlew :libdirections-offboard:artifactoryPublish
-	./gradlew :libdirections-hybrid:artifactoryPublish
-	./gradlew :libdirections-onboard:artifactoryPublish
-	./gradlew :libnavigation-base:artifactoryPublish
-	./gradlew :libnavigation-metrics:artifactoryPublish
-	./gradlew :libnavigation-util:artifactoryPublish
-	./gradlew :libnavigator:artifactoryPublish
-	./gradlew :libtrip-notification:artifactoryPublish
-	./gradlew :libnavigation-core:artifactoryPublish
+	$(call run-gradle-tasks,$(CORE_MODULES),artifactoryPublish)
+
+.PHONY: 1.0-core-publish-to-sdk-registry
+1.0-core-publish-to-sdk-registry:
+	$(call run-gradle-tasks,$(CORE_MODULES),sdkRegistryPublishRelease)
 
 .PHONY: 1.0-core-dependency-graph
 1.0-core-dependency-graph:
-	./gradlew :libnavigator:generateDependencyGraphMapboxLibraries
-	./gradlew :libnavigation-base:generateDependencyGraphMapboxLibraries
-	./gradlew :libdirections-onboard:generateDependencyGraphMapboxLibraries
-	./gradlew :libdirections-offboard:generateDependencyGraphMapboxLibraries
-	./gradlew :libdirections-hybrid:generateDependencyGraphMapboxLibraries
-	./gradlew :libnavigation-metrics:generateDependencyGraphMapboxLibraries
-	./gradlew :libtrip-notification:generateDependencyGraphMapboxLibraries
-	./gradlew :libnavigation-util:generateDependencyGraphMapboxLibraries
-	./gradlew :libnavigation-core:generateDependencyGraphMapboxLibraries
+	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries)
 
 .PHONY: 1.0-core-check-api
 1.0-core-check-api:
@@ -194,23 +154,27 @@ navigation-fixtures:
 
 .PHONY: 1.0-build-ui-debug
 1.0-build-ui-debug:
-	./gradlew :libnavigation-ui:assembleDebug
+	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug)
 
 .PHONY: 1.0-build-ui-release
 1.0-build-ui-release:
-	./gradlew :libnavigation-ui:assembleRelease
+	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
 
 .PHONY: 1.0-ui-unit-tests
 1.0-ui-unit-tests:
-	./gradlew :libnavigation-ui:test
+	$(call run-gradle-tasks,$(UI_MODULES),test)
 
 .PHONY: 1.0-ui-publish-to-bintray
 1.0-ui-publish-to-bintray:
-	./gradlew :libnavigation-ui:bintrayUpload
+	$(call run-gradle-tasks,$(UI_MODULES),bintrayUpload)
 
 .PHONY: 1.0-ui-publish-to-artifactory
 1.0-ui-publish-to-artifactory:
-	./gradlew :libnavigation-ui:artifactoryPublish
+	$(call run-gradle-tasks,$(UI_MODULES),artifactoryPublish)
+
+.PHONY: 1.0-ui-publish-to-sdk-registry
+1.0-ui-publish-to-sdk-registry:
+	$(call run-gradle-tasks,$(UI_MODULES),sdkRegistryPublishRelease)
 
 .PHONY: 1.0-ui-check-api
 1.0-ui-check-api:
