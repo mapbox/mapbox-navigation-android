@@ -19,13 +19,13 @@ import kotlinx.android.synthetic.main.activity_main.settingsFab
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
-    private val permissionsHelper = PermissionsHelper(this)
+    private val permissionsHelper = LocationPermissionsHelper(this)
     private val CHANGE_SETTING_REQUEST_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        when (PermissionsHelper.areLocationPermissionsGranted(this)) {
+        when (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
             true -> requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE)
             else -> permissionsHelper.requestLocationPermissions(this)
         }
