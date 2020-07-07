@@ -56,6 +56,8 @@ package com.mapbox.navigation.core {
 
   public final class MapboxNavigationProvider {
     method public static com.mapbox.navigation.core.MapboxNavigation create(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
+    method public static void destroy();
+    method public static boolean isCreated();
     method public static com.mapbox.navigation.core.MapboxNavigation retrieve();
     field public static final com.mapbox.navigation.core.MapboxNavigationProvider! INSTANCE;
   }
