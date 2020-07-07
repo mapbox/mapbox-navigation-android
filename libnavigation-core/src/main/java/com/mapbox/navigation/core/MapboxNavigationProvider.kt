@@ -17,14 +17,12 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun create(navigationOptions: NavigationOptions): MapboxNavigation {
-        synchronized(MapboxNavigationProvider::class.java) {
-            mapboxNavigation?.onDestroy()
-            mapboxNavigation = MapboxNavigation(
-                navigationOptions
-            )
+        mapboxNavigation?.onDestroy()
+        mapboxNavigation = MapboxNavigation(
+            navigationOptions
+        )
 
-            return mapboxNavigation!!
-        }
+        return mapboxNavigation!!
     }
 
     /**
@@ -33,16 +31,29 @@ object MapboxNavigationProvider {
      */
     @JvmStatic
     fun retrieve(): MapboxNavigation {
-        var instance = mapboxNavigation
-        if (instance == null) {
-            synchronized(MapboxNavigationProvider::class.java) {
-                instance = mapboxNavigation
-                if (instance == null) {
-                    throw RuntimeException("Need to create MapboxNavigation before using it.")
-                }
-            }
+        if (!isCreated()) {
+            throw RuntimeException("Need to create MapboxNavigation before using it.")
         }
 
-        return instance!!
+        return mapboxNavigation!!
+    }
+
+    /**
+     * Destroy MapboxNavigation with provided options.
+     * Should be called after [create]
+     *
+     */
+    @JvmStatic
+    fun destroy() {
+        mapboxNavigation?.onDestroy()
+        mapboxNavigation = null
+    }
+
+    /**
+     * Check if MapboxNavigation is created.
+     */
+    @JvmStatic
+    fun isCreated(): Boolean {
+        return mapboxNavigation != null
     }
 }
