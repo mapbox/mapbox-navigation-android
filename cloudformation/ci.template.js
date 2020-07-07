@@ -43,6 +43,30 @@ AWSTemplateFormatVersion: '2010-09-09',
                 }
               ]
             }
+          },
+          {
+            PolicyName: 'upload-sdk-registry-staging',
+            PolicyDocument: {
+              Statement: [
+                {
+                  Action: ['s3:PutObject'],
+                  Effect: 'Allow',
+                  Resource: ['arn:aws:s3:::mapbox-api-downloads-staging/v2/*']
+                }
+              ]
+            }
+          },
+          {
+            PolicyName: 'upload-sdk-registry-production',
+            PolicyDocument: {
+              Statement: [
+                {
+                  Action: ['s3:PutObject'],
+                  Effect: 'Allow',
+                  Resource: ['arn:aws:s3:::mapbox-api-downloads-production/v2/*']
+                }
+              ]
+            }
           }
         ]
       }
