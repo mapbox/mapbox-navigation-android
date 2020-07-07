@@ -1,5 +1,6 @@
 package com.mapbox.navigation.core.fasterroute
 
+import android.util.Log
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
@@ -26,11 +27,11 @@ internal class FasterRouteController(
         val previousFasterRouteObserver = this.fasterRouteObserver
         this.fasterRouteObserver = fasterRouteObserver
         if (previousFasterRouteObserver == null) {
-            val restartAfterMillis = fasterRouteObserver.restartAfterMillis()
-            check(TimeUnit.MILLISECONDS.toMinutes(restartAfterMillis) >= 2) {
-                "Faster route should be >= 2 minutes, $restartAfterMillis is out of range"
-            }
-            fasterRouteTimer.restartAfterMillis = restartAfterMillis
+//            val restartAfterMillis = fasterRouteObserver.restartAfterMillis()
+//            check(TimeUnit.MILLISECONDS.toMinutes(restartAfterMillis) >= 2) {
+//                "Faster route should be >= 2 minutes, $restartAfterMillis is out of range"
+//            }
+            fasterRouteTimer.restartAfterMillis = TimeUnit.SECONDS.toMillis(10)
             fasterRouteTimer.startTimer {
                 requestFasterRoute()
             }
@@ -43,13 +44,13 @@ internal class FasterRouteController(
     }
 
     private fun requestFasterRoute() {
-        val restartAfterMillis = fasterRouteObserver?.restartAfterMillis()
-            ?: return
+//        val restartAfterMillis = fasterRouteObserver?.restartAfterMillis()
+//            ?: return
         if (directionsSession.routes.isEmpty()) {
             return
         }
 
-        fasterRouteTimer.restartAfterMillis = restartAfterMillis
+//        fasterRouteTimer.restartAfterMillis = restartAfterMillis
         ifNonNull(tripSession.getEnhancedLocation()) { enhancedLocation ->
             val optionsRebuilt = AdjustedRouteOptionsProvider.getRouteOptions(directionsSession, tripSession, enhancedLocation)
                 ?: return
@@ -62,7 +63,9 @@ internal class FasterRouteController(
             val currentRoute = directionsSession.routes.firstOrNull()
                 ?: return
             tripSession.getRouteProgress()?.let { progress ->
-                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], progress)
+                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes.first(), progress)
+//                Log.i("faster_route_debug","faster_route_debug current route ${progress.route.geometry()}")
+//                Log.i("faster_route_debug","faster_route_debug alternative route ${routes.first().geometry()}")
                 fasterRouteObserver?.onFasterRoute(currentRoute, routes, isAlternativeFaster)
             }
         }

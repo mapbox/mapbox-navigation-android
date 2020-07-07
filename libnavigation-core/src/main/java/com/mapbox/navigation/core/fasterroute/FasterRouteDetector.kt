@@ -11,7 +11,10 @@ internal class FasterRouteDetector(
         val alternativeDuration = alternativeRoute.duration() ?: return false
         val weightedDuration = routeProgress.durationRemaining * PERCENTAGE_THRESHOLD
         val isNewRouteFaster = alternativeDuration < weightedDuration
-        return isNewRouteFaster && routeComparator.isNewRoute(routeProgress, alternativeRoute)
+
+        // TODO Moved here for debugging, don't merge this
+        val isNewRoute = routeComparator.isNewRoute(routeProgress, alternativeRoute)
+        return isNewRouteFaster && isNewRoute
     }
 
     companion object {
