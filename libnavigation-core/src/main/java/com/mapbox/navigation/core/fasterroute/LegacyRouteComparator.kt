@@ -20,4 +20,15 @@ internal class LegacyRouteComparator {
         }
         return routeLegDescription.toString()
     }
+
+//    private fun obtainRouteLegDescriptionFrom(route: DirectionsRoute): String {
+//        val routeLegs = route.legs()!!
+//        val routeLegDescription = StringBuilder()
+//        for (leg in routeLegs) {
+//            leg.steps()?.forEach { step ->
+//                routeLegDescription.append(step.name())
+//            }
+//        }
+//        return routeLegDescription.toString()
+//    }
 }

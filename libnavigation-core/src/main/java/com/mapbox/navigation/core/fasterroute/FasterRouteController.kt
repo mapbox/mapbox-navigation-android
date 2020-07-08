@@ -64,6 +64,10 @@ internal class FasterRouteController(
                 ?: return
             tripSession.getRouteProgress()?.let { progress ->
                 val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes.first(), progress)
+//                val isAlternativeFaster = false
+//                routes.forEach {
+//                    fasterRouteDetector.isRouteFaster(it, progress)
+//                }
 //                Log.i("faster_route_debug","faster_route_debug current route ${progress.route.geometry()}")
 //                Log.i("faster_route_debug","faster_route_debug alternative route ${routes.first().geometry()}")
                 fasterRouteObserver?.onFasterRoute(currentRoute, routes, isAlternativeFaster)
