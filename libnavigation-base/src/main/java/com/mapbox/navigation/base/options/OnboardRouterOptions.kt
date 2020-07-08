@@ -1,7 +1,5 @@
 package com.mapbox.navigation.base.options
 
-import android.content.Context
-import java.io.File
 import java.net.URI
 
 /**
@@ -16,7 +14,7 @@ import java.net.URI
 data class OnboardRouterOptions(
     val tilesUri: URI,
     val tilesVersion: String,
-    val filePath: String,
+    val filePath: String?,
     val builder: Builder
 ) {
     /**
@@ -58,27 +56,13 @@ data class OnboardRouterOptions(
             apply { this.filePath = filePath }
 
         /**
-         * Helper function that creates a [filePath] to internal storage. This
-         * function uses [tilesUri] and [tilesVersion]. Set custom options before
-         * using this function, otherwise the directory will point to default tile values.
-         */
-        fun internalFilePath(context: Context) =
-            apply {
-                val directoryVersion = "Offline/${tilesUri.host}/$tilesVersion/tiles"
-                this.filePath = File(context.filesDir, directoryVersion).absolutePath
-            }
-
-        /**
          * Build the [OnboardRouterOptions]
          */
         fun build(): OnboardRouterOptions {
-            check(!this.filePath.isNullOrEmpty()) {
-                "Specify a filePath to store onboard route tiles"
-            }
             return OnboardRouterOptions(
                 tilesUri = tilesUri,
                 tilesVersion = tilesVersion,
-                filePath = filePath!!,
+                filePath = filePath,
                 builder = this
             )
         }

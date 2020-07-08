@@ -22,7 +22,6 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
-import com.mapbox.navigation.base.options.OnboardRouterOptions;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
@@ -187,12 +186,6 @@ public class NavigationViewModel extends AndroidViewModel {
               .accessToken(accessToken)
               .isFromNavigationUi(true)
               .distanceFormatter(distanceFormatter);
-
-      if (options.navigationOptions().getOnboardRouterOptions() == null) {
-        OnboardRouterOptions onboardRouterOptions = new OnboardRouterOptions.Builder()
-                .internalFilePath(getApplication()).build();
-        updatedOptionsBuilder.onboardRouterOptions(onboardRouterOptions);
-      }
 
       LocationEngine locationEngine = initializeLocationEngineFrom(options);
       if (locationEngine != null) {

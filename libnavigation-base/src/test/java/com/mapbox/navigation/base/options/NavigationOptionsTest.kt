@@ -13,6 +13,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 
@@ -40,7 +41,7 @@ class NavigationOptionsTest {
         assertEquals(options.timeFormatType, NONE_SPECIFIED)
         assertEquals(options.navigatorPredictionMillis, DEFAULT_NAVIGATOR_PREDICTION_MILLIS)
         assertEquals(options.distanceFormatter, null)
-        assertEquals(options.onboardRouterOptions, null)
+        assertNotNull(options.onboardRouterOptions)
     }
 
     @Test

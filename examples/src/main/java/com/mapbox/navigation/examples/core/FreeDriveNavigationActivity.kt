@@ -60,7 +60,6 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             .onboardRouterOptions(OnboardRouterOptions.Builder()
                 .tilesUri("https://api-routing-tiles-staging.tilestream.net")
                 .tilesVersion("2020_02_02-03_00_00")
-                .internalFilePath(this)
                 .build())
             .build()
 

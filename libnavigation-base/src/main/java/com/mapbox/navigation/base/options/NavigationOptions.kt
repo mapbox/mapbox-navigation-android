@@ -42,7 +42,7 @@ data class NavigationOptions(
     @TimeFormat.Type val timeFormatType: Int,
     val navigatorPredictionMillis: Long,
     val distanceFormatter: DistanceFormatter?,
-    val onboardRouterOptions: OnboardRouterOptions?,
+    val onboardRouterOptions: OnboardRouterOptions,
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
     val deviceProfile: DeviceProfile,
@@ -64,7 +64,7 @@ data class NavigationOptions(
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
-        private var onboardRouterOptions: OnboardRouterOptions? = null
+        private var onboardRouterOptions: OnboardRouterOptions = OnboardRouterOptions.Builder().build()
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = HandheldProfile()
@@ -108,7 +108,7 @@ data class NavigationOptions(
         /**
          * Defines configuration for the default on-board router
          */
-        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions?) =
+        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions) =
             apply { this.onboardRouterOptions = onboardRouterOptions }
 
         /**

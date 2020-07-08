@@ -81,7 +81,7 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class NavigationOptions {
-    ctor public NavigationOptions(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
+    ctor public NavigationOptions(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
     method public android.content.Context component1();
     method public com.mapbox.navigation.base.options.DeviceProfile component10();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder component11();
@@ -90,10 +90,10 @@ package com.mapbox.navigation.base.options {
     method public int component4();
     method public long component5();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter? component6();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions? component7();
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions component7();
     method public boolean component8();
     method public boolean component9();
-    method public com.mapbox.navigation.base.options.NavigationOptions copy(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
+    method public com.mapbox.navigation.base.options.NavigationOptions copy(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder getBuilder();
@@ -101,7 +101,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
     method public long getNavigatorPredictionMillis();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions? getOnboardRouterOptions();
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions getOnboardRouterOptions();
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
@@ -118,7 +118,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions? onboardRouterOptions);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder onboardRouterOptions(com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder timeFormatType(int type);
   }
 
@@ -127,14 +127,14 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class OnboardRouterOptions {
-    ctor public OnboardRouterOptions(java.net.URI tilesUri, String tilesVersion, String filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
+    ctor public OnboardRouterOptions(java.net.URI tilesUri, String tilesVersion, String? filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
     method public java.net.URI component1();
     method public String component2();
-    method public String component3();
+    method public String? component3();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder component4();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions copy(java.net.URI tilesUri, String tilesVersion, String filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions copy(java.net.URI tilesUri, String tilesVersion, String? filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder getBuilder();
-    method public String getFilePath();
+    method public String? getFilePath();
     method public java.net.URI getTilesUri();
     method public String getTilesVersion();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder toBuilder();
@@ -144,7 +144,6 @@ package com.mapbox.navigation.base.options {
     ctor public OnboardRouterOptions.Builder();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions build();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String filePath);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder internalFilePath(android.content.Context context);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(String tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);

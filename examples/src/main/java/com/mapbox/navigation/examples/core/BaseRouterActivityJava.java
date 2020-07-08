@@ -92,6 +92,7 @@ public abstract class BaseRouterActivityJava extends AppCompatActivity
             .build();
 
     return new MapboxOnboardRouter(
+            context.getApplicationContext(),
             Utils.getMapboxAccessToken(context),
             MapboxNativeNavigatorImpl.INSTANCE.create(new HandheldProfile(), null),
             onboardRouterOptions,

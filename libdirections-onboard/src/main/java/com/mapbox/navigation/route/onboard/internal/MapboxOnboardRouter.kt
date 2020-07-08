@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.onboard.internal
 
+import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
@@ -22,7 +23,6 @@ import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
-import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -34,6 +34,7 @@ import kotlinx.coroutines.withContext
  * It uses offline storage path to store and retrieve data, setup endpoint,
  * tiles' version, token. Config is provided via [OnboardRouterOptions].
  *
+ * @param applicationContext Application context
  * @param accessToken Mapbox token
  * @param navigatorNative Native Navigator
  * @param options configuration for on-board router
@@ -42,6 +43,7 @@ import kotlinx.coroutines.withContext
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
+    private val applicationContext: Context,
     private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
     private val options: OnboardRouterOptions,
@@ -50,37 +52,22 @@ class MapboxOnboardRouter(
 ) : Router {
 
     private companion object {
-        private const val TAG = "MapboxOnboardRouter"
+        private val loggerTag = Tag("MapboxOnboardRouter")
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
     }
 
-    private val mainJobControl by lazy {
-        ThreadController.getMainScopeAndRootJob()
-    }
+    private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private val gson = Gson()
 
+    private val onboardRouterFiles = OnboardRouterFiles(applicationContext, logger)
+
     init {
-        if (options.filePath.isNotEmpty()) {
-            val tileDir = File(options.filePath)
-            if (!tileDir.exists()) {
-                tileDir.mkdirs()
+        mainJobControl.scope.launch {
+            onboardRouterFiles.absolutePath(options)?.let { absolutePath ->
+                val tilesFound = configureRouter(absolutePath)
+                logger.i(loggerTag, Message("Router configured with $tilesFound tiles found"))
             }
-            val routerParams = RouterParams(
-                tileDir.absolutePath,
-                null,
-                null,
-                THREADS_COUNT,
-                TileEndpointConfiguration(
-                    options.tilesUri.toString(),
-                    options.tilesVersion,
-                    accessToken,
-                    USER_AGENT,
-                    "",
-                    NativeSkuTokenProvider(skuTokenProvider)
-                )
-            )
-            navigatorNative.configureRouter(routerParams)
         }
     }
 
@@ -160,6 +147,24 @@ class MapboxOnboardRouter(
         // Does nothing
     }
 
+    private fun configureRouter(absolutePath: String): Long {
+        val routerParams = RouterParams(
+            absolutePath,
+            null,
+            null,
+            THREADS_COUNT,
+            TileEndpointConfiguration(
+                options.tilesUri.toString(),
+                options.tilesVersion,
+                accessToken,
+                USER_AGENT,
+                "",
+                NativeSkuTokenProvider(skuTokenProvider)
+            )
+        )
+        return navigatorNative.configureRouter(routerParams)
+    }
+
     private fun retrieveRoute(url: String, callback: Router.Callback) {
         mainJobControl.scope.launch {
             try {
@@ -193,7 +198,7 @@ class MapboxOnboardRouter(
     private fun generateErrorMessage(response: String): String {
         val (_, _, error, errorCode) = gson.fromJson(response, OfflineRouteError::class.java)
         val errorMessage = "Error occurred fetching offline route: $error - Code: $errorCode"
-        logger.e(Tag(TAG), Message(errorMessage))
+        logger.e(loggerTag, Message(errorMessage))
         return errorMessage
     }
 }
