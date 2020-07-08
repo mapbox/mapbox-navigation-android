@@ -83,4 +83,22 @@ class RouteComparatorTest {
 
         assertTrue(isNewRoute)
     }
+
+    @Test
+    fun `route progress should be on route`() {
+        val currentGeometry = """}u`}bAwgejiGd@tDVdCzA~ItKxa@rIbXhH~W~@jD`CzClGbIbDlE|DpEhHvIlJ`KpKvLlQ|U`BjBza@|d@fA`BdClDda@zk@zA~Bp_@|k@lBxC`BdCzHrLpOjW~FxJbG`KjPfYlBzCdDjDt@rD`Ltk@zJ~e@vCnNlBtKxB|JdC~IvDdGlEdGvC`CrB`B`DpB|KjEtEl@fF?lBGdYkA~@KnAWdL{ErKyCxBe@hGY~BN`DvA|BnA`CvAbBxB`BbCvDxHjApC}TrPqDlEx@jPh@rc@DzCmAp^qFra@yIzd@gZpc@kH|K`EbB"""
+        val alternativeGeometry = """mq||bAwm~iiGdS~TfA`BdClDda@zk@zA~Bp_@|k@lBxC`BdCzHrLpOjW~FxJbG`KjPfYlBzCdDjDt@rD`Ltk@zJ~e@vCnNlBtKxB|JdC~IvDdGlEdGvC`CrB`B`DpB|KjEtEl@fF?lBGdYkA~@KnAWdL{ErKyCxBe@hGY~BN`DvA|BnA`CvAbBxB`BbCvDxHjApC}TrPqDlEx@jPh@rc@DzCmAp^qFra@yIzd@gZpc@kH|K`EbB"""
+        val routeProgress: RouteProgress = mockk {
+            every { route } returns mockk {
+                every { geometry() } returns currentGeometry
+            }
+        }
+        val directionsRoute: DirectionsRoute = mockk {
+            every { geometry() } returns alternativeGeometry
+        }
+
+        val isNewRoute = routeComparator.isNewRoute(routeProgress, directionsRoute)
+
+        assertFalse(isNewRoute)
+    }
 }
