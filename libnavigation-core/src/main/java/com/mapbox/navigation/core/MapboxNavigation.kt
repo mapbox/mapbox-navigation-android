@@ -132,7 +132,7 @@ class MapboxNavigation(
     private val navigationAccountsSession = NavigationAccountsSession(navigationOptions.applicationContext)
     private val logger: Logger
     private val internalRoutesObserver: RoutesObserver
-    private val internalOffRouteObserver: OffRouteObserver
+    private val internalRerouteObserver: RerouteController.RoutesCallback= createInternalRerouteObserver()
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
@@ -145,7 +145,7 @@ class MapboxNavigation(
     /**
      * Reroute controller, by default uses [MapboxRerouteController].
      */
-    private var rerouteController: RerouteController
+    private var rerouteController: RerouteController?
 
     init {
         ThreadController.init()
@@ -224,10 +224,10 @@ class MapboxNavigation(
             ThreadController,
             logger
         )
-
+        rerouteController?.let {
+            tripSession.registerOffRouteObserver(it)
+        }
         internalRoutesObserver = createInternalRoutesObserver()
-        internalOffRouteObserver = createInternalOffRouteObserver()
-        tripSession.registerOffRouteObserver(internalOffRouteObserver)
         directionsSession.registerRoutesObserver(internalRoutesObserver)
     }
 
@@ -347,15 +347,25 @@ class MapboxNavigation(
 
     /**
      * Set [RerouteController]. By default uses [MapboxRerouteController]
+     *
+     * Set *null* to disable reroute
      */
-    fun setRerouteController(rerouteController: RerouteController) {
+    fun attachRerouteController(rerouteController: RerouteController?) {
+        this.rerouteController?.let {
+            tripSession.unregisterOffRouteObserver(it)
+            it.unregisterRerouteObserver(internalRerouteObserver)
+        }
+        rerouteController?.let {
+            tripSession.registerOffRouteObserver(it)
+            it.registerRerouteObserver(internalRerouteObserver)
+        }
         this.rerouteController = rerouteController
     }
 
     /**
      * Get [RerouteController]
      */
-    fun getRerouteController(): RerouteController = rerouteController
+    fun getRerouteController(): RerouteController? = rerouteController
 
     /**
      * API used to retrieve logged location and route progress samples for debug purposes.
@@ -589,26 +599,14 @@ class MapboxNavigation(
         }
     }
 
-    private fun createInternalOffRouteObserver() = object : OffRouteObserver {
-        override fun onOffRouteStateChanged(offRoute: Boolean) {
-            if (offRoute) {
-                reroute()
-            } else {
-                interruptReroute()
-            }
+    private fun createInternalRerouteObserver() = object : RerouteController.RoutesCallback{
+        override fun onNewRoutes(routes: List<DirectionsRoute>) {
+            setRoutes(routes)
         }
     }
 
-    private fun reroute() {
-        rerouteController.reroute(object : RerouteController.RoutesCallback {
-            override fun onNewRoutes(routes: List<DirectionsRoute>) {
-                setRoutes(routes)
-            }
-        })
-    }
-
     private fun interruptReroute() {
-        rerouteController.interrupt()
+        rerouteController?.interrupt()
     }
 
     private fun obtainUserAgent(isFromNavigationUi: Boolean): String {

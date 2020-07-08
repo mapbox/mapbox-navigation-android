@@ -140,7 +140,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
             .build()
 
         mapboxNavigation = MapboxNavigation(mapboxNavigationOptions)
-        mapboxNavigation?.setRerouteController(
+        mapboxNavigation?.attachRerouteController(
             SampleRerouteController(Utils.getMapboxAccessToken(this), routeSettings)
         )
         initListeners()
@@ -156,7 +156,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
             registerRoutesObserver(routeObserver)
             registerRouteProgressObserver(routeProgressObserver)
             registerOffRouteObserver(this@ReRouteActivity)
-            getRerouteController().registerRerouteStateObserver(this@ReRouteActivity)
+            getRerouteController()?.registerRerouteStateObserver(this@ReRouteActivity)
         }
     }
 
@@ -178,7 +178,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
             unregisterRouteProgressObserver(routeProgressObserver)
             unregisterRoutesObserver(routeObserver)
             unregisterOffRouteObserver(this@ReRouteActivity)
-            getRerouteController().unregisterRerouteStateObserver(this@ReRouteActivity)
+            getRerouteController()?.unregisterRerouteStateObserver(this@ReRouteActivity)
         }
         stopLocationUpdates()
         mapView.onStop()
@@ -338,6 +338,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
         private val coordinatesHolder: CoordinatesHolder
     ) : RerouteController {
         private val stateObservers = mutableSetOf<RerouteController.RerouteStateObserver>()
+        private val rerouteObservers = mutableSetOf<RerouteController.RoutesCallback>()
 
         private var mapboxDirections: MapboxDirections? = null
         private val mainHandler = Handler(Looper.getMainLooper())
@@ -351,7 +352,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
                 stateObservers.forEach { it.onRerouteStateChanged(field) }
             }
 
-        override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+        override fun reroute() {
             state = RerouteState.FetchingRoute
             mapboxDirections = MapboxDirections.builder()
                 .accessToken(accessToken)
@@ -374,7 +375,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
                             }
                             response.isSuccessful && !routes.isNullOrEmpty() -> {
                                 state = RerouteState.RouteFetched
-                                routesCallback.onNewRoutes(routes)
+                                rerouteObservers.forEach {  it.onNewRoutes(routes) }
                             }
                             else -> {
                                 state = RerouteState.Failed("Reroute request is empty")
@@ -411,6 +412,22 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
 
         override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
             return stateObservers.remove(rerouteStateObserver)
+        }
+
+        override fun registerRerouteObserver(rerouteObserver: RerouteController.RoutesCallback) {
+            rerouteObservers.add(rerouteObserver)
+        }
+
+        override fun unregisterRerouteObserver(rerouteObserver: RerouteController.RoutesCallback) {
+            rerouteObservers.remove(rerouteObserver)
+        }
+
+        override fun onOffRouteStateChanged(offRoute: Boolean) {
+            if (offRoute){
+                reroute()
+            } else {
+                interrupt()
+            }
         }
     }
 

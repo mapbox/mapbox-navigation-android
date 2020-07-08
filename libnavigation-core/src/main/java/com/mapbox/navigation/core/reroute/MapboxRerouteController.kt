@@ -9,6 +9,7 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
+import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -28,6 +29,8 @@ internal class MapboxRerouteController(
 
     private val observers = CopyOnWriteArraySet<RerouteController.RerouteStateObserver>()
 
+    private val rerouteObservers = CopyOnWriteArraySet<RerouteController.RoutesCallback>()
+
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
 
     override var state: RerouteState = RerouteState.Idle
@@ -43,8 +46,7 @@ internal class MapboxRerouteController(
         const val TAG = "MapboxRerouteController"
     }
 
-    // current implementation ignore `onNewRoutes` callback because `DirectionsSession` update routes internally
-    override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+    override fun reroute() {
         state = RerouteState.FetchingRoute
         logger.d(
             Tag(TAG),
@@ -74,7 +76,6 @@ internal class MapboxRerouteController(
 
     private fun request(routeOptions: RouteOptions) {
         directionsSession.requestRoutes(routeOptions, object : RoutesRequestCallback {
-            // ignore result, DirectionsSession sets routes internally
             override fun onRoutesReady(routes: List<DirectionsRoute>) {
                 logger.d(
                     Tag(TAG),
@@ -82,6 +83,7 @@ internal class MapboxRerouteController(
                 )
                 mainJobController.scope.launch {
                     state = RerouteState.RouteFetched
+                    rerouteObservers.forEach { it.onNewRoutes(routes) }
                     state = RerouteState.Idle
                 }
             }
@@ -135,5 +137,21 @@ internal class MapboxRerouteController(
 
     override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
         return observers.remove(rerouteStateObserver)
+    }
+
+    override fun registerRerouteObserver(rerouteObserver: RerouteController.RoutesCallback) {
+        rerouteObservers.add(rerouteObserver)
+    }
+
+    override fun unregisterRerouteObserver(rerouteObserver: RerouteController.RoutesCallback) {
+        rerouteObservers.remove(rerouteObserver)
+    }
+
+    override fun onOffRouteStateChanged(offRoute: Boolean) {
+        if (offRoute){
+            reroute()
+        } else {
+            interrupt()
+        }
     }
 }

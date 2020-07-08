@@ -8,7 +8,7 @@ import com.mapbox.navigation.core.trip.session.OffRouteObserver
  * Reroute controller allows changing the reroute logic externally. Use [MapboxNavigation.rerouteController]
  * to replace it.
  */
-interface RerouteController {
+interface RerouteController : OffRouteObserver {
 
     /**
      * Reroute state
@@ -21,7 +21,7 @@ interface RerouteController {
      *
      * @see [OffRouteObserver]
      */
-    fun reroute(routesCallback: RoutesCallback)
+    fun reroute()
 
     /**
      * Invoked when re-route is not needed anymore (for instance when driver returns to previous route).
@@ -43,6 +43,10 @@ interface RerouteController {
      * @return `true` if the element has been successfully removed; `false` if it was not present in the collection.
      */
     fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteStateObserver): Boolean
+
+    fun registerRerouteObserver(rerouteObserver: RoutesCallback)
+
+    fun unregisterRerouteObserver(rerouteObserver: RoutesCallback)
 
     /**
      * Route Callback is useful to set new route(s) on reroute event. Doing the same as
