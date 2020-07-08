@@ -266,41 +266,6 @@ public class MapRouteLineTest extends BaseTest {
   }
 
   @Test
-  public void updatePrimaryIndex_newPrimaryRouteIndexIsNotUpdated() throws Exception {
-    GeoJsonSource routeLineSource = mock(GeoJsonSource.class);
-    GeoJsonSource wayPointSource = mock(GeoJsonSource.class);
-    List<String> routeLayerIds = buildMockLayers();
-    MapRouteLine routeLine = new MapRouteLine(routeLineSource, wayPointSource, routeLayerIds);
-    List<DirectionsRoute> routes = new ArrayList<>();
-    routes.add(buildTestDirectionsRoute());
-    routes.add(buildTestDirectionsRoute());
-    routes.add(buildTestDirectionsRoute());
-    routes.add(buildTestDirectionsRoute());
-    ArgumentCaptor<Runnable> runnableFeatures = ArgumentCaptor.forClass(Runnable.class);
-    ArgumentCaptor<Runnable> runnablePrimary = ArgumentCaptor.forClass(Runnable.class);
-    CountDownLatch latchRunnableFeatures = new CountDownLatch(1);
-    CountDownLatch latchRunnablePrimary = new CountDownLatch(1);
-    CountDownLatch latch = new CountDownLatch(1);
-    Handler handlerFeatures = mock(Handler.class);
-    buildFeatureProcessingTask(routes, routeLine, handlerFeatures);
-    Handler handlerPrimary = mock(Handler.class);
-    buildPrimaryRouteUpdateTask(routeLine, handlerPrimary);
-    routeLine.draw(routes);
-    latchRunnableFeatures.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerFeatures).post(runnableFeatures.capture());
-    runnableFeatures.getValue().run();
-    latchRunnablePrimary.await(25, TimeUnit.MILLISECONDS);
-    verify(handlerPrimary).post(runnablePrimary.capture());
-    runnablePrimary.getValue().run();
-
-    boolean isNewIndex = routeLine.updatePrimaryRouteIndex(-1);
-
-    latch.await(25, TimeUnit.MILLISECONDS);
-    assertFalse(isNewIndex);
-    assertEquals(0, routeLine.retrievePrimaryRouteIndex());
-  }
-
-  @Test
   public void routeLineCap_defaultIsSet() {
     Context context = mock(Context.class);
     TypedArray typedArray = mock(TypedArray.class);
