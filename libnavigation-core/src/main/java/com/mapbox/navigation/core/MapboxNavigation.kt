@@ -69,9 +69,6 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default OnboardRouter. " +
         "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
-private const val MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER =
-    "You need to provide OnboardRouterOptions in NavigationOptions in order to use the default OnboardRouter. " +
-        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access token in NavigationOptions " +
     "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 
@@ -658,10 +655,10 @@ class MapboxNavigation(
             MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
+                    Context::class.java to navigationOptions.applicationContext,
                     String::class.java to accessToken,
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                    OnboardRouterOptions::class.java to (navigationOptions.onboardRouterOptions
-                        ?: throw RuntimeException(MAPBOX_NAVIGATION_OPTIONS_EXCEPTION_ONBOARD_ROUTER)),
+                    OnboardRouterOptions::class.java to navigationOptions.onboardRouterOptions,
                     Logger::class.java to logger,
                     SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
                 )
@@ -736,16 +733,9 @@ class MapboxNavigation(
                 .withUnitType(VoiceUnit.UNDEFINED)
                 .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
                 .build(context)
-            val builder = NavigationOptions.Builder(context)
+            return NavigationOptions.Builder(context)
                 .accessToken(accessToken)
                 .distanceFormatter(distanceFormatter)
-
-            val onboardRouterOptions = OnboardRouterOptions.Builder()
-                .internalFilePath(context)
-                .build()
-            builder.onboardRouterOptions(onboardRouterOptions)
-
-            return builder
         }
     }
 }

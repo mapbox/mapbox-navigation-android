@@ -1,5 +1,6 @@
 package com.mapbox.navigation.route.onboard.internal
 
+import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
@@ -56,6 +57,7 @@ class MapboxOnboardRouterTest {
 
     private lateinit var onboardRouter: MapboxOnboardRouter
 
+    private val applicationContext: Context = mockk()
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
     private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
@@ -71,7 +73,7 @@ class MapboxOnboardRouterTest {
     fun setUp() {
         every { navigator.configureRouter(any()) } returns 0
         every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
-        onboardRouter = MapboxOnboardRouter(ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
+        onboardRouter = MapboxOnboardRouter(applicationContext, ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE

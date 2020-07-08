@@ -30,17 +30,6 @@ class OnboardRouterOptionsTest {
     }
 
     @Test
-    fun `filePath should fail to build when not specified`() {
-        val onboardRouterOptions = try {
-            OnboardRouterOptions.Builder().build()
-        } catch (e: IllegalStateException) {
-            null
-        }
-
-        assertNull(onboardRouterOptions)
-    }
-
-    @Test
     fun `tilesUri should fail to build fake uri`() {
         val onboardRouterOptions = try {
             OnboardRouterOptions.Builder()
