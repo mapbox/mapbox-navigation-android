@@ -31,6 +31,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.history.HistoryFilesActivity
+import com.mapbox.navigation.examples.performance.FrameMetricsPerformance
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
@@ -64,6 +65,9 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        FrameMetricsPerformance().observe(this)
+
         setContentView(R.layout.activity_replay_history_layout)
         mapView.onCreate(savedInstanceState)
 
