@@ -50,6 +50,7 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyled
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfMeasurement
+import java.math.BigDecimal
 
 /**
  * Responsible for the appearance of the route lines on the map. This class applies styling
@@ -700,7 +701,7 @@ internal class MapRouteLine(
             }
         }.map {
             Expression.stop(
-                it.offset,
+                it.offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
                 Expression.color(it.segmentColor)
             )
         }
@@ -798,7 +799,7 @@ internal class MapRouteLine(
             Expression.lineProgress(),
             Expression.color(routeLineShieldTraveledColor),
             Expression.stop(
-                offset,
+                offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
                 Expression.color(routeShieldColor)
             )
         )
@@ -818,7 +819,7 @@ internal class MapRouteLine(
             Expression.lineProgress(),
             Expression.color(routeLineTraveledColor),
             Expression.stop(
-                offset,
+                offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
                 Expression.color(routeDefaultColor)
             )
         )
