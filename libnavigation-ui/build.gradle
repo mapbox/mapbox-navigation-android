@@ -76,6 +76,9 @@ dependencies {
 
   // Mapbox Maps SDK
   api dependenciesList.mapboxMapSdk
+  // regression fix until it's included in the Maps SDK platform release
+  // remove with the next release
+  implementation "com.mapbox.mapboxsdk:mapbox-android-sdk-gl-core:1.8.2"
 
   implementation dependenciesList.mapboxAnnotationPlugin
 
