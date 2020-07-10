@@ -101,10 +101,10 @@ internal class MapboxTripSession(
 
     private var isOffRoute: Boolean = false
         set(value) {
-            if (field == value) {
+            field = value
+            if (route == null) {
                 return
             }
-            field = value
             offRouteObservers.forEach { it.onOffRouteStateChanged(value) }
         }
 
