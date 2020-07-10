@@ -13,10 +13,10 @@ class FrameMetricsListener(
 ) : Window.OnFrameMetricsAvailableListener {
 
     private var frameMetricsReport = FrameMetricsReport(options)
+    private var totalDurationWindow = TotalDurationWindow(options.windowSize)
 
-    fun report(): FrameMetricsReport {
-        return frameMetricsReport.copy()
-    }
+    fun report(): FrameMetricsReport = frameMetricsReport.copy()
+    fun totalDuration(): Float = this.totalDurationWindow.value()
 
     override fun onFrameMetricsAvailable(window: Window, frameMetrics: FrameMetrics, dropCountSinceLastInvocation: Int) {
         val frameMetricsCopy = FrameMetrics(frameMetrics)
@@ -26,9 +26,10 @@ class FrameMetricsListener(
         frameMetricsReport.maxDuration = max(totalDurationMs, frameMetricsReport.maxDuration)
         Timber.i("frame metric available total duration: %.2fms dropCount: %d".format(totalDurationMs, dropCountSinceLastInvocation))
 
+        totalDurationWindow.update(totalDurationMs.toFloat())
         if (totalDurationMs > options.warningLevelMs) {
             val jankMessage = "Jank detected total duration: %.2fms\n".format(totalDurationMs) +
-                "${mapToFrameMetricsFull(frameMetricsCopy)}"
+                "${mapToFrameMetricsJank(frameMetricsCopy)}"
             if (totalDurationMs > options.errorLevelMs) {
                 frameMetricsReport.errorFrames++
                 Timber.e(jankMessage)
@@ -39,8 +40,9 @@ class FrameMetricsListener(
         }
     }
 
-    private fun mapToFrameMetricsFull(frameMetrics: FrameMetrics): FrameMetricsFull {
-        return FrameMetricsFull(
+
+    private fun mapToFrameMetricsJank(frameMetrics: FrameMetrics): FrameMetricsJank {
+        return FrameMetricsJank(
             frameMetrics.nanosToMillis(FrameMetrics.UNKNOWN_DELAY_DURATION),
             frameMetrics.nanosToMillis(FrameMetrics.INPUT_HANDLING_DURATION),
             frameMetrics.nanosToMillis(FrameMetrics.ANIMATION_DURATION),
@@ -54,16 +56,16 @@ class FrameMetricsListener(
     }
 
     private fun FrameMetrics.nanosToMillis(metric: Int): Double = getMetric(metric) * 0.000001
+
+    private class TotalDurationWindow(windowSize: Int) {
+        private val valueWindow = FloatArray(windowSize)
+        private var currentIndex = 0
+
+        fun update(totalDurationMs: Float) {
+            valueWindow[currentIndex] = totalDurationMs
+            currentIndex = (currentIndex + 1) % valueWindow.size
+        }
+        fun value(): Float = valueWindow.max() ?: valueWindow.last()
+    }
 }
 
-private data class FrameMetricsFull(
-    val unknownDelayDuration: Double,
-    val inputHandlingDuration: Double,
-    val animationDuration: Double,
-    val layoutMeasureDuration: Double,
-    val drawDuration: Double,
-    val syncDuration: Double,
-    val commandIssueDuration: Double,
-    val swapBuffersDuration: Double,
-    val totalDuration: Double
-)

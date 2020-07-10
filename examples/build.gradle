@@ -122,6 +122,8 @@ dependencies {
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.lifecycleExtensions
+    annotationProcessor dependenciesList.lifecycleCompiler
 
     implementation dependenciesList.gmsLocation
 
@@ -133,6 +135,8 @@ dependencies {
     // Butter Knife
     implementation dependenciesList.butterKnife
     annotationProcessor dependenciesList.butterKnifeProcessor
+
+    implementation 'com.robinhood.spark:spark:1.2.0'
 
     // Leak Canary
     debugImplementation dependenciesList.leakCanaryDebug

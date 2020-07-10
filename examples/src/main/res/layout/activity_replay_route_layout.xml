@@ -30,4 +30,13 @@
         android:textColor="@android:color/white"
         android:visibility="gone" />
 
+    <fragment
+        android:name="com.mapbox.navigation.examples.performance.JankFragment"
+        android:id="@+id/jankFragment"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -29,7 +30,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.performance.FrameMetricsPerformance
+import com.mapbox.navigation.examples.performance.FrameMetricsSparkUi
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
@@ -57,9 +58,8 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        FrameMetricsPerformance().observe(this)
-
         setContentView(R.layout.activity_replay_route_layout)
+
         mapView.onCreate(savedInstanceState)
 
         val mapboxNavigationOptions = MapboxNavigation
