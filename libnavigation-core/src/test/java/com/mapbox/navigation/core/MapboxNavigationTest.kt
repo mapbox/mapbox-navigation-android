@@ -94,7 +94,6 @@ class MapboxNavigationTest {
     private lateinit var mapboxNavigation: MapboxNavigation
 
     companion object {
-        private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
         private const val DEFAULT_REROUTE_BEARING_ANGLE = 11f
 
         @BeforeClass
@@ -301,6 +300,7 @@ class MapboxNavigationTest {
 
     @Test
     fun offroute_lead_to_reroute() {
+        every { rerouteController.state } returns RerouteState.Idle
         val observers = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(observers)) }
 
@@ -317,23 +317,21 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun offroute_lead_to_reroute_and_after_interrupt_reroute() {
+    fun offroute_lead_to_interrupt_reroute_and_after_reroute_if_currently_fetching() {
+        every { rerouteController.state } returns RerouteState.FetchingRoute
         val observers = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(observers)) }
 
         observers.forEach {
             it.onOffRouteStateChanged(true)
         }
-        observers.forEach {
-            it.onOffRouteStateChanged(false)
-        }
 
-        verify(exactly = 1) { rerouteController.reroute(any()) }
         verify(exactly = 1) { rerouteController.interrupt() }
+        verify(exactly = 1) { rerouteController.reroute(any()) }
         verify(ordering = Ordering.ORDERED) {
             tripSession.registerOffRouteObserver(capture(observers))
-            rerouteController.reroute(any())
             rerouteController.interrupt()
+            rerouteController.reroute(any())
         }
     }
 
@@ -402,11 +400,11 @@ class MapboxNavigationTest {
         mapboxNavigation.setRerouteController(newRerouteController)
 
         verify(exactly = 1) { rerouteController.reroute(any()) }
-        verify(exactly = 1) { rerouteController.interrupt() }
+        verify(exactly = 2) { rerouteController.interrupt() }
         verify(exactly = 1) { newRerouteController.reroute(any()) }
         verifyOrder {
-            rerouteController.reroute(any())
             rerouteController.interrupt()
+            rerouteController.reroute(any())
             newRerouteController.reroute(any())
         }
     }
