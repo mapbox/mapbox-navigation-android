@@ -62,6 +62,10 @@ class ReplayRouteLocationConverter {
      * @return list of sliced {@link Point}s.
      */
     List<Point> sliceRoute(LineString lineString) {
+        if (lineString == null || lineString.coordinates().isEmpty()) {
+            return Collections.emptyList();
+        }
+
         double distanceMeters = TurfMeasurement.length(lineString, TurfConstants.UNIT_METERS);
         if (distanceMeters <= 0) {
             return Collections.emptyList();
