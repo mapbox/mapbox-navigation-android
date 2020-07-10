@@ -342,6 +342,8 @@ public class NavigationHelper {
                                                   @NonNull List<Pair<StepIntersection, Double>> measuredIntersections,
                                                   double stepDistanceTraveled) {
     for (Pair<StepIntersection, Double> measuredIntersection : measuredIntersections) {
+      if (measuredIntersection.first == null)
+        return intersections.get(0);
       double intersectionDistance = measuredIntersection.second;
       int intersectionIndex = measuredIntersections.indexOf(measuredIntersection);
       int nextIntersectionIndex = intersectionIndex + ONE_INDEX;
@@ -486,6 +488,8 @@ public class NavigationHelper {
 
   static boolean shouldCheckFasterRoute(NavigationLocationUpdate navigationLocationUpdate,
                                         RouteProgress routeProgress) {
+    if(navigationLocationUpdate == null)
+      return false;
     FasterRoute fasterRoute = navigationLocationUpdate.mapboxNavigation().getFasterRouteEngine();
     return fasterRoute.shouldCheckFasterRoute(navigationLocationUpdate.location(), routeProgress);
   }

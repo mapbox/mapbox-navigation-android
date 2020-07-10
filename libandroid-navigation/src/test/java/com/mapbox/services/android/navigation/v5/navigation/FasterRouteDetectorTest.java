@@ -115,8 +115,7 @@ public class FasterRouteDetectorTest extends BaseTest {
       .build();
     Context context = mock(Context.class);
     when(context.getApplicationContext()).thenReturn(mock(Context.class));
-    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(NavigationTelemetry.class),
-      mock(LocationEngine.class));
+    return new MapboxNavigation(context, ACCESS_TOKEN, options, mock(LocationEngine.class));
   }
 
   private RouteProgress obtainDefaultRouteProgress() throws Exception {
@@ -130,6 +129,7 @@ public class FasterRouteDetectorTest extends BaseTest {
     String body = loadJsonFixture(PRECISION_6);
     DirectionsResponse response = gson.fromJson(body, DirectionsResponse.class);
     DirectionsRoute aRoute = response.routes().get(0);
+
     return aRoute;
   }
 
