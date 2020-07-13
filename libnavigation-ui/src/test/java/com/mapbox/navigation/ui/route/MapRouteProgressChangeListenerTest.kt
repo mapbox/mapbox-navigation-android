@@ -1,12 +1,11 @@
 package com.mapbox.navigation.ui.route
 
-import android.animation.ValueAnimator
 import android.os.Build
-import android.view.animation.LinearInterpolator
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -28,12 +27,7 @@ class MapRouteProgressChangeListenerTest {
 
     private val routeLine: MapRouteLine = mockk(relaxUnitFun = true)
     private val routeArrow: MapRouteArrow = mockk(relaxUnitFun = true)
-    private val animator: ValueAnimator by lazy {
-        ValueAnimator.ofFloat().apply {
-            duration = 0
-            interpolator = LinearInterpolator()
-        }
-    }
+    private val animator: RouteLineValueAnimator = RouteLineValueAnimator()
 
     private val drawDirections = mutableListOf<DirectionsRoute>()
     private val addRouteProgress = mutableListOf<RouteProgress>()
@@ -107,7 +101,7 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should cancel animator when route progress has geometry`() {
-        val animator = mockk<ValueAnimator>(relaxUnitFun = true)
+        val animator = mockk<RouteLineValueAnimator>(relaxUnitFun = true)
         val routeProgressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
 
         every { routeLine.retrieveDirectionsRoutes() } returns listOf(
@@ -127,7 +121,7 @@ class MapRouteProgressChangeListenerTest {
 
         routeProgressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify(exactly = 1) { animator.cancel() }
+        verify(exactly = 1) { animator.cancelAnimationCallbacks() }
     }
 
     @Test
@@ -295,7 +289,7 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `calls addUpcomingManeuverArrow when on progress update`() {
+    fun `calls addUpcomingManeuverArrow when on progress update`() = coroutineRule.runBlockingTest {
         val expression: Expression = mockk()
         val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
         val routes = listOf(

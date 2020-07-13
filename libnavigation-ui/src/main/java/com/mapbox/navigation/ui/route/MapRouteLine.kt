@@ -729,7 +729,7 @@ internal class MapRouteLine(
             }
         }.map {
             Expression.stop(
-                it.offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
+                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
                 Expression.color(it.segmentColor)
             )
         }
@@ -827,7 +827,7 @@ internal class MapRouteLine(
             Expression.lineProgress(),
             Expression.color(routeLineShieldTraveledColor),
             Expression.stop(
-                offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
+                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
                 Expression.color(routeShieldColor)
             )
         )
@@ -847,7 +847,7 @@ internal class MapRouteLine(
             Expression.lineProgress(),
             Expression.color(routeLineTraveledColor),
             Expression.stop(
-                offset.toBigDecimal().setScale(6, BigDecimal.ROUND_DOWN),
+                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
                 Expression.color(routeDefaultColor)
             )
         )

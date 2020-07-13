@@ -93,7 +93,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, null, true, true)
             mapInstanceState?.let { state ->
                 navigationMapboxMap?.restoreFrom(state)
             }
