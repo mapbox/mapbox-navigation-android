@@ -122,7 +122,7 @@ navigation-fixtures:
 
 .PHONY: 1.0-core-publish-to-sdk-registry
 1.0-core-publish-to-sdk-registry:
-	$(call run-gradle-tasks,$(CORE_MODULES),sdkRegistryPublishRelease)
+	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
 
 .PHONY: 1.0-core-dependency-graph
 1.0-core-dependency-graph:
@@ -174,7 +174,7 @@ navigation-fixtures:
 
 .PHONY: 1.0-ui-publish-to-sdk-registry
 1.0-ui-publish-to-sdk-registry:
-	$(call run-gradle-tasks,$(UI_MODULES),sdkRegistryPublishRelease)
+	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
 
 .PHONY: 1.0-ui-check-api
 1.0-ui-check-api:

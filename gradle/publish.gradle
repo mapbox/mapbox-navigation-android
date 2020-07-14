@@ -1,6 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'com.mapbox.sdkRegistry'
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
 afterEvaluate {
@@ -89,26 +90,25 @@ artifactory {
     }
 }
 
-task sdkRegistryPublishDebug(type: Exec) {
-    afterEvaluate {
-        dependsOn(assembleDebug)
-        dependsOn(generatePomFileForDebugPublication)
-        dependsOn(androidJavadocsJar)
-        dependsOn(androidSourcesJar)
-        workingDir = "$rootDir"
-        commandLine("./scripts/publish_release_to_aws.sh", "${project.name}", "${project.ext.mapboxArtifactId}", "${project.ext.versionName}", "debug")
-    }
-}
+def sdkNameMap = [:]
+sdkNameMap["libnavigation-base"] = "mobile-navigation-base"
+sdkNameMap["libnavigation-core"] = "mobile-navigation-core"
+sdkNameMap["libnavigation-metrics"] = "mobile-navigation-metrics"
+sdkNameMap["libnavigator"] = "mobile-navigation-navigator"
+sdkNameMap["libtrip-notification"] = "mobile-navigation-notification"
+sdkNameMap["libdirections-hybrid"] = "mobile-navigation-router"
+sdkNameMap["libdirections-offboard"] = "mobile-navigation-router-offboard"
+sdkNameMap["libdirections-onboard"] = "mobile-navigation-router-onboard"
+sdkNameMap["libnavigation-util"] = "mobile-navigation-utils"
+sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui-v1"
 
-task sdkRegistryPublishRelease(type: Exec) {
-    afterEvaluate {
-        dependsOn(assembleRelease)
-        dependsOn(generatePomFileForReleasePublication)
-        dependsOn(androidJavadocsJar)
-        dependsOn(androidSourcesJar)
-        workingDir = "$rootDir"
-        commandLine("./scripts/publish_release_to_aws.sh", "${project.name}", "${project.ext.mapboxArtifactId}", "${project.ext.versionName}", "release")
-    }
+registry {
+    sdkName = sdkNameMap[project.name]
+    production = true
+    snapshot = project.ext.versionName.endsWith("-SNAPSHOT")
+    override = true
+    dryRun = false
+    publications = ["release"]
 }
 
 task androidSourcesJar(type: Jar) {
