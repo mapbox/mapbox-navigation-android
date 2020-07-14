@@ -175,7 +175,8 @@ ext {
       mapboxSdkVersions  : '1.0.0',
       bintray            : '1.8.4',
       artifactory        : '4.9.3',
-      dokka              : '0.10.1'
+      dokka              : '0.10.1',
+      mapbox             : '0.2.1'
   ]
 
   pluginDependencies = [
@@ -195,6 +196,7 @@ ext {
       mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       bintray            : "com.jfrog.bintray.gradle:gradle-bintray-plugin:${pluginVersion.bintray}",
       artifactory        : "org.jfrog.buildinfo:build-info-extractor-gradle:${pluginVersion.artifactory}",
-      dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}"
+      dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
+      mapbox             : "com.mapbox.gradle:plugins:${pluginVersion.mapbox}"
   ]
 }
