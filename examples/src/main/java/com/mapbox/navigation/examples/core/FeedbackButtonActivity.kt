@@ -30,9 +30,11 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
+import com.mapbox.navigation.examples.BuildConfig
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -298,7 +300,8 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 feedback.description,
                 UI,
                 screenShot,
-                feedback.feedbackSubType.toTypedArray()
+                feedback.feedbackSubType.toTypedArray(),
+                AppMetadata.Builder(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME).build()
             )
             showFeedbackSentSnackBar(context = this, view = mapView)
         }
