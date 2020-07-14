@@ -39,12 +39,9 @@ internal class MapboxRerouteController(
             observers.forEach { it.onRerouteStateChanged(field) }
         }
 
-    private companion object {
-        const val TAG = "MapboxRerouteController"
-    }
-
-    // current implementation ignore `onNewRoutes` callback because `DirectionsSession` update routes internally
+    // current implementation ignores `routesCallback` callback because `DirectionsSession` update routes internally
     override fun reroute(routesCallback: RerouteController.RoutesCallback) {
+        interrupt()
         state = RerouteState.FetchingRoute
         logger.d(
             Tag(TAG),
@@ -70,6 +67,28 @@ internal class MapboxRerouteController(
                     }
                 }
             }
+    }
+
+    @MainThread
+    override fun interrupt() {
+        if (state == RerouteState.FetchingRoute) {
+            directionsSession.cancel() // do not change state here because it's changed into onRoutesRequestCanceled callback
+            logger.d(
+                Tag(TAG),
+                Message("Route request interrupted")
+            )
+        }
+    }
+
+    override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        mainJobController.scope.launch {
+            rerouteStateObserver.onRerouteStateChanged(state)
+        }
+        return observers.add(rerouteStateObserver)
+    }
+
+    override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        return observers.remove(rerouteStateObserver)
     }
 
     private fun request(routeOptions: RouteOptions) {
@@ -115,25 +134,7 @@ internal class MapboxRerouteController(
         })
     }
 
-    @MainThread
-    override fun interrupt() {
-        if (state == RerouteState.FetchingRoute) {
-            directionsSession.cancel() // do not change state here because it's changed into onRoutesRequestCanceled callback
-            logger.d(
-                Tag(TAG),
-                Message("Route request interrupted")
-            )
-        }
-    }
-
-    override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
-        mainJobController.scope.launch {
-            rerouteStateObserver.onRerouteStateChanged(state)
-        }
-        return observers.add(rerouteStateObserver)
-    }
-
-    override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
-        return observers.remove(rerouteStateObserver)
+    private companion object {
+        const val TAG = "MapboxRerouteController"
     }
 }

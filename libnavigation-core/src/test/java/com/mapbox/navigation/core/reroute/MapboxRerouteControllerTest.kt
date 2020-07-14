@@ -84,7 +84,7 @@ class MapboxRerouteControllerTest {
 
     @Test
     fun initial_state() {
-        assertEquals(rerouteController.state, RerouteState.Idle)
+        assertEquals(RerouteState.Idle, rerouteController.state)
         verify(exactly = 0) { rerouteController.reroute(any()) }
         verify(exactly = 0) { rerouteController.interrupt() }
     }
@@ -219,6 +219,41 @@ class MapboxRerouteControllerTest {
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Interrupted)
             primaryRerouteObserver.onRerouteStateChanged(RerouteState.Idle)
         }
+    }
+
+    @Test
+    fun reroute_calls_interrupt_if_currently_fetching() {
+        mockRouteOptionsResult(successFromResult)
+        val routeRequestCallback = slot<RoutesRequestCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns mockk()
+        rerouteController.reroute(routeCallback)
+
+        rerouteController.reroute(routeCallback)
+        routeRequestCallback.captured.onRoutesReady(mockk())
+
+        verify(exactly = 1) { directionsSession.cancel() }
+    }
+
+    @Test
+    fun reroute_only_calls_interrupt_if_currently_fetching() {
+        mockRouteOptionsResult(successFromResult)
+        val routeRequestCallback = slot<RoutesRequestCallback>()
+        every {
+            directionsSession.requestRoutes(
+                routeOptionsFromSuccessResult,
+                capture(routeRequestCallback)
+            )
+        } returns mockk()
+
+        rerouteController.reroute(routeCallback)
+        routeRequestCallback.captured.onRoutesReady(mockk())
+
+        verify(exactly = 0) { directionsSession.cancel() }
     }
 
     @Test

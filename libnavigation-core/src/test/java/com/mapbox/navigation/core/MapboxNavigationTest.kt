@@ -300,7 +300,6 @@ class MapboxNavigationTest {
 
     @Test
     fun offroute_lead_to_reroute() {
-        every { rerouteController.state } returns RerouteState.Idle
         val observers = mutableListOf<OffRouteObserver>()
         verify { tripSession.registerOffRouteObserver(capture(observers)) }
 
@@ -309,28 +308,8 @@ class MapboxNavigationTest {
         }
 
         verify(exactly = 1) { rerouteController.reroute(any()) }
-        verify(exactly = 0) { rerouteController.interrupt() }
         verify(ordering = Ordering.ORDERED) {
             tripSession.registerOffRouteObserver(any())
-            rerouteController.reroute(any())
-        }
-    }
-
-    @Test
-    fun offroute_lead_to_interrupt_reroute_and_after_reroute_if_currently_fetching() {
-        every { rerouteController.state } returns RerouteState.FetchingRoute
-        val observers = mutableListOf<OffRouteObserver>()
-        verify { tripSession.registerOffRouteObserver(capture(observers)) }
-
-        observers.forEach {
-            it.onOffRouteStateChanged(true)
-        }
-
-        verify(exactly = 1) { rerouteController.interrupt() }
-        verify(exactly = 1) { rerouteController.reroute(any()) }
-        verify(ordering = Ordering.ORDERED) {
-            tripSession.registerOffRouteObserver(capture(observers))
-            rerouteController.interrupt()
             rerouteController.reroute(any())
         }
     }
@@ -400,11 +379,11 @@ class MapboxNavigationTest {
         mapboxNavigation.setRerouteController(newRerouteController)
 
         verify(exactly = 1) { rerouteController.reroute(any()) }
-        verify(exactly = 2) { rerouteController.interrupt() }
+        verify(exactly = 1) { rerouteController.interrupt() }
         verify(exactly = 1) { newRerouteController.reroute(any()) }
         verifyOrder {
-            rerouteController.interrupt()
             rerouteController.reroute(any())
+            rerouteController.interrupt()
             newRerouteController.reroute(any())
         }
     }
