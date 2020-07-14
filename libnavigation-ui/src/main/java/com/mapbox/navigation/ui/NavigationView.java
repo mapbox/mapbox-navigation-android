@@ -3,11 +3,11 @@ package com.mapbox.navigation.ui;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
@@ -691,13 +691,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void initializeNavigationViewModel() {
     try {
-      if (getContext() instanceof ContextThemeWrapper) {
-        navigationViewModel = ViewModelProviders.of(
-                (FragmentActivity)(((ContextThemeWrapper) getContext()).getBaseContext()))
-                .get(NavigationViewModel.class);
-      } else {
-        navigationViewModel = ViewModelProviders.of((FragmentActivity) getContext()).get(NavigationViewModel.class);
+      Context context = getContext();
+      // unwrap the context if needed, see https://github.com/mapbox/mapbox-navigation-android/issues/2777
+      while (!(context instanceof FragmentActivity) && context instanceof ContextWrapper) {
+        context = ((ContextWrapper) context).getBaseContext();
       }
+      navigationViewModel = ViewModelProviders.of((FragmentActivity) context).get(NavigationViewModel.class);
     } catch (ClassCastException exception) {
       throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
     }
