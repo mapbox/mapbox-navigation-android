@@ -1,10 +1,10 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Fin de navigation</string>
-    <string name="kilometers">km</string>
-    <string name="meters">m</string>
-    <string name="miles">mi</string>
-    <string name="feet">ft</string>
+    <string name="mapbox_kilometers">km</string>
+    <string name="mapbox_meters">m</string>
+    <string name="mapbox_miles">mi</string>
+    <string name="mapbox_feet">ft</string>
     <!-- Time formatting -->
     <plurals name="numberOfDays">
         <item quantity="one">jour</item>

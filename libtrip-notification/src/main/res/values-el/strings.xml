@@ -1,10 +1,10 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Τέλος πλοήγησης</string>
-    <string name="kilometers">χλμ</string>
-    <string name="meters">μ</string>
-    <string name="miles">μίλια</string>
-    <string name="feet">πόδια</string>
+    <string name="mapbox_kilometers">χλμ</string>
+    <string name="mapbox_meters">μ</string>
+    <string name="mapbox_miles">μίλια</string>
+    <string name="mapbox_feet">πόδια</string>
     <string name="eta_format">%s ETA</string>
 
     <!-- Time formatting -->
