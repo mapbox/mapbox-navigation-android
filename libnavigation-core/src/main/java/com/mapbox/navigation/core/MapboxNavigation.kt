@@ -604,9 +604,6 @@ class MapboxNavigation(
     private fun createInternalOffRouteObserver() = object : OffRouteObserver {
         override fun onOffRouteStateChanged(offRoute: Boolean) {
             if (offRoute) {
-                if (rerouteController?.state == RerouteState.FetchingRoute) {
-                    rerouteController?.interrupt()
-                }
                 reroute()
             }
         }
