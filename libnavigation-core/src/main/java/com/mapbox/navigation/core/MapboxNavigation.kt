@@ -42,6 +42,7 @@ import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsProvider
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
+import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
@@ -700,6 +701,7 @@ class MapboxNavigation(
          * @param feedbackSource one of [FeedbackEvent.Source]
          * @param screenshot encoded screenshot (optional)
          * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+         * @param appMetadata [AppMetadata] information (optional)
          */
         @JvmStatic
         fun postUserFeedback(
@@ -707,14 +709,16 @@ class MapboxNavigation(
             description: String,
             @FeedbackEvent.Source feedbackSource: String,
             screenshot: String?,
-            feedbackSubType: Array<String>? = emptyArray()
+            feedbackSubType: Array<String>? = emptyArray(),
+            appMetadata: AppMetadata? = null
         ) {
             MapboxNavigationTelemetry.postUserFeedback(
                 feedbackType,
                 description,
                 feedbackSource,
                 screenshot,
-                feedbackSubType
+                feedbackSubType,
+                appMetadata
             )
         }
 
