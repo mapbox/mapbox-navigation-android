@@ -21,6 +21,8 @@
     <dimen name="mapbox_feedback_report_button_height">110dp</dimen>
 
     <dimen name="instruction_layout_height">64dp</dimen>
+    <dimen name="instruction_layout_width">150dp</dimen>
+    <dimen name="instruction_sub_layout_height">40dp</dimen>
     <dimen name="summary_bottomsheet_height">56dp</dimen>
     <dimen name="wayname_view_height">24dp</dimen>
     <dimen name="route_overview_left_right_padding">15dp</dimen>
