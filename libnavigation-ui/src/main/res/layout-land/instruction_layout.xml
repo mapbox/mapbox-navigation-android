@@ -9,49 +9,36 @@
     app:layout_constraintTop_toTopOf="parent"
     tools:showIn="@layout/instruction_view_layout">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/instructionManeuverLayout"
-        android:layout_width="88dp"
-        android:layout_height="104dp"
+        android:layout_width="@dimen/instruction_layout_width"
+        android:layout_height="@dimen/instruction_layout_height"
         android:layout_marginBottom="4dp"
-        android:background="@drawable/instruction_background"
         android:elevation="4dp"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.mapbox.navigation.ui.instruction.maneuver.ManeuverView
             android:id="@+id/maneuverView"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_margin="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_margin="8dp" />
 
         <TextView
             android:id="@+id/stepDistanceText"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_marginBottom="4dp"
-            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:gravity="start"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/maneuverView"
             tools:text="3.2 mi" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/instructionLayoutText"
@@ -60,7 +47,6 @@
         android:elevation="4dp"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
-        android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
         app:layout_constraintTop_toTopOf="parent">
@@ -95,27 +81,25 @@
         android:id="@+id/turnLaneLayout"
         layout="@layout/turn_lane_layout"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="@dimen/instruction_sub_layout_height"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
         app:layout_constraintEnd_toStartOf="@+id/soundLayout"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
-        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText" />
+        app:layout_constraintStart_toStartOf="@+id/instructionManeuverLayout"
+        app:layout_constraintTop_toBottomOf="@+id/instructionManeuverLayout" />
 
     <include
         android:id="@+id/subStepLayout"
         layout="@layout/sub_instruction_layout"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="@dimen/instruction_sub_layout_height"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/instructionManeuverLayout"
         app:layout_constraintEnd_toStartOf="@+id/soundLayout"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/instructionManeuverLayout"
-        app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText" />
+        app:layout_constraintStart_toStartOf="@+id/instructionManeuverLayout"
+        app:layout_constraintTop_toBottomOf="@+id/instructionManeuverLayout" />
 
     <ImageView
         android:id="@+id/guidanceImageView"

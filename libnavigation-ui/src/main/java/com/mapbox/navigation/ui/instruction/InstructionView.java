@@ -605,8 +605,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     instructionLayoutText.setBackgroundColor(primaryBackgroundColor);
 
     View instructionLayoutManeuver = findViewById(R.id.instructionManeuverLayout);
-    Drawable maneuverBackground = DrawableCompat.wrap(instructionLayoutManeuver.getBackground()).mutate();
-    DrawableCompat.setTint(maneuverBackground, primaryBackgroundColor);
+    instructionLayoutManeuver.setBackgroundColor(primaryBackgroundColor);
 
     Drawable subStepBackground = DrawableCompat.wrap(subStepLayout.getBackground()).mutate();
     DrawableCompat.setTint(subStepBackground, listViewBackgroundColor);
@@ -1025,7 +1024,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private void updateLandscapeConstraintsTo(int layoutRes) {
     final int feedbackButtonVisibility = feedbackButton.getVisibility();
     final int soundButtonVisibility = feedbackButton.getVisibility();
-    final int subInstructionLayoutVisitbility = subStepLayout.getVisibility();
+    final int subInstructionLayoutVisibility = subStepLayout.getVisibility();
+    final int turnLaneLayoutVisibility = turnLaneLayout.getVisibility();
 
     ConstraintSet collapsed = new ConstraintSet();
     collapsed.clone(getContext(), layoutRes);
@@ -1033,7 +1033,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
     feedbackButton.setVisibility(feedbackButtonVisibility);
     soundButton.setVisibility(soundButtonVisibility);
-    subStepLayout.setVisibility(subInstructionLayoutVisitbility);
+    subStepLayout.setVisibility(subInstructionLayoutVisibility);
+    turnLaneLayout.setVisibility(turnLaneLayoutVisibility);
   }
 
   /**

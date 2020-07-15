@@ -11,13 +11,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="88dp" />
+        app:layout_constraintGuide_begin="@dimen/instruction_layout_width" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
+        android:layout_marginBottom="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,13 +33,14 @@
 
         <TextView
             android:id="@+id/stepDistanceText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_margin="4dp"
+            android:gravity="start"
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textSize="20sp"
-            tools:text="302 mi" />
+            tools:text="3.2 mi" />
 
     </LinearLayout>
 
