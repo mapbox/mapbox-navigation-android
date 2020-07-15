@@ -31,20 +31,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btn_add_original_route"
-        android:background="@color/colorPrimary"
-        android:text="@string/simple_mapbox_navigation_clear_routes"
-        android:textColor="@android:color/white"/>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_add_original_route"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/startNavigation"
         android:background="@color/colorPrimary"
-        android:text="@string/simple_mapbox_navigation_add_original_route"
+        android:text="@string/simple_mapbox_navigation_clear_routes"
         android:textColor="@android:color/white"/>
 
     <androidx.appcompat.widget.AppCompatButton

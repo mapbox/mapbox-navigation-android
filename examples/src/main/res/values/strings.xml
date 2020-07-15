@@ -121,7 +121,6 @@
     <string name="general_category_title" translatable="false">General</string>
     <string name="send_user_feedback" translatable="false">Send User Feedback</string>
     <string name="simple_mapbox_navigation_clear_routes" translatable="false">CLEAR ROUTES</string>
-    <string name="simple_mapbox_navigation_add_original_route" translatable="false">ADD ORIGINAL ROUTE</string>
     <string name="history_failed_to_load_item" translatable="false">History failed to load item</string>
     <string name="history_failed_to_load_list" translatable="false">Failed to load list</string>
     <string name="history_local_history_file" translatable="false">Local history file</string>

@@ -109,21 +109,6 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 )
             }
         }
-        findViewById<Button>(R.id.btn_add_original_route)?.let { button ->
-            button.setOnClickListener {
-                originalRoute?.let {
-                    val routes = mapboxNavigation.getRoutes()
-                    if (routes.isNotEmpty()) {
-                        mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                            removeAt(0)
-                            add(0, it)
-                        })
-                    } else {
-                        mapboxNavigation.setRoutes(listOf(it))
-                    }
-                }
-            }
-        }
         findViewById<Button>(R.id.btn_clear_routes)?.let { button ->
             button.setOnClickListener {
                 mapboxNavigation.setRoutes(emptyList())
