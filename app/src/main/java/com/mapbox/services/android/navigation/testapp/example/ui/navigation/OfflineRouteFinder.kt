@@ -39,14 +39,9 @@ class OfflineRouteFinder(
         }
 
         offlineRouter.configure(version, object : OnOfflineTilesConfiguredCallback {
-            override fun onConfigured(numberOfTiles: Int) {
-                Timber.d("Offline tiles configured: $numberOfTiles")
+            override fun onConfigured() {
+                Timber.d("Offline data configured")
                 isConfigured = true
-            }
-
-            override fun onConfigurationError(error: OfflineError) {
-                Timber.d("Offline tiles configuration error: {${error.message}}")
-                isConfigured = false
             }
         })
     }

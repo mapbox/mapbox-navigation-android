@@ -1,12 +1,6 @@
 package com.mapbox.services.android.navigation.ui.v5;
 
-
-import androidx.annotation.NonNull;
-
-import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
 import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
-
-import timber.log.Timber;
 
 class OfflineRouterConfiguredCallback implements OnOfflineTilesConfiguredCallback {
 
@@ -17,12 +11,7 @@ class OfflineRouterConfiguredCallback implements OnOfflineTilesConfiguredCallbac
   }
 
   @Override
-  public void onConfigured(int numberOfTiles) {
+  public void onConfigured() {
     offlineRouter.setIsConfigured(true);
-  }
-
-  @Override
-  public void onConfigurationError(@NonNull OfflineError error) {
-    Timber.e(error.getMessage());
   }
 }

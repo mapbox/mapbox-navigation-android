@@ -699,18 +699,12 @@ public class MapboxNavigation implements ServiceConnection {
           .getAbsolutePath();
       freeDriveLocationUpdater.configure(tilePath, new OnOfflineTilesConfiguredCallback() {
         @Override
-        public void onConfigured(int numberOfTiles) {
-          Timber.d("DEBUG: onConfigured %d", numberOfTiles);
+        public void onConfigured() {
+          Timber.d("DEBUG: onConfigured");
           isFreeDriveConfigured.set(true);
           if (!isActiveGuidanceOnGoing.get() && isFreeDriveEnabled.get()) {
             freeDriveLocationUpdater.start();
           }
-        }
-
-        @Override
-        public void onConfigurationError(@NotNull OfflineError error) {
-          Timber.e("Free drive: onConfigurationError %s", error.getMessage());
-          isFreeDriveConfigured.set(false);
         }
       });
     } else {

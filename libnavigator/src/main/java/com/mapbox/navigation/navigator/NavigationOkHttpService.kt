@@ -114,14 +114,6 @@ internal class NavigationOkHttpService(
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun pauseRequest(id: Long, callback: ResultCallback) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun resumeRequest(id: Long, callback: ResultCallback) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
-    }
-
     internal inner class HttpCallback constructor(
         private val id: Long,
         private val request: HttpRequest,

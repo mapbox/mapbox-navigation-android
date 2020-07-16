@@ -8,18 +8,14 @@ internal class ConfigureRouterTask(
     private val navigator: Navigator,
     private val routerParams: RouterParams,
     private val callback: OnOfflineTilesConfiguredCallback
-) : AsyncTask<Void, Void, Long>() {
+) : AsyncTask<Void, Void, Any?>() {
 
     @Synchronized
-    override fun doInBackground(vararg paramsUnused: Void): Long =
-        navigator.configureRouter(routerParams)
+    override fun doInBackground(vararg paramsUnused: Void): Any {
+        return navigator.configureRouter(routerParams)
+    }
 
-    override fun onPostExecute(numberOfTiles: Long) {
-        if (numberOfTiles >= 0) {
-            callback.onConfigured(numberOfTiles.toInt())
-        } else {
-            val error = OfflineError("Offline tile configuration error: 0 tiles found in directory")
-            callback.onConfigurationError(error)
-        }
+    override fun onPostExecute(result: Any?) {
+        callback.onConfigured()
     }
 }
