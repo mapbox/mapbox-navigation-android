@@ -37,31 +37,6 @@ workflows:
               only: /^release_ui_.*_core_.*/
             branches:
               ignore: /.*/
-      - release-core-1_0-qa:
-          filters:
-            tags:
-              only: /^qa_release_core_.*/
-            branches:
-              ignore: /.*/
-      - release-ui-1_0-qa:
-          filters:
-            tags:
-              only: /^qa_release_ui_.*_core_.*/
-            branches:
-              ignore: /.*/
-      - release-core-1_0-prod:
-          filters:
-            tags:
-              only: /^prod_release_core_.*/
-            branches:
-              ignore: /.*/
-
-      - release-ui-1_0-prod:
-          filters:
-            tags:
-              only: /^prod_release_ui_.*_core_.*/
-            branches:
-              ignore: /.*/
       - ui-tests-1_0
       - publish:
           filters:
@@ -365,17 +340,14 @@ commands:
 
   publish-artifacts:
     parameters:
-      repository:
-        description: artifactory, bintray or sdk-registry
-        type: string
       artifact-type:
         description: core or ui
         type: string
     steps:
       - deploy:
-          name: Publish Navigation SDK 1.0 to << parameters.repository >>
+          name: Publish Navigation SDK 1.0 to SDK Registry
           command: |
-            make 1.0-<< parameters.artifact-type >>-publish-to-<< parameters.repository >>
+            make 1.0-<< parameters.artifact-type >>-publish-to-sdk-registry
 
   check-public-documentation:
     steps:
@@ -568,7 +540,6 @@ jobs:
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "sdk-registry"
           artifact-type: "core"
       - track-performance
 
@@ -576,8 +547,6 @@ jobs:
     working_directory: ~/code
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_private
     steps:
       - generate-core-version-name
       - checkout
@@ -585,39 +554,6 @@ jobs:
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "bintray"
-          artifact-type: "core"
-
-  release-core-1_0-qa:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_internal
-    steps:
-      - generate-core-version-name
-      - checkout
-      - build-release-core-1_0
-      - check-public-documentation
-      - generate-documentation
-      - publish-artifacts:
-          repository: "bintray"
-          artifact-type: "core"
-
-  release-core-1_0-prod:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_collab
-    steps:
-      - generate-core-version-name
-      - checkout
-      - build-release-core-1_0
-      - check-public-documentation
-      - generate-documentation
-      - publish-artifacts:
-          repository: "bintray"
           artifact-type: "core"
 
   release-ui-1_0-snapshot:
@@ -630,7 +566,6 @@ jobs:
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "sdk-registry"
           artifact-type: "ui"
       - track-performance
 
@@ -638,8 +573,6 @@ jobs:
     working_directory: ~/code
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_private
     steps:
       - generate-ui-version-name
       - checkout
@@ -647,39 +580,6 @@ jobs:
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
-          repository: "bintray"
-          artifact-type: "ui"
-
-  release-ui-1_0-qa:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_internal
-    steps:
-      - generate-ui-version-name
-      - checkout
-      - build-release-ui-1_0
-      - check-public-documentation
-      - generate-documentation
-      - publish-artifacts:
-          repository: "bintray"
-          artifact-type: "ui"
-
-  release-ui-1_0-prod:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    environment:
-      BINTRAY_REPO: mapbox_collab
-    steps:
-      - generate-ui-version-name
-      - checkout
-      - build-release-ui-1_0
-      - check-public-documentation
-      - generate-documentation
-      - publish-artifacts:
-          repository: "bintray"
           artifact-type: "ui"
 # ------------------------------------------------------------------------------
   publish:

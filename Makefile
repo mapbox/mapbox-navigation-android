@@ -112,14 +112,6 @@ navigation-fixtures:
 1.0-core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
-.PHONY: 1.0-core-publish-to-bintray
-1.0-core-publish-to-bintray:
-	$(call run-gradle-tasks,$(CORE_MODULES),bintrayUpload)
-
-.PHONY: 1.0-core-publish-to-artifactory
-1.0-core-publish-to-artifactory:
-	$(call run-gradle-tasks,$(CORE_MODULES),artifactoryPublish)
-
 .PHONY: 1.0-core-publish-to-sdk-registry
 1.0-core-publish-to-sdk-registry:
 	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
@@ -163,14 +155,6 @@ navigation-fixtures:
 .PHONY: 1.0-ui-unit-tests
 1.0-ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
-
-.PHONY: 1.0-ui-publish-to-bintray
-1.0-ui-publish-to-bintray:
-	$(call run-gradle-tasks,$(UI_MODULES),bintrayUpload)
-
-.PHONY: 1.0-ui-publish-to-artifactory
-1.0-ui-publish-to-artifactory:
-	$(call run-gradle-tasks,$(UI_MODULES),artifactoryPublish)
 
 .PHONY: 1.0-ui-publish-to-sdk-registry
 1.0-ui-publish-to-sdk-registry:

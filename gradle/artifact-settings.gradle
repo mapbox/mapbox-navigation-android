@@ -17,10 +17,4 @@ ext {
     else if ( releaseSdk == 'ui' ) {
         versionName = System.getenv('POM_UI_VERSION_NAME') ?: project.property('POM_UI_SNAPSHOT_VERSION_NAME')
     }
-
-    mapboxBintrayUserOrg = 'mapbox'
-    mapboxBintrayRepoName = System.getenv('BINTRAY_REPO') ?: 'mapbox_internal'
-    mapboxBintrayUser = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
-    mapboxBintrayApiKey = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
-    mapboxGpgPassphrase = project.hasProperty('GPG_PASSPHRASE') ? project.property('GPG_PASSPHRASE') : System.getenv('GPG_PASSPHRASE')
 }
