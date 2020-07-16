@@ -10,7 +10,6 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener
@@ -41,8 +40,7 @@ class CustomPuckActivity : AppCompatActivity(), OnNavigationReadyCallback,
         navigationView.onCreate(savedInstanceState)
         navigationView.initialize(
             this,
-            getInitialCameraPosition(),
-            Utils.getMapboxAccessToken(this)
+            getInitialCameraPosition()
         )
     }
 

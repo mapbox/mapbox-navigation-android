@@ -454,11 +454,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * which will fire the ready events for this view.
    *
    * @param onNavigationReadyCallback to be set to this view
-   * @param accessToken access token used to make  Directions API/Map Matching request
    */
-  public void initialize(OnNavigationReadyCallback onNavigationReadyCallback, String accessToken) {
+  public void initialize(OnNavigationReadyCallback onNavigationReadyCallback) {
     onNavigationReadyCallbacks.add(onNavigationReadyCallback);
-    instructionView.setAccessToken(accessToken);
     if (!isMapInitialized) {
       mapView.getMapAsync(this);
     } else {
@@ -477,11 +475,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param onNavigationReadyCallback to be set to this view
    * @param initialMapCameraPosition to be shown once the map is ready
-   * @param accessToken access token used to make Directions API/Map Matching request
    */
   public void initialize(OnNavigationReadyCallback onNavigationReadyCallback,
-      @NonNull CameraPosition initialMapCameraPosition, String accessToken) {
-    instructionView.setAccessToken(accessToken);
+      @NonNull CameraPosition initialMapCameraPosition) {
     this.initialMapCameraPosition = initialMapCameraPosition;
     onNavigationReadyCallbacks.add(onNavigationReadyCallback);
     if (!isMapInitialized) {

@@ -15,7 +15,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.internal.building.BuildingFootprintHighlightLayer
@@ -50,8 +49,7 @@ class BuildingFootprintHighlightActivityKt : AppCompatActivity(), OnNavigationRe
         navigationView.onCreate(savedInstanceState)
         navigationView.initialize(
             this,
-            getInitialCameraPosition(),
-            Utils.getMapboxAccessToken(this)
+            getInitialCameraPosition()
         )
     }
 

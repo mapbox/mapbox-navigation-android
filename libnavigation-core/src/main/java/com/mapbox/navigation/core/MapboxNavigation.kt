@@ -178,7 +178,8 @@ class MapboxNavigation(
             locationEngine = navigationOptions.locationEngine,
             navigatorPredictionMillis = navigationOptions.navigatorPredictionMillis,
             navigator = navigator,
-            logger = logger
+            logger = logger,
+            accessToken = accessToken
         )
         tripSession.registerStateObserver(navigationSession)
         navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)

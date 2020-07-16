@@ -440,7 +440,8 @@ class MapboxNavigationTest {
                 locationEngine,
                 any(),
                 navigator = navigator,
-                logger = logger
+                logger = logger,
+                accessToken = "pk.1234"
             )
         } returns tripSession
         every { tripSession.getEnhancedLocation() } returns location

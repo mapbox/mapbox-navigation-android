@@ -27,8 +27,7 @@ data class RouteStepProgress(
     val distanceRemaining: Float,
     val distanceTraveled: Float,
     val fractionTraveled: Float,
-    val durationRemaining: Double,
-    val guidanceViewURL: String?
+    val durationRemaining: Double
 ) {
     /**
      * Builder of [RouteStepProgress]
@@ -41,7 +40,6 @@ data class RouteStepProgress(
         private var distanceTraveled: Float = 0f
         private var fractionTraveled: Float = 0f
         private var durationRemaining: Double = 0.0
-        private var guidanceViewURL: String? = null
 
         /**
          * Index representing the current step the user is on
@@ -101,14 +99,6 @@ data class RouteStepProgress(
             apply { this.durationRemaining = durationRemaining }
 
         /**
-         * Guidance image URL
-         *
-         * @return Builder
-         */
-        fun guidanceViewURL(guidanceURL: String?) =
-            apply { this.guidanceViewURL = guidanceURL }
-
-        /**
          * Build new instance of [RouteStepProgress]
          *
          * @return RouteStepProgress
@@ -121,8 +111,7 @@ data class RouteStepProgress(
                 distanceRemaining,
                 distanceTraveled,
                 fractionTraveled,
-                durationRemaining,
-                guidanceViewURL
+                durationRemaining
             )
         }
     }

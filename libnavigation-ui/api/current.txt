@@ -84,8 +84,8 @@ package com.mapbox.navigation.ui {
     method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
     method public androidx.lifecycle.Lifecycle getLifecycle();
     method public void hideRecenterBtn();
-    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, String!);
-    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition, String!);
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!);
+    method public void initialize(com.mapbox.navigation.ui.OnNavigationReadyCallback!, com.mapbox.mapboxsdk.camera.CameraPosition);
     method public boolean isRecenterButtonVisible();
     method public boolean isSummaryBottomSheetHidden();
     method public boolean isVoiceGuidanceMuted();
@@ -362,7 +362,6 @@ package com.mapbox.navigation.ui.instruction {
     ctor public InstructionView(android.content.Context!);
     ctor public InstructionView(android.content.Context!, android.util.AttributeSet?);
     ctor public InstructionView(android.content.Context!, android.util.AttributeSet?, int);
-    method public void determineGuidanceView(com.mapbox.navigation.base.trip.model.RouteProgress!);
     method public boolean handleBackPressed();
     method public void hideInstructionList();
     method public void hideRerouteState();
@@ -372,13 +371,13 @@ package com.mapbox.navigation.ui.instruction {
     method public com.mapbox.navigation.ui.instruction.NavigationAlertView! retrieveAlertView();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveFeedbackButton();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
-    method public void setAccessToken(String!);
     method public void setDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter!);
     method public void setInstructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
     method public void showFeedbackBottomSheet();
     method public void showInstructionList();
     method public void showRerouteState();
     method public void subscribe(androidx.lifecycle.LifecycleOwner!, com.mapbox.navigation.ui.NavigationViewModel!);
+    method public void toggleGuidanceView(com.mapbox.api.directions.v5.models.BannerInstructions?);
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_DESTROY) public void unsubscribe();
     method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions!);
     method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions!, String!);

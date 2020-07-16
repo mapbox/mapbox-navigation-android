@@ -39,13 +39,15 @@ internal object NavigationComponentProvider {
         locationEngine: LocationEngine,
         navigatorPredictionMillis: Long,
         navigator: MapboxNativeNavigator,
-        logger: Logger
+        logger: Logger,
+        accessToken: String?
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
         navigatorPredictionMillis,
         navigator = navigator,
-        logger = logger
+        logger = logger,
+        accessToken = accessToken
     )
 
     fun createNavigationSession(): NavigationSession = NavigationSession()
