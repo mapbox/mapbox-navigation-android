@@ -447,36 +447,8 @@ class MapboxNavigationTest : BaseTest() {
                 capture(onOfflineTilesConfiguredCallback)
             )
         }
-        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+        onOfflineTilesConfiguredCallback.captured.onConfigured()
         verify(exactly = 1) {
-            mockedFreeDriveLocationUpdater.start()
-        }
-    }
-
-    @Test
-    fun enableFreeDrive_freeDriveLocationUpdaterStartIsNotCalledWhenOnConfigurationError() {
-        val mockedFreeDriveLocationUpdater = mockk<FreeDriveLocationUpdater>(relaxed = true)
-        val navigation = MapboxNavigation(
-            RuntimeEnvironment.application,
-            ACCESS_TOKEN,
-            mockk<MapboxNavigationOptions>(relaxed = true),
-            mockk<NavigationTelemetry>(relaxed = true),
-            mockk<LocationEngine>(relaxed = true),
-            mockk<Navigator>(relaxed = true),
-            mockedFreeDriveLocationUpdater
-        )
-        val onOfflineTilesConfiguredCallback = slot<OnOfflineTilesConfiguredCallback>()
-
-        navigation.enableFreeDrive()
-
-        verify(exactly = 1) {
-            mockedFreeDriveLocationUpdater.configure(
-                any(),
-                capture(onOfflineTilesConfiguredCallback)
-            )
-        }
-        onOfflineTilesConfiguredCallback.captured.onConfigurationError(OfflineError("test"))
-        verify(exactly = 0) {
             mockedFreeDriveLocationUpdater.start()
         }
     }
@@ -501,7 +473,7 @@ class MapboxNavigationTest : BaseTest() {
                 capture(onOfflineTilesConfiguredCallback)
             )
         }
-        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+        onOfflineTilesConfiguredCallback.captured.onConfigured()
 
         navigation.enableFreeDrive()
 
@@ -530,7 +502,7 @@ class MapboxNavigationTest : BaseTest() {
                 capture(onOfflineTilesConfiguredCallback)
             )
         }
-        onOfflineTilesConfiguredCallback.captured.onConfigured(3)
+        onOfflineTilesConfiguredCallback.captured.onConfigured()
         verify(exactly = 1) {
             mockedFreeDriveLocationUpdater.start()
         }

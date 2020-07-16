@@ -148,7 +148,7 @@ interface MapboxNativeNavigator {
      *
      * @return number of tiles founded in the directory
      */
-    fun configureRouter(routerParams: RouterParams): Long
+    fun configureRouter(routerParams: RouterParams)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.

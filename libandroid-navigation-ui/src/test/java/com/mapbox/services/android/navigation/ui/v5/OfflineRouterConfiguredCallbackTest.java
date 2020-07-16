@@ -13,7 +13,7 @@ public class OfflineRouterConfiguredCallbackTest {
     NavigationViewOfflineRouter offlineRouter = mock(NavigationViewOfflineRouter.class);
     OfflineRouterConfiguredCallback callback = new OfflineRouterConfiguredCallback(offlineRouter);
 
-    callback.onConfigured(122);
+    callback.onConfigured();
 
     verify(offlineRouter).setIsConfigured(eq(true));
   }

@@ -16,8 +16,10 @@ import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigator.RouterResult
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
@@ -71,7 +73,7 @@ class MapboxOnboardRouterTest {
 
     @Before
     fun setUp() {
-        every { navigator.configureRouter(any()) } returns 0
+        every { navigator.configureRouter(any()) } just Runs
         every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
         onboardRouter = MapboxOnboardRouter(applicationContext, ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
 

@@ -65,8 +65,7 @@ class MapboxOnboardRouter(
     init {
         mainJobControl.scope.launch {
             onboardRouterFiles.absolutePath(options)?.let { absolutePath ->
-                val tilesFound = configureRouter(absolutePath)
-                logger.i(loggerTag, Message("Router configured with $tilesFound tiles found"))
+                configureRouter(absolutePath)
             }
         }
     }
@@ -147,7 +146,7 @@ class MapboxOnboardRouter(
         // Does nothing
     }
 
-    private fun configureRouter(absolutePath: String): Long {
+    private fun configureRouter(absolutePath: String) {
         val routerParams = RouterParams(
             absolutePath,
             null,
@@ -162,7 +161,7 @@ class MapboxOnboardRouter(
                 NativeSkuTokenProvider(skuTokenProvider)
             )
         )
-        return navigatorNative.configureRouter(routerParams)
+        navigatorNative.configureRouter(routerParams)
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {

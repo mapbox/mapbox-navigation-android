@@ -255,7 +255,7 @@ License: [Mapbox Terms of Service](https://www.mapbox.com/tos/)
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the mapbox-navigation-native (Common multi-platform navigation logic).
+Mapbox Navigation uses portions of the Mapbox Navigation Native (Common multi-platform navigation logic).
 URL: [https://github.com/mapbox/mapbox-navigation-native](https://github.com/mapbox/mapbox-navigation-native)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
 
@@ -1219,7 +1219,7 @@ License: [The Apache Software License, Version 2.0](http://www.apache.org/licens
 
 ===========================================================================
 
-Mapbox Navigation uses portions of the mapbox-navigation-native (Common multi-platform navigation logic).
+Mapbox Navigation uses portions of the Mapbox Navigation Native (Common multi-platform navigation logic).
 URL: [https://github.com/mapbox/mapbox-navigation-native](https://github.com/mapbox/mapbox-navigation-native)
 License: [Mapbox Terms of Service](https://www.mapbox.com/tos)
 
