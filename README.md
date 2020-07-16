@@ -39,7 +39,26 @@ You can use a `-SNAPSHOT` release if you want to test recent bug fixes or featur
 
 ##### `1.0.0`+ versions of the Navigation SDK:
 
-SNAPSHOTs are currently unavailable, but the Mapbox team is working on setting up an infrastructure to provide them to you. Thank you for your patience.
+To access SNAPSHOT builds follow the [installation instructions](https://docs.mapbox.com/android/beta/navigation/overview/#installation) but replace the repository url and the version name:
+```groovy
+allprojects {
+   repositories {
+     maven {
+       url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
+       authentication {
+         basic(BasicAuthentication)
+       }
+       credentials {
+         username = "mapbox"
+         password = "{secret Mapbox token with DOWNLOADS:READ scope}"
+       }
+     }
+   }
+}
+
+dependencies {
+   implementation 'com.mapbox.navigation:ui-v1:1.0.0-SNAPSHOT'
+}
 
 ##### Pre-`1.0.0` versions of the Navigation SDK:
 

@@ -1,6 +1,4 @@
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.mapbox.sdkRegistry'
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
@@ -50,46 +48,6 @@ afterEvaluate {
     }
 }
 
-bintray {
-    user = mapboxBintrayUser
-    key = mapboxBintrayApiKey
-    publications('release')
-    pkg {
-        repo = project.ext.mapboxBintrayRepoName
-        name = mapboxArtifactGroupId + ":" + project.ext.mapboxArtifactId
-        userOrg = project.ext.mapboxBintrayUserOrg
-        licenses = [project.ext.mapboxArtifactLicenseName]
-        vcsUrl = project.ext.mapboxArtifactVcsUrl
-        publish = false
-        version {
-            name = project.ext.versionName
-            desc = project.ext.mapboxArtifactDescription
-            released = new Date()
-            gpg {
-                sign = true
-                passphrase = mapboxGpgPassphrase
-            }
-            mavenCentralSync {
-                sync = false
-            }
-        }
-    }
-}
-
-artifactory {
-    contextUrl = 'http://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-            username = mapboxBintrayUser
-            password = mapboxBintrayApiKey
-        }
-        defaults {
-            publications('release')
-        }
-    }
-}
-
 def sdkNameMap = [:]
 sdkNameMap["libnavigation-base"] = "mobile-navigation-base"
 sdkNameMap["libnavigation-core"] = "mobile-navigation-core"
@@ -106,7 +64,7 @@ registry {
     sdkName = sdkNameMap[project.name]
     production = true
     snapshot = project.ext.versionName.endsWith("-SNAPSHOT")
-    override = true
+    override = snapshot ? true : false
     dryRun = false
     publications = ["release"]
 }
