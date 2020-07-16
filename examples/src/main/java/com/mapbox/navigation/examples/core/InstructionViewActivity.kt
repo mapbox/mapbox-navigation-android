@@ -24,7 +24,6 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
@@ -64,19 +63,20 @@ import java.lang.ref.WeakReference
 import java.util.Locale
 import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
 import okhttp3.Cache
+import timber.log.Timber
 
 /**
  * This activity shows how to integrate the Navigation UI SDK's
  * InstructionView, FeedbackButton, and SoundButton with
  * the Navigation SDK.
  */
+@SuppressLint("MissingPermission")
 class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
     FeedbackBottomSheetListener {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private lateinit var speechPlayer: NavigationSpeechPlayer
-    private lateinit var destination: LatLng
     private val mapboxReplayer = MapboxReplayer()
 
     private var mapboxMap: MapboxMap? = null
@@ -202,7 +202,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
-            destination = latLng
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
                 mapboxNavigation?.requestRoutes(
                     RouteOptions.builder().applyDefaultParams()
@@ -260,7 +259,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun initListeners() {
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
@@ -420,7 +418,18 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private val voiceInstructionsObserver = object : VoiceInstructionsObserver {
         override fun onNewVoiceInstructions(voiceInstructions: VoiceInstructions) {
-            speechPlayer.play(voiceInstructions)
+            Timber.e("Issue3299 Enter: ${voiceInstructions.announcement()}")
+
+            val newInstructions = VoiceInstructions.builder()
+                .announcement(
+                    voiceInstructions.announcement()!!.replace("Head", "American")
+                        .replace("You have arrived at", "Arrival")
+                )
+                .distanceAlongGeometry(voiceInstructions.distanceAlongGeometry())
+                .build()
+
+            Timber.e("Issue3299 After: ${newInstructions.announcement()}")
+            speechPlayer.play(newInstructions)
         }
     }
 
@@ -459,7 +468,6 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
         const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
     }
 
-    @SuppressLint("MissingPermission")
     private fun restoreNavigation() {
         directionRoute?.let {
             mapboxNavigation?.setRoutes(listOf(it))

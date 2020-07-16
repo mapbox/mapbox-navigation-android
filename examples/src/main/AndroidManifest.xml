@@ -337,6 +337,14 @@
                 android:value=".core.ReplayHistoryActivity" />
         </activity>
 
+        <activity
+            android:name=".core.InstructionViewActivityJava"
+            android:label="@string/title_instruction_view">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

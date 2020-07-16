@@ -18,6 +18,7 @@ import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.HybridRouterActivityJava
 import com.mapbox.navigation.examples.core.HybridRouterActivityKt
 import com.mapbox.navigation.examples.core.InstructionViewActivity
+import com.mapbox.navigation.examples.core.InstructionViewActivityJava
 import com.mapbox.navigation.examples.core.NavigationMapRouteActivity
 import com.mapbox.navigation.examples.core.OffboardRouterActivityJava
 import com.mapbox.navigation.examples.core.OffboardRouterActivityKt
@@ -154,6 +155,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_instruction_view),
                 getString(R.string.description_instruction_view),
                 InstructionViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_instruction_view_java),
+                getString(R.string.description_instruction_view),
+                InstructionViewActivityJava::class.java
             ),
             SampleItem(
                 getString(R.string.title_summary_bottom_sheet),

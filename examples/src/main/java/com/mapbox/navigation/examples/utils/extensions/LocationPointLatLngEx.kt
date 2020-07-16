@@ -1,3 +1,4 @@
+@file:JvmName("LocationPointLatLngUtils")
 package com.mapbox.navigation.examples.utils.extensions
 
 import android.location.Location

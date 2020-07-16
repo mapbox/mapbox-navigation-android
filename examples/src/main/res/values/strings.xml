@@ -94,6 +94,8 @@
     <string name="title_instruction_view" translatable="false">InstructionView</string>
     <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with the Navigation SDK.</string>
 
+    <string name="title_instruction_view_java" translatable="false">InstructionView Java</string>
+
     <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
     <string name="description_component_navigation" translatable="false">Shows how to use the MapboxNavigation class with UI components.</string>
 
