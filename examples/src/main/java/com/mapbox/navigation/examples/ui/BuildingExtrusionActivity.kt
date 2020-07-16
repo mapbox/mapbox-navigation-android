@@ -11,7 +11,6 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.internal.building.BuildingExtrusionLayer
@@ -44,8 +43,7 @@ class BuildingExtrusionActivity : AppCompatActivity(), OnNavigationReadyCallback
         navigationView.onCreate(savedInstanceState)
         navigationView.initialize(
             this,
-            getInitialCameraPosition(),
-            Utils.getMapboxAccessToken(this)
+            getInitialCameraPosition()
         )
     }
 

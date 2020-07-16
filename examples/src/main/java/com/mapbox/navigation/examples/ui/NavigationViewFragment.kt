@@ -11,7 +11,6 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.NavigationListener
@@ -45,8 +44,7 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
         activity?.let {
             navigationView.initialize(
                 this,
-                getInitialCameraPosition(),
-                Utils.getMapboxAccessToken(it)
+                getInitialCameraPosition()
             )
         }
     }

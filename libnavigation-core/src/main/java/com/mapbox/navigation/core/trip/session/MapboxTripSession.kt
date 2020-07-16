@@ -7,6 +7,7 @@ import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.VoiceInstructions
@@ -51,7 +52,8 @@ internal class MapboxTripSession(
     private val navigatorPredictionMillis: Long,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
     threadController: ThreadController = ThreadController,
-    private val logger: Logger
+    private val logger: Logger,
+    private val accessToken: String?
 ) : TripSession {
 
     companion object {
@@ -451,8 +453,20 @@ internal class MapboxTripSession(
         action: (BannerInstructions) -> Unit
     ) {
         if (bannerInstructionEvent.isOccurring(progress)) {
-            ifNonNull(bannerInstructionEvent.bannerInstructions) {
-                action(it)
+            ifNonNull(bannerInstructionEvent.bannerInstructions) { bannerInstructions ->
+                val bannerView = bannerInstructions.view()
+                val bannerComponents = bannerView?.components()
+                ifNonNull(bannerComponents) { components ->
+                    components.forEachIndexed { index, component ->
+                        component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let { c ->
+                            components[index] =
+                                c.toBuilder()
+                                    .imageUrl(c.imageUrl()?.plus("&access_token=$accessToken"))
+                                    .build()
+                        }
+                    }
+                }
+                action(bannerInstructions)
             }
         }
     }

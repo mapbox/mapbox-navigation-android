@@ -86,9 +86,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
                 it.addProgressChangeListener(mapboxNavigation)
             }
 
-            // Use the same token, you are using to fetch directionsRoute
-            instructionView.setAccessToken(Utils.getMapboxAccessToken(this))
-
             // Ideally we should use Mapbox.getAccessToken(), but to show GuidanceView we need a
             // specific access token for route request.
             mapboxNavigation.requestRoutes(
@@ -112,7 +109,6 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     private val routeProgressObserver = object : RouteProgressObserver {
         override fun onRouteProgressChanged(routeProgress: RouteProgress) {
             instructionView.updateDistanceWith(routeProgress)
-            instructionView.determineGuidanceView(routeProgress)
         }
     }
 
@@ -151,6 +147,7 @@ class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
     private val bannerInstructionObserver = object : BannerInstructionsObserver {
         override fun onNewBannerInstructions(bannerInstructions: BannerInstructions) {
             instructionView.updateBannerInstructionsWith(bannerInstructions)
+            instructionView.toggleGuidanceView(bannerInstructions)
         }
     }
 

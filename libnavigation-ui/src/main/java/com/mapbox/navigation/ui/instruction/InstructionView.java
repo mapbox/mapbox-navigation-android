@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.instruction;
 
-import android.animation.TimeInterpolator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -15,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,15 +32,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
+import com.mapbox.api.directions.v5.models.BannerView;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.libnavigation.ui.R;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
-import com.mapbox.navigation.base.trip.model.RouteLegProgress;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.Rounding;
@@ -58,17 +59,17 @@ import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 import com.mapbox.navigation.ui.internal.instruction.InstructionModel;
 import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneAdapter;
-import com.mapbox.navigation.ui.internal.junction.RouteJunction;
 import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
 import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+import java.util.Locale;
+
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
-
-import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
 import static com.mapbox.navigation.ui.NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION;
@@ -90,8 +91,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private static final String USER_AGENT_KEY = "User-Agent";
   private static final String USER_AGENT_VALUE = "MapboxJava/";
   private static final String COMPONENT_TYPE_LANE = "lane";
-  private static final long GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED = 900L;
-  private static final long GUIDANCE_VIEW_HIDE_TRANSITION_SPEED = 900L;
+  private static final long GUIDANCE_VIEW_TRANSITION_SPEED = 900L;
   private static final double MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE = 0.75;
 
   private ManeuverView maneuverView;
@@ -125,9 +125,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private FeedbackButton feedbackButton;
   private LifecycleOwner lifecycleOwner;
 
-  private String accessToken;
-  private String guidanceImageUrl = "";
-  private RouteJunction routeJunction = null;
+
 
   private int primaryBackgroundColor;
   private int secondaryBackgroundColor;
@@ -174,15 +172,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
-   * Set the access token used to make Directions API/Map matching request
-   *
-   * @param accessToken access token
-   */
-  public void setAccessToken(String accessToken) {
-    this.accessToken = accessToken;
-  }
-
-  /**
    * Subscribes to a {@link NavigationViewModel} for
    * updates from {@link androidx.lifecycle.LiveData}.
    * <p>
@@ -195,16 +184,17 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
 
+    navigationViewModel.retrieveBannerInstructions().observe(lifecycleOwner, bannerInstructions -> {
+      toggleGuidanceView(bannerInstructions);
+      updateBannerInstructionsWith(bannerInstructions);
+    });
+
     navigationViewModel.retrieveRouteProgress().observe(lifecycleOwner, routeProgress -> {
       if (routeProgress != null) {
         updateDistanceWith(routeProgress);
-        determineGuidanceView(routeProgress);
-      } else {
-        animateHideGuidanceViewImage();
       }
     });
-    navigationViewModel.retrieveBannerInstructions()
-            .observe(lifecycleOwner, this::updateBannerInstructionsWith);
+
     navigationViewModel.retrieveIsOffRoute().observe(lifecycleOwner, isOffRoute -> {
       if (isOffRoute != null) {
         if (isOffRoute) {
@@ -410,32 +400,18 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * The method determines if a junction is arriving and displays appropriate junction view image based
    * on the distance remaining for the junction to arrive.
    *
-   * @param routeProgress {@link RouteProgress}
+   * @param bannerInstructions {@link BannerInstructions}
    */
-  public void determineGuidanceView(RouteProgress routeProgress) {
-    if (routeProgress != null && !isRerouting) {
-      double currentStepTotalDistance = 0.0;
-      float currentStepDistanceTraveled = 0f;
-      String guidanceUrl = null;
-
-      RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
-      if (legProgress != null && legProgress.getCurrentStepProgress() != null) {
-        guidanceUrl = legProgress.getCurrentStepProgress().getGuidanceViewURL();
-        if (legProgress.getCurrentStepProgress().getStep() != null) {
-          currentStepTotalDistance = legProgress.getCurrentStepProgress().getStep().distance();
-          currentStepDistanceTraveled = legProgress.getCurrentStepProgress().getDistanceTraveled();
-        }
+  public void toggleGuidanceView(@Nullable BannerInstructions bannerInstructions) {
+    if (bannerInstructions != null) {
+      BannerView bannerView = bannerInstructions.view();
+      if (bannerView != null) {
+        showGuidanceView(bannerView);
+      } else {
+        animateHideGuidanceViewImage();
       }
-      if (guidanceUrl != null && !this.guidanceImageUrl.equals(guidanceUrl)) {
-        guidanceImageUrl = guidanceUrl;
-      }
-      if (currentStepTotalDistance != 0.0) {
-        if (routeJunction != null) {
-          hideGuidanceView(currentStepTotalDistance);
-        } else {
-          showGuidanceView(currentStepDistanceTraveled, currentStepTotalDistance);
-        }
-      }
+    } else {
+      animateHideGuidanceViewImage();
     }
   }
 
@@ -680,39 +656,18 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private void showGuidanceView(float currentStepDistanceTraveled, double currentStepTotalDistance) {
-    int metersBeforeShowGuidanceView = 200;
-    if (currentStepTotalDistance <= metersBeforeShowGuidanceView) {
-      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
+  private void showGuidanceView(BannerView bannerView) {
+    List<BannerComponents> components = bannerView.components();
+    if (components != null) {
       animateShowGuidanceViewImage();
+      String urlToLoad = components.get(0).imageUrl();
       new Picasso
           .Builder(getContext())
           .downloader(new OkHttp3Downloader(getClient()))
           .build()
-          .load(routeJunction.getGuidanceImageUrl())
+          .load(urlToLoad)
           .into(guidanceViewImage);
-    } else if (currentStepDistanceTraveled + metersBeforeShowGuidanceView >= currentStepTotalDistance) {
-      routeJunction = new RouteJunction(appendTokenTo(), currentStepTotalDistance);
-      new Picasso
-          .Builder(getContext())
-          .downloader(new OkHttp3Downloader(getClient()))
-          .build()
-          .load(routeJunction.getGuidanceImageUrl())
-          .into(guidanceViewImage);
-      animateShowGuidanceViewImage();
     }
-  }
-
-  private void hideGuidanceView(double currentStepTotalDistance) {
-    if (currentStepTotalDistance != routeJunction.getDistanceToHideView()) {
-      guidanceImageUrl = "";
-      routeJunction = null;
-      animateHideGuidanceViewImage();
-    }
-  }
-
-  private String appendTokenTo() {
-    return guidanceImageUrl + "&access_token=" + accessToken;
   }
 
   private OkHttpClient getClient() {
@@ -893,14 +848,14 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private void animateShowGuidanceViewImage() {
     if (guidanceViewImage.getVisibility() == GONE) {
-      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_DISPLAY_TRANSITION_SPEED, new DecelerateInterpolator());
+      beginGuidanceImageDelayedTransition();
       guidanceViewImage.setVisibility(VISIBLE);
     }
   }
 
   private void animateHideGuidanceViewImage() {
     if (guidanceViewImage.getVisibility() == VISIBLE) {
-      beginGuidanceImageDelayedTransition(GUIDANCE_VIEW_HIDE_TRANSITION_SPEED, new DecelerateInterpolator());
+      beginGuidanceImageDelayedTransition();
       guidanceViewImage.setVisibility(GONE);
     }
   }
@@ -958,10 +913,10 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     TransitionManager.beginDelayedTransition(this);
   }
 
-  private void beginGuidanceImageDelayedTransition(long duration, TimeInterpolator interpolator) {
+  private void beginGuidanceImageDelayedTransition() {
     AutoTransition transition = new AutoTransition();
-    transition.setDuration(duration);
-    transition.setInterpolator(interpolator);
+    transition.setDuration(GUIDANCE_VIEW_TRANSITION_SPEED);
+    transition.setInterpolator(new DecelerateInterpolator());
     TransitionManager.beginDelayedTransition(this, transition);
   }
 

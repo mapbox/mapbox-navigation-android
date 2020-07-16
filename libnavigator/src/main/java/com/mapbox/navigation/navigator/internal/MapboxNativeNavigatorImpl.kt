@@ -396,9 +396,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                             }
                             routeProgressBuilder.bannerInstructions(bannerInstructions)
                         }
-                        ifNonNull(currentStep.bannerInstructions()) {
-                            stepProgressBuilder.guidanceViewURL(getGuidanceViewUrl(it))
-                        }
                     }
 
                     if (upcomingStepIndex < steps.size) {
@@ -435,15 +432,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             routeProgressBuilder.route(route)
 
             return routeProgressBuilder.build()
-        }
-        return null
-    }
-
-    private fun getGuidanceViewUrl(bannerInstructions: List<BannerInstructions>): String? {
-        bannerInstructions.forEach {
-            ifNonNull(it.view()) { bannerView ->
-                return bannerView.components()?.firstOrNull()?.imageUrl()
-            }
         }
         return null
     }
