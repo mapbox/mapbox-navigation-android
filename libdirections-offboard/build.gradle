@@ -26,6 +26,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
     defaultConfig {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
@@ -59,7 +63,13 @@ dependencies {
         force = true
     }
 
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.lifecycleRuntimeKtx
+
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
+
+    androidTestImplementation dependenciesList.androidxTestCoreKtx
+    androidTestImplementation dependenciesList.testRules
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

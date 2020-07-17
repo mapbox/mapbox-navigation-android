@@ -117,6 +117,7 @@ ext {
 
       // architecture
       lifecycleViewModelKtx     : "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.lifecycleViewModelKtx}",
+      lifecycleRuntimeKtx       : "androidx.lifecycle:lifecycle-runtime-ktx:${version.lifecycleViewModelKtx}",
       lifecycleExtensions       : "androidx.lifecycle:lifecycle-extensions:${version.lifecycle}",
       lifecycleCompiler         : "androidx.lifecycle:lifecycle-compiler:${version.lifecycle}",
 
@@ -146,6 +147,7 @@ ext {
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
       json                      : "org.json:json:${version.json}",
       androidxTestCore          : "androidx.test:core:${version.androidxTestCore}",
+      androidxTestCoreKtx       : "androidx.test:core-ktx:${version.androidxTestCore}",
 
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
