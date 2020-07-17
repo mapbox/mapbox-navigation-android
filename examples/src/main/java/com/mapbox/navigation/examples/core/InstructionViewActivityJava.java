@@ -19,8 +19,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineRequest;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteOptions;
+import com.mapbox.api.directions.v5.models.*;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
@@ -59,6 +58,7 @@ import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider;
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader;
 
+import com.mapbox.navigator.BannerComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -71,6 +71,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.Cache;
+import timber.log.Timber;
 
 import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
@@ -456,13 +457,83 @@ public class InstructionViewActivityJava extends AppCompatActivity
   };
 
   private RouteProgressObserver routeProgressObserver =
-    routeProgress -> instructionView.updateDistanceWith(routeProgress);
+      routeProgress -> instructionView.updateDistanceWith(routeProgress);
 
-  private BannerInstructionsObserver bannerInstructionsObserver =
-    bannerInstructions -> instructionView.updateBannerInstructionsWith(bannerInstructions);
+  private BannerInstructionsObserver bannerInstructionsObserver = bannerInstructions -> {
+    //===THIS IS CALLED APPROX. EVERY SECOND
+    Timber.i("$$$ MAPBOX : ENTER $$$$$$$$$$");
+
+    try {
+      if (bannerInstructions != null) {
+        //=== THIS DOES NOT APPEAR TO WORK, TKV 26MAY20
+        BannerInstructions newBannerInstructions = cleanupBannerInstructions(bannerInstructions);
+        Timber.i("$$$ MAPBOX : updating BannerInstructions with = \n" + newBannerInstructions.toJson());
+        ///// fixed in 1.1.0-beta.6 ???
+        instructionView.updateBannerInstructionsWith(newBannerInstructions);
+      } else {
+        Timber.i("$$$ MAPBOX : bannerInstructions is NULL");
+      }
+    } catch (Exception e) {
+      Timber.i("$$$ MAPBOX : EXCEPTION = " + e.getMessage());
+    }
+
+    Timber.i("$$$ MAPBOX : EXIT $$$$$$$$$$");
+    //instructionView.updateBannerInstructionsWith(bannerInstructions);
+  };
 
   private VoiceInstructionsObserver voiceInstructionsObserver =
-    voiceInstructions -> speechPlayer.play(voiceInstructions);
+      voiceInstructions -> {
+        VoiceInstructions newAnnouncement = null;//voiceInstructions;
+        String theAnnouncement = voiceInstructions.announcement();
+        Timber.i("$$$ MAPBOX : ENTER $$$$$$$$$$$$$$$$$$$$$$$$$$$$ " +
+            theAnnouncement);
+
+        //=== CHECK FOR SPECIAL CHARACTER DENOTING CUSTOMER SERVICES PRESENT
+        //if(theAnnouncement.contains("\u00A0")){
+        //  Timber.i("$$$ MAPBOX : voiceInstructions has SPLIT CHAR");
+
+          //=== REMOVE SOME OF MAPBOX VERBAGE ***** DOES NOT SEEM TO WORK, 12FEB20
+          VoiceInstructions.Builder announcementBuilder = VoiceInstructions.builder();
+
+          theAnnouncement = theAnnouncement.replace("\u00A0", " ")
+              .replace("\u002c", " ")
+              .replace("then you have arrived at", "to")
+              .replace("You have arrived at", "Arrival")
+              .replace("left", "go go left")
+              .replace("right", "go go right")
+              .replace("turn", "turn turn turn");
+
+          //theAnnouncement = theAnnouncement.replace("\u00A0", " ");
+          //theAnnouncement = theAnnouncement.replace("\u002c", " ");
+          //theAnnouncement = theAnnouncement.replace("then you have arrived at", "to");
+          ////				theAnnouncement = theAnnouncement.replace(", then you have arrived at", " to");
+          //theAnnouncement = theAnnouncement.replace("You have arrived at", "Arrival");
+          ////Head northwest on Station Road, then you have arrived at 8016 Station Rd delivery   front porch
+          ////You have arrived at 8036 Station Rd must deliver
+
+          newAnnouncement = announcementBuilder.announcement(theAnnouncement)
+              //.distanceAlongGeometry(voiceInstructions.distanceAlongGeometry())
+              //adding ssmlAnnouncement seems to have the voice modification working 30jun20
+              //.ssmlAnnouncement(theAnnouncement)
+              .build();
+
+          String newAnnouncementText = newAnnouncement.announcement();
+          Timber.i("$$$ MAPBOX : $$$$$$$$$$$$$$$$$$$$$$$$$$$$ new voiceInstructions = " +
+              newAnnouncementText);
+
+          ////=== SOUND ALERT BELL IF CUSTOMER INSTRUCTIONS ARE PRESENT
+          //try{
+          //  soundPool.play(sound1, 1, 1, 0, 0, 1);
+          //}
+          //catch(Exception e){
+          //  Timber.i("$$$ MAPBOX : EXCEPTION : alert bell $$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+          //}
+        //}
+
+        speechPlayer.play(newAnnouncement);
+        Timber.i("$$$ MAPBOX : EXIT $$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+        //speechPlayer.play(voiceInstructions);
+      };
 
   private static class MyLocationEngineCallback implements LocationEngineCallback<LocationEngineResult> {
     private WeakReference<InstructionViewActivityJava> activityWeakReference;
@@ -485,5 +556,106 @@ public class InstructionViewActivityJava extends AppCompatActivity
     public void onFailure(@NonNull Exception exception) {
 
     }
+  }
+
+  public BannerInstructions cleanupBannerInstructions(@NotNull BannerInstructions bannerInstructions) {
+    List<BannerComponents> components = bannerInstructions.primary().components();
+    List<BannerComponents> newComponents = new ArrayList<>();
+    for (BannerComponents component : components) {
+      newComponents.add(component.toBuilder().text(component.text() + "Test; ").build());
+    }
+
+    BannerText primaryBannerText =
+        bannerInstructions.primary().toBuilder().components(newComponents).build();
+    return bannerInstructions.toBuilder().primary(primaryBannerText).build();
+
+    /**
+     Timber.i("$$$ MAPBOX : ENTER $$$$$$$$$$");
+     BannerInstructions newBannerInstructions = bannerInstructions.toBuilder().build();
+
+     try {
+     if (bannerInstructions != null) {
+     Timber.i("$$$ MAPBOX : $$$$$$$$$$ INCOMING $$$$$$$$$$$$$$$$" +
+     "\nPRIMARY " + ((newBannerInstructions == null || newBannerInstructions.primary() == null) ? " is NULL"
+     : newBannerInstructions.primary().text()) +
+     "\nSECONDARY" + ((newBannerInstructions == null || newBannerInstructions.secondary() == null) ? " is NULL"
+     : newBannerInstructions.secondary().text()) +
+     "\nSUB" + ((newBannerInstructions == null || newBannerInstructions.sub() == null) ? " is NULL"
+     : newBannerInstructions.sub().text()));
+
+     if (newBannerInstructions.primary() == null) {
+     Timber.i("$$$ MAPBOX : newBannerInstructions.primary() is NULL ");
+     } else {
+     //===HANDLING DELIVERY INSTRUCTIONS IN A DIFFERENT WINDOW
+     //===SO EXTRACT IT HERE AND PASS IT ON.
+     if (!newBannerInstructions.primary().text().contains("\u00A0")) {
+     Timber.i("$$$ MAPBOX : newBannerInstructions.primary().text() DOES NOT CONTAIN split char");
+     } else {
+     String[] splits = newBannerInstructions.primary().text().split("\u00A0");
+     //Timber.i("$$$ MAPBOX : newBannerInstructions primary splits count is " + splits.length);
+     //for(int i = 0; i < splits.length; i++){
+     //	Timber.i("$$$ MAPBOX : newBannerInstructions primary split[" + i + "] = " + splits[i]);
+     //}
+
+     if (splits.length <= 3) {
+     Timber.i("$$$ MAPBOX : newBannerInstructions primary splits count is TOO LOW");
+     } else {
+     List bannerComponents = newBannerInstructions.primary().components();
+     if (bannerComponents == null || bannerComponents.size() < 1) {
+     Timber.i("$$$ MAPBOX : primary bannerComponents.size() is TOO LOW");
+     } else {
+     String addressText = splits[0] == null ? "" : splits[0];
+     //							String jobTypeText = splits[1] == null ? "" : splits[1];
+     //							String productsText = splits[2] == null ? "" : splits[2].equals("\u002c") ? "" : splits[2];
+     //							String instructionsText = splits[3] == null ? "" : splits[3].equals("\u002c") ? "" : splits[3];
+     //
+     //							String deliveryText = jobTypeText + " at " + addressText + " " + (productsText.isEmpty() ? "" : productsText) + (instructionsText.isEmpty() ? "\n" : " " + instructionsText + "\n");
+     String newBannerText = addressText;
+
+     BannerText primaryBannerText = newBannerInstructions.primary();
+     Timber.i("$$$ MAPBOX : primaryBannerText = " + (primaryBannerText == null ? "NULL"
+     : primaryBannerText.text()));
+     BannerText.Builder primaryBannerTextBuilder = primaryBannerText.toBuilder();
+     //=== FORCE TO DRIVING SIDE RIGHT AS THIS IS NOT IN bannerInstructions, 25 MAY 20
+     Timber.i("$$$ MAPBOX : primaryBannerTextBuilder = " + (primaryBannerTextBuilder == null ? "NULL"
+     : "NOT NULL"));
+     primaryBannerTextBuilder.text(newBannerText);
+     //Timber.i("$$$ MAPBOX : FORCE TO DRIVING SIDE RIGHT AS THIS IS NOT IN bannerInstructions");
+     //primaryBannerTextBuilder.drivingSide("right");
+
+     BannerText newPrimaryBannerText = primaryBannerTextBuilder.build();
+
+     //===PRIMARY TEXT IS NEVER ALTERED/CHANGED, TKV, 3MAR20
+     BannerInstructions.Builder newBannerInstructionsBuilder = newBannerInstructions.toBuilder();
+     newBannerInstructions = newBannerInstructionsBuilder.primary(newPrimaryBannerText).build();
+
+     Timber.i("$$$ MAPBOX : $$$$$$$$$ OUTGOING $$$$$$$$$$$$$$$$$" +
+     "\nPRIMARY " + ((newBannerInstructions == null || newBannerInstructions.primary() == null)
+     ? " is NULL" : newBannerInstructions.primary().text()) +
+     "\nSECONDARY" + ((newBannerInstructions == null || newBannerInstructions.secondary() == null)
+     ? " is NULL" : newBannerInstructions.secondary().text()) +
+     "\nSUB" + ((newBannerInstructions == null || newBannerInstructions.sub() == null) ? " is NULL"
+     : newBannerInstructions.sub().text()));
+
+     //							Timber.i("$$$ MAPBOX : new deliveryText = \n" + (deliveryText == null ? "NULL" : deliveryText));
+     //							MyMapboxNavigationActivity.this.handleDeliveryInstructions(deliveryText);
+
+     //=== THIS DOES NOT APPEAR TO WORK, TKV 26MAY20
+     Timber.i("$$$ MAPBOX : newBannerInstructions json = \n" + newBannerInstructions.toJson());
+     //							myBannerInstructionView.updateBannerInstructionsWith(newBannerInstructions);
+     }
+     }
+     }
+     }
+     } else {
+     Timber.i("$$$ MAPBOX : newBannerInstructions is NULL");
+     }
+     } catch (Exception e) {
+     Timber.i("$$$ MAPBOX : EXCEPTION = " + e.getMessage());
+     }
+
+     Timber.i("$$$ MAPBOX : EXIT $$$$$$$$$$");
+     return newBannerInstructions;
+     **/
   }
 }
