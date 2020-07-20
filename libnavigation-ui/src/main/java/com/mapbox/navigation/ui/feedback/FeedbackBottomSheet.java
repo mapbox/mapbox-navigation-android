@@ -80,6 +80,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private FeedbackItem selectedFeedbackItem;
   private Map<String, List<FeedbackSubTypeItem>> feedbackSubTypeMap;
   private Class<? extends FeedbackBottomSheetListener> listenerClass;
+  private DismissCommand dismissCommand = null;
 
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
@@ -160,8 +161,21 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    if (dismissCommand != null) {
+      dismissCommand.invoke();
+    }
+    dismissCommand = null;
+  }
+
+  @Override
   public void onAnimationEnd(Animator animation) {
-    FeedbackBottomSheet.this.dismiss();
+    if (FeedbackBottomSheet.this.isResumed()) {
+      FeedbackBottomSheet.this.dismiss();
+    } else {
+      dismissCommand = delayedDismissCommand;
+    }
   }
 
   //region Unused Listener Methods
@@ -524,4 +538,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   public static final int FEEDBACK_MAIN_FLOW = 0;
   public static final int FEEDBACK_DETAIL_FLOW = 1;
 
+  private interface DismissCommand {
+    void invoke();
+  }
+
+  private DismissCommand delayedDismissCommand = FeedbackBottomSheet.this::dismiss;
 }
