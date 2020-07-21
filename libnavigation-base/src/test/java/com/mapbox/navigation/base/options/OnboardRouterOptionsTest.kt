@@ -1,6 +1,8 @@
 package com.mapbox.navigation.base.options
 
 import java.net.URISyntaxException
+import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -40,5 +42,35 @@ class OnboardRouterOptionsTest {
         }
 
         assertNull(onboardRouterOptions)
+    }
+
+    @Test
+    fun `builders should build equal objects`() {
+        val options = OnboardRouterOptions.Builder()
+            .filePath(validFilePath)
+            .tilesVersion("2020_08_01-03_10_00")
+            .build()
+
+        val otherOptions = OnboardRouterOptions.Builder()
+            .filePath(validFilePath)
+            .tilesVersion("2020_08_01-03_10_00")
+            .build()
+
+        assertEquals(options, otherOptions)
+    }
+
+    @Test
+    fun `builders should detect u equal objects`() {
+        val options = OnboardRouterOptions.Builder()
+            .filePath(validFilePath)
+            .tilesVersion("2020_08_01-03_10_00")
+            .build()
+
+        val otherOptions = OnboardRouterOptions.Builder()
+            .filePath(validFilePath)
+            .tilesVersion("2020_08_02-03_10_00")
+            .build()
+
+        assertNotEquals(options, otherOptions)
     }
 }

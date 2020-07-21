@@ -3,24 +3,76 @@ package com.mapbox.navigation.base.options
 /**
  * The navigation SDK has algorithms optimized for the type of data
  * being provided. The device profile selects the optimization.
+ *
+ * @param customConfig Json custom configuration used by the navigator
+ * @param deviceType The type of device providing data to the navigator.
  */
-interface DeviceProfile {
+class DeviceProfile private constructor(
+    val customConfig: String,
+    val deviceType: DeviceType
+) {
     /**
-     * Custom configuration in json format, understood by the navigator.
+     * Build a new [DeviceProfile]
      */
-    val customConfig: String
+    class Builder {
+        private var customConfig = ""
+        private var deviceType = DeviceType.HANDHELD
+
+        /**
+         * Json custom configuration used by the navigator
+         */
+        fun customConfig(customConfig: String) = apply { this.customConfig = customConfig }
+
+        /**
+         * Change the [DeviceType]
+         */
+        fun deviceType(deviceType: DeviceType) = apply { this.deviceType = deviceType }
+
+        /**
+         * Build the [DeviceType]
+         */
+        fun build() = DeviceProfile(
+            customConfig = customConfig,
+            deviceType = deviceType
+        )
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DeviceProfile
+
+        if (customConfig != other.customConfig) return false
+        if (deviceType != other.deviceType) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = customConfig.hashCode()
+        result = 31 * result + deviceType.hashCode()
+        return result
+    }
 }
 
 /**
- * Any typical Android smart phone with GPS.
+ * The type of device providing data to the navigator.
  */
-class HandheldProfile @JvmOverloads constructor(
-    override val customConfig: String = ""
-) : DeviceProfile
+enum class DeviceType {
+    /**
+     * Any typical Android smart phone with GPS
+     */
+    HANDHELD,
 
-/**
- * Automobiles that provide data directly from the vehicle.
- */
-class AutomobileProfile @JvmOverloads constructor(
-    override val customConfig: String = ""
-) : DeviceProfile
+    /**
+     * Automobiles that provide data directly from the vehicle
+     */
+    AUTOMOBILE
+}
