@@ -25,7 +25,7 @@ import com.mapbox.api.directions.v5.models.RouteLeg
  * @param upcomingStep Next/upcoming step immediately after the current step. If the user is on the last step
  * on the last leg, this will return null since a next step doesn't exist
  */
-data class RouteLegProgress(
+class RouteLegProgress private constructor(
     val legIndex: Int,
     val routeLeg: RouteLeg?,
     val distanceTraveled: Float,
@@ -35,6 +35,43 @@ data class RouteLegProgress(
     val currentStepProgress: RouteStepProgress?,
     val upcomingStep: LegStep?
 ) {
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteLegProgress
+
+        if (legIndex != other.legIndex) return false
+        if (routeLeg != other.routeLeg) return false
+        if (distanceTraveled != other.distanceTraveled) return false
+        if (distanceRemaining != other.distanceRemaining) return false
+        if (durationRemaining != other.durationRemaining) return false
+        if (fractionTraveled != other.fractionTraveled) return false
+        if (currentStepProgress != other.currentStepProgress) return false
+        if (upcomingStep != other.upcomingStep) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = legIndex
+        result = 31 * result + (routeLeg?.hashCode() ?: 0)
+        result = 31 * result + distanceTraveled.hashCode()
+        result = 31 * result + distanceRemaining.hashCode()
+        result = 31 * result + durationRemaining.hashCode()
+        result = 31 * result + fractionTraveled.hashCode()
+        result = 31 * result + (currentStepProgress?.hashCode() ?: 0)
+        result = 31 * result + (upcomingStep?.hashCode() ?: 0)
+        return result
+    }
+
     /**
      * Builder of [RouteLegProgress].
      */

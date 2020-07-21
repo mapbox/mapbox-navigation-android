@@ -2,9 +2,8 @@ package com.mapbox.navigation.navigator.internal
 
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.common.HttpServiceFactory
-import com.mapbox.navigation.base.options.AutomobileProfile
 import com.mapbox.navigation.base.options.DeviceProfile
-import com.mapbox.navigation.base.options.HandheldProfile
+import com.mapbox.navigation.base.options.DeviceType
 import com.mapbox.navigation.navigator.NavigationOkHttpService
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
 import com.mapbox.navigator.Navigator
@@ -33,12 +32,12 @@ internal object NavigatorLoader {
     }
 
     private fun settingsProfile(deviceProfile: DeviceProfile): SettingsProfile {
-        return when (deviceProfile) {
-            is AutomobileProfile -> {
-                SettingsProfile(ProfileApplication.KAUTO, ProfilePlatform.KANDROID)
-            }
-            is HandheldProfile -> {
+        return when (deviceProfile.deviceType) {
+            DeviceType.HANDHELD -> {
                 SettingsProfile(ProfileApplication.KMOBILE, ProfilePlatform.KANDROID)
+            }
+            DeviceType.AUTOMOBILE -> {
+                SettingsProfile(ProfileApplication.KAUTO, ProfilePlatform.KANDROID)
             }
             else -> throw NotImplementedError("Unknown device profile")
         }

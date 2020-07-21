@@ -18,9 +18,8 @@ import com.mapbox.geojson.Point
  * float value between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the
  * next step (if another step exist in route)
  * @param durationRemaining [Double] The duration remaining in seconds until the user reaches the end of the current step
- * @param guidanceViewURL [String] Guidance image URL
  */
-data class RouteStepProgress(
+class RouteStepProgress private constructor(
     val stepIndex: Int,
     val step: LegStep?,
     val stepPoints: List<Point>?,
@@ -29,6 +28,41 @@ data class RouteStepProgress(
     val fractionTraveled: Float,
     val durationRemaining: Double
 ) {
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteStepProgress
+
+        if (stepIndex != other.stepIndex) return false
+        if (step != other.step) return false
+        if (stepPoints != other.stepPoints) return false
+        if (distanceRemaining != other.distanceRemaining) return false
+        if (distanceTraveled != other.distanceTraveled) return false
+        if (fractionTraveled != other.fractionTraveled) return false
+        if (durationRemaining != other.durationRemaining) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = stepIndex
+        result = 31 * result + (step?.hashCode() ?: 0)
+        result = 31 * result + (stepPoints?.hashCode() ?: 0)
+        result = 31 * result + distanceRemaining.hashCode()
+        result = 31 * result + distanceTraveled.hashCode()
+        result = 31 * result + fractionTraveled.hashCode()
+        result = 31 * result + durationRemaining.hashCode()
+        return result
+    }
+
     /**
      * Builder of [RouteStepProgress]
      */

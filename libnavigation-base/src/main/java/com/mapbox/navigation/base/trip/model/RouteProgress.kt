@@ -37,7 +37,7 @@ import com.mapbox.geojson.Point
  * between 0 and 1 and isn't guaranteed to reach 1 before the user reaches the end of the route.
  * @param remainingWaypoints [Int] number of waypoints remaining on the current route.
  */
-data class RouteProgress(
+class RouteProgress private constructor(
     val route: DirectionsRoute,
     val routeGeometryWithBuffer: Geometry?,
     val bannerInstructions: BannerInstructions?,
@@ -52,6 +52,53 @@ data class RouteProgress(
     val fractionTraveled: Float,
     val remainingWaypoints: Int
 ) {
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteProgress
+
+        if (route != other.route) return false
+        if (routeGeometryWithBuffer != other.routeGeometryWithBuffer) return false
+        if (bannerInstructions != other.bannerInstructions) return false
+        if (voiceInstructions != other.voiceInstructions) return false
+        if (currentState != other.currentState) return false
+        if (currentLegProgress != other.currentLegProgress) return false
+        if (upcomingStepPoints != other.upcomingStepPoints) return false
+        if (inTunnel != other.inTunnel) return false
+        if (distanceRemaining != other.distanceRemaining) return false
+        if (distanceTraveled != other.distanceTraveled) return false
+        if (durationRemaining != other.durationRemaining) return false
+        if (fractionTraveled != other.fractionTraveled) return false
+        if (remainingWaypoints != other.remainingWaypoints) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = route.hashCode()
+        result = 31 * result + (routeGeometryWithBuffer?.hashCode() ?: 0)
+        result = 31 * result + (bannerInstructions?.hashCode() ?: 0)
+        result = 31 * result + (voiceInstructions?.hashCode() ?: 0)
+        result = 31 * result + currentState.hashCode()
+        result = 31 * result + (currentLegProgress?.hashCode() ?: 0)
+        result = 31 * result + (upcomingStepPoints?.hashCode() ?: 0)
+        result = 31 * result + inTunnel.hashCode()
+        result = 31 * result + distanceRemaining.hashCode()
+        result = 31 * result + distanceTraveled.hashCode()
+        result = 31 * result + durationRemaining.hashCode()
+        result = 31 * result + fractionTraveled.hashCode()
+        result = 31 * result + remainingWaypoints
+        return result
+    }
+
     /**
      * Builder for [RouteProgress]
      */

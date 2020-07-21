@@ -190,7 +190,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val arrivalController = object : ArrivalController {
         val arrivalOptions = ArrivalOptions.Builder()
-            .arriveInSeconds(5.0)
+            .arrivalInSeconds(5.0)
             .build()
         override fun arrivalOptions(): ArrivalOptions = arrivalOptions
 
