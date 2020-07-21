@@ -4,25 +4,50 @@ package com.mapbox.navigation.core.sensors
  * Options for the [SensorEventEmitter]. Use this to decide which sensors are
  * enabled and the frequency.
  *
- * @param enabledSensorTypes set of enabled sensors
+ * @param enableSensorTypes set of enabled sensors
  * @param signalsPerSecond signals per second received from sensors
- * @param builder used for updating options
  */
-data class SensorOptions(
-    val enabledSensorTypes: Set<Int>,
-    val signalsPerSecond: Int,
-    val builder: Builder
+class SensorOptions private constructor(
+    val enableSensorTypes: Set<Int>,
+    val signalsPerSecond: Int
 ) {
     /**
      * @return the builder that created the [SensorOptions]
      */
-    fun toBuilder() = builder
+    fun toBuilder() = Builder().apply {
+        enableSensorTypes(enableSensorTypes)
+        signalsPerSecond(signalsPerSecond)
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SensorOptions
+
+        if (enableSensorTypes != other.enableSensorTypes) return false
+        if (signalsPerSecond != other.signalsPerSecond) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = enableSensorTypes.hashCode()
+        result = 31 * result + signalsPerSecond
+        return result
+    }
 
     /**
      * Builder of [SensorOptions]
      */
     class Builder {
-        private val enabledSensors: MutableSet<Int> = mutableSetOf()
+        private val enableSensorTypes: MutableSet<Int> = mutableSetOf()
         private var signalsPerSecond: Int = 25
 
         /**
@@ -31,7 +56,7 @@ data class SensorOptions(
          * @return Builder
          */
         fun enableAllSensors(): Builder {
-            this.enabledSensors.addAll(SensorMapper.getSupportedSensorTypes())
+            this.enableSensorTypes.addAll(SensorMapper.getSupportedSensorTypes())
             return this
         }
 
@@ -41,8 +66,8 @@ data class SensorOptions(
          * @param sensorTypes that will be handled
          * @return Builder
          */
-        fun enableSensors(sensorTypes: Set<Int>): Builder {
-            this.enabledSensors.addAll(sensorTypes)
+        fun enableSensorTypes(sensorTypes: Set<Int>): Builder {
+            this.enableSensorTypes.addAll(sensorTypes)
             return this
         }
 
@@ -64,9 +89,8 @@ data class SensorOptions(
          */
         fun build(): SensorOptions {
             return SensorOptions(
-                enabledSensorTypes = enabledSensors,
-                signalsPerSecond = signalsPerSecond,
-                builder = this
+                enableSensorTypes = enableSensorTypes,
+                signalsPerSecond = signalsPerSecond
             )
         }
     }

@@ -9,18 +9,46 @@ import java.net.URI
  * @param tilesUri tiles endpoint
  * @param tilesVersion version of tiles
  * @param filePath used for storing road network tiles
- * @param builder used for updating options
  */
-data class OnboardRouterOptions(
+class OnboardRouterOptions private constructor(
     val tilesUri: URI,
     val tilesVersion: String,
-    val filePath: String?,
-    val builder: Builder
+    val filePath: String?
 ) {
     /**
      * @return the builder that created the [OnboardRouterOptions]
      */
-    fun toBuilder() = builder
+    fun toBuilder() = Builder().apply {
+        tilesUri(tilesUri)
+        tilesVersion(tilesVersion)
+        filePath(filePath)
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OnboardRouterOptions
+
+        if (tilesUri != other.tilesUri) return false
+        if (tilesVersion != other.tilesVersion) return false
+        if (filePath != other.filePath) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = tilesUri.hashCode()
+        result = 31 * result + tilesVersion.hashCode()
+        result = 31 * result + (filePath?.hashCode() ?: 0)
+        return result
+    }
 
     /**
      * Builder for [OnboardRouterOptions]. You must choose a [filePath]
@@ -52,7 +80,7 @@ data class OnboardRouterOptions(
         /**
          * Creates a custom file path to store the road network tiles.
          */
-        fun filePath(filePath: String) =
+        fun filePath(filePath: String?) =
             apply { this.filePath = filePath }
 
         /**
@@ -62,8 +90,7 @@ data class OnboardRouterOptions(
             return OnboardRouterOptions(
                 tilesUri = tilesUri,
                 tilesVersion = tilesVersion,
-                filePath = filePath,
-                builder = this
+                filePath = filePath
             )
         }
     }

@@ -63,40 +63,26 @@ package com.mapbox.navigation.base.metrics {
 
 package com.mapbox.navigation.base.options {
 
-  public final class AutomobileProfile implements com.mapbox.navigation.base.options.DeviceProfile {
-    ctor public AutomobileProfile(String customConfig);
-    ctor public AutomobileProfile();
+  public final class DeviceProfile {
     method public String getCustomConfig();
+    method public com.mapbox.navigation.base.options.DeviceType getDeviceType();
   }
 
-  public interface DeviceProfile {
-    method public String getCustomConfig();
-    property public abstract String customConfig;
+  public static final class DeviceProfile.Builder {
+    ctor public DeviceProfile.Builder();
+    method public com.mapbox.navigation.base.options.DeviceProfile build();
+    method public com.mapbox.navigation.base.options.DeviceProfile.Builder customConfig(String customConfig);
+    method public com.mapbox.navigation.base.options.DeviceProfile.Builder deviceType(com.mapbox.navigation.base.options.DeviceType deviceType);
   }
 
-  public final class HandheldProfile implements com.mapbox.navigation.base.options.DeviceProfile {
-    ctor public HandheldProfile(String customConfig);
-    ctor public HandheldProfile();
-    method public String getCustomConfig();
+  public enum DeviceType {
+    enum_constant public static final com.mapbox.navigation.base.options.DeviceType AUTOMOBILE;
+    enum_constant public static final com.mapbox.navigation.base.options.DeviceType HANDHELD;
   }
 
   public final class NavigationOptions {
-    ctor public NavigationOptions(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, @com.mapbox.navigation.base.TimeFormat.Type int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
-    method public android.content.Context component1();
-    method public com.mapbox.navigation.base.options.DeviceProfile component10();
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder component11();
-    method public String? component2();
-    method public com.mapbox.android.core.location.LocationEngine component3();
-    method public int component4();
-    method public long component5();
-    method public com.mapbox.navigation.base.formatter.DistanceFormatter? component6();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions component7();
-    method public boolean component8();
-    method public boolean component9();
-    method public com.mapbox.navigation.base.options.NavigationOptions copy(android.content.Context applicationContext, String? accessToken, com.mapbox.android.core.location.LocationEngine locationEngine, int timeFormatType, long navigatorPredictionMillis, com.mapbox.navigation.base.formatter.DistanceFormatter? distanceFormatter, com.mapbox.navigation.base.options.OnboardRouterOptions onboardRouterOptions, boolean isFromNavigationUi, boolean isDebugLoggingEnabled, com.mapbox.navigation.base.options.DeviceProfile deviceProfile, com.mapbox.navigation.base.options.NavigationOptions.Builder builder);
     method public String? getAccessToken();
     method public android.content.Context getApplicationContext();
-    method public com.mapbox.navigation.base.options.NavigationOptions.Builder getBuilder();
     method public com.mapbox.navigation.base.options.DeviceProfile getDeviceProfile();
     method public com.mapbox.navigation.base.formatter.DistanceFormatter? getDistanceFormatter();
     method public com.mapbox.android.core.location.LocationEngine getLocationEngine();
@@ -127,13 +113,6 @@ package com.mapbox.navigation.base.options {
   }
 
   public final class OnboardRouterOptions {
-    ctor public OnboardRouterOptions(java.net.URI tilesUri, String tilesVersion, String? filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
-    method public java.net.URI component1();
-    method public String component2();
-    method public String? component3();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder component4();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions copy(java.net.URI tilesUri, String tilesVersion, String? filePath, com.mapbox.navigation.base.options.OnboardRouterOptions.Builder builder);
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder getBuilder();
     method public String? getFilePath();
     method public java.net.URI getTilesUri();
     method public String getTilesVersion();
@@ -143,7 +122,7 @@ package com.mapbox.navigation.base.options {
   public static final class OnboardRouterOptions.Builder {
     ctor public OnboardRouterOptions.Builder();
     method public com.mapbox.navigation.base.options.OnboardRouterOptions build();
-    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String filePath);
+    method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder filePath(String? filePath);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(String tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesUri(java.net.URI tilesUri);
     method public com.mapbox.navigation.base.options.OnboardRouterOptions.Builder tilesVersion(String version);
@@ -186,16 +165,6 @@ package com.mapbox.navigation.base.route {
 package com.mapbox.navigation.base.trip.model {
 
   public final class RouteLegProgress {
-    ctor public RouteLegProgress(int legIndex, com.mapbox.api.directions.v5.models.RouteLeg? routeLeg, float distanceTraveled, float distanceRemaining, double durationRemaining, float fractionTraveled, com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress, com.mapbox.api.directions.v5.models.LegStep? upcomingStep);
-    method public int component1();
-    method public com.mapbox.api.directions.v5.models.RouteLeg? component2();
-    method public float component3();
-    method public float component4();
-    method public double component5();
-    method public float component6();
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress? component7();
-    method public com.mapbox.api.directions.v5.models.LegStep? component8();
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress copy(int legIndex, com.mapbox.api.directions.v5.models.RouteLeg? routeLeg, float distanceTraveled, float distanceRemaining, double durationRemaining, float fractionTraveled, com.mapbox.navigation.base.trip.model.RouteStepProgress? currentStepProgress, com.mapbox.api.directions.v5.models.LegStep? upcomingStep);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress? getCurrentStepProgress();
     method public float getDistanceRemaining();
     method public float getDistanceTraveled();
@@ -220,21 +189,6 @@ package com.mapbox.navigation.base.trip.model {
   }
 
   public final class RouteProgress {
-    ctor public RouteProgress(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
-    method public com.mapbox.api.directions.v5.models.DirectionsRoute component1();
-    method public float component10();
-    method public double component11();
-    method public float component12();
-    method public int component13();
-    method public com.mapbox.geojson.Geometry? component2();
-    method public com.mapbox.api.directions.v5.models.BannerInstructions? component3();
-    method public com.mapbox.api.directions.v5.models.VoiceInstructions? component4();
-    method public com.mapbox.navigation.base.trip.model.RouteProgressState component5();
-    method public com.mapbox.navigation.base.trip.model.RouteLegProgress? component6();
-    method public java.util.List<com.mapbox.geojson.Point>? component7();
-    method public boolean component8();
-    method public float component9();
-    method public com.mapbox.navigation.base.trip.model.RouteProgress copy(com.mapbox.api.directions.v5.models.DirectionsRoute route, com.mapbox.geojson.Geometry? routeGeometryWithBuffer, com.mapbox.api.directions.v5.models.BannerInstructions? bannerInstructions, com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions, com.mapbox.navigation.base.trip.model.RouteProgressState currentState, com.mapbox.navigation.base.trip.model.RouteLegProgress? currentLegProgress, java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints, boolean inTunnel, float distanceRemaining, float distanceTraveled, double durationRemaining, float fractionTraveled, int remainingWaypoints);
     method public com.mapbox.api.directions.v5.models.BannerInstructions? getBannerInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteLegProgress? getCurrentLegProgress();
     method public com.mapbox.navigation.base.trip.model.RouteProgressState getCurrentState();
@@ -279,15 +233,6 @@ package com.mapbox.navigation.base.trip.model {
   }
 
   public final class RouteStepProgress {
-    ctor public RouteStepProgress(int stepIndex, com.mapbox.api.directions.v5.models.LegStep? step, java.util.List<com.mapbox.geojson.Point>? stepPoints, float distanceRemaining, float distanceTraveled, float fractionTraveled, double durationRemaining);
-    method public int component1();
-    method public com.mapbox.api.directions.v5.models.LegStep? component2();
-    method public java.util.List<com.mapbox.geojson.Point>? component3();
-    method public float component4();
-    method public float component5();
-    method public float component6();
-    method public double component7();
-    method public com.mapbox.navigation.base.trip.model.RouteStepProgress copy(int stepIndex, com.mapbox.api.directions.v5.models.LegStep? step, java.util.List<com.mapbox.geojson.Point>? stepPoints, float distanceRemaining, float distanceTraveled, float fractionTraveled, double durationRemaining);
     method public float getDistanceRemaining();
     method public float getDistanceTraveled();
     method public double getDurationRemaining();

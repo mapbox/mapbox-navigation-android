@@ -64,7 +64,7 @@ class SensorEventEmitter(
     private fun enabledSensors(sensorOptions: SensorOptions): List<Sensor> {
         return sensorManager.getSensorList(Sensor.TYPE_ALL)
             .filter { sensor ->
-                sensorOptions.enabledSensorTypes.contains(sensor.type)
+                sensorOptions.enableSensorTypes.contains(sensor.type)
             }
             .filterNotNull()
     }
