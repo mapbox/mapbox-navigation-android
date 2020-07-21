@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.instruction;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -36,7 +37,6 @@ import androidx.transition.TransitionManager;
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
-import com.mapbox.api.directions.v5.models.BannerView;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.libnavigation.ui.R;
@@ -62,13 +62,11 @@ import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneAdapter;
 import com.mapbox.navigation.ui.internal.summary.InstructionListAdapter;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
-import com.squareup.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Locale;
 
-import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
@@ -88,8 +86,6 @@ import static com.mapbox.navigation.ui.NavigationConstants.FEEDBACK_BOTTOM_SHEET
  */
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
-  private static final String USER_AGENT_KEY = "User-Agent";
-  private static final String USER_AGENT_VALUE = "MapboxJava/";
   private static final String COMPONENT_TYPE_LANE = "lane";
   private static final long GUIDANCE_VIEW_TRANSITION_SPEED = 900L;
   private static final double MAXIMUM_PRIMARY_INSTRUCTION_TEXT_WIDTH_RATIO_IN_LANDSCAPE = 0.75;
@@ -124,8 +120,25 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
   private LifecycleOwner lifecycleOwner;
+  private GuidanceViewImageProvider guidanceViewImageProvider = new GuidanceViewImageProvider();
+  private GuidanceViewImageProvider.OnGuidanceImageDownload callback =
+    new GuidanceViewImageProvider.OnGuidanceImageDownload() {
+    @Override
+    public void onGuidanceImageReady(@NotNull Bitmap bitmap) {
+      animateShowGuidanceViewImage();
+      guidanceViewImage.setImageBitmap(bitmap);
+    }
 
+    @Override
+    public void onNoGuidanceImageUrl() {
+      animateHideGuidanceViewImage();
+    }
 
+    @Override
+    public void onFailure(@org.jetbrains.annotations.Nullable String message) {
+      animateHideGuidanceViewImage();
+    }
+  };
 
   private int primaryBackgroundColor;
   private int secondaryBackgroundColor;
@@ -403,13 +416,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * @param bannerInstructions {@link BannerInstructions}
    */
   public void toggleGuidanceView(@Nullable BannerInstructions bannerInstructions) {
-    if (bannerInstructions != null) {
-      BannerView bannerView = bannerInstructions.view();
-      if (bannerView != null) {
-        showGuidanceView(bannerView);
-      } else {
-        animateHideGuidanceViewImage();
-      }
+    if (bannerInstructions != null && guidanceViewImageProvider != null) {
+      guidanceViewImageProvider.renderGuidanceView(bannerInstructions, getContext(), callback);
     } else {
       animateHideGuidanceViewImage();
     }
@@ -653,27 +661,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
       updateDataFromBannerText(primaryBanner, secondaryBanner);
       updateSubStep(subBanner, primaryBanner.modifier(), currentDrivingSide);
     }
-  }
-
-  private void showGuidanceView(BannerView bannerView) {
-    List<BannerComponents> components = bannerView.components();
-    if (components != null) {
-      animateShowGuidanceViewImage();
-      String urlToLoad = components.get(0).imageUrl();
-      new Picasso
-          .Builder(getContext())
-          .downloader(new OkHttp3Downloader(getClient()))
-          .build()
-          .load(urlToLoad)
-          .into(guidanceViewImage);
-    }
-  }
-
-  private OkHttpClient getClient() {
-    return new OkHttpClient.Builder().addInterceptor(chain ->
-        chain.proceed(
-          chain.request().newBuilder().addHeader(USER_AGENT_KEY, USER_AGENT_VALUE).build())
-    ).build();
   }
 
   private void onInstructionListVisibilityChanged(boolean visible) {
