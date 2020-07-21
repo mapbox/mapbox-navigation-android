@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="mapboxNotificationBlue">#2D4E73</color>
-    <color name="mapbox_navigation_view_color_banner_maneuver_primary">#FFFFFF</color>
-    <color name="mapbox_navigation_view_color_banner_maneuver_secondary">#4DFFFFFF</color>
-</resources>

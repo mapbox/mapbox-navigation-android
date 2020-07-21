@@ -10,9 +10,7 @@ If you want to contribute code:
 
 3. Pull requests are gladly accepted. If there are any changes that developers should be aware of, please update the [change log](CHANGELOG.md)
 
-4. Mapbox uses checkstyle to enforce good Java code standards, Make sure to read the [wiki entry](https://github.com/mapbox/mapbox-navigation-android/wiki/Setting-up-Mapbox-checkstyle) and setup. CI will fail if your PR contains any mistakes.
-
-5. If you are contributing to legacy **Java** code please follow proper coding style [codestyle](./docs/codestyle-setup.md)
+4. Mapbox uses checkstyle and ktlint to enforce good code standards. Make sure to read the [codestyle setup](./docs/codestyle-setup.md). CI will fail if your PR contains any mistakes.
 
 ## Adding or updating a localization
 

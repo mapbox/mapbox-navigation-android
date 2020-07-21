@@ -1,15 +1,15 @@
 ## [Metalava](https://android.googlesource.com/platform/tools/metalava/) setup
 
-Use `$> make 1.0-core-check-api` / `$> make 1.0-core-update-api` (Core) `$> make 1.0-ui-check-api` / `$> make 1.0-ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/master/Makefile) to interact. Make sure to run `$> make 1.0-build-core-release` (Core) and `$> make 1.0-build-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
+Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/master/Makefile) to interact. Make sure to run `$> make build-core-release` (Core) and `$> make build-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
 
 ```
-$> make 1.0-build-core-release
-$> make 1.0-build-ui-release
-$> make 1.0-core-check-api / make 1.0-core-update-api
-$> make 1.0-ui-check-api / make 1.0-ui-update-api
+$> make build-core-release
+$> make build-ui-release
+$> make core-check-api / make core-update-api
+$> make ui-check-api / make ui-update-api
 ```
 
-:warning: Noting that we might need to update / push `api/current.txt` files after running `$> make 1.0-core-update-api` (Core) / `$> make 1.0-ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀
+:warning: Noting that we might need to update / push `api/current.txt` files after running `$> make core-update-api` (Core) / `$> make ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀
 
 #### When releasing
 

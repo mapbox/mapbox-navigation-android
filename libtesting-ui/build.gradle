@@ -20,8 +20,4 @@ android {
 dependencies {
     api dependenciesList.androidxTestJunit
     api dependenciesList.junit
-    api(dependenciesList.barista) {
-        exclude group: 'org.jetbrains.kotlin'
-        exclude group: 'androidx.annotation'
-    }
 }

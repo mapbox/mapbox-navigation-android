@@ -56,13 +56,6 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
-
-  licenseReport {
-    generateHtmlReport = false
-    generateJsonReport = true
-    copyHtmlReportToAssets = false
-    copyJsonReportToAssets = false
-  }
 }
 
 dependencies {
@@ -131,5 +124,4 @@ dependencies {
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
 apply from: "${rootDir}/gradle/jacoco.gradle"
-apply from: "${rootDir}/gradle/checkstyle.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"

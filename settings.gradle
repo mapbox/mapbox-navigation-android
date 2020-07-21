@@ -1,7 +1,4 @@
-include ':app',
-        ':examples',
-        ':libandroid-navigation',
-        ':libandroid-navigation-ui',
+include ':examples',
         ':libnavigator',
         ':libnavigation-base',
         ':libdirections-onboard',
@@ -13,13 +10,4 @@ include ':app',
         ':libnavigation-core',
         ':libnavigation-ui',
         ':libtesting-ui',
-        ':libtesting-utils',
-        ':libnavui-alert',
-        ':libnavui-base',
-        ':libnavui-feedback',
-        ':libnavui-guidance',
-        ':libnavui-maps',
-        ':libnavui-summary',
-        ':libnavui-util',
-        ':libnavui-voice'
-include ':carbon'
+        ':libtesting-utils'
