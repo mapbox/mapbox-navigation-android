@@ -13,6 +13,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -92,5 +93,33 @@ class NavigationOptionsTest {
         assertEquals(options.timeFormatType, newTimeFormat)
         assertEquals(options.navigatorPredictionMillis, newNavigatorPredictionMillis)
         assertEquals(options.distanceFormatter, distanceFormatter)
+    }
+
+    @Test
+    fun whenSeparateBuildersBuildSameOptions() {
+        val timeFormat = TWELVE_HOURS
+        val navigatorPredictionMillis = 1020L
+
+        val options = NavigationOptions.Builder(context)
+            .timeFormatType(timeFormat)
+            .navigatorPredictionMillis(navigatorPredictionMillis)
+            .build()
+
+        val otherOptions = NavigationOptions.Builder(context)
+            .timeFormatType(timeFormat)
+            .navigatorPredictionMillis(navigatorPredictionMillis)
+            .build()
+
+        assertEquals(options, otherOptions)
+    }
+
+    @Test
+    fun reuseChangedBuilder() {
+        val builder = NavigationOptions.Builder(context)
+        val options = builder.build()
+        builder.accessToken("pk.123")
+
+        assertNotEquals(options.toBuilder().build(), builder.build())
+        assertEquals(options.toBuilder().build(), options)
     }
 }

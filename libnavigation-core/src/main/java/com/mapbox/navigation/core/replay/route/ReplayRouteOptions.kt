@@ -11,20 +11,54 @@ package com.mapbox.navigation.core.replay.route
  * @param uTurnSpeedMps Speed the driver will go when facing a u-turn
  * @param maxAcceleration How fast the driver will accelerate to [maxSpeedMps] in mps^2
  * @param minAcceleration How fast the driver will decelerate in mps^2
- * @param builder used for updating options
  */
-class ReplayRouteOptions(
+class ReplayRouteOptions private constructor(
     val maxSpeedMps: Double,
     val turnSpeedMps: Double,
     val uTurnSpeedMps: Double,
     val maxAcceleration: Double,
-    val minAcceleration: Double,
-    val builder: Builder
+    val minAcceleration: Double
 ) {
     /**
      * @return the builder that created the [ReplayRouteOptions]
      */
-    fun toBuilder() = builder
+    fun toBuilder() = Builder().apply {
+        maxSpeedMps(maxSpeedMps)
+        turnSpeedMps(turnSpeedMps)
+        uTurnSpeedMps(uTurnSpeedMps)
+        maxAcceleration(maxAcceleration)
+        minAcceleration(minAcceleration)
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ReplayRouteOptions
+
+        if (maxSpeedMps != other.maxSpeedMps) return false
+        if (turnSpeedMps != other.turnSpeedMps) return false
+        if (uTurnSpeedMps != other.uTurnSpeedMps) return false
+        if (maxAcceleration != other.maxAcceleration) return false
+        if (minAcceleration != other.minAcceleration) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = maxSpeedMps.hashCode()
+        result = 31 * result + turnSpeedMps.hashCode()
+        result = 31 * result + uTurnSpeedMps.hashCode()
+        result = 31 * result + maxAcceleration.hashCode()
+        result = 31 * result + minAcceleration.hashCode()
+        return result
+    }
 
     /**
      * Used to build [ReplayRouteOptions].
@@ -47,8 +81,7 @@ class ReplayRouteOptions(
                 turnSpeedMps = turnSpeedMps,
                 uTurnSpeedMps = uTurnSpeedMps,
                 maxAcceleration = maxAcceleration,
-                minAcceleration = minAcceleration,
-                builder = this
+                minAcceleration = minAcceleration
             )
         }
 
