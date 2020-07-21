@@ -49,8 +49,8 @@ import kotlinx.android.synthetic.main.activity_guidance_view.startNavigation
 class GuidanceViewActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val mapboxReplayer = MapboxReplayer()
-    private val origin: Point = Point.fromLngLat(139.7772481, 35.6818019)
-    private val destination: Point = Point.fromLngLat(139.7756523, 35.6789722)
+    private val origin: Point = Point.fromLngLat(139.7745686, 35.677573)
+    private val destination: Point = Point.fromLngLat(139.784915, 35.680960)
 
     private lateinit var mapboxNavigation: MapboxNavigation
     private var navigationMapboxMap: NavigationMapboxMap? = null
