@@ -42,6 +42,7 @@ dependencies {
 
     // Navigator
     api dependenciesList.mapboxNavigator
+    api dependenciesList.mapboxCommonSdk // Workaround. Remove when upgrading Nav Native.
 
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
