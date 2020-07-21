@@ -35,7 +35,7 @@ Please describe the manual tests that you ran to verify your changes
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have updated the `CHANGELOG` including this PR
-- [ ] We might need to update / push `api/current.txt` files after running `$> make 1.0-core-update-api` (Core) / `$> make 1.0-ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀 If there are SemVer breaking changes add the `SEMVER` label. See [Metalava](https://github.com/mapbox/mapbox-navigation-android/blob/master/docs/metalava.md) docs
+- [ ] We might need to update / push `api/current.txt` files after running `$> make core-update-api` (Core) / `$> make ui-update-api` (UI) if there are changes / errors we're 🆗 with (e.g. `AddedMethod` changes are marked as errors but don't break SemVer) 🚀 If there are SemVer breaking changes add the `SEMVER` label. See [Metalava](https://github.com/mapbox/mapbox-navigation-android/blob/master/docs/metalava.md) docs
 <!-- - [ ] I have added an `Activity` example in the test app showing the new feature implemented (where applicable) -->
 <!-- - [ ] I have made corresponding changes to the documentation (where applicable) -->
 <!-- - [ ] Any changes to strings have been published to our translation tool (where applicable) -->

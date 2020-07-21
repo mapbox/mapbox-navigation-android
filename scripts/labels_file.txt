@@ -1,2 +1,0 @@
-Navigation AAR
-Navigation UI AAR

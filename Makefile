@@ -18,110 +18,70 @@ define run-gradle-tasks
 	done
 endef
 
-checkstyle:
-	./gradlew checkstyle
+.PHONY: check
+check:
+	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(CORE_MODULES),checkstyle)
 
+.PHONY: license-verification
 license-verification:
 	python ./scripts/validate-license.py
 
+.PHONY: license
 license:
 	./gradlew licenseReleaseReport
 	python ./scripts/generate-license.py
 
-test:
-	# See libandroid-navigation/build.gradle for details
-	./gradlew :libandroid-navigation:test
-	./gradlew :libandroid-navigation-ui:test
-
-build-release:
-	./gradlew :libandroid-navigation:assembleRelease
-	./gradlew :libandroid-navigation-ui:assembleRelease
-
-javadoc:
-	./gradlew :libandroid-navigation:javadocrelease
-	./gradlew :libandroid-navigation-ui:javadocrelease
-
+.PHONY: javadoc-dokka
 javadoc-dokka:
 	$(call run-gradle-tasks,$(CORE_MODULES),dokka)
 	$(call run-gradle-tasks,$(UI_MODULES),dokka)
 
-publish:
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation:uploadArchives
-	export IS_LOCAL_DEVELOPMENT=false; ./gradlew :libandroid-navigation-ui:uploadArchives
+.PHONY: dependency-graphs
+dependency-graphs:
+	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),generateDependencyGraphMapboxLibraries)
 
-publish-local:
-	# This publishes to ~/.m2/repository/com/mapbox/mapboxsdk
-	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation:uploadArchives
-	export IS_LOCAL_DEVELOPMENT=true; ./gradlew :libandroid-navigation-ui:uploadArchives
-
-graphs:
-	./gradlew :libandroid-navigation:generateDependencyGraphMapboxLibraries
-	./gradlew :libandroid-navigation-ui:generateDependencyGraphMapboxLibraries
-
+.PHONY: dependency-updates
 dependency-updates:
-	./gradlew :libandroid-navigation:dependencyUpdates
-	./gradlew :libandroid-navigation-ui:dependencyUpdates
-	./gradlew :app:dependencyUpdates
+	$(call run-gradle-tasks,$(CORE_MODULES),dependencyUpdates) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),dependencyUpdates)
 
+.PHONY: dex-count
 dex-count:
 	./gradlew countDebugDexMethods
 	./gradlew countReleaseDexMethods
 
-navigation-fixtures:
-	# Navigation: Taylor street to Page street
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.413165,37.795042;-122.433378,37.7727?geometries=polyline6&overview=full&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/navigation.json
-
-	# Directions: polyline geometry with precision 5
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.416667,37.783333;-121.900000,37.333333?geometries=polyline&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/directions_v5.json
-
-	# Intersection:
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-101.70939001157072,33.62145406099651;-101.68721910152767,33.6213852194939?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/single_intersection.json
-
-	# Distance Congestion annotation: Mapbox DC to National Mall
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving-traffic/-77.034042,38.899949;-77.03949,38.888871?geometries=polyline6&overview=full&steps=true&annotations=congestion%2Cdistance&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/directions_distance_congestion_annotation.json
-
-	# Default Directions
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-122.416686,37.783425;-121.90034,37.333317?geometries=polyline6&steps=true&banner_instructions=true&voice_instructions=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/directions_v5_precision_6.json
-
-    # No VoiceInstructions
-	curl "https://api.mapbox.com/directions/v5/mapbox/driving/-77.034013,38.899994;-77.033757,38.903311?geometries=polyline6&steps=true&access_token=$(MAPBOX_ACCESS_TOKEN)" \
-		-o libandroid-navigation/src/test/resources/directions_v5_no_voice.json
-
-.PHONY: 1.0-core-publish-local
-1.0-core-publish-local:
+.PHONY: core-publish-local
+core-publish-local:
 	$(call run-gradle-tasks,$(CORE_MODULES),publishToMavenLocal)
 
-.PHONY: 1.0-ui-publish-local
-1.0-ui-publish-local:
+.PHONY: ui-publish-local
+ui-publish-local:
 	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal)
 
-.PHONY: 1.0-build-core-debug
-1.0-build-core-debug:
+.PHONY: build-core-debug
+build-core-debug:
 	$(call run-gradle-tasks,$(CORE_MODULES),assembleDebug)
 
-.PHONY: 1.0-build-core-release
-1.0-build-core-release:
+.PHONY: build-core-release
+build-core-release:
 	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease)
 
-.PHONY: 1.0-core-unit-tests
-1.0-core-unit-tests:
+.PHONY: core-unit-tests
+core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
-.PHONY: 1.0-core-publish-to-sdk-registry
-1.0-core-publish-to-sdk-registry:
+.PHONY: core-publish-to-sdk-registry
+core-publish-to-sdk-registry:
 	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
 
-.PHONY: 1.0-core-dependency-graph
-1.0-core-dependency-graph:
+.PHONY: core-dependency-graph
+core-dependency-graph:
 	$(call run-gradle-tasks,$(CORE_MODULES),generateDependencyGraphMapboxLibraries)
 
-.PHONY: 1.0-core-check-api
-1.0-core-check-api:
+.PHONY: core-check-api
+core-check-api:
 	./gradlew :libdirections-offboard:checkApi -PhidePackage=com.mapbox.navigation.route.offboard.internal
 	./gradlew :libdirections-hybrid:checkApi -PhidePackage=com.mapbox.navigation.route.hybrid.internal
 	./gradlew :libdirections-onboard:checkApi -PhidePackage=com.mapbox.navigation.route.onboard.internal
@@ -132,8 +92,8 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:checkApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
 	./gradlew :libnavigation-core:checkApi -PhidePackage=com.mapbox.navigation.core.internal
 
-.PHONY: 1.0-core-update-api
-1.0-core-update-api:
+.PHONY: core-update-api
+core-update-api:
 	./gradlew :libdirections-offboard:updateApi -PhidePackage=com.mapbox.navigation.route.offboard.internal
 	./gradlew :libdirections-hybrid:updateApi -PhidePackage=com.mapbox.navigation.route.hybrid.internal
 	./gradlew :libdirections-onboard:updateApi -PhidePackage=com.mapbox.navigation.route.onboard.internal
@@ -144,29 +104,29 @@ navigation-fixtures:
 	./gradlew :libtrip-notification:updateApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
 	./gradlew :libnavigation-core:updateApi -PhidePackage=com.mapbox.navigation.core.internal
 
-.PHONY: 1.0-build-ui-debug
-1.0-build-ui-debug:
+.PHONY: build-ui-debug
+build-ui-debug:
 	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug)
 
-.PHONY: 1.0-build-ui-release
-1.0-build-ui-release:
+.PHONY: build-ui-release
+build-ui-release:
 	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
 
-.PHONY: 1.0-ui-unit-tests
-1.0-ui-unit-tests:
+.PHONY: ui-unit-tests
+ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
 
-.PHONY: 1.0-ui-publish-to-sdk-registry
-1.0-ui-publish-to-sdk-registry:
+.PHONY: ui-publish-to-sdk-registry
+ui-publish-to-sdk-registry:
 	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
 
-.PHONY: 1.0-ui-check-api
-1.0-ui-check-api:
+.PHONY: ui-check-api
+ui-check-api:
 	# TODO Remove -PhideId=ReferencesHidden after fixing errors
 	./gradlew :libnavigation-ui:checkApi -PhidePackage=com.mapbox.navigation.ui.internal -PhideId=ReferencesHidden
 
-.PHONY: 1.0-ui-update-api
-1.0-ui-update-api:
+.PHONY: ui-update-api
+ui-update-api:
 	./gradlew :libnavigation-ui:updateApi -PhidePackage=com.mapbox.navigation.ui.internal
 
 .PHONY: update-metalava

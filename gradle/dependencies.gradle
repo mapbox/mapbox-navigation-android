@@ -9,7 +9,6 @@ ext {
   version = [
       mapboxMapSdk              : '9.3.0-beta.1',
       mapboxSdkServices         : '5.3.0',
-      mapboxSdkDirectionsModels : '5.3.0',
       mapboxEvents              : '6.0.0',
       mapboxCore                : '3.0.0',
       mapboxNavigator           : '16.0.0',
@@ -17,7 +16,6 @@ ext {
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
-      mapboxSearchSdk           : '0.1.0-SNAPSHOT',
       mapboxBaseAndroid         : '0.1.2',
       androidXCoreVersion       : '1.2.0',
       androidXAppCompatVersion  : '1.1.0',
@@ -31,15 +29,12 @@ ext {
       constraintLayout          : '1.1.3',
       mockito                   : '2.23.4',
       mockkVersion              : '1.10.0',
-      hamcrest                  : '2.0.0.0',
-      errorprone                : '2.3.1',
       butterknife               : '10.1.0',
       leakCanaryVersion         : '2.3',
       timber                    : '4.7.1',
       testRunnerVersion         : '1.2.0',
       orchestratorVersion       : '1.2.0',
       espressoVersion           : '3.1.0',
-      spoonRunner               : '1.6.2',
       commonsIO                 : '2.6',
       robolectric               : '4.3.1',
       mockwebserver             : '3.12.0',
@@ -49,7 +44,6 @@ ext {
       gmsLocation               : '16.0.0',
       ktlint                    : '0.36.0',
       kotlinStdLib              : '1.3.72',
-      ankoCommon                : '0.10.0',
       firebaseCrashlytics       : '17.1.0',
       multidex                  : '2.0.0',
       json                      : '20180813',
@@ -57,7 +51,6 @@ ext {
       okhttp                    : '3.12.10',
       okio                      : '2.4.3',
       androidxTestJunit         : '1.1.1',
-      barista                   : '3.2.0',
       androidxTestCore          : '1.2.0'
   ]
   dependenciesList = [
@@ -66,13 +59,12 @@ ext {
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
-      mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkDirectionsModels}",
+      mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxEvents              : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonSdk           : "com.mapbox.common:common:${version.mapboxCommonSdk}", // Workaround. Remove when upgrading Nav Native.
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
-      mapboxSearchSdk           : "com.mapbox.mapboxsdk:mapbox-search-android:${version.mapboxSearchSdk}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",
       mapboxAnnotations         : "com.mapbox.base:annotations:${version.mapboxBaseAndroid}",
@@ -82,7 +74,6 @@ ext {
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",
-      ankoCommon                : "org.jetbrains.anko:anko-common:${version.ankoCommon}",
 
       // Coroutines and Channels
       coroutinesAndroid         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${version.coroutinesAndroid}",
@@ -128,7 +119,6 @@ ext {
       leakCanaryDebug           : "com.squareup.leakcanary:leakcanary-android:${version.leakCanaryVersion}",
 
       // instrumentation test
-      testSpoonRunner           : "com.squareup.spoon:spoon-client:${version.spoonRunner}",
       testRunner                : "androidx.test:runner:${version.testRunnerVersion}",
       testOrchestrator          : "androidx.test:orchestrator:${version.orchestratorVersion}",
       testRules                 : "androidx.test:rules:${version.testRunnerVersion}",
@@ -136,13 +126,11 @@ ext {
       testEspressoContrib       : "androidx.test.espresso:espresso-contrib:${version.espressoVersion}",
       testEspressoIntents       : "androidx.test.espresso:espresso-intents:${version.espressoVersion}",
       androidxTestJunit         : "androidx.test.ext:junit:${version.androidxTestJunit}",
-      barista                   : "com.schibsted.spain:barista:${version.barista}",
 
       // unit test
       junit                     : "junit:junit:${version.junit}",
       mockito                   : "org.mockito:mockito-core:${version.mockito}",
       mockk                     : "io.mockk:mockk:${version.mockkVersion}",
-      hamcrest                  : "org.hamcrest:hamcrest-junit:${version.hamcrest}",
       commonsIO                 : "commons-io:commons-io:${version.commonsIO}",
       robolectric               : "org.robolectric:robolectric:${version.robolectric}",
       mockwebserver             : "com.squareup.okhttp3:mockwebserver:${version.mockwebserver}",
@@ -152,28 +140,19 @@ ext {
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
-      firebaseCrashlytics       : "com.google.firebase:firebase-crashlytics:${version.firebaseCrashlytics}",
-
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
-
-      errorprone                : "com.google.errorprone:error_prone_core:${version.errorprone}"
   ]
 
   pluginVersion = [
       checkstyle         : '8.2',
       pmd                : '5.8.1',
-      errorprone         : '0.0.13',
-      coveralls          : '2.8.1',
-      spotbugs           : '1.3',
       gradle             : '3.6.2',
       dependencyGraph    : '0.5.0',
-      dependencyUpdates  : '0.20.0',
+      dependencyUpdates  : '0.29.0',
       kotlin             : '1.3.72',
       license            : '0.8.5',
       jacoco             : '0.1.4',
-      playPublisher      : '2.3.0',
       googleServices     : '4.3.3',
-      firebaseCrashlytics: '2.2.0',
       mapboxSdkVersions  : '1.0.0',
       dokka              : '0.10.1',
       mapbox             : '0.2.1'
@@ -184,15 +163,10 @@ ext {
       kotlin             : "org.jetbrains.kotlin:kotlin-gradle-plugin:${pluginVersion.kotlin}",
       checkstyle         : "com.puppycrawl.tools:checkstyle:${pluginVersion.checkstyle}",
       license            : "com.jaredsburrows:gradle-license-plugin:${pluginVersion.license}",
-      spotbugs           : "gradle.plugin.com.github.spotbugs:gradlePlugin:${pluginVersion.spotbugs}",
-      coveralls          : "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${pluginVersion.coveralls}",
-      errorprone         : "net.ltgt.gradle:gradle-errorprone-plugin:${pluginVersion.errorprone}",
       dependencyGraph    : "com.vanniktech:gradle-dependency-graph-generator-plugin:${pluginVersion.dependencyGraph}",
       dependencyUpdates  : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
       jacoco             : "com.dicedmelon.gradle:jacoco-android:${pluginVersion.jacoco}",
-      playPublisher      : "com.github.triplet.gradle:play-publisher:${pluginVersion.playPublisher}",
       googleServices     : "com.google.gms:google-services:${pluginVersion.googleServices}",
-      firebaseCrashlytics: "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}",
       mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
       mapbox             : "com.mapbox.gradle:plugins:${pluginVersion.mapbox}"

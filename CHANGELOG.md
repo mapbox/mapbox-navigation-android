@@ -2,8 +2,6 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v1.0.0-beta.1 - January 24, 2020
-
 ### v0.43.0 -
 
 * Fix Javadoc Kotlin issues [#2103](https://github.com/mapbox/mapbox-navigation-android/pull/2103)

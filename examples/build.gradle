@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.github.triplet.play'
+apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
 
@@ -11,12 +11,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    playConfigs {
-        defaultAccountConfig {
-            serviceAccountCredentials = file("$project.rootDir/android-gl-native-15d95ab30d0f.json")
-        }
     }
 
     def getGitHash = { ->
@@ -79,11 +73,6 @@ android {
     lintOptions {
         abortOnError false
     }
-
-    play {
-        serviceAccountCredentials = playConfigs.defaultAccountConfig.serviceAccountCredentials
-        track = System.getenv("GOOGLE_PLAY_TRACK") ?: "internal"
-    }
 }
 
 dependencies {
@@ -96,7 +85,6 @@ dependencies {
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')
     implementation project(':libnavigation-ui')
-    implementation project(':libnavui-alert')
     implementation dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin
@@ -112,7 +100,6 @@ dependencies {
 
     // Kotlin support
     implementation dependenciesList.kotlinStdLib
-    implementation dependenciesList.ankoCommon
 
     //Coroutines
     implementation dependenciesList.coroutinesAndroid
@@ -143,7 +130,3 @@ dependencies {
         force = true
     }
 }
-
-apply from: "${rootDir}/gradle/developer-config.gradle"
-apply from: "${rootDir}/gradle/checkstyle.gradle"
-apply from: "${rootDir}/gradle/dependency-updates.gradle"
