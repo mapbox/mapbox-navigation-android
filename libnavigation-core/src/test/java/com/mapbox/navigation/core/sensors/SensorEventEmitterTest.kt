@@ -32,7 +32,7 @@ class SensorEventEmitterTest {
     @Test
     fun `should convert signals per second to sampling period microseconds`() {
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER
             )
             every { signalsPerSecond } returns 25
@@ -46,7 +46,7 @@ class SensorEventEmitterTest {
     @Test
     fun `should register multiple sensors`() {
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER_UNCALIBRATED,
                 Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED,
                 Sensor.TYPE_GYROSCOPE_UNCALIBRATED
@@ -62,7 +62,7 @@ class SensorEventEmitterTest {
     @Test
     fun `should only unregister once`() {
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER_UNCALIBRATED,
                 Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED,
                 Sensor.TYPE_GYROSCOPE_UNCALIBRATED
@@ -83,7 +83,7 @@ class SensorEventEmitterTest {
             mockSensor(Sensor.TYPE_ACCELEROMETER)
         )
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER,
                 Sensor.TYPE_GYROSCOPE
             )
@@ -98,7 +98,7 @@ class SensorEventEmitterTest {
     @Test
     fun `should emit events`() {
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER
             )
             every { signalsPerSecond } returns 25
@@ -117,7 +117,7 @@ class SensorEventEmitterTest {
     @Test
     fun `should not emit events after unregister`() {
         val sensorOptions: SensorOptions = mockk {
-            every { enabledSensorTypes } returns setOf(
+            every { enableSensorTypes } returns setOf(
                 Sensor.TYPE_ACCELEROMETER
             )
             every { signalsPerSecond } returns 25

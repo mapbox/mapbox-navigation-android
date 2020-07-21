@@ -51,17 +51,42 @@ class AutoArrivalController : ArrivalController {
  * [ArrivalController.navigateNextRouteLeg] will be called
  * @param arrivalInMeters While the next stop is less than [arrivalInMeters] away,
  * [ArrivalController.navigateNextRouteLeg] will be called
- * @param builder used for updating options
  */
-data class ArrivalOptions(
+class ArrivalOptions private constructor(
     val arrivalInSeconds: Double?,
-    val arrivalInMeters: Double?,
-    val builder: Builder
+    val arrivalInMeters: Double?
 ) {
     /**
      * @return the builder that created the [ArrivalOptions]
      */
-    fun toBuilder() = builder
+    fun toBuilder() = Builder().apply {
+        arrivalInSeconds(arrivalInSeconds)
+        arrivalInMeters(arrivalInMeters)
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ArrivalOptions
+
+        if (arrivalInSeconds != other.arrivalInSeconds) return false
+        if (arrivalInMeters != other.arrivalInMeters) return false
+
+        return true
+    }
+
+    /**
+     * Regenerate whenever a change is made
+     */
+    override fun hashCode(): Int {
+        var result = arrivalInSeconds?.hashCode() ?: 0
+        result = 31 * result + (arrivalInMeters?.hashCode() ?: 0)
+        return result
+    }
 
     /**
      * Build your [ArrivalOptions].
@@ -75,7 +100,7 @@ data class ArrivalOptions(
          * (Recommended) Use time estimation for arrival, arrival is influenced by traffic conditions.
          * Arrive when the estimated time to a stop is less than or equal to this threshold.
          */
-        fun arriveInSeconds(arriveInSeconds: Double?): Builder {
+        fun arrivalInSeconds(arriveInSeconds: Double?): Builder {
             this.arrivalInSeconds = arriveInSeconds
             return this
         }
@@ -83,7 +108,7 @@ data class ArrivalOptions(
         /**
          * Arrive when the estimated distance to a stop is less than or equal to this threshold.
          */
-        fun arriveInMeters(arriveInMeters: Double?): Builder {
+        fun arrivalInMeters(arriveInMeters: Double?): Builder {
             this.arrivalInMeters = arriveInMeters
             return this
         }
@@ -97,8 +122,7 @@ data class ArrivalOptions(
             }
             return ArrivalOptions(
                 arrivalInSeconds = arrivalInSeconds,
-                arrivalInMeters = arrivalInMeters,
-                builder = this
+                arrivalInMeters = arrivalInMeters
             )
         }
     }
