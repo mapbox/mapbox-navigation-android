@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mapbox.navigation.core">
+
+    <application>
+        <activity
+            android:name=".TripServiceActivity"
+            android:theme="@style/AppTheme" />
+    </application>
+</manifest>

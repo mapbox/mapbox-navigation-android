@@ -72,6 +72,8 @@ dependencies {
 
     testImplementation project(':libdirections-hybrid')
     testImplementation project(':libtrip-notification')
+
+    androidTestImplementation project(':libtesting-ui')
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"

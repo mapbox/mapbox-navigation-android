@@ -54,6 +54,20 @@ commands:
           name: Check codebase
           command: make check
 
+  build-module:
+    parameters:
+      module_target:
+        description: module target
+        type: string
+      variant:
+        description: debug or release
+        type: string
+    steps:
+      - run:
+          name: Build << parameters.module_target >> APK in << parameters.variant >> mode
+          command: |
+            ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
+
   build-example-app:
     parameters:
       variant:
@@ -67,11 +81,15 @@ commands:
             ./gradlew examples:assemble<< parameters.variant >>
 
   build-instrumentation-test:
+    parameters:
+      module_target:
+        description: module target
+        type: string
     steps:
       - run:
           name: Build Instrumentation Test APK
           command: |
-            ./gradlew examples:assembleAndroidTest
+            ./gradlew << parameters.module_target >>:assembleAndroidTest
 
   login-google-cloud-platform:
     steps:
@@ -329,14 +347,15 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
-# Commented out because there are no Instrumentation tests at the moment.
-# Uncomment if necessary. See https://github.com/mapbox/mapbox-navigation-android/pull/3209#issuecomment-658837053
-#      - build-example-app:
-#          variant: "Debug"
-#      - build-instrumentation-test
+      - build-module:
+          module_target: "libnavigation-core"
+          variant: "Debug"
+      - build-instrumentation-test:
+          module_target: "libnavigation-core"
       - login-google-cloud-platform
-#      - run-firebase-instrumentation:
-#          variant: "debug"
+      - run-firebase-instrumentation:
+          module_target: "libnavigation-core"
+          variant: "debug"
       - build-example-app:
           variant: "Release"
       - run-firebase-robo:
