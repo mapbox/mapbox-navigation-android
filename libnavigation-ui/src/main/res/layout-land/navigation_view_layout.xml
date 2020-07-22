@@ -29,14 +29,13 @@
 
     <com.mapbox.navigation.ui.RecenterButton
         android:id="@+id/recenterBtn"
-        style="@style/RecenterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom"
         android:visibility="invisible"
-        app:layout_anchor="@id/summaryBottomSheet"
-        app:layout_anchorGravity="top|left" />
+        app:layout_anchor="@id/feedbackLayout"
+        app:layout_anchorGravity="bottom|right"
+        style="@style/RecenterButton" />
 
     <com.mapbox.navigation.ui.map.WayNameView
         android:id="@+id/wayNameView"

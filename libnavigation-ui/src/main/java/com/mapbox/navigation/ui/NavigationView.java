@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -43,6 +44,7 @@ import com.mapbox.navigation.ui.instruction.InstructionView;
 import com.mapbox.navigation.ui.instruction.NavigationAlertView;
 import com.mapbox.navigation.ui.internal.NavigationContract;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
+import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
@@ -78,6 +80,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
+  private static final long WAY_NAME_TRANSLATIONX_DURATION = 750L;
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
@@ -427,6 +430,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     snackbar.show();
   }
 
+  @Override
+  public void onGuidanceViewChange(int left, int top, int width, int height) {
+    if (ViewUtils.isLandscape(getContext())) {
+      navigationMap.adjustLocationIconWith(new int[] { width, 0, 0, 0 });
+      ObjectAnimator animator = ObjectAnimator.ofFloat(wayNameView, "translationX", (float) width / 2);
+      animator.setDuration(WAY_NAME_TRANSLATIONX_DURATION);
+      animator.start();
+    } else {
+      navigationMap.adjustLocationIconWith(new int[] { 0, height, 0, 0 });
+    }
+  }
+
   /**
    * Should be called when this view is completely initialized.
    *
@@ -670,7 +685,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     initializeNavigationViewModel();
     initializeNavigationEventDispatcher();
     initializeNavigationPresenter();
-    initializeInstructionListListener();
+    initializeInstructionListener();
     initializeSummaryBottomSheet();
   }
 
@@ -710,8 +725,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationViewModel.initializeEventDispatcher(navigationViewEventDispatcher);
   }
 
-  private void initializeInstructionListListener() {
+  private void initializeInstructionListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationViewEventDispatcher));
+    instructionView.setGuidanceViewListener(new NavigationGuidanceViewListener(navigationPresenter));
   }
 
   private void initializeNavigationMap(MapView mapView, MapboxMap map) {

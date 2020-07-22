@@ -46,5 +46,7 @@ public interface NavigationContract {
     void updateCameraRouteOverview();
 
     void onFeedbackSent();
+
+    void onGuidanceViewChange(int left, int top, int width, int height);
   }
 }

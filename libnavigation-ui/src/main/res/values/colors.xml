@@ -102,7 +102,7 @@
 
   <!-- Default RecenterButton -->
   <color name="mapbox_recenter_button_primary">@color/mapbox_navigation_view_color_primary</color>
-  <color name="mapbox_recenter_button_secondary">@color/mapbox_navigation_view_color_accent</color>
+  <color name="mapbox_recenter_button_secondary">@color/mapbox_navigation_view_color_secondary</color>
 
   <!-- Default WayNameView -->
   <color name="mapbox_way_name_view_primary">@color/mapbox_navigation_view_color_primary</color>

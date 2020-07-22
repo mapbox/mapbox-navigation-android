@@ -99,4 +99,8 @@ class NavigationPresenter {
   void onFeedbackSent() {
     view.onFeedbackSent();
   }
+
+  void onGuidanceViewChange(int left, int top, int width, int height) {
+    view.onGuidanceViewChange(left, top, width, height);
+  }
 }

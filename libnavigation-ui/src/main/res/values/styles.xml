@@ -212,7 +212,7 @@
     <!-- Default RecenterButton style -->
     <style name="RecenterButton">
         <item name="recenterButtonPrimaryColor">?attr/navigationViewPrimary</item>
-        <item name="recenterButtonSecondaryColor">?attr/navigationViewAccent</item>
+        <item name="recenterButtonSecondaryColor">?attr/navigationViewSecondary</item>
     </style>
 
     <!-- Default WayNameView style -->

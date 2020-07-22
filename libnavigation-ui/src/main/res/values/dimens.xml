@@ -24,6 +24,7 @@
     <dimen name="instruction_layout_width">150dp</dimen>
     <dimen name="instruction_sub_layout_height">40dp</dimen>
     <dimen name="summary_bottomsheet_height">56dp</dimen>
+    <dimen name="summary_bottomsheet_shadow_height">6dp</dimen>
     <dimen name="wayname_view_height">24dp</dimen>
     <dimen name="route_overview_left_right_padding">15dp</dimen>
     <dimen name="route_overview_buffer_padding">15dp</dimen>

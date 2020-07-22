@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -114,6 +115,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private InstructionListListener instructionListListener;
+  private GuidanceViewListener guidanceViewListener;
 
   private DistanceFormatter distanceFormatter;
   private boolean isRerouting;
@@ -126,6 +128,17 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     @Override
     public void onGuidanceImageReady(@NotNull Bitmap bitmap) {
       animateShowGuidanceViewImage();
+      guidanceViewImage.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop,
+            int oldRight, int oldBottom) {
+          guidanceViewImage.removeOnLayoutChangeListener(this);
+          if (guidanceViewListener != null) {
+            guidanceViewListener.onShownAt(left, top, guidanceViewImage.getMeasuredWidth(),
+                guidanceViewImage.getMeasuredHeight());
+          }
+        }
+      });
       guidanceViewImage.setImageBitmap(bitmap);
     }
 
@@ -424,6 +437,16 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   /**
+   * Set the listener which will be called when GuidanceView visibility changes
+   *
+   * @param guidanceViewListener the listener
+   */
+  public void setGuidanceViewListener(
+      GuidanceViewListener guidanceViewListener) {
+    this.guidanceViewListener = guidanceViewListener;
+  }
+
+  /**
    * Once this view has finished inflating, it will bind the views.
    * <p>
    * It will also initialize the {@link RecyclerView} used to display the turn lanes
@@ -553,6 +576,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rerouteText = findViewById(R.id.rerouteText);
 
     guidanceViewImage = findViewById(R.id.guidanceImageView);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      guidanceViewImage.setClipToOutline(true);
+    }
 
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
     rvTurnLanes = findViewById(R.id.rvTurnLanes);
@@ -843,6 +869,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     if (guidanceViewImage.getVisibility() == VISIBLE) {
       beginGuidanceImageDelayedTransition();
       guidanceViewImage.setVisibility(GONE);
+      if (guidanceViewListener != null) {
+        guidanceViewListener.onHidden();
+      }
     }
   }
 
