@@ -367,7 +367,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun initDynamicCamera(route: DirectionsRoute) {
-        navigationMapboxMap.startCamera(route)
+        if (::navigationMapboxMap.isInitialized) {
+            navigationMapboxMap.startCamera(route)
+        }
     }
 
     public override fun onResume() {
