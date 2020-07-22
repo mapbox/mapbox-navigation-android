@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Mapbox 1.0 လမ်းညွန်ခြင်း development tookkit</string>
 
-    <string name="title_mock_navigation">စမ်းသပ်လမ်းညွှန်ခြင်း</string>
-    <string name="description_mock_navigation">စမ်းသပ်လမ်းညွန်မှုအပိုင်းကို စမ်းသပ်တည်နေရာပြengine အသုံးပြုသည်</string>
-
     <string name="settings">ချိန်ညှိမှုများ</string>
     <string name="simulate_route">လမ်းကြောင်းစမ်းသပ်သည်</string>
     <string name="language">ဘာသာစကား</string>

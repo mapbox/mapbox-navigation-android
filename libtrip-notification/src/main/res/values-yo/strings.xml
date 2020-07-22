@@ -2,8 +2,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Muu Lilọ kiri</string>
-    <string name="channel_name">Awọn iwifunni Lilọ kiri</string>
-    <string name="notification_arrival_time_format">Yọọ ni%s</string>
     <string name="eta_format">%s ETA</string>
 
     <!-- Time formatting -->

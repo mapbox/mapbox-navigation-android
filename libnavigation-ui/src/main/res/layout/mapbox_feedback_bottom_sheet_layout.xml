@@ -76,7 +76,6 @@
         tools:visibility="gone">
 
         <LinearLayout
-            android:id="@+id/guidanceIssueLayout"
             style="@style/FeedbackBottomSheetIssueListLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -98,7 +97,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/navigationIssueLayout"
             style="@style/FeedbackBottomSheetIssueListLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"

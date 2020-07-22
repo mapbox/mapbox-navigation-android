@@ -1,8 +1,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Τέλος πλοήγησης</string>
-    <string name="channel_name">Ειδοποιήσεις πλοήγησης</string>
-    <string name="notification_arrival_time_format">Άφιξη στις %s</string>
     <string name="kilometers">χλμ</string>
     <string name="meters">μ</string>
     <string name="miles">μίλια</string>

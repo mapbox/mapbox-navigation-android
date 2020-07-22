@@ -1,6 +1,4 @@
 <resources>
-    <string name="title_mock_navigation">Navigation simulée</string>
-    <string name="description_mock_navigation">Simule une session de navigation en utilisant un moteur de localisation simulée.</string>
 
     <string name="language">Langue</string>
 </resources>

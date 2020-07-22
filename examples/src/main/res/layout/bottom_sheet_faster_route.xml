@@ -49,7 +49,6 @@
         app:layout_constraintTop_toBottomOf="@id/saveMinutes">
 
         <ImageView
-            android:id="@+id/dismissIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -58,7 +57,6 @@
             app:srcCompat="@drawable/ic_dismiss"/>
 
         <TextView
-            android:id="@+id/dismiss"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
@@ -96,7 +94,6 @@
         app:layout_constraintTop_toBottomOf="@id/saveMinutes">
 
         <ImageView
-            android:id="@+id/acceptIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -105,7 +102,6 @@
             app:srcCompat="@drawable/ic_accept"/>
 
         <TextView
-            android:id="@+id/accept"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="10dp"

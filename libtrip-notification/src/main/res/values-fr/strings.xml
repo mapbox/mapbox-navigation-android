@@ -1,8 +1,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Fin de navigation</string>
-    <string name="channel_name">Notifications de navigation</string>
-    <string name="notification_arrival_time_format">Arrivée à %s</string>
     <string name="kilometers">km</string>
     <string name="meters">m</string>
     <string name="miles">mi</string>

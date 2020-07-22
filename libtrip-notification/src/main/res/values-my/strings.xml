@@ -2,6 +2,4 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">လမ်းညွန်မှုအဆုံးသတ်ပါ</string>
-    <string name="channel_name">လမ်းညွန်မှုအသိပေးခြင်းများ</string>
-    <string name="notification_arrival_time_format">%sတွင်ရောက်ရှိသည်</string>
-    </resources>
+</resources>

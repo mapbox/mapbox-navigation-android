@@ -2,8 +2,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Край на навигация</string>
-    <string name="channel_name">Нотификации от навигация</string>
-    <string name="notification_arrival_time_format">Пристигнахте на %s</string>
     <string name="eta_format">%s Пристигане</string>
 
     <!-- Time formatting -->

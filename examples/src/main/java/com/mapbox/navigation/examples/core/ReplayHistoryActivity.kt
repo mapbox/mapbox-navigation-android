@@ -43,7 +43,6 @@ import java.nio.charset.Charset.forName
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.android.synthetic.main.activity_replay_history_layout.*
-import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

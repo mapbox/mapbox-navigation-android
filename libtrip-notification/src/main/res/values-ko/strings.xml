@@ -2,8 +2,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">네비게이션 종료</string>
-    <string name="channel_name">네비게이션 알림</string>
-    <string name="notification_arrival_time_format">%s 에 도착</string>
     <!-- Hour -->
     <string name="hr">시</string>
     <!-- Minute -->

@@ -70,9 +70,6 @@
     <string name="title_instruction_view" translatable="false">InstructionView</string>
     <string name="description_instruction_view" translatable="false">Shows how to integrate InstructionView, FeedbackButton and SoundButton with the Navigation SDK.</string>
 
-    <string name="title_component_navigation" translatable="false">MapboxNavigation with UI components</string>
-    <string name="description_component_navigation" translatable="false">Shows how to use the MapboxNavigation class with UI components.</string>
-
     <string name="title_debug_navigation_kotlin" translatable="false">Debug MapboxNavigation Kotlin</string>
     <string name="description_debug_navigation_kotlin" translatable="false">Shows debug points for raw(red) and enhanced(blue) location update.</string>
 
@@ -100,7 +97,6 @@
     <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
     <string name="nav_native_history_collect" translatable="false">Collect Nav Native history</string>
     <string name="offline_version_key" translatable="false">offline_preference_key</string>
-    <string name="offline_region_download" translatable="false">offline_region_download</string>
     <string name="offline_enabled" translatable="false">offline_region_download</string>
     <string name="default_locale" translatable="false">default_for_device</string>
     <string name="default_unit_type" translatable="false">default_for_device</string>
@@ -108,10 +104,7 @@
     <string name="navigate_waypoints_next_stop" translatable="false">Next stop</string>
     <string name="play_history" translatable="false">Play history</string>
     <string name="select_history" translatable="false">Select history</string>
-    <string name="offline_region_download_title" translatable="false">Download offline region</string>
     <string name="msg_long_press_map_to_place_waypoint" translatable="false">Long press on the map to place a waypoint</string>
-    <string name="msg_tap_map_to_place_waypoint" translatable="false">Tap on the map to place a waypoint</string>
-    <string name="only_two_waypoints_supported" translatable="false">Only two waypoints are supported for this example</string>
     <string name="no_routes" translatable="false">No available routes to that destination</string>
     <string name="steps_in_route" translatable="false">There are %1$d steps in the route</string>
     <string name="route_request_failed" translatable="false">The route request failed</string>

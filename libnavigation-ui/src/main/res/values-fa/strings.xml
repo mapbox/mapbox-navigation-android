@@ -15,37 +15,10 @@
     <!-- Feedback -->
     <string name="report_feedback">ارصال بازخورد</string>
 
-    <!-- Feedback type for Bad Route -->
-    <string name="feedback_bad_route">ناکارمد یا  \n مسیر بد</string>
-
-    <!-- Feedback type for Confusing Instruction -->
-    <string name="feedback_confusing_instruction">دستورالعمل \n گیج کننده</string>
-
-    <!-- Feedback type for Missing Exit -->
-    <string name="feedback_missing_exit">فاقد \n خروجی</string>
-
-    <!-- Feedback type for Missing Road -->
-    <string name="feedback_missing_road">فاقد \n راه</string>
-
-    <!-- Feedback type for a maneuver that is Not Allowed -->
-    <string name="feedback_not_allowed">مجاز \n نیست</string>
-
-    <!-- Feedback type for Road Closed -->
-    <string name="feedback_road_closure">راه \n بسته است</string>
-
     <!-- Shown after a feedback type has been submitted -->
     <string name="feedback_submitted">بازخورد ارسال شد</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
     <string name="report_problem">گزارش خطا</string>
 
-    <!-- Test app dialog text -->
-    <string name="dropoff_dialog_text">آیا می خواهید به مسیر بعدی تغییر مسیر بدهید؟</string>
-
-    <!-- Test app dialog text start next route -->
-    <string name="dropoff_dialog_positive_text">شروع بعدی</string>
-
-    <!-- Test app dialog text cancel navigation -->
-    <string name="dropoff_dialog_negative_text">انصراف</string>
-
-    </resources>
+</resources>
