@@ -85,6 +85,7 @@ package com.mapbox.navigation.ui {
     method public void onCreate(android.os.Bundle?);
     method public void onDestroy();
     method public void onFeedbackSent();
+    method public void onGuidanceViewChange(int, int, int, int);
     method public void onLowMemory();
     method public void onMapReady(com.mapbox.mapboxsdk.maps.MapboxMap!);
     method public void onPause();
@@ -176,7 +177,7 @@ package com.mapbox.navigation.ui {
     method public void onNavigationReady(boolean);
   }
 
-  public class RecenterButton extends androidx.cardview.widget.CardView implements com.mapbox.navigation.ui.NavigationButton {
+  public class RecenterButton extends androidx.constraintlayout.widget.ConstraintLayout implements com.mapbox.navigation.ui.NavigationButton {
     ctor public RecenterButton(android.content.Context!);
     ctor public RecenterButton(android.content.Context!, android.util.AttributeSet?);
     ctor public RecenterButton(android.content.Context!, android.util.AttributeSet?, int);
@@ -362,6 +363,11 @@ package com.mapbox.navigation.ui.instruction {
     method public void onNoGuidanceImageUrl();
   }
 
+  public interface GuidanceViewListener {
+    method public void onHidden();
+    method public void onShownAt(int left, int top, int width, int height);
+  }
+
   public class InstructionView extends android.widget.RelativeLayout implements com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener androidx.lifecycle.LifecycleObserver {
     ctor public InstructionView(android.content.Context!);
     ctor public InstructionView(android.content.Context!, android.util.AttributeSet?);
@@ -376,6 +382,7 @@ package com.mapbox.navigation.ui.instruction {
     method public com.mapbox.navigation.ui.NavigationButton! retrieveFeedbackButton();
     method public com.mapbox.navigation.ui.NavigationButton! retrieveSoundButton();
     method public void setDistanceFormatter(com.mapbox.navigation.base.formatter.DistanceFormatter!);
+    method public void setGuidanceViewListener(com.mapbox.navigation.ui.instruction.GuidanceViewListener!);
     method public void setInstructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
     method public void showFeedbackBottomSheet();
     method public void showInstructionList();

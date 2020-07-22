@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+      android:id="@+id/recenterFab"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/fab_margin_bottom"
+      android:layout_marginEnd="@dimen/dimen_16dp"
+      android:layout_marginStart="@dimen/dimen_8dp"
+      android:layout_marginTop="@dimen/dimen_16dp"
+      android:contentDescription="@string/re_center"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:borderWidth="0dp"
+      app:fabSize="mini"
+      app:srcCompat="@drawable/ic_recenter" />
+
+</merge>

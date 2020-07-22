@@ -1,18 +1,18 @@
 package com.mapbox.navigation.ui;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.libnavigation.ui.R;
 
 /**
@@ -24,14 +24,12 @@ import com.mapbox.libnavigation.ui.R;
  * <p>
  * This button uses a custom {@link TranslateAnimation} with {@link OvershootInterpolator}
  * to be shown.
- *
  */
-public class RecenterButton extends CardView implements NavigationButton {
+public class RecenterButton extends ConstraintLayout implements NavigationButton {
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
   private Animation slideUpBottom;
 
-  private ImageView recenterIcon;
-  private TextView recenterText;
+  private FloatingActionButton recenterFab;
 
   private int primaryColor;
   private int secondaryColor;
@@ -47,12 +45,11 @@ public class RecenterButton extends CardView implements NavigationButton {
   public RecenterButton(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initAttributes(attrs);
-    init();
+    initialize(context);
   }
 
   /**
    * Sets visibility to VISIBLE and starts custom animation.
-   *
    */
   @Override
   public void show() {
@@ -84,7 +81,6 @@ public class RecenterButton extends CardView implements NavigationButton {
 
   /**
    * Sets visibility to INVISIBLE.
-   *
    */
   @Override
   public void hide() {
@@ -139,13 +135,29 @@ public class RecenterButton extends CardView implements NavigationButton {
   }
 
   private void setupOnClickListeners() {
-    setOnClickListener(multiOnClickListener);
+    recenterFab.setOnClickListener(multiOnClickListener);
   }
 
   private void clearListeners() {
     multiOnClickListener.clearListeners();
     multiOnClickListener = null;
-    setOnClickListener(null);
+    recenterFab.setOnClickListener(null);
+  }
+
+  /**
+   * Inflates the layout.
+   */
+  private void initialize(Context context) {
+    inflate(context, R.layout.recenter_button_layout, this);
+  }
+
+  private void bind() {
+    recenterFab = findViewById(R.id.recenterFab);
+  }
+
+  private void applyAttributes() {
+    recenterFab.setBackgroundTintList(ColorStateList.valueOf(primaryColor));
+    recenterFab.setColorFilter(secondaryColor);
   }
 
   private void initAttributes(AttributeSet attributeSet) {
@@ -158,25 +170,6 @@ public class RecenterButton extends CardView implements NavigationButton {
             R.color.mapbox_recenter_button_secondary));
 
     typedArray.recycle();
-  }
-
-  private void bind() {
-    recenterIcon = findViewById(R.id.recenterIcon);
-    recenterText = findViewById(R.id.recenterText);
-  }
-
-  private void applyAttributes() {
-    CardView recenterBtnCardView = findViewById(R.id.recenterBtnCardView);
-    recenterBtnCardView.setCardBackgroundColor(primaryColor);
-    recenterIcon.setColorFilter(secondaryColor);
-    recenterText.setTextColor(secondaryColor);
-  }
-
-  /**
-   * Inflates the layout.
-   */
-  private void init() {
-    inflate(getContext(), R.layout.recenter_btn_layout, this);
   }
 
   /**

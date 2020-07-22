@@ -30,7 +30,7 @@
         android:layout_margin="16dp"
         android:visibility="invisible"
         app:layout_anchor="@id/summaryBottomSheet"
-        app:layout_anchorGravity="top|left" />
+        app:layout_anchorGravity="top|right" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/startNavigation"
