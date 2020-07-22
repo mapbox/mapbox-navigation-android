@@ -40,7 +40,6 @@
             tools:text="250 ft" />
 
         <ImageView
-            android:id="@+id/dot"
             android:layout_width="4dp"
             android:layout_height="4dp"
             android:layout_gravity="center_vertical"

@@ -2,8 +2,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">پایان مسیر یابی</string>
-    <string name="channel_name">اعلانات مسیر یابی</string>
-    <string name="notification_arrival_time_format">فعال در %s</string>
     <string name="eta_format">%s ETA</string>
 
     <!-- Time formatting -->

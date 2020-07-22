@@ -12,28 +12,4 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">အသံပြန်ဖွင့်</string>
 
-    <!-- Feedback type for Confusing Instruction -->
-    <string name="feedback_confusing_instruction">ညွန်ကြားချက်ရှုတ်ထွေးနေသည်</string>
-
-    <!-- Feedback type for Missing Exit -->
-    <string name="feedback_missing_exit">ထွက်ပေါက်ပျောက်နေသည်</string>
-
-    <!-- Feedback type for Missing Road -->
-    <string name="feedback_missing_road">လမ်းပျောက်နေသည်</string>
-
-    <!-- Feedback type for a maneuver that is Not Allowed -->
-    <string name="feedback_not_allowed">ခွင့်ပြုချက်မရှိ</string>
-
-    <!-- Feedback type for Road Closed -->
-    <string name="feedback_road_closure">လမ်းပိတ်သွားပြီ</string>
-
-    <!-- Test app dialog text -->
-    <string name="dropoff_dialog_text">နောက်ထပ်နေရာကိုလမ်းညွန်ချက်လိုချင်ပါသလား</string>
-
-    <!-- Test app dialog text start next route -->
-    <string name="dropoff_dialog_positive_text">နောက်ထပ်တစ်ခု</string>
-
-    <!-- Test app dialog text cancel navigation -->
-    <string name="dropoff_dialog_negative_text">ပယ်ဖျက်သည်</string>
-
-    </resources>
+</resources>

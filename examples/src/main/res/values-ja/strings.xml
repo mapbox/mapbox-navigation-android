@@ -1,12 +1,6 @@
 <resources>
     <string name="app_name">Android向け 1.0 Mapbox ナビゲーション SDK</string>
 
-    <string name="title_mock_navigation">モック ナビゲーション</string>
-    <string name="description_mock_navigation">モック ロケーション エンジンを使用してナビゲーション セッションをモックします。</string>
-
-    <string name="title_component_navigation">UI コンポーネントを使用した MapboxNavigation</string>
-    <string name="description_component_navigation">UI コンポーネントを使用した MapboxNavigation</string>
-
     <string name="settings">設定</string>
     <string name="simulate_route">ルートをシミュレート</string>
     <string name="language">言語</string>

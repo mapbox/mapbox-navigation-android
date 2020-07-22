@@ -2,8 +2,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="end_navigation">Finalizar navegação</string>
-    <string name="channel_name">Notificações de navegação</string>
-    <string name="notification_arrival_time_format">Chegar às %s</string>
     <string name="eta_format">%s estimado</string>
 
     <!-- Time formatting -->

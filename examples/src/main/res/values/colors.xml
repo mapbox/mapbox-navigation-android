@@ -3,9 +3,6 @@
     <color name="colorPrimary">#2D4E73</color>
     <color name="colorPrimaryDark">#2D4E73</color>
     <color name="colorAccent">#2D4E73</color>
-    <color name="ic_launcher_background">#2D4E73</color>
-    <color name="red">#FF0000</color>
-    <color name="white">#FFFFFF</color>
 
     <!-- Custom Navigation View Colors -->
     <color name="navigation_primary_background">#FEFFFF</color>

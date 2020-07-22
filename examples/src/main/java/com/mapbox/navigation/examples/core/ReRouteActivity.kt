@@ -46,7 +46,6 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_reroute_layout.*
-import kotlinx.android.synthetic.main.activity_trip_service.mapView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

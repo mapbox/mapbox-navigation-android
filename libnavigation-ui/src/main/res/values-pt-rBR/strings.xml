@@ -12,7 +12,4 @@
     <!-- Indicates voice instructions are unmuted -->
     <string name="unmuted">Som ligado</string>
 
-    <!-- Test app dialog text cancel navigation -->
-    <string name="dropoff_dialog_negative_text">Cancelar</string>
-
-    </resources>
+</resources>
