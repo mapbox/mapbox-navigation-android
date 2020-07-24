@@ -134,7 +134,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 mapboxNavigation.setRoutes(emptyList())
             }
         }
-        initViews()
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
         localLocationEngine = LocationEngineProvider.getBestLocationEngine(applicationContext)
@@ -142,6 +141,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
         mapboxNavigation = getMapboxNavigation(mapboxNavigationOptions)
+        initViews()
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -192,6 +192,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     add(0, route)
                 })
             }
+            initNavigationButton()
 
             when (originalRoute) {
                 null -> {
@@ -218,11 +219,23 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     }
 
-    @SuppressLint("MissingPermission")
     private fun initViews() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFasterRoute)
         bottomSheetBehavior.peekHeight = 0
         fasterRouteAcceptProgress.max = maxProgress.toInt()
+        dismissLayout.setOnClickListener {
+            fasterRouteSelectionTimer.onFinish()
+        }
+        acceptLayout.setOnClickListener { _ ->
+            fasterRoutes.takeIf { it.isNotEmpty() }?.let { newRoutes ->
+                mapboxNavigation.setRoutes(newRoutes)
+                fasterRouteSelectionTimer.onFinish()
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun initNavigationButton() {
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
@@ -232,15 +245,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 initDynamicCamera(routes[0])
             }
             navigationMapboxMap.showAlternativeRoutes(false)
-        }
-        dismissLayout.setOnClickListener {
-            fasterRouteSelectionTimer.onFinish()
-        }
-        acceptLayout.setOnClickListener { _ ->
-            fasterRoutes.takeIf { it.isNotEmpty() }?.let { newRoutes ->
-                mapboxNavigation.setRoutes(newRoutes)
-                fasterRouteSelectionTimer.onFinish()
-            }
         }
     }
 
