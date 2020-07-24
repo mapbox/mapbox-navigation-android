@@ -4,13 +4,15 @@ If you have a usage question pertaining to the Mapbox Navigation SDK for Android
 
 If you want to contribute code:
 
-1. Please familiarize yourself with the [install process](https://www.mapbox.com/android-docs/navigation/overview/#install-the-navigation-sdk).
+1. Ensure that existing [pull requests](https://github.com/mapbox/mapbox-navigation-android/pulls) and [issues](https://github.com/mapbox/mapbox-navigation-android/issues) don’t already cover your contribution or question.
 
-2. Ensure that existing [pull requests](https://github.com/mapbox/mapbox-navigation-android/pulls) and [issues](https://github.com/mapbox/mapbox-navigation-android/issues) don’t already cover your contribution or question.
+2. Add an `SDK_REGISTRY_TOKEN` gradle property or env variable with a **secret token**. The token needs to have the `DOWNLOADS:READ` scope. You can obtain the token from your [Mapbox Account page](https://account.mapbox.com/access-tokens/).
 
-3. Pull requests are gladly accepted. If there are any changes that developers should be aware of, please update the [change log](CHANGELOG.md)
+3. Add your **public token** to `examples/src/main/res/values/mapbox-access-token.xml` to be able to run the examples app. You can obtain the token from your [Mapbox Account page](https://account.mapbox.com/access-tokens/).
 
-4. Mapbox uses checkstyle and ktlint to enforce good code standards. Make sure to read the [codestyle setup](./docs/codestyle-setup.md). CI will fail if your PR contains any mistakes.
+4. Pull requests are gladly accepted. If there are any changes that developers should be aware of, please update the [change log](CHANGELOG.md)
+
+5. Mapbox uses checkstyle and ktlint to enforce good code standards. Make sure to read the [codestyle setup](./docs/codestyle-setup.md). CI will fail if your PR contains any mistakes.
 
 ## Adding or updating a localization
 
