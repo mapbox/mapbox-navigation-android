@@ -170,6 +170,7 @@ ext {
       googleServices     : "com.google.gms:google-services:${pluginVersion.googleServices}",
       mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
-      mapbox             : "com.mapbox.gradle:plugins:${pluginVersion.mapbox}"
+      mapboxSdkRegistry  : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapbox}",
+      mapboxAccessToken  : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapbox}"
   ]
 }
