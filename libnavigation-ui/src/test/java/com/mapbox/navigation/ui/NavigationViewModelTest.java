@@ -22,46 +22,12 @@ public class NavigationViewModelTest {
   public void stopNavigation_progressListenersAreRemoved() {
     Application application = mock(Application.class);
     MapboxNavigation navigation = mock(MapboxNavigation.class);
-    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
-    MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
     NavigationViewOptions mockNavigationViewOptions = mock(NavigationViewOptions.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-        mapOfflineManager, mockNavigationViewOptions);
+    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockNavigationViewOptions);
 
     viewModel.stopNavigation();
 
     verify(navigation, times(1)).stopTripSession();
-  }
-
-  @Test
-  public void stopNavigation_mapOfflineManagerOnDestroyIsCalledIfNotNull() {
-    Application application = mock(Application.class);
-    MapboxNavigation navigation = mock(MapboxNavigation.class);
-    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
-    MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
-    NavigationViewOptions mockNavigationViewOptions = mock(NavigationViewOptions.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-            mapOfflineManager, mockNavigationViewOptions);
-
-    viewModel.onDestroy(false);
-
-    verify(mapOfflineManager).onDestroy();
-  }
-
-  @Test
-  public void stopNavigation_mapConnectivityControllerStateIsReset() {
-    Application application = mock(Application.class);
-    MapboxNavigation navigation = mock(MapboxNavigation.class);
-    NavigationViewOptions mockNavigationViewOptions = mock(NavigationViewOptions.class);
-    MapConnectivityController mockedConnectivityController = mock(MapConnectivityController.class);
-    MapOfflineManager mapOfflineManager = mock(MapOfflineManager.class);
-    NavigationViewModel viewModel = new NavigationViewModel(application, navigation, mockedConnectivityController,
-            mapOfflineManager, mockNavigationViewOptions);
-    Boolean defaultState = null;
-
-    viewModel.onDestroy(false);
-
-    verify(mockedConnectivityController).assign(eq(defaultState));
   }
 
   @Test

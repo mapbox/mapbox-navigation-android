@@ -21,15 +21,6 @@ public abstract class NavigationUiOptions {
   public abstract boolean waynameChipEnabled();
 
   @Nullable
-  public abstract String offlineRoutingTilesPath();
-
-  @Nullable
-  public abstract String offlineRoutingTilesVersion();
-
-  @Nullable
-  public abstract MapOfflineOptions offlineMapOptions();
-
-  @Nullable
   public abstract Camera camera();
 
   @Nullable
