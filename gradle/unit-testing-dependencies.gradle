@@ -4,4 +4,5 @@ dependencies {
     testImplementation dependenciesList.coroutinesTestAndroid
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
+    testImplementation dependenciesList.kotlinReflect
 }

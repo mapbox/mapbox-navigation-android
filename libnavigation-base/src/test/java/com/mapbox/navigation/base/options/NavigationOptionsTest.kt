@@ -18,8 +18,10 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
-import java.lang.reflect.Modifier
-import kotlin.reflect.jvm.javaConstructor
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KProperty
+import kotlin.reflect.KVisibility
+import kotlin.reflect.jvm.javaType
 
 class NavigationOptionsTest {
 
@@ -48,8 +50,59 @@ class NavigationOptionsTest {
     }
 
     @Test
+    fun impl_onlyOneConstructor() {
+        Assert.assertEquals(1, implClass.constructors.size)
+    }
+
+    @Test
+    fun builder_onlyOneConstructor() {
+        Assert.assertEquals(1, builderClass.constructors.size)
+    }
+
+    @Test
+    fun impl_allConstructorsArePrivate() {
+        Assert.assertTrue(implClass.constructors.all { it.visibility == KVisibility.PRIVATE })
+    }
+
+    @Test
     fun impl_allFieldsAreVals() {
-        implClass.constructors.all { it.javaConstructor!!.modifiers == Modifier.PRIVATE }
+        Assert.assertTrue(implClass.members.filterIsInstance<KProperty<*>>().all { it !is KMutableProperty })
+    }
+
+    @Test
+    fun builder_allConstructorsArePrivate() {
+        Assert.assertTrue(builderClass.constructors.all { it.visibility == KVisibility.PRIVATE })
+    }
+
+    @Test
+    fun builder_hasNoPublicFields() {
+        val publicFields = builderClass.members.filter { it is KProperty<*> && it.visibility != KVisibility.PRIVATE }
+        Assert.assertEquals("there should be no public fields", 0, publicFields.size)
+    }
+
+    @Test
+    fun equals() {
+        val requiredFieldNames = builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.name }
+        val requiredFieldTypes = builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.returnType }
+        val requiredArgumentInstances = getOptionalArgumentInstances()
+        requiredFieldTypes.forEachIndexed { index, kType ->
+            Assert.assertEquals("required argument $index is incorrect", kType.javaType.typeName, requiredArgumentInstances[index]::class.java.simpleName)
+        }
+
+        val optionalFieldNames = builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.name }
+        val optionalFieldTypes = builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.returnType }
+        val optionalArgumentInstances = getOptionalArgumentInstances()
+        optionalFieldTypes.forEachIndexed { index, kType ->
+            Assert.assertEquals("optional argument $index is incorrect", kType.javaType.typeName, optionalArgumentInstances[index]::class.java.simpleName)
+        }
+    }
+
+    private fun getOptionalArgumentInstances() : List<Any> {
+        return listOf(mockk<Context>())
+    }
+
+    private fun getOptionalRequiredArgumentInstances() : List<Any> {
+        return emptyList()
     }
 
     @Test
