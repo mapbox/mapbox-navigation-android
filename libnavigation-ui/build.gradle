@@ -115,6 +115,7 @@ dependencies {
   testImplementation dependenciesList.robolectric
   testImplementation dependenciesList.json
   testImplementation dependenciesList.androidxTestCore
+  testImplementation dependenciesList.mockwebserver
   testImplementation dependenciesList.coroutinesTestAndroid
   testImplementation project(':libtesting-utils')
 }
