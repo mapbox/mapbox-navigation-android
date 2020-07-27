@@ -7,10 +7,12 @@ import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import kotlin.reflect.KClass
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -18,21 +20,40 @@ import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 
-class NavigationOptionsTest {
+class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 
-    val context: Context = mockk()
+    private val context: Context = mockk()
 
     @Before
     fun setup() {
         every { context.applicationContext } returns context
 
         mockkStatic(LocationEngineProvider::class)
-        every { LocationEngineProvider.getBestLocationEngine(context) } returns mockk()
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
     }
 
     @After
     fun teardown() {
         unmockkStatic(LocationEngineProvider::class)
+    }
+
+    override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
+
+    override fun getFilledUpBuilder(): NavigationOptions.Builder {
+        val context = mockk<Context>()
+        val appContext = mockk<Context>(relaxed = true)
+        every { appContext.applicationContext } returns appContext
+        every { context.applicationContext } returns appContext
+        return NavigationOptions.Builder(context)
+            .accessToken("pk.123")
+            .deviceProfile(mockk())
+            .distanceFormatter(mockk())
+            .isDebugLoggingEnabled(true)
+            .isFromNavigationUi(true)
+            .locationEngine(mockk())
+            .navigatorPredictionMillis(1)
+            .onboardRouterOptions(mockk())
+            .timeFormatType(1)
     }
 
     @Test
