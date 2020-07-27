@@ -74,6 +74,7 @@ ext {
 
       // Kotlin
       kotlinStdLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version.kotlinStdLib}",
+      kotlinReflect             : "org.jetbrains.kotlin:kotlin-reflect:${version.kotlinStdLib}",
 
       // Coroutines and Channels
       coroutinesAndroid         : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${version.coroutinesAndroid}",
