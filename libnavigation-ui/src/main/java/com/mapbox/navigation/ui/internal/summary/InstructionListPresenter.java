@@ -5,6 +5,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
 
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.LegStep;
@@ -27,7 +28,6 @@ class InstructionListPresenter {
   private static final int FIRST_INSTRUCTION_INDEX = 0;
   private DistanceFormatter distanceFormatter;
   private List<BannerInstructions> instructions;
-  private RouteLeg currentLeg;
   private String drivingSide;
 
   InstructionListPresenter(DistanceFormatter distanceFormatter) {
@@ -46,9 +46,16 @@ class InstructionListPresenter {
     return instructions.size();
   }
 
-  boolean updateBannerListWith(RouteProgress routeProgress) {
-    addBannerInstructions(routeProgress);
-    return updateInstructionList(routeProgress);
+  void update(RouteProgress routeProgress, InstructionListAdapter adapter) {
+    drivingSide = getDrivingSide(routeProgress);
+    final List<BannerInstructions> routeInstructions = getBannerInstructionsFromRouteProgress(routeProgress);
+    final List<BannerInstructions> filteredRouteInstructions = filterListAfterStep(routeProgress, routeInstructions);
+
+    final List<BannerInstructions> oldItems = new ArrayList<>(instructions);
+    final DiffUtil.DiffResult result = DiffUtil.calculateDiff(getDiffCallback(oldItems, filteredRouteInstructions));
+    instructions.clear();
+    instructions.addAll(filteredRouteInstructions);
+    result.dispatchUpdatesTo(adapter);
   }
 
   void updateDistanceFormatter(DistanceFormatter distanceFormatter) {
@@ -111,56 +118,53 @@ class InstructionListPresenter {
     listView.updateManeuverViewDrivingSide(drivingSide);
   }
 
-  private void addBannerInstructions(RouteProgress routeProgress) {
-    if (isNewLeg(routeProgress)) {
-      instructions = new ArrayList<>();
-      currentLeg = routeProgress.getCurrentLegProgress().getRouteLeg();
-      if (routeProgress.getCurrentLegProgress().getCurrentStepProgress() != null
-          && routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep() != null) {
-        drivingSide = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep().drivingSide();
-      }
-      if (currentLeg != null) {
-        List<LegStep> steps = currentLeg.steps();
+  private String getDrivingSide(final RouteProgress routeProgress) {
+    if (routeProgress.getCurrentLegProgress().getCurrentStepProgress() != null
+            && routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep() != null) {
+      return routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep().drivingSide();
+    } else {
+      return "";
+    }
+  }
+
+  private List<BannerInstructions> getBannerInstructionsFromRouteProgress(final RouteProgress routeProgress) {
+    final List<BannerInstructions> instructions = new ArrayList<>();
+    final RouteLeg routeLeg = routeProgress.getCurrentLegProgress().getRouteLeg();
+    if (routeLeg != null) {
+      final List<LegStep> steps = routeLeg.steps();
+      if (steps != null) {
         for (LegStep step : steps) {
-          List<BannerInstructions> bannerInstructions = step.bannerInstructions();
-          if (bannerInstructions != null && !bannerInstructions.isEmpty()) {
+          final List<BannerInstructions> bannerInstructions = step.bannerInstructions();
+          if (bannerInstructions != null) {
             instructions.addAll(bannerInstructions);
           }
         }
       }
     }
+    return instructions;
   }
 
-  private boolean isNewLeg(RouteProgress routeProgress) {
-    return currentLeg == null || !currentLeg.equals(routeProgress.getCurrentLegProgress());
-  }
-
-  private boolean updateInstructionList(RouteProgress routeProgress) {
-    if (instructions.isEmpty()) {
-      return false;
-    }
-    RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
-    LegStep currentStep = legProgress.getCurrentStepProgress().getStep();
-    double stepDistanceRemaining = legProgress.getCurrentStepProgress().getDistanceRemaining();
-    BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
-        currentStep, stepDistanceRemaining
+  private List<BannerInstructions> filterListAfterStep(
+          final RouteProgress routeProgress,
+          final List<BannerInstructions> bannerInstructions
+  ) {
+    final RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
+    final LegStep currentStep = legProgress.getCurrentStepProgress().getStep();
+    final double stepDistanceRemaining = legProgress.getCurrentStepProgress().getDistanceRemaining();
+    final BannerInstructions currentBannerInstructions = findCurrentBannerInstructions(
+            currentStep, stepDistanceRemaining
     );
-    if (!instructions.contains(currentBannerInstructions)) {
-      return false;
-    }
-    int currentInstructionIndex = instructions.indexOf(currentBannerInstructions);
-    return removeInstructionsFrom(currentInstructionIndex);
-  }
 
-  private boolean removeInstructionsFrom(int currentInstructionIndex) {
-    if (currentInstructionIndex == FIRST_INSTRUCTION_INDEX) {
-      instructions.remove(FIRST_INSTRUCTION_INDEX);
-      return true;
-    } else if (currentInstructionIndex <= instructions.size()) {
-      instructions.subList(FIRST_INSTRUCTION_INDEX, currentInstructionIndex).clear();
-      return true;
+    if (!bannerInstructions.contains(currentBannerInstructions)) {
+      return bannerInstructions;
+    } else {
+      int currentInstructionIndex = bannerInstructions.indexOf(currentBannerInstructions);
+      if (currentInstructionIndex + 1 <= bannerInstructions.size()) {
+        return bannerInstructions.subList(currentInstructionIndex + 1, bannerInstructions.size());
+      } else {
+        return new ArrayList<>();
+      }
     }
-    return false;
   }
 
   /**
@@ -193,12 +197,45 @@ class InstructionListPresenter {
 
   private List<BannerInstructions> sortBannerInstructions(List<BannerInstructions> instructions) {
     List<BannerInstructions> sortedInstructions = new ArrayList<>(instructions);
-    Collections.sort(sortedInstructions, new Comparator<BannerInstructions>() {
-      @Override
-      public int compare(BannerInstructions instructions, BannerInstructions nextInstructions) {
-        return Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
-      }
-    });
+    Collections.sort(sortedInstructions, bannerInstructionsComparator);
     return sortedInstructions;
+  }
+
+  private Comparator<BannerInstructions> bannerInstructionsComparator = (
+          instructions,
+          nextInstructions
+  ) -> Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
+
+  private DiffUtil.Callback getDiffCallback(
+          final List<BannerInstructions> oldItems,
+          final List<BannerInstructions> updatedInstructions
+  ) {
+    return new DiffUtil.Callback() {
+      @Override
+      public int getOldListSize() {
+        return oldItems.size();
+      }
+
+      @Override
+      public int getNewListSize() {
+        return updatedInstructions.size();
+      }
+
+      @Override
+      public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+        return bannerInstructionsComparator.compare(
+                oldItems.get(oldItemPosition),
+                updatedInstructions.get(newItemPosition)
+        ) == 0;
+      }
+
+      @Override
+      public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+        return bannerInstructionsComparator.compare(
+                oldItems.get(oldItemPosition),
+                updatedInstructions.get(newItemPosition)
+        ) == 0;
+      }
+    };
   }
 }

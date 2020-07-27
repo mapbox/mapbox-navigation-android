@@ -52,9 +52,8 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   }
 
   public void updateBannerListWith(RouteProgress routeProgress, boolean isListShowing) {
-    boolean didUpdate = presenter.updateBannerListWith(routeProgress);
-    if (didUpdate && isListShowing) {
-      notifyDataSetChanged();
+    if (isListShowing) {
+      presenter.update(routeProgress, this);
     }
   }
 
