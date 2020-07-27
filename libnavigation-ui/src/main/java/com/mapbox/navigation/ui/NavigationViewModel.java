@@ -2,7 +2,6 @@ package com.mapbox.navigation.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
@@ -19,7 +18,6 @@ import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.offline.OfflineManager;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
@@ -84,8 +82,6 @@ public class NavigationViewModel extends AndroidViewModel {
   private DistanceFormatter distanceFormatter;
   private String accessToken;
   private boolean isRunning;
-  private MapConnectivityController connectivityController;
-  private MapOfflineManager mapOfflineManager;
   private NavigationViewModelProgressObserver navigationProgressObserver =
       new NavigationViewModelProgressObserver(this);
 
@@ -95,16 +91,12 @@ public class NavigationViewModel extends AndroidViewModel {
   public NavigationViewModel(Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
-    this.connectivityController = new MapConnectivityController();
   }
 
   @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,
-      MapConnectivityController connectivityController, MapOfflineManager mapOfflineManager,
       NavigationViewOptions navigationViewOptions) {
     super(application);
     this.navigation = navigation;
-    this.connectivityController = connectivityController;
-    this.mapOfflineManager = mapOfflineManager;
     this.navigationViewOptions = navigationViewOptions;
   }
 
@@ -120,7 +112,6 @@ public class NavigationViewModel extends AndroidViewModel {
   public void onDestroy(boolean isChangingConfigurations) {
     if (!isChangingConfigurations) {
       endNavigation();
-      destroyMapOffline();
       deactivateInstructionPlayer();
       isRunning = false;
     }
@@ -197,7 +188,6 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
-      initializeMapOfflineManager(options);
     }
     navigation.setRoutes(Arrays.asList(options.directionsRoute()));
     navigation.startTripSession();
@@ -340,23 +330,6 @@ public class NavigationViewModel extends AndroidViewModel {
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 
-  private void initializeMapOfflineManager(NavigationViewOptions options) {
-    MapOfflineOptions mapOfflineOptions = options.offlineMapOptions();
-    if (mapOfflineOptions == null) {
-      return;
-    }
-    String mapStyleUrl = mapOfflineOptions.getStyleUrl();
-    Context applicationContext = getApplication().getApplicationContext();
-    OfflineManager offlineManager = OfflineManager.getInstance(applicationContext);
-    float pixelRatio = applicationContext.getResources().getDisplayMetrics().density;
-    OfflineRegionDefinitionProvider definitionProvider = new OfflineRegionDefinitionProvider(mapStyleUrl, pixelRatio);
-    OfflineMetadataProvider metadataProvider = new OfflineMetadataProvider();
-    RegionDownloadCallback regionDownloadCallback = new RegionDownloadCallback(connectivityController);
-    mapOfflineManager = new MapOfflineManager(offlineManager, definitionProvider, metadataProvider,
-        connectivityController, regionDownloadCallback);
-    navigation.registerRouteProgressObserver(mapOfflineManager);
-  }
-
   private void initializeVoiceInstructionLoader() {
     Cache cache = new Cache(new File(getApplication().getCacheDir(), OKHTTP_INSTRUCTION_CACHE),
         TEN_MEGABYTE_CACHE_SIZE);
@@ -482,13 +455,6 @@ public class NavigationViewModel extends AndroidViewModel {
         ((DynamicCamera) cameraEngine).clearMap();
       }
     }
-  }
-
-  private void destroyMapOffline() {
-    if (mapOfflineManager != null) {
-      mapOfflineManager.onDestroy();
-    }
-    connectivityController.assign(null);
   }
 
   private void deactivateInstructionPlayer() {

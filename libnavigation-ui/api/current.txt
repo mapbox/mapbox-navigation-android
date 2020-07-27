@@ -28,12 +28,6 @@ package com.mapbox.navigation.ui {
     method public void updateStyle(@StyleRes int);
   }
 
-  public class MapOfflineOptions {
-    ctor public MapOfflineOptions(String, String);
-    method public String getDatabasePath();
-    method public String getStyleUrl();
-  }
-
   public interface NavigationButton {
     method public void addOnClickListener(android.view.View.OnClickListener!);
     method public void hide();
@@ -68,9 +62,6 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.api.directions.v5.models.DirectionsRoute! directionsRoute();
     method public abstract Integer? lightThemeResId();
     method public abstract boolean muteVoiceGuidance();
-    method public abstract com.mapbox.navigation.ui.MapOfflineOptions? offlineMapOptions();
-    method public abstract String? offlineRoutingTilesPath();
-    method public abstract String? offlineRoutingTilesVersion();
     method public abstract com.mapbox.navigation.ui.puck.PuckDrawableSupplier? puckDrawableSupplier();
     method public abstract boolean shouldSimulateRoute();
     method public abstract boolean waynameChipEnabled();
@@ -172,9 +163,6 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! muteVoiceGuidance(boolean);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationListener(com.mapbox.navigation.ui.listeners.NavigationListener!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! navigationOptions(com.mapbox.navigation.base.options.NavigationOptions!);
-    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineMapOptions(com.mapbox.navigation.ui.MapOfflineOptions!);
-    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineRoutingTilesPath(String!);
-    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! offlineRoutingTilesVersion(String!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! puckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! roundingIncrement(@com.mapbox.navigation.core.Rounding.Increment Integer!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! routeProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver!);
