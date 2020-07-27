@@ -351,12 +351,15 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void showInstructionList() {
     onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
-    beginDelayedListTransition();
     if (ViewUtils.isLandscape(getContext())) {
       updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
       rerouteLayout.setBackgroundColor(secondaryBackgroundColor);
     }
+
+    final Animation animation = AnimationUtils.loadAnimation(this.getContext(), R.anim.instruction_view_fade_in);
+    animation.setAnimationListener(getInstructionListAnimationListener());
     instructionListLayout.setVisibility(VISIBLE);
+    instructionListLayout.startAnimation(animation);
   }
 
   public boolean handleBackPressed() {
@@ -906,12 +909,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     TransitionManager.beginDelayedTransition(this, transition);
   }
 
-  private void beginDelayedListTransition() {
-    AutoTransition transition = new AutoTransition();
-    transition.addListener(new InstructionListTransitionListener(rvInstructions, instructionListAdapter));
-    TransitionManager.beginDelayedTransition(this, transition);
-  }
-
   private void cancelDelayedTransition() {
     clearAnimation();
   }
@@ -1051,5 +1048,21 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     } else {
       return ManeuverModifier.RIGHT;
     }
+  }
+
+  private Animation.AnimationListener getInstructionListAnimationListener() {
+    return new Animation.AnimationListener() {
+      @Override
+      public void onAnimationStart(Animation animation) {}
+
+      @Override
+      public void onAnimationEnd(Animation animation) {
+        rvInstructions.stopScroll();
+        rvInstructions.smoothScrollToPosition(0);
+      }
+
+      @Override
+      public void onAnimationRepeat(Animation animation) {}
+    };
   }
 }
