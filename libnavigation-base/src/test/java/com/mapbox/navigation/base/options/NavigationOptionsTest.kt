@@ -12,15 +12,21 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import java.lang.reflect.Modifier
+import kotlin.reflect.jvm.javaConstructor
 
 class NavigationOptionsTest {
 
     val context: Context = mockk()
+
+    val implClass = NavigationOptions::class
+    val builderClass = implClass.nestedClasses.find { it.simpleName == "Builder" }!!
 
     @Before
     fun setup() {
@@ -33,6 +39,17 @@ class NavigationOptionsTest {
     @After
     fun teardown() {
         unmockkStatic(LocationEngineProvider::class)
+    }
+
+    @Test
+    fun isNotDataClass() {
+        Assert.assertFalse(implClass.isData)
+        Assert.assertFalse(builderClass.isData)
+    }
+
+    @Test
+    fun impl_allFieldsAreVals() {
+        implClass.constructors.all { it.javaConstructor!!.modifiers == Modifier.PRIVATE }
     }
 
     @Test
