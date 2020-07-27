@@ -417,7 +417,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   public void toggleGuidanceView(@Nullable BannerInstructions bannerInstructions) {
     if (bannerInstructions != null && guidanceViewImageProvider != null) {
-      guidanceViewImageProvider.renderGuidanceView(bannerInstructions, getContext(), callback);
+      guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback);
     } else {
       animateHideGuidanceViewImage();
     }

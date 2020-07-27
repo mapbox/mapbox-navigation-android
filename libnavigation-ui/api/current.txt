@@ -348,8 +348,8 @@ package com.mapbox.navigation.ui.instruction {
 
   public final class GuidanceViewImageProvider {
     ctor public GuidanceViewImageProvider();
-    method public void cancelRender(android.content.Context context);
-    method public void renderGuidanceView(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions, android.content.Context context, com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.OnGuidanceImageDownload callback);
+    method public void cancelRender();
+    method public void renderGuidanceView(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions, com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.OnGuidanceImageDownload callback);
     field public static final com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.Companion! Companion;
   }
 

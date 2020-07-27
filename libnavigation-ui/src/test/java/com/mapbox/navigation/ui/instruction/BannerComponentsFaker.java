@@ -19,4 +19,20 @@ class BannerComponentsFaker {
       .abbreviation("abbreviation text")
       .build();
   }
+
+  static BannerComponents bannerComponentsWithNullGuidanceUrl() {
+    return BannerComponents.builder()
+            .type("guidance-view")
+            .text("some text")
+            .imageUrl(null)
+            .build();
+  }
+
+  static BannerComponents bannerComponentsWithGuidanceUrlNoAccessToken(String path) {
+    return BannerComponents.builder()
+            .type("guidance-view")
+            .text("some text")
+            .imageUrl(path)
+            .build();
+  }
 }
