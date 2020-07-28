@@ -737,10 +737,10 @@ class MapboxNavigation(
          */
         @JvmStatic
         fun defaultNavigationOptionsBuilder(context: Context, accessToken: String?): NavigationOptions.Builder {
-            val distanceFormatter = MapboxDistanceFormatter.builder()
-                .withUnitType(VoiceUnit.UNDEFINED)
-                .withRoundingIncrement(Rounding.INCREMENT_FIFTY)
-                .build(context)
+            val distanceFormatter = MapboxDistanceFormatter.Builder(context)
+                .unitType(VoiceUnit.UNDEFINED)
+                .roundingIncrement(Rounding.INCREMENT_FIFTY)
+                .build()
             return NavigationOptions.Builder(context)
                 .accessToken(accessToken)
                 .distanceFormatter(distanceFormatter)

@@ -54,6 +54,23 @@ class RouteProgress private constructor(
 ) {
 
     /**
+     * @return builder matching the one used to create this instance
+     */
+    fun toBuilder() = Builder(route)
+        .routeGeometryWithBuffer(routeGeometryWithBuffer)
+        .bannerInstructions(bannerInstructions)
+        .voiceInstructions(voiceInstructions)
+        .currentState(currentState)
+        .currentLegProgress(currentLegProgress)
+        .upcomingStepPoints(upcomingStepPoints)
+        .inTunnel(inTunnel)
+        .distanceRemaining(distanceRemaining)
+        .distanceTraveled(distanceTraveled)
+        .durationRemaining(durationRemaining)
+        .fractionTraveled(fractionTraveled)
+        .remainingWaypoints(remainingWaypoints)
+
+    /**
      * Regenerate whenever a change is made
      */
     override fun equals(other: Any?): Boolean {
@@ -99,11 +116,16 @@ class RouteProgress private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "RouteProgress(route=$route, routeGeometryWithBuffer=$routeGeometryWithBuffer, bannerInstructions=$bannerInstructions, voiceInstructions=$voiceInstructions, currentState=$currentState, currentLegProgress=$currentLegProgress, upcomingStepPoints=$upcomingStepPoints, inTunnel=$inTunnel, distanceRemaining=$distanceRemaining, distanceTraveled=$distanceTraveled, durationRemaining=$durationRemaining, fractionTraveled=$fractionTraveled, remainingWaypoints=$remainingWaypoints)"
+    }
+
     /**
      * Builder for [RouteProgress]
+     *
+     * @param route [DirectionsRoute] currently is used for the navigation session
      */
-    class Builder {
-        private var directionsRoute: DirectionsRoute? = null
+    class Builder(private val route: DirectionsRoute) {
         private var routeGeometryWithBuffer: Geometry? = null
         private var bannerInstructions: BannerInstructions? = null
         private var voiceInstructions: VoiceInstructions? = null
@@ -116,16 +138,6 @@ class RouteProgress private constructor(
         private var durationRemaining: Double = 0.0
         private var fractionTraveled: Float = 0f
         private var remainingWaypoints: Int = 0
-
-        /**
-         * [DirectionsRoute] currently is used for the navigation session
-         *
-         * This is required in order to build a [RouteProgress]
-         *
-         * @return Builder
-         */
-        fun route(route: DirectionsRoute) =
-            apply { this.directionsRoute = route }
 
         /**
          * Current [DirectionsRoute] geometry with a buffer
@@ -170,7 +182,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun currentLegProgress(legProgress: RouteLegProgress) =
+        fun currentLegProgress(legProgress: RouteLegProgress?) =
             apply { this.currentLegProgress = legProgress }
 
         /**
@@ -237,7 +249,7 @@ class RouteProgress private constructor(
          */
         fun build(): RouteProgress {
             return RouteProgress(
-                requireNotNull(directionsRoute) { "DirectionsRoute is required to build a RouteProgress." },
+                route,
                 routeGeometryWithBuffer,
                 bannerInstructions,
                 voiceInstructions,

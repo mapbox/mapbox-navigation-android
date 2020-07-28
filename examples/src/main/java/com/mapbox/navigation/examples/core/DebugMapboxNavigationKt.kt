@@ -61,6 +61,7 @@ import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
 import java.io.File
 import java.lang.ref.WeakReference
+import java.net.URI
 import java.util.Date
 import java.util.Locale
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
@@ -142,7 +143,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
-                .tilesUri("https://api-routing-tiles-staging.tilestream.net")
+                .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
                 .tilesVersion("2020_02_02-03_00_00")
                 .build())
             .navigatorPredictionMillis(1000L)

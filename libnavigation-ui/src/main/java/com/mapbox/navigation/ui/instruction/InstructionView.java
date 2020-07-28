@@ -525,11 +525,11 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     final String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getContext()));
     final int roundingIncrement = Rounding.INCREMENT_FIFTY;
     final Locale locale = ContextEx.inferDeviceLocale(getContext());
-    distanceFormatter = new MapboxDistanceFormatter.Builder()
-        .withUnitType(unitType)
-        .withRoundingIncrement(roundingIncrement)
-        .withLocale(locale)
-        .build(getContext());
+    distanceFormatter = new MapboxDistanceFormatter.Builder(getContext())
+        .unitType(unitType)
+        .roundingIncrement(roundingIncrement)
+        .locale(locale)
+        .build();
     inflate(getContext(), R.layout.instruction_view_layout, this);
   }
 

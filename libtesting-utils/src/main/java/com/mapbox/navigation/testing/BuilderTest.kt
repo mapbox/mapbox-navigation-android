@@ -12,6 +12,122 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.isAccessible
 
+/**
+ * Abstract test class that each implementation that follows a builder pattern should implement in a unit test.
+ *
+ * You can read more about the design goals in https://github.com/mapbox/mapbox-navigation-android/issues/2709.
+ *
+ * A target pattern looks more-or-less like this:
+ * ``` kotlin
+ * /**
+ *  * Description of the RequiredExample. This is a data class because it is responsible for
+ *  * transporting data values.
+ *  *
+ *  * @param required description of what to expect from required
+ *  * @param foo description of what to expect from foo
+ *  * @param bar description of what to expect from bar
+ *  */
+ * class Example private constructor(
+ *     val required: String, // required
+ *     val foo: String, // optional with default value
+ *     val bar: Int? // optional without default value
+ * ) {
+ *     /**
+ *      * @return the builder that created the [Example]
+ *      */
+ *     fun toBuilder() = Builder(required).also {
+ *         it.foo(this.foo)
+ *         it.bar(this.bar)
+ *     }
+ *
+ *     override fun equals(other: Any?): Boolean {
+ *         if (this === other) return true
+ *         if (javaClass != other?.javaClass) return false
+ *
+ *         other as Example
+ *
+ *         if (required != other.required) return false
+ *         if (foo != other.foo) return false
+ *         if (bar != other.bar) return false
+ *
+ *         return true
+ *     }
+ *
+ *     override fun hashCode(): Int {
+ *         var result = required.hashCode()
+ *         result = 31 * result + foo.hashCode()
+ *         result = 31 * result + (bar ?: 0)
+ *         return result
+ *     }
+ *
+ *     override fun toString(): String {
+ *         return "Example(required='$required', foo='$foo', bar=$bar)"
+ *     }
+ *
+ *     /**
+ *      * Description for when to use this builder
+ *      *
+ *      * @param required does not have a default value
+ *      */
+ *     class Builder(
+ *         private val required: String
+ *     ) {
+ *         private var foo: String = "default foo value"
+ *         private var bar: Int? = null
+ *
+ *         /**
+ *          * @param foo description of what to expect when writing foo
+ *          * @return Builder
+ *          */
+ *         fun foo(foo: String) =
+ *             apply { this.foo = foo }
+ *
+ *         /**
+ *          * @param bar description of what to expect when writing bar
+ *          * @return Builder
+ *          */
+ *         fun bar(bar: Int?) =
+ *             apply { this.bar = bar }
+ *
+ *         /**
+ *          * Build new instance of [Example]
+ *          * @return Example
+ *          */
+ *         fun build(): Example {
+ *             return Example(
+ *                 required,
+ *                 foo,
+ *                 bar
+ *             )
+ *         }
+ *
+ *         override fun equals(other: Any?): Boolean {
+ *             if (this === other) return true
+ *             if (javaClass != other?.javaClass) return false
+ *
+ *             other as Builder
+ *
+ *             if (required != other.required) return false
+ *             if (foo != other.foo) return false
+ *             if (bar != other.bar) return false
+ *
+ *             return true
+ *         }
+ *
+ *         override fun hashCode(): Int {
+ *             var result = required.hashCode()
+ *             result = 31 * result + foo.hashCode()
+ *             result = 31 * result + (bar ?: 0)
+ *             return result
+ *         }
+ *
+ *         override fun toString(): String {
+ *             return "Builder(required='$required', foo='$foo', bar=$bar)"
+ *         }
+ *     }
+ * }
+ * ```
+ */
 abstract class BuilderTest<Implementation : Any, Builder> {
 
     private val implClass: KClass<*> by lazy { getImplementationClass() }
@@ -26,15 +142,17 @@ abstract class BuilderTest<Implementation : Any, Builder> {
      */
     abstract fun getFilledUpBuilder(): Builder
 
-    private val toBuilderMethod = implClass.members.find { it.name == "toBuilder" } as KFunction
-    private val toStringMethod = implClass.members.find { it.name == "toString" } as KFunction
+    private val toBuilderMethod = implClass.members.find { it.name == "toBuilder" } as? KFunction
+        ?: throw RuntimeException("missing toBuilder method")
 
-    private val builderClass = implClass.nestedClasses.find { it.simpleName == "Builder" }!!
+    private val builderClass = implClass.nestedClasses.find { it.simpleName == "Builder" }
+        ?: throw RuntimeException("missing Builder nested class")
     private val requiredFieldNames =
         builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.name }
     private val optionalFieldNames =
         builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.name }
-    private val buildMethod = builderClass.members.find { it.name == "build" } as KFunction
+    private val buildMethod = builderClass.members.find { it.name == "build" } as? KFunction
+        ?: throw RuntimeException("missing Builder.build method")
 
     @Test
     fun isNotDataClass() {
@@ -65,6 +183,19 @@ abstract class BuilderTest<Implementation : Any, Builder> {
     }
 
     @Test
+    fun builder_allOptionalFieldsHaveCorrespondingImplMethod() {
+        val implFields = implClass.members.filterIsInstance<KProperty<*>>().filter {
+            it !is KMutableProperty
+        }.map { it.name }
+        optionalFieldNames.forEach {
+            assertTrue(
+                "builder method should have a corresponding impl field for $it",
+                implFields.contains(it)
+            )
+        }
+    }
+
+    @Test
     fun builder_hasNoPublicFields() {
         val publicFields = builderClass.members.filter {
             it is KProperty<*> && it.visibility != KVisibility.PRIVATE
@@ -73,16 +204,8 @@ abstract class BuilderTest<Implementation : Any, Builder> {
     }
 
     @Test
-    fun builderAndImpl_fieldCountIsTheSame() {
-        assertEquals(
-            "number of fields in a builder should match number of fields in the implementation",
-            implClass.members.filterIsInstance<KProperty<*>>().size,
-            (requiredFieldNames.size + optionalFieldNames.size)
-        )
-    }
-
-    @Test
     fun impl_toString_coversAllFields() {
+        val toStringMethod = implClass.members.find { it.name == "toString" } as KFunction
         val builderInstance = getFilledUpBuilder()
         val implInstance = buildMethod.call(builderInstance)
         val string = toStringMethod.call(implInstance) as String
@@ -163,13 +286,22 @@ abstract class BuilderTest<Implementation : Any, Builder> {
                 throw RuntimeException("make sure the provided value is different than default for \"${exclude.first.name}\"")
             }
             optionalFieldValues.filter { it != exclude }.forEach { fieldValue ->
-                builderClass.members.find { it is KFunction && it.name == fieldValue.first.name }!!
+                (builderClass.members.find { it is KFunction && it.name == fieldValue.first.name }
+                    ?: throw RuntimeException("field name is not equal to method name for ${fieldValue.first.name} field"))
                     .call(newBuilderInstance, fieldValue.second)
             }
+
+            val newImplInstance1 = buildMethod.call(newBuilderInstance)!!
+            val newImplInstance2 = buildMethod.call(newBuilderInstance)!!
             assertNotEquals(
                 "\"${exclude.first.name}\" is not included in the $methodName",
                 transformation(implInstance),
-                transformation(buildMethod.call(newBuilderInstance)!!)
+                transformation(newImplInstance1)
+            )
+            assertEquals(
+                "\"${exclude.first.name}\" is not included in the $methodName",
+                transformation(newImplInstance1),
+                transformation(newImplInstance2)
             )
         }
     }

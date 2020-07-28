@@ -1,13 +1,26 @@
 package com.mapbox.navigation.base.options
 
+import com.mapbox.navigation.testing.BuilderTest
+import io.mockk.mockk
+import java.net.URI
 import java.net.URISyntaxException
 import junit.framework.TestCase.assertEquals
+import kotlin.reflect.KClass
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class OnboardRouterOptionsTest {
+class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouterOptions.Builder>() {
+
+    override fun getImplementationClass(): KClass<OnboardRouterOptions> = OnboardRouterOptions::class
+
+    override fun getFilledUpBuilder(): OnboardRouterOptions.Builder {
+        return OnboardRouterOptions.Builder()
+            .filePath("123")
+            .tilesUri(mockk(relaxed = true))
+            .tilesVersion("456")
+    }
 
     private val validFilePath = """/data/user/0/com.mapbox.navigation.examples/files/Offline/api.mapbox.com/2020_02_02-03_00_00/tiles"""
 
@@ -36,7 +49,7 @@ class OnboardRouterOptionsTest {
         val onboardRouterOptions = try {
             OnboardRouterOptions.Builder()
                 .filePath(validFilePath)
-                .tilesUri("fake uri")
+                .tilesUri(URI("fake uri"))
         } catch (e: URISyntaxException) {
             null
         }

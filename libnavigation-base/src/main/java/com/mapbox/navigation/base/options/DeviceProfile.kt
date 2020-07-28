@@ -11,6 +11,12 @@ class DeviceProfile private constructor(
     val customConfig: String,
     val deviceType: DeviceType
 ) {
+
+    /**
+     * @return builder matching the one used to create this instance
+     */
+    fun toBuilder() = Builder().customConfig(customConfig).deviceType(deviceType)
+
     /**
      * Build a new [DeviceProfile]
      */
@@ -59,6 +65,10 @@ class DeviceProfile private constructor(
         var result = customConfig.hashCode()
         result = 31 * result + deviceType.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "DeviceProfile(customConfig='$customConfig', deviceType=$deviceType)"
     }
 }
 
