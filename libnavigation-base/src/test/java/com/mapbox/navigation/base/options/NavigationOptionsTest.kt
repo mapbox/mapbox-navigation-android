@@ -7,35 +7,29 @@ import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import kotlin.reflect.KClass
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.KVisibility
-import kotlin.reflect.jvm.javaType
 
-class NavigationOptionsTest {
+class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.Builder>() {
 
-    val context: Context = mockk()
-
-    val implClass = NavigationOptions::class
-    val builderClass = implClass.nestedClasses.find { it.simpleName == "Builder" }!!
+    private val context: Context = mockk()
 
     @Before
     fun setup() {
         every { context.applicationContext } returns context
 
         mockkStatic(LocationEngineProvider::class)
-        every { LocationEngineProvider.getBestLocationEngine(context) } returns mockk()
+        every { LocationEngineProvider.getBestLocationEngine(any()) } returns mockk()
     }
 
     @After
@@ -43,66 +37,23 @@ class NavigationOptionsTest {
         unmockkStatic(LocationEngineProvider::class)
     }
 
-    @Test
-    fun isNotDataClass() {
-        Assert.assertFalse(implClass.isData)
-        Assert.assertFalse(builderClass.isData)
-    }
+    override fun getImplementationClass(): KClass<NavigationOptions> = NavigationOptions::class
 
-    @Test
-    fun impl_onlyOneConstructor() {
-        Assert.assertEquals(1, implClass.constructors.size)
-    }
-
-    @Test
-    fun builder_onlyOneConstructor() {
-        Assert.assertEquals(1, builderClass.constructors.size)
-    }
-
-    @Test
-    fun impl_allConstructorsArePrivate() {
-        Assert.assertTrue(implClass.constructors.all { it.visibility == KVisibility.PRIVATE })
-    }
-
-    @Test
-    fun impl_allFieldsAreVals() {
-        Assert.assertTrue(implClass.members.filterIsInstance<KProperty<*>>().all { it !is KMutableProperty })
-    }
-
-    @Test
-    fun builder_allConstructorsArePrivate() {
-        Assert.assertTrue(builderClass.constructors.all { it.visibility == KVisibility.PRIVATE })
-    }
-
-    @Test
-    fun builder_hasNoPublicFields() {
-        val publicFields = builderClass.members.filter { it is KProperty<*> && it.visibility != KVisibility.PRIVATE }
-        Assert.assertEquals("there should be no public fields", 0, publicFields.size)
-    }
-
-    @Test
-    fun equals() {
-        val requiredFieldNames = builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.name }
-        val requiredFieldTypes = builderClass.members.filter { it is KProperty && it !is KMutableProperty }.map { it.returnType }
-        val requiredArgumentInstances = getOptionalArgumentInstances()
-        requiredFieldTypes.forEachIndexed { index, kType ->
-            Assert.assertEquals("required argument $index is incorrect", kType.javaType.typeName, requiredArgumentInstances[index]::class.java.simpleName)
-        }
-
-        val optionalFieldNames = builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.name }
-        val optionalFieldTypes = builderClass.members.filter { it is KProperty && it is KMutableProperty }.map { it.returnType }
-        val optionalArgumentInstances = getOptionalArgumentInstances()
-        optionalFieldTypes.forEachIndexed { index, kType ->
-            Assert.assertEquals("optional argument $index is incorrect", kType.javaType.typeName, optionalArgumentInstances[index]::class.java.simpleName)
-        }
-    }
-
-    private fun getOptionalArgumentInstances() : List<Any> {
-        return listOf(mockk<Context>())
-    }
-
-    private fun getOptionalRequiredArgumentInstances() : List<Any> {
-        return emptyList()
+    override fun getFilledUpBuilder(): NavigationOptions.Builder {
+        val context = mockk<Context>()
+        val appContext = mockk<Context>(relaxed = true)
+        every { appContext.applicationContext } returns appContext
+        every { context.applicationContext } returns appContext
+        return NavigationOptions.Builder(context)
+            .accessToken("pk.123")
+            .deviceProfile(mockk())
+            .distanceFormatter(mockk())
+            .isDebugLoggingEnabled(true)
+            .isFromNavigationUi(true)
+            .locationEngine(mockk())
+            .navigatorPredictionMillis(1)
+            .onboardRouterOptions(mockk())
+            .timeFormatType(1)
     }
 
     @Test

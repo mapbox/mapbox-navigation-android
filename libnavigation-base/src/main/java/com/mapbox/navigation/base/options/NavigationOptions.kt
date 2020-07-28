@@ -99,6 +99,10 @@ class NavigationOptions private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "NavigationOptions(applicationContext=$applicationContext, accessToken=$accessToken, locationEngine=$locationEngine, timeFormatType=$timeFormatType, navigatorPredictionMillis=$navigatorPredictionMillis, distanceFormatter=$distanceFormatter, onboardRouterOptions=$onboardRouterOptions, isFromNavigationUi=$isFromNavigationUi, isDebugLoggingEnabled=$isDebugLoggingEnabled, deviceProfile=$deviceProfile)"
+    }
+
     /**
      * Build a new [NavigationOptions]
      */

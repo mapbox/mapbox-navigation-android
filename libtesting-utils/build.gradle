@@ -20,4 +20,5 @@ android {
 dependencies {
     implementation dependenciesList.junit
     implementation dependenciesList.coroutinesTestAndroid
+    implementation dependenciesList.kotlinReflect
 }
