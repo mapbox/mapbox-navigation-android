@@ -11,7 +11,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHeight
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionOpacity
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility
 import com.mapbox.navigation.ui.internal.utils.MapUtils
-import com.mapbox.navigation.ui.map.building.BuildingFootprintHighlightLayer.Companion.HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID
 
 /**
  * This layer handles the creation and customization of a [FillExtrusionLayer]
@@ -115,7 +114,7 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
                         fillExtrusionOpacity(opacity),
                         fillExtrusionHeight(get("height"))
                 )
-                MapUtils.addLayerToMap(style, this, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
+                MapUtils.addLayerToMap(style, this, null)
             }
         }
     }
