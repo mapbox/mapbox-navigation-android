@@ -33,10 +33,10 @@ class SummaryModelTest : BaseTest() {
     @Test
     fun getDistanceRemaining() {
         val routeProgress = buildRouteProgress()
-        val distanceFormatter = MapboxDistanceFormatter.Builder()
-            .withUnitType(METRIC)
-            .withRoundingIncrement(INCREMENT_FIFTY)
-            .build(ctx)
+        val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
+            .unitType(METRIC)
+            .roundingIncrement(INCREMENT_FIFTY)
+            .build()
 
         val result = SummaryModel(
             ctx,
@@ -50,10 +50,10 @@ class SummaryModelTest : BaseTest() {
     @Test
     fun getTimeRemaining() {
         val routeProgress = buildRouteProgress()
-        val distanceFormatter = MapboxDistanceFormatter.Builder()
-            .withUnitType(METRIC)
-            .withRoundingIncrement(INCREMENT_FIFTY)
-            .build(ctx)
+        val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
+            .unitType(METRIC)
+            .roundingIncrement(INCREMENT_FIFTY)
+            .build()
 
         val result = SummaryModel(
             ctx,
@@ -67,10 +67,10 @@ class SummaryModelTest : BaseTest() {
     @Test
     fun getArrivalTime() {
         val routeProgress = buildRouteProgress()
-        val distanceFormatter = MapboxDistanceFormatter.Builder()
-            .withUnitType(METRIC)
-            .withRoundingIncrement(INCREMENT_FIFTY)
-            .build(ctx)
+        val distanceFormatter = MapboxDistanceFormatter.Builder(ctx)
+            .unitType(METRIC)
+            .roundingIncrement(INCREMENT_FIFTY)
+            .build()
         val time = Calendar.getInstance().also {
             it.set(2020, 2, 20, 20, 20, 20)
         }

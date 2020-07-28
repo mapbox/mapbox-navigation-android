@@ -30,7 +30,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     RouteProgressObserver, LocationObserver, RoutesObserver, OffRouteObserver {
     private var lastLocation: AtomicReference<Location?> = AtomicReference(null)
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
-        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder().route(DirectionsRoute.builder().build()).build()))
+        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder(DirectionsRoute.builder().build()).build()))
     private val channelOffRouteEvent = Channel<Boolean>(Channel.CONFLATED)
     private val channelNewRouteAvailable = Channel<RouteAvailable>(Channel.CONFLATED)
     private val channelLocationReceived = Channel<Location>(Channel.CONFLATED)

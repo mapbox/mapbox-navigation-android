@@ -50,6 +50,10 @@ class OnboardRouterOptions private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "OnboardRouterOptions(tilesUri=$tilesUri, tilesVersion='$tilesVersion', filePath=$filePath)"
+    }
+
     /**
      * Builder for [OnboardRouterOptions]. You must choose a [filePath]
      * for this to be built successfully.
@@ -58,12 +62,6 @@ class OnboardRouterOptions private constructor(
         private var tilesUri: URI = URI("https://api.mapbox.com")
         private var tilesVersion: String = "2020_02_02-03_00_00"
         private var filePath: String? = null
-
-        /**
-         * Override the routing tiles endpoint with a [String]
-         */
-        fun tilesUri(tilesUri: String) =
-            apply { this.tilesUri = URI(tilesUri) }
 
         /**
          * Override the routing tiles endpoint with a [URI]

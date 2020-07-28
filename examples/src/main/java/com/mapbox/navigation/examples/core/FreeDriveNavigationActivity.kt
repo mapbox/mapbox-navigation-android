@@ -23,6 +23,7 @@ import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
+import java.net.URI
 import kotlinx.android.synthetic.main.free_drive_navigation_layout.*
 import timber.log.Timber
 
@@ -58,7 +59,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
             .onboardRouterOptions(OnboardRouterOptions.Builder()
-                .tilesUri("https://api-routing-tiles-staging.tilestream.net")
+                .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
                 .tilesVersion("2020_02_02-03_00_00")
                 .build())
             .build()

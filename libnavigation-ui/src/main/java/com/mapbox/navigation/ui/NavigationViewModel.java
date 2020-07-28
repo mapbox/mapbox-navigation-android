@@ -312,11 +312,11 @@ public class NavigationViewModel extends AndroidViewModel {
     final String unitType = initializeUnitType(options);
     final int roundingIncrement = options.roundingIncrement();
     final Locale locale = getLocaleDirectionsRoute(options.directionsRoute(), getApplication());
-    return new MapboxDistanceFormatter.Builder()
-        .withUnitType(unitType)
-        .withRoundingIncrement(roundingIncrement)
-        .withLocale(locale)
-        .build(getApplication());
+    return new MapboxDistanceFormatter.Builder(getApplication())
+        .unitType(unitType)
+        .roundingIncrement(roundingIncrement)
+        .locale(locale)
+        .build();
   }
 
   private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {

@@ -2,8 +2,11 @@ package com.mapbox.navigation.route.onboard
 
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.testing.BuilderTest
+import io.mockk.mockk
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
+import kotlin.reflect.KClass
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,12 +15,25 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-class OfflineRouteTest {
+internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder>() {
+
+    override fun getImplementationClass(): KClass<OfflineRoute> = OfflineRoute::class
+
+    override fun getFilledUpBuilder(): OfflineRoute.Builder {
+        return OfflineRoute.Builder(mockk(relaxed = true))
+            .bicycleType(mockk(relaxed = true))
+            .cyclingSpeed(123f)
+            .cyclewayBias(456f)
+            .hillBias(789f)
+            .ferryBias(101112f)
+            .roughSurfaceBias(131415f)
+            .waypointTypes(mockk(relaxed = true))
+    }
 
     @Test
     fun addBicycleTypeIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .bicycleType(OfflineCriteria.BicycleType.ROAD).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -28,7 +44,7 @@ class OfflineRouteTest {
     @Test
     fun addCyclingSpeedIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .cyclingSpeed(10.0f).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -39,7 +55,7 @@ class OfflineRouteTest {
     @Test
     fun addCyclewayBiasIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .cyclewayBias(0.0f).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -50,7 +66,7 @@ class OfflineRouteTest {
     @Test
     fun addHillBiasIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .hillBias(0.0f).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -61,7 +77,7 @@ class OfflineRouteTest {
     @Test
     fun addFerryBiasIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .ferryBias(0.0f).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -72,7 +88,7 @@ class OfflineRouteTest {
     @Test
     fun addRoughSurfaceBiasIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .roughSurfaceBias(0.0f).build()
 
         val offlineUrl = offlineRoute.buildUrl()
@@ -90,7 +106,7 @@ class OfflineRouteTest {
             null,
             OfflineCriteria.WaypointType.BREAK
         )
-        val offlineRoute = OfflineRoute.builder(routeUrl)
+        val offlineRoute = OfflineRoute.Builder(routeUrl)
             .waypointTypes(waypointTypes).build()
         val offlineUrl = offlineRoute.buildUrl()
 

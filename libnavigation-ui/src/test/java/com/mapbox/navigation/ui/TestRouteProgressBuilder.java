@@ -54,11 +54,10 @@ class TestRouteProgressBuilder {
     legProgressBuilder.distanceRemaining((float) legDurationRemaining);
     legProgressBuilder.upcomingStep(upcomingStep);
 
-    return new RouteProgress.Builder()
+    return new RouteProgress.Builder(route)
             .distanceRemaining((float) legDistanceRemaining)
             .upcomingStepPoints(currentStepPoints)
             .currentLegProgress(legProgressBuilder.build())
-            .route(route)
       .build();
   }
 

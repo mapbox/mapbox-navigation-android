@@ -87,7 +87,7 @@ class GuidanceViewImageProvider() {
      */
     fun cancelRender(context: Context) {
         if (targets.isNotEmpty()) {
-            for(target in targets) {
+            for (target in targets) {
                 Picasso.Builder(context).build().cancelRequest(target)
             }
             targets.clear()

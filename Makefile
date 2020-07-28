@@ -21,7 +21,8 @@ endef
 .PHONY: check
 check:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(CORE_MODULES),checkstyle)
+	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
+	&& $(call run-gradle-tasks,$(UI_MODULES),checkstyle)
 
 .PHONY: license-verification
 license-verification:
