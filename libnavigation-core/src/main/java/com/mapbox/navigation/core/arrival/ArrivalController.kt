@@ -88,6 +88,10 @@ class ArrivalOptions private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "ArrivalOptions(arrivalInSeconds=$arrivalInSeconds, arrivalInMeters=$arrivalInMeters)"
+    }
+
     /**
      * Build your [ArrivalOptions].
      */

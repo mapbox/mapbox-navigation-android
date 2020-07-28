@@ -3,7 +3,7 @@ package com.mapbox.navigation.core.telemetry.events
 /**
  * Custom metadata that can be used to associate app state with feedback events in the telemetry pipeline.
  */
-data class AppMetadata constructor(
+class AppMetadata private constructor(
     /**
      * Name of the application. Value should be non-empty.
      */
@@ -31,6 +31,32 @@ data class AppMetadata constructor(
     fun toBuilder() = Builder(name, version).apply {
         userId(userId)
         sessionId(sessionId)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AppMetadata
+
+        if (name != other.name) return false
+        if (version != other.version) return false
+        if (userId != other.userId) return false
+        if (sessionId != other.sessionId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + version.hashCode()
+        result = 31 * result + (userId?.hashCode() ?: 0)
+        result = 31 * result + (sessionId?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String {
+        return "AppMetadata(name='$name', version='$version', userId=$userId, sessionId=$sessionId)"
     }
 
     /**

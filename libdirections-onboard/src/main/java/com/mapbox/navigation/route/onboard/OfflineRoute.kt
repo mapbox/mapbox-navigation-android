@@ -9,27 +9,18 @@ import com.mapbox.navigation.utils.internal.ifNonNull
  * The [OfflineRoute] class wraps the [RouteUrl] class with parameters which
  * could be set in order for an offline navigation session to successfully begin.
  */
-internal class OfflineRoute
-private constructor(
+internal class OfflineRoute private constructor(
     private val routeUrl: RouteUrl,
-    bicycleType: OfflineCriteria.BicycleType?,
+    private val bicycleType: OfflineCriteria.BicycleType?,
     private val cyclingSpeed: Float?,
     private val cyclewayBias: Float?,
     private val hillBias: Float?,
     private val ferryBias: Float?,
     private val roughSurfaceBias: Float?,
-    waypointTypes: List<OfflineCriteria.WaypointType?>?
+    private val waypointTypes: List<OfflineCriteria.WaypointType?>?
 ) {
-    private val bicycleType: String?
-    private val waypointTypes: String?
-
-    init {
-        this.bicycleType = bicycleType?.type
-        this.waypointTypes = checkWaypointTypes(waypointTypes)
-    }
 
     companion object {
-
         private const val BICYCLE_TYPE_QUERY_PARAMETER = "bicycle_type"
         private const val CYCLING_SPEED_QUERY_PARAMETER = "cycling_speed"
         private const val CYCLEWAY_BIAS_QUERY_PARAMETER = "cycleway_bias"
@@ -37,17 +28,19 @@ private constructor(
         private const val FERRY_BIAS_QUERY_PARAMETER = "ferry_bias"
         private const val ROUGH_SURFACE_BIAS_QUERY_PARAMETER = "rough_surface_bias"
         private const val WAYPOINT_TYPES_QUERY_PARAMETER = "waypoint_types"
-
-        /**
-         * Build a new [OfflineRoute] object with the proper offline navigation parameters already setup.
-         *
-         * @return a [Builder] object for creating this object
-         */
-        @JvmStatic
-        fun builder(routeUrl: RouteUrl): Builder {
-            return Builder(routeUrl)
-        }
     }
+
+    /**
+     * @return builder matching the one used to create this instance
+     */
+    fun toBuilder() = Builder(routeUrl)
+        .bicycleType(bicycleType)
+        .cyclingSpeed(cyclingSpeed)
+        .cyclewayBias(cyclewayBias)
+        .hillBias(hillBias)
+        .ferryBias(ferryBias)
+        .roughSurfaceBias(roughSurfaceBias)
+        .waypointTypes(waypointTypes)
 
     /**
      * Builds a URL string for offline.
@@ -75,7 +68,7 @@ private constructor(
     private fun buildOfflineUrl(url: Uri): String {
         val offlineUrlBuilder = url.buildUpon()
 
-        offlineUrlBuilder.appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType)
+        offlineUrlBuilder.appendQueryParamIfNonNull(BICYCLE_TYPE_QUERY_PARAMETER, bicycleType?.type)
         offlineUrlBuilder.appendQueryParamIfNonNull(CYCLING_SPEED_QUERY_PARAMETER, cyclingSpeed)
         offlineUrlBuilder.appendQueryParamIfNonNull(CYCLEWAY_BIAS_QUERY_PARAMETER, cyclewayBias)
         offlineUrlBuilder.appendQueryParamIfNonNull(HILL_BIAS_QUERY_PARAMETER, hillBias)
@@ -84,7 +77,7 @@ private constructor(
             ROUGH_SURFACE_BIAS_QUERY_PARAMETER,
             roughSurfaceBias
         )
-        offlineUrlBuilder.appendQueryParamIfNonNull(WAYPOINT_TYPES_QUERY_PARAMETER, waypointTypes)
+        offlineUrlBuilder.appendQueryParamIfNonNull(WAYPOINT_TYPES_QUERY_PARAMETER, checkWaypointTypes(waypointTypes))
 
         return offlineUrlBuilder.build().toString()
     }
@@ -96,6 +89,40 @@ private constructor(
         ifNonNull(value) {
             appendQueryParameter(key, it)
         } ?: this
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OfflineRoute
+
+        if (routeUrl != other.routeUrl) return false
+        if (bicycleType != other.bicycleType) return false
+        if (cyclingSpeed != other.cyclingSpeed) return false
+        if (cyclewayBias != other.cyclewayBias) return false
+        if (hillBias != other.hillBias) return false
+        if (ferryBias != other.ferryBias) return false
+        if (roughSurfaceBias != other.roughSurfaceBias) return false
+        if (waypointTypes != other.waypointTypes) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = routeUrl.hashCode()
+        result = 31 * result + (bicycleType?.hashCode() ?: 0)
+        result = 31 * result + (cyclingSpeed?.hashCode() ?: 0)
+        result = 31 * result + (cyclewayBias?.hashCode() ?: 0)
+        result = 31 * result + (hillBias?.hashCode() ?: 0)
+        result = 31 * result + (ferryBias?.hashCode() ?: 0)
+        result = 31 * result + (roughSurfaceBias?.hashCode() ?: 0)
+        result = 31 * result + (waypointTypes?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String {
+        return "OfflineRoute(routeUrl=$routeUrl, bicycleType=$bicycleType, cyclingSpeed=$cyclingSpeed, cyclewayBias=$cyclewayBias, hillBias=$hillBias, ferryBias=$ferryBias, roughSurfaceBias=$roughSurfaceBias, waypointTypes=$waypointTypes)"
+    }
 
     class Builder internal constructor(private val routeUrl: RouteUrl) {
         private var bicycleType: OfflineCriteria.BicycleType? = null

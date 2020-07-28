@@ -30,6 +30,18 @@ class RouteStepProgress private constructor(
 ) {
 
     /**
+     * @return builder matching the one used to create this instance
+     */
+    fun toBuilder() = Builder()
+        .stepIndex(stepIndex)
+        .step(step)
+        .stepPoints(stepPoints)
+        .distanceRemaining(distanceRemaining)
+        .distanceTraveled(distanceTraveled)
+        .fractionTraveled(fractionTraveled)
+        .durationRemaining(durationRemaining)
+
+    /**
      * Regenerate whenever a change is made
      */
     override fun equals(other: Any?): Boolean {
@@ -63,6 +75,10 @@ class RouteStepProgress private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "RouteStepProgress(stepIndex=$stepIndex, step=$step, stepPoints=$stepPoints, distanceRemaining=$distanceRemaining, distanceTraveled=$distanceTraveled, fractionTraveled=$fractionTraveled, durationRemaining=$durationRemaining)"
+    }
+
     /**
      * Builder of [RouteStepProgress]
      */
@@ -88,7 +104,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun step(step: LegStep) =
+        fun step(step: LegStep?) =
             apply { this.step = step }
 
         /**
@@ -96,7 +112,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun stepPoints(stepPoints: List<Point>) =
+        fun stepPoints(stepPoints: List<Point>?) =
             apply { this.stepPoints = stepPoints }
 
         /**

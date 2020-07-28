@@ -60,6 +60,10 @@ class ReplayRouteOptions private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "ReplayRouteOptions(maxSpeedMps=$maxSpeedMps, turnSpeedMps=$turnSpeedMps, uTurnSpeedMps=$uTurnSpeedMps, maxAcceleration=$maxAcceleration, minAcceleration=$minAcceleration)"
+    }
+
     /**
      * Used to build [ReplayRouteOptions].
      */

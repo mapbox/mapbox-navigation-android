@@ -320,7 +320,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         route?.let { route ->
             val upcomingStepIndex = stepIndex + ONE_INDEX
 
-            val routeProgressBuilder = RouteProgress.Builder()
+            val routeProgressBuilder = RouteProgress.Builder(route)
             val legProgressBuilder = RouteLegProgress.Builder()
             val stepProgressBuilder = RouteStepProgress.Builder()
 
@@ -428,8 +428,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             routeProgressBuilder.routeGeometryWithBuffer(routeBufferGeoJson)
 
             routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
-
-            routeProgressBuilder.route(route)
 
             return routeProgressBuilder.build()
         }

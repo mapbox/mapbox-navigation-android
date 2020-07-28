@@ -43,31 +43,26 @@ class SensorOptions private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "SensorOptions(enableSensorTypes=$enableSensorTypes, signalsPerSecond=$signalsPerSecond)"
+    }
+
     /**
      * Builder of [SensorOptions]
      */
     class Builder {
-        private val enableSensorTypes: MutableSet<Int> = mutableSetOf()
+        private var enableSensorTypes: Set<Int> = emptySet()
         private var signalsPerSecond: Int = 25
-
-        /**
-         * Enable all available sensors
-         *
-         * @return Builder
-         */
-        fun enableAllSensors(): Builder {
-            this.enableSensorTypes.addAll(SensorMapper.getSupportedSensorTypes())
-            return this
-        }
 
         /**
          * Set a set of sensors that will be handled
          *
          * @param sensorTypes that will be handled
          * @return Builder
+         * @see SensorMapper.getSupportedSensorTypes
          */
         fun enableSensorTypes(sensorTypes: Set<Int>): Builder {
-            this.enableSensorTypes.addAll(sensorTypes)
+            this.enableSensorTypes = sensorTypes
             return this
         }
 

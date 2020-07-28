@@ -37,6 +37,19 @@ class RouteLegProgress private constructor(
 ) {
 
     /**
+     * @return builder matching the one used to create this instance
+     */
+    fun toBuilder() = Builder()
+        .legIndex(legIndex)
+        .routeLeg(routeLeg)
+        .distanceTraveled(distanceTraveled)
+        .distanceRemaining(distanceRemaining)
+        .durationRemaining(durationRemaining)
+        .fractionTraveled(fractionTraveled)
+        .currentStepProgress(currentStepProgress)
+        .upcomingStep(upcomingStep)
+
+    /**
      * Regenerate whenever a change is made
      */
     override fun equals(other: Any?): Boolean {
@@ -72,6 +85,10 @@ class RouteLegProgress private constructor(
         return result
     }
 
+    override fun toString(): String {
+        return "RouteLegProgress(legIndex=$legIndex, routeLeg=$routeLeg, distanceTraveled=$distanceTraveled, distanceRemaining=$distanceRemaining, durationRemaining=$durationRemaining, fractionTraveled=$fractionTraveled, currentStepProgress=$currentStepProgress, upcomingStep=$upcomingStep)"
+    }
+
     /**
      * Builder of [RouteLegProgress].
      */
@@ -99,7 +116,7 @@ class RouteLegProgress private constructor(
          *
          * @return Builder
          */
-        fun routeLeg(routeLeg: RouteLeg) = apply { this.routeLeg = routeLeg }
+        fun routeLeg(routeLeg: RouteLeg?) = apply { this.routeLeg = routeLeg }
 
         /**
          * Total distance traveled in meters along current leg
@@ -140,7 +157,7 @@ class RouteLegProgress private constructor(
          *
          * @return Builder
          */
-        fun currentStepProgress(currentStepProgress: RouteStepProgress) =
+        fun currentStepProgress(currentStepProgress: RouteStepProgress?) =
             apply { this.currentStepProgress = currentStepProgress }
 
         /**
@@ -149,7 +166,7 @@ class RouteLegProgress private constructor(
          *
          * @return Builder
          */
-        fun upcomingStep(upcomingStep: LegStep) =
+        fun upcomingStep(upcomingStep: LegStep?) =
                 apply { this.upcomingStep = upcomingStep }
 
         /**
