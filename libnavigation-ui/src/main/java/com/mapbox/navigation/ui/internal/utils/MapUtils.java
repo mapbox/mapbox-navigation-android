@@ -34,4 +34,23 @@ public final class MapUtils {
       style.addLayerBelow(layer, idBelowLayer);
     }
   }
+
+  /**
+   * Generic method for adding a new layer to the map that's above another specific layer.
+   *
+   * @param style that the current mapView is using
+   * @param layer a layer that will be added to the map
+   * @param idAboveLayer optionally providing the layer which the new layer should be placed above
+   */
+  public static void addLayerToMapAbove(@NonNull Style style, @NonNull Layer layer,
+                                   @Nullable String idAboveLayer) {
+    if (layer != null && style.getLayer(layer.getId()) != null) {
+      return;
+    }
+    if (idAboveLayer == null) {
+      style.addLayer(layer);
+    } else {
+      style.addLayerAbove(layer, idAboveLayer);
+    }
+  }
 }

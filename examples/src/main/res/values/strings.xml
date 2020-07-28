@@ -24,10 +24,10 @@
     <string name="description_custom_ui_component_style" translatable="false">Shows how to use your own colors to style the UI SDK Components: InstructionView, SummaryBottomSheet, and so on.</string>
 
     <string name="title_building_highlight_kotlin" translatable="false">Building footprint highlight</string>
-    <string name="description_building_highlight_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize a highlighted building footprint. Great to show the final destination building location. Example\'s in Kotlin.</string>
+    <string name="description_building_highlight_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize a single highlighted building footprint.</string>
 
     <string name="title_ui_building_extrusions_kotlin" translatable="false">Building extrusions highlight</string>
-    <string name="description_ui_building_extrusions_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize 3D building extrusions.</string>
+    <string name="description_ui_building_extrusions_kotlin" translatable="false">Use the Navigation UI SDK\'s to show and customize a single highlighted 3D building extrusion.</string>
 
     <string name="title_replay_route" translatable="false">Replay route</string>
     <string name="description_replay_route" translatable="false">Shows how to use the MapboxNavigation class with the replay engine in Kotlin code.</string>

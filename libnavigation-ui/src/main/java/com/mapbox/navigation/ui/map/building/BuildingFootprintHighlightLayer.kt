@@ -110,7 +110,7 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
                         fillColor(color),
                         fillOpacity(opacity)
                 )
-                MapUtils.addLayerToMap(style, this, BuildingLayerSupport.BUILDING_LAYER_ID)
+                MapUtils.addLayerToMapAbove(style, this, BuildingLayerSupport.BUILDING_LAYER_ID)
             }
         }
     }
