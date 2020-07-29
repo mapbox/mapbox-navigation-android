@@ -370,7 +370,6 @@ package com.mapbox.navigation.core.sensors {
   public static final class SensorOptions.Builder {
     ctor public SensorOptions.Builder();
     method public com.mapbox.navigation.core.sensors.SensorOptions build();
-    method public com.mapbox.navigation.core.sensors.SensorOptions.Builder enableAllSensors();
     method public com.mapbox.navigation.core.sensors.SensorOptions.Builder enableSensorTypes(java.util.Set<java.lang.Integer> sensorTypes);
     method public com.mapbox.navigation.core.sensors.SensorOptions.Builder signalsPerSecond(int signalsPerSecond);
   }
@@ -390,12 +389,6 @@ package com.mapbox.navigation.core.telemetry {
 package com.mapbox.navigation.core.telemetry.events {
 
   public final class AppMetadata {
-    ctor public AppMetadata(String name, String version, String? userId, String? sessionId);
-    method public String component1();
-    method public String component2();
-    method public String? component3();
-    method public String? component4();
-    method public com.mapbox.navigation.core.telemetry.events.AppMetadata copy(String name, String version, String? userId, String? sessionId);
     method public String getName();
     method public String? getSessionId();
     method public String? getUserId();

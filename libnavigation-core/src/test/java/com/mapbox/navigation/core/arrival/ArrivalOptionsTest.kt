@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.arrival
 
 import com.mapbox.navigation.testing.BuilderTest
-import org.junit.Test
 import kotlin.reflect.KClass
+import org.junit.Test
 
 class ArrivalOptionsTest : BuilderTest<ArrivalOptions, ArrivalOptions.Builder>() {
     override fun getImplementationClass(): KClass<ArrivalOptions> = ArrivalOptions::class

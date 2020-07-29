@@ -2,8 +2,8 @@ package com.mapbox.navigation.base.trip.model
 
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
-import org.junit.Test
 import kotlin.reflect.KClass
+import org.junit.Test
 
 class RouteStepProgressTest : BuilderTest<RouteStepProgress, RouteStepProgress.Builder>() {
     override fun getImplementationClass(): KClass<RouteStepProgress> = RouteStepProgress::class

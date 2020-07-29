@@ -75,6 +75,9 @@ class RouteStepProgress private constructor(
         return result
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "RouteStepProgress(stepIndex=$stepIndex, step=$step, stepPoints=$stepPoints, distanceRemaining=$distanceRemaining, distanceTraveled=$distanceTraveled, fractionTraveled=$fractionTraveled, durationRemaining=$durationRemaining)"
     }
