@@ -154,6 +154,14 @@ abstract class BuilderTest<Implementation : Any, Builder> {
     private val buildMethod = builderClass.members.find { it.name == "build" } as? KFunction
         ?: throw RuntimeException("missing Builder.build method")
 
+    /**
+     * This method needs to be overridden and HAS TO explicitly add the @Test annotation in the child.
+     * This is needed to trick JUnit4 to process the test class if all the actual test cases are in the abstract parent.
+     * TODO add a lint rule to detect the missing annotation in the child, or create a new test runner
+     */
+    @Test
+    abstract fun trigger()
+
     @Test
     fun isNotDataClass() {
         assertFalse(implClass.isData)

@@ -31,6 +31,11 @@ internal class OfflineRouteTest : BuilderTest<OfflineRoute, OfflineRoute.Builder
     }
 
     @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
+    }
+
+    @Test
     fun addBicycleTypeIncludedInRequest() {
         val routeUrl = provideOnlineRouteBuilder()
         val offlineRoute = OfflineRoute.Builder(routeUrl)

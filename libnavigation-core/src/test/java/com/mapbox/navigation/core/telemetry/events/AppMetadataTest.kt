@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import com.mapbox.navigation.testing.BuilderTest
+import org.junit.Test
 import kotlin.reflect.KClass
 
 class AppMetadataTest : BuilderTest<AppMetadata, AppMetadata.Builder>() {
@@ -10,5 +11,10 @@ class AppMetadataTest : BuilderTest<AppMetadata, AppMetadata.Builder>() {
         return AppMetadata.Builder("name", "version")
             .sessionId("sessionId")
             .userId("userId")
+    }
+
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 }

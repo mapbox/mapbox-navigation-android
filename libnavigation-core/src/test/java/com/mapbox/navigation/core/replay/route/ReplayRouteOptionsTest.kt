@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.navigation.testing.BuilderTest
+import org.junit.Test
 import kotlin.reflect.KClass
 
 class ReplayRouteOptionsTest : BuilderTest<ReplayRouteOptions, ReplayRouteOptions.Builder>() {
@@ -13,5 +14,10 @@ class ReplayRouteOptionsTest : BuilderTest<ReplayRouteOptions, ReplayRouteOption
             .minAcceleration(56.0)
             .turnSpeedMps(78.0)
             .uTurnSpeedMps(910.0)
+    }
+
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 }
