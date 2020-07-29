@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.options
 
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
+import org.junit.Test
 import kotlin.reflect.KClass
 
 class DeviceProfileTest : BuilderTest<DeviceProfile, DeviceProfile.Builder>() {
@@ -11,5 +12,10 @@ class DeviceProfileTest : BuilderTest<DeviceProfile, DeviceProfile.Builder>() {
         return DeviceProfile.Builder()
             .customConfig("123")
             .deviceType(mockk(relaxed = true))
+    }
+
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 }

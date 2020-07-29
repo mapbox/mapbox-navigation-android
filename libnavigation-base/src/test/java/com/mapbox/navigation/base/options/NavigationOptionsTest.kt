@@ -57,6 +57,11 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
     }
 
     @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
+    }
+
+    @Test
     fun whenBuilderBuildWithNoValuesCalledThenDefaultValuesUsed() {
         val options = NavigationOptions.Builder(context).build()
 

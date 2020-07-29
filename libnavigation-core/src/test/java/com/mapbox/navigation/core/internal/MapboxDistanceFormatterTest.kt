@@ -38,6 +38,11 @@ class MapboxDistanceFormatterTest : BuilderTest<MapboxDistanceFormatter, MapboxD
             .unitType("unitType")
     }
 
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
+    }
+
     @Before
     fun setup() {
         ctx = ApplicationProvider.getApplicationContext<Context>()
