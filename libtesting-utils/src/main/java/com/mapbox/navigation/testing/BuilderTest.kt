@@ -100,30 +100,6 @@ import kotlin.reflect.jvm.isAccessible
  *                 bar
  *             )
  *         }
- *
- *         override fun equals(other: Any?): Boolean {
- *             if (this === other) return true
- *             if (javaClass != other?.javaClass) return false
- *
- *             other as Builder
- *
- *             if (required != other.required) return false
- *             if (foo != other.foo) return false
- *             if (bar != other.bar) return false
- *
- *             return true
- *         }
- *
- *         override fun hashCode(): Int {
- *             var result = required.hashCode()
- *             result = 31 * result + foo.hashCode()
- *             result = 31 * result + (bar ?: 0)
- *             return result
- *         }
- *
- *         override fun toString(): String {
- *             return "Builder(required='$required', foo='$foo', bar=$bar)"
- *         }
  *     }
  * }
  * ```
@@ -280,34 +256,38 @@ abstract class BuilderTest<Implementation : Any, Builder> {
         }
 
         val optionalFieldValues = mutableListOf<Pair<KProperty<*>, Any>>()
-        (builderClass.members.filter { it is KProperty && it is KMutableProperty } as List<KProperty<*>>).forEachIndexed { index, kProperty ->
+        val optionalFields =
+        builderClass.members.filter { it is KProperty && it is KMutableProperty } as List<KProperty<*>>
+        optionalFields.forEach { kProperty ->
             kProperty.isAccessible = true
             optionalFieldValues.add(Pair(kProperty, kProperty.getter.call(builderInstance)!!))
         }
 
         optionalFieldValues.forEach { exclude ->
+            val field = exclude.first
+            val value = exclude.second
             val newBuilderInstance =
                 builderClass.constructors.first().call(*requiredValues.toTypedArray())
-            exclude.first.isAccessible = true
-            val defaultValue = exclude.first.getter.call(newBuilderInstance)
-            if (defaultValue == exclude.second) {
-                throw RuntimeException("make sure the provided value is different than default for \"${exclude.first.name}\"")
+            field.isAccessible = true
+            val defaultValue = field.getter.call(newBuilderInstance)
+            if (defaultValue == value) {
+                throw RuntimeException("Make sure getFilledUpBuilder() provides a unique value for \"${field.name}\". It should not equal \"$defaultValue\".")
             }
             optionalFieldValues.filter { it != exclude }.forEach { fieldValue ->
                 (builderClass.members.find { it is KFunction && it.name == fieldValue.first.name }
-                    ?: throw RuntimeException("field name is not equal to method name for ${fieldValue.first.name} field"))
+                    ?: throw RuntimeException("Make sure the \"${fieldValue.first.name}\" field name has a function with identical name."))
                     .call(newBuilderInstance, fieldValue.second)
             }
 
             val newImplInstance1 = buildMethod.call(newBuilderInstance)!!
             val newImplInstance2 = buildMethod.call(newBuilderInstance)!!
             assertNotEquals(
-                "\"${exclude.first.name}\" is not included in the $methodName",
+                "\"${field.name}\" is not included in the $methodName",
                 transformation(implInstance),
                 transformation(newImplInstance1)
             )
             assertEquals(
-                "\"${exclude.first.name}\" is not included in the $methodName",
+                "\"${field.name}\" is not included in the $methodName",
                 transformation(newImplInstance1),
                 transformation(newImplInstance2)
             )

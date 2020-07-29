@@ -1,8 +1,8 @@
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.navigation.testing.BuilderTest
-import org.junit.Test
 import kotlin.reflect.KClass
+import org.junit.Test
 
 class ReplayRouteOptionsTest : BuilderTest<ReplayRouteOptions, ReplayRouteOptions.Builder>() {
     override fun getImplementationClass(): KClass<ReplayRouteOptions> = ReplayRouteOptions::class

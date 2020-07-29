@@ -33,6 +33,9 @@ class AppMetadata private constructor(
         sessionId(sessionId)
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -47,6 +50,9 @@ class AppMetadata private constructor(
         return true
     }
 
+    /**
+     * Regenerate whenever a change is made
+     */
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + version.hashCode()
@@ -55,6 +61,9 @@ class AppMetadata private constructor(
         return result
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "AppMetadata(name='$name', version='$version', userId=$userId, sessionId=$sessionId)"
     }

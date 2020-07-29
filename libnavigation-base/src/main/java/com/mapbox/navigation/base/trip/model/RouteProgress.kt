@@ -116,6 +116,9 @@ class RouteProgress private constructor(
         return result
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "RouteProgress(route=$route, routeGeometryWithBuffer=$routeGeometryWithBuffer, bannerInstructions=$bannerInstructions, voiceInstructions=$voiceInstructions, currentState=$currentState, currentLegProgress=$currentLegProgress, upcomingStepPoints=$upcomingStepPoints, inTunnel=$inTunnel, distanceRemaining=$distanceRemaining, distanceTraveled=$distanceTraveled, durationRemaining=$durationRemaining, fractionTraveled=$fractionTraveled, remainingWaypoints=$remainingWaypoints)"
     }

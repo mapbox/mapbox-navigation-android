@@ -1,5 +1,7 @@
 package com.mapbox.navigation.base.options
 
+import java.lang.annotation.Inherited
+
 /**
  * The navigation SDK has algorithms optimized for the type of data
  * being provided. The device profile selects the optimization.
@@ -67,6 +69,9 @@ class DeviceProfile private constructor(
         return result
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "DeviceProfile(customConfig='$customConfig', deviceType=$deviceType)"
     }

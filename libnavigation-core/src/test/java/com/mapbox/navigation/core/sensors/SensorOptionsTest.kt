@@ -2,8 +2,8 @@ package com.mapbox.navigation.core.sensors
 
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
-import org.junit.Test
 import kotlin.reflect.KClass
+import org.junit.Test
 
 class SensorOptionsTest : BuilderTest<SensorOptions, SensorOptions.Builder>() {
     override fun getImplementationClass(): KClass<SensorOptions> = SensorOptions::class

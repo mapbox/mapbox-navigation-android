@@ -88,6 +88,9 @@ class ArrivalOptions private constructor(
         return result
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
     override fun toString(): String {
         return "ArrivalOptions(arrivalInSeconds=$arrivalInSeconds, arrivalInMeters=$arrivalInMeters)"
     }
