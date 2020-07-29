@@ -1,0 +1,17 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    defaultConfig {
+        applicationId "com.mapbox.navigation.testswrapper"
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+}

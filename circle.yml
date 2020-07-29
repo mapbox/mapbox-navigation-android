@@ -226,6 +226,9 @@ commands:
 
   run-firebase-instrumentation:
     parameters:
+      module_wrapper:
+        description: module wrapper
+        type: string
       module_target:
         description: module target
         type: string
@@ -239,7 +242,7 @@ commands:
           shell: /bin/bash -euo pipefail
           command: |
             gcloud firebase test android run --type instrumentation \
-              --app << parameters.module_target >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>.apk \
+              --app << parameters.module_wrapper >>/build/outputs/apk/<< parameters.variant >>/<< parameters.module_wrapper >>-<< parameters.variant >>.apk \
               --test << parameters.module_target >>/build/outputs/apk/androidTest/<< parameters.variant >>/<< parameters.module_target >>-<< parameters.variant >>-androidTest.apk \
               --device model=hammerhead,version=21,locale=en,orientation=portrait  \
               --device model=athene,version=23,locale=fr,orientation=landscape \
@@ -348,6 +351,9 @@ jobs:
       - checkout
       - restore-gradle-cache
       - build-module:
+          module_target: "app-tests-wrapper"
+          variant: "Debug"
+      - build-module:
           module_target: "libnavigation-core"
           variant: "Debug"
       - build-instrumentation-test:
@@ -355,6 +361,7 @@ jobs:
       - login-google-cloud-platform
       - run-firebase-instrumentation:
           module_target: "libnavigation-core"
+          module_wrapper: "app-tests-wrapper"
           variant: "debug"
       - build-example-app:
           variant: "Release"
