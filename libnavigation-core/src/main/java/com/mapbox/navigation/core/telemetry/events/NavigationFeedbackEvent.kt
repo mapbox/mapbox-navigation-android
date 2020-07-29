@@ -1,7 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import android.annotation.SuppressLint
-import android.location.Location
+import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.base.metrics.NavigationMetrics
 
 @SuppressLint("ParcelCreator")
@@ -20,11 +20,22 @@ internal class NavigationFeedbackEvent(
     var feedbackType: String? = null
     var source: String? = null
     var description: String? = null
-    var locationsBefore: Array<Location>? = emptyArray()
-    var locationsAfter: Array<Location>? = emptyArray()
+    var locationsBefore: Array<FeedbackLocation>? = emptyArray()
+    var locationsAfter: Array<FeedbackLocation>? = emptyArray()
     var screenshot: String? = null
     var feedbackSubType: Array<String>? = emptyArray()
     var appMetadata: AppMetadata? = null
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
 }
+
+internal data class FeedbackLocation(
+    @SerializedName("lat") val latitude: Double,
+    @SerializedName("lng") val longitude: Double,
+    @SerializedName("speed") val speed: Float,
+    @SerializedName("course") val course: Float,
+    @SerializedName("altitude") val altitude: Double,
+    @SerializedName("timestamp") val timestamp: Long,
+    @SerializedName("horizontalAccuracy") val horizontalAccuracy: Float,
+    @SerializedName("verticalAccuracy") val verticalAccuracy: Float
+)

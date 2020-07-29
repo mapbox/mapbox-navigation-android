@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.location.Location
+import android.os.Build
 import android.util.Log
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.telemetry.AppUserTurnstile
@@ -20,6 +21,7 @@ import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackLocation
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
@@ -436,8 +438,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 this.source = feedbackSource
                 this.description = description
                 this.screenshot = screenshot
-                this.locationsBefore = preEventBuffer.toTypedArray()
-                this.locationsAfter = postEventBuffer.toTypedArray()
+                this.locationsBefore = preEventBuffer.toFeedbackLocations().toTypedArray()
+                this.locationsAfter = postEventBuffer.toFeedbackLocations().toTypedArray()
                 this.feedbackSubType = feedbackSubType
                 this.appMetadata = appMetadata
             }
@@ -445,6 +447,26 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             val eventPosted = telemetryEventGate(feedbackEvent)
             Log.i(TAG, "Posting a user feedback event $eventPosted")
         })
+    }
+
+    private fun ArrayDeque<Location>.toFeedbackLocations(): List<FeedbackLocation> {
+        val feedbackLocations = mutableListOf<FeedbackLocation>()
+        this.forEach {
+            feedbackLocations.add(
+                FeedbackLocation(
+                    it.latitude,
+                    it.longitude,
+                    it.speed,
+                    it.bearing,
+                    it.altitude,
+                    it.time,
+                    it.accuracy,
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) it.verticalAccuracyMeters else 0f
+                )
+            )
+        }
+
+        return feedbackLocations
     }
 
     /**
