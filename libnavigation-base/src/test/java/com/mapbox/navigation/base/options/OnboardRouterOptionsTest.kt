@@ -22,6 +22,11 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
             .tilesVersion("456")
     }
 
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
+    }
+
     private val validFilePath = """/data/user/0/com.mapbox.navigation.examples/files/Offline/api.mapbox.com/2020_02_02-03_00_00/tiles"""
 
     @Test

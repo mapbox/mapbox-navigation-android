@@ -2,6 +2,7 @@ package com.mapbox.navigation.base.trip.model
 
 import com.mapbox.navigation.testing.BuilderTest
 import io.mockk.mockk
+import org.junit.Test
 import kotlin.reflect.KClass
 
 class RouteStepProgressTest : BuilderTest<RouteStepProgress, RouteStepProgress.Builder>() {
@@ -16,5 +17,10 @@ class RouteStepProgressTest : BuilderTest<RouteStepProgress, RouteStepProgress.B
             .distanceTraveled(789f)
             .fractionTraveled(101112f)
             .durationRemaining(131415.0)
+    }
+
+    @Test
+    override fun trigger() {
+        // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 }
