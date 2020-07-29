@@ -15,9 +15,9 @@ import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.metrics.extensions.toTelemetryEvent
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import java.lang.reflect.Type
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import java.lang.reflect.Type
 
 /**
  * Default implementation of [MetricsReporter] interface.
