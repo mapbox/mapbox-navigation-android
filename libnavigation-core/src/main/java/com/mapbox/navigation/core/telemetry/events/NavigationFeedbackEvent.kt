@@ -33,7 +33,7 @@ internal data class FeedbackLocation(
     @SerializedName("lat") val latitude: Double,
     @SerializedName("lng") val longitude: Double,
     @SerializedName("speed") val speed: Float,
-    @SerializedName("course") val course: Float,
+    @SerializedName("course") val bearing: Float,
     @SerializedName("altitude") val altitude: Double,
     @SerializedName("timestamp") val timestamp: Long,
     @SerializedName("horizontalAccuracy") val horizontalAccuracy: Float,
