@@ -133,6 +133,8 @@
         style="@style/SoundButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginTop="@dimen/fab_margin_top"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/instructionLayoutText" />
 
@@ -141,6 +143,7 @@
         style="@style/FeedbackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin_end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/soundLayout" />
 

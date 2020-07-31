@@ -60,21 +60,20 @@
         style="@style/SoundButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/extraInstructionContentLayout"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_below="@id/extraInstructionContentLayout"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginTop="@dimen/fab_margin_top" />
 
     <com.mapbox.navigation.ui.FeedbackButton
         android:id="@+id/feedbackLayout"
         style="@style/FeedbackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_below="@id/soundLayout"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
+        android:layout_marginEnd="@dimen/fab_margin_end" />
 
     <include
         android:id="@+id/instructionListLayout"

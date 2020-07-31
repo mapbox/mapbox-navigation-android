@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fab_margin">@dimen/dimen_8dp</dimen>
+    <dimen name="fab_margin_end">@dimen/dimen_8dp</dimen>
+    <dimen name="fab_margin_top">@dimen/dimen_8dp</dimen>
+</resources>

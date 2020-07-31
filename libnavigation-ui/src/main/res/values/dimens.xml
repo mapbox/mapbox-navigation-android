@@ -3,8 +3,9 @@
     <dimen name="dimen_2dp">2dp</dimen>
     <dimen name="dimen_8dp">8dp</dimen>
     <dimen name="dimen_16dp">16dp</dimen>
-    <dimen name="fab_margin_bottom">@dimen/dimen_8dp</dimen>
-    <dimen name="fab_feedback_margin_top">@dimen/dimen_16dp</dimen>
+    <dimen name="fab_margin">@dimen/dimen_2dp</dimen>
+    <dimen name="fab_margin_end">0dp</dimen>
+    <dimen name="fab_margin_top">0dp</dimen>
     <dimen name="wayname_bottom_padding">@dimen/dimen_8dp</dimen>
     <dimen name="wayname_padding">@dimen/dimen_16dp</dimen>
     <dimen name="wayname_padding_bottom">@dimen/dimen_2dp</dimen>
