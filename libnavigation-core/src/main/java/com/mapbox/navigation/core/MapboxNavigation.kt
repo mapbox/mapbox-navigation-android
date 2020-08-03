@@ -61,6 +61,7 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.NavigatorConfig
 import java.lang.reflect.Field
 import kotlinx.coroutines.channels.ReceiveChannel
 
@@ -137,6 +138,7 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
+    private val navigatorConfig = NavigatorConfig(null)
 
     private var notificationChannelField: Field? = null
     private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
@@ -153,6 +155,7 @@ class MapboxNavigation(
         logger = MapboxModuleProvider.createModule(MapboxModuleType.CommonLogger, ::paramsProvider)
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
+            navigatorConfig,
             logger
         )
         navigationSession = NavigationComponentProvider.createNavigationSession()
@@ -339,7 +342,7 @@ class MapboxNavigation(
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
-        navigator.create(navigationOptions.deviceProfile, logger)
+        navigator.create(navigationOptions.deviceProfile, navigatorConfig, logger)
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         fasterRouteController.stop()
@@ -682,15 +685,6 @@ class MapboxNavigation(
      */
     fun updateSensorEvent(sensorEvent: SensorEvent) {
         tripSession.updateSensorEvent(sensorEvent)
-    }
-
-    /**
-     * Updates the configuration to enable or disable the extended kalman filter (EKF).
-     *
-     * @param useEKF the new value for EKF
-     */
-    fun useExtendedKalmanFilter(useEKF: Boolean) {
-        tripSession.useExtendedKalmanFilter(useEKF)
     }
 
     companion object {

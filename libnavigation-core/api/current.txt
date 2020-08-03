@@ -42,7 +42,6 @@ package com.mapbox.navigation.core {
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
     method public void unregisterVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public void updateSensorEvent(android.hardware.SensorEvent sensorEvent);
-    method public void useExtendedKalmanFilter(boolean useEKF);
     field public static final com.mapbox.navigation.core.MapboxNavigation.Companion! Companion;
   }
 

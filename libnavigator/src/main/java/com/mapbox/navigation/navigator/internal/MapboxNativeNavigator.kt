@@ -28,7 +28,7 @@ interface MapboxNativeNavigator {
     /**
      * Initialize the navigator with a device profile
      */
-    fun create(deviceProfile: DeviceProfile, logger: Logger?): MapboxNativeNavigator
+    fun create(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator
 
     // Route following
 
@@ -145,8 +145,6 @@ interface MapboxNativeNavigator {
      *
      * @param routerParams Optional [RouterParams] object which contains router configurations for
      * getting routes offline.
-     *
-     * @return number of tiles founded in the directory
      */
     fun configureRouter(routerParams: RouterParams)
 
@@ -209,22 +207,6 @@ interface MapboxNativeNavigator {
      * @param eventJsonProperties the json to attach to the "properties" key of the event
      */
     fun addHistoryEvent(eventType: String, eventJsonProperties: String)
-
-    // Configuration
-
-    /**
-     * Gets the current configuration used for navigation.
-     *
-     * @return the [NavigatorConfig] used for navigation.
-     */
-    fun getConfig(): NavigatorConfig
-
-    /**
-     * Updates the configuration used for navigation. Passing null resets the config.
-     *
-     * @param config the new [NavigatorConfig]
-     */
-    fun setConfig(config: NavigatorConfig?)
 
     // Other
 

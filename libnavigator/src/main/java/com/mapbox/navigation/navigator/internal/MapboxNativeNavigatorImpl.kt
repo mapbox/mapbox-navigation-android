@@ -60,8 +60,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * Create or reset resources. This must be called before calling any
      * functions within [MapboxNativeNavigatorImpl]
      */
-    override fun create(deviceProfile: DeviceProfile, logger: Logger?): MapboxNativeNavigator {
-        navigator = NavigatorLoader.createNavigator(deviceProfile, logger)
+    override fun create(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator {
+        navigator = NavigatorLoader.createNavigator(deviceProfile, navigatorConfig, logger)
         route = null
         routeBufferGeoJson = null
         return this
@@ -280,24 +280,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun addHistoryEvent(eventType: String, eventJsonProperties: String) {
         navigator!!.pushHistory(eventType, eventJsonProperties)
-    }
-
-    // Configuration
-
-    /**
-     * Gets the current configuration used for navigation.
-     *
-     * @return the [NavigatorConfig] used for navigation.
-     */
-    override fun getConfig(): NavigatorConfig = navigator!!.config
-
-    /**
-     * Updates the configuration used for navigation. Passing null resets the config.
-     *
-     * @param config the new [NavigatorConfig]
-     */
-    override fun setConfig(config: NavigatorConfig?) {
-        navigator!!.setConfig(config)
     }
 
     // Other

@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigator.NavigatorConfig
 
 internal object NavigationComponentProvider {
     fun createDirectionsSession(
@@ -21,8 +22,8 @@ internal object NavigationComponentProvider {
     ): DirectionsSession =
         MapboxDirectionsSession(router)
 
-    fun createNativeNavigator(deviceProfile: DeviceProfile, logger: Logger?): MapboxNativeNavigator =
-        MapboxNativeNavigatorImpl.create(deviceProfile, logger)
+    fun createNativeNavigator(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator =
+        MapboxNativeNavigatorImpl.create(deviceProfile, navigatorConfig, logger)
 
     fun createTripService(
         applicationContext: Context,
