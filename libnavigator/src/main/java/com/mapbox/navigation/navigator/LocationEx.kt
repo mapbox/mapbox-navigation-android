@@ -7,18 +7,19 @@ import com.mapbox.navigator.FixLocation
 import java.util.Date
 
 internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
-    it.latitude = this.coordinate.latitude()
-    it.longitude = this.coordinate.longitude()
-    it.time = this.time.time
-    it.speed = this.speed ?: 0f
-    it.bearing = this.bearing ?: 0f
-    it.altitude = this.altitude?.toDouble() ?: 0.0
-    it.accuracy = this.accuracyHorizontal ?: 0f
+    it.latitude = coordinate.latitude()
+    it.longitude = coordinate.longitude()
+    it.time = time.time
+    it.elapsedRealtimeNanos = monotonicTimestampNanoseconds
+    it.speed = speed ?: 0f
+    it.bearing = bearing ?: 0f
+    it.altitude = altitude?.toDouble() ?: 0.0
+    it.accuracy = accuracyHorizontal ?: 0f
 
     if (isCurrentSdkVersionEqualOrGreaterThan(Build.VERSION_CODES.O)) {
-        it.bearingAccuracyDegrees = this.bearingAccuracy ?: 0f
-        it.speedAccuracyMetersPerSecond = this.speedAccuracy ?: 0f
-        it.verticalAccuracyMeters = this.verticalAccuracy ?: 0f
+        it.bearingAccuracyDegrees = bearingAccuracy ?: 0f
+        it.speedAccuracyMetersPerSecond = speedAccuracy ?: 0f
+        it.verticalAccuracyMeters = verticalAccuracy ?: 0f
     }
 }
 
@@ -35,6 +36,7 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
 
     return FixLocation(
         Point.fromLngLat(longitude, latitude),
+        elapsedRealtimeNanos,
         date,
         if (hasSpeed()) speed else null,
         if (hasBearing()) bearing else null,

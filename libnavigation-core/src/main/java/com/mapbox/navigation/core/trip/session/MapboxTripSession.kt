@@ -368,19 +368,6 @@ internal class MapboxTripSession(
         return navigator.updateLegIndex(legIndex)
     }
 
-    /**
-     * Updates the configuration to enable or disable the extended kalman filter (EKF).
-     *
-     * @param useEKF the new value for EKF
-     */
-    override fun useExtendedKalmanFilter(useEKF: Boolean) {
-        val config = navigator.getConfig()
-        if (config.useEKF != useEKF) {
-            config.useEKF = useEKF
-            navigator.setConfig(config)
-        }
-    }
-
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.lastOrNull()?.let {

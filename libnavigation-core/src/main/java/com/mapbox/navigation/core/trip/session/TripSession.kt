@@ -45,6 +45,5 @@ internal interface TripSession {
     fun unregisterAllVoiceInstructionsObservers()
 
     fun updateSensorEvent(sensorEvent: SensorEvent)
-    fun useExtendedKalmanFilter(useEKF: Boolean)
     fun updateLegIndex(legIndex: Int): NavigationStatus
 }

@@ -11,8 +11,7 @@ ext {
       mapboxSdkServices         : '5.3.0',
       mapboxEvents              : '6.0.0',
       mapboxCore                : '3.0.0',
-      mapboxNavigator           : '16.0.0',
-      mapboxCommonSdk           : '3.1.0', // Workaround. Remove when upgrading Nav Native.
+      mapboxNavigator           : '18.0.2',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
