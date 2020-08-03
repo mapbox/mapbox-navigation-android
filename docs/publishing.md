@@ -62,7 +62,7 @@ allprojects {
 
 dependencies {
    implementation 'com.mapbox.navigation:core:VERSION'
-   implementation 'com.mapbox.navigation:ui-v1:VERSION'
+   implementation 'com.mapbox.navigation:ui:VERSION'
 }
 ```
 

@@ -58,7 +58,7 @@ sdkNameMap["libdirections-hybrid"] = "mobile-navigation-router"
 sdkNameMap["libdirections-offboard"] = "mobile-navigation-router-offboard"
 sdkNameMap["libdirections-onboard"] = "mobile-navigation-router-onboard"
 sdkNameMap["libnavigation-util"] = "mobile-navigation-utils"
-sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui-v1"
+sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui"
 
 registry {
     sdkName = sdkNameMap[project.name]
