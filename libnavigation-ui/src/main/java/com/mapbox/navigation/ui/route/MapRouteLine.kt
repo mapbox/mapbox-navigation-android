@@ -145,10 +145,10 @@ internal class MapRouteLine(
         )
     }
 
-    private val routeLineShieldTraveledColor: Int by lazy {
+    private val routeLineCasingTraveledColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeLineShieldTraveledColor,
-            R.color.mapbox_navigation_route_shield_line_traveled_color,
+            R.styleable.NavigationMapRoute_routeLineCasingTraveledColor,
+            R.color.mapbox_navigation_route_casing_line_traveled_color,
             context,
             styleRes
         )
@@ -208,10 +208,10 @@ internal class MapRouteLine(
         )
     }
 
-    private val routeShieldColor: Int by lazy {
+    private val routeCasingColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeShieldColor,
-            R.color.mapbox_navigation_route_shield_layer_color,
+            R.styleable.NavigationMapRoute_routeCasingColor,
+            R.color.mapbox_navigation_route_casing_layer_color,
             context,
             styleRes
         )
@@ -298,10 +298,10 @@ internal class MapRouteLine(
         )
     }
 
-    private val alternativeRouteShieldColor: Int by lazy {
+    private val alternativeRouteCasingColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteShieldColor,
-            R.color.mapbox_navigation_route_alternative_shield_color,
+            R.styleable.NavigationMapRoute_alternativeRouteCasingColor,
+            R.color.mapbox_navigation_route_alternative_casing_color,
             context,
             styleRes
         )
@@ -397,7 +397,7 @@ internal class MapRouteLine(
             val expression = getExpressionAtOffset(vanishPointOffset)
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
             hideRouteLineAtOffset(vanishPointOffset)
-            hideShieldLineAtOffset(vanishPointOffset)
+            hideCasingLineAtOffset(vanishPointOffset)
         }
 
         routeLineInitializedCallback?.onInitialized(
@@ -449,7 +449,7 @@ internal class MapRouteLine(
         this.routeFeatureData.firstOrNull { it.route == primaryRoute }?.let {
             drawPrimaryRoute(it)
             hideRouteLineAtOffset(vanishPointOffset)
-            hideShieldLineAtOffset(vanishPointOffset)
+            hideCasingLineAtOffset(vanishPointOffset)
         }
     }
 
@@ -576,10 +576,10 @@ internal class MapRouteLine(
         belowLayerId: String
     ) {
 
-        layerProvider.initializeAlternativeRouteShieldLayer(
+        layerProvider.initializeAlternativeRouteCasingLayer(
             style,
             alternativeRouteScale,
-            alternativeRouteShieldColor
+            alternativeRouteCasingColor
         ).apply {
             MapUtils.addLayerToMap(
                 style,
@@ -603,10 +603,10 @@ internal class MapRouteLine(
             routeLayerIds.add(this.id)
         }
 
-        layerProvider.initializePrimaryRouteShieldLayer(
+        layerProvider.initializePrimaryRouteCasingLayer(
             style,
             routeScale,
-            routeShieldColor
+            routeCasingColor
         ).apply {
             MapUtils.addLayerToMap(
                 style,
@@ -667,7 +667,7 @@ internal class MapRouteLine(
         partitionedRoutes.first.firstOrNull()?.let {
             drawPrimaryRoute(it)
             hideRouteLineAtOffset(vanishPointOffset)
-            hideShieldLineAtOffset(vanishPointOffset)
+            hideCasingLineAtOffset(vanishPointOffset)
         }
         drawAlternativeRoutes(partitionedRoutes.second)
     }
@@ -774,7 +774,7 @@ internal class MapRouteLine(
         if (style.isFullyLoaded) {
             routeLayerIds.filter {
                 it == RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID ||
-                    it == RouteConstants.ALTERNATIVE_ROUTE_SHIELD_LAYER_ID
+                    it == RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
             }.mapNotNull { style.getLayer(it) }.forEach {
                 (it as LineLayer).setFilter(Expression.literal(isAlternativeVisible))
             }
@@ -818,21 +818,21 @@ internal class MapRouteLine(
     }
 
     /**
-     * Hides the RouteShield Layer
+     * Hides the RouteCasing Layer
      *
      * @param offset the offset of the visibility in the expression
      */
-    fun hideShieldLineAtOffset(offset: Float) {
+    fun hideCasingLineAtOffset(offset: Float) {
         val expression = Expression.step(
             Expression.lineProgress(),
-            Expression.color(routeLineShieldTraveledColor),
+            Expression.color(routeLineCasingTraveledColor),
             Expression.stop(
                 offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
-                Expression.color(routeShieldColor)
+                Expression.color(routeCasingColor)
             )
         )
         if (style.isFullyLoaded) {
-            style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID)
+            style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
                 ?.setProperties(lineGradient(expression))
         }
     }

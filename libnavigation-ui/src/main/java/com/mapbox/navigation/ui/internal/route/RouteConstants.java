@@ -5,10 +5,10 @@ public class RouteConstants {
   public static final String PRIMARY_ROUTE_TRAFFIC_SOURCE_ID = "mapbox-navigation-route-traffic-source";
   public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
   public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";
-  public static final String PRIMARY_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-route-shield-layer";
+  public static final String PRIMARY_ROUTE_CASING_LAYER_ID = "mapbox-navigation-route-casing-layer";
   public static final String ALTERNATIVE_ROUTE_SOURCE_ID = "mapbox-navigation-alt-route-source";
   public static final String ALTERNATIVE_ROUTE_LAYER_ID = "mapbox-navigation-alt-route-layer";
-  public static final String ALTERNATIVE_ROUTE_SHIELD_LAYER_ID = "mapbox-navigation-alt-route-shield-layer";
+  public static final String ALTERNATIVE_ROUTE_CASING_LAYER_ID = "mapbox-navigation-alt-route-casing-layer";
   public static final String WAYPOINT_SOURCE_ID = "mapbox-navigation-waypoint-source";
   public static final String WAYPOINT_LAYER_ID = "mapbox-navigation-waypoint-layer";
   public static final int TWO_POINTS = 2;

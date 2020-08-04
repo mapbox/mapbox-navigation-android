@@ -118,9 +118,9 @@
         <item name="routeModerateCongestionColor">@color/customRouteModerateCongestionColor</item>
         <item name="routeHeavyCongestionColor">@color/customRouteHeavyCongestionColor</item>
         <item name="routeSevereCongestionColor">@color/customRouteSevereCongestionColor</item>
-        <item name="routeShieldColor">@color/customRouteShieldColor</item>
+        <item name="routeCasingColor">@color/customRouteCasingColor</item>
         <item name="routeLineTraveledColor">@color/customRouteLineTraveledColor</item>
-        <item name="routeLineShieldTraveledColor">@color/customRouteLineShieldTraveledColor</item>
+        <item name="routeLineCasingTraveledColor">@color/customRouteLineCasingTraveledColor</item>
         <item name="alternativeRouteColor">@color/customAlternativeRouteColor</item>
         <item name="alternativeRouteUnknownCongestionColor">
             @color/customAlternativeRouteUnknownCongestionColor
@@ -134,8 +134,8 @@
         <item name="alternativeRouteSevereCongestionColor">
             @color/customAlternativeRouteSevereCongestionColor
         </item>
-        <item name="alternativeRouteShieldColor">
-            @color/customAlternativeRouteShieldColor
+        <item name="alternativeRouteCasingColor">
+            @color/customAlternativeRouteCasingColor
         </item>
         <item name="routeTrafficScale">0.5</item>
     </style>

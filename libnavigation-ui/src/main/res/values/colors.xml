@@ -7,9 +7,9 @@
   <color name="mapbox_navigation_route_layer_congestion_yellow">#F3A64F</color>
   <color name="mapbox_navigation_route_layer_congestion_heavy">#E93340</color>
   <color name="mapbox_navigation_route_layer_congestion_red">#E93340</color>
-  <color name="mapbox_navigation_route_shield_layer_color">#2F7AC6</color>
+  <color name="mapbox_navigation_route_casing_layer_color">#2F7AC6</color>
   <color name="mapbox_navigation_route_line_traveled_color">#00000000</color>
-  <color name="mapbox_navigation_route_shield_line_traveled_color">#00000000</color>
+  <color name="mapbox_navigation_route_casing_line_traveled_color">#00000000</color>
 
   <!-- Alternative route colors -->
   <color name="mapbox_navigation_route_alternative_color">#8694A5</color>
@@ -17,7 +17,7 @@
   <color name="mapbox_navigation_route_alternative_congestion_yellow">#BEA087</color>
   <color name="mapbox_navigation_route_alternative_congestion_heavy">#B58281</color>
   <color name="mapbox_navigation_route_alternative_congestion_red">#B58281</color>
-  <color name="mapbox_navigation_route_alternative_shield_color">#727E8D</color>
+  <color name="mapbox_navigation_route_alternative_casing_color">#727E8D</color>
 
   <color name="mapbox_navigation_route_upcoming_maneuver_arrow_color">#FFFFFF</color>
   <color name="mapbox_navigation_route_upcoming_maneuver_arrow_border_color">#2D3F53</color>

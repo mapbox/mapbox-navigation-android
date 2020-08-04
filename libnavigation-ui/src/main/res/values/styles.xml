@@ -17,11 +17,11 @@
         <item name="routeSevereCongestionColor">
             @color/mapbox_navigation_route_layer_congestion_red
         </item>
-        <item name="routeShieldColor">@color/mapbox_navigation_route_shield_layer_color</item>
+        <item name="routeCasingColor">@color/mapbox_navigation_route_casing_layer_color</item>
         <item name="routeLineTraveledColor">@color/mapbox_navigation_route_line_traveled_color
         </item>
-        <item name="routeLineShieldTraveledColor">
-            @color/mapbox_navigation_route_shield_line_traveled_color
+        <item name="routeLineCasingTraveledColor">
+            @color/mapbox_navigation_route_casing_line_traveled_color
         </item>
         <item name="alternativeRouteColor">@color/mapbox_navigation_route_alternative_color</item>
         <item name="alternativeRouteUnknownCongestionColor">
@@ -39,8 +39,8 @@
         <item name="alternativeRouteSevereCongestionColor">
             @color/mapbox_navigation_route_alternative_congestion_red
         </item>
-        <item name="alternativeRouteShieldColor">
-            @color/mapbox_navigation_route_alternative_shield_color
+        <item name="alternativeRouteCasingColor">
+            @color/mapbox_navigation_route_alternative_casing_color
         </item>
         <!-- Scales -->
         <item name="routeScale">1.0</item>
