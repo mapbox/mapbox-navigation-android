@@ -63,7 +63,6 @@ ext {
       mapboxEvents              : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
-      mapboxCommonSdk           : "com.mapbox.common:common:${version.mapboxCommonSdk}", // Workaround. Remove when upgrading Nav Native.
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",

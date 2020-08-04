@@ -1,6 +1,5 @@
 package com.mapbox.navigation.route.onboard.internal
 
-import android.content.Context
 import com.google.gson.Gson
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
@@ -10,19 +9,15 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
-import com.mapbox.navigation.route.onboard.NativeSkuTokenProvider
 import com.mapbox.navigation.route.onboard.OfflineRoute
 import com.mapbox.navigation.route.onboard.model.OfflineRouteError
 import com.mapbox.navigation.utils.NavigationException
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.RouterParams
-import com.mapbox.navigator.TileEndpointConfiguration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
@@ -34,41 +29,21 @@ import kotlinx.coroutines.withContext
  * It uses offline storage path to store and retrieve data, setup endpoint,
  * tiles' version, token. Config is provided via [OnboardRouterOptions].
  *
- * @param applicationContext Application context
- * @param accessToken Mapbox token
  * @param navigatorNative Native Navigator
- * @param options configuration for on-board router
  * @param logger interface for logging any events
- * @param skuTokenProvider skuTokenProvider [SkuTokenProvider]
  */
 @MapboxModule(MapboxModuleType.NavigationOnboardRouter)
 class MapboxOnboardRouter(
-    private val applicationContext: Context,
-    private val accessToken: String,
     private val navigatorNative: MapboxNativeNavigator,
-    private val options: OnboardRouterOptions,
-    private val logger: Logger,
-    private val skuTokenProvider: SkuTokenProvider
+    private val logger: Logger
 ) : Router {
 
     private companion object {
         private val loggerTag = Tag("MapboxOnboardRouter")
-        private const val USER_AGENT: String = "MapboxNavigationNative"
-        private const val THREADS_COUNT = 2
     }
 
     private val mainJobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private val gson = Gson()
-
-    private val onboardRouterFiles = OnboardRouterFiles(applicationContext, logger)
-
-    init {
-        mainJobControl.scope.launch {
-            onboardRouterFiles.absolutePath(options)?.let { absolutePath ->
-                configureRouter(absolutePath)
-            }
-        }
-    }
 
     /**
      * Fetch route based on [RouteOptions]
@@ -144,24 +119,6 @@ class MapboxOnboardRouter(
      */
     override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
         // Does nothing
-    }
-
-    private fun configureRouter(absolutePath: String) {
-        val routerParams = RouterParams(
-            absolutePath,
-            null,
-            null,
-            THREADS_COUNT,
-            TileEndpointConfiguration(
-                options.tilesUri.toString(),
-                options.tilesVersion,
-                accessToken,
-                USER_AGENT,
-                "",
-                NativeSkuTokenProvider(skuTokenProvider)
-            )
-        )
-        navigatorNative.configureRouter(routerParams)
     }
 
     private fun retrieveRoute(url: String, callback: Router.Callback) {
