@@ -311,8 +311,8 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private List<FeedbackItem> buildGuidanceIssueList() {
     List<FeedbackItem> list = new ArrayList<>();
 
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_incorrect_visual),
-      R.drawable.ic_feedback_incorrect_visual,
+    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_looks_incorrect),
+      R.drawable.ic_feedback_looks_incorrect,
       FeedbackEvent.INCORRECT_VISUAL_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
     list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_confusing_audio),

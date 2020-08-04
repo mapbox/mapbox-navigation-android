@@ -18,8 +18,8 @@
     <!-- Feedback Guidance Issue -->
     <string name="feedback_guidance_issue">Guidance Issue</string>
 
-    <!-- Feedback type for Incorrect Visual -->
-    <string name="feedback_type_incorrect_visual">Incorrect\nVisual</string>
+    <!-- Feedback type for Looks Incorrect -->
+    <string name="feedback_type_looks_incorrect">Looks\nIncorrect</string>
 
     <!-- Feedback type for Confusing Audio -->
     <string name="feedback_type_confusing_audio">Confusing\nAudio</string>
@@ -42,7 +42,7 @@
     <!-- Shown after a feedback type has been submitted -->
     <string name="feedback_reported">Thank you! Issue reported.</string>
 
-    <!-- Feedback description for Incorrect Visual -->
+    <!-- Feedback description for Looks Incorrect -->
     <string name="feedback_description_turn_icon_incorrect">Turn icon incorrect</string>
     <string name="feedback_description_street_name_incorrect">Street name incorrect</string>
     <string name="feedback_description_instruction_unnecessary">Instruction unnecessary</string>
