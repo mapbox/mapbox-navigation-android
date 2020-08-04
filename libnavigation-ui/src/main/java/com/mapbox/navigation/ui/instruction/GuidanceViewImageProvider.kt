@@ -24,7 +24,7 @@ import okhttp3.Response
  * [BannerInstructions]
  * @constructor
  */
-class GuidanceViewImageProvider() {
+class GuidanceViewImageProvider {
 
     companion object {
         private const val USER_AGENT_KEY = "User-Agent"

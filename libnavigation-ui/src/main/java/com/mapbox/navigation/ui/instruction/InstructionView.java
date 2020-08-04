@@ -148,7 +148,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
 
     @Override
-    public void onFailure(@org.jetbrains.annotations.Nullable String message) {
+    public void onFailure(@Nullable String message) {
       animateHideGuidanceViewImage();
     }
   };
