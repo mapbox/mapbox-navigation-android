@@ -4,20 +4,14 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
-import java.io.IOException
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.IOException
 
 /**
  * The class serves as a medium to emit bitmaps for the respective guidance view URL embedded in
@@ -31,7 +25,6 @@ class GuidanceViewImageProvider {
         private const val USER_AGENT_VALUE = "MapboxJava/"
     }
 
-    private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
     private val okHttpClient = OkHttpClient.Builder().addInterceptor { chain: Interceptor.Chain ->
         chain.proceed(
             chain.request().newBuilder().addHeader(USER_AGENT_KEY, USER_AGENT_VALUE).build()
@@ -60,13 +53,6 @@ class GuidanceViewImageProvider {
                 }
             } ?: callback.onNoGuidanceImageUrl()
         } ?: callback.onNoGuidanceImageUrl()
-    }
-
-    /**
-     * The API allows you to cancel the rendering of guidance view.
-     */
-    fun cancelRender() {
-        mainJobController.job.cancelChildren()
     }
 
     private fun getBitmap(url: String, callback: OnGuidanceImageDownload) {
