@@ -14,7 +14,6 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.navigation.base.internal.VoiceUnit
-import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
@@ -62,8 +61,11 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.NavigatorConfig
+import com.mapbox.navigator.RouterParams
+import com.mapbox.navigator.TileEndpointConfiguration
 import java.lang.reflect.Field
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -158,6 +160,7 @@ class MapboxNavigation(
             navigatorConfig,
             logger
         )
+        configureRouter()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
@@ -661,12 +664,8 @@ class MapboxNavigation(
             MapboxModuleType.NavigationOnboardRouter -> {
                 check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
                 arrayOf(
-                    Context::class.java to navigationOptions.applicationContext,
-                    String::class.java to accessToken,
                     MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                    OnboardRouterOptions::class.java to navigationOptions.onboardRouterOptions,
-                    Logger::class.java to logger,
-                    SkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
+                    Logger::class.java to logger
                 )
             }
             MapboxModuleType.NavigationTripNotification -> arrayOf(
@@ -687,7 +686,35 @@ class MapboxNavigation(
         tripSession.updateSensorEvent(sensorEvent)
     }
 
+    private fun configureRouter() {
+        with(navigationOptions) {
+            ThreadController.getMainScopeAndRootJob().scope.launch {
+                val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
+                    .absolutePath(onboardRouterOptions)
+                offlineFilesPath?.let { path ->
+                    val routerParams = RouterParams(
+                        path,
+                        null,
+                        null,
+                        THREADS_COUNT,
+                        TileEndpointConfiguration(
+                            onboardRouterOptions.tilesUri.toString(),
+                            onboardRouterOptions.tilesVersion,
+                            accessToken ?: "",
+                            USER_AGENT,
+                            "",
+                            NativeSkuTokenProvider(MapboxNavigationAccounts.getInstance(applicationContext))
+                        )
+                    )
+                    navigator.configureRouter(routerParams)
+                }
+            }
+        }
+    }
+
     companion object {
+        private const val USER_AGENT: String = "MapboxNavigationNative"
+        private const val THREADS_COUNT = 2
 
         /**
          * Send user feedback about an issue or problem with the Navigation SDK

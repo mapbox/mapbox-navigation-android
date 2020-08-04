@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard.internal
+package com.mapbox.navigation.core
 
 import android.content.Context
 import com.mapbox.base.common.logger.Logger

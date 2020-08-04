@@ -1,4 +1,4 @@
-package com.mapbox.navigation.route.onboard
+package com.mapbox.navigation.core
 
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigator.SkuTokenSource
