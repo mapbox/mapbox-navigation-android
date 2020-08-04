@@ -4,14 +4,18 @@ import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -29,11 +33,14 @@ class GuidanceViewImageProviderTest {
 
     private val callback: GuidanceViewImageProvider.OnGuidanceImageDownload = mockk(relaxed = true)
     private val guidanceViewImageProvider: GuidanceViewImageProvider = GuidanceViewImageProvider()
+    private val parentJob = SupervisorJob()
+    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     @Before
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
     }
 
     @After
@@ -45,7 +52,9 @@ class GuidanceViewImageProviderTest {
     fun `when banner view is null`() {
         val bannerInstructions: BannerInstructions = mockk()
         every { bannerInstructions.view() } returns null
+
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
+
         verify(exactly = 1) { callback.onNoGuidanceImageUrl() }
     }
 
@@ -57,6 +66,7 @@ class GuidanceViewImageProviderTest {
         every { bannerView.components() } returns null
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
+
         verify(exactly = 1) { callback.onNoGuidanceImageUrl() }
     }
 
@@ -71,6 +81,7 @@ class GuidanceViewImageProviderTest {
         every { bannerView.components() } returns bannerComponentList
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
+
         verify(exactly = 1) { callback.onFailure(capture(captureData)) }
         assertEquals("Guidance View Image URL is null", captureData.captured)
     }
@@ -89,14 +100,12 @@ class GuidanceViewImageProviderTest {
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentList
 
-        guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
-
         val job = launch {
             guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
         }
         job.join()
 
-        verify(exactly = 1) { callback.onFailure(capture(captureData)) }
+        coVerify(exactly = 1) { callback.onFailure(capture(captureData)) }
         assertEquals("Client Error", captureData.captured)
         mockWebServer.shutdown()
     }
