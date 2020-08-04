@@ -362,7 +362,6 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                     updateLocationLayerRenderMode(RenderMode.GPS)
                 } else {
                     symbolManager?.deleteAll()
-                    removeRoute()
                     updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_NONE)
                     updateLocationLayerRenderMode(RenderMode.COMPASS)
                 }
