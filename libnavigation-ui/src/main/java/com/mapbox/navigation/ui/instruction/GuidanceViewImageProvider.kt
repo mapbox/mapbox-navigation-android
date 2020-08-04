@@ -5,13 +5,13 @@ import android.graphics.BitmapFactory
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.navigation.utils.internal.ifNonNull
+import java.io.IOException
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.IOException
 
 /**
  * The class serves as a medium to emit bitmaps for the respective guidance view URL embedded in
