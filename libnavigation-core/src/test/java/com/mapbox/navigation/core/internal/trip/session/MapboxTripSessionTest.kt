@@ -4,7 +4,6 @@ import android.location.Location
 import android.os.Looper
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineRequest
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
@@ -69,7 +68,6 @@ class MapboxTripSessionTest {
 
     private val tripService: TripService = mockk(relaxUnitFun = true)
     private val locationEngine: LocationEngine = mockk(relaxUnitFun = true)
-    private val locationEngineRequest: LocationEngineRequest = mockk()
     private val route: DirectionsRoute = mockk()
 
     private val locationCallbackSlot = slot<LocationEngineCallback<LocationEngineResult>>()
