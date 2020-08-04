@@ -37,6 +37,8 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textSize="20sp"
+            android:textDirection="locale"
+            android:textAlignment="gravity"
             tools:text="3.2 mi" />
     </LinearLayout>
 
@@ -62,6 +64,8 @@
             android:maxLines="1"
             android:textSize="28sp"
             android:textStyle="bold"
+            android:textDirection="locale"
+            android:textAlignment="gravity"
             tools:text="Fulton St." />
 
         <TextView
@@ -73,6 +77,8 @@
             android:maxLines="1"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:textDirection="locale"
+            android:textAlignment="gravity"
             tools:text="San Jose / Cupertino / Saratoga Montery / SR-1" />
 
     </LinearLayout>

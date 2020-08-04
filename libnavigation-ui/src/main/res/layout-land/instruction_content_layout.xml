@@ -40,6 +40,8 @@
             android:includeFontPadding="false"
             android:maxLines="1"
             android:textSize="20sp"
+            android:textDirection="locale"
+            android:textAlignment="gravity"
             tools:text="3.2 mi" />
 
     </LinearLayout>
@@ -64,6 +66,8 @@
             android:maxLines="1"
             android:textSize="28sp"
             android:textStyle="bold"
+            android:textDirection="rtl"
+            android:textAlignment="gravity"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -81,6 +85,8 @@
             android:maxLines="1"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:textDirection="rtl"
+            android:textAlignment="gravity"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/stepPrimaryText"
