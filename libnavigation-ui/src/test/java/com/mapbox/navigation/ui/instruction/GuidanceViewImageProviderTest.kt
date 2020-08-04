@@ -3,50 +3,21 @@ package com.mapbox.navigation.ui.instruction
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
-import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.JobControl
-import com.mapbox.navigation.utils.internal.ThreadController
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class GuidanceViewImageProviderTest {
 
-    @get:Rule
-    var coroutineRule = MainCoroutineRule()
-
     private val callback: GuidanceViewImageProvider.OnGuidanceImageDownload = mockk(relaxed = true)
     private val guidanceViewImageProvider: GuidanceViewImageProvider = GuidanceViewImageProvider()
-    private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
-
-    @Before
-    fun setUp() {
-        mockkObject(ThreadController)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
-    }
-
-    @After
-    fun tearDown() {
-        unmockkObject(ThreadController)
-    }
 
     @Test
     fun `when banner view is null`() {
@@ -87,7 +58,7 @@ class GuidanceViewImageProviderTest {
     }
 
     @Test
-    fun `when url has invalid access token`() = coroutineRule.runBlockingTest {
+    fun `when url has invalid access token`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()
@@ -100,12 +71,9 @@ class GuidanceViewImageProviderTest {
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentList
 
-        val job = launch {
-            guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
-        }
-        job.join()
+        guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
 
-        coVerify(exactly = 1) { callback.onFailure(capture(captureData)) }
+        verify(exactly = 1) { callback.onFailure(capture(captureData)) }
         assertEquals("Client Error", captureData.captured)
         mockWebServer.shutdown()
     }

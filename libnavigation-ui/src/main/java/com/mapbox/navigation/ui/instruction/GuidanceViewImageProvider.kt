@@ -54,12 +54,7 @@ class GuidanceViewImageProvider {
                 components.forEach { component ->
                     component.takeIf { it.type() == BannerComponents.GUIDANCE_VIEW }?.let {
                         ifNonNull(it.imageUrl()) { url ->
-                            mainJobController.scope.launch {
-                                val response = getBitmap(url)
-                                response.bitmap?.let { b ->
-                                    callback.onGuidanceImageReady(b)
-                                } ?: callback.onFailure(response.error)
-                            }
+                            getBitmap(url, callback)
                         } ?: callback.onFailure("Guidance View Image URL is null")
                     }
                 }
@@ -74,35 +69,21 @@ class GuidanceViewImageProvider {
         mainJobController.job.cancelChildren()
     }
 
-    private suspend fun getBitmap(url: String): GuidanceViewImageResponse =
-        withContext(ThreadController.IODispatcher) {
-            suspendCoroutine<GuidanceViewImageResponse> {
-                val req = Request.Builder().url(url).build()
-                okHttpClient.newCall(req).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        resumeCoroutine(GuidanceViewImageResponse(error = e.message))
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        resumeCoroutine(
-                            GuidanceViewImageResponse(
-                                BitmapFactory.decodeStream(response.body()?.byteStream()),
-                                response.message()
-                            )
-                        )
-                    }
-
-                    private fun resumeCoroutine(result: GuidanceViewImageResponse) {
-                        it.resumeWith(Result.success(result))
-                    }
-                })
+    private fun getBitmap(url: String, callback: OnGuidanceImageDownload) {
+        val req = Request.Builder().url(url).build()
+        okHttpClient.newCall(req).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                callback.onFailure(e.message)
             }
-        }
 
-    internal data class GuidanceViewImageResponse(
-        val bitmap: Bitmap? = null,
-        val error: String? = null
-    )
+            override fun onResponse(call: Call, response: Response) {
+                val bitmap = BitmapFactory.decodeStream(response.body()?.byteStream())
+                bitmap?.let {
+                    callback.onGuidanceImageReady(it)
+                } ?: callback.onFailure(response.message())
+            }
+        })
+    }
 
     /**
      * Callback that is triggered based on appropriate state of image downloading
