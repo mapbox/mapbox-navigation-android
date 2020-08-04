@@ -60,7 +60,7 @@ object FeedbackEvent {
     const val INACCURATE_GPS = "inaccurate_gps"
 
     /**
-     * Feedback type *incorrect visual guidance*: wrong visual guidance
+     * Feedback type *looks incorrect*: wrong visual guidance
      */
     const val INCORRECT_VISUAL_GUIDANCE = "incorrect_visual_guidance"
 
@@ -85,42 +85,42 @@ object FeedbackEvent {
     const val UI = "user"
 
     /**
-     * Feedback description for *incorrect visual guidance*: turn icon incorrect
+     * Feedback description for *looks incorrect*: turn icon incorrect
      */
     const val TURN_ICON_INCORRECT = "turn_icon_incorrect"
 
     /**
-     * Feedback description for *incorrect visual guidance*: street name incorrect
+     * Feedback description for *looks incorrect*: street name incorrect
      */
     const val STREET_NAME_INCORRECT = "street_name_incorrect"
 
     /**
-     * Feedback description for *incorrect visual guidance*: instruction unnecessary
+     * Feedback description for *looks incorrect*: instruction unnecessary
      */
     const val INSTRUCTION_UNNECESSARY = "instruction_unnecessary"
 
     /**
-     * Feedback description for *incorrect visual guidance*: instruction missing
+     * Feedback description for *looks incorrect*: instruction missing
      */
     const val INSTRUCTION_MISSING = "instruction_missing"
 
     /**
-     * Feedback description for *incorrect visual guidance*: maneuver incorrect
+     * Feedback description for *looks incorrect*: maneuver incorrect
      */
     const val MANEUVER_INCORRECT = "maneuver_incorrect"
 
     /**
-     * Feedback description for *incorrect visual guidance*: exit info incorrect
+     * Feedback description for *looks incorrect*: exit info incorrect
      */
     const val EXIT_INFO_INCORRECT = "exit_info_incorrect"
 
     /**
-     * Feedback description for *incorrect visual guidance*: lane guidance incorrect
+     * Feedback description for *looks incorrect*: lane guidance incorrect
      */
     const val LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect"
 
     /**
-     * Feedback description for *incorrect visual guidance*: road know by different name
+     * Feedback description for *looks incorrect*: road know by different name
      */
     const val ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name"
 
