@@ -54,7 +54,7 @@ internal class MapRouteProgressChangeListener(
     private val routeLineAnimatorUpdateHandler: RouteLineValueAnimatorHandler = { animationValue ->
         if (animationValue > MINIMUM_ROUTE_LINE_OFFSET) {
             val expression = routeLine.getExpressionAtOffset(animationValue)
-            routeLine.hideShieldLineAtOffset(animationValue)
+            routeLine.hideCasingLineAtOffset(animationValue)
             routeLine.hideRouteLineAtOffset(animationValue)
             routeLine.decorateRouteLine(expression)
             lastDistanceValue = animationValue

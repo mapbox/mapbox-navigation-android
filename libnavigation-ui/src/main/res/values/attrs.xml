@@ -8,9 +8,9 @@
     <attr name="routeModerateCongestionColor" format="color"/>
     <attr name="routeHeavyCongestionColor" format="color"/>
     <attr name="routeSevereCongestionColor" format="color"/>
-    <attr name="routeShieldColor" format="color"/>
+    <attr name="routeCasingColor" format="color"/>
     <attr name="routeLineTraveledColor" format="color"/>
-    <attr name="routeLineShieldTraveledColor" format="color"/>
+    <attr name="routeLineCasingTraveledColor" format="color"/>
 
     <!-- Alternative route colors -->
     <attr name="alternativeRouteColor" format="color"/>
@@ -19,7 +19,7 @@
     <attr name="alternativeRouteModerateCongestionColor" format="color"/>
     <attr name="alternativeRouteHeavyCongestionColor" format="color"/>
     <attr name="alternativeRouteSevereCongestionColor" format="color"/>
-    <attr name="alternativeRouteShieldColor" format="color"/>
+    <attr name="alternativeRouteCasingColor" format="color"/>
 
     <!-- Origin/Destination waypoint drawables -->
     <attr name="originWaypointIcon" format="reference"/>

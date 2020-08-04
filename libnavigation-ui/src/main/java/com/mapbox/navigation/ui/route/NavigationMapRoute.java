@@ -445,7 +445,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   public void updateRouteLineWithDistanceTraveled(float distanceTraveled) {
-    routeLine.hideShieldLineAtOffset(distanceTraveled);
+    routeLine.hideCasingLineAtOffset(distanceTraveled);
     routeLine.hideRouteLineAtOffset(distanceTraveled);
     mapRouteProgressChangeListener.updatePercentDistanceTraveled(distanceTraveled);
   }

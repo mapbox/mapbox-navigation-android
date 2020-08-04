@@ -235,7 +235,7 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `hides shield line at offset when route progress route has geometry`() {
+    fun `hides casing line at offset when route progress route has geometry`() {
         val expression: Expression = mockk()
         val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
         val routes = listOf(
@@ -258,11 +258,11 @@ class MapRouteProgressChangeListenerTest {
             progressChangeListener.onRouteProgressChanged(routeProgress)
         }
 
-        verify { routeLine.hideShieldLineAtOffset(any()) }
+        verify { routeLine.hideCasingLineAtOffset(any()) }
     }
 
     @Test
-    fun `does not hide shield line at offset when route progress route does not have geometry`() {
+    fun `does not hide casing line at offset when route progress route does not have geometry`() {
         val expression: Expression = mockk()
         val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow, animator)
         val routes = listOf(
@@ -285,7 +285,7 @@ class MapRouteProgressChangeListenerTest {
             progressChangeListener.onRouteProgressChanged(routeProgress)
         }
 
-        verify(exactly = 0) { routeLine.hideShieldLineAtOffset(any()) }
+        verify(exactly = 0) { routeLine.hideCasingLineAtOffset(any()) }
     }
 
     @Test

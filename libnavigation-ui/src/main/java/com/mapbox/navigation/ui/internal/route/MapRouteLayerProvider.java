@@ -29,12 +29,12 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID;
-import static com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SHIELD_LAYER_ID;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.DESTINATION_MARKER_NAME;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.ORIGIN_MARKER_NAME;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID;
-import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID;
+import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID;
@@ -46,15 +46,15 @@ import static com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SO
 
 public class MapRouteLayerProvider {
 
-  public LineLayer initializePrimaryRouteShieldLayer(Style style, float routeScale, int routeShieldColor) {
-    LineLayer primaryShieldLayer = style.getLayerAs(PRIMARY_ROUTE_SHIELD_LAYER_ID);
-    if (primaryShieldLayer != null) {
-      style.removeLayer(primaryShieldLayer);
+  public LineLayer initializePrimaryRouteCasingLayer(Style style, float routeScale, int routeCasingColor) {
+    LineLayer primaryCasingLayer = style.getLayerAs(PRIMARY_ROUTE_CASING_LAYER_ID);
+    if (primaryCasingLayer != null) {
+      style.removeLayer(primaryCasingLayer);
     }
 
     // fixme reduce all the duplicate code here
 
-    primaryShieldLayer = new LineLayer(PRIMARY_ROUTE_SHIELD_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID).withProperties(
+    primaryCasingLayer = new LineLayer(PRIMARY_ROUTE_CASING_LAYER_ID, PRIMARY_ROUTE_SOURCE_ID).withProperties(
      lineCap(Property.LINE_CAP_ROUND),
      lineJoin(Property.LINE_JOIN_ROUND),
      lineWidth(
@@ -67,22 +67,22 @@ public class MapRouteLayerProvider {
              stop(22f, product(literal(29f), literal(routeScale)))
           )
      ),
-     lineColor(color(routeShieldColor))
+     lineColor(color(routeCasingColor))
    );
-    return primaryShieldLayer;
+    return primaryCasingLayer;
   }
 
-  public LineLayer initializeAlternativeRouteShieldLayer(
+  public LineLayer initializeAlternativeRouteCasingLayer(
     Style style,
     float alternativeRouteScale,
-    int alternativeRouteShieldColor) {
-    LineLayer alternativeShieldLayer = style.getLayerAs(ALTERNATIVE_ROUTE_SHIELD_LAYER_ID);
-    if (alternativeShieldLayer != null) {
-      style.removeLayer(alternativeShieldLayer);
+    int alternativeRouteCasingColor) {
+    LineLayer alternativeCasingLayer = style.getLayerAs(ALTERNATIVE_ROUTE_CASING_LAYER_ID);
+    if (alternativeCasingLayer != null) {
+      style.removeLayer(alternativeCasingLayer);
     }
 
-    alternativeShieldLayer = new LineLayer(
-            ALTERNATIVE_ROUTE_SHIELD_LAYER_ID,
+    alternativeCasingLayer = new LineLayer(
+            ALTERNATIVE_ROUTE_CASING_LAYER_ID,
             ALTERNATIVE_ROUTE_SOURCE_ID)
             .withProperties(
        lineCap(Property.LINE_CAP_ROUND),
@@ -97,9 +97,9 @@ public class MapRouteLayerProvider {
                    stop(22f, product(literal(29f), literal(alternativeRouteScale)))
                )
        ),
-       lineColor(alternativeRouteShieldColor)
+       lineColor(alternativeRouteCasingColor)
     );
-    return alternativeShieldLayer;
+    return alternativeCasingLayer;
   }
 
   public LineLayer initializePrimaryRouteLayer(Style style,

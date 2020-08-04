@@ -20,10 +20,10 @@ import com.mapbox.navigation.ui.internal.ThemeSwitcher
 import com.mapbox.navigation.ui.internal.route.MapRouteLayerProvider
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SHIELD_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SHIELD_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import io.mockk.every
@@ -51,9 +51,9 @@ class MapRouteLineTest {
 
     lateinit var mapRouteSourceProvider: MapRouteSourceProvider
     lateinit var layerProvider: MapRouteLayerProvider
-    lateinit var alternativeRouteShieldLayer: LineLayer
+    lateinit var alternativeRouteCasingdLayer: LineLayer
     lateinit var alternativeRouteLayer: LineLayer
-    lateinit var primaryRouteShieldLayer: LineLayer
+    lateinit var primaryRouteCasingLayer: LineLayer
     lateinit var primaryRouteLayer: LineLayer
     lateinit var primaryRouteTrafficLayer: LineLayer
     lateinit var waypointLayer: SymbolLayer
@@ -67,16 +67,16 @@ class MapRouteLineTest {
             ctx,
             R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
         )
-        alternativeRouteShieldLayer = mockk {
-            every { id } returns ALTERNATIVE_ROUTE_SHIELD_LAYER_ID
+        alternativeRouteCasingdLayer = mockk {
+            every { id } returns ALTERNATIVE_ROUTE_CASING_LAYER_ID
         }
 
         alternativeRouteLayer = mockk {
             every { id } returns ALTERNATIVE_ROUTE_LAYER_ID
         }
 
-        primaryRouteShieldLayer = mockk {
-            every { id } returns PRIMARY_ROUTE_SHIELD_LAYER_ID
+        primaryRouteCasingLayer = mockk {
+            every { id } returns PRIMARY_ROUTE_CASING_LAYER_ID
         }
 
         primaryRouteLayer = mockk {
@@ -93,10 +93,10 @@ class MapRouteLineTest {
 
         style = mockk(relaxUnitFun = true) {
             every { getLayer(ALTERNATIVE_ROUTE_LAYER_ID) } returns alternativeRouteLayer
-            every { getLayer(ALTERNATIVE_ROUTE_SHIELD_LAYER_ID) } returns alternativeRouteShieldLayer
+            every { getLayer(ALTERNATIVE_ROUTE_CASING_LAYER_ID) } returns alternativeRouteCasingdLayer
             every { getLayer(PRIMARY_ROUTE_LAYER_ID) } returns primaryRouteLayer
             every { getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns primaryRouteTrafficLayer
-            every { getLayer(PRIMARY_ROUTE_SHIELD_LAYER_ID) } returns primaryRouteShieldLayer
+            every { getLayer(PRIMARY_ROUTE_CASING_LAYER_ID) } returns primaryRouteCasingLayer
             every { getLayer(WAYPOINT_LAYER_ID) } returns waypointLayer
             every { isFullyLoaded } returns false
         }
@@ -114,12 +114,12 @@ class MapRouteLineTest {
         }
         layerProvider = mockk {
             every {
-                initializeAlternativeRouteShieldLayer(
+                initializeAlternativeRouteCasingLayer(
                     style,
                     1.0f,
                     -9273715
                 )
-            } returns alternativeRouteShieldLayer
+            } returns alternativeRouteCasingdLayer
             every {
                 initializeAlternativeRouteLayer(
                     style,
@@ -129,12 +129,12 @@ class MapRouteLineTest {
                 )
             } returns alternativeRouteLayer
             every {
-                initializePrimaryRouteShieldLayer(
+                initializePrimaryRouteCasingLayer(
                     style,
                     1.0f,
                     -13665594
                 )
-            } returns primaryRouteShieldLayer
+            } returns primaryRouteCasingLayer
             every {
                 initializePrimaryRouteLayer(
                     style,
@@ -1027,18 +1027,18 @@ class MapRouteLineTest {
         every { style.isFullyLoaded } returns true
         every { style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) } returns primaryRouteLayer
         every { primaryRouteLayer.setFilter(any()) } returns Unit
-        every { primaryRouteShieldLayer.setFilter(any()) } returns Unit
+        every { primaryRouteCasingLayer.setFilter(any()) } returns Unit
         every { alternativeRouteLayer.setFilter(any()) } returns Unit
-        every { alternativeRouteShieldLayer.setFilter(any()) } returns Unit
+        every { alternativeRouteCasingdLayer.setFilter(any()) } returns Unit
         every { primaryRouteTrafficLayer.setFilter(any()) } returns Unit
         every { waypointLayer.setFilter(any()) } returns Unit
         every { primaryRouteLayer.setProperties(any()) } returns Unit
-        every { primaryRouteShieldLayer.setProperties(any()) } returns Unit
+        every { primaryRouteCasingLayer.setProperties(any()) } returns Unit
         every { alternativeRouteLayer.setProperties(any()) } returns Unit
-        every { alternativeRouteShieldLayer.setProperties(any()) } returns Unit
+        every { alternativeRouteCasingdLayer.setProperties(any()) } returns Unit
         every { primaryRouteTrafficLayer.setProperties(any()) } returns Unit
         every { waypointLayer.setProperties(any()) } returns Unit
-        every { style.getLayerAs<LineLayer>("mapbox-navigation-route-shield-layer") } returns primaryRouteShieldLayer
+        every { style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer") } returns primaryRouteCasingLayer
 
         val route = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
