@@ -1,5 +1,6 @@
 package com.mapbox.navigation.ui.instruction
 
+import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
@@ -7,10 +8,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
@@ -63,18 +68,42 @@ class GuidanceViewImageProviderTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()
 
-        val captureData = slot<String>()
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentList =
             mutableListOf<BannerComponents>(BannerComponentsFaker.bannerComponentsWithGuidanceUrlNoAccessToken(mockWebServer.url("guidance-views/v1/1580515200/jct/CA075101?arrow_ids=CA07510E&access_token=null").toString()))
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentList
+        val latch = CountDownLatch(1)
+        val bitmapRef = AtomicReference<Bitmap>()
+        val failureRef = AtomicBoolean()
+        val failureMessageRef = AtomicReference<String?>()
+        val aCallback = provideACallback(latch, bitmapRef, failureRef, failureMessageRef)
 
-        guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
+        guidanceViewImageProvider.renderGuidanceView(bannerInstructions, aCallback)
 
-        verify(exactly = 1) { callback.onFailure(capture(captureData)) }
-        assertEquals("Client Error", captureData.captured)
+        latch.await()
+        assertTrue(failureRef.get())
+        assertEquals("Client Error", failureMessageRef.get())
         mockWebServer.shutdown()
+    }
+
+    private fun provideACallback(latch: CountDownLatch, bitmapRef: AtomicReference<Bitmap>, failureRef: AtomicBoolean, failureMessageRef: AtomicReference<String?>): GuidanceViewImageProvider.OnGuidanceImageDownload {
+        return object : GuidanceViewImageProvider.OnGuidanceImageDownload {
+            override fun onGuidanceImageReady(bitmap: Bitmap) {
+                bitmapRef.set(bitmap)
+                failureRef.set(true)
+                latch.countDown()
+            }
+
+            override fun onNoGuidanceImageUrl() {
+            }
+
+            override fun onFailure(message: String?) {
+                failureRef.set(true)
+                failureMessageRef.set(message)
+                latch.countDown()
+            }
+        }
     }
 }
