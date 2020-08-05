@@ -31,7 +31,8 @@ class LocationExTest {
         location.toFixLocation(DATE).run {
             assertEquals(LATITUDE, coordinate.latitude(), .0)
             assertEquals(LONGITUDE, coordinate.longitude(), .0)
-            assertEquals(REAL_TIME, monotonicTimestampNanoseconds)
+            // TODO Replace by REAL_TIME when monotonic approach is implemented - check LocationEx
+            assertEquals(0, monotonicTimestampNanoseconds)
             assertEquals(DATE, time)
             assertEquals(SPEED, speed!!, .0f)
             assertEquals(BEARING, bearing!!, .0f)

@@ -14,7 +14,7 @@ libnavigation-ui \
 
 define run-gradle-tasks
 	for module in $(1) ; do \
-		./gradlew $$module:$(2) ; \
+		./gradlew $$module:$(2) || exit 1 ; \
 	done
 endef
 
