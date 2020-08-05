@@ -90,6 +90,7 @@ class ReplayLocationEngine(
         location.longitude = eventLocation.lon
         location.latitude = eventLocation.lat
         location.time = Date().time
+        location.elapsedRealtimeNanos = System.nanoTime()
         eventLocation.accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
         eventLocation.bearing?.toFloat()?.let { location.bearing = it }
         eventLocation.altitude?.let { location.altitude = it }
