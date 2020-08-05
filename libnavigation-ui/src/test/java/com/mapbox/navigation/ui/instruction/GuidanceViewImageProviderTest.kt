@@ -1,26 +1,27 @@
 package com.mapbox.navigation.ui.instruction
 
+import android.graphics.Bitmap
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.navigation.testing.MainCoroutineRule
-import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,14 +34,11 @@ class GuidanceViewImageProviderTest {
 
     private val callback: GuidanceViewImageProvider.OnGuidanceImageDownload = mockk(relaxed = true)
     private val guidanceViewImageProvider: GuidanceViewImageProvider = GuidanceViewImageProvider()
-    private val parentJob = SupervisorJob()
-    private val testScope = CoroutineScope(parentJob + coroutineRule.testDispatcher)
 
     @Before
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-        every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
     }
 
     @After
@@ -92,7 +90,6 @@ class GuidanceViewImageProviderTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()
 
-        val captureData = slot<String>()
         val bannerInstructions: BannerInstructions = mockk()
         val bannerView: BannerView = mockk()
         val bannerComponentList =
@@ -100,13 +97,39 @@ class GuidanceViewImageProviderTest {
         every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns bannerComponentList
 
+        val latch = CountDownLatch(1)
+        val bitmapRef = AtomicReference<Bitmap>()
+        val failureRef = AtomicBoolean()
+        val failureMessageRef = AtomicReference<String?>()
+        val aCallback = provideACallback(latch, bitmapRef, failureRef, failureMessageRef)
+
         val job = launch {
-            guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
+            guidanceViewImageProvider.renderGuidanceView(bannerInstructions, aCallback)
         }
         job.join()
 
-        coVerify(exactly = 1) { callback.onFailure(capture(captureData)) }
-        assertEquals("Client Error", captureData.captured)
+        latch.await()
+        assertTrue(failureRef.get())
+        assertEquals("Client Error", failureMessageRef.get())
         mockWebServer.shutdown()
+    }
+
+    private fun provideACallback(latch: CountDownLatch, bitmapRef: AtomicReference<Bitmap>, failureRef: AtomicBoolean, failureMessageRef: AtomicReference<String?>): GuidanceViewImageProvider.OnGuidanceImageDownload {
+        return object : GuidanceViewImageProvider.OnGuidanceImageDownload {
+            override fun onGuidanceImageReady(bitmap: Bitmap) {
+                bitmapRef.set(bitmap)
+                failureRef.set(true)
+                latch.countDown()
+            }
+
+            override fun onNoGuidanceImageUrl() {
+            }
+
+            override fun onFailure(message: String?) {
+                failureRef.set(true)
+                failureMessageRef.set(message)
+                latch.countDown()
+            }
+        }
     }
 }
