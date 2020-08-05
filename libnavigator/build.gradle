@@ -63,8 +63,6 @@ dependencies {
 
     implementation dependenciesList.androidXAnnotation
 
-    implementation dependenciesList.mapboxSdkGeoJSON
-
     implementation dependenciesList.coroutinesCore
 
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
