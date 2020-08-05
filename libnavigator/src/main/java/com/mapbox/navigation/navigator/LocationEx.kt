@@ -11,15 +11,16 @@ internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
     it.longitude = coordinate.longitude()
     it.time = time.time
     it.elapsedRealtimeNanos = monotonicTimestampNanoseconds
-    it.speed = speed ?: 0f
-    it.bearing = bearing ?: 0f
-    it.altitude = altitude?.toDouble() ?: 0.0
-    it.accuracy = accuracyHorizontal ?: 0f
+
+    speed?.run { it.speed = this }
+    bearing?.run { it.bearing = this }
+    altitude?.run { it.altitude = this.toDouble() }
+    accuracyHorizontal?.run { it.accuracy = this }
 
     if (isCurrentSdkVersionEqualOrGreaterThan(Build.VERSION_CODES.O)) {
-        it.bearingAccuracyDegrees = bearingAccuracy ?: 0f
-        it.speedAccuracyMetersPerSecond = speedAccuracy ?: 0f
-        it.verticalAccuracyMeters = verticalAccuracy ?: 0f
+        bearingAccuracy?.run { it.bearingAccuracyDegrees = this }
+        speedAccuracy?.run { it.speedAccuracyMetersPerSecond = this }
+        verticalAccuracy?.run { it.verticalAccuracyMeters = this }
     }
 }
 
