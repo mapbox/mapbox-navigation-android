@@ -351,10 +351,7 @@ package com.mapbox.navigation.ui.instruction {
     ctor public GuidanceViewImageProvider();
     method public void cancelRender();
     method public void renderGuidanceView(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions, com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.OnGuidanceImageDownload callback);
-    field public static final com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.Companion! Companion;
-  }
-
-  public static final class GuidanceViewImageProvider.Companion {
+    field @Deprecated public static final com.mapbox.navigation.ui.instruction.GuidanceViewImageProvider.Companion! Companion;
   }
 
   public static interface GuidanceViewImageProvider.OnGuidanceImageDownload {

@@ -1,10 +1,10 @@
 package com.mapbox.navigation.ui.instruction
 
-import android.graphics.Bitmap
-import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerView
 import com.mapbox.navigation.testing.MainCoroutineRule
+import com.mapbox.navigation.ui.instruction.BannerComponentsFaker.bannerComponentsWithGuidanceUrlNoAccessToken
+import com.mapbox.navigation.ui.instruction.BannerComponentsFaker.bannerComponentsWithNullGuidanceUrl
 import com.mapbox.navigation.utils.internal.ThreadController
 import io.mockk.every
 import io.mockk.mockk
@@ -13,15 +13,11 @@ import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -34,11 +30,14 @@ class GuidanceViewImageProviderTest {
 
     private val callback: GuidanceViewImageProvider.OnGuidanceImageDownload = mockk(relaxed = true)
     private val guidanceViewImageProvider: GuidanceViewImageProvider = GuidanceViewImageProvider()
+    private val bannerInstructions: BannerInstructions = mockk()
+    private val bannerView: BannerView = mockk()
 
     @Before
     fun setUp() {
         mockkObject(ThreadController)
         every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
+        every { bannerInstructions.view() } returns bannerView
     }
 
     @After
@@ -58,9 +57,6 @@ class GuidanceViewImageProviderTest {
 
     @Test
     fun `when banner component list is null`() {
-        val bannerInstructions: BannerInstructions = mockk()
-        val bannerView: BannerView = mockk()
-        every { bannerInstructions.view() } returns bannerView
         every { bannerView.components() } returns null
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
@@ -70,66 +66,39 @@ class GuidanceViewImageProviderTest {
 
     @Test
     fun `when guidance view url is null`() {
-        val captureData = slot<String>()
-        val bannerInstructions: BannerInstructions = mockk()
-        val bannerView: BannerView = mockk()
-        val bannerComponentList =
-            mutableListOf<BannerComponents>(BannerComponentsFaker.bannerComponentsWithNullGuidanceUrl())
-        every { bannerInstructions.view() } returns bannerView
-        every { bannerView.components() } returns bannerComponentList
+        val messageSlot = slot<String>()
+        every { bannerView.components() } returns mutableListOf(bannerComponentsWithNullGuidanceUrl())
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
 
-        verify(exactly = 1) { callback.onFailure(capture(captureData)) }
-        assertEquals("Guidance View Image URL is null", captureData.captured)
+        verify(exactly = 1) { callback.onFailure(capture(messageSlot)) }
+        assertEquals("Guidance View Image URL is null", messageSlot.captured)
     }
 
     @Test
-    fun `when url has invalid access token`() = coroutineRule.runBlockingTest {
+    fun `when url has invalid access token`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(MockResponse().setResponseCode(401))
         mockWebServer.start()
-
-        val bannerInstructions: BannerInstructions = mockk()
-        val bannerView: BannerView = mockk()
-        val bannerComponentList =
-            mutableListOf<BannerComponents>(BannerComponentsFaker.bannerComponentsWithGuidanceUrlNoAccessToken(mockWebServer.url("guidance-views/v1/1580515200/jct/CA075101?arrow_ids=CA07510E&access_token=null").toString()))
-        every { bannerInstructions.view() } returns bannerView
-        every { bannerView.components() } returns bannerComponentList
-
+        every { bannerView.components() } returns mutableListOf(
+            bannerComponentsWithGuidanceUrlNoAccessToken(
+                mockWebServer.url(URL_WITH_NULL_TOKEN).toString()
+            )
+        )
+        val messageSlot = slot<String>()
         val latch = CountDownLatch(1)
-        val bitmapRef = AtomicReference<Bitmap>()
-        val failureRef = AtomicBoolean()
-        val failureMessageRef = AtomicReference<String?>()
-        val aCallback = provideACallback(latch, bitmapRef, failureRef, failureMessageRef)
+        every { callback.onFailure(capture(messageSlot)) } answers { latch.countDown() }
 
-        val job = launch {
-            guidanceViewImageProvider.renderGuidanceView(bannerInstructions, aCallback)
-        }
-        job.join()
+        guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
 
         latch.await()
-        assertTrue(failureRef.get())
-        assertEquals("Client Error", failureMessageRef.get())
+        verify(exactly = 1) { callback.onFailure(any()) }
+        assertEquals("Client Error", messageSlot.captured)
         mockWebServer.shutdown()
     }
 
-    private fun provideACallback(latch: CountDownLatch, bitmapRef: AtomicReference<Bitmap>, failureRef: AtomicBoolean, failureMessageRef: AtomicReference<String?>): GuidanceViewImageProvider.OnGuidanceImageDownload {
-        return object : GuidanceViewImageProvider.OnGuidanceImageDownload {
-            override fun onGuidanceImageReady(bitmap: Bitmap) {
-                bitmapRef.set(bitmap)
-                failureRef.set(true)
-                latch.countDown()
-            }
-
-            override fun onNoGuidanceImageUrl() {
-            }
-
-            override fun onFailure(message: String?) {
-                failureRef.set(true)
-                failureMessageRef.set(message)
-                latch.countDown()
-            }
-        }
+    private companion object {
+        private const val URL_WITH_NULL_TOKEN =
+            "guidance-views/v1/1580515200/jct/CA075101?arrow_ids=CA07510E&access_token=null"
     }
 }

@@ -26,9 +26,10 @@ import okhttp3.Response
  */
 class GuidanceViewImageProvider {
 
-    companion object {
+    private companion object {
         private const val USER_AGENT_KEY = "User-Agent"
         private const val USER_AGENT_VALUE = "MapboxJava/"
+        private const val ERROR_VIEW_IMAGE_URL_NULL = "Guidance View Image URL is null"
     }
 
     private val mainJobController: JobControl by lazy { ThreadController.getMainScopeAndRootJob() }
@@ -60,7 +61,7 @@ class GuidanceViewImageProvider {
                                     callback.onGuidanceImageReady(b)
                                 } ?: callback.onFailure(response.error)
                             }
-                        } ?: callback.onFailure("Guidance View Image URL is null")
+                        } ?: callback.onFailure(ERROR_VIEW_IMAGE_URL_NULL)
                     }
                 }
             } ?: callback.onNoGuidanceImageUrl()
