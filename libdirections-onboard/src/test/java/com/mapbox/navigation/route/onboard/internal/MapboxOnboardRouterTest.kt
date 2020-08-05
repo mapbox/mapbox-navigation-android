@@ -1,6 +1,5 @@
 package com.mapbox.navigation.route.onboard.internal
 
-import android.content.Context
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
@@ -9,7 +8,6 @@ import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.internal.route.RouteUrl
-import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -59,15 +57,11 @@ class MapboxOnboardRouterTest {
 
     private lateinit var onboardRouter: MapboxOnboardRouter
 
-    private val applicationContext: Context = mockk()
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
     private val routerCallback: Router.Callback = mockk(relaxUnitFun = true)
     private val routerResultSuccess: RouterResult = mockk(relaxUnitFun = true)
     private val routerResultFailure: RouterResult = mockk(relaxUnitFun = true)
     private val routerOptions: RouteOptions = provideDefaultRouteOptions()
-    private val onboardRouterOptions = OnboardRouterOptions.Builder()
-        .filePath("test_file_path")
-        .build()
     private val logger: Logger = mockk(relaxUnitFun = true)
     private val mockSkuTokenProvider = mockk<SkuTokenProvider>(relaxed = true)
 
@@ -75,7 +69,7 @@ class MapboxOnboardRouterTest {
     fun setUp() {
         every { navigator.configureRouter(any()) } just Runs
         every { mockSkuTokenProvider.obtainSkuToken() } returns ("102ka34odzf38e3b8f5f1ba42818e94d31090d6479f")
-        onboardRouter = MapboxOnboardRouter(applicationContext, ACCESS_TOKEN, navigator, onboardRouterOptions, logger, mockSkuTokenProvider)
+        onboardRouter = MapboxOnboardRouter(navigator, logger)
 
         every { routerResultSuccess.json } returns SUCCESS_RESPONSE
         every { routerResultFailure.json } returns FAILURE_RESPONSE
