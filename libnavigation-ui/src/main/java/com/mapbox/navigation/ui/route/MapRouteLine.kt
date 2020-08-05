@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.route
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.LruCache
 import androidx.annotation.AnyRes
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
@@ -31,9 +32,11 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_
 import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
@@ -42,7 +45,9 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
+import com.mapbox.navigation.ui.internal.utils.MemoizeUtils.memoize
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.generateFeatureCollection
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBelowLayer
@@ -51,8 +56,11 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getFloatS
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.parallelMap
+import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import com.mapbox.turf.TurfMisc
 import java.math.BigDecimal
 
 /**
@@ -137,6 +145,8 @@ internal class MapRouteLine(
     private var primaryRoute: DirectionsRoute? = null
     var vanishPointOffset: Float = 0f
         private set
+    private var vanishingPointUpdateInhibited: Boolean = false
+    private val distanceRemainingCache = LruCache<DirectionsRoute, Float>(2)
 
     @get:ColorInt
     private val routeLineTraveledColor: Int by lazy {
@@ -418,6 +428,14 @@ internal class MapRouteLine(
         )
     }
 
+    fun updateDistanceRemainingCache(route: DirectionsRoute, distanceRemaining: Float) {
+        distanceRemainingCache.put(route, distanceRemaining)
+    }
+
+    fun inhibitVanishingPointUpdate(inhibitVanishingPointUpdate: Boolean) {
+        vanishingPointUpdateInhibited = inhibitVanishingPointUpdate
+    }
+
     /**
      * Creates a route line which is applied to the route layer(s)
      *
@@ -585,23 +603,21 @@ internal class MapRouteLine(
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
     }
 
-    private fun getIdentifiableRouteFeatureDataProvider(
-        directionsRoutes: List<IdentifiableRoute>
-    ): () -> List<RouteFeatureData> = {
-        directionsRoutes.parallelMap(
-            ::generateFeatureCollection,
-            ThreadController.getMainScopeAndRootJob().scope
-        )
-    }
+    private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>):
+        () -> List<RouteFeatureData> = {
+            directionsRoutes.parallelMap(
+                ::generateFeatureCollection,
+                ThreadController.getMainScopeAndRootJob().scope
+            )
+        }
 
-    private fun getRouteFeatureDataProvider(
-        directionsRoutes: List<DirectionsRoute>
-    ): () -> List<RouteFeatureData> = {
-        directionsRoutes.parallelMap(
-            ::generateFeatureCollection,
-            ThreadController.getMainScopeAndRootJob().scope
-        )
-    }
+    private fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>):
+        () -> List<RouteFeatureData> = {
+            directionsRoutes.parallelMap(
+                ::generateFeatureCollection,
+                ThreadController.getMainScopeAndRootJob().scope
+            )
+        }
 
     /**
      * Initializes the layers used for drawing routes.
@@ -923,12 +939,51 @@ internal class MapRouteLine(
         }
     }
 
+    /**
+     * Updates the route line appearance from the origin point to the point indicated in
+     * @param point representing the portion of the route that has been traveled.
+     */
+    fun updateTraveledRouteLine(point: Point) {
+        if (vanishingPointUpdateInhibited) {
+            return
+        }
+
+        ifNonNull(primaryRoute, primaryRoute?.distance()) { primaryRoute, routeDistance ->
+            val lineString = getLineStringForRoute(primaryRoute)
+            val nearestPointOnLineDistance = TurfMisc.nearestPointOnLine(
+                point,
+                lineString.coordinates(),
+                TurfConstants.UNIT_METERS
+            ).getProperty("dist").asDouble
+
+            if (nearestPointOnLineDistance > ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS) {
+                return
+            }
+
+            val distanceRemainingFromCache: Float = distanceRemainingCache[primaryRoute] ?: 0f
+            val distanceRemaining = calculatePreciseDistanceTraveledAlongLine(
+                lineString,
+                distanceRemainingFromCache,
+                point
+            )
+            val auxDistanceTraveled = (routeDistance - distanceRemaining)
+            val percentTraveled = (auxDistanceTraveled / routeDistance).toFloat()
+
+            if (percentTraveled > MINIMUM_ROUTE_LINE_OFFSET) {
+                val expression = getExpressionAtOffset(percentTraveled)
+                hideCasingLineAtOffset(percentTraveled)
+                hideRouteLineAtOffset(percentTraveled)
+                decorateRouteLine(expression)
+            }
+        }
+    }
+
     internal object MapRouteLineSupport {
 
         /**
          * Returns a resource value from the style or a default value
          * @param index the index of the item in the styled attributes.
-         * @param defaultValue the default value to use if no value is found
+         * @param colorResourceId the default value to use if no value is found
          * @param context the context to obtain the resource from
          * @param styleRes the style resource to look in
          *
@@ -1056,28 +1111,26 @@ internal class MapRouteLine(
         fun generateFeatureCollection(routeData: IdentifiableRoute): RouteFeatureData =
             generateFeatureCollection(routeData.route, routeData.routeIdentifier)
 
-        private fun generateFeatureCollection(
-            route: DirectionsRoute,
-            identifier: String?
-        ): RouteFeatureData {
-            val routeGeometry = LineString.fromPolyline(
-                route.geometry() ?: "",
-                Constants.PRECISION_6
-            )
+        private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?):
+            RouteFeatureData {
+                val routeGeometry = LineString.fromPolyline(
+                    route.geometry() ?: "",
+                    Constants.PRECISION_6
+                )
 
-            val routeFeature = when (identifier) {
-                null -> Feature.fromGeometry(routeGeometry)
-                else -> Feature.fromGeometry(routeGeometry).also {
-                    it.addBooleanProperty(identifier, true)
+                val routeFeature = when (identifier) {
+                    null -> Feature.fromGeometry(routeGeometry)
+                    else -> Feature.fromGeometry(routeGeometry).also {
+                        it.addBooleanProperty(identifier, true)
+                    }
                 }
-            }
 
-            return RouteFeatureData(
-                route,
-                FeatureCollection.fromFeatures(listOf(routeFeature)),
-                routeGeometry
-            )
-        }
+                return RouteFeatureData(
+                    route,
+                    FeatureCollection.fromFeatures(listOf(routeFeature)),
+                    routeGeometry
+                )
+            }
 
         /**
          * Calculates line segments based on the legs in the route line and color representation
@@ -1108,7 +1161,7 @@ internal class MapRouteLine(
                 false -> calculateRouteLineSegmentsFromCongestion(
                     congestionSections,
                     routeLineString,
-                    route.distance() ?: 0.0,
+                    route.distance(),
                     isPrimaryRoute,
                     congestionColorProvider
                 )
@@ -1158,9 +1211,6 @@ internal class MapRouteLine(
                         continue
                     }
 
-                    // sometimes the fractional distance is returned in scientific notation
-                    // which the Maps Expression doesn't accept as valid input.
-                    // This checks that the value is above a certain threshold to prevent that.
                     val fractionalDist: Double = distanceTraveled / routeDistance
                     if (fractionalDist < MINIMUM_ROUTE_LINE_OFFSET) {
                         continue
@@ -1235,6 +1285,45 @@ internal class MapRouteLine(
                 it.addStringProperty(WAYPOINT_PROPERTY_KEY, propValue)
             }
         }
+
+        val getDistanceBetweenPoints: (firstPoint: Point, secondPoint: Point) -> Double =
+            { firstPoint: Point, secondPoint: Point ->
+                TurfMeasurement.distance(firstPoint, secondPoint, TurfConstants.UNIT_METERS)
+            }.memoize(POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE)
+
+        val getReversedCoordinates: (line: LineString) -> List<Point> = { line: LineString ->
+            line.coordinates().reversed()
+        }.memoize(1)
+
+        fun calculatePreciseDistanceTraveledAlongLine(
+            line: LineString,
+            targetDistance: Float,
+            targetPoint: Point
+        ): Double {
+            val linePoints = getReversedCoordinates(line)
+            var runningDistance = 0.0
+            var lastPointIndex = 0
+
+            for (currentIndex in linePoints.indices) {
+                if (currentIndex + 1 < linePoints.size) {
+                    val nextSectionDistance = getDistanceBetweenPoints(
+                        linePoints[currentIndex],
+                        linePoints[currentIndex + 1]
+                    )
+                    if (runningDistance + nextSectionDistance > targetDistance) {
+                        lastPointIndex = currentIndex
+                        break
+                    } else {
+                        runningDistance += nextSectionDistance
+                    }
+                }
+            }
+
+            return runningDistance + getDistanceBetweenPoints(
+                linePoints[lastPointIndex],
+                targetPoint
+            )
+        }
     }
 }
 
@@ -1242,7 +1331,7 @@ internal class MapRouteLine(
  * Maintains an association between a DirectionsRoute, FeatureCollection
  * and LineString.
  *
- * @param route a Directionsroute
+ * @param route a DirectionsRoute
  * @param featureCollection a FeatureCollection created using the route
  * @param lineString a LineString derived from the route's geometry.
  */

@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.route;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -124,6 +125,7 @@ public class NavigationMapRouteTest {
 
   @Test
   public void checksMapClickListenerIsRemovedInOnStop() {
+    LocationComponent mockLocationComponent = mock(LocationComponent.class);
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -136,6 +138,7 @@ public class NavigationMapRouteTest {
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
       mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener);
+    when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
     theNavigationMapRoute.onStop();
 
@@ -144,6 +147,7 @@ public class NavigationMapRouteTest {
 
   @Test
   public void checksDidFinishLoadingStyleListenerIsRemovedInOnStop() {
+    LocationComponent mockLocationComponent = mock(LocationComponent.class);
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -156,6 +160,7 @@ public class NavigationMapRouteTest {
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
       mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
       mockedProgressChangeListener);
+    when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
     theNavigationMapRoute.onStop();
 
@@ -165,6 +170,7 @@ public class NavigationMapRouteTest {
 
   @Test
   public void checksMapRouteProgressChangeListenerIsRemovedInOnStop() {
+    LocationComponent mockLocationComponent = mock(LocationComponent.class);
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -177,6 +183,7 @@ public class NavigationMapRouteTest {
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView,
       mockedMapboxMap, mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener,
       mockedDidFinishLoadingStyleListener, mockedProgressChangeListener);
+    when (mockedMapboxMap.getLocationComponent()).thenReturn(mockLocationComponent);
 
     theNavigationMapRoute.onStop();
 
