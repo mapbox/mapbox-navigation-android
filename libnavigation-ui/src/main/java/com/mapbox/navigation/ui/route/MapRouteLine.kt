@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.route
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import androidx.annotation.AnyRes
+import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -136,6 +138,7 @@ internal class MapRouteLine(
     var vanishPointOffset: Float = 0f
         private set
 
+    @get:ColorInt
     private val routeLineTraveledColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeLineTraveledColor,
@@ -154,6 +157,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeUnknownColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeUnknownCongestionColor,
@@ -163,6 +167,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeDefaultColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeColor,
@@ -172,6 +177,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeLowCongestionColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeLowCongestionColor,
@@ -181,6 +187,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeModerateColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeModerateCongestionColor,
@@ -190,6 +197,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeHeavyColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeHeavyCongestionColor,
@@ -199,6 +207,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeSevereColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeSevereCongestionColor,
@@ -208,6 +217,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val routeCasingColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_routeCasingColor,
@@ -244,6 +254,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteUnknownColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteUnknownCongestionColor,
@@ -253,6 +264,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteDefaultColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteColor,
@@ -262,6 +274,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteLowColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteLowCongestionColor,
@@ -271,6 +284,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteModerateColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteSevereCongestionColor,
@@ -280,6 +294,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteHeavyColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteHeavyCongestionColor,
@@ -289,6 +304,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteSevereColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteSevereCongestionColor,
@@ -298,6 +314,7 @@ internal class MapRouteLine(
         )
     }
 
+    @get:ColorInt
     private val alternativeRouteCasingColor: Int by lazy {
         getStyledColor(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteCasingColor,
@@ -828,6 +845,7 @@ internal class MapRouteLine(
      * @param isPrimaryRoute indicates if the congestion value for the primary route should
      * be returned or the color for an alternative route.
      */
+    @ColorInt
     fun getRouteColorForCongestion(congestionValue: String, isPrimaryRoute: Boolean): Int {
         return when (isPrimaryRoute) {
             true -> when (congestionValue) {
@@ -916,6 +934,7 @@ internal class MapRouteLine(
          *
          * @return the resource value
          */
+        @ColorInt
         fun getStyledColor(index: Int, colorResourceId: Int, context: Context, styleRes: Int): Int {
             val typedArray =
                 context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
@@ -983,6 +1002,7 @@ internal class MapRouteLine(
          *
          * @return the resource value
          */
+        @AnyRes
         fun getResourceStyledValue(
             index: Int,
             defaultValue: Int,
