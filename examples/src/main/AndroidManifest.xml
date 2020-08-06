@@ -90,6 +90,15 @@
         </activity>
 
         <activity
+            android:name=".core.JunctionSnapshotActivity"
+            android:label="@string/title_guidance_view"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity
             android:name=".core.ReplayWaypointsActivity"
             android:label="@string/title_replay_route"
             android:screenOrientation="portrait">
