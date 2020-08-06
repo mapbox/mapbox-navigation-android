@@ -16,6 +16,7 @@ import com.mapbox.navigation.examples.core.FeedbackButtonActivity
 import com.mapbox.navigation.examples.core.FreeDriveNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.InstructionViewActivity
+import com.mapbox.navigation.examples.core.JunctionSnapshotActivity
 import com.mapbox.navigation.examples.core.MapMatchingActivity
 import com.mapbox.navigation.examples.core.NavigationMapRouteActivity
 import com.mapbox.navigation.examples.core.ReRouteActivity
@@ -58,6 +59,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_guidance_view),
                 getString(R.string.description_guidance_view),
                 GuidanceViewActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_junction_snapshot_sample),
+                getString(R.string.description_junction_snapshot_sample),
+                JunctionSnapshotActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_reroute_view),

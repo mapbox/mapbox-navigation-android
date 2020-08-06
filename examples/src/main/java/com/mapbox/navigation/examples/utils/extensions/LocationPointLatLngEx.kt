@@ -14,3 +14,9 @@ fun Point.toLocation(): Location {
 fun Location.toPoint(): Point = Point.fromLngLat(this.longitude, this.latitude)
 
 fun LatLng.toPoint(): Point = Point.fromLngLat(this.longitude, this.latitude)
+
+fun Point.toLatLng(): LatLng =
+    if (this.hasAltitude())
+        LatLng(this.latitude(), this.longitude(), this.altitude())
+    else
+        LatLng(this.latitude(), this.longitude())
