@@ -688,7 +688,7 @@ class MapboxNavigation(
 
     private fun configureRouter() {
         with(navigationOptions) {
-            ThreadController.getMainScopeAndRootJob().scope.launch {
+            ThreadController.getIOScopeAndRootJob().scope.launch {
                 val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
                     .absolutePath(onboardRouterOptions)
                 offlineFilesPath?.let { path ->
