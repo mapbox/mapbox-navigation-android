@@ -147,6 +147,14 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
      */
     public abstract Builder muteVoiceGuidance(boolean muteVoiceGuidance);
 
+    /**
+     * Set false to not fallback to TTS for voice guidance when the connection is slow. The default setting is true.
+     *
+     * @param isFallbackAlwaysEnabled true or false
+     * @return this {@link Builder}
+     */
+    public abstract Builder isFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled);
+
     public abstract NavigationViewOptions build();
   }
 
@@ -157,6 +165,7 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
         .shouldSimulateRoute(false)
         .waynameChipEnabled(true)
         .muteVoiceGuidance(false)
+        .isFallbackAlwaysEnabled(true)
         .enableVanishingRouteLine(false);
   }
 }

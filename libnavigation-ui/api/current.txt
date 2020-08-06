@@ -60,6 +60,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.camera.Camera? camera();
     method public abstract Integer? darkThemeResId();
     method public abstract com.mapbox.api.directions.v5.models.DirectionsRoute! directionsRoute();
+    method public abstract boolean isFallbackAlwaysEnabled();
     method public abstract Integer? lightThemeResId();
     method public abstract boolean muteVoiceGuidance();
     method public abstract com.mapbox.navigation.ui.puck.PuckDrawableSupplier? puckDrawableSupplier();
@@ -158,6 +159,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! enableVanishingRouteLine(boolean);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! feedbackListener(com.mapbox.navigation.ui.listeners.FeedbackListener!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! instructionListListener(com.mapbox.navigation.ui.listeners.InstructionListListener!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! isFallbackAlwaysEnabled(boolean);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! lightThemeResId(Integer!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationEngine(com.mapbox.android.core.location.LocationEngine!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! locationObserver(com.mapbox.navigation.core.trip.session.LocationObserver!);
@@ -681,6 +683,7 @@ package com.mapbox.navigation.ui.voice {
 
   public class SpeechPlayerProvider {
     ctor public SpeechPlayerProvider(android.content.Context, String!, boolean, com.mapbox.navigation.ui.voice.VoiceInstructionLoader!);
+    method public void setIsFallbackAlwaysEnabled(boolean);
   }
 
   public enum SpeechPlayerState {

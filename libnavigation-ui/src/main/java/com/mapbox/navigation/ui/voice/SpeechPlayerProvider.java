@@ -36,6 +36,7 @@ public class SpeechPlayerProvider {
   private SpeechPlayerState speechPlayerState = SpeechPlayerState.IDLE;
   @Nullable
   private SpeechPlayerStateChangeObserver observer = null;
+  private boolean isFallbackAlwaysEnabled = true;
 
   /**
    * Constructed when creating an instance of {@link NavigationSpeechPlayer}.
@@ -48,6 +49,20 @@ public class SpeechPlayerProvider {
   public SpeechPlayerProvider(@NonNull Context context, String language,
                               boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
     initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
+  }
+
+  /**
+   * Set false to not fallback to TTS for voice guidance when the connection is slow.
+   * The default setting is enabled. The TTS is used in two cases:
+   * 1. when request polly voice fails
+   * 2. when connection is slow
+   *
+   * This setting only impact the 2nd case.
+   *
+   * @param isFallbackAlwaysEnabled true to use TTS when connection is slow, false otherwise
+   */
+  public void setIsFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled) {
+    this.isFallbackAlwaysEnabled = isFallbackAlwaysEnabled;
   }
 
   // Package private (no modifier) for testing purposes
@@ -63,7 +78,9 @@ public class SpeechPlayerProvider {
       return null;
     }
 
-    if (voiceInstructionLoader.hasCache() || connectivityStatus.isConnectedFast()) {
+    if (voiceInstructionLoader.hasCache()
+        || connectivityStatus.isConnectedFast()
+        || (connectivityStatus.isConnected() && !isFallbackAlwaysEnabled)) {
       speechPlayerState = SpeechPlayerState.ONLINE_PLAYING;
       return speechPlayers.get(FIRST_PLAYER);
     } else if (speechPlayerState == SpeechPlayerState.IDLE) {

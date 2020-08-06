@@ -27,4 +27,6 @@ public abstract class NavigationUiOptions {
   public abstract PuckDrawableSupplier puckDrawableSupplier();
 
   public abstract boolean muteVoiceGuidance();
+
+  public abstract boolean isFallbackAlwaysEnabled();
 }

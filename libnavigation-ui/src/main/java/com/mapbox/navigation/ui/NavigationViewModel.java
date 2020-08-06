@@ -327,6 +327,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
     boolean isVoiceLanguageSupported = options.directionsRoute().voiceLanguage() != null;
     SpeechPlayerProvider speechPlayerProvider = initializeSpeechPlayerProvider(isVoiceLanguageSupported);
+    speechPlayerProvider.setIsFallbackAlwaysEnabled(options.isFallbackAlwaysEnabled());
     this.speechPlayer = new NavigationSpeechPlayer(speechPlayerProvider);
   }
 

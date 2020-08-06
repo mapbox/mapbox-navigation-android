@@ -11,7 +11,6 @@ import java.util.Locale;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,6 +136,39 @@ public class SpeechPlayerProviderTest {
     provider.onSpeechPlayerStateChanged(state);
 
     verify(observer).onStateChange(state);
+  }
+
+  @Test
+  public void slowConnectionEnableFallback_returnAndroidSpeechPlayer() {
+    Context context = mock(Context.class);
+    String language = Locale.US.getLanguage();
+    VoiceInstructionLoader voiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(connectivityStatus.isConnectedFast()).thenReturn(false);
+    when(connectivityStatus.isConnected()).thenReturn(true);
+    SpeechPlayerProvider provider = new SpeechPlayerProvider(context, language, true,
+        voiceInstructionLoader, connectivityStatus);
+
+    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+
+    assertTrue(speechPlayer instanceof AndroidSpeechPlayer);
+  }
+
+  @Test
+  public void slowConnectionDisableFallback_returnMapboxSpeechPlayer() {
+    Context context = mock(Context.class);
+    String language = Locale.US.getLanguage();
+    VoiceInstructionLoader voiceInstructionLoader = mock(VoiceInstructionLoader.class);
+    ConnectivityStatusProvider connectivityStatus = mock(ConnectivityStatusProvider.class);
+    when(connectivityStatus.isConnectedFast()).thenReturn(false);
+    when(connectivityStatus.isConnected()).thenReturn(true);
+    SpeechPlayerProvider provider = new SpeechPlayerProvider(context, language, true,
+        voiceInstructionLoader, connectivityStatus);
+    provider.setIsFallbackAlwaysEnabled(false);
+
+    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+
+    assertTrue(speechPlayer instanceof MapboxSpeechPlayer);
   }
 
   private SpeechPlayerProvider buildSpeechPlayerProvider(boolean voiceLanguageSupported) {
