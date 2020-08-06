@@ -31,8 +31,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -70,17 +68,13 @@ internal class MapboxTripSession(
             .build()
     }
 
-    private val mutex = Mutex()
-
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
             ioJobController.scope.launch {
-                mutex.withLock {
-                    navigator.setRoute(value)
-                    mainJobController.scope.launch {
-                        isOffRoute = false
-                    }
+                navigator.setRoute(value)
+                mainJobController.scope.launch {
+                    isOffRoute = false
                 }
             }
         }
@@ -410,9 +404,7 @@ internal class MapboxTripSession(
             launch {
                 updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
                 updateRouteProgress(status.routeProgress)
-                mutex.withLock {
-                    isOffRoute = status.offRoute
-                }
+                isOffRoute = status.offRoute
             }
         }
     }

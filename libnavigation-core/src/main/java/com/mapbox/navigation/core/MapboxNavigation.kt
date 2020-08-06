@@ -65,6 +65,7 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
 import java.lang.reflect.Field
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -687,25 +688,26 @@ class MapboxNavigation(
 
     private fun configureRouter() {
         with(navigationOptions) {
-            // TODO StrictMode may report a violation as we're creating a File from the Main
-            val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
-                .absolutePath(onboardRouterOptions)
-            offlineFilesPath?.let { path ->
-                val routerParams = RouterParams(
-                    path,
-                    null,
-                    null,
-                    THREADS_COUNT,
-                    TileEndpointConfiguration(
-                        onboardRouterOptions.tilesUri.toString(),
-                        onboardRouterOptions.tilesVersion,
-                        accessToken ?: "",
-                        USER_AGENT,
-                        "",
-                        NativeSkuTokenProvider(MapboxNavigationAccounts.getInstance(applicationContext))
+            ThreadController.getMainScopeAndRootJob().scope.launch {
+                val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
+                    .absolutePath(onboardRouterOptions)
+                offlineFilesPath?.let { path ->
+                    val routerParams = RouterParams(
+                        path,
+                        null,
+                        null,
+                        THREADS_COUNT,
+                        TileEndpointConfiguration(
+                            onboardRouterOptions.tilesUri.toString(),
+                            onboardRouterOptions.tilesVersion,
+                            accessToken ?: "",
+                            USER_AGENT,
+                            "",
+                            NativeSkuTokenProvider(MapboxNavigationAccounts.getInstance(applicationContext))
+                        )
                     )
-                )
-                navigator.configureRouter(routerParams)
+                    navigator.configureRouter(routerParams)
+                }
             }
         }
     }
