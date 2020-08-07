@@ -640,7 +640,7 @@ class MapRouteLineTest {
     fun buildRouteLineExpression() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression =
-            "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31436133, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.92972755, [\"rgba\", 233.0, 51.0, 64.0, 1.0], 1.0003215, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+            "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31436133, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.92972755, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 1.0003215, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
             ctx,
@@ -661,7 +661,7 @@ class MapRouteLineTest {
     fun buildRouteLineExpressionMultileg() {
         every { style.layers } returns listOf(primaryRouteLayer)
         val expectedExpression =
-            "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.021346012, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.06847635, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.09496192, [\"rgba\", 243.0, 166.0, 79.0, 1.0], 0.1054035, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31133384, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31479248, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.38133165, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.38438845, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.41593167, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.45903113, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.7533547, [\"rgba\", 243.0, 166.0, 79.0, 1.0], 0.7613792, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.7993399, [\"rgba\", 243.0, 166.0, 79.0, 1.0], 0.8467529, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.86620295, [\"rgba\", 243.0, 166.0, 79.0, 1.0], 0.8693383, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.9069854, [\"rgba\", 233.0, 51.0, 64.0, 1.0], 0.9224731, [\"rgba\", 233.0, 51.0, 64.0, 1.0], 0.9338598, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.9950478, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+            "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.021346012, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.06847635, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.09496192, [\"rgba\", 255.0, 149.0, 0.0, 1.0], 0.1054035, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31133384, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31479248, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.38133165, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.38438845, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.41593167, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.45903113, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.7533547, [\"rgba\", 255.0, 149.0, 0.0, 1.0], 0.7613792, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.7993399, [\"rgba\", 255.0, 149.0, 0.0, 1.0], 0.8467529, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.86620295, [\"rgba\", 255.0, 149.0, 0.0, 1.0], 0.8693383, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.9069854, [\"rgba\", 143.0, 36.0, 71.0, 1.0], 0.9224731, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.9338598, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.9950478, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getMultilegRoute()
         val mapRouteLine = MapRouteLine(
             ctx,
@@ -830,7 +830,7 @@ class MapRouteLineTest {
         val result =
             mapRouteLine.getRouteColorForCongestion(RouteConstants.MODERATE_CONGESTION_VALUE, true)
 
-        assertEquals(-809393, result)
+        assertEquals(-27392, result)
     }
 
     @Test
@@ -849,7 +849,7 @@ class MapRouteLineTest {
         val result =
             mapRouteLine.getRouteColorForCongestion(RouteConstants.HEAVY_CONGESTION_VALUE, true)
 
-        assertEquals(-1494208, result)
+        assertEquals(-45747, result)
     }
 
     @Test
@@ -868,7 +868,7 @@ class MapRouteLineTest {
         val result =
             mapRouteLine.getRouteColorForCongestion(RouteConstants.SEVERE_CONGESTION_VALUE, true)
 
-        assertEquals(-1494208, result)
+        assertEquals(-7396281, result)
     }
 
     @Test
