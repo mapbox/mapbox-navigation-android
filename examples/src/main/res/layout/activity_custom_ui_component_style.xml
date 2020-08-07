@@ -32,11 +32,11 @@
         style="@style/CustomRecenterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom"
+        android:paddingTop="@dimen/dimen_8dp"
         android:visibility="invisible"
-        app:layout_anchor="@id/summaryBottomSheet"
-        app:layout_anchorGravity="top|left" />
+        app:layout_anchor="@id/feedbackLayout"
+        app:layout_anchorGravity="bottom|right" />
 
     <com.mapbox.navigation.ui.map.WayNameView
         android:id="@+id/wayNameView"
