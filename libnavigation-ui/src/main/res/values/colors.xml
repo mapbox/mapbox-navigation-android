@@ -4,9 +4,9 @@
   <color name="mapbox_navigation_route_layer_blue">#56A8FB</color>
   <color name="mapbox_navigation_route_traffic_layer_color">#56A8FB</color>
   <color name="mapbox_navigation_route_layer_congestion_unknown">#56A8FB</color>
-  <color name="mapbox_navigation_route_layer_congestion_yellow">#F3A64F</color>
-  <color name="mapbox_navigation_route_layer_congestion_heavy">#E93340</color>
-  <color name="mapbox_navigation_route_layer_congestion_red">#E93340</color>
+  <color name="mapbox_navigation_route_layer_congestion_yellow">#ff9500</color>
+  <color name="mapbox_navigation_route_layer_congestion_heavy">#ff4d4d</color>
+  <color name="mapbox_navigation_route_layer_congestion_red">#8f2447</color>
   <color name="mapbox_navigation_route_casing_layer_color">#2F7AC6</color>
   <color name="mapbox_navigation_route_line_traveled_color">#00000000</color>
   <color name="mapbox_navigation_route_casing_line_traveled_color">#00000000</color>

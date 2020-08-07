@@ -83,9 +83,9 @@
 
     <!-- Should not be translated -->
     <string name="navigation_guidance_day"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-day-v4</string>
+            translatable="false">mapbox://styles/mapbox-map-design/ckd6dqf981hi71iqlyn3e896y</string>
     <string name="navigation_guidance_night"
-            translatable="false">mapbox://styles/mapbox/navigation-guidance-night-v4</string>
+            translatable="false">mapbox://styles/mapbox-map-design/ckd6dnz2q0m0q1io1mssumxqd</string>
     <string name="navigation_view_instance_state"
             translatable="false">navigation_view_instance_state</string>
     <string name="navigation_running"
