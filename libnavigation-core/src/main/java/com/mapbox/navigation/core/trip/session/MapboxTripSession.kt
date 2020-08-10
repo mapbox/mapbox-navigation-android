@@ -25,14 +25,13 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
 import java.util.Date
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -70,20 +69,24 @@ internal class MapboxTripSession(
             .build()
     }
 
-    private val mutex = Mutex()
+    private var updateNavigatorStatusDataJobs: MutableList<Job> = CopyOnWriteArrayList()
 
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
+            cancelOngoingUpdateNavigatorStatusDataJobs()
             ioJobController.scope.launch {
-                mutex.withLock {
-                    navigator.setRoute(value)
-                    mainJobController.scope.launch {
-                        isOffRoute = false
-                    }
-                }
+                cancelOngoingUpdateNavigatorStatusDataJobs()
+                navigator.setRoute(value)
             }
+            isOffRoute = false
         }
+
+    private fun cancelOngoingUpdateNavigatorStatusDataJobs() {
+        updateNavigatorStatusDataJobs.forEach {
+            it.cancel()
+        }
+    }
 
     private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
@@ -186,6 +189,7 @@ internal class MapboxTripSession(
         enhancedLocation = null
         routeProgress = null
         isOffRoute = false
+        updateNavigatorStatusDataJobs.clear()
     }
 
     /**
@@ -405,16 +409,25 @@ internal class MapboxTripSession(
     }
 
     private fun updateDataFromNavigatorStatus(date: Date) {
-        mainJobController.scope.launch {
+        val updateNavigatorStatusDataJob = mainJobController.scope.launch {
             val status = getNavigatorStatus(date)
-            launch {
-                updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
-                updateRouteProgress(status.routeProgress)
-                mutex.withLock {
-                    isOffRoute = status.offRoute
-                }
+            if (!isActive) {
+                return@launch
             }
+            updateEnhancedLocation(status.enhancedLocation, status.keyPoints)
+            if (!isActive) {
+                return@launch
+            }
+            updateRouteProgress(status.routeProgress)
+            if (!isActive) {
+                return@launch
+            }
+            isOffRoute = status.offRoute
         }
+        updateNavigatorStatusDataJob.invokeOnCompletion {
+            updateNavigatorStatusDataJobs.remove(updateNavigatorStatusDataJob)
+        }
+        updateNavigatorStatusDataJobs.add(updateNavigatorStatusDataJob)
     }
 
     private suspend fun getNavigatorStatus(date: Date): TripStatus =

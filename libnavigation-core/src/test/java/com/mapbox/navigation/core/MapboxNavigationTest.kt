@@ -321,7 +321,7 @@ class MapboxNavigationTest {
 
         offRouteObserverSlot.captured.onOffRouteStateChanged(false)
 
-        verify(exactly = 0) { directionsSession.requestRoutes(any(), any()) }
+        verify(exactly = 0) { rerouteController.reroute(any()) }
     }
 
     @Test
