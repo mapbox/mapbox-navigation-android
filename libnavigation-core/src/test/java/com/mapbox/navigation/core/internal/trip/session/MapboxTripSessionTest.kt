@@ -36,8 +36,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -280,7 +282,7 @@ class MapboxTripSessionTest {
         }
 
     @Test
-    fun unconditionallGetStatusRepeated() = coroutineRule.runBlockingTest {
+    fun unconditionalGetStatusRepeated() = coroutineRule.runBlockingTest {
         tripSession.start()
 
         locationCallbackSlot.captured.onSuccess(locationEngineResult)
@@ -414,6 +416,117 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun offRouteObserverCalledWhenStatusIsDifferentToCurrent() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.start()
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+
+        every { tripStatus.offRoute } returns true
+        updateLocationAndJoin()
+
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
+        verifyOrder {
+            offRouteObserver.onOffRouteStateChanged(false)
+            offRouteObserver.onOffRouteStateChanged(true)
+        }
+        tripSession.stop()
+    }
+
+    @Test
+    fun offRouteObserverNotCalledWhenStatusIsEqualToCurrent() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.start()
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+
+        updateLocationAndJoin()
+
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(false) }
+        verify(exactly = 0) { offRouteObserver.onOffRouteStateChanged(true) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun isOffRouteIsSetToFalseWhenSettingARoute() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.route = route
+        tripSession.start()
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+        every { tripStatus.offRoute } returns true
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        tripSession.route = route
+
+        parentJob.cancelAndJoin()
+        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(false) }
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
+        verifyOrder {
+            offRouteObserver.onOffRouteStateChanged(false)
+            offRouteObserver.onOffRouteStateChanged(true)
+            offRouteObserver.onOffRouteStateChanged(false)
+        }
+        tripSession.stop()
+    }
+
+    @Test
+    fun isOffRouteIsSetToFalseWhenSettingANullRoute() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.route = route
+        tripSession.start()
+        val offRouteObserver: OffRouteObserver = mockk(relaxUnitFun = true)
+        tripSession.registerOffRouteObserver(offRouteObserver)
+        every { tripStatus.offRoute } returns true
+        locationCallbackSlot.captured.onSuccess(locationEngineResult)
+
+        tripSession.route = null
+
+        parentJob.cancelAndJoin()
+        verify(exactly = 2) { offRouteObserver.onOffRouteStateChanged(false) }
+        verify(exactly = 1) { offRouteObserver.onOffRouteStateChanged(true) }
+        verifyOrder {
+            offRouteObserver.onOffRouteStateChanged(false)
+            offRouteObserver.onOffRouteStateChanged(true)
+            offRouteObserver.onOffRouteStateChanged(false)
+        }
+        tripSession.stop()
+    }
+
+    @Test
     fun enhancedLocationObserverSuccess() = coroutineRule.runBlockingTest {
         tripSession = MapboxTripSession(
             tripService,
@@ -499,6 +612,25 @@ class MapboxTripSessionTest {
         tripSession.route = null
 
         coVerify { navigator.setRoute(null) }
+    }
+
+    @Test
+    fun checksCancelOngoingUpdateNavigatorStatusDataJobsAreCalledWhenARouteIsSet() {
+        tripSession = spyk(
+            MapboxTripSession(
+                tripService,
+                locationEngine,
+                navigatorPredictionMillis,
+                navigator,
+                logger = logger,
+                accessToken = "pk.1234"
+            ),
+            recordPrivateCalls = true
+        )
+
+        tripSession.route = null
+
+        verify(exactly = 2) { tripSession["cancelOngoingUpdateNavigatorStatusDataJobs"]() }
     }
 
     @Test
