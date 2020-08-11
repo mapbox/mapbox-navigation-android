@@ -14,8 +14,8 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:paddingLeft="@dimen/mapbox_wayname_padding"
-        android:paddingRight="@dimen/mapbox_wayname_padding"
+        android:paddingStart="@dimen/mapbox_wayname_padding"
+        android:paddingEnd="@dimen/mapbox_wayname_padding"
         android:paddingBottom="@dimen/mapbox_wayname_padding_bottom"
         android:textStyle="bold"
         tools:text="Wayname Text"/>
