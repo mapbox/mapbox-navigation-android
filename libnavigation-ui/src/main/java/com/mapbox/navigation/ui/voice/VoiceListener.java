@@ -8,7 +8,7 @@ interface VoiceListener {
 
   void onStart(@NonNull SpeechPlayerState state);
 
-  void onDone();
+  void onDone(@NonNull SpeechPlayerState state);
 
   void onError(String errorText, VoiceInstructions voiceInstructions);
 }

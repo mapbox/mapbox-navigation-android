@@ -27,7 +27,7 @@ public class NavigationVoiceListenerTest {
     SpeechAudioFocusManager audioFocusManager = mock(SpeechAudioFocusManager.class);
     NavigationVoiceListener navigationSpeechListener = buildSpeechListener(audioFocusManager);
 
-    navigationSpeechListener.onDone();
+    navigationSpeechListener.onDone(SpeechPlayerState.IDLE);
 
     verify(audioFocusManager).abandonAudioFocus();
   }
@@ -61,7 +61,11 @@ public class NavigationVoiceListenerTest {
     SpeechPlayerProvider provider = mock(SpeechPlayerProvider.class);
     NavigationVoiceListener navigationSpeechListener = buildSpeechListener(provider);
 
-    navigationSpeechListener.onDone();
+    navigationSpeechListener.onDone(SpeechPlayerState.IDLE);
+
+    verify(provider).onSpeechPlayerStateChanged(SpeechPlayerState.IDLE);
+
+    navigationSpeechListener.onDone(SpeechPlayerState.OFFLINE_PLAYER_INITIALIZED);
 
     verify(provider).onSpeechPlayerStateChanged(SpeechPlayerState.IDLE);
   }

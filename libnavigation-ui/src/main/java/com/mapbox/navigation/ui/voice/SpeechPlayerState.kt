@@ -3,9 +3,21 @@ package com.mapbox.navigation.ui.voice
 /**
  * The [SpeechPlayer] will be at one of these states.
  */
-enum class SpeechPlayerState {
+internal enum class SpeechPlayerState {
     /**
-     * No voice guidance is playing. [SpeechPlayer] is not idle.
+     * The offline player [AndroidSpeechPlayer] is initializing.
+     * In this state, can't use the [AndroidSpeechPlayer]. Only [MapboxSpeechPlayer] can be used.
+     */
+    OFFLINE_PLAYER_INITIALIZING,
+
+    /**
+     * The offline player [AndroidSpeechPlayer] is ready for use.
+     * This state will be only fired once.
+     */
+    OFFLINE_PLAYER_INITIALIZED,
+
+    /**
+     * No voice guidance is playing. [SpeechPlayer] is idle.
      */
     IDLE,
 

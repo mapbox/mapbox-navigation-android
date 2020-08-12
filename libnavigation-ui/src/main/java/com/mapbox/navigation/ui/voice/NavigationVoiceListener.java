@@ -24,9 +24,11 @@ class NavigationVoiceListener implements VoiceListener {
   }
 
   @Override
-  public void onDone() {
-    speechPlayerProvider.onSpeechPlayerStateChanged(SpeechPlayerState.IDLE);
-    audioFocusManager.abandonAudioFocus();
+  public void onDone(@NonNull SpeechPlayerState state) {
+    speechPlayerProvider.onSpeechPlayerStateChanged(state);
+    if (state == SpeechPlayerState.IDLE) {
+      audioFocusManager.abandonAudioFocus();
+    }
   }
 
   @Override
