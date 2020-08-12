@@ -123,7 +123,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       isPlaying = false;
       mediaPlayer.stop();
       mediaPlayer.release();
-      voiceListener.onDone();
+      voiceListener.onDone(SpeechPlayerState.IDLE);
     }
   }
 
@@ -201,7 +201,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
       public void onCompletion(MediaPlayer mp) {
         mp.release();
         isPlaying = false;
-        voiceListener.onDone();
+        voiceListener.onDone(SpeechPlayerState.IDLE);
         onInstructionFinishedPlaying();
       }
     });

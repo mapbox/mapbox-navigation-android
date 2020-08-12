@@ -4,7 +4,7 @@ package com.mapbox.navigation.ui.voice
  * Interface definition for an observer that get's notified
  * whenever the [SpeechPlayer]'s [SpeechPlayerState] changes.
  */
-interface SpeechPlayerStateChangeObserver {
+internal interface SpeechPlayerStateChangeObserver {
 
     /**
      * Invoked whenever the [SpeechPlayer]'s [SpeechPlayerState] changes.

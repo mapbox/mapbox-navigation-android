@@ -15,7 +15,6 @@ import timber.log.Timber;
  * Default player used to play voice instructions when a connection to Polly is unable to be established.
  * <p>
  * This instruction player uses {@link TextToSpeech} to play voice instructions.
- *
  */
 class AndroidSpeechPlayer implements SpeechPlayer {
 
@@ -30,7 +29,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   /**
    * Creates an instance of {@link AndroidSpeechPlayer}.
    *
-   * @param context  used to create an instance of {@link TextToSpeech}
+   * @param context used to create an instance of {@link TextToSpeech}
    * @param language to initialize locale to set
    */
   AndroidSpeechPlayer(Context context, final String language, final VoiceListener voiceListener) {
@@ -53,11 +52,11 @@ class AndroidSpeechPlayer implements SpeechPlayer {
   @Override
   public void play(VoiceInstructions voiceInstructions) {
     boolean isValidAnnouncement = voiceInstructions != null
-      && !TextUtils.isEmpty(voiceInstructions.announcement());
+        && !TextUtils.isEmpty(voiceInstructions.announcement());
     boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;
     if (!canPlay) {
       if (voiceListener != null) {
-        voiceListener.onDone();
+        voiceListener.onDone(SpeechPlayerState.IDLE);
       }
       return;
     }
@@ -124,6 +123,9 @@ class AndroidSpeechPlayer implements SpeechPlayer {
     }
     languageSupported = true;
     textToSpeech.setLanguage(language);
+    if (voiceListener != null) {
+      voiceListener.onDone(SpeechPlayerState.OFFLINE_PLAYER_INITIALIZED);
+    }
   }
 
   private void setVoiceListener(final VoiceListener voiceListener) {
