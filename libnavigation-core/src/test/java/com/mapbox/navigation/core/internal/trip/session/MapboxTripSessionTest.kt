@@ -32,6 +32,7 @@ import com.mapbox.navigator.NavigationStatus
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -604,14 +605,36 @@ class MapboxTripSessionTest {
     fun setRoute() {
         tripSession.route = route
 
-        coVerify { navigator.setRoute(route) }
+        coVerify(exactly = 1) { navigator.setRoute(route) }
     }
 
     @Test
     fun setRoute_nullable() {
         tripSession.route = null
 
-        coVerify { navigator.setRoute(null) }
+        coVerify(exactly = 1) { navigator.setRoute(null) }
+    }
+
+    @Test
+    fun checksGetNavigatorStatusIsCalledAfterSettingARouteWhenTripSessionHasStarted() {
+        tripSession.start()
+
+        tripSession.route = route
+
+        coVerify(exactly = 1) { navigator.setRoute(route) }
+        coVerify(exactly = 1) { navigator.getStatus(any()) }
+        coVerifyOrder {
+            navigator.setRoute(route)
+            navigator.getStatus(any())
+        }
+    }
+
+    @Test
+    fun checksGetNavigatorStatusIsNotCalledAfterSettingARouteIfTripSessionHasNotStarted() {
+        tripSession.route = route
+
+        coVerify(exactly = 1) { navigator.setRoute(route) }
+        coVerify(exactly = 0) { navigator.getStatus(any()) }
     }
 
     @Test
