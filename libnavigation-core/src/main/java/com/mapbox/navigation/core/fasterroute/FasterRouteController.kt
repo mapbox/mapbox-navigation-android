@@ -6,7 +6,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 internal class FasterRouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val routeOptionsProvider: RouteOptionsProvider,
+    private val routeOptionsUpdater: RouteOptionsUpdater,
     private val fasterRouteDetector: FasterRouteDetector,
     private val logger: Logger
 ) {
@@ -57,19 +57,19 @@ internal class FasterRouteController(
 
         fasterRouteTimer.restartAfterMillis = restartAfterMillis
 
-        routeOptionsProvider.update(
+        routeOptionsUpdater.update(
             directionsSession.getRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
-                    is RouteOptionsProvider.RouteOptionsResult.Success ->
+                    is RouteOptionsUpdater.RouteOptionsResult.Success ->
                         directionsSession.requestFasterRoute(
                             routeOptionsResult.routeOptions,
                             fasterRouteRequestCallback
                         )
-                    is RouteOptionsProvider.RouteOptionsResult.Error -> Unit
+                    is RouteOptionsUpdater.RouteOptionsResult.Error -> Unit
                 }
             }
     }

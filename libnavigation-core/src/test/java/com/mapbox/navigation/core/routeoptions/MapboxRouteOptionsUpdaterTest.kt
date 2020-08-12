@@ -15,14 +15,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-class MapboxRouteOptionsProviderTest {
+class MapboxRouteOptionsUpdaterTest {
 
     @MockK
     private lateinit var logger: Logger
 
     private val accessToken = "pk.1234pplffd"
 
-    private lateinit var routeRefreshAdapter: MapboxRouteOptionsProvider
+    private lateinit var routeRefreshAdapter: MapboxRouteOptionsUpdater
     private lateinit var location: Location
 
     companion object {
@@ -35,7 +35,7 @@ class MapboxRouteOptionsProviderTest {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
         mockLocation()
 
-        routeRefreshAdapter = MapboxRouteOptionsProvider(logger)
+        routeRefreshAdapter = MapboxRouteOptionsUpdater(logger)
     }
 
     @Test
@@ -46,8 +46,8 @@ class MapboxRouteOptionsProviderTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsProvider.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsProvider.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -73,8 +73,8 @@ class MapboxRouteOptionsProviderTest {
         val newRouteOptions =
             routeRefreshAdapter.update(routeOptions, routeProgress, location)
                 .let {
-                    assertTrue(it is RouteOptionsProvider.RouteOptionsResult.Success)
-                    return@let it as RouteOptionsProvider.RouteOptionsResult.Success
+                    assertTrue(it is RouteOptionsUpdater.RouteOptionsResult.Success)
+                    return@let it as RouteOptionsUpdater.RouteOptionsResult.Success
                 }
                 .routeOptions
 
@@ -102,7 +102,7 @@ class MapboxRouteOptionsProviderTest {
 
             assertTrue(
                 message,
-                routeRefreshAdapter.update(routeOptions, routeProgress, location) is RouteOptionsProvider.RouteOptionsResult.Error
+                routeRefreshAdapter.update(routeOptions, routeProgress, location) is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
     }

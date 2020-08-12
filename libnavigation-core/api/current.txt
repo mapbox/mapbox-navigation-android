@@ -1,7 +1,7 @@
 // Signature format: 3.0
 package com.mapbox.navigation.core {
 
-  public final class MapboxNavigation {
+  @UiThread public final class MapboxNavigation {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
@@ -28,7 +28,8 @@ package com.mapbox.navigation.core {
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
     method public void setArrivalController();
-    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController);
+    method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
+    method public void setRerouteController();
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
@@ -53,7 +54,7 @@ package com.mapbox.navigation.core {
   public final class MapboxNavigationKt {
   }
 
-  public final class MapboxNavigationProvider {
+  @UiThread public final class MapboxNavigationProvider {
     method public static com.mapbox.navigation.core.MapboxNavigation create(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public static void destroy();
     method public static boolean isCreated();
@@ -346,6 +347,40 @@ package com.mapbox.navigation.core.reroute {
 
   public static final class RerouteState.RouteFetched extends com.mapbox.navigation.core.reroute.RerouteState {
     field public static final com.mapbox.navigation.core.reroute.RerouteState.RouteFetched! INSTANCE;
+  }
+
+}
+
+package com.mapbox.navigation.core.routeoptions {
+
+  public final class MapboxRouteOptionsUpdater implements com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater {
+    ctor public MapboxRouteOptionsUpdater(com.mapbox.base.common.logger.Logger? logger);
+    ctor public MapboxRouteOptionsUpdater();
+    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
+  }
+
+  public final class MapboxRouteOptionsUpdaterKt {
+  }
+
+  public interface RouteOptionsUpdater {
+    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult update(com.mapbox.api.directions.v5.models.RouteOptions? routeOptions, com.mapbox.navigation.base.trip.model.RouteProgress? routeProgress, android.location.Location? location);
+  }
+
+  public abstract static sealed class RouteOptionsUpdater.RouteOptionsResult {
+  }
+
+  public static final class RouteOptionsUpdater.RouteOptionsResult.Error extends com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult {
+    ctor public RouteOptionsUpdater.RouteOptionsResult.Error(Throwable error);
+    method public Throwable component1();
+    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult.Error copy(Throwable error);
+    method public Throwable getError();
+  }
+
+  public static final class RouteOptionsUpdater.RouteOptionsResult.Success extends com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult {
+    ctor public RouteOptionsUpdater.RouteOptionsResult.Success(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public com.mapbox.api.directions.v5.models.RouteOptions component1();
+    method public com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater.RouteOptionsResult.Success copy(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public com.mapbox.api.directions.v5.models.RouteOptions getRouteOptions();
   }
 
 }

@@ -30,7 +30,6 @@ import kotlin.math.roundToInt
  * @param locale the locale to use for localization of distance resources
  * @param unitType to use, or UNDEFINED to use default for locale country
  * @param roundingIncrement increment by which to round small distances
- * @param builder used for updating options
  */
 class MapboxDistanceFormatter private constructor(
     private val applicationContext: Context,

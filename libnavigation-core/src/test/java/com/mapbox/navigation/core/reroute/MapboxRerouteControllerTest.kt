@@ -4,7 +4,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -37,19 +37,19 @@ class MapboxRerouteControllerTest {
     private lateinit var tripSession: TripSession
 
     @MockK
-    private lateinit var routeOptionsProvider: RouteOptionsProvider
+    private lateinit var routeOptionsUpdater: RouteOptionsUpdater
 
     @MockK
     private lateinit var logger: Logger
 
     @MockK
-    private lateinit var successFromResult: RouteOptionsProvider.RouteOptionsResult.Success
+    private lateinit var successFromResult: RouteOptionsUpdater.RouteOptionsResult.Success
 
     @MockK
     private lateinit var routeOptionsFromSuccessResult: RouteOptions
 
     @MockK
-    private lateinit var errorFromResult: RouteOptionsProvider.RouteOptionsResult.Error
+    private lateinit var errorFromResult: RouteOptionsUpdater.RouteOptionsResult.Error
 
     @MockK
     private lateinit var routeCallback: RerouteController.RoutesCallback
@@ -67,7 +67,7 @@ class MapboxRerouteControllerTest {
             MapboxRerouteController(
                 directionsSession,
                 tripSession,
-                routeOptionsProvider,
+                routeOptionsUpdater,
                 ThreadController,
                 logger
             )
@@ -332,13 +332,13 @@ class MapboxRerouteControllerTest {
         return rerouteController.registerRerouteStateObserver(rerouteStateObserver)
     }
 
-    private fun mockRouteOptionsResult(_routeOptionsResult: RouteOptionsProvider.RouteOptionsResult) {
+    private fun mockRouteOptionsResult(_routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult) {
         assertFalse(
             "routeOptionsResult mustn't be the *RouteOptionsProvider.RouteOptionsResult*, subclass is applied only",
             _routeOptionsResult::class.isAbstract
         )
         every {
-            routeOptionsProvider.update(
+            routeOptionsUpdater.update(
                 any(),
                 any(),
                 any()
