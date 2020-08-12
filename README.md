@@ -59,6 +59,7 @@ allprojects {
 dependencies {
    implementation 'com.mapbox.navigation:ui-v1:1.0.0-SNAPSHOT'
 }
+```
 
 ##### Pre-`1.0.0` versions of the Navigation SDK:
 
