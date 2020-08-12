@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.hardware.SensorEvent
 import androidx.annotation.RequiresPermission
+import androidx.annotation.UiThread
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.annotation.module.MapboxModuleType
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -39,7 +40,7 @@ import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
-import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsProvider
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
@@ -50,6 +51,7 @@ import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
@@ -74,24 +76,25 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
 private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
     "You need to provide an access token in NavigationOptions in order to use the default OnboardRouter. " +
         "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an access token in NavigationOptions " +
-    "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
+private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
+    "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
+private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
 /**
  * ## Mapbox Navigation Core SDK
- * An entry point for interacting with and customizing a navigation session.
+ * An entry point for interacting with the Mapbox Navigation SDK.
  *
  * **Only one instance of this class should be used per application process.**
+ * Use [MapboxNavigationProvider] to easily manage the instance across lifecycle.
  *
- * The Navigation Core SDK artifact is composed out of multiple separate artifacts or modules.
- * TODO insert modules documentation
+ * Feel free to visit our [docs pages and examples](https://docs.mapbox.com/android/beta/navigation/overview/) before diving in!
  *
  * The [MapboxNavigation] implementation can enter into a couple of internal states:
  * - `Idle`
  * - `Free Drive`
  * - `Active Guidance`
  *
- * The SDK starts of in an `Idle` state.
+ * The SDK starts off in an `Idle` state.
  *
  * ### Location
  * Whenever the [startTripSession] is called, the SDK will enter the `Free Drive` state starting to request and propagate location updates via the [LocationObserver].
@@ -117,11 +120,11 @@ private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION = "You need to provide an ac
  * If a new routes request is made, or the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
  *
  * You can use [setRoutes] to provide new routes, clear current ones, or change the route at primary index 0.
- * todo should we expose a "primaryRouteIndex" field instead of relying on the list's order?
  *
  * @param navigationOptions a set of [NavigationOptions] used to customize various features of the SDK.
  * Use [defaultNavigationOptionsBuilder] to set default options
  */
+@UiThread
 class MapboxNavigation(
     val navigationOptions: NavigationOptions
 ) {
@@ -142,14 +145,12 @@ class MapboxNavigation(
     private val navigatorConfig = NavigatorConfig(null)
 
     private var notificationChannelField: Field? = null
-    private val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
-        "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
-    private val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButtonChannel"
 
     /**
-     * Reroute controller, by default uses [MapboxRerouteController].
+     * Reroute controller, by default uses [defaultRerouteController].
      */
     private var rerouteController: RerouteController?
+    private val defaultRerouteController: RerouteController
 
     init {
         ThreadController.init()
@@ -195,7 +196,7 @@ class MapboxNavigation(
             )
             MapboxMetricsReporter.init(
                 navigationOptions.applicationContext,
-                accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION),
+                token,
                 obtainUserAgent(navigationOptions.isFromNavigationUi)
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
@@ -210,7 +211,7 @@ class MapboxNavigation(
             )
         }
 
-        val routeOptionsProvider = MapboxRouteOptionsProvider(logger)
+        val routeOptionsProvider = MapboxRouteOptionsUpdater(logger)
 
         fasterRouteController = FasterRouteController(
             directionsSession,
@@ -225,13 +226,14 @@ class MapboxNavigation(
         arrivalProgressObserver = ArrivalProgressObserver(tripSession)
         setArrivalController()
 
-        rerouteController = MapboxRerouteController(
+        defaultRerouteController = MapboxRerouteController(
             directionsSession,
             tripSession,
             routeOptionsProvider,
             ThreadController,
             logger
         )
+        rerouteController = defaultRerouteController
 
         internalRoutesObserver = createInternalRoutesObserver()
         internalOffRouteObserver = createInternalOffRouteObserver()
@@ -265,9 +267,9 @@ class MapboxNavigation(
 
     /**
      * Return the current [TripSession]'s state.
-     * The state is [STARTED] when the session is active, running a foreground service and
+     * The state is [TripSessionState.STARTED] when the session is active, running a foreground service and
      * requesting and returning location updates.
-     * The state is [STOPPED] when the session is inactive.
+     * The state is [TripSessionState.STOPPED] when the session is inactive.
      *
      * @return current [TripSessionState]
      * @see [registerTripSessionStateObserver]
@@ -404,7 +406,7 @@ class MapboxNavigation(
      * Registers [RouteProgressObserver]. The updates are available whenever the trip session is started and a primary route is available.
      *
      * @see [startTripSession]
-     * @see [requestRoutes] // TODO add route setter
+     * @see [requestRoutes]
      */
     fun registerRouteProgressObserver(routeProgressObserver: RouteProgressObserver) {
         tripSession.registerRouteProgressObserver(routeProgressObserver)
@@ -419,7 +421,10 @@ class MapboxNavigation(
 
     /**
      * Registers [OffRouteObserver]. The updates are available whenever SDK is in an `Active Guidance` state and detects an off route event.
-     * The SDK will automatically request redirected route.
+     *
+     * The SDK will automatically request redirected route. You can control or observe this request with
+     * [RerouteController] and [RerouteState].
+     * @see getRerouteController
      */
     fun registerOffRouteObserver(offRouteObserver: OffRouteObserver) {
         tripSession.registerOffRouteObserver(offRouteObserver)
@@ -517,11 +522,12 @@ class MapboxNavigation(
     }
 
     /**
-     * Set [RerouteController]. By default uses [MapboxRerouteController].
+     * Set [RerouteController] that's automatically invoked when user is off-route.
      *
-     * Set *null* disables auto-reroute.
+     * By default uses [MapboxRerouteController]. Setting *null* disables auto-reroute.
      */
-    fun setRerouteController(rerouteController: RerouteController?) {
+    @JvmOverloads
+    fun setRerouteController(rerouteController: RerouteController? = defaultRerouteController) {
         val legacyRerouteController = this.rerouteController
         this.rerouteController = rerouteController
 
@@ -532,7 +538,9 @@ class MapboxNavigation(
     }
 
     /**
-     * Get [RerouteController]
+     * Get currently set [RerouteController].
+     *
+     * @see setRerouteController
      */
     fun getRerouteController(): RerouteController? = rerouteController
 
@@ -715,7 +723,7 @@ class MapboxNavigation(
         private const val THREADS_COUNT = 2
 
         /**
-         * Send user feedback about an issue or problem with the Navigation SDK
+         * Send user feedback about an issue or problem with the Navigation SDK.
          *
          * @param feedbackType one of [FeedbackEvent.Type]
          * @param description description message

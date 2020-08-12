@@ -1,10 +1,12 @@
 package com.mapbox.navigation.core
 
+import androidx.annotation.UiThread
 import com.mapbox.navigation.base.options.NavigationOptions
 
 /**
  * Singleton responsible for ensuring there is only one MapboxNavigation instance.
  */
+@UiThread
 object MapboxNavigationProvider {
     @Volatile
     private var mapboxNavigation: MapboxNavigation? = null
@@ -26,8 +28,9 @@ object MapboxNavigationProvider {
     }
 
     /**
-     * Retrieve MapboxNavigation instance.
-     * Should be called after [create]
+     * Retrieve MapboxNavigation instance. Should be called after [create].
+     *
+     * @see [isCreated]
      */
     @JvmStatic
     fun retrieve(): MapboxNavigation {
@@ -39,9 +42,7 @@ object MapboxNavigationProvider {
     }
 
     /**
-     * Destroy MapboxNavigation with provided options.
-     * Should be called after [create]
-     *
+     * Destroy MapboxNavigation when your process/activity exits.
      */
     @JvmStatic
     fun destroy() {

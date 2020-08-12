@@ -31,7 +31,6 @@ interface RoutesRequestCallback {
      * @param throwable the exception
      * @param routeOptions the original request options
      */
-    // return a boolean here, or a long that will indicate when should we retry the request? or leave that to the user?
     fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions)
 
     /**

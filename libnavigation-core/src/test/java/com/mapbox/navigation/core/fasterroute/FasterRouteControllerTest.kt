@@ -5,7 +5,7 @@ import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.testing.MainCoroutineRule
 import io.mockk.coEvery
@@ -35,13 +35,13 @@ class FasterRouteControllerTest {
     }
     private val routesRequestCallbacks = slot<RoutesRequestCallback>()
     private val logger: Logger = mockk()
-    private val routeOptionsProvider: RouteOptionsProvider = mockk()
+    private val routeOptionsUpdater: RouteOptionsUpdater = mockk()
 
-    private val routeOptionsResultSuccess: RouteOptionsProvider.RouteOptionsResult.Success = mockk()
+    private val routeOptionsResultSuccess: RouteOptionsUpdater.RouteOptionsResult.Success = mockk()
     private val routeOptionsResultSuccessRouteOptions: RouteOptions = mockk()
     private val fasterRouteDetector: FasterRouteDetector = mockk()
 
-    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsProvider, fasterRouteDetector, logger)
+    private val fasterRouteController = FasterRouteController(directionsSession, tripSession, routeOptionsUpdater, fasterRouteDetector, logger)
 
     @Before
     fun setup() {
@@ -164,7 +164,7 @@ class FasterRouteControllerTest {
         coroutineRule.testDispatcher.cleanupTestCoroutines()
     }
 
-    private fun mockRouteOptionsProvider(routeOptionsResult: RouteOptionsProvider.RouteOptionsResult) {
-        every { routeOptionsProvider.update(any(), any(), any()) } returns routeOptionsResult
+    private fun mockRouteOptionsProvider(routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult) {
+        every { routeOptionsUpdater.update(any(), any(), any()) } returns routeOptionsResult
     }
 }
