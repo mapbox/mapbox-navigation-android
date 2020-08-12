@@ -8,7 +8,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.routeoptions.RouteOptionsProvider
+import com.mapbox.navigation.core.routeoptions.RouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 internal class MapboxRerouteController(
     private val directionsSession: DirectionsSession,
     private val tripSession: TripSession,
-    private val routeOptionsProvider: RouteOptionsProvider,
+    private val routeOptionsUpdater: RouteOptionsUpdater,
     threadController: ThreadController = ThreadController,
     private val logger: Logger
 ) : RerouteController {
@@ -47,17 +47,17 @@ internal class MapboxRerouteController(
             Tag(TAG),
             Message("Fetching route")
         )
-        routeOptionsProvider.update(
+        routeOptionsUpdater.update(
             directionsSession.getRouteOptions(),
             tripSession.getRouteProgress(),
             tripSession.getEnhancedLocation()
         )
             .let { routeOptionsResult ->
                 when (routeOptionsResult) {
-                    is RouteOptionsProvider.RouteOptionsResult.Success -> {
+                    is RouteOptionsUpdater.RouteOptionsResult.Success -> {
                         request(routeOptionsResult.routeOptions)
                     }
-                    is RouteOptionsProvider.RouteOptionsResult.Error -> {
+                    is RouteOptionsUpdater.RouteOptionsResult.Error -> {
                         mainJobController.scope.launch {
                             state = RerouteState.Failed(
                                 "Cannot combine route options", routeOptionsResult.error

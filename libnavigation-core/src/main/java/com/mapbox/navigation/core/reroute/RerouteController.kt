@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.reroute
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 
 /**
@@ -93,6 +94,9 @@ sealed class RerouteState {
 
     /**
      * Re-route request has failed.
+     *
+     * You can [MapboxNavigation.requestRoutes] with [MapboxRouteOptionsUpdater] to retry the request.
+     *
      * @param message describes error
      * @param throwable is optional
      */

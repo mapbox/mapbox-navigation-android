@@ -8,36 +8,34 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.RouteProgress
 
-/**
- * Default implementation of [RouteOptionsProvider]
- */
-internal class MapboxRouteOptionsProvider(
-    private val logger: Logger
-) : RouteOptionsProvider {
+private const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
 
-    private companion object {
-        const val DEFAULT_REROUTE_BEARING_TOLERANCE = 90.0
-    }
+/**
+ * Default implementation of [RouteOptionsUpdater].
+ */
+class MapboxRouteOptionsUpdater(
+    private val logger: Logger? = null
+) : RouteOptionsUpdater {
 
     /**
-     * Provides a new instance of *RouteOptions* based on initial *RouteOptions*, *RouteProgress* and
-     * current *Location*
+     * Provides a new [RouteOptions] instance based on the original request options and the current route progress.
      *
-     * Returns *null* if a new [RouteOptions] instance cannot be combined based on the input given.
+     * Returns *null* if a new [RouteOptions] instance cannot be combined based on the input given. When *null*
+     * is returned new route is not fetched.
      */
     override fun update(
         routeOptions: RouteOptions?,
         routeProgress: RouteProgress?,
         location: Location?
-    ): RouteOptionsProvider.RouteOptionsResult {
+    ): RouteOptionsUpdater.RouteOptionsResult {
         if (routeOptions == null || routeProgress == null || location == null) {
             val msg = "Cannot combine RouteOptions, invalid inputs. routeOptions, " +
                 "routeProgress, and location mustn't be null"
-            logger.w(
+            logger?.w(
                 Tag("MapboxRouteOptionsProvider"),
                 Message(msg)
             )
-            return RouteOptionsProvider.RouteOptionsResult.Error(Throwable(msg))
+            return RouteOptionsUpdater.RouteOptionsResult.Error(Throwable(msg))
         }
 
         val optionsBuilder = routeOptions.toBuilder()
@@ -127,6 +125,6 @@ internal class MapboxRouteOptionsProvider(
                 })
         }
 
-        return RouteOptionsProvider.RouteOptionsResult.Success(optionsBuilder.build())
+        return RouteOptionsUpdater.RouteOptionsResult.Success(optionsBuilder.build())
     }
 }
