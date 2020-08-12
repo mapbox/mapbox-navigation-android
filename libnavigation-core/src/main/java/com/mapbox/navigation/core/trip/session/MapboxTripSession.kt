@@ -78,6 +78,9 @@ internal class MapboxTripSession(
             ioJobController.scope.launch {
                 cancelOngoingUpdateNavigatorStatusDataJobs()
                 navigator.setRoute(value)
+                if (state == TripSessionState.STARTED) {
+                    updateDataFromNavigatorStatus(Date())
+                }
             }
             isOffRoute = false
         }
