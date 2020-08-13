@@ -47,7 +47,7 @@ class NavigationOptions private constructor(
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder() = Builder(context = applicationContext).apply {
+    fun toBuilder(): Builder = Builder(context = applicationContext).apply {
         accessToken(accessToken)
         locationEngine(locationEngine)
         timeFormatType(timeFormatType)
@@ -124,55 +124,55 @@ class NavigationOptions private constructor(
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
          */
-        fun accessToken(accessToken: String?) =
+        fun accessToken(accessToken: String?): Builder =
             apply { this.accessToken = accessToken }
 
         /**
          * Override the mechanism responsible for providing location approximations to navigation
          */
-        fun locationEngine(locationEngine: LocationEngine) =
+        fun locationEngine(locationEngine: LocationEngine): Builder =
             apply { this.locationEngine = locationEngine }
 
         /**
          * Defines the type of device creating localization data
          */
-        fun deviceProfile(deviceProfile: DeviceProfile) =
+        fun deviceProfile(deviceProfile: DeviceProfile): Builder =
             apply { this.deviceProfile = deviceProfile }
 
         /**
          * Defines time format for calculation remaining trip time
          */
-        fun timeFormatType(type: Int) =
+        fun timeFormatType(type: Int): Builder =
             apply { this.timeFormatType = type }
 
         /**
          * Defines approximate navigator prediction in milliseconds
          */
-        fun navigatorPredictionMillis(predictionMillis: Long) =
+        fun navigatorPredictionMillis(predictionMillis: Long): Builder =
             apply { navigatorPredictionMillis = predictionMillis }
 
         /**
          *  Defines format distances showing in notification during navigation
          */
-        fun distanceFormatter(distanceFormatter: DistanceFormatter?) =
+        fun distanceFormatter(distanceFormatter: DistanceFormatter?): Builder =
             apply { this.distanceFormatter = distanceFormatter }
 
         /**
          * Defines configuration for the default on-board router
          */
-        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions) =
+        fun onboardRouterOptions(onboardRouterOptions: OnboardRouterOptions): Builder =
             apply { this.onboardRouterOptions = onboardRouterOptions }
 
         /**
          * Defines if the builder instance is created from the Navigation UI
          */
-        fun isFromNavigationUi(flag: Boolean) =
+        fun isFromNavigationUi(flag: Boolean): Builder =
             apply { this.isFromNavigationUi = flag }
 
         /**
          * Defines if debug logging is enabled
          */
-        fun isDebugLoggingEnabled(flag: Boolean) =
+        fun isDebugLoggingEnabled(flag: Boolean): Builder =
             apply { this.isDebugLoggingEnabled = flag }
 
         /**

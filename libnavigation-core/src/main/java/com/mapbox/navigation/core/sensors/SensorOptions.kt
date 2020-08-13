@@ -14,7 +14,7 @@ class SensorOptions private constructor(
     /**
      * @return the builder that created the [SensorOptions]
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         enableSensorTypes(enableSensorTypes)
         signalsPerSecond(signalsPerSecond)
     }
