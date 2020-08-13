@@ -56,7 +56,7 @@ class RouteProgress private constructor(
     /**
      * @return builder matching the one used to create this instance
      */
-    fun toBuilder() = Builder(route)
+    fun toBuilder(): Builder = Builder(route)
         .routeGeometryWithBuffer(routeGeometryWithBuffer)
         .bannerInstructions(bannerInstructions)
         .voiceInstructions(voiceInstructions)
@@ -151,7 +151,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?) =
+        fun routeGeometryWithBuffer(routeGeometryWithBuffer: Geometry?): Builder =
             apply { this.routeGeometryWithBuffer = routeGeometryWithBuffer }
 
         /**
@@ -159,7 +159,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun bannerInstructions(bannerInstructions: BannerInstructions?) =
+        fun bannerInstructions(bannerInstructions: BannerInstructions?): Builder =
             apply { this.bannerInstructions = bannerInstructions }
 
         /**
@@ -167,7 +167,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun voiceInstructions(voiceInstructions: VoiceInstructions?) =
+        fun voiceInstructions(voiceInstructions: VoiceInstructions?): Builder =
             apply { this.voiceInstructions = voiceInstructions }
 
         /**
@@ -176,7 +176,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun currentState(currentState: RouteProgressState) =
+        fun currentState(currentState: RouteProgressState): Builder =
             apply { this.currentState = currentState }
 
         /**
@@ -185,7 +185,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun currentLegProgress(legProgress: RouteLegProgress?) =
+        fun currentLegProgress(legProgress: RouteLegProgress?): Builder =
             apply { this.currentLegProgress = legProgress }
 
         /**
@@ -193,7 +193,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun upcomingStepPoints(upcomingStepPoints: List<Point>?) =
+        fun upcomingStepPoints(upcomingStepPoints: List<Point>?): Builder =
             apply { this.upcomingStepPoints = upcomingStepPoints }
 
         /**
@@ -201,14 +201,14 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun inTunnel(inTunnel: Boolean) = apply { this.inTunnel = inTunnel }
+        fun inTunnel(inTunnel: Boolean): Builder = apply { this.inTunnel = inTunnel }
 
         /**
          * The distance remaining in meters until the user reaches the end of the route.
          *
          * @return Builder
          */
-        fun distanceRemaining(distanceRemaining: Float) =
+        fun distanceRemaining(distanceRemaining: Float): Builder =
             apply { this.distanceRemaining = distanceRemaining }
 
         /**
@@ -216,7 +216,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun distanceTraveled(distanceTraveled: Float) =
+        fun distanceTraveled(distanceTraveled: Float): Builder =
             apply { this.distanceTraveled = distanceTraveled }
 
         /**
@@ -224,7 +224,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun durationRemaining(durationRemaining: Double) =
+        fun durationRemaining(durationRemaining: Double): Builder =
             apply { this.durationRemaining = durationRemaining }
 
         /**
@@ -233,7 +233,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun fractionTraveled(fractionTraveled: Float) =
+        fun fractionTraveled(fractionTraveled: Float): Builder =
             apply { this.fractionTraveled = fractionTraveled }
 
         /**
@@ -241,7 +241,7 @@ class RouteProgress private constructor(
          *
          * @return Builder
          */
-        fun remainingWaypoints(remainingWaypoints: Int) =
+        fun remainingWaypoints(remainingWaypoints: Int): Builder =
             apply { this.remainingWaypoints = remainingWaypoints }
 
         /**

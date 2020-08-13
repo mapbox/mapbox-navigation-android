@@ -274,7 +274,7 @@ class MapboxNavigation(
      * @return current [TripSessionState]
      * @see [registerTripSessionStateObserver]
      */
-    fun getTripSessionState() = tripSession.getState()
+    fun getTripSessionState(): TripSessionState = tripSession.getState()
 
     /**
      * Requests a route using the provided [Router] implementation.
@@ -323,7 +323,7 @@ class MapboxNavigation(
      *
      * @return a list of [DirectionsRoute]s
      */
-    fun getRoutes() = directionsSession.routes
+    fun getRoutes(): List<DirectionsRoute> = directionsSession.routes
 
     /**
      * Call this method whenever this instance of the [MapboxNavigation] is not going to be used anymore and should release all of its resources.

@@ -28,7 +28,7 @@ class AppMetadata private constructor(
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder() = Builder(name, version).apply {
+    fun toBuilder(): Builder = Builder(name, version).apply {
         userId(userId)
         sessionId(sessionId)
     }

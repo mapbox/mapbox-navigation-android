@@ -32,7 +32,7 @@ class RouteStepProgress private constructor(
     /**
      * @return builder matching the one used to create this instance
      */
-    fun toBuilder() = Builder()
+    fun toBuilder(): Builder = Builder()
         .stepIndex(stepIndex)
         .step(step)
         .stepPoints(stepPoints)
@@ -99,7 +99,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun stepIndex(stepIndex: Int) =
+        fun stepIndex(stepIndex: Int): Builder =
             apply { this.stepIndex = stepIndex }
 
         /**
@@ -107,7 +107,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun step(step: LegStep?) =
+        fun step(step: LegStep?): Builder =
             apply { this.step = step }
 
         /**
@@ -115,7 +115,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun stepPoints(stepPoints: List<Point>?) =
+        fun stepPoints(stepPoints: List<Point>?): Builder =
             apply { this.stepPoints = stepPoints }
 
         /**
@@ -123,7 +123,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun distanceRemaining(distanceRemaining: Float) =
+        fun distanceRemaining(distanceRemaining: Float): Builder =
             apply { this.distanceRemaining = distanceRemaining }
 
         /**
@@ -131,7 +131,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun distanceTraveled(distanceTraveled: Float) =
+        fun distanceTraveled(distanceTraveled: Float): Builder =
             apply { this.distanceTraveled = distanceTraveled }
 
         /**
@@ -140,7 +140,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun fractionTraveled(fractionTraveled: Float) =
+        fun fractionTraveled(fractionTraveled: Float): Builder =
             apply { this.fractionTraveled = fractionTraveled }
 
         /**
@@ -148,7 +148,7 @@ class RouteStepProgress private constructor(
          *
          * @return Builder
          */
-        fun durationRemaining(durationRemaining: Double) =
+        fun durationRemaining(durationRemaining: Double): Builder =
             apply { this.durationRemaining = durationRemaining }
 
         /**

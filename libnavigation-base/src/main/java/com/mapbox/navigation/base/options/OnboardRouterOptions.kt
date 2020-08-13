@@ -18,7 +18,7 @@ class OnboardRouterOptions private constructor(
     /**
      * @return the builder that created the [OnboardRouterOptions]
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         tilesUri(tilesUri)
         tilesVersion(tilesVersion)
         filePath(filePath)
@@ -69,19 +69,19 @@ class OnboardRouterOptions private constructor(
         /**
          * Override the routing tiles endpoint with a [URI]
          */
-        fun tilesUri(tilesUri: URI) =
+        fun tilesUri(tilesUri: URI): Builder =
             apply { this.tilesUri = tilesUri }
 
         /**
          * Override the routing tiles version.
          */
-        fun tilesVersion(version: String) =
+        fun tilesVersion(version: String): Builder =
             apply { this.tilesVersion = version }
 
         /**
          * Creates a custom file path to store the road network tiles.
          */
-        fun filePath(filePath: String?) =
+        fun filePath(filePath: String?): Builder =
             apply { this.filePath = filePath }
 
         /**

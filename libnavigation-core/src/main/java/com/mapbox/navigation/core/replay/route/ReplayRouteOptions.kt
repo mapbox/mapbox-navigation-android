@@ -22,7 +22,7 @@ class ReplayRouteOptions private constructor(
     /**
      * @return the builder that created the [ReplayRouteOptions]
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         maxSpeedMps(maxSpeedMps)
         turnSpeedMps(turnSpeedMps)
         uTurnSpeedMps(uTurnSpeedMps)

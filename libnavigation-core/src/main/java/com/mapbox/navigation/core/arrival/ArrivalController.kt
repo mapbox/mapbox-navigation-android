@@ -59,7 +59,7 @@ class ArrivalOptions private constructor(
     /**
      * @return the builder that created the [ArrivalOptions]
      */
-    fun toBuilder() = Builder().apply {
+    fun toBuilder(): Builder = Builder().apply {
         arrivalInSeconds(arrivalInSeconds)
         arrivalInMeters(arrivalInMeters)
     }

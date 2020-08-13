@@ -15,7 +15,7 @@ class DeviceProfile private constructor(
     /**
      * @return builder matching the one used to create this instance
      */
-    fun toBuilder() = Builder().customConfig(customConfig).deviceType(deviceType)
+    fun toBuilder(): Builder = Builder().customConfig(customConfig).deviceType(deviceType)
 
     /**
      * Build a new [DeviceProfile]
