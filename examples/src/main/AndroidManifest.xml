@@ -274,6 +274,14 @@
                 android:value=".CoreActivity" />
         </activity>
 
+        <activity
+            android:name=".ui.TrafficToggleActivity"
+            android:label="@string/title_traffic_toggle">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity" />
+        </activity>
+        
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />
