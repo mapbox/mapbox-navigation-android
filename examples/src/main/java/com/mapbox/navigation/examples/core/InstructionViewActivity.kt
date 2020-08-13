@@ -399,7 +399,7 @@ class InstructionViewActivity : AppCompatActivity(), OnMapReadyCallback,
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
                     startLocationUpdates()
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }

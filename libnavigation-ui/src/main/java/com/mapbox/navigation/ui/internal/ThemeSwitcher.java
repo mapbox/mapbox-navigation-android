@@ -14,7 +14,7 @@ import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationConstants;

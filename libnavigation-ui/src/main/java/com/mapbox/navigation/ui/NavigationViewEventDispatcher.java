@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -33,6 +34,7 @@ class NavigationViewEventDispatcher {
   private SpeechAnnouncementListener speechAnnouncementListener;
   private BannerInstructionsListener bannerInstructionsListener;
   private ArrivalObserver arrivalObserver;
+  private MapboxNavigation navigation;
 
   /**
    * Initializes the listeners in the dispatcher, as well as the listeners in the {@link MapboxNavigation}
@@ -47,13 +49,18 @@ class NavigationViewEventDispatcher {
     assignSpeechAnnouncementListener(navigationViewOptions.speechAnnouncementListener());
     assignBannerInstructionsListener(navigationViewOptions.bannerInstructionsListener());
 
-    MapboxNavigation navigation = navigationViewModel.retrieveNavigation();
-    assignRouteProgressChangeObserver(navigationViewOptions, navigation);
-    assignLocationObserver(navigationViewOptions, navigation);
-    assignArrivalObserver(navigationViewOptions, navigation);
+    navigation = navigationViewModel.retrieveNavigation();
+    if (navigation != null) {
+      assignRouteProgressChangeObserver(navigationViewOptions, navigation);
+      assignLocationObserver(navigationViewOptions, navigation);
+      assignArrivalObserver(navigationViewOptions, navigation);
+    }
   }
 
-  void onDestroy(@Nullable MapboxNavigation navigation) {
+  /**
+   * Call when clearing up the navigation view and view model resources.
+   */
+  void onDestroy() {
     if (navigation != null) {
       removeRouteProgressChangeObserver(navigation);
       removeLocationObserver(navigation);
@@ -153,40 +160,42 @@ class NavigationViewEventDispatcher {
 
   private void assignRouteProgressChangeObserver(
     NavigationViewOptions navigationViewOptions,
-    MapboxNavigation navigation) {
+    @NonNull MapboxNavigation navigation) {
     this.routeProgressObserver = navigationViewOptions.routeProgressObserver();
     if (routeProgressObserver != null) {
       navigation.registerRouteProgressObserver(routeProgressObserver);
     }
   }
 
-  private void assignLocationObserver(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+  private void assignLocationObserver(NavigationViewOptions navigationViewOptions,
+                                      @NonNull MapboxNavigation navigation) {
     this.locationObserver = navigationViewOptions.locationObserver();
     if (locationObserver != null) {
       navigation.registerLocationObserver(locationObserver);
     }
   }
 
-  private void assignArrivalObserver(NavigationViewOptions navigationViewOptions, MapboxNavigation navigation) {
+  private void assignArrivalObserver(NavigationViewOptions navigationViewOptions,
+                                     @NonNull MapboxNavigation navigation) {
     arrivalObserver = navigationViewOptions.arrivalObserver();
     if (arrivalObserver != null) {
       navigation.registerArrivalObserver(arrivalObserver);
     }
   }
 
-  private void removeRouteProgressChangeObserver(MapboxNavigation navigation) {
+  private void removeRouteProgressChangeObserver(@NonNull MapboxNavigation navigation) {
     if (routeProgressObserver != null) {
       navigation.unregisterRouteProgressObserver(routeProgressObserver);
     }
   }
 
-  private void removeLocationObserver(MapboxNavigation navigation) {
+  private void removeLocationObserver(@NonNull MapboxNavigation navigation) {
     if (locationObserver != null) {
       navigation.unregisterLocationObserver(locationObserver);
     }
   }
 
-  private void removeArrivalObserver(MapboxNavigation navigation) {
+  private void removeArrivalObserver(@NonNull MapboxNavigation navigation) {
     if (arrivalObserver != null) {
       navigation.unregisterArrivalObserver(arrivalObserver);
     }

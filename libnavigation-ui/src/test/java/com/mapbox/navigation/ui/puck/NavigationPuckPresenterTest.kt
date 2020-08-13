@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.puck
 
-import com.mapbox.libnavigation.ui.R
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentOptions
@@ -9,6 +8,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.ui.R
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

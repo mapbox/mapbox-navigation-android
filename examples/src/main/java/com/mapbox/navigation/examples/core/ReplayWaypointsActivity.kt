@@ -271,7 +271,7 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             if (tripSessionState == TripSessionState.STOPPED) {
                 stopsController.clear()
-                navigationMapboxMap?.removeRoute()
+                navigationMapboxMap?.hideRoute()
                 updateCameraOnNavigationStateChange(false)
             }
         }

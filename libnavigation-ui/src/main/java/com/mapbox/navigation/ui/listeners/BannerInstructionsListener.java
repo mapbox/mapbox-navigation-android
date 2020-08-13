@@ -7,7 +7,6 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
  * <p>
  * The listener gives you the option to override any values and pass as the return value,
  * which will be the value used for the banner instructions.
- *
  */
 public interface BannerInstructionsListener {
 

@@ -104,7 +104,7 @@ public class RuntimeRouteStylingActivity extends AppCompatActivity implements On
       mapboxReplayer.pushRealLocation(this, 0.0);
       mapboxReplayer.play();
 
-      mapCamera = new NavigationCamera(mapboxMap, mapboxNavigation, mapboxMap.getLocationComponent());
+      mapCamera = new NavigationCamera(mapboxMap);
       mapCamera.addProgressChangeListener(mapboxNavigation);
 
       List<RouteStyleDescriptor> routeDescriptors =

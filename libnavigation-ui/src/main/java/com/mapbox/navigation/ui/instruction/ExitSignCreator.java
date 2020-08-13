@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 import java.util.List;
 

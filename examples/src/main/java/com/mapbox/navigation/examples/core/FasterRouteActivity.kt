@@ -109,7 +109,7 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     startLocationUpdates()
                     mapboxNavigation.detachFasterRouteObserver()
                     mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }

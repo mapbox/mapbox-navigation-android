@@ -9,7 +9,7 @@ import androidx.annotation.StyleRes;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.api.directions.v5.models.BannerComponents;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 import java.util.ArrayList;
 import java.util.List;

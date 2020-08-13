@@ -10,8 +10,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
 
+/**
+ * Button that can be used to inflate the {@link FeedbackBottomSheet}.
+ * @see #addOnClickListener(OnClickListener)
+ */
 public class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();

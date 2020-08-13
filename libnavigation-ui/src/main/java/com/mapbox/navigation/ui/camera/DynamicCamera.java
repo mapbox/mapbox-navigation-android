@@ -17,6 +17,9 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Extension that recalculates the camera position on each progress update.
+ */
 public class DynamicCamera extends SimpleCamera {
 
   private static final double MAX_CAMERA_TILT = 60d;

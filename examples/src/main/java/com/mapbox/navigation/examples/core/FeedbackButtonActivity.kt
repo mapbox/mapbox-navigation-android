@@ -258,7 +258,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
                 TripSessionState.STOPPED -> {
                     updateViews(TripSessionState.STOPPED)
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }
@@ -353,13 +353,13 @@ fun showFeedbackSentSnackBar(
     snackBar.view.setBackgroundColor(
         ContextCompat.getColor(
             context,
-            com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
+            com.mapbox.navigation.ui.R.color.mapbox_feedback_bottom_sheet_secondary
         )
     )
     snackBar.setTextColor(
         ContextCompat.getColor(
             context,
-            com.mapbox.libnavigation.ui.R.color.mapbox_feedback_bottom_sheet_primary_text
+            com.mapbox.navigation.ui.R.color.mapbox_feedback_bottom_sheet_primary_text
         )
     )
 

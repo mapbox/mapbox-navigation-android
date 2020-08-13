@@ -20,6 +20,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
@@ -40,7 +41,7 @@ import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -85,6 +86,7 @@ import static com.mapbox.navigation.ui.NavigationConstants.FEEDBACK_BOTTOM_SHEET
  * {@link MapboxNavigation},
  * add the view as a {@link RouteProgressObserver} and / or {@link OffRouteObserver}
  */
+@UiThread
 public class InstructionView extends RelativeLayout implements LifecycleObserver, FeedbackBottomSheetListener {
 
   private static final String COMPONENT_TYPE_LANE = "lane";
@@ -375,6 +377,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     instructionListLayout.startAnimation(animation);
   }
 
+  /**
+   * Convenience method to be invoked in an onBackPressed scenario.
+   *
+   * @return true if the instruction view was expanded and has now been hidden,
+   * the event can be considered consumed.
+   */
   public boolean handleBackPressed() {
     if (isShowingInstructionList()) {
       hideInstructionList();
@@ -444,8 +452,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param guidanceViewListener the listener
    */
-  public void setGuidanceViewListener(
-      GuidanceViewListener guidanceViewListener) {
+  public void setGuidanceViewListener(GuidanceViewListener guidanceViewListener) {
     this.guidanceViewListener = guidanceViewListener;
   }
 

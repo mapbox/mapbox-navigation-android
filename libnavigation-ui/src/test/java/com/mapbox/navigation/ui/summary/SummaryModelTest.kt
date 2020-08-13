@@ -38,7 +38,7 @@ class SummaryModelTest : BaseTest() {
             .roundingIncrement(INCREMENT_FIFTY)
             .build()
 
-        val result = SummaryModel(
+        val result = SummaryModel.create(
             ctx,
             distanceFormatter,
             routeProgress,
@@ -55,7 +55,7 @@ class SummaryModelTest : BaseTest() {
             .roundingIncrement(INCREMENT_FIFTY)
             .build()
 
-        val result = SummaryModel(
+        val result = SummaryModel.create(
             ctx,
             distanceFormatter,
             routeProgress,
@@ -88,7 +88,7 @@ class SummaryModelTest : BaseTest() {
                 false
             )
 
-        val result = SummaryModel(
+        val result = SummaryModel.create(
             ctx,
             distanceFormatter,
             routeProgress,

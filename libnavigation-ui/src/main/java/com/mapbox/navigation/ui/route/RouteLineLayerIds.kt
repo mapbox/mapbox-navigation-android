@@ -5,10 +5,10 @@ package com.mapbox.navigation.ui.route
  *
  * @param primaryRouteTrafficLineLayerId the layer ID for the traffic line layer
  * @param primaryRouteLineLayerId the layer ID for the primary route line
- * @param alternativeRouteLineLayerId the layer ID for the alternative route line(s)
+ * @param alternativeRouteLineLayerIds the layer IDs for the alternative route line(s)
  */
 data class RouteLineLayerIds(
     val primaryRouteTrafficLineLayerId: String,
     val primaryRouteLineLayerId: String,
-    val alternativeRouteLineLayerId: String
+    val alternativeRouteLineLayerIds: List<String>
 )
