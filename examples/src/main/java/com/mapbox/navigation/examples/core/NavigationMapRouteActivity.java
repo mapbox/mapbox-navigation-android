@@ -115,7 +115,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       mapboxReplayer.pushRealLocation(this, 0.0);
       mapboxReplayer.play();
 
-      mapCamera = new NavigationCamera(mapboxMap, mapboxNavigation, mapboxMap.getLocationComponent());
+      mapCamera = new NavigationCamera(mapboxMap);
       mapCamera.addProgressChangeListener(mapboxNavigation);
       navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this)
               .withMapboxNavigation(mapboxNavigation, true)

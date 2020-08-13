@@ -222,7 +222,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private val tripSessionStateObserver = object : TripSessionStateObserver {
         override fun onSessionStateChanged(tripSessionState: TripSessionState) {
             if (tripSessionState == TripSessionState.STOPPED) {
-                navigationMapboxMap?.removeRoute()
+                navigationMapboxMap?.hideRoute()
                 updateCameraOnNavigationStateChange(false)
             }
         }

@@ -22,7 +22,7 @@ import androidx.annotation.StyleRes;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 /**
  * A custom View that can show a quick message to a user.

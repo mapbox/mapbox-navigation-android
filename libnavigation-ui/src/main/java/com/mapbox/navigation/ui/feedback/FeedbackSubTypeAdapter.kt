@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui.feedback
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 
 /**
  * FeedbackSubTypeAdapter provides a binding from [FeedbackBottomSheet] data set

@@ -2,7 +2,7 @@ package com.mapbox.navigation.ui.map
 
 import android.content.Context
 import android.content.res.Resources
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView
 import io.mockk.every
 import io.mockk.mockk

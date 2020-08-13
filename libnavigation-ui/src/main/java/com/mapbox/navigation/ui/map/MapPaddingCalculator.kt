@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.map
 
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView
 
 internal object MapPaddingCalculator {

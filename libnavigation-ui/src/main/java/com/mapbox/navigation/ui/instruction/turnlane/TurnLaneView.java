@@ -18,7 +18,7 @@ import com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneViewData;
 /**
  * Use this view to render turn lane data.
  * <p>
- * Based on the data provided, a turn lane will render.  It's opacity will be
+ * Based on the data provided, a turn lane will render. It's opacity will be
  * determined by whether or not the lane is "active".
  */
 public class TurnLaneView extends AppCompatImageView {

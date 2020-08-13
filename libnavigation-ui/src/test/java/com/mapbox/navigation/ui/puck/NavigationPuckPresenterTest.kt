@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.puck
 
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.location.LocationComponent
 import com.mapbox.mapboxsdk.location.LocationComponentOptions

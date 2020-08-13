@@ -6,13 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StyleRes;
+import androidx.annotation.UiThread;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -23,6 +26,7 @@ import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
 import com.mapbox.navigation.ui.internal.route.RouteConstants;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
+import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 
 import org.jetbrains.annotations.TestOnly;
 
@@ -35,17 +39,15 @@ import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
  * runtime styling. The route will automatically be placed below all labels independent of specific
  * style. If the map styles changed when a routes drawn on the map, the route will automatically be
- * redrawn onto the new map style. If during a navigation session, the user gets re-routed, the
- * route line will be redrawn to reflect the new geometry.
+ * redrawn onto the new map style.
  * <p>
  * You are given the option when first constructing an instance of this class to pass in a style
  * resource. This allows for custom colorizing and line scaling of the route. Inside your
  * applications {@code style.xml} file, you extend {@code <style name="NavigationMapRoute">} and
  * change some or all the options currently offered. If no style files provided in the constructor,
  * the default style will be used.
- *
  */
-
+@UiThread
 public class NavigationMapRoute implements LifecycleObserver {
 
   @StyleRes
@@ -230,28 +232,12 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * This method will allow this class to listen to new routes based on
-   * the progress updates from {@link MapboxNavigation}.
-   * <p>
-   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
-   * class will automatically draw the new route.
-   *
-   * @param navigation to add the progress change listener
-   */
-  public void addProgressChangeListener(MapboxNavigation navigation) {
-    this.navigation = navigation;
-    navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
-  }
-
-  /**
-   * This method will allow this class to listen to new routes based on
-   * the progress updates from {@link MapboxNavigation}.
-   * <p>
-   * If a new route is given to {@link MapboxNavigation#startTripSession()}, this
-   * class will automatically draw the new route.
+   * This method will allow this class to listen to route progress and adapt the route line
+   * whenever {@link TripSessionState#STARTED}.
    *
    * @param navigation to add the progress change listener
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck.
+   * @see MapboxNavigation#startTripSession()
    */
   public void addProgressChangeListener(MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
     this.navigation = navigation;
@@ -261,7 +247,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * Should be called if {@link NavigationMapRoute#addProgressChangeListener(MapboxNavigation)} was
+   * Should be called if {@link #addProgressChangeListener(MapboxNavigation, boolean)} was
    * called to prevent leaking.
    *
    * @param navigation to remove the progress change listener
@@ -273,6 +259,15 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
+  /**
+   * Can be used to manually update the route progress.
+   * <p>
+   * {@link NavigationMapRoute} automatically listens to
+   * {@link RouteProgressObserver#onRouteProgressChanged(RouteProgress)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation, boolean)}
+   * and invoking this method in that scenario will lead to competing updates.
+   * @param routeProgress current progress
+   */
   public void onNewRouteProgress(RouteProgress routeProgress) {
     if (mapRouteProgressChangeListener != null) {
       mapRouteProgressChangeListener.onRouteProgressChanged(routeProgress);
@@ -444,6 +439,14 @@ public class NavigationMapRoute implements LifecycleObserver {
     return mapRouteProgressChangeListener.getPercentDistanceTraveled();
   }
 
+  /**
+   * Can be used to manually update the percentage of route traveled.
+   *
+   * This is also invoked automatically when the vanishing route line feature is enabled and
+   * a new route progress update is delivered.
+   * @see #addProgressChangeListener(MapboxNavigation, boolean)
+   * @see #onNewRouteProgress(RouteProgress)
+   */
   public void updateRouteLineWithDistanceTraveled(float distanceTraveled) {
     routeLine.hideCasingLineAtOffset(distanceTraveled);
     routeLine.hideRouteLineAtOffset(distanceTraveled);

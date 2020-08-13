@@ -1,8 +1,14 @@
 package com.mapbox.navigation.ui.map;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+/**
+ * Used to restore the {@link NavigationMapboxMap} instance.
+ * @see NavigationMapboxMap#saveStateWith(String, Bundle)
+ * @see NavigationMapboxMap#restoreFrom(NavigationMapboxMapInstanceState)
+ */
 public class NavigationMapboxMapInstanceState implements Parcelable {
 
   private final NavigationMapSettings settings;

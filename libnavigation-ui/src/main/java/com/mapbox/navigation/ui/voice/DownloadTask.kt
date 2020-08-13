@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui
+package com.mapbox.navigation.ui.voice
 
 import android.os.AsyncTask
 import java.io.File
@@ -19,7 +19,7 @@ import timber.log.Timber
  * @param extension file extension of the resulting file
  * @param downloadListener listener to be updated on completion of the task
  */
-class DownloadTask
+internal class DownloadTask
 @JvmOverloads
 constructor(
     private val destDirectory: String,

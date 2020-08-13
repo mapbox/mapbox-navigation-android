@@ -10,7 +10,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
  * make additional configuration changes to the map's camera.
  *
  */
-data class RouteInformation(
+data class RouteInformation constructor(
     /**
      * The current route the user is navigating along. This value will update when reroutes occur
      * and it will be null if the [RouteInformation] is generated from an update to route

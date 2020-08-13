@@ -9,7 +9,7 @@ import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Layer

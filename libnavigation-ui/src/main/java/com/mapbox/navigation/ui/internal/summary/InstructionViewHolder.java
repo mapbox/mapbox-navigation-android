@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.ui.instruction.maneuver.ManeuverView;
 
 class InstructionViewHolder extends RecyclerView.ViewHolder implements InstructionListView {

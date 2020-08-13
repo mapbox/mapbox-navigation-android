@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui
+package com.mapbox.navigation.ui.instruction
 
 /**
  * The file is used to verify if the current Android SDK Version against
@@ -6,7 +6,7 @@ package com.mapbox.navigation.ui
  *
  * @param currentSdkVersion The current version of Android SDK
  */
-class SdkVersionChecker(private val currentSdkVersion: Int) {
+internal class SdkVersionChecker(private val currentSdkVersion: Int) {
 
     /**
      * Checks if the current SDK version is equal to or greater than the sdkCode

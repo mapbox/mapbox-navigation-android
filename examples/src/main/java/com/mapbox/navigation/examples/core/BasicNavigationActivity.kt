@@ -260,7 +260,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }

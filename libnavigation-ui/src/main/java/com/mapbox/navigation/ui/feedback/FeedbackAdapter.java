@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 import java.util.List;
 

@@ -80,7 +80,7 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
                 }
                 TripSessionState.STOPPED -> {
                     startLocationUpdates()
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }

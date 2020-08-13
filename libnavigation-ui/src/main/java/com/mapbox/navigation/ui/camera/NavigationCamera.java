@@ -5,6 +5,7 @@ import android.location.Location;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -46,8 +47,8 @@ import static com.mapbox.navigation.ui.NavigationConstants.NAVIGATION_MIN_CAMERA
  * <p>
  * This class listens to the progress of {@link MapboxNavigation} and moves
  * the {@link MapboxMap} camera based on the location updates.
- *
  */
+@UiThread
 public class NavigationCamera {
 
   /**
@@ -116,39 +117,6 @@ public class NavigationCamera {
 
   /**
    * Creates an instance of {@link NavigationCamera}.
-   *
-   * @param mapboxMap for moving the camera
-   * @param navigation for listening to location updates
-   * @param locationComponent for managing camera mode
-   */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation,
-      @NonNull LocationComponent locationComponent) {
-    this.mapboxMap = mapboxMap;
-    this.navigation = navigation;
-    this.locationComponent = locationComponent;
-    this.animationDelegate = new CameraAnimationDelegate(mapboxMap);
-    this.locationComponent.addOnCameraTrackingChangedListener(cameraTrackingChangedListener);
-    this.camera = new DynamicCamera(mapboxMap);
-  }
-
-  /**
-   * Creates an instance of {@link NavigationCamera}.
-   * <p>
-   * Camera will start tracking current user location by default.
-   *
-   * @param mapboxMap for moving the camera
-   * @param locationComponent for managing camera mode
-   */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap, LocationComponent locationComponent) {
-    this.mapboxMap = mapboxMap;
-    this.locationComponent = locationComponent;
-    this.animationDelegate = new CameraAnimationDelegate(mapboxMap);
-    this.locationComponent.addOnCameraTrackingChangedListener(cameraTrackingChangedListener);
-    this.camera = new DynamicCamera(mapboxMap);
-  }
-
-  /**
-   * Creates an instance of {@link NavigationCamera}.
    * <p>
    * Camera will start tracking current user location by default.
    *
@@ -162,14 +130,15 @@ public class NavigationCamera {
     this.camera = new DynamicCamera(mapboxMap);
   }
 
-  @TestOnly NavigationCamera(MapboxMap mapboxMap, MapboxNavigation navigation,
-      RouteProgressObserver routeProgressObserver,
-      LocationComponent locationComponent, RouteInformation currentRouteInformation) {
+  @TestOnly
+  NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation,
+                   @NonNull LocationComponent locationComponent) {
     this.mapboxMap = mapboxMap;
-    this.locationComponent = locationComponent;
     this.navigation = navigation;
-    this.routeProgressObserver = routeProgressObserver;
-    this.currentRouteInformation = currentRouteInformation;
+    this.locationComponent = locationComponent;
+    this.animationDelegate = new CameraAnimationDelegate(mapboxMap);
+    this.locationComponent.addOnCameraTrackingChangedListener(cameraTrackingChangedListener);
+    this.camera = new DynamicCamera(mapboxMap);
   }
 
   /**

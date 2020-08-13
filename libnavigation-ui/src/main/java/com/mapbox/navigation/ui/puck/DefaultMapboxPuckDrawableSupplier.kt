@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.puck
 
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 
 /**

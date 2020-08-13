@@ -23,7 +23,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -147,7 +147,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   public void update(RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       @SuppressLint("WrongConstant")
-      SummaryModel model = new SummaryModel(getContext().getApplicationContext(),
+      SummaryModel model = SummaryModel.create(getContext().getApplicationContext(),
         distanceFormatter, routeProgress, timeFormatType);
       arrivalTimeText.setText(model.getArrivalTime());
       timeRemainingText.setText(model.getTimeRemaining());

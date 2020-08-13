@@ -184,29 +184,6 @@ public class NavigationMapRouteTest {
   }
 
   @Test
-  public void addProgressChangeListener_mapRouteProgressChangeListenerIsAdded() {
-    MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
-    MapView mockedMapView = mock(MapView.class);
-    MapboxMap mockedMapboxMap = mock(MapboxMap.class);
-    int mockedStyleRes = 0;
-    MapRouteClickListener mockedMapClickListener = mock(MapRouteClickListener.class);
-    MapView.OnDidFinishLoadingStyleListener mockedDidFinishLoadingStyleListener =
-      mock(MapView.OnDidFinishLoadingStyleListener.class);
-    MapRouteProgressChangeListener mockedProgressChangeListener = mock(MapRouteProgressChangeListener.class);
-    MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
-    MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
-    LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
-    NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
-      mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
-      mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
-
-    theNavigationMapRoute.addProgressChangeListener(mockedNavigation);
-
-    verify(mockedNavigation, times(1))
-      .registerRouteProgressObserver(eq(mockedProgressChangeListener));
-  }
-
-  @Test
   public void removeProgressChangeListener_mapRouteProgressChangeListenerIsRemoved() {
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);

@@ -290,7 +290,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initializeLanguage(NavigationUiOptions options) {
+  private void initializeLanguage(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     if (routeOptions != null) {
       language = routeOptions.language();
@@ -299,7 +299,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private String initializeUnitType(NavigationUiOptions options) {
+  private String initializeUnitType(NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
     if (routeOptions != null) {

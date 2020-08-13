@@ -220,7 +220,7 @@ public class NavigationViewEventDispatcherTest {
     RouteProgressObserver routeProgressObserver = setupRouteProgressObserver(options);
     eventDispatcher.initializeListeners(options, navigationViewModel);
 
-    eventDispatcher.onDestroy(navigation);
+    eventDispatcher.onDestroy();
 
     verify(navigation, times(1)).unregisterRouteProgressObserver(routeProgressObserver);
   }

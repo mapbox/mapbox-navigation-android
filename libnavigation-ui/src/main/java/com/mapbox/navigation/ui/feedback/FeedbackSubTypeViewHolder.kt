@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.libnavigation.ui.R
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.ui.feedback.FeedbackSubTypeAdapter.OnSubTypeItemClickListener
 
 /**
