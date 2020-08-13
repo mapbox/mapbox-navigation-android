@@ -863,14 +863,16 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   private void showSubLayout() {
     if (!(subStepLayout.getVisibility() == VISIBLE)) {
-      beginDelayedTransition();
+      //beginDelayedTransition();
+      navigationViewModel.delayTransition();
       subStepLayout.setVisibility(VISIBLE);
     }
   }
 
   private void hideSubLayout() {
     if (subStepLayout.getVisibility() == VISIBLE) {
-      beginDelayedTransition();
+      //beginDelayedTransition();
+      navigationViewModel.delayTransition();
       subStepLayout.setVisibility(GONE);
     }
   }

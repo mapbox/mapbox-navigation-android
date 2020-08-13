@@ -100,6 +100,10 @@ class NavigationPresenter {
     view.onFeedbackSent();
   }
 
+  void delayTransition() {
+    view.delayTransition();
+  }
+
   void onGuidanceViewChange(int left, int top, int width, int height) {
     view.onGuidanceViewChange(left, top, width, height);
   }

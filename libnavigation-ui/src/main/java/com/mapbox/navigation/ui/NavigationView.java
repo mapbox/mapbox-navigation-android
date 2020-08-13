@@ -21,6 +21,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.transition.TransitionManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -428,6 +429,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     snackbar.setTextColor(ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_primary_text));
 
     snackbar.show();
+  }
+
+  @Override public void delayTransition() {
+    TransitionManager.beginDelayedTransition(this);
   }
 
   @Override

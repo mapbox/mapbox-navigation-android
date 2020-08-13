@@ -49,6 +49,10 @@ class NavigationViewSubscriber implements LifecycleObserver {
         navigationPresenter.onFeedbackSent();
       }
     });
+
+    navigationViewModel.retrieveIsAnimation().observe(lifecycleOwner, isAnimation -> {
+      navigationPresenter.delayTransition();
+    });
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -58,5 +62,6 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveIsFeedbackSentSuccess().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveIsAnimation().removeObservers(lifecycleOwner);
   }
 }

@@ -64,6 +64,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<RouteProgress> routeProgress = new MutableLiveData<>();
   private final MutableLiveData<BannerInstructions> bannerInstructions = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isOffRoute = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> isAnimation = new MutableLiveData<>();
   private final MutableLiveData<Location> navigationLocation = new MutableLiveData<>();
   private final MutableLiveData<DirectionsRoute> route = new MutableLiveData<>();
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
@@ -289,6 +290,10 @@ public class NavigationViewModel extends AndroidViewModel {
     return isOffRoute;
   }
 
+  public LiveData<Boolean> retrieveIsAnimation() {
+    return isAnimation;
+  }
+
   NavigationViewOptions getNavigationViewOptions() {
     return navigationViewOptions;
   }
@@ -488,6 +493,15 @@ public class NavigationViewModel extends AndroidViewModel {
         ((DynamicCamera) cameraEngine).clearMap();
       }
     }
+  }
+
+  public void delayTransition() {
+    if (isAnimation.getValue()!= null) {
+      isAnimation.setValue(!isAnimation.getValue());
+    } else {
+      isAnimation.setValue(false);
+    }
+
   }
 
   private void deactivateInstructionPlayer() {

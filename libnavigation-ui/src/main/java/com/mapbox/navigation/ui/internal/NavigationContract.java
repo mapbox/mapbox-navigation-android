@@ -47,6 +47,8 @@ public interface NavigationContract {
 
     void onFeedbackSent();
 
+    void delayTransition();
+
     void onGuidanceViewChange(int left, int top, int width, int height);
   }
 }
