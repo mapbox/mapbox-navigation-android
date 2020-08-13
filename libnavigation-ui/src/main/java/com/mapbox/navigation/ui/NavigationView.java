@@ -25,7 +25,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -932,7 +931,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (navigationMap != null) {
       navigationMap.removeOnCameraTrackingChangedListener(onTrackingChangedListener);
     }
-    navigationViewEventDispatcher.onDestroy(navigationViewModel.retrieveNavigation());
+    navigationViewEventDispatcher.onDestroy();
     mapView.onDestroy();
     navigationViewModel.onDestroy(isChangingConfigurations());
     navigationMap = null;

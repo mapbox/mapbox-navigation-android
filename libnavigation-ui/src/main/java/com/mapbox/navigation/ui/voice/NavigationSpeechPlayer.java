@@ -4,6 +4,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -14,9 +17,9 @@ import java.util.Queue;
  * Takes a {@link SpeechPlayerProvider} which will provide either a {@link MapboxSpeechPlayer}
  * or {@link AndroidSpeechPlayer} based on the given language - if it is supported by our Voice API.
  * <p>
- * {@link MapboxSpeechPlayer} requires Internet connectivity.  In cases where a connection is not
+ * {@link MapboxSpeechPlayer} requires Internet connectivity. In cases where a connection is not
  * available, the provider will fall back to the {@link AndroidSpeechPlayer}.
- *
+ * @see MapboxNavigation#registerVoiceInstructionsObserver(VoiceInstructionsObserver)
  */
 public class NavigationSpeechPlayer implements SpeechPlayer {
 
@@ -39,6 +42,7 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    * Plays the given {@link VoiceInstructions}.
    *
    * @param voiceInstructions with SSML and normal announcement text
+   * @see MapboxNavigation#registerVoiceInstructionsObserver(VoiceInstructionsObserver)
    */
   @Override
   public void play(VoiceInstructions voiceInstructions) {
@@ -75,11 +79,10 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
   }
 
   /**
-   * Optional method to implement in an {@link com.mapbox.services.android.navigation.v5.offroute.OffRouteListener}.
+   * Optional method to implement in an {@link OffRouteObserver}.
    * <p>
    * During an off-route scenario, you can use this method to cancel existing announcements without
    * completely muting the player.
-   *
    */
   @Override
   public void onOffRoute() {

@@ -479,15 +479,15 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_left_right_padding)
+            resources.getDimension(com.mapbox.navigation.ui.R.dimen.route_overview_left_right_padding)
                 .toInt()
         val paddingBuffer =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.route_overview_buffer_padding)
+            resources.getDimension(com.mapbox.navigation.ui.R.dimen.route_overview_buffer_padding)
                 .toInt()
         val instructionHeight =
-            (resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
+            (resources.getDimension(com.mapbox.navigation.ui.R.dimen.instruction_layout_height) + paddingBuffer).toInt()
         val summaryHeight =
-            resources.getDimension(com.mapbox.libnavigation.ui.R.dimen.summary_bottomsheet_height)
+            resources.getDimension(com.mapbox.navigation.ui.R.dimen.summary_bottomsheet_height)
                 .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }
@@ -542,7 +542,7 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                     updateViews(TripSessionState.STOPPED)
 
                     if (mapboxNavigation.getRoutes().isNotEmpty()) {
-                        navigationMapboxMap?.removeRoute()
+                        navigationMapboxMap?.hideRoute()
                     }
 
                     navigationMapboxMap?.removeOnWayNameChangedListener(this@BasicNavigationFragment)

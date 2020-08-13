@@ -23,7 +23,29 @@ import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
 
 @AutoValue
-public abstract class NavigationViewOptions extends NavigationUiOptions {
+public abstract class NavigationViewOptions {
+
+  public abstract DirectionsRoute directionsRoute();
+
+  @Nullable
+  public abstract Integer lightThemeResId();
+
+  @Nullable
+  public abstract Integer darkThemeResId();
+
+  public abstract boolean shouldSimulateRoute();
+
+  public abstract boolean waynameChipEnabled();
+
+  @Nullable
+  public abstract Camera camera();
+
+  @Nullable
+  public abstract PuckDrawableSupplier puckDrawableSupplier();
+
+  public abstract boolean muteVoiceGuidance();
+
+  public abstract boolean isFallbackAlwaysEnabled();
 
   public abstract NavigationOptions navigationOptions();
 

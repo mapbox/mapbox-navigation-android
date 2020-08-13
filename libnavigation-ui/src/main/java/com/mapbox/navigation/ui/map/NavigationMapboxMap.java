@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -16,7 +17,10 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.core.directions.session.RoutesObserver;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
@@ -64,6 +68,7 @@ import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGA
  * <p>
  * These APIs include drawing a route line, camera animations, and more.
  */
+@UiThread
 public class NavigationMapboxMap implements LifecycleObserver {
 
   static final String STREETS_LAYER_ID = "streetsLayer";
@@ -265,6 +270,11 @@ public class NavigationMapboxMap implements LifecycleObserver {
   /**
    * Updates the location icon on the map and way name data (if found)
    * for the given {@link Location}.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link LocationObserver#onEnhancedLocationChanged(Location, List)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
    *
    * @param location to update the icon and query the map
    */
@@ -280,6 +290,11 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * This method can be used to provide the list of locations where the last one is the target
    * and the rest are intermediate points used as the animation path.
    * The puck and the camera will be animated between each of the points linearly until reaching the target.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link LocationObserver#onEnhancedLocationChanged(Location, List)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
    *
    * @param locations the path to update the location icon
    */
@@ -353,12 +368,13 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
-   * Can be used to automatically drive the map camera / route updates and arrow
-   * once navigation has started.
+   * Can be used to automatically drive the map camera, puck and route updates
+   * when {@link TripSessionState#STARTED}.
    * <p>
-   * These will automatically be removed in {@link MapboxNavigation#onDestroy()}.
+   * Use {@link #removeProgressChangeListener()} when the session is finished to avoid leaks.
    *
    * @param navigation to add the progress listeners
+   * @see MapboxNavigation#startTripSession()
    */
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
@@ -374,13 +390,14 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
-   * Can be used to automatically drive the map camera / route updates and arrow
-   * once navigation has started.
+   * Can be used to automatically drive the map camera, puck and route updates
+   * when {@link TripSessionState#STARTED}.
    * <p>
-   * These will automatically be removed in {@link MapboxNavigation#onDestroy()}.
+   * Use {@link #removeProgressChangeListener()} when the session is finished to avoid leaks.
    *
    * @param navigation to add the progress listeners
    * @param enableVanishingRouteLine determines if the route line should vanish behind the puck.
+   * @see MapboxNavigation#startTripSession()
    */
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean enableVanishingRouteLine) {
     this.vanishRouteLineEnabled = enableVanishingRouteLine;
@@ -463,8 +480,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
   /**
    * Will draw the given {@link DirectionsRoute} on the map using the colors defined
    * in your given style.
+   * <p>
+   * In most of the scenarios, this call can be wired to the {@link RoutesObserver#onRoutesChanged(List)}
+   * to display the route that {@link MapboxNavigation} uses to compute the route progress.
    *
    * @param route to be drawn
+   * @see MapboxNavigation#registerRoutesObserver(RoutesObserver)
    */
   public void drawRoute(@NonNull DirectionsRoute route) {
     mapRoute.addRoute(route);
@@ -476,8 +497,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * <p>
    * The primary route will default to the first route in the directions route list.
    * All other routes in the list will be drawn on the map using the alternative route style.
+   * <p>
+   * In most of the scenarios, this call can be wired to the {@link RoutesObserver#onRoutesChanged(List)}
+   * to display the route that {@link MapboxNavigation} uses to compute the route progress.
    *
    * @param routes to be drawn
+   * @see MapboxNavigation#registerRoutesObserver(RoutesObserver)
    */
   public void drawRoutes(@NonNull List<? extends DirectionsRoute> routes) {
     mapRoute.addRoutes(routes);
@@ -491,6 +516,15 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapRoute.addIdentifiableRoutes(routes);
   }
 
+  /**
+   * Can be used to manually update the route progress.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link RouteProgressObserver#onRouteProgressChanged(RouteProgress)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
+   * @param routeProgress current progress
+   */
   public void onNewRouteProgress(RouteProgress routeProgress) {
     mapRoute.onNewRouteProgress(routeProgress);
   }
@@ -520,16 +554,18 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
-   * Will remove the drawn route displayed on the map.  Does nothing
+   * Will hide the drawn route displayed on the map. Does nothing
    * if no route is drawn.
+   * @see #showRoute()
    */
-  public void removeRoute() {
+  public void hideRoute() {
     mapRoute.updateRouteVisibilityTo(false);
     mapRoute.updateRouteArrowVisibilityTo(false);
   }
 
   /**
    * Will show the drawn route displayed on the map.
+   * @see #hideRoute()
    */
   public void showRoute() {
     mapRoute.updateRouteVisibilityTo(true);
@@ -546,6 +582,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
     return mapCamera;
   }
 
+  /**
+   * Provides the object being used to draw the route line.
+   */
   public NavigationMapRoute retrieveMapRoute() {
     return mapRoute;
   }
@@ -594,7 +633,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   /**
    * This method resets the map padding to the default padding that is
    * generated when navigation begins (location icon moved to lower half of the screen) or
-   * the custom padding that was last passed via {@link MapPaddingAdjustor#adjustLocationIconWith(int[])}.
+   * the custom padding that was last passed via {@link #adjustLocationIconWith(int[])}.
    * <p>
    * The custom padding will be used if it exists, otherwise the default will be used.
    */
@@ -759,6 +798,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
     this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
   }
 
+  /**
+   * Used to take the snapshot of the current state of the map.
+   */
   public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
     mapboxMap.snapshot(navigationSnapshotReadyCallback);
   }

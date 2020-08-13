@@ -1,7 +1,7 @@
 package com.mapbox.navigation.ui.puck
 
-import com.mapbox.libnavigation.ui.R
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import com.mapbox.navigation.ui.R
 
 /**
  * Returns a default puck supplier associated with different RouteProgressState

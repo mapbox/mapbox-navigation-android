@@ -1,4 +1,1 @@
-<manifest
-    package="com.mapbox.libnavigation.ui">
-
-</manifest>
+<manifest package="com.mapbox.navigation.ui"/>

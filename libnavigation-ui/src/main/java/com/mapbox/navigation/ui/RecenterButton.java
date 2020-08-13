@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.libnavigation.ui.R;
 
 /**
  * Button used to re-activate following user location during navigation.

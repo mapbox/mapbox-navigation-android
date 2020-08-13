@@ -4,8 +4,6 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
-import com.mapbox.navigation.ui.SdkVersionChecker;
-
 class UrlDensityMap extends SparseArray<String> {
 
   private static final String ONE_X = "@1x";

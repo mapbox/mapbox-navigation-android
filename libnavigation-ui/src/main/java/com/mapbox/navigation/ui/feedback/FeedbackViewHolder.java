@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 /**
  * A ViewHolder describes a Feedback category view and metadata about its place within the RecyclerView.

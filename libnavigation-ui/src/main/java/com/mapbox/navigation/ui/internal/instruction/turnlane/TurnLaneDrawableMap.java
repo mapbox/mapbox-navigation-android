@@ -1,6 +1,6 @@
 package com.mapbox.navigation.ui.internal.instruction.turnlane;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
 import java.util.HashMap;
 

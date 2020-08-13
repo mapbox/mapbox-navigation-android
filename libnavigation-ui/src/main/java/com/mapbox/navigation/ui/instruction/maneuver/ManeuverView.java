@@ -17,7 +17,7 @@ import androidx.core.util.Pair;
 
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.api.directions.v5.models.StepManeuver;
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconDrawer;
 import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuversStyleKit;
@@ -30,7 +30,6 @@ import static com.mapbox.navigation.trip.notification.internal.maneuver.Maneuver
 
 /**
  * A view that draws a maneuver arrow indicating the upcoming maneuver.
- *
  */
 public class ManeuverView extends View {
 

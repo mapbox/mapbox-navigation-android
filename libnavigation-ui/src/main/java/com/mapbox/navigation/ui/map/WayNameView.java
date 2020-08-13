@@ -12,8 +12,12 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
-import com.mapbox.libnavigation.ui.R;
+import com.mapbox.navigation.ui.R;
 
+/**
+ * View that displays the current road name below the user location icon.
+ * @see NavigationMapboxMap#updateWaynameQueryMap(boolean)
+ */
 public class WayNameView extends FrameLayout {
 
   private TextView wayNameText;

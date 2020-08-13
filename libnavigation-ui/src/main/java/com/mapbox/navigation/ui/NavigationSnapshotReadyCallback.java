@@ -6,11 +6,15 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.libnavigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * Used to take a snapshot of the current map when sending the feedback event.
+ */
 public class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
 
   private NavigationView navigationView;
@@ -22,7 +26,7 @@ public class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyC
   }
 
   @Override
-  public void onSnapshotReady(Bitmap snapshot) {
+  public void onSnapshotReady(@NotNull Bitmap snapshot) {
     ImageView screenshotView = updateScreenshotViewWithSnapshot(snapshot);
     updateFeedbackScreenshot();
     resetViewVisibility(screenshotView);

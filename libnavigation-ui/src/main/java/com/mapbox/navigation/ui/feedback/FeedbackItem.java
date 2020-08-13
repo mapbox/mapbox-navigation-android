@@ -1,10 +1,17 @@
 package com.mapbox.navigation.ui.feedback;
 
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.telemetry.events.AppMetadata;
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent;
 
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Feedback element returned by {@link FeedbackBottomSheet}.
+ *
+ * Should be passed to {@link MapboxNavigation#postUserFeedback(String, String, String, String, String[], AppMetadata)}
+ */
 public class FeedbackItem {
 
   @FeedbackEvent.Type

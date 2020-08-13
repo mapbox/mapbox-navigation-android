@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mapbox.libnavigation.ui.R;
 
 public class SoundButton extends ConstraintLayout implements NavigationButton {
   private static final float ALPHA_VALUE_ZERO = 0;

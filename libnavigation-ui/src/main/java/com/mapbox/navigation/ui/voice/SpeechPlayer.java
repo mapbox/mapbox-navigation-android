@@ -36,13 +36,11 @@ public interface SpeechPlayer {
   /**
    * Used in off-route scenarios to stop current
    * announcement (if playing) and voice a rerouting cue.
-   *
    */
   void onOffRoute();
 
   /**
    * Used to stop and release the media (if needed).
-   *
    */
   void onDestroy();
 }

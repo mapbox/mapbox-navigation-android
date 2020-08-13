@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui;
 
-
 import androidx.annotation.NonNull;
 
 import com.mapbox.navigation.ui.map.OnWayNameChangedListener;
