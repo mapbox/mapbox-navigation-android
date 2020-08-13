@@ -13,6 +13,7 @@ import com.mapbox.navigation.examples.ui.CustomPuckActivity
 import com.mapbox.navigation.examples.ui.CustomUIComponentStyleActivity
 import com.mapbox.navigation.examples.ui.NavigationViewActivity
 import com.mapbox.navigation.examples.ui.NavigationViewFragmentActivity
+import com.mapbox.navigation.examples.ui.TrafficToggleActivity
 import kotlinx.android.synthetic.main.activity_ui.*
 
 class UIActivity : AppCompatActivity() {
@@ -72,6 +73,11 @@ class UIActivity : AppCompatActivity() {
                 getString(R.string.title_custom_ui_component_style),
                 getString(R.string.description_custom_ui_component_style),
                 CustomUIComponentStyleActivity::class.java
+            ),
+            SampleItem(
+                    getString(R.string.title_traffic_toggle),
+                    getString(R.string.description_traffic_toggle),
+                    TrafficToggleActivity::class.java
             )
         )
     }
