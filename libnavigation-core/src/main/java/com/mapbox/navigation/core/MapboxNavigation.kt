@@ -115,7 +115,6 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
  *
  * If the SDK is already in the `Free Drive` mode or entering it whenever a primary route is available,
  * the SDK will enter the `Active Guidance` mode instead and propagate meaningful [RouteProgress].
- * Additionally, the enhanced location's map-matching will be more precise and based on the primary route itself.
  *
  * If a new routes request is made, or the routes are manually cleared, the SDK automatically fall back to either `Idle` or `Free Drive` state.
  *
@@ -304,7 +303,7 @@ class MapboxNavigation(
      * If the list is empty, the SDK will exit the `Active Guidance` state.
      *
      * If the list is not empty, the route at index 0 is going to be treated as the primary route
-     * and used for route progress, off route events and map-matching calculations.
+     * and used for route progress calculations and off route events.
      *
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.
      *
@@ -439,7 +438,7 @@ class MapboxNavigation(
 
     /**
      * Registers [RoutesObserver]. The updates are available when a new list of routes is set.
-     * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance' and location map-matching.
+     * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
      */
     fun registerRoutesObserver(routesObserver: RoutesObserver) {
         directionsSession.registerRoutesObserver(routesObserver)

@@ -14,7 +14,7 @@ interface RoutesRequestCallback {
      * Invoked whenever a new set of routes is available.
      *
      * The provided list is the list of routes created by this request and assigned to be managed by the SDK.
-     * The route at index 0, if exist, is treated as the primary route for 'Active Guidance' and location map-matching.
+     * The route at index 0, if exist, is treated as the primary route for 'Active Guidance'.
      *
      * The list provided by this callback is not guaranteed to still be the one managed by the SDK at the moment of invocation.
      * Use [RoutesObserver] and [MapboxNavigation.registerRoutesObserver] to observe whenever the routes list reference managed by the SDK changes, regardless of a source.

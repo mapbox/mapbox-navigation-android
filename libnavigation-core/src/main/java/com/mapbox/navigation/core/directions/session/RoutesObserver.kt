@@ -11,7 +11,7 @@ interface RoutesObserver {
     /**
      * Invoked whenever a list of routes changes.
      *
-     * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance' and location map-matching.
+     * The route at index 0, if exist, will be treated as the primary route for 'Active Guidance'.
      *
      * A list of routes can be modified internally and externally at any time with methods like
      * [MapboxNavigation.requestRoutes], [MapboxNavigation.setRoutes], or during automatic reroutes, faster route and route refresh operations.
