@@ -14,21 +14,18 @@ public interface NavigationListener {
   /**
    * Will be triggered when the user clicks
    * on the cancel "X" icon while navigating.
-   *
    */
   void onCancelNavigation();
 
   /**
    * Will be triggered when {@link MapboxNavigation}
    * has finished and the service is completely shut down.
-   *
    */
   void onNavigationFinished();
 
   /**
    * Will be triggered when {@link MapboxNavigation}
    * has been initialized and the user is navigating the given route.
-   *
    */
   void onNavigationRunning();
 }

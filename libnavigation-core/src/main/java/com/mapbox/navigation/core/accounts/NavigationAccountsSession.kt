@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.accounts
 import android.content.Context
 import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSessionStateObserver
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 
 internal class NavigationAccountsSession(private val context: Context) : NavigationSessionStateObserver {
 

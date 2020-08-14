@@ -40,7 +40,7 @@ import timber.log.Timber
 class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
-        const val MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state"
+        const val MAP_INSTANCE_STATE_KEY = "navigation_mapbox_map_instance_state"
         const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
         const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
     }

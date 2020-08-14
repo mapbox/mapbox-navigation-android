@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.internal
+package com.mapbox.navigation.core.internal.formatter
 
 import android.content.Context
 import android.graphics.Typeface

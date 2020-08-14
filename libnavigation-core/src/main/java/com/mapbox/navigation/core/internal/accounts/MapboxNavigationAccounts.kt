@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.accounts
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import android.text.format.DateUtils
@@ -8,11 +8,12 @@ import com.mapbox.android.accounts.v1.AccountsConstants.MAPBOX_SHARED_PREFERENCE
 import com.mapbox.android.accounts.v1.MapboxAccounts
 import com.mapbox.navigation.base.internal.accounts.SkuTokenProvider
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
+import com.mapbox.navigation.core.accounts.Billing
 
 /**
  * This class generates and retains the Navigation SDK's SKU token according to internal Mapbox policies
  */
-internal class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider,
+class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider,
     SkuTokenProvider {
 
     companion object {

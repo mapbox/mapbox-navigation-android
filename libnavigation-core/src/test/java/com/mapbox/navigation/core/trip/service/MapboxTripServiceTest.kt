@@ -1,11 +1,10 @@
-package com.mapbox.navigation.core.internal.trip.service
+package com.mapbox.navigation.core.trip.service
 
 import android.app.Notification
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.trip.service.MapboxTripService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

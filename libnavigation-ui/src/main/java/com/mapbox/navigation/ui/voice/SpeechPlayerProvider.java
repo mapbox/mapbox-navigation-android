@@ -22,7 +22,6 @@ import java.util.List;
  * <p>
  * If false, an instance of {@link MapboxSpeechPlayer} will never be provided to the {@link NavigationSpeechPlayer}.
  * The SDK will default to the {@link AndroidSpeechPlayer} powered by {@link android.speech.tts.TextToSpeech}.
- *
  */
 public class SpeechPlayerProvider {
 

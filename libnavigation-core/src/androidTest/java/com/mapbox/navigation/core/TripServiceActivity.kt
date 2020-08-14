@@ -13,7 +13,7 @@ import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.notification.TripNotification
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.test.R
 import com.mapbox.navigation.core.trip.service.MapboxTripService
 import com.mapbox.navigation.utils.internal.ThreadController

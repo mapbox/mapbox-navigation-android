@@ -47,7 +47,7 @@ import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.Rounding;
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter;
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;

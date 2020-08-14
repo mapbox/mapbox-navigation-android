@@ -6,7 +6,7 @@ import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.ui.BaseTest
 import io.mockk.every

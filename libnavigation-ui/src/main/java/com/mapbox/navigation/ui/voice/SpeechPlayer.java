@@ -6,7 +6,6 @@ import com.mapbox.navigation.ui.NavigationView;
 /**
  * Defines a contract for speech players
  * used in {@link NavigationView}.
- *
  */
 public interface SpeechPlayer {
 
