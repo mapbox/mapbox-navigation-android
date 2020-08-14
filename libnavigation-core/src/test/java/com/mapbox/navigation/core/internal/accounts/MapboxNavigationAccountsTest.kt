@@ -1,4 +1,4 @@
-package com.mapbox.navigation.core.accounts
+package com.mapbox.navigation.core.internal.accounts
 
 import android.content.Context
 import android.os.Bundle

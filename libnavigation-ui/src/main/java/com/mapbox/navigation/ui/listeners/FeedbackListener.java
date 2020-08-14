@@ -14,7 +14,6 @@ public interface FeedbackListener {
   /**
    * Will be triggered when the feedback bottomsheet
    * is opened by a user while navigating.
-   *
    */
   void onFeedbackOpened();
 
@@ -22,7 +21,6 @@ public interface FeedbackListener {
    * Will be triggered when the feedback bottomsheet
    * is opened by a user while navigating but then dismissed
    * without clicking on a specific {@link FeedbackItem} in the list.
-   *
    */
   void onFeedbackCancelled();
 

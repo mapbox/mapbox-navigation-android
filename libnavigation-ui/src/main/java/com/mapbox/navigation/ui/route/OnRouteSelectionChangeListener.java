@@ -5,7 +5,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute;
 /**
  * Listener for determining which current route the user has selected as their primary route for
  * navigation.
- *
  */
 public interface OnRouteSelectionChangeListener {
 

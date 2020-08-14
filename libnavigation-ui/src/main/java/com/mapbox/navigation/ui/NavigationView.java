@@ -76,7 +76,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
     NavigationContract.View {
 
-  private static final String MAP_INSTANCE_STATE_KEY = "navgation_mapbox_map_instance_state";
+  private static final String MAP_INSTANCE_STATE_KEY = "navigation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
   private static final long WAY_NAME_TRANSLATIONX_DURATION = 750L;
@@ -170,7 +170,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   /**
    * Used to restore the bottomsheet state and re-center
    * button visibility.  As well as the {@link MapView}
-   * position prior to rotation.
+   * position prior to a configuration change.
    *
    * @param savedInstanceState to extract state variables
    */
@@ -485,7 +485,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * which will fire the ready events for this view.
    * <p>
    * This method also accepts a {@link CameraPosition} that will be set as soon as the map is
-   * ready.  Note, this position is ignored during rotation in favor of the last known map position.
+   * ready.  Note, this position is ignored during a configuration change in favor of the last known map position.
    *
    * @param onNavigationReadyCallback to be set to this view
    * @param initialMapCameraPosition to be shown once the map is ready

@@ -87,7 +87,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param routeLineInitializedCallback indicates that the route line layer has been added to the current style
    * @param routeStyleDescriptors optionally describes the styling of the route lines
    */
-
   private NavigationMapRoute(@Nullable MapboxNavigation navigation,
       @NonNull MapView mapView,
       @NonNull MapboxMap mapboxMap,

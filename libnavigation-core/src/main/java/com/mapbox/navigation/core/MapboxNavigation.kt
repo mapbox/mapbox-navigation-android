@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
-import com.mapbox.navigation.core.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.accounts.NavigationAccountsSession
 import com.mapbox.navigation.core.arrival.ArrivalController
 import com.mapbox.navigation.core.arrival.ArrivalObserver
@@ -36,7 +35,8 @@ import com.mapbox.navigation.core.fasterroute.FasterRouteController
 import com.mapbox.navigation.core.fasterroute.FasterRouteDetector
 import com.mapbox.navigation.core.fasterroute.FasterRouteObserver
 import com.mapbox.navigation.core.fasterroute.RouteComparator
-import com.mapbox.navigation.core.internal.MapboxDistanceFormatter
+import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.MapboxRerouteController
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
