@@ -1,5 +1,5 @@
 <resources>
-    <string name="kilometers">ק״מ</string>
-    <string name="meters">מ׳</string>
-    <string name="miles">מייל</string>
+    <string name="mapbox_unit_kilometers">ק״מ</string>
+    <string name="mapbox_unit_meters">מ׳</string>
+    <string name="mapbox_unit_miles">מייל</string>
     </resources>
