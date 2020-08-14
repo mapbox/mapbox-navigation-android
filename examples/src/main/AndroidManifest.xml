@@ -250,6 +250,15 @@
         </activity>
 
         <activity
+            android:name=".core.MapMatchingActivity"
+            android:label="@string/title_map_matching"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity
             android:name=".ui.NavigationViewFragmentActivity"
             android:label="@string/title_navigation_view_fragment">
             <meta-data

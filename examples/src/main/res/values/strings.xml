@@ -88,6 +88,9 @@
     <string name="title_runtime_styling">Runtime Route Styling</string>
     <string name="description_runtime_styling">An example using RuntimeRouteStyling</string>
 
+    <string name="title_map_matching">Map Matching</string>
+    <string name="description_map_matching">Use MapMatching to fetch DirectionsRoute</string>
+
     <string name="settings">Settings</string>
     <string name="simulate_route">Simulate Route</string>
     <string name="language">Language</string>

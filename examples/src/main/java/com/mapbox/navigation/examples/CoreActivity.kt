@@ -16,6 +16,7 @@ import com.mapbox.navigation.examples.core.FeedbackButtonActivity
 import com.mapbox.navigation.examples.core.FreeDriveNavigationActivity
 import com.mapbox.navigation.examples.core.GuidanceViewActivity
 import com.mapbox.navigation.examples.core.InstructionViewActivity
+import com.mapbox.navigation.examples.core.MapMatchingActivity
 import com.mapbox.navigation.examples.core.NavigationMapRouteActivity
 import com.mapbox.navigation.examples.core.ReRouteActivity
 import com.mapbox.navigation.examples.core.ReplayActivity
@@ -137,6 +138,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_runtime_styling),
                 getString(R.string.description_runtime_styling),
                 RuntimeRouteStylingActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_map_matching),
+                getString(R.string.description_map_matching),
+                MapMatchingActivity::class.java
             )
         )
     }
