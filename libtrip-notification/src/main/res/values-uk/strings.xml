@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Закінчити навігацію</string>
-    <string name="eta_format">До прибуття %s</string>
+    <string name="mapbox_end_navigation">Закінчити навігацію</string>
+    <string name="mapbox_eta_format">До прибуття %s</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">день</item>
         <item quantity="few">дні</item>
         <item quantity="many">днів</item>
         <item quantity="other">днів</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">год</string>
+    <string name="mapbox_unit_hr">год</string>
     <!-- Minute -->
-    <string name="min">хв</string>
+    <string name="mapbox_unit_min">хв</string>
 </resources>

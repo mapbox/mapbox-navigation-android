@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Navigation beenden</string>
-    <string name="eta_format">%s ETA</string>
+    <string name="mapbox_end_navigation">Navigation beenden</string>
+    <string name="mapbox_eta_format">%s ETA</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">Tag</item>
         <item quantity="other">Tage</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">Std.</string>
+    <string name="mapbox_unit_hr">Std.</string>
     <!-- Minute -->
-    <string name="min">Min.</string>
+    <string name="mapbox_unit_min">Min.</string>
 </resources>

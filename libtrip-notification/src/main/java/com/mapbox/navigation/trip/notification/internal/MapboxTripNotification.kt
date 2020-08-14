@@ -95,7 +95,7 @@ class MapboxTripNotification constructor(
     private var expandedNotificationRemoteViews: RemoteViews? = null
     private var pendingOpenIntent: PendingIntent? = null
     private var pendingCloseIntent: PendingIntent? = null
-    private val etaFormat: String = applicationContext.getString(R.string.eta_format)
+    private val etaFormat: String = applicationContext.getString(R.string.mapbox_eta_format)
     private val notificationReceiver = NotificationActionReceiver()
     private val distanceFormatter: DistanceFormatter =
         navigationOptions.distanceFormatter
@@ -218,7 +218,7 @@ class MapboxTripNotification constructor(
             NotificationCompat.Builder(applicationContext, NAVIGATION_NOTIFICATION_CHANNEL)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setSmallIcon(R.drawable.ic_navigation)
+                .setSmallIcon(R.drawable.mapbox_ic_navigation)
                 .setCustomContentView(collapsedNotificationRemoteViews)
                 .setCustomBigContentView(expandedNotificationRemoteViews)
                 .setOngoing(true)
@@ -234,14 +234,14 @@ class MapboxTripNotification constructor(
      */
     private fun buildRemoteViews() {
         val backgroundColor =
-            ContextCompat.getColor(applicationContext, R.color.mapboxNotificationBlue)
+            ContextCompat.getColor(applicationContext, R.color.mapbox_notification_blue)
 
         buildCollapsedViews(backgroundColor)
         buildExpandedViews(backgroundColor)
     }
 
     private fun buildCollapsedViews(backgroundColor: Int) {
-        val collapsedLayout = R.layout.collapsed_navigation_notification_layout
+        val collapsedLayout = R.layout.mapbox_notification_navigation_collapsed
         val collapsedLayoutId = R.id.navigationCollapsedNotificationLayout
 
         RemoteViewsProvider.createRemoteViews(applicationContext.packageName, collapsedLayout)
@@ -252,7 +252,7 @@ class MapboxTripNotification constructor(
     }
 
     private fun buildExpandedViews(backgroundColor: Int) {
-        val expandedLayout = R.layout.expanded_navigation_notification_layout
+        val expandedLayout = R.layout.mapbox_notification_navigation_expanded
         val expandedLayoutId = R.id.navigationExpandedNotificationLayout
         RemoteViewsProvider.createRemoteViews(applicationContext.packageName, expandedLayout)
             .also { remoteViews ->
@@ -362,7 +362,7 @@ class MapboxTripNotification constructor(
     private fun updateEndNavigationBtnText(isFreeDriveMode: Boolean) {
         expandedNotificationRemoteViews?.setTextViewText(
             R.id.endNavigationBtnText,
-            applicationContext.getString(if (isFreeDriveMode) R.string.stop_session else R.string.end_navigation)
+            applicationContext.getString(if (isFreeDriveMode) R.string.mapbox_stop_session else R.string.mapbox_end_navigation)
         )
     }
 
@@ -370,11 +370,11 @@ class MapboxTripNotification constructor(
         if (isFreeDriveMode) {
             collapsedNotificationRemoteViews?.setImageViewResource(
                 R.id.maneuverImage,
-                R.drawable.ic_navigation
+                R.drawable.mapbox_ic_navigation
             )
             expandedNotificationRemoteViews?.setImageViewResource(
                 R.id.maneuverImage,
-                R.drawable.ic_navigation
+                R.drawable.mapbox_ic_navigation
             )
         }
     }
@@ -493,9 +493,9 @@ class MapboxTripNotification constructor(
         }
 
         val width =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_width)
+            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_image_width_notification_maneuver)
         val height =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.notification_maneuver_image_view_height)
+            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_image_height_notification_maneuver)
 
         val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val maneuverCanvas = Canvas(maneuverImage)

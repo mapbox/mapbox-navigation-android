@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">လမ်းညွန်မှုအဆုံးသတ်ပါ</string>
+    <string name="mapbox_end_navigation">လမ်းညွန်မှုအဆုံးသတ်ပါ</string>
 </resources>
