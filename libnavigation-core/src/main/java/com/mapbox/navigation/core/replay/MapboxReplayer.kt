@@ -58,10 +58,9 @@ class MapboxReplayer {
      * Remove registered observers.
      *
      * @param observer the observer being removed
-     * @return true if the observer was registered, false otherwise
      */
-    fun unregisterObserver(observer: ReplayEventsObserver): Boolean {
-        return replayEventsObservers.remove(observer)
+    fun unregisterObserver(observer: ReplayEventsObserver) {
+        replayEventsObservers.remove(observer)
     }
 
     /**

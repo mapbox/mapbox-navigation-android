@@ -154,7 +154,7 @@ package com.mapbox.navigation.core.replay {
     method public void seekTo(double replayTime);
     method public void seekTo(com.mapbox.navigation.core.replay.history.ReplayEventBase replayEvent);
     method public void stop();
-    method public boolean unregisterObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
+    method public void unregisterObserver(com.mapbox.navigation.core.replay.history.ReplayEventsObserver observer);
     method public void unregisterObservers();
   }
 
