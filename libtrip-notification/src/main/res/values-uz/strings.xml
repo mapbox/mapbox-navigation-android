@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Yo\'nalish tugallandi</string>
+    <string name="mapbox_end_navigation">Yo\'nalish tugallandi</string>
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="other">kun</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">soat</string>
+    <string name="mapbox_unit_hr">soat</string>
     <!-- Minute -->
-    <string name="min">minut</string>
+    <string name="mapbox_unit_min">minut</string>
 </resources>

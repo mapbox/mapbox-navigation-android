@@ -1,14 +1,14 @@
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Fin de navigation</string>
+    <string name="mapbox_end_navigation">Fin de navigation</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">jour</item>
         <item quantity="other">jours</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">h</string>
+    <string name="mapbox_unit_hr">h</string>
     <!-- Minute -->
-    <string name="min">min</string>
+    <string name="mapbox_unit_min">min</string>
 </resources>

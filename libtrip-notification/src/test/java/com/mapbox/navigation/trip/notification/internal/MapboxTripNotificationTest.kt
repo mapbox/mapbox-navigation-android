@@ -80,13 +80,13 @@ class MapboxTripNotificationTest {
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.collapsed_navigation_notification_layout
+                R.layout.mapbox_notification_navigation_collapsed
             )
         } returns collapsedViews
         every {
             RemoteViewsProvider.createRemoteViews(
                 any(),
-                R.layout.expanded_navigation_notification_layout
+                R.layout.mapbox_notification_navigation_expanded
             )
         } returns expandedViews
     }
@@ -110,8 +110,8 @@ class MapboxTripNotificationTest {
         every { mockedContext.packageManager } returns (mockedPackageManager)
         every { mockedContext.packageName } returns ("com.mapbox.navigation.trip.notification")
         every { mockedContext.getString(any()) } returns FORMAT_STRING
-        every { mockedContext.getString(R.string.stop_session) } returns STOP_SESSION
-        every { mockedContext.getString(R.string.end_navigation) } returns END_NAVIGATION
+        every { mockedContext.getString(R.string.mapbox_stop_session) } returns STOP_SESSION
+        every { mockedContext.getString(R.string.mapbox_end_navigation) } returns END_NAVIGATION
         val notificationManager = mockk<NotificationManager>(relaxed = true)
         every { mockedContext.getSystemService(Context.NOTIFICATION_SERVICE) } returns (notificationManager)
         every { DateFormat.is24HourFormat(mockedContext) } returns (false)

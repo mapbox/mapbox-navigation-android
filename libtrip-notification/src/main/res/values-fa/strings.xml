@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">پایان مسیر یابی</string>
-    <string name="eta_format">%s ETA</string>
+    <string name="mapbox_end_navigation">پایان مسیر یابی</string>
+    <string name="mapbox_eta_format">%s ETA</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">روز</item>
         <item quantity="other">روزها</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">ساعت</string>
+    <string name="mapbox_unit_hr">ساعت</string>
     <!-- Minute -->
-    <string name="min">دقیقه</string>
+    <string name="mapbox_unit_min">دقیقه</string>
 </resources>

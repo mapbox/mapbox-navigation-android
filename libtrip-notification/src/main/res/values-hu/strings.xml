@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Navigáció vége</string>
-    <string name="eta_format">%s érkezés</string>
+    <string name="mapbox_end_navigation">Navigáció vége</string>
+    <string name="mapbox_eta_format">%s érkezés</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">nap</item>
         <item quantity="other">nap</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">óra</string>
+    <string name="mapbox_unit_hr">óra</string>
     <!-- Minute -->
-    <string name="min">perc</string>
+    <string name="mapbox_unit_min">perc</string>
 </resources>

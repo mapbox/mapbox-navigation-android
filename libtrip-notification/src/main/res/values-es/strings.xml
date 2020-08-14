@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Finaliza navegación</string>
+    <string name="mapbox_end_navigation">Finaliza navegación</string>
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">día</item>
         <item quantity="other">días</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">h</string>
+    <string name="mapbox_unit_hr">h</string>
     <!-- Minute -->
-    <string name="min">min</string>
+    <string name="mapbox_unit_min">min</string>
 </resources>

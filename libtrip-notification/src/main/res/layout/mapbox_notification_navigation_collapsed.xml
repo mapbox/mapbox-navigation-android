@@ -4,12 +4,12 @@
     android:id="@+id/navigationCollapsedNotificationLayout"
     android:layout_width="match_parent"
     android:layout_height="64dp"
-    android:background="@color/mapboxNotificationBlue">
+    android:background="@color/mapbox_notification_blue">
 
     <ImageView
         android:id="@+id/maneuverImage"
-        android:layout_width="@dimen/notification_maneuver_image_view_width"
-        android:layout_height="@dimen/notification_maneuver_image_view_height"
+        android:layout_width="@dimen/mapbox_image_width_notification_maneuver"
+        android:layout_height="@dimen/mapbox_image_height_notification_maneuver"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
@@ -32,7 +32,7 @@
 
         <TextView
             android:id="@+id/notificationDistanceText"
-            style="@style/NotificationTitle"
+            style="@style/MapboxStyleNotificationTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:lines="1"
@@ -45,12 +45,12 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:src="@drawable/ic_circle"
+            android:src="@drawable/mapbox_ic_circle"
             android:tint="@android:color/white" />
 
         <TextView
             android:id="@+id/notificationArrivalText"
-            style="@style/NotificationTitle"
+            style="@style/MapboxStyleNotificationTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -63,20 +63,20 @@
 
     <TextView
         android:id="@+id/freeDriveText"
-        style="@style/NotificationTitle"
+        style="@style/MapboxStyleNotificationTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/maneuverImage"
         android:layout_toRightOf="@id/maneuverImage"
         android:lines="1"
-        android:text="@string/free_drive_notification_text"
+        android:text="@string/mapbox_free_drive_session"
         android:textColor="@android:color/white"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/notificationInstructionText"
-        style="@style/NotificationText"
+        style="@style/MapboxStyleNotificationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/maneuverImage"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Avsluta Navigering</string>
-    <string name="eta_format">%s ETA</string>
+    <string name="mapbox_end_navigation">Avsluta Navigering</string>
+    <string name="mapbox_eta_format">%s ETA</string>
 
     </resources>

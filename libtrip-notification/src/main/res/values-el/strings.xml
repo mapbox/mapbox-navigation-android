@@ -1,15 +1,15 @@
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Τέλος πλοήγησης</string>
-    <string name="eta_format">%s ETA</string>
+    <string name="mapbox_end_navigation">Τέλος πλοήγησης</string>
+    <string name="mapbox_eta_format">%s ETA</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="one">μέρα</item>
         <item quantity="other">μέρες</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">ώρες</string>
+    <string name="mapbox_unit_hr">ώρες</string>
     <!-- Minute -->
-    <string name="min">λεπτά</string>
+    <string name="mapbox_unit_min">λεπτά</string>
 </resources>

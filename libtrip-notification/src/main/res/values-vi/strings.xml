@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">Kết thúc Điều hướng</string>
-    <string name="eta_format">Đến %s</string>
+    <string name="mapbox_end_navigation">Kết thúc Điều hướng</string>
+    <string name="mapbox_eta_format">Đến %s</string>
 
     <!-- Time formatting -->
-    <plurals name="numberOfDays">
+    <plurals name="mapbox_number_of_days">
         <item quantity="other">ngày</item>
     </plurals>
     <!-- Hour -->
-    <string name="hr">giờ</string>
+    <string name="mapbox_unit_hr">giờ</string>
     <!-- Minute -->
-    <string name="min">phút</string>
+    <string name="mapbox_unit_min">phút</string>
 </resources>

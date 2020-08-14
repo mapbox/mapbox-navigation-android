@@ -83,7 +83,7 @@ object TimeFormatter {
     private fun formatDays(resources: Resources, days: Long, textSpanItems: MutableList<SpanItem>) {
         if (days != 0L) {
             val dayQuantityString =
-                resources.getQuantityString(R.plurals.numberOfDays, days.toInt())
+                resources.getQuantityString(R.plurals.mapbox_number_of_days, days.toInt())
             val dayString = String.format(TIME_STRING_FORMAT, dayQuantityString)
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), days.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), dayString))
@@ -96,7 +96,7 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (hours != 0L) {
-            val hourString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.hr))
+            val hourString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_hr))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), hours.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), hourString))
         }
@@ -108,7 +108,7 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (minutes != 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.min))
+            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), minutes.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }
@@ -122,7 +122,7 @@ object TimeFormatter {
         textSpanItems: MutableList<SpanItem>
     ) {
         if (days == 0L && hours == 0L && minutes == 0L) {
-            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.min))
+            val minuteString = String.format(TIME_STRING_FORMAT, resources.getString(R.string.mapbox_unit_min))
             textSpanItems.add(TextSpanItem(StyleSpan(Typeface.BOLD), 1.toString()))
             textSpanItems.add(TextSpanItem(RelativeSizeSpan(1f), minuteString))
         }

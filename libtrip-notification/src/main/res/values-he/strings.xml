@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="end_navigation">סיום ניווט</string>
+    <string name="mapbox_end_navigation">סיום ניווט</string>
     <!-- Hour -->
-    <string name="hr">שעות</string>
+    <string name="mapbox_unit_hr">שעות</string>
     <!-- Minute -->
-    <string name="min">דק׳</string>
+    <string name="mapbox_unit_min">דק׳</string>
 </resources>
