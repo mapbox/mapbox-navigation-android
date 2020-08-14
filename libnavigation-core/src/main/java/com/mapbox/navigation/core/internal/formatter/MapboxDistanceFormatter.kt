@@ -136,10 +136,10 @@ class MapboxDistanceFormatter private constructor(
     }
 
     private fun getUnitString(resources: Resources, @TurfConstants.TurfUnitCriteria unit: String) = when (unit) {
-        TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.kilometers)
-        TurfConstants.UNIT_METERS -> resources.getString(R.string.meters)
-        TurfConstants.UNIT_MILES -> resources.getString(R.string.miles)
-        TurfConstants.UNIT_FEET -> resources.getString(R.string.feet)
+        TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.mapbox_unit_kilometers)
+        TurfConstants.UNIT_METERS -> resources.getString(R.string.mapbox_unit_meters)
+        TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
+        TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
         else -> ""
     }
 
