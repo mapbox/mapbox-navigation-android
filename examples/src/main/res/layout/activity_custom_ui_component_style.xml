@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:paddingTop="@dimen/dimen_8dp"
+        android:paddingTop="@dimen/mapbox_dimen_8dp"
         android:visibility="invisible"
         app:layout_anchor="@id/feedbackLayout"
         app:layout_anchorGravity="bottom|right" />

@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/maneuverImage"
-        android:layout_width="@dimen/mapbox_image_width_notification_maneuver"
-        android:layout_height="@dimen/mapbox_image_height_notification_maneuver"
+        android:layout_width="@dimen/mapbox_notification_maneuver_image_width"
+        android:layout_height="@dimen/mapbox_notification_maneuver_image_height"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"

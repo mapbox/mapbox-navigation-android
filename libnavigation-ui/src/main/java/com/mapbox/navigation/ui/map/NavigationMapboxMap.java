@@ -860,7 +860,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     Context context = mapView.getContext();
     Style style = map.getStyle();
     int locationLayerStyleRes = ThemeSwitcher.retrieveAttrResourceId(context,
-        R.attr.navigationViewLocationLayerStyle, R.style.NavigationLocationLayerStyle);
+        R.attr.navigationViewLocationLayerStyle, R.style.MapboxStyleNavigationLocationLayerStyle);
     LocationComponentOptions options = LocationComponentOptions.createFromAttributes(context, locationLayerStyleRes);
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(context, style)
       .locationComponentOptions(options)
@@ -893,7 +893,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   private void initializeRoute(@NonNull MapView mapView, @NonNull MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(
-        context, R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
+        context, R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
     );
     mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
         .withStyle(routeStyleRes)

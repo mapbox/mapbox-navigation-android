@@ -493,9 +493,9 @@ class MapboxTripNotification constructor(
         }
 
         val width =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_image_width_notification_maneuver)
+            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_width)
         val height =
-            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_image_height_notification_maneuver)
+            applicationContext.resources.getDimensionPixelSize(R.dimen.mapbox_notification_maneuver_image_height)
 
         val maneuverImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val maneuverCanvas = Canvas(maneuverImage)

@@ -44,7 +44,7 @@ class NavigationPuckPresenterTest {
         routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
 
         verify { locationComponent.applyStyle(locationComponentOptions) }
-        assertEquals(R.drawable.user_puck_icon, drawableSlot.captured)
+        assertEquals(R.drawable.mapbox_ic_user_puck, drawableSlot.captured)
     }
 
     @Test

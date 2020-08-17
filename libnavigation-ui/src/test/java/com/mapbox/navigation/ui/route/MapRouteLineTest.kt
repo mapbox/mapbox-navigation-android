@@ -66,7 +66,7 @@ class MapRouteLineTest {
         ctx = ApplicationProvider.getApplicationContext()
         styleRes = ThemeSwitcher.retrieveAttrResourceId(
             ctx,
-            R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
+            R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
         )
         alternativeRouteCasingLayer = mockk {
             every { id } returns ALTERNATIVE_ROUTE_CASING_LAYER_ID
@@ -152,7 +152,7 @@ class MapRouteLineTest {
     @Test
     fun getStyledColor() {
         val result = MapRouteLine.MapRouteLineSupport.getStyledColor(
-            R.styleable.NavigationMapRoute_routeColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeColor,
             R.color.mapbox_navigation_route_layer_blue,
             ctx,
             styleRes
@@ -417,16 +417,16 @@ class MapRouteLineTest {
         every {
             context.obtainStyledAttributes(
                 styleRes,
-                R.styleable.NavigationMapRoute
+                R.styleable.MapboxStyleNavigationMapRoute
             )
         } returns typedArray
         every { context.resources } returns resources
         every { context.getColor(R.color.mapbox_navigation_route_layer_blue) } returns 0
         every { resources.getColor(R.color.mapbox_navigation_route_layer_blue) } returns 0
-        every { typedArray.getColor(R.styleable.NavigationMapRoute_routeColor, anyInt()) } returns 0
+        every { typedArray.getColor(R.styleable.MapboxStyleNavigationMapRoute_routeColor, anyInt()) } returns 0
 
         MapRouteLine.MapRouteLineSupport.getStyledColor(
-            R.styleable.NavigationMapRoute_routeColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeColor,
             R.color.mapbox_navigation_route_layer_blue,
             context,
             styleRes
@@ -438,7 +438,7 @@ class MapRouteLineTest {
     @Test
     fun getFloatStyledValue() {
         val result: Float = MapRouteLine.MapRouteLineSupport.getFloatStyledValue(
-            R.styleable.NavigationMapRoute_alternativeRouteScale,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteScale,
             1.0f,
             ctx,
             styleRes
@@ -454,18 +454,18 @@ class MapRouteLineTest {
         every {
             context.obtainStyledAttributes(
                 styleRes,
-                R.styleable.NavigationMapRoute
+                R.styleable.MapboxStyleNavigationMapRoute
             )
         } returns typedArray
         every {
             typedArray.getFloat(
-                R.styleable.NavigationMapRoute_alternativeRouteScale,
+                R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteScale,
                 1.0f
             )
         } returns 1.0f
 
         MapRouteLine.MapRouteLineSupport.getFloatStyledValue(
-            R.styleable.NavigationMapRoute_alternativeRouteScale,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteScale,
             1.0f,
             context,
             styleRes
@@ -477,7 +477,7 @@ class MapRouteLineTest {
     @Test
     fun getBooleanStyledValue() {
         val result = MapRouteLine.MapRouteLineSupport.getBooleanStyledValue(
-            R.styleable.NavigationMapRoute_roundedLineCap,
+            R.styleable.MapboxStyleNavigationMapRoute_roundedLineCap,
             true,
             ctx,
             styleRes
@@ -493,18 +493,18 @@ class MapRouteLineTest {
         every {
             context.obtainStyledAttributes(
                 styleRes,
-                R.styleable.NavigationMapRoute
+                R.styleable.MapboxStyleNavigationMapRoute
             )
         } returns typedArray
         every {
             typedArray.getBoolean(
-                R.styleable.NavigationMapRoute_roundedLineCap,
+                R.styleable.MapboxStyleNavigationMapRoute_roundedLineCap,
                 true
             )
         } returns true
 
         MapRouteLine.MapRouteLineSupport.getBooleanStyledValue(
-            R.styleable.NavigationMapRoute_roundedLineCap,
+            R.styleable.MapboxStyleNavigationMapRoute_roundedLineCap,
             true,
             context,
             styleRes
@@ -516,13 +516,13 @@ class MapRouteLineTest {
     @Test
     fun getResourceStyledValue() {
         val result = MapRouteLine.MapRouteLineSupport.getResourceStyledValue(
-            R.styleable.NavigationMapRoute_originWaypointIcon,
-            R.drawable.ic_route_origin,
+            R.styleable.MapboxStyleNavigationMapRoute_originWaypointIcon,
+            R.drawable.mapbox_ic_route_origin,
             ctx,
             styleRes
         )
 
-        assertEquals(R.drawable.ic_route_origin, result)
+        assertEquals(R.drawable.mapbox_ic_route_origin, result)
     }
 
     @Test
@@ -532,19 +532,19 @@ class MapRouteLineTest {
         every {
             context.obtainStyledAttributes(
                 styleRes,
-                R.styleable.NavigationMapRoute
+                R.styleable.MapboxStyleNavigationMapRoute
             )
         } returns typedArray
         every {
             typedArray.getResourceId(
-                R.styleable.NavigationMapRoute_originWaypointIcon,
-                R.drawable.ic_route_origin
+                R.styleable.MapboxStyleNavigationMapRoute_originWaypointIcon,
+                R.drawable.mapbox_ic_route_origin
             )
-        } returns R.drawable.ic_route_origin
+        } returns R.drawable.mapbox_ic_route_origin
 
         MapRouteLine.MapRouteLineSupport.getResourceStyledValue(
-            R.styleable.NavigationMapRoute_originWaypointIcon,
-            R.drawable.ic_route_origin,
+            R.styleable.MapboxStyleNavigationMapRoute_originWaypointIcon,
+            R.drawable.mapbox_ic_route_origin,
             context,
             styleRes
         )

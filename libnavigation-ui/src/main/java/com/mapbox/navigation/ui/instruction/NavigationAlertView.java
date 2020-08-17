@@ -58,7 +58,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     if (!isEnabled) {
       return;
     }
-    show(getContext().getString(R.string.feedback_submitted), THREE_SECOND_DELAY_IN_MILLIS, false);
+    show(getContext().getString(R.string.mapbox_feedback_submitted), THREE_SECOND_DELAY_IN_MILLIS, false);
   }
 
   /**
@@ -72,7 +72,7 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
     handler.postDelayed(new Runnable() {
       @Override
       public void run() {
-        show(getContext().getString(R.string.report_problem),
+        show(getContext().getString(R.string.mapbox_report_problem),
           ALERT_VIEW_PROBLEM_DURATION, true);
       }
     }, THREE_SECOND_DELAY_IN_MILLIS);
@@ -144,6 +144,6 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
   }
 
   private boolean isShowingReportProblem() {
-    return getAlertText().equals(getContext().getString(R.string.report_problem));
+    return getAlertText().equals(getContext().getString(R.string.mapbox_report_problem));
   }
 }

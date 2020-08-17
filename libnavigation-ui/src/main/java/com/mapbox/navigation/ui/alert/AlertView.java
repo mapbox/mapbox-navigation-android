@@ -106,19 +106,19 @@ public class AlertView extends CardView {
   }
 
   public void updateStyle(@StyleRes int styleRes) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.AlertView);
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.MapboxStyleAlertView);
 
     backgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewBackgroundColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewBackgroundColor,
         R.color.mapbox_alert_view_background));
     progressBarBackgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarBackgroundColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewProgressBarBackgroundColor,
         R.color.mapbox_alert_view_progress_bar_background));
     progressBarColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewProgressBarColor,
         R.color.mapbox_alert_view_progress_bar));
     textColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewTextColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewTextColor,
         R.color.mapbox_alert_view_text));
 
     typedArray.recycle();
@@ -137,7 +137,7 @@ public class AlertView extends CardView {
   }
 
   private void init() {
-    inflate(getContext(), R.layout.alert_view_layout, this);
+    inflate(getContext(), R.layout.mapbox_alert_view, this);
   }
 
   private void bind() {
@@ -146,18 +146,18 @@ public class AlertView extends CardView {
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.AlertView);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleAlertView);
     backgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewBackgroundColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewBackgroundColor,
         R.color.mapbox_alert_view_background));
     progressBarBackgroundColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarBackgroundColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewProgressBarBackgroundColor,
         R.color.mapbox_alert_view_progress_bar_background));
     progressBarColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewProgressBarColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewProgressBarColor,
         R.color.mapbox_alert_view_progress_bar));
     textColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.AlertView_alertViewTextColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleAlertView_alertViewTextColor,
         R.color.mapbox_alert_view_text));
 
     typedArray.recycle();
@@ -167,7 +167,7 @@ public class AlertView extends CardView {
     fadeOut = new AlphaAnimation(1, 0);
     fadeOut.setInterpolator(new AccelerateInterpolator());
     fadeOut.setDuration(300);
-    slideDownTop = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_top);
+    slideDownTop = AnimationUtils.loadAnimation(getContext(), R.anim.mapbox_animation_slide_down_top);
     slideDownTop.setInterpolator(new OvershootInterpolator(2.0f));
   }
 

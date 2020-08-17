@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Enrutando</string>
+    <string name="mapbox_rerouting">Enrutando</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">Centrando</string>
+    <string name="mapbox_re_center">Centrando</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Silenciado</string>
+    <string name="mapbox_muted">Silenciado</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Sin silenciar</string>
+    <string name="mapbox_unmuted">Sin silenciar</string>
 
 </resources>
