@@ -9,9 +9,10 @@ import java.util.HashMap;
 
 class MobileNetworkChecker {
 
+  @NonNull
   private final HashMap<Integer, Boolean> statusMap;
 
-  MobileNetworkChecker(HashMap<Integer, Boolean> statusMap) {
+  MobileNetworkChecker(@NonNull HashMap<Integer, Boolean> statusMap) {
     this.statusMap = statusMap;
     initialize(statusMap);
   }
@@ -25,7 +26,7 @@ class MobileNetworkChecker {
     return isConnectionFast;
   }
 
-  private void initialize(HashMap<Integer, Boolean> statusMap) {
+  private void initialize(@NonNull HashMap<Integer, Boolean> statusMap) {
     statusMap.put(TelephonyManager.NETWORK_TYPE_1xRTT, false);
     statusMap.put(TelephonyManager.NETWORK_TYPE_GPRS, false);
     statusMap.put(TelephonyManager.NETWORK_TYPE_CDMA, false);

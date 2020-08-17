@@ -12,6 +12,7 @@ import android.util.TypedValue;
 
 import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.mapbox.navigation.ui.R;
@@ -30,7 +31,8 @@ public class ThemeSwitcher {
    * @param context to retrieve the drawable for the given resource ID
    * @return {@link Bitmap} map marker dark or light
    */
-  public static Bitmap retrieveThemeMapMarker(Context context) {
+  @Nullable
+  public static Bitmap retrieveThemeMapMarker(@NonNull Context context) {
     TypedValue destinationMarkerResId = resolveAttributeFromId(context, R.attr.navigationViewDestinationMarker);
     int markerResId = destinationMarkerResId.resourceId;
     if (!isValid(markerResId)) {
@@ -53,7 +55,7 @@ public class ThemeSwitcher {
    * @param attrId  for the given attribute Id
    * @return resolved resource Id
    */
-  public static int retrieveAttrResourceId(Context context, int attrId, int defaultResId) {
+  public static int retrieveAttrResourceId(@NonNull Context context, int attrId, int defaultResId) {
     TypedValue outValue = resolveAttributeFromId(context, attrId);
     if (isValid(outValue.resourceId)) {
       return outValue.resourceId;
@@ -69,7 +71,7 @@ public class ThemeSwitcher {
    * @param context {@link NavigationView} where the theme will be set
    * @param attrs   holding custom styles if any are set
    */
-  public static void setTheme(Context context, AttributeSet attrs) {
+  public static void setTheme(@NonNull Context context, AttributeSet attrs) {
     boolean nightModeEnabled = isNightModeEnabled(context);
 
     if (shouldSetThemeFromPreferences(context)) {
@@ -91,7 +93,8 @@ public class ThemeSwitcher {
     context.setTheme(nightModeEnabled ? darkTheme : lightTheme);
   }
 
-  public static String retrieveMapStyle(Context context) {
+  @NonNull
+  public static String retrieveMapStyle(@NonNull Context context) {
     TypedValue mapStyleAttr = resolveAttributeFromId(context, R.attr.navigationViewMapStyle);
     return mapStyleAttr.string.toString();
   }
@@ -99,18 +102,18 @@ public class ThemeSwitcher {
   /**
    * Returns true if the current UI_MODE_NIGHT is enabled, false otherwise.
    */
-  private static boolean isNightModeEnabled(Context context) {
+  private static boolean isNightModeEnabled(@NonNull Context context) {
     int currentNightMode = retrieveCurrentUiMode(context);
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
   }
 
-  private static int retrieveCurrentUiMode(Context context) {
+  private static int retrieveCurrentUiMode(@NonNull Context context) {
     return context.getResources().getConfiguration().uiMode
       & Configuration.UI_MODE_NIGHT_MASK;
   }
 
   @NonNull
-  private static TypedValue resolveAttributeFromId(Context context, int resId) {
+  private static TypedValue resolveAttributeFromId(@NonNull Context context, int resId) {
     TypedValue outValue = new TypedValue();
     context.getTheme().resolveAttribute(resId, outValue, true);
     return outValue;

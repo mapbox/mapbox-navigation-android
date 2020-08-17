@@ -7,6 +7,9 @@ import android.text.SpannableString;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 import com.mapbox.api.directions.v5.models.BannerText;
@@ -39,9 +42,10 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
     super(imageVerifier);
   }
 
+  @NonNull
   @Override
-  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex,
-      String modifier) {
+  BannerComponentNode setupNode(@NonNull BannerComponents components, int index, int startIndex,
+                                String modifier) {
     addShieldInfo(components, index);
     return new BannerComponentNode(components, startIndex);
   }
@@ -53,7 +57,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
    * @param bannerComponents containing image info
    * @param index of the BannerComponentNode which refers to the given BannerComponents
    */
-  private void addShieldInfo(BannerComponents bannerComponents, int index) {
+  private void addShieldInfo(@NonNull BannerComponents bannerComponents, int index) {
     bannerShieldList.add(new BannerShield(bannerComponents, index));
   }
 
@@ -78,7 +82,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
    *
    * @param context to init Picasso
    */
-  void initialize(Context context) {
+  void initialize(@NonNull Context context) {
     if (!isInitialized) {
       initializePicasso(context);
       initializeData(context);
@@ -110,7 +114,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
    *
    * @param textView target for the banner text
    */
-  private void loadImages(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  private void loadImages(@NonNull TextView textView, @NonNull List<BannerComponentNode> bannerComponentNodes) {
     if (!hasImages()) {
       return;
     }
@@ -120,12 +124,12 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
     loadTargets();
   }
 
-  private void initializePicasso(Context context) {
+  private void initializePicasso(@NonNull Context context) {
     Picasso.Builder builder = new Picasso.Builder(context);
     picassoImageLoader = builder.build();
   }
 
-  private void initializeData(Context context) {
+  private void initializeData(@NonNull Context context) {
     SdkVersionChecker currentVersionChecker = new SdkVersionChecker(Build.VERSION.SDK_INT);
     int displayDensity = context.getResources().getDisplayMetrics().densityDpi;
     urlDensityMap = new UrlDensityMap(displayDensity, currentVersionChecker);
@@ -133,7 +137,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
     bannerShieldList = new ArrayList<>();
   }
 
-  private void fetchInstructions(LegStep legStep) {
+  private void fetchInstructions(@Nullable LegStep legStep) {
     if (legStep == null || legStep.bannerInstructions() == null
         || legStep.bannerInstructions().isEmpty()) {
       return;
@@ -150,13 +154,13 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
     }
   }
 
-  private void updateShieldUrlIndices(List<BannerComponentNode> bannerComponentNodes) {
+  private void updateShieldUrlIndices(@NonNull List<BannerComponentNode> bannerComponentNodes) {
     for (BannerShield bannerShield : bannerShieldList) {
       bannerShield.setStartIndex(bannerComponentNodes.get(bannerShield.getNodeIndex()).startIndex);
     }
   }
 
-  private boolean hasComponents(BannerText bannerText) {
+  private boolean hasComponents(@Nullable BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 
@@ -170,7 +174,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
    *
    * @param bannerText to provide the base URL
    */
-  private void fetchImageBaseUrls(BannerText bannerText) {
+  private void fetchImageBaseUrls(@NonNull BannerText bannerText) {
     for (BannerComponents components : bannerText.components()) {
       if (nodeVerifier.hasImageUrl(components)) {
         picassoImageLoader.load(urlDensityMap.get(components.imageBaseUrl())).fetch();
@@ -178,7 +182,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
     }
   }
 
-  private void createTargets(TextView textView) {
+  private void createTargets(@NonNull TextView textView) {
     Spannable instructionSpannable = new SpannableString(textView.getText());
 
     for (final BannerShield bannerShield : bannerShieldList) {
@@ -207,7 +211,7 @@ class ImageCreator extends NodeCreator<BannerComponentNode, ImageVerifier> {
   }
 
   @Override
-  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  void postProcess(@NonNull TextView textView, @NonNull List<BannerComponentNode> bannerComponentNodes) {
     loadImages(textView, bannerComponentNodes);
   }
 }

@@ -28,6 +28,7 @@ class InstructionListPresenter {
   private static final int FIRST_INSTRUCTION_INDEX = 0;
   private DistanceFormatter distanceFormatter;
   private List<BannerInstructions> instructions;
+  @Nullable
   private String drivingSide;
 
   InstructionListPresenter(DistanceFormatter distanceFormatter) {
@@ -46,7 +47,7 @@ class InstructionListPresenter {
     return instructions.size();
   }
 
-  void update(RouteProgress routeProgress, InstructionListAdapter adapter) {
+  void update(@NonNull RouteProgress routeProgress, @NonNull InstructionListAdapter adapter) {
     drivingSide = getDrivingSide(routeProgress);
     final List<BannerInstructions> routeInstructions = getBannerInstructionsFromRouteProgress(routeProgress);
     final List<BannerInstructions> filteredRouteInstructions = filterListAfterStep(routeProgress, routeInstructions);
@@ -64,13 +65,13 @@ class InstructionListPresenter {
     }
   }
 
-  private boolean shouldUpdate(DistanceFormatter distanceFormatter) {
+  private boolean shouldUpdate(@Nullable DistanceFormatter distanceFormatter) {
     return distanceFormatter != null
         && (this.distanceFormatter == null || !this.distanceFormatter.equals(distanceFormatter));
   }
 
-  private void updateListView(@NonNull InstructionListView listView, BannerInstructions bannerInstructions,
-      SpannableString distanceText) {
+  private void updateListView(@NonNull InstructionListView listView, @NonNull BannerInstructions bannerInstructions,
+                              SpannableString distanceText) {
     listView.updatePrimaryText(bannerInstructions.primary().text());
     updateSecondaryInstruction(listView, bannerInstructions);
     updateManeuverView(listView, bannerInstructions);
@@ -78,7 +79,7 @@ class InstructionListPresenter {
   }
 
   private void updateSecondaryInstruction(@NonNull InstructionListView listView,
-      BannerInstructions bannerInstructions) {
+                                          @NonNull BannerInstructions bannerInstructions) {
     boolean hasSecondaryInstructions = bannerInstructions.secondary() != null;
     adjustListViewForSecondaryInstructions(listView, hasSecondaryInstructions);
     if (hasSecondaryInstructions) {
@@ -86,7 +87,10 @@ class InstructionListPresenter {
     }
   }
 
-  private void adjustListViewForSecondaryInstructions(InstructionListView listView, boolean hasSecondaryInstructions) {
+  private void adjustListViewForSecondaryInstructions(
+          @NonNull InstructionListView listView,
+          boolean hasSecondaryInstructions
+  ) {
     if (hasSecondaryInstructions) {
       hasSecondaryInstructions(listView);
     } else {
@@ -94,19 +98,21 @@ class InstructionListPresenter {
     }
   }
 
-  private void hasSecondaryInstructions(InstructionListView listView) {
+  private void hasSecondaryInstructions(@NonNull InstructionListView listView) {
     listView.updatePrimaryMaxLines(ONE_LINE);
     listView.updateSecondaryVisibility(View.VISIBLE);
     listView.updateBannerVerticalBias(TWO_LINE_BIAS);
   }
 
-  private void hasNoSecondaryInstructions(InstructionListView listView) {
+  private void hasNoSecondaryInstructions(@NonNull InstructionListView listView) {
     listView.updatePrimaryMaxLines(TWO_LINES);
     listView.updateSecondaryVisibility(View.GONE);
     listView.updateBannerVerticalBias(ONE_LINE_BIAS);
   }
 
-  private void updateManeuverView(@NonNull InstructionListView listView, BannerInstructions bannerInstructions) {
+  private void updateManeuverView(
+          @NonNull InstructionListView listView,
+          @NonNull BannerInstructions bannerInstructions) {
     String maneuverType = bannerInstructions.primary().type();
     String maneuverModifier = bannerInstructions.primary().modifier();
     listView.updateManeuverViewTypeAndModifier(maneuverType, maneuverModifier);
@@ -118,7 +124,8 @@ class InstructionListPresenter {
     listView.updateManeuverViewDrivingSide(drivingSide);
   }
 
-  private String getDrivingSide(final RouteProgress routeProgress) {
+  @Nullable
+  private String getDrivingSide(@NonNull final RouteProgress routeProgress) {
     if (routeProgress.getCurrentLegProgress().getCurrentStepProgress() != null
             && routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep() != null) {
       return routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep().drivingSide();
@@ -127,7 +134,8 @@ class InstructionListPresenter {
     }
   }
 
-  private List<BannerInstructions> getBannerInstructionsFromRouteProgress(final RouteProgress routeProgress) {
+  @NonNull
+  private List<BannerInstructions> getBannerInstructionsFromRouteProgress(@NonNull final RouteProgress routeProgress) {
     final List<BannerInstructions> instructions = new ArrayList<>();
     final RouteLeg routeLeg = routeProgress.getCurrentLegProgress().getRouteLeg();
     if (routeLeg != null) {
@@ -144,9 +152,10 @@ class InstructionListPresenter {
     return instructions;
   }
 
+  @NonNull
   private List<BannerInstructions> filterListAfterStep(
-          final RouteProgress routeProgress,
-          final List<BannerInstructions> bannerInstructions
+          @NonNull final RouteProgress routeProgress,
+          @NonNull final List<BannerInstructions> bannerInstructions
   ) {
     final RouteLegProgress legProgress = routeProgress.getCurrentLegProgress();
     final LegStep currentStep = legProgress.getCurrentStepProgress().getStep();
@@ -195,20 +204,23 @@ class InstructionListPresenter {
     }
   }
 
-  private List<BannerInstructions> sortBannerInstructions(List<BannerInstructions> instructions) {
+  @NonNull
+  private List<BannerInstructions> sortBannerInstructions(@NonNull List<BannerInstructions> instructions) {
     List<BannerInstructions> sortedInstructions = new ArrayList<>(instructions);
     Collections.sort(sortedInstructions, bannerInstructionsComparator);
     return sortedInstructions;
   }
 
+  @NonNull
   private Comparator<BannerInstructions> bannerInstructionsComparator = (
           instructions,
           nextInstructions
   ) -> Double.compare(instructions.distanceAlongGeometry(), nextInstructions.distanceAlongGeometry());
 
+  @NonNull
   private DiffUtil.Callback getDiffCallback(
-          final List<BannerInstructions> oldItems,
-          final List<BannerInstructions> updatedInstructions
+          @NonNull final List<BannerInstructions> oldItems,
+          @NonNull final List<BannerInstructions> updatedInstructions
   ) {
     return new DiffUtil.Callback() {
       @Override

@@ -95,6 +95,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   private LifecycleOwner lifecycleOwner;
   private LocationComponent locationComponent;
   private MapPaddingAdjustor mapPaddingAdjustor;
+  @Nullable
   private NavigationSymbolManager navigationSymbolManager;
   private MapLayerInteractor layerInteractor;
   private NavigationMapRoute mapRoute;
@@ -228,7 +229,11 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @TestOnly
-  NavigationMapboxMap(MapboxMap mapboxMap, MapLayerInteractor layerInteractor, MapPaddingAdjustor adjustor) {
+  NavigationMapboxMap(
+          @NonNull MapboxMap mapboxMap,
+          MapLayerInteractor layerInteractor,
+          @NonNull MapPaddingAdjustor adjustor
+  ) {
     this.layerInteractor = layerInteractor;
     this.mapboxMap = mapboxMap;
     initializeWayName(mapboxMap, adjustor);
@@ -444,14 +449,11 @@ public class NavigationMapboxMap implements LifecycleObserver {
   /**
    * Can be used to store the current state of the map in
    * {@link androidx.fragment.app.Fragment#onSaveInstanceState(Bundle)}.
-   * <p>
-   * This method uses {@link NavigationMapboxMapInstanceState}, stored with the provided key.  This key
-   * can also later be used to extract the {@link NavigationMapboxMapInstanceState}.
    *
    * @param outState to store state variables
    * @see #restoreStateFrom(Bundle)
    */
-  public void saveStateWith(Bundle outState) {
+  public void saveStateWith(@NonNull Bundle outState) {
     settings.updateCurrentPadding(mapPaddingAdjustor.retrieveCurrentPadding());
     settings.updateShouldUseDefaultPadding(mapPaddingAdjustor.isUsingDefault());
     settings.updateCameraTrackingMode(mapCamera.getCameraTrackingMode());
@@ -470,7 +472,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param inState to store state variables
    * @see #saveStateWith(Bundle)
    */
-  public void restoreStateFrom(Bundle inState) {
+  public void restoreStateFrom(@NonNull Bundle inState) {
     Parcelable parcelable = inState.getParcelable(STATE_BUNDLE_KEY);
     if (parcelable instanceof NavigationMapboxMapInstanceState) {
       NavigationMapboxMapInstanceState instanceState = (NavigationMapboxMapInstanceState) parcelable;
@@ -687,6 +689,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @return map provided in the constructor
    */
+  @NonNull
   public MapboxMap retrieveMap() {
     return mapboxMap;
   }
@@ -737,7 +740,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @param listener to be added
    */
-  public void addOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
+  public void addOnCameraTrackingChangedListener(@NonNull OnCameraTrackingChangedListener listener) {
     locationComponent.addOnCameraTrackingChangedListener(listener);
   }
 
@@ -747,7 +750,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @param listener to be removed
    */
-  public void removeOnCameraTrackingChangedListener(OnCameraTrackingChangedListener listener) {
+  public void removeOnCameraTrackingChangedListener(@NonNull OnCameraTrackingChangedListener listener) {
     locationComponent.removeOnCameraTrackingChangedListener(listener);
   }
 
@@ -781,7 +784,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @param customPadding true if should be centered on the map, false to position above the bottom view
    */
-  public void adjustLocationIconWith(int[] customPadding) {
+  public void adjustLocationIconWith(@NonNull int[] customPadding) {
     mapPaddingAdjustor.adjustLocationIconWith(customPadding);
   }
 
@@ -799,14 +802,14 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @param supplier PuckDrawableSupplier
    */
-  public void setPuckDrawableSupplier(PuckDrawableSupplier supplier) {
+  public void setPuckDrawableSupplier(@NonNull PuckDrawableSupplier supplier) {
     this.navigationPuckPresenter = new NavigationPuckPresenter(mapboxMap, supplier);
   }
 
   /**
    * Used to take the snapshot of the current state of the map.
    */
-  public void takeScreenshot(MapboxMap.SnapshotReadyCallback snapshotReadyCallback) {
+  public void takeScreenshot(@NonNull MapboxMap.SnapshotReadyCallback snapshotReadyCallback) {
     mapboxMap.snapshot(snapshotReadyCallback);
   }
 
@@ -849,7 +852,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @SuppressLint("MissingPermission")
-  private void setupLocationComponent(MapView mapView, MapboxMap map, boolean useSpecializedLocationLayer) {
+  private void setupLocationComponent(
+          @NonNull MapView mapView,
+          @NonNull MapboxMap map, boolean useSpecializedLocationLayer) {
     locationComponent = map.getLocationComponent();
     map.setMaxZoomPreference(NAVIGATION_MAXIMUM_MAP_ZOOM);
     Context context = mapView.getContext();
@@ -868,11 +873,11 @@ public class NavigationMapboxMap implements LifecycleObserver {
     locationComponent.setRenderMode(RenderMode.COMPASS);
   }
 
-  private void initializeMapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
+  private void initializeMapPaddingAdjustor(@NonNull MapView mapView, MapboxMap mapboxMap) {
     mapPaddingAdjustor = new MapPaddingAdjustor(mapView, mapboxMap);
   }
 
-  private void initializeNavigationSymbolManager(MapView mapView, MapboxMap mapboxMap) {
+  private void initializeNavigationSymbolManager(@NonNull MapView mapView, @NonNull MapboxMap mapboxMap) {
     Bitmap markerBitmap = ThemeSwitcher.retrieveThemeMapMarker(mapView.getContext());
     mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
     SymbolManager symbolManager = new SymbolManager(mapView, mapboxMap, mapboxMap.getStyle());
@@ -885,7 +890,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     layerInteractor = new MapLayerInteractor(mapboxMap);
   }
 
-  private void initializeRoute(MapView mapView, MapboxMap map, String routeBelowLayerId) {
+  private void initializeRoute(@NonNull MapView mapView, @NonNull MapboxMap map, String routeBelowLayerId) {
     Context context = mapView.getContext();
     int routeStyleRes = ThemeSwitcher.retrieveAttrResourceId(
         context, R.attr.navigationViewRouteStyle, R.style.NavigationMapRoute
@@ -896,15 +901,15 @@ public class NavigationMapboxMap implements LifecycleObserver {
         .build();
   }
 
-  private void initializeCamera(MapboxMap map) {
+  private void initializeCamera(@NonNull MapboxMap map) {
     mapCamera = new NavigationCamera(map);
   }
 
-  private void initializeLocationFpsDelegate(MapboxMap map, LocationComponent locationComponent) {
+  private void initializeLocationFpsDelegate(@NonNull MapboxMap map, @NonNull LocationComponent locationComponent) {
     locationFpsDelegate = new LocationFpsDelegate(map, locationComponent);
   }
 
-  private void initializeWayName(MapboxMap mapboxMap, MapPaddingAdjustor paddingAdjustor) {
+  private void initializeWayName(@NonNull MapboxMap mapboxMap, @NonNull MapPaddingAdjustor paddingAdjustor) {
     if (mapWayName != null) {
       return;
     }
@@ -915,7 +920,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapWayName.addOnWayNameChangedListener(internalWayNameChangedListener);
   }
 
-  private void initializeStreetsSource(MapboxMap mapboxMap) {
+  private void initializeStreetsSource(@NonNull MapboxMap mapboxMap) {
     List<Source> sources = mapboxMap.getStyle().getSources();
     Source sourceV7 = findSourceByUrl(sources, MAPBOX_STREETS_V7_URL);
     Source sourceV8 = findSourceByUrl(sources, MAPBOX_STREETS_V8_URL);
@@ -936,7 +941,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @Nullable
-  private Source findSourceByUrl(List<Source> sources, String streetsUrl) {
+  private Source findSourceByUrl(@NonNull List<Source> sources, @NonNull String streetsUrl) {
     for (Source source : sources) {
       if (source instanceof VectorSource) {
         VectorSource vectorSource = (VectorSource) source;
@@ -979,7 +984,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapWayName.updateWayNameWithPoint(mapPoint);
   }
 
-  private void restoreVanishingRouteLineSection(NavigationMapSettings settings) {
+  private void restoreVanishingRouteLineSection(@NonNull NavigationMapSettings settings) {
     float percentDistanceTraveled = settings.retrievePercentDistanceTraveled();
     if (percentDistanceTraveled > 0) {
       mapRoute.updateRouteLineWithDistanceTraveled(percentDistanceTraveled);
@@ -987,7 +992,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     }
   }
 
-  private void restoreMapWith(NavigationMapSettings settings) {
+  private void restoreMapWith(@NonNull NavigationMapSettings settings) {
     updateCameraTrackingMode(settings.retrieveCameraTrackingMode());
     updateLocationFpsThrottleEnabled(settings.isLocationFpsEnabled());
     if (settings.shouldUseDefaultPadding()) {
@@ -1032,6 +1037,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     }
   }
 
+  @NonNull
   private LocationObserver locationObserver = new LocationObserver() {
     @Override
     public void onRawLocationChanged(@NotNull Location rawLocation) {

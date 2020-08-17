@@ -4,6 +4,8 @@ import android.content.Context;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 import java.util.HashMap;
@@ -32,7 +34,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    * @param context used to create an instance of {@link TextToSpeech}
    * @param language to initialize locale to set
    */
-  AndroidSpeechPlayer(Context context, final String language, final VoiceListener voiceListener) {
+  AndroidSpeechPlayer(Context context, @Nullable final String language, final VoiceListener voiceListener) {
     this.voiceListener = voiceListener;
     textToSpeech = new TextToSpeech(context, status -> {
       boolean ableToInitialize = status == TextToSpeech.SUCCESS && language != null;
@@ -50,7 +52,7 @@ class AndroidSpeechPlayer implements SpeechPlayer {
    * @param voiceInstructions with voice instruction to be synthesized and played
    */
   @Override
-  public void play(VoiceInstructions voiceInstructions) {
+  public void play(@Nullable VoiceInstructions voiceInstructions) {
     boolean isValidAnnouncement = voiceInstructions != null
         && !TextUtils.isEmpty(voiceInstructions.announcement());
     boolean canPlay = isValidAnnouncement && languageSupported && !isMuted;

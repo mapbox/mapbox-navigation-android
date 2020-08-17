@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mapbox.navigation.ui.R;
@@ -32,7 +33,7 @@ class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   }
 
   @Override
-  public void onBindViewHolder(FeedbackViewHolder viewHolder, int position) {
+  public void onBindViewHolder(@NonNull FeedbackViewHolder viewHolder, int position) {
     viewHolder.setFeedbackImage(feedbackItems.get(position).getFeedbackImageId());
     viewHolder.setFeedbackText(feedbackItems.get(position).getFeedbackText());
   }
@@ -42,6 +43,7 @@ class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
     return feedbackItems.size();
   }
 
+  @Nullable
   FeedbackItem getFeedbackItem(int feedbackPosition) {
     if (feedbackPosition < feedbackItems.size()) {
       return feedbackItems.get(feedbackPosition);

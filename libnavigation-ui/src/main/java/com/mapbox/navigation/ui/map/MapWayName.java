@@ -5,6 +5,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
@@ -22,16 +23,20 @@ class MapWayName {
   private static final String NAME_PROPERTY = "name";
   private static final String EMPTY_CURRENT_WAY_NAME = "";
   private final MapWayNameChangeObserver mapWayNameChangeObserver = new MapWayNameChangeObserver(this);
+  @NonNull
   private final Set<OnWayNameChangedListener> onWayNameChangedListeners;
   private WaynameFeatureFinder featureInteractor;
+  @Nullable
   private List<Point> currentStepPoints = new ArrayList<>();
+  @Nullable
   private Location currentLocation = null;
   private MapboxNavigation navigation;
   private boolean isAutoQueryEnabled;
+  @Nullable
   private FeatureFilterTask filterTask;
   private String wayName = EMPTY_CURRENT_WAY_NAME;
 
-  MapWayName(WaynameFeatureFinder featureInteractor, MapPaddingAdjustor paddingAdjustor) {
+  MapWayName(WaynameFeatureFinder featureInteractor, @NonNull MapPaddingAdjustor paddingAdjustor) {
     this.featureInteractor = featureInteractor;
     paddingAdjustor.updatePaddingWithDefault();
     this.onWayNameChangedListeners = new HashSet<>();
@@ -49,7 +54,7 @@ class MapWayName {
     executeFeatureFilterTask(roadLabelFeatures);
   }
 
-  void updateProgress(List<Point> currentStepPoints) {
+  void updateProgress(@Nullable List<Point> currentStepPoints) {
     if (currentStepPoints != null && !this.currentStepPoints.equals(currentStepPoints)) {
       this.currentStepPoints = currentStepPoints;
     }
@@ -139,7 +144,7 @@ class MapWayName {
     return currentLocation != null && !currentStepPoints.isEmpty();
   }
 
-  private void updateWayNameLayerWithNameProperty(Feature roadFeature) {
+  private void updateWayNameLayerWithNameProperty(@NonNull Feature roadFeature) {
     boolean hasValidNameProperty = roadFeature.hasNonNullValueForProperty(NAME_PROPERTY);
     if (hasValidNameProperty) {
       String currentWayName = roadFeature.getStringProperty(NAME_PROPERTY);
@@ -153,7 +158,7 @@ class MapWayName {
     }
   }
 
-  private void updateListenersWith(String currentWayName) {
+  private void updateListenersWith(@NonNull String currentWayName) {
     for (OnWayNameChangedListener listener : onWayNameChangedListeners) {
       listener.onWayNameChanged(currentWayName);
     }

@@ -13,6 +13,7 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 
 public class InstructionListAdapter extends RecyclerView.Adapter<InstructionViewHolder> {
 
+  @NonNull
   private final InstructionListPresenter presenter;
 
   private int primaryTextColor;

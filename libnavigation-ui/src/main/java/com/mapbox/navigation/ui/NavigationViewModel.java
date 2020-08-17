@@ -71,37 +71,49 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
+  @Nullable
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
+  @Nullable
   private SpeechPlayer speechPlayer;
+  @Nullable
   private VoiceInstructionLoader voiceInstructionLoader;
+  @Nullable
   private VoiceInstructionCache voiceInstructionCache;
   private int voiceInstructionsToAnnounce = 0;
+  @Nullable
   private FeedbackItem feedbackItem;
+  @Nullable
   private String feedbackEncodedScreenShot;
+  @Nullable
   private String language;
+  @Nullable
   private DistanceFormatter distanceFormatter;
+  @Nullable
   private String accessToken;
   private boolean isRunning;
+  @NonNull
   private NavigationViewModelProgressObserver navigationProgressObserver =
       new NavigationViewModelProgressObserver(this);
 
   private NavigationViewOptions navigationViewOptions;
+  @NonNull
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
 
-  public NavigationViewModel(Application application) {
+  public NavigationViewModel(@NonNull Application application) {
     super(application);
     this.accessToken = Mapbox.getAccessToken();
   }
 
-  @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,
-      NavigationViewOptions navigationViewOptions) {
+  @TestOnly NavigationViewModel(@NonNull Application application, MapboxNavigation navigation,
+                                NavigationViewOptions navigationViewOptions) {
     super(application);
     this.navigation = navigation;
     this.navigationViewOptions = navigationViewOptions;
   }
 
-  @TestOnly NavigationViewModel(Application application, MapboxNavigation navigation,
-      NavigationViewEventDispatcher dispatcher, VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
+  @TestOnly NavigationViewModel(@NonNull Application application, MapboxNavigation navigation,
+                                NavigationViewEventDispatcher dispatcher,
+                                VoiceInstructionCache cache, SpeechPlayer speechPlayer) {
     super(application);
     this.navigation = navigation;
     this.navigationViewEventDispatcher = dispatcher;
@@ -165,7 +177,7 @@ public class NavigationViewModel extends AndroidViewModel {
    * @param options to init MapboxNavigation
    */
   @SuppressLint("MissingPermission")
-  void initialize(NavigationViewOptions options) {
+  void initialize(@NonNull NavigationViewOptions options) {
     this.navigationViewOptions = options;
 
     initializeDistanceFormatter(options);
@@ -237,34 +249,42 @@ public class NavigationViewModel extends AndroidViewModel {
     shouldRecordScreenshot.setValue(true);
   }
 
+  @NonNull
   LiveData<Location> retrieveNavigationLocation() {
     return navigationLocation;
   }
 
+  @NonNull
   LiveData<DirectionsRoute> retrieveRoute() {
     return route;
   }
 
+  @NonNull
   LiveData<Point> retrieveDestination() {
     return destination;
   }
 
+  @NonNull
   LiveData<Boolean> retrieveShouldRecordScreenshot() {
     return shouldRecordScreenshot;
   }
 
+  @NonNull
   LiveData<Boolean> retrieveIsFeedbackSentSuccess() {
     return isFeedbackSentSuccess;
   }
 
+  @NonNull
   public LiveData<RouteProgress> retrieveRouteProgress() {
     return routeProgress;
   }
 
+  @NonNull
   public LiveData<BannerInstructions> retrieveBannerInstructions() {
     return bannerInstructions;
   }
 
+  @NonNull
   public LiveData<Boolean> retrieveIsOffRoute() {
     return isOffRoute;
   }
@@ -273,6 +293,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigationViewOptions;
   }
 
+  @Nullable
   DistanceFormatter getDistanceFormatter() {
     if (distanceFormatter == null && navigationViewOptions != null) {
       initializeDistanceFormatter(navigationViewOptions);
@@ -280,7 +301,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return distanceFormatter;
   }
 
-  private void initializeDistanceFormatter(NavigationViewOptions options) {
+  private void initializeDistanceFormatter(@NonNull NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     if ((routeOptions == null || TextUtils.isEmpty(routeOptions.voiceUnits()))
       && options.navigationOptions().getDistanceFormatter() != null) {
@@ -290,7 +311,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initializeLanguage(NavigationViewOptions options) {
+  private void initializeLanguage(@NonNull NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     if (routeOptions != null) {
       language = routeOptions.language();
@@ -299,7 +320,8 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private String initializeUnitType(NavigationViewOptions options) {
+  @Nullable
+  private String initializeUnitType(@NonNull NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
     if (routeOptions != null) {
@@ -308,7 +330,8 @@ public class NavigationViewModel extends AndroidViewModel {
     return unitType;
   }
 
-  private DistanceFormatter buildDistanceFormatter(final NavigationViewOptions options) {
+  @NonNull
+  private DistanceFormatter buildDistanceFormatter(@NonNull final NavigationViewOptions options) {
     final String unitType = initializeUnitType(options);
     final int roundingIncrement = options.roundingIncrement();
     final Locale locale = getLocaleDirectionsRoute(options.directionsRoute(), getApplication());
@@ -319,7 +342,7 @@ public class NavigationViewModel extends AndroidViewModel {
         .build();
   }
 
-  private void initializeNavigationSpeechPlayer(NavigationViewOptions options) {
+  private void initializeNavigationSpeechPlayer(@NonNull NavigationViewOptions options) {
     SpeechPlayer speechPlayer = options.speechPlayer();
     if (speechPlayer != null) {
       this.speechPlayer = speechPlayer;
@@ -348,7 +371,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   @Nullable
-  private LocationEngine initializeLocationEngineFrom(final NavigationViewOptions options) {
+  private LocationEngine initializeLocationEngineFrom(@NonNull final NavigationViewOptions options) {
     if (options.locationEngine() != null) {
       return options.locationEngine();
     } else if (options.shouldSimulateRoute()) {
@@ -363,7 +386,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void initializeNavigation(NavigationOptions options) {
+  private void initializeNavigation(@NonNull NavigationOptions options) {
     navigation = new MapboxNavigation(options);
     addNavigationListeners();
   }
@@ -401,6 +424,7 @@ public class NavigationViewModel extends AndroidViewModel {
     shouldRecordScreenshot.setValue(false);
   }
 
+  @NonNull
   private VoiceInstructionsObserver voiceInstructionsObserver = new VoiceInstructionsObserver() {
     @Override
     public void onNewVoiceInstructions(@NotNull VoiceInstructions voiceInstructions) {
@@ -411,6 +435,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
+  @NonNull
   private OffRouteObserver offRouteObserver = new OffRouteObserver() {
     @Override
     public void onOffRouteStateChanged(boolean offRoute) {
@@ -421,9 +446,11 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
+  @NonNull
   private BannerInstructionsObserver bannerInstructionsObserver = bannerInstructions ->
           this.bannerInstructions.setValue(retrieveInstructionsFromBannerEvent(bannerInstructions));
 
+  @NonNull
   private TripSessionStateObserver tripSessionStateObserver = new TripSessionStateObserver() {
     @Override
     public void onSessionStateChanged(@NotNull TripSessionState tripSessionState) {
@@ -436,6 +463,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
+  @NonNull
   private RoutesObserver routesObserver = routes -> {
     if (routes.size() > 0) {
       route.setValue(routes.get(0));
@@ -484,7 +512,7 @@ public class NavigationViewModel extends AndroidViewModel {
     return instructions;
   }
 
-  private Point getOriginOfRoute(final DirectionsRoute directionsRoute) {
+  private Point getOriginOfRoute(@NonNull final DirectionsRoute directionsRoute) {
     return PolylineUtils.decode(directionsRoute.geometry(), 6).get(0);
   }
 }

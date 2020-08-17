@@ -90,6 +90,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
   private NavigationViewModel navigationViewModel;
+  @Nullable
   private NavigationMapboxMap navigationMap;
   private NavigationOnCameraTrackingChangedListener onTrackingChangedListener;
   private Bundle mapInstanceState;
@@ -98,17 +99,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private boolean isSubscribed;
   private boolean logoAndAttributionShownForFirstTime;
   private LifecycleRegistry lifecycleRegistry;
+  @NonNull
   private Set<OnNavigationReadyCallback> onNavigationReadyCallbacks = new CopyOnWriteArraySet<>();
 
-  public NavigationView(Context context) {
+  public NavigationView(@NonNull Context context) {
     this(context, null);
   }
 
-  public NavigationView(Context context, @Nullable AttributeSet attrs) {
+  public NavigationView(@NonNull Context context, @Nullable AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public NavigationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public NavigationView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     ThemeSwitcher.setTheme(context, attrs);
     initializeView();
@@ -152,7 +154,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param outState to store state variables
    */
-  public void onSaveInstanceState(Bundle outState) {
+  public void onSaveInstanceState(@NonNull Bundle outState) {
     int bottomSheetBehaviorState = summaryBehavior == null ? INVALID_STATE : summaryBehavior.getState();
     boolean isWayNameVisible = wayNameView.getVisibility() == VISIBLE;
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
@@ -172,7 +174,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @param savedInstanceState to extract state variables
    */
-  public void onRestoreInstanceState(Bundle savedInstanceState) {
+  public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
     NavigationViewInstanceState navigationViewInstanceState = savedInstanceState.getParcelable(instanceKey);
     recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
@@ -233,7 +235,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param mapboxMap used for route, camera, and location UI
    */
   @Override
-  public void onMapReady(final MapboxMap mapboxMap) {
+  public void onMapReady(@NonNull final MapboxMap mapboxMap) {
     mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), new Style.OnStyleLoaded() {
       @Override
       public void onStyleLoaded(@NonNull Style style) {
@@ -298,7 +300,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   @Override
-  public void drawRoute(DirectionsRoute directionsRoute) {
+  public void drawRoute(@NonNull DirectionsRoute directionsRoute) {
     if (navigationMap != null) {
       navigationMap.drawRoute(directionsRoute);
     }
@@ -363,6 +365,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    *
    * @return the current text of the way name view
    */
+  @NonNull
   @Override
   public String retrieveWayNameText() {
     return wayNameView.retrieveWayNameText();
@@ -384,7 +387,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param directionsRoute where camera should move to
    */
   @Override
-  public void startCamera(DirectionsRoute directionsRoute) {
+  public void startCamera(@NonNull DirectionsRoute directionsRoute) {
     if (navigationMap != null) {
       navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
       navigationMap.updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS);
@@ -399,7 +402,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param location where the camera should move to
    */
   @Override
-  public void resumeCamera(Location location) {
+  public void resumeCamera(@NonNull Location location) {
     if (navigationMap != null) {
       navigationMap.resumeCamera(location);
     }
@@ -445,7 +448,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param options with containing route / coordinate data
    */
   @SuppressLint("MissingPermission")
-  public void startNavigation(NavigationViewOptions options) {
+  public void startNavigation(@NonNull NavigationViewOptions options) {
     navigationMap.drawRoute(options.directionsRoute());
     initializeNavigation(options);
     startCamera(options.directionsRoute());
@@ -644,6 +647,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
+  @NonNull
   private OnNavigationReadyCallback internalNavigationReadyCallback = new OnNavigationReadyCallback() {
     @Override
     public void onNavigationReady(final boolean isRunning) {
@@ -727,7 +731,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     instructionView.setGuidanceViewListener(new NavigationGuidanceViewListener(navigationPresenter));
   }
 
-  private void initializeNavigationMap(MapView mapView, MapboxMap map) {
+  private void initializeNavigationMap(@NonNull MapView mapView, @NonNull MapboxMap map) {
     if (initialMapCameraPosition != null) {
       map.setCameraPosition(initialMapCameraPosition);
     }
@@ -779,7 +783,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationMap.addOnWayNameChangedListener(wayNameListener);
   }
 
-  private void saveNavigationMapInstanceState(Bundle outState) {
+  private void saveNavigationMapInstanceState(@NonNull Bundle outState) {
     if (navigationMap != null) {
       navigationMap.saveStateWith(outState);
     }
@@ -806,7 +810,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     ((SoundButton) instructionView.retrieveSoundButton()).onRestoreInstanceState(isMuted);
   }
 
-  private int[] buildRouteOverviewPadding(Context context) {
+  @NonNull
+  private int[] buildRouteOverviewPadding(@NonNull Context context) {
     Resources resources = context.getResources();
     int leftRightPadding = (int) resources.getDimension(R.dimen.route_overview_left_right_padding);
     int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
@@ -835,7 +840,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
-  private void initializeNavigation(NavigationViewOptions options) {
+  private void initializeNavigation(@NonNull NavigationViewOptions options) {
     navigationViewModel.initialize(options);
     establish(options);
 
@@ -862,7 +867,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
-  private void initializeVoiceGuidanceMuteState(final NavigationViewOptions options) {
+  private void initializeVoiceGuidanceMuteState(@NonNull final NavigationViewOptions options) {
     if (options.muteVoiceGuidance() && !isVoiceGuidanceMuted()) {
       navigationViewModel.setMuted(((SoundButton) retrieveSoundButton()).toggleMute());
     }
@@ -880,7 +885,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationMap.addOnCameraTrackingChangedListener(onTrackingChangedListener);
   }
 
-  private void establish(NavigationViewOptions options) {
+  private void establish(@NonNull NavigationViewOptions options) {
     establishDistanceFormatter();
     establishTimeFormat(options);
   }
@@ -891,13 +896,16 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     summaryBottomSheet.setDistanceFormatter(formatter);
   }
 
-  private void establishTimeFormat(NavigationViewOptions options) {
+  private void establishTimeFormat(@NonNull NavigationViewOptions options) {
     @TimeFormat.Type
     int timeFormatType = options.navigationOptions().getTimeFormatType();
     summaryBottomSheet.setTimeFormat(timeFormatType);
   }
 
-  private void initializeNavigationListeners(NavigationViewOptions options, NavigationViewModel navigationViewModel) {
+  private void initializeNavigationListeners(
+          @NonNull NavigationViewOptions options,
+          @NonNull NavigationViewModel navigationViewModel
+  ) {
     navigationMap.addProgressChangeListener(
         navigationViewModel.retrieveNavigation(),
         options.enableVanishingRouteLine()
@@ -905,7 +913,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationViewEventDispatcher.initializeListeners(options, navigationViewModel);
   }
 
-  private void setupNavigationMapboxMap(NavigationViewOptions options) {
+  private void setupNavigationMapboxMap(@NonNull NavigationViewOptions options) {
     navigationMap.updateWaynameQueryMap(options.waynameChipEnabled());
   }
 

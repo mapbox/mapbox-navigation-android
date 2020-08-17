@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -31,7 +33,7 @@ class VoiceInstructionCache {
     this.connectivityStatus = connectivityStatus;
   }
 
-  void initCache(DirectionsRoute route) {
+  void initCache(@NonNull DirectionsRoute route) {
     totalVoiceInstructions = 0;
 
     List<RouteLeg> routeLegs = route.legs();

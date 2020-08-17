@@ -13,8 +13,10 @@ import com.mapbox.navigation.base.trip.model.RouteStepProgress;
 
 public class InstructionModel {
 
+  @Nullable
   private RouteProgress progress;
   private SpannableString stepDistanceRemaining;
+  @Nullable
   private String drivingSide;
 
   public InstructionModel(@NonNull DistanceFormatter distanceFormatter, @Nullable RouteProgress progress) {
@@ -35,6 +37,7 @@ public class InstructionModel {
     }
   }
 
+  @Nullable
   public RouteProgress retrieveProgress() {
     return progress;
   }
@@ -43,6 +46,7 @@ public class InstructionModel {
     return stepDistanceRemaining;
   }
 
+  @Nullable
   public String retrieveDrivingSide() {
     return drivingSide;
   }

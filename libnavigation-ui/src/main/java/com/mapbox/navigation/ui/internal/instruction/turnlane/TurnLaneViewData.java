@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.internal.instruction.turnlane;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 
 public class TurnLaneViewData {
@@ -14,7 +16,7 @@ public class TurnLaneViewData {
   private boolean shouldFlip;
   private String drawMethod;
 
-  public TurnLaneViewData(String laneIndications, String maneuverModifier) {
+  public TurnLaneViewData(@NonNull String laneIndications, @NonNull String maneuverModifier) {
     buildDrawData(laneIndications, maneuverModifier);
   }
 
@@ -26,7 +28,7 @@ public class TurnLaneViewData {
     return drawMethod;
   }
 
-  private void buildDrawData(String laneIndications, String maneuverModifier) {
+  private void buildDrawData(@NonNull String laneIndications, @NonNull String maneuverModifier) {
 
     // U-turn
     if (laneIndications.contentEquals(ManeuverModifier.UTURN)) {
@@ -70,7 +72,7 @@ public class TurnLaneViewData {
     }
   }
 
-  private void setDrawMethodWithModifier(String maneuverModifier) {
+  private void setDrawMethodWithModifier(@NonNull String maneuverModifier) {
     if (maneuverModifier.contains(ManeuverModifier.RIGHT)) {
       drawMethod = DRAW_LANE_RIGHT_ONLY;
     } else if (maneuverModifier.contains(ManeuverModifier.STRAIGHT)) {
@@ -80,7 +82,7 @@ public class TurnLaneViewData {
     }
   }
 
-  private boolean isStraightPlusIndication(String laneIndications, String turnLaneIndication) {
+  private boolean isStraightPlusIndication(@NonNull String laneIndications, @NonNull String turnLaneIndication) {
     return laneIndications.contains(ManeuverModifier.STRAIGHT)
       && laneIndications.contains(turnLaneIndication);
   }

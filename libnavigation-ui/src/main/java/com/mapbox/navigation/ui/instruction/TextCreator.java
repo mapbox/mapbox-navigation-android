@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.instruction;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 /**
@@ -14,6 +16,7 @@ class TextCreator extends NodeCreator<BannerComponentNode, TextVerifier> {
     super(textVerifier);
   }
 
+  @NonNull
   @Override
   BannerComponentNode setupNode(BannerComponents components, int index, int startIndex, String
     modifier) {

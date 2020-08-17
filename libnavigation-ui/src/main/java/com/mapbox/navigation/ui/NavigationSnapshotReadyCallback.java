@@ -48,7 +48,7 @@ class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback
     navigationViewModel.updateFeedbackScreenshot(encoded);
   }
 
-  private void resetViewVisibility(ImageView screenshotView) {
+  private void resetViewVisibility(@NonNull ImageView screenshotView) {
     screenshotView.setVisibility(View.INVISIBLE);
     MapView mapView = navigationView.findViewById(R.id.navigationMapView);
     mapView.setVisibility(View.VISIBLE);

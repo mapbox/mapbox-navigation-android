@@ -26,8 +26,8 @@ public class SummaryModel {
    * Creates a new summary display model.
    */
   @NonNull
-  public static SummaryModel create(final Context context, final DistanceFormatter distanceFormatter,
-                                    final RouteProgress progress,
+  public static SummaryModel create(@NonNull final Context context, @NonNull final DistanceFormatter distanceFormatter,
+                                    @NonNull final RouteProgress progress,
                                     final @TimeFormat.Type int timeFormatType) {
     final Locale locale = LocaleEx.getLocaleDirectionsRoute(progress.getRoute(), context);
     String distanceRemaining = distanceFormatter.formatDistance(progress.getDistanceRemaining()).toString();
@@ -48,8 +48,11 @@ public class SummaryModel {
     return new SummaryModel(distanceRemaining, timeRemaining, arrivalTime);
   }
 
+  @NonNull
   private final String distanceRemaining;
+  @NonNull
   private final SpannableStringBuilder timeRemaining;
+  @NonNull
   private final String arrivalTime;
 
   private SummaryModel(@NonNull String distanceRemaining,

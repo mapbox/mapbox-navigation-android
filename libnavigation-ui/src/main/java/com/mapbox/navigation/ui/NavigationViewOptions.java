@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -177,10 +178,11 @@ public abstract class NavigationViewOptions {
      */
     public abstract Builder isFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled);
 
+    @NonNull
     public abstract NavigationViewOptions build();
   }
 
-  public static Builder builder(Context context) {
+  public static Builder builder(@NonNull Context context) {
     return new AutoValue_NavigationViewOptions.Builder()
         .navigationOptions(new NavigationOptions.Builder(context).build())
         .roundingIncrement(Rounding.INCREMENT_FIFTY)

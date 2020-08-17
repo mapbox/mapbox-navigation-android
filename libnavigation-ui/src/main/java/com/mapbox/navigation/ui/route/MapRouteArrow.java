@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
@@ -91,11 +92,12 @@ class MapRouteArrow {
   private GeoJsonSource arrowShaftGeoJsonSource;
   private GeoJsonSource arrowHeadGeoJsonSource;
 
+  @NonNull
   private final MapView mapView;
   private final MapboxMap mapboxMap;
   private boolean isVisible = true;
 
-  MapRouteArrow(MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, String aboveLayer) {
+  MapRouteArrow(@NonNull MapView mapView, MapboxMap mapboxMap, @StyleRes int styleRes, @NonNull String aboveLayer) {
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
     this.maneuverPoints = new ArrayList<>();
@@ -112,7 +114,7 @@ class MapRouteArrow {
     updateVisibilityTo(isVisible);
   }
 
-  void addUpcomingManeuverArrow(RouteProgress routeProgress) {
+  void addUpcomingManeuverArrow(@NonNull RouteProgress routeProgress) {
     boolean invalidUpcomingStepPoints = routeProgress.getUpcomingStepPoints() == null
             || routeProgress.getUpcomingStepPoints().size() < TWO_POINTS;
     boolean invalidCurrentStepPoints = routeProgress.getCurrentLegProgress() == null
@@ -154,7 +156,8 @@ class MapRouteArrow {
     return isVisible;
   }
 
-  private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {
+  @NonNull
+  private List<Point> obtainArrowPointsFrom(@NonNull RouteProgress routeProgress) {
     List<Point> reversedCurrent =
       new ArrayList<>(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStepPoints());
     Collections.reverse(reversedCurrent);
@@ -175,20 +178,20 @@ class MapRouteArrow {
     return combined;
   }
 
-  private void updateArrowShaftWith(List<Point> points) {
+  private void updateArrowShaftWith(@NonNull List<Point> points) {
     LineString shaft = LineString.fromLngLats(points);
     Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(shaft);
     arrowShaftGeoJsonSource.setGeoJson(arrowShaftGeoJsonFeature);
   }
 
-  private void updateArrowHeadWith(List<Point> points) {
+  private void updateArrowHeadWith(@NonNull List<Point> points) {
     double azimuth = TurfMeasurement.bearing(points.get(points.size() - 2), points.get(points.size() - 1));
     Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(points.get(points.size() - 1));
     arrowHeadGeoJsonFeature.addNumberProperty(ARROW_BEARING, (float) MathUtils.wrap(azimuth, 0, MAX_DEGREES));
     arrowHeadGeoJsonSource.setGeoJson(arrowHeadGeoJsonFeature);
   }
 
-  private void initialize(String aboveLayer) {
+  private void initialize(@NonNull String aboveLayer) {
     initializeArrowShaft();
     initializeArrowHead();
 
@@ -251,6 +254,7 @@ class MapRouteArrow {
     mapboxMap.getStyle().addImage(ARROW_HEAD_ICON_CASING, icon);
   }
 
+  @NonNull
   private LineLayer createArrowShaftLayer() {
     LineLayer shaftLayer = (LineLayer) mapboxMap.getStyle().getLayer(ARROW_SHAFT_LINE_LAYER_ID);
     if (shaftLayer != null) {
@@ -277,6 +281,7 @@ class MapRouteArrow {
     );
   }
 
+  @NonNull
   private LineLayer createArrowShaftCasingLayer() {
     LineLayer shaftCasingLayer = (LineLayer) mapboxMap.getStyle().getLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID);
     if (shaftCasingLayer != null) {
@@ -303,6 +308,7 @@ class MapRouteArrow {
     );
   }
 
+  @NonNull
   private SymbolLayer createArrowHeadLayer() {
     SymbolLayer headLayer = (SymbolLayer) mapboxMap.getStyle().getLayer(ARROW_HEAD_LAYER_ID);
     if (headLayer != null) {
@@ -332,6 +338,7 @@ class MapRouteArrow {
             );
   }
 
+  @NonNull
   private SymbolLayer createArrowHeadCasingLayer() {
     SymbolLayer headCasingLayer = (SymbolLayer) mapboxMap.getStyle().getLayer(ARROW_HEAD_CASING_LAYER_ID);
     if (headCasingLayer != null) {
@@ -360,8 +367,11 @@ class MapRouteArrow {
     );
   }
 
-  private void createArrowLayerList(LineLayer shaftLayer, LineLayer shaftCasingLayer, SymbolLayer headLayer,
-                                    SymbolLayer headCasingLayer) {
+  private void createArrowLayerList(
+          @NonNull LineLayer shaftLayer,
+          @NonNull LineLayer shaftCasingLayer,
+          @NonNull SymbolLayer headLayer,
+          @NonNull SymbolLayer headCasingLayer) {
     arrowLayerIds = new ArrayList<>();
     arrowLayerIds.add(shaftCasingLayer.getId());
     arrowLayerIds.add(shaftLayer.getId());

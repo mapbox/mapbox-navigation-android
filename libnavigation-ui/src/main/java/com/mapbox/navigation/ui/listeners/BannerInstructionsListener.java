@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.listeners;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.BannerInstructions;
 
 /**
@@ -19,5 +21,6 @@ public interface BannerInstructionsListener {
    * @param instructions about to be displayed
    * @return instructions to be displayed; null if should be ignored
    */
+  @NonNull
   BannerInstructions willDisplay(BannerInstructions instructions);
 }

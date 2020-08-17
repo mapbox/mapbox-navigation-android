@@ -18,6 +18,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
 
   private static final String EMPTY_STRING = "";
   private String maneuverModifier = EMPTY_STRING;
+  @NonNull
   private List<BannerComponents> laneComponents = new ArrayList<>();
   @StyleRes
   private int turnLaneViewStyle;
@@ -46,7 +47,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
     return laneComponents.size();
   }
 
-  public void addTurnLanes(List<BannerComponents> laneComponents, String maneuverModifier) {
+  public void addTurnLanes(@NonNull List<BannerComponents> laneComponents, String maneuverModifier) {
     this.laneComponents.clear();
     this.laneComponents.addAll(laneComponents);
     this.maneuverModifier = maneuverModifier;

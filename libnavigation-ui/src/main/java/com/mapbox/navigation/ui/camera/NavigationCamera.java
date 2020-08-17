@@ -82,6 +82,7 @@ public class NavigationCamera {
   private LocationComponent locationComponent;
   private MapboxNavigation navigation;
   private Location currentLocation;
+  @Nullable
   private RouteInformation currentRouteInformation;
   private RouteProgress currentRouteProgress;
   @TrackingMode
@@ -90,6 +91,7 @@ public class NavigationCamera {
   private CameraAnimationDelegate animationDelegate;
   private Camera camera;
 
+  @NonNull
   private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override
     public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
@@ -98,6 +100,7 @@ public class NavigationCamera {
     }
   };
 
+  @NonNull
   private LocationObserver locationObserver = new LocationObserver() {
 
     @Override
@@ -146,7 +149,7 @@ public class NavigationCamera {
    *
    * @param route used to update route information
    */
-  public void start(DirectionsRoute route) {
+  public void start(@Nullable DirectionsRoute route) {
     if (route != null) {
       currentRouteInformation = buildRouteInformationFromRoute(route);
     }
@@ -159,7 +162,7 @@ public class NavigationCamera {
    *
    * @param location used to update route information
    */
-  public void resume(Location location) {
+  public void resume(@Nullable Location location) {
     if (location != null) {
       currentRouteInformation = buildRouteInformationFromLocation(location, null);
     }
@@ -213,7 +216,7 @@ public class NavigationCamera {
    *
    * @param padding in pixels around the bounding box of the overview (left, top, right, bottom)
    */
-  public void showRouteOverview(int[] padding) {
+  public void showRouteOverview(@NonNull int[] padding) {
     updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
     RouteInformation routeInformation =
         new RouteInformation(currentRouteProgress.getRoute(), null, null);
@@ -229,7 +232,7 @@ public class NavigationCamera {
    * @param update the change that should be applied to the camera.
    * @see CameraUpdateMode for how this update interacts with the current tracking
    */
-  public void update(NavigationCameraUpdate update) {
+  public void update(@NonNull NavigationCameraUpdate update) {
     animationDelegate.render(update, MapboxConstants.ANIMATION_DURATION, null);
   }
 
@@ -244,7 +247,7 @@ public class NavigationCamera {
    * positive, otherwise an IllegalArgumentException will be thrown.
    * @see CameraUpdateMode for how this update interacts with the current tracking
    */
-  public void update(NavigationCameraUpdate update, int durationMs) {
+  public void update(@NonNull NavigationCameraUpdate update, int durationMs) {
     animationDelegate.render(update, durationMs, null);
   }
 
@@ -267,7 +270,10 @@ public class NavigationCamera {
    * isn't required, leave it as null.
    * @see CameraUpdateMode for how this update interacts with the current tracking
    */
-  public void update(NavigationCameraUpdate update, int durationMs, @Nullable MapboxMap.CancelableCallback callback) {
+  public void update(
+          @NonNull NavigationCameraUpdate update,
+          int durationMs,
+          @Nullable MapboxMap.CancelableCallback callback) {
     animationDelegate.render(update, durationMs, callback);
   }
 
@@ -303,7 +309,7 @@ public class NavigationCamera {
    *
    * @param navigation to add the camera progress change listener
    */
-  public void addProgressChangeListener(MapboxNavigation navigation) {
+  public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
     navigation.registerRouteProgressObserver(routeProgressObserver);
   }
@@ -442,14 +448,14 @@ public class NavigationCamera {
     }
   }
 
-  private void animateCameraForRouteOverview(RouteInformation routeInformation, int[] padding) {
+  private void animateCameraForRouteOverview(@NonNull RouteInformation routeInformation, @NonNull int[] padding) {
     List<Point> routePoints = camera.overview(routeInformation);
     if (!routePoints.isEmpty()) {
       animateMapboxMapForRouteOverview(padding, routePoints);
     }
   }
 
-  private void animateMapboxMapForRouteOverview(int[] padding, List<Point> routePoints) {
+  private void animateMapboxMapForRouteOverview(@NonNull int[] padding, @NonNull List<Point> routePoints) {
     if (routePoints.size() <= ONE_POINT) {
       return;
     }
@@ -467,14 +473,15 @@ public class NavigationCamera {
   }
 
   @NonNull
-  private CameraUpdate buildOverviewCameraUpdate(int[] padding, List<Point> routePoints) {
+  private CameraUpdate buildOverviewCameraUpdate(int[] padding, @NonNull List<Point> routePoints) {
     final LatLngBounds routeBounds = convertRoutePointsToLatLngBounds(routePoints);
     return CameraUpdateFactory.newLatLngBounds(
         routeBounds, padding[0], padding[1], padding[2], padding[3]
     );
   }
 
-  private LatLngBounds convertRoutePointsToLatLngBounds(List<Point> routePoints) {
+  @NonNull
+  private LatLngBounds convertRoutePointsToLatLngBounds(@NonNull List<Point> routePoints) {
     List<LatLng> latLngs = new ArrayList<>();
     for (Point routePoint : routePoints) {
       latLngs.add(new LatLng(routePoint.latitude(), routePoint.longitude()));
@@ -528,14 +535,14 @@ public class NavigationCamera {
     }
   }
 
-  private void adjustCameraForReset(RouteInformation routeInformation) {
+  private void adjustCameraForReset(@NonNull RouteInformation routeInformation) {
     float tilt = (float) camera.tilt(routeInformation);
     double zoom = camera.zoom(routeInformation);
     locationComponent.zoomWhileTracking(zoom, getZoomAnimationDuration(zoom), new ResetCancelableCallback(this));
     locationComponent.tiltWhileTracking(tilt, getTiltAnimationDuration(tilt));
   }
 
-  private void adjustCameraFromLocation(RouteInformation routeInformation) {
+  private void adjustCameraFromLocation(@NonNull RouteInformation routeInformation) {
     float tilt = (float) camera.tilt(routeInformation);
     double zoom = camera.zoom(routeInformation);
     locationComponent.zoomWhileTracking(zoom, getZoomAnimationDuration(zoom));

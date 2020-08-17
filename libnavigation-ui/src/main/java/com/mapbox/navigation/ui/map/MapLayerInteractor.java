@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.map;
 
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
@@ -49,7 +51,7 @@ class MapLayerInteractor {
     mapboxMap.getStyle().addLayerAt(streetsLayer, LAST_INDEX);
   }
 
-  private void updateLayerWithVisibility(String layerIdentifier, List<Layer> layers, boolean isVisible) {
+  private void updateLayerWithVisibility(String layerIdentifier, @NonNull List<Layer> layers, boolean isVisible) {
     for (Layer layer : layers) {
       if (isValid(layer)) {
         String sourceLayerId = retrieveSourceLayerId(layer);
@@ -60,7 +62,7 @@ class MapLayerInteractor {
     }
   }
 
-  private boolean findLayerVisibility(String layerIdentifier, List<Layer> layers) {
+  private boolean findLayerVisibility(String layerIdentifier, @NonNull List<Layer> layers) {
     for (Layer layer : layers) {
       if (isValid(layer)) {
         String sourceLayerId = retrieveSourceLayerId(layer);

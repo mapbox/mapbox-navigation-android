@@ -13,9 +13,11 @@ import android.text.style.ImageSpan;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 class TextViewUtils {
 
-  boolean textFits(TextView textView, String text) {
+  boolean textFits(@NonNull TextView textView, String text) {
     Paint paint = new Paint(textView.getPaint());
     float width = paint.measureText(text);
 
@@ -26,7 +28,8 @@ class TextViewUtils {
     }
   }
 
-  Drawable createDrawable(TextView textView, Bitmap bitmap) {
+  @NonNull
+  Drawable createDrawable(@NonNull TextView textView, @NonNull Bitmap bitmap) {
     Drawable drawable = new BitmapDrawable(textView.getContext().getResources(), bitmap);
     int bottom = textView.getLineHeight();
     int right = bottom * bitmap.getWidth() / bitmap.getHeight();
@@ -35,17 +38,17 @@ class TextViewUtils {
     return drawable;
   }
 
-  void setImageSpan(TextView textView, View view, int start, int end) {
+  void setImageSpan(@NonNull TextView textView, @NonNull View view, int start, int end) {
     Bitmap bitmap = createBitmapFromView(view);
     setImageSpan(textView, bitmap, start, end);
   }
 
-  private void setImageSpan(TextView textView, Bitmap bitmap, int start, int end) {
+  private void setImageSpan(@NonNull TextView textView, @NonNull Bitmap bitmap, int start, int end) {
     Drawable drawable = createDrawable(textView, bitmap);
     setImageSpan(textView, drawable, start, end);
   }
 
-  private void setImageSpan(TextView textView, Drawable drawable, int start, int end) {
+  private void setImageSpan(@NonNull TextView textView, @NonNull Drawable drawable, int start, int end) {
     Spannable instructionSpannable = new SpannableString(textView.getText());
 
     instructionSpannable.setSpan(new ImageSpan(drawable),
@@ -54,7 +57,7 @@ class TextViewUtils {
     textView.setText(instructionSpannable);
   }
 
-  private Bitmap createBitmapFromView(View view) {
+  private Bitmap createBitmapFromView(@NonNull View view) {
     int measureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
     view.measure(measureSpec, measureSpec);
 

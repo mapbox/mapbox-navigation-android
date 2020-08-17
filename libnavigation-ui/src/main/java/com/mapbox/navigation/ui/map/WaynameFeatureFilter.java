@@ -29,11 +29,17 @@ class WaynameFeatureFilter {
   private static final int TWO_POINTS = 2;
   private static final double ZERO_METERS = 0d;
   private static final double TEN = 10d;
+  @NonNull
   private final List<Feature> queriedFeatures;
+  @NonNull
   private final Point currentPoint;
+  @NonNull
   private final LineString currentStepLineString;
 
-  WaynameFeatureFilter(List<Feature> queriedFeatures, Location currentLocation, List<Point> currentStepPoints) {
+  WaynameFeatureFilter(
+          @NonNull List<Feature> queriedFeatures,
+          @NonNull Location currentLocation,
+          @NonNull List<Point> currentStepPoints) {
     this.queriedFeatures = new ArrayList<>(new HashSet<>(queriedFeatures));
     this.currentPoint = Point.fromLngLat(currentLocation.getLongitude(), currentLocation.getLatitude());
     this.currentStepLineString = LineString.fromLngLats(currentStepPoints);
@@ -126,7 +132,7 @@ class WaynameFeatureFilter {
     return filteredFeature;
   }
 
-  private double calculateDistance(Point lhs, Point rhs) {
+  private double calculateDistance(@Nullable Point lhs, @Nullable Point rhs) {
     if (lhs == null || rhs == null) {
       return Double.POSITIVE_INFINITY;
     }
@@ -134,7 +140,7 @@ class WaynameFeatureFilter {
   }
 
   @Nullable
-  Point findPointFromCurrentPoint(Point currentPoint, LineString lineString) {
+  Point findPointFromCurrentPoint(@Nullable Point currentPoint, @NonNull LineString lineString) {
     List<Point> lineStringCoordinates = lineString.coordinates();
     int coordinateSize = lineStringCoordinates.size();
     if (coordinateSize < TWO_POINTS) {
@@ -154,7 +160,7 @@ class WaynameFeatureFilter {
   }
 
   @NonNull
-  private LineString reverseFeatureLineStringCoordinates(LineString featureLineString) {
+  private LineString reverseFeatureLineStringCoordinates(@NonNull LineString featureLineString) {
     List<Point> reversedFeatureCoordinates = new ArrayList<>(featureLineString.coordinates());
     Collections.reverse(reversedFeatureCoordinates);
     return LineString.fromLngLats(reversedFeatureCoordinates);

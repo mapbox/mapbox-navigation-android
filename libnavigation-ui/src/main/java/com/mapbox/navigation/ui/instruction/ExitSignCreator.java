@@ -5,6 +5,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 import com.mapbox.navigation.ui.R;
 
@@ -24,8 +27,9 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
     textViewUtils = new TextViewUtils();
   }
 
+  @Nullable
   @Override
-  BannerComponentNode setupNode(BannerComponents components, int index, int startIndex,
+  BannerComponentNode setupNode(@NonNull BannerComponents components, int index, int startIndex,
                                 String modifier) {
     if (components.type().equals(EXIT)) {
       return null;
@@ -46,7 +50,7 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
    * @param bannerComponentNodes containing instructions
    */
   @Override
-  void postProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  void postProcess(@NonNull TextView textView, List<BannerComponentNode> bannerComponentNodes) {
     if (exitNumber != null) {
       LayoutInflater inflater = (LayoutInflater) textView.getContext().getSystemService(Context
         .LAYOUT_INFLATER_SERVICE);

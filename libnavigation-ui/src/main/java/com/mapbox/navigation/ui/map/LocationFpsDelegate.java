@@ -19,7 +19,9 @@ class LocationFpsDelegate implements MapboxMap.OnCameraIdleListener {
   private static final int MAX_ANIMATION_FPS_FIFTEEN = 15;
   private static final int MAX_ANIMATION_FPS_TWENTY_FIVE = 25;
   private static final int MAX_ANIMATION_FPS = Integer.MAX_VALUE;
+  @NonNull
   private final MapboxMap mapboxMap;
+  @NonNull
   private final LocationComponent locationComponent;
   private int currentFps = MAX_ANIMATION_FPS;
   private boolean isEnabled = true;

@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 class MapBatteryMonitor {
 
   private static final int DEFAULT_BATTERY_LEVEL = -1;
 
-  boolean isPluggedIn(Context context) {
+  boolean isPluggedIn(@NonNull Context context) {
     Intent batteryStatus = registerBatteryUpdates(context);
     if (batteryStatus == null) {
       return false;
@@ -23,7 +26,8 @@ class MapBatteryMonitor {
     return isPlugged;
   }
 
-  private static Intent registerBatteryUpdates(Context context) {
+  @Nullable
+  private static Intent registerBatteryUpdates(@NonNull Context context) {
     IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
     return context.registerReceiver(null, filter);
   }

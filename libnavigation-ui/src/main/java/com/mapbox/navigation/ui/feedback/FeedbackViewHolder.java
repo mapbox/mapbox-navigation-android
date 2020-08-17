@@ -4,6 +4,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +18,7 @@ class FeedbackViewHolder extends RecyclerView.ViewHolder {
   private ImageView feedbackImage;
   private TextView feedbackText;
 
-  FeedbackViewHolder(View itemView) {
+  FeedbackViewHolder(@NonNull View itemView) {
     super(itemView);
     feedbackImage = itemView.findViewById(R.id.feedbackImage);
     feedbackText = itemView.findViewById(R.id.feedbackText);

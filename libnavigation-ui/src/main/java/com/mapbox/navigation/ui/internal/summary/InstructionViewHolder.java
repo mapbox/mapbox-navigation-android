@@ -5,6 +5,7 @@ import android.text.SpannableString;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,7 +20,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
   private TextView secondaryText;
   private View instructionLayoutText;
 
-  InstructionViewHolder(View itemView) {
+  InstructionViewHolder(@NonNull View itemView) {
     super(itemView);
     maneuverView = itemView.findViewById(R.id.maneuverView);
     distanceText = itemView.findViewById(R.id.stepDistanceText);
@@ -29,7 +30,7 @@ class InstructionViewHolder extends RecyclerView.ViewHolder implements Instructi
   }
 
   @Override
-  public void updateManeuverViewTypeAndModifier(String maneuverType, String maneuverModifier) {
+  public void updateManeuverViewTypeAndModifier(@NonNull String maneuverType, String maneuverModifier) {
     maneuverView.setManeuverTypeAndModifier(maneuverType, maneuverModifier);
   }
 

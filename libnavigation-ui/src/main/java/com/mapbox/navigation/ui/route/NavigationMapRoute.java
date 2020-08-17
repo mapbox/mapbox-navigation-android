@@ -53,6 +53,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   @StyleRes
   private final int styleRes;
+  @Nullable
   private final String belowLayer;
   @NonNull
   private final MapboxMap mapboxMap;
@@ -60,17 +61,24 @@ public class NavigationMapRoute implements LifecycleObserver {
   private final MapView mapView;
   @NonNull
   private final LifecycleOwner lifecycleOwner;
+  @Nullable
   private MapRouteClickListener mapRouteClickListener;
+  @Nullable
   private MapRouteProgressChangeListener mapRouteProgressChangeListener;
   private boolean isMapClickListenerAdded = false;
   private MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener;
   private boolean isDidFinishLoadingStyleListenerAdded = false;
+  @Nullable
   private MapboxNavigation navigation;
+  @Nullable
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
   private boolean vanishRouteLineEnabled;
+  @Nullable
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
+  @Nullable
   private RouteLineValueAnimator vanishingRouteLineAnimator;
+  @Nullable
   private List<RouteStyleDescriptor> routeStyleDescriptors;
 
   /**
@@ -273,7 +281,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck.
    * @see MapboxNavigation#startTripSession()
    */
-  public void addProgressChangeListener(MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
+  public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
     this.navigation = navigation;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
@@ -286,7 +294,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    *
    * @param navigation to remove the progress change listener
    */
-  public void removeProgressChangeListener(MapboxNavigation navigation) {
+  public void removeProgressChangeListener(@Nullable MapboxNavigation navigation) {
     shutdownVanishingRouteLineAnimator();
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
@@ -302,7 +310,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * and invoking this method in that scenario will lead to competing updates.
    * @param routeProgress current progress
    */
-  public void onNewRouteProgress(RouteProgress routeProgress) {
+  public void onNewRouteProgress(@NonNull RouteProgress routeProgress) {
     if (mapRouteProgressChangeListener != null) {
       mapRouteProgressChangeListener.onRouteProgressChanged(routeProgress);
     }
@@ -330,6 +338,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     lifecycleOwner.getLifecycle().addObserver(this);
   }
 
+  @Nullable
   private MapRouteLine buildMapRouteLine(@NonNull final MapView mapView, @NonNull final MapboxMap mapboxMap,
                                          @StyleRes final int styleRes, @Nullable final String belowLayer,
                                          @Nullable final List<RouteStyleDescriptor> routeStyleDescriptors,
@@ -405,7 +414,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
-  private void redraw(Style style) {
+  private void redraw(@NonNull Style style) {
     recreateRouteLine(style);
     boolean arrowVisibility = routeArrow.routeArrowIsVisible();
     routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
@@ -413,7 +422,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     updateProgressChangeListener();
   }
 
-  private void recreateRouteLine(final Style style) {
+  private void recreateRouteLine(@NonNull final Style style) {
     final Context context = mapView.getContext();
     final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
             ? Collections.emptyList() : routeStyleDescriptors;
@@ -449,6 +458,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
+  @Nullable
   private MapRouteProgressChangeListener buildMapRouteProgressChangeListener() {
     shutdownVanishingRouteLineAnimator();
     if (vanishRouteLineEnabled) {
@@ -528,6 +538,7 @@ public class NavigationMapRoute implements LifecycleObserver {
      * during navigation. By default is `false`
      * @return the builder
      */
+    @NonNull
     public Builder withMapboxNavigation(@Nullable MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
       this.navigation = navigation;
       this.vanishRouteLineEnabled = vanishRouteLineEnabled;
@@ -539,6 +550,7 @@ public class NavigationMapRoute implements LifecycleObserver {
      *
      * @return the builder
      */
+    @NonNull
     public Builder withStyle(@StyleRes int styleRes) {
       this.styleRes = styleRes;
       return this;
@@ -549,6 +561,7 @@ public class NavigationMapRoute implements LifecycleObserver {
      *
      * @return the builder
      */
+    @NonNull
     public Builder withBelowLayer(@Nullable String belowLayer) {
       this.belowLayer = belowLayer;
       return this;
@@ -559,6 +572,7 @@ public class NavigationMapRoute implements LifecycleObserver {
      *
      * @return the builder
      */
+    @NonNull
     public Builder withRouteStyleDescriptors(List<RouteStyleDescriptor> routeStyleDescriptors) {
       this.routeStyleDescriptors = routeStyleDescriptors;
       return this;
@@ -569,6 +583,7 @@ public class NavigationMapRoute implements LifecycleObserver {
      *
      * @return the builder
      */
+    @NonNull
     public Builder withRouteLineInitializedCallback(
         @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback
     ) {
@@ -579,6 +594,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     /**
      * Build an instance of {@link NavigationMapRoute}
      */
+    @Nullable
     public NavigationMapRoute build() {
       return new NavigationMapRoute(
           navigation,

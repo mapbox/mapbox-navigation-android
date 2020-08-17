@@ -12,6 +12,7 @@ import java.util.List;
 
 class BannerComponentTree {
   private final NodeCreator[] nodeCreators;
+  @NonNull
   private final List<BannerComponentNode> bannerComponentNodes;
 
   /**
@@ -31,7 +32,8 @@ class BannerComponentTree {
    * @param bannerText to parse
    * @return the list of nodes representing the bannerComponents
    */
-  private List<BannerComponentNode> parseBannerComponents(BannerText bannerText) {
+  @NonNull
+  private List<BannerComponentNode> parseBannerComponents(@NonNull BannerText bannerText) {
     int length = 0;
     List<BannerComponentNode> bannerComponentNodes = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.ui.route;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
@@ -51,7 +52,7 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     this.alternativesVisible = alternativesVisible;
   }
 
-  private boolean invalidMapClick(Map<LineString, DirectionsRoute> routeLineStrings) {
+  private boolean invalidMapClick(@Nullable Map<LineString, DirectionsRoute> routeLineStrings) {
     return routeLineStrings == null || routeLineStrings.isEmpty() || !alternativesVisible;
   }
 
@@ -59,8 +60,8 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     return routeLine.retrieveVisibility();
   }
 
-  private void findClickedRoute(@NonNull LatLng point, Map<LineString, DirectionsRoute> routeLineStrings,
-                                List<DirectionsRoute> directionsRoutes) {
+  private void findClickedRoute(@NonNull LatLng point, @NonNull Map<LineString, DirectionsRoute> routeLineStrings,
+                                @NonNull List<DirectionsRoute> directionsRoutes) {
 
     Map<Double, DirectionsRoute> routeDistancesAwayFromClick = new HashMap<>();
     Point clickPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
@@ -77,8 +78,10 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     }
   }
 
-  private void calculateClickDistances(Map<Double, DirectionsRoute> routeDistancesAwayFromClick,
-                                       Point clickPoint, Map<LineString, DirectionsRoute> routeLineStrings) {
+  private void calculateClickDistances(
+          @NonNull Map<Double, DirectionsRoute> routeDistancesAwayFromClick,
+          @NonNull Point clickPoint,
+          @NonNull Map<LineString, DirectionsRoute> routeLineStrings) {
     for (LineString lineString : routeLineStrings.keySet()) {
       Point pointOnLine = findPointOnLine(clickPoint, lineString);
       if (pointOnLine == null) {
@@ -89,7 +92,8 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     }
   }
 
-  private Point findPointOnLine(Point clickPoint, LineString lineString) {
+  @Nullable
+  private Point findPointOnLine(@NonNull Point clickPoint, @NonNull LineString lineString) {
     List<Point> linePoints = lineString.coordinates();
     Feature feature = TurfMisc.nearestPointOnLine(clickPoint, linePoints);
     return (Point) feature.geometry();

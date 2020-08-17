@@ -4,6 +4,8 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 class UrlDensityMap extends SparseArray<String> {
 
   private static final String ONE_X = "@1x";
@@ -14,7 +16,7 @@ class UrlDensityMap extends SparseArray<String> {
 
   private final int displayDensity;
 
-  UrlDensityMap(int displayDensity, SdkVersionChecker sdkVersionChecker) {
+  UrlDensityMap(int displayDensity, @NonNull SdkVersionChecker sdkVersionChecker) {
     super(4);
     this.displayDensity = displayDensity;
     put(DisplayMetrics.DENSITY_LOW, ONE_X + DOT_PNG);
@@ -50,6 +52,7 @@ class UrlDensityMap extends SparseArray<String> {
     }
   }
 
+  @NonNull
   public String get(String url) {
     return url + super.get(displayDensity);
   }

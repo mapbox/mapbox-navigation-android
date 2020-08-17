@@ -1,5 +1,8 @@
 package com.mapbox.navigation.ui.map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
@@ -13,9 +16,10 @@ class MapPaddingAdjustor {
 
   private final MapboxMap mapboxMap;
   private final int[] defaultPadding;
+  @Nullable
   private int[] customPadding;
 
-  MapPaddingAdjustor(MapView mapView, MapboxMap mapboxMap) {
+  MapPaddingAdjustor(@NonNull MapView mapView, MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     defaultPadding = calculateDefaultPadding(mapView);
   }
@@ -31,11 +35,12 @@ class MapPaddingAdjustor {
     updatePaddingWith(defaultPadding);
   }
 
-  void adjustLocationIconWith(int[] customPadding) {
+  void adjustLocationIconWith(@NonNull int[] customPadding) {
     this.customPadding = customPadding;
     updatePaddingWith(customPadding);
   }
 
+  @NonNull
   int[] retrieveCurrentPadding() {
     return mapboxMap.getPadding();
   }

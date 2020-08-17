@@ -111,20 +111,25 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private ConstraintLayout instructionLayout;
   private LinearLayout instructionLayoutText;
   private View instructionListLayout;
+  @Nullable
   private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
+  @Nullable
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private InstructionListListener instructionListListener;
   private GuidanceViewListener guidanceViewListener;
 
+  @Nullable
   private DistanceFormatter distanceFormatter;
   private boolean isRerouting;
   private SoundButton soundButton;
   private FeedbackButton feedbackButton;
   private LifecycleOwner lifecycleOwner;
+  @NonNull
   private GuidanceViewImageProvider guidanceViewImageProvider = new GuidanceViewImageProvider();
+  @NonNull
   private GuidanceViewImageProvider.OnGuidanceImageDownload callback =
     new GuidanceViewImageProvider.OnGuidanceImageDownload() {
     @Override
@@ -207,7 +212,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param navigationViewModel to which this View is subscribing
    */
-  public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
+  public void subscribe(LifecycleOwner owner, @NonNull NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
@@ -262,7 +267,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param routeProgress for route data used to populate the views
    */
-  public void updateDistanceWith(RouteProgress routeProgress) {
+  public void updateDistanceWith(@Nullable RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       InstructionModel model = new InstructionModel(distanceFormatter, routeProgress);
       updateDataFromInstruction(model);
@@ -290,7 +295,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * @param instructions for banner info used to populate the views
    * @param drivingSideFallback one of {@link ManeuverModifier#RIGHT} or {@link ManeuverModifier#LEFT}.
    */
-  public void updateBannerInstructionsWith(BannerInstructions instructions, String drivingSideFallback) {
+  public void updateBannerInstructionsWith(@Nullable BannerInstructions instructions, String drivingSideFallback) {
     if (instructions != null) {
       updateBannerInstructions(instructions.primary(),
           instructions.secondary(), instructions.sub(), getDrivingSide(drivingSideFallback));
@@ -396,7 +401,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param distanceFormatter to set
    */
-  public void setDistanceFormatter(DistanceFormatter distanceFormatter) {
+  public void setDistanceFormatter(@Nullable DistanceFormatter distanceFormatter) {
     if (distanceFormatter != null && !distanceFormatter.equals(this.distanceFormatter)) {
       this.distanceFormatter = distanceFormatter;
       instructionListAdapter.updateDistanceFormatter(distanceFormatter);
@@ -690,8 +695,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
   }
 
-  private void updateBannerInstructions(BannerText primaryBanner, BannerText secondaryBanner,
-      BannerText subBanner, String currentDrivingSide) {
+  private void updateBannerInstructions(@Nullable BannerText primaryBanner, BannerText secondaryBanner,
+                                        @NonNull BannerText subBanner, String currentDrivingSide) {
     if (primaryBanner != null) {
       updateManeuverView(primaryBanner.type(), primaryBanner.modifier(), primaryBanner.degrees(), currentDrivingSide);
       updateDataFromBannerText(primaryBanner, secondaryBanner);
@@ -778,7 +783,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param model provides distance text
    */
-  private boolean newDistanceText(InstructionModel model) {
+  private boolean newDistanceText(@NonNull InstructionModel model) {
     return !stepDistanceText.getText().toString().isEmpty()
         && !TextUtils.isEmpty(model.retrieveStepDistanceRemaining())
         && !stepDistanceText.getText().toString()
@@ -790,11 +795,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param model provides distance text
    */
-  private void distanceText(InstructionModel model) {
+  private void distanceText(@NonNull InstructionModel model) {
     stepDistanceText.setText(model.retrieveStepDistanceRemaining());
   }
 
-  private InstructionLoader createInstructionLoader(TextView textView, BannerText bannerText) {
+  @Nullable
+  private InstructionLoader createInstructionLoader(TextView textView, @NonNull BannerText bannerText) {
     if (hasComponents(bannerText)) {
       return new InstructionLoader(textView, bannerText);
     } else {
@@ -802,7 +808,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private boolean hasComponents(BannerText bannerText) {
+  private boolean hasComponents(@Nullable BannerText bannerText) {
     return bannerText != null && bannerText.components() != null && !bannerText.components().isEmpty();
   }
 
@@ -812,14 +818,14 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * @param routeProgress provides updated step information
    * @return true if new step, false if not
    */
-  private boolean newStep(RouteProgress routeProgress) {
+  private boolean newStep(@NonNull RouteProgress routeProgress) {
     boolean newStep = currentStep == null
         || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
     currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
     return newStep;
   }
 
-  private void updateSubStep(BannerText subText, String primaryManeuverModifier, String drivingSide) {
+  private void updateSubStep(@NonNull BannerText subText, String primaryManeuverModifier, String drivingSide) {
     if (shouldShowSubStep(subText)) {
       String maneuverType = subText.type();
       String maneuverModifier = subText.modifier();
@@ -885,7 +891,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private boolean shouldShowTurnLanes(BannerText subText, String maneuverModifier) {
+  private boolean shouldShowTurnLanes(@NonNull BannerText subText, String maneuverModifier) {
     if (!hasComponents(subText) || TextUtils.isEmpty(maneuverModifier)) {
       return false;
     }
@@ -949,7 +955,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     clearAnimation();
   }
 
-  private void updateDataFromInstruction(InstructionModel model) {
+  private void updateDataFromInstruction(@NonNull InstructionModel model) {
     updateDistanceText(model);
     updateInstructionList(model);
     if (newStep(model.retrieveProgress())) {
@@ -962,7 +968,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Looks to see if we have a new instruction text.
    * Sets new instruction text if found.
    */
-  private void updateDataFromBannerText(@NonNull BannerText primaryBannerText, BannerText secondaryBannerText) {
+  private void updateDataFromBannerText(
+          @NonNull BannerText primaryBannerText,
+          @Nullable BannerText secondaryBannerText) {
     if (secondaryBannerText == null) {
       loadPrimary(primaryBannerText);
       return;
@@ -970,7 +978,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     loadPrimaryAndSecondary(primaryBannerText, secondaryBannerText);
   }
 
-  private void loadPrimary(BannerText primaryBannerText) {
+  private void loadPrimary(@NonNull BannerText primaryBannerText) {
     if (!ViewUtils.isLandscape(getContext())) {
       stepPrimaryText.setMaxLines(2);
     }
@@ -983,7 +991,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     loadTextWith(primaryBannerText, stepPrimaryText);
   }
 
-  private void loadPrimaryAndSecondary(BannerText primaryBannerText, BannerText secondaryBannerText) {
+  private void loadPrimaryAndSecondary(@NonNull BannerText primaryBannerText, @NonNull BannerText secondaryBannerText) {
     stepPrimaryText.setMaxLines(1);
     stepSecondaryText.setVisibility(VISIBLE);
     adjustBannerTextVerticalBias(0.65f);
@@ -1007,7 +1015,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     loadTextWith(secondaryBannerText, stepSecondaryText);
   }
 
-  private void loadTextWith(BannerText bannerText, TextView textView) {
+  private void loadTextWith(@NonNull BannerText bannerText, TextView textView) {
     InstructionLoader instructionLoader = createInstructionLoader(textView, bannerText);
     if (instructionLoader != null) {
       instructionLoader.loadInstruction();
@@ -1018,8 +1026,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * Looks to see if we have a new maneuver modifier or type.
    * Updates new maneuver image if one is found.
    */
-  private void updateManeuverView(String maneuverViewType, String maneuverViewModifier,
-      @Nullable Double roundaboutAngle, String drivingSide) {
+  private void updateManeuverView(@NonNull String maneuverViewType, String maneuverViewModifier,
+                                  @Nullable Double roundaboutAngle, String drivingSide) {
     maneuverView.setManeuverTypeAndModifier(maneuverViewType, maneuverViewModifier);
     if (roundaboutAngle != null) {
       maneuverView.setRoundaboutAngle(roundaboutAngle.floatValue());
@@ -1033,7 +1041,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param model provides distance text
    */
-  private void updateDistanceText(InstructionModel model) {
+  private void updateDistanceText(@NonNull InstructionModel model) {
     if (newDistanceText(model)) {
       distanceText(model);
     } else if (stepDistanceText.getText().toString().isEmpty()) {
@@ -1062,7 +1070,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param model to provide the current steps and unit type
    */
-  private void updateInstructionList(InstructionModel model) {
+  private void updateInstructionList(@NonNull InstructionModel model) {
     RouteProgress routeProgress = model.retrieveProgress();
     boolean isListShowing = instructionListLayout.getVisibility() == VISIBLE;
     rvInstructions.stopScroll();
@@ -1076,7 +1084,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @return the driving side
    */
-  private String getDrivingSide(String drivingSideFallback) {
+  @Nullable
+  private String getDrivingSide(@Nullable String drivingSideFallback) {
     if (currentStep != null) {
       return currentStep.drivingSide();
     } else if (drivingSideFallback != null) {
@@ -1086,6 +1095,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
+  @NonNull
   private Animation.AnimationListener getInstructionListAnimationListener() {
     return new Animation.AnimationListener() {
       @Override
