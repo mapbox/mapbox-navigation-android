@@ -12,9 +12,7 @@ import com.mapbox.navigation.ui.internal.utils.MapUtils
 
 /**
  * This layer handles the creation and customization of a [FillLayer]
- * to highlight the footprint of an individual building. For now, this layer is only
- * compatible with the Mapbox Streets v7 vector tile source because that's what the default
- * Navigation UI SDK styles use.
+ * to highlight the footprint of an individual building.
  */
 class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
 
@@ -37,8 +35,8 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
                 mapboxMap.getStyle { style ->
                     val buildingFootprintLayer = style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
                     buildingFootprintLayer?.setFilter(
-                            buildingLayerSupport.getBuildingFilterExpression(newLatLng,
-                                    buildingLayerSupport.getBuildingId(mapboxMap, queryLatLng)))
+                            buildingLayerSupport.getBuildingFilterExpression(
+                                    buildingLayerSupport.getBuildingId(mapboxMap, newLatLng)))
                 }
             }
         }
@@ -75,8 +73,6 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
             buildingLayerSupport.updateLayerProperty(fillOpacity(value), mapboxMap, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
         }
 
-    private val buildingLayerSupport = BuildingLayerSupport()
-
     /**
      * Toggles the visibility of the building footprint highlight layer.
      *
@@ -84,8 +80,7 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
      */
     fun updateVisibility(visible: Boolean) {
         mapboxMap.getStyle { style ->
-            val buildingFootprintFillLayer = style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
-            if (buildingFootprintFillLayer == null && visible) {
+            if (style.getLayerAs<FillLayer>(HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID) == null && visible) {
                 addFootprintHighlightFillLayerToMap(queryLatLng)
             } else buildingLayerSupport.updateLayerProperty(visibility(
                     if (visible) VISIBLE else NONE), mapboxMap, HIGHLIGHTED_BUILDING_FOOTPRINT_LAYER_ID)
@@ -103,7 +98,7 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
             buildingFootprintFillLayer.apply {
                 sourceLayer = BuildingLayerSupport.BUILDING_LAYER_ID
                 queryLatLng?.let {
-                    setFilter(buildingLayerSupport.getBuildingFilterExpression(it,
+                    setFilter(buildingLayerSupport.getBuildingFilterExpression(
                             buildingLayerSupport.getBuildingId(mapboxMap, queryLatLng)))
                 }
                 withProperties(
@@ -116,6 +111,7 @@ class BuildingFootprintHighlightLayer(private val mapboxMap: MapboxMap) {
     }
 
     companion object {
+        private val buildingLayerSupport = BuildingLayerSupport()
 
         /**
          * A constant String that serves as a layer id for the [FillLayer] that

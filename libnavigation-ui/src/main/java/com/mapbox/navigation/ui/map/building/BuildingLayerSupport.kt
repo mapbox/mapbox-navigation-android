@@ -2,17 +2,15 @@ package com.mapbox.navigation.ui.map.building
 
 import android.graphics.Color
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.expressions.Expression.all
-import com.mapbox.mapboxsdk.style.expressions.Expression.distance
 import com.mapbox.mapboxsdk.style.expressions.Expression.eq
 import com.mapbox.mapboxsdk.style.expressions.Expression.get
 import com.mapbox.mapboxsdk.style.expressions.Expression.id
 import com.mapbox.mapboxsdk.style.expressions.Expression.literal
-import com.mapbox.mapboxsdk.style.expressions.Expression.lt
+import com.mapbox.mapboxsdk.style.expressions.Expression.toString
 import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.PropertyValue
 
@@ -21,8 +19,6 @@ import com.mapbox.mapboxsdk.style.layers.PropertyValue
  * and [BuildingFootprintHighlightLayer] classes which show
  * [com.mapbox.mapboxsdk.style.layers.FillExtrusionLayer] 3D buildings
  * and [com.mapbox.mapboxsdk.style.layers.FillLayer] polygons, respectively.
- * For now, this class is only compatible with the Mapbox Streets v7 vector tile source
- * because that's what the default Navigation UI SDK styles use.
  */
 internal class BuildingLayerSupport {
 
@@ -34,14 +30,11 @@ internal class BuildingLayerSupport {
      * expression and which building is closest to the coordinate.
      * @return an [Expression.all] expression
      */
-    fun getBuildingFilterExpression(queryLatLng: LatLng, buildingInt: Int): Expression {
+    fun getBuildingFilterExpression(buildingString: String): Expression {
         return all(
                 eq(get("extrude"), "true"),
-                eq(get("type"), "building"),
                 eq(get("underground"), "false"),
-                eq(id(), literal(buildingInt)),
-                lt(distance(Point.fromLngLat(queryLatLng.longitude, queryLatLng.latitude)),
-                        literal(QUERY_DISTANCE_MAX_METERS))
+                eq(toString(id()), toString(literal(buildingString)))
         )
     }
 
@@ -55,17 +48,16 @@ internal class BuildingLayerSupport {
      * coordinate.
      * @return the building ID as an integer
      */
-    fun getBuildingId(mapboxMap: MapboxMap, queryLatLng: LatLng?): Int {
+    fun getBuildingId(mapboxMap: MapboxMap, queryLatLng: LatLng?): String {
         queryLatLng?.let { queryCoordinate ->
-            val renderedBuildingFootprintFeatures = mapboxMap.queryRenderedFeatures(
-                    mapboxMap.projection.toScreenLocation(queryCoordinate), BUILDING_LAYER_ID)
+            val renderedBuildingFootprintFeatures = mapboxMap.queryRenderedFeatures(mapboxMap.projection.toScreenLocation(queryCoordinate), BUILDING_LAYER_ID)
             if (renderedBuildingFootprintFeatures.isNotEmpty()) {
-                renderedBuildingFootprintFeatures[0].id()?.let { id ->
-                    return Integer.valueOf(id)
+                renderedBuildingFootprintFeatures[0].id()?.let {
+                    return it
                 }
             }
         }
-        return 0
+        return DEFAULT_BUILDING_ID
     }
 
     /**
@@ -83,6 +75,6 @@ internal class BuildingLayerSupport {
         const val BUILDING_LAYER_ID = "building"
         const val DEFAULT_HIGHLIGHT_COLOR = Color.RED
         const val DEFAULT_HIGHLIGHT_OPACITY = 1f
-        const val QUERY_DISTANCE_MAX_METERS = 20f
+        private const val DEFAULT_BUILDING_ID = "0"
     }
 }
