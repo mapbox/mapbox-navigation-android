@@ -16,20 +16,21 @@ class NavigationSymbolManager {
 
   static final String MAPBOX_NAVIGATION_MARKER_NAME = "mapbox-navigation-marker";
   private final List<Symbol> mapMarkersSymbols = new ArrayList<>();
+  @NonNull
   private final SymbolManager symbolManager;
 
-  NavigationSymbolManager(SymbolManager symbolManager) {
+  NavigationSymbolManager(@NonNull SymbolManager symbolManager) {
     this.symbolManager = symbolManager;
     symbolManager.setIconAllowOverlap(true);
     symbolManager.setIconIgnorePlacement(true);
   }
 
-  void addDestinationMarkerFor(Point position) {
+  void addDestinationMarkerFor(@NonNull Point position) {
     SymbolOptions options = createSymbolOptionsFor(position);
     createSymbolFrom(options);
   }
 
-  void addCustomSymbolFor(SymbolOptions options) {
+  void addCustomSymbolFor(@NonNull SymbolOptions options) {
     createSymbolFrom(options);
   }
 
@@ -41,7 +42,7 @@ class NavigationSymbolManager {
   }
 
   @NonNull
-  private SymbolOptions createSymbolOptionsFor(Point position) {
+  private SymbolOptions createSymbolOptionsFor(@NonNull Point position) {
     LatLng markerPosition = new LatLng(position.latitude(),
       position.longitude());
     return new SymbolOptions()
@@ -49,7 +50,7 @@ class NavigationSymbolManager {
       .withIconImage(MAPBOX_NAVIGATION_MARKER_NAME);
   }
 
-  private void createSymbolFrom(SymbolOptions options) {
+  private void createSymbolFrom(@NonNull SymbolOptions options) {
     Symbol symbol = symbolManager.create(options);
     mapMarkersSymbols.add(symbol);
   }

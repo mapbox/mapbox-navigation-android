@@ -1,10 +1,12 @@
 package com.mapbox.navigation.ui.voice;
 
+import androidx.annotation.NonNull;
+
 class SpeechAudioFocusManager {
 
   private final AudioFocusDelegate audioFocusDelegate;
 
-  SpeechAudioFocusManager(AudioFocusDelegateProvider provider) {
+  SpeechAudioFocusManager(@NonNull AudioFocusDelegateProvider provider) {
     audioFocusDelegate = provider.retrieveAudioFocusDelegate();
   }
 

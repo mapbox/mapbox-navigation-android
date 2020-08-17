@@ -3,6 +3,9 @@ package com.mapbox.navigation.ui.voice;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.speech.v1.MapboxSpeech;
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider;
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts;
@@ -34,10 +37,11 @@ public class VoiceInstructionLoader {
   private List<String> urlsCached;
   private final Cache cache;
   private final Context context;
+  @Nullable
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
   private UrlSkuTokenProvider urlSkuTokenProvider;
 
-  public VoiceInstructionLoader(Context context, String accessToken, Cache cache) {
+  public VoiceInstructionLoader(@NonNull Context context, String accessToken, Cache cache) {
     this.connectivityStatus = new ConnectivityStatusProvider(context);
     this.accessToken = accessToken;
     this.context = context;
@@ -57,6 +61,7 @@ public class VoiceInstructionLoader {
     this.connectivityStatus = connectivityStatus;
   }
 
+  @NonNull
   public List<String> evictVoiceInstructions() {
     List<String> urlsToRemove = new ArrayList<>();
     for (int i = 0; i < urlsCached.size() && i < VOICE_INSTRUCTIONS_TO_EVICT_THRESHOLD; i++) {
@@ -79,7 +84,7 @@ public class VoiceInstructionLoader {
     return urlsToRemove;
   }
 
-  public void cacheInstructions(List<String> instructions) {
+  public void cacheInstructions(@NonNull List<String> instructions) {
     for (String instruction : instructions) {
       cacheInstruction(instruction);
     }
@@ -100,7 +105,7 @@ public class VoiceInstructionLoader {
     }
   }
 
-  void requestInstruction(String instruction, String textType, Callback<ResponseBody> callback) {
+  void requestInstruction(@NonNull String instruction, String textType, Callback<ResponseBody> callback) {
     if (context != null && !cache.isClosed() && mapboxSpeechBuilder != null) {
       MapboxSpeech mapboxSpeech = mapboxSpeechBuilder
         .instruction(instruction)
@@ -126,12 +131,13 @@ public class VoiceInstructionLoader {
     urlsCached.add(url);
   }
 
-  private void cacheInstruction(String instruction) {
+  private void cacheInstruction(@NonNull String instruction) {
     if (!TextUtils.isEmpty(instruction)) {
       requestInstruction(instruction, SSML_TEXT_TYPE, new InstructionCacheCallback(this));
     }
   }
 
+  @NonNull
   private Interceptor provideOfflineCacheInterceptor() {
     return new Interceptor() {
       @NotNull

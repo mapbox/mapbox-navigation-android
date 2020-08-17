@@ -98,7 +98,7 @@ class SummaryModelTest : BaseTest() {
     }
 
     @Throws(Exception::class)
-    private fun buildRouteProgress(): RouteProgress? {
+    private fun buildRouteProgress(): RouteProgress {
         val route = buildTestDirectionsRoute()
         return buildRouteProgress(route, 100.0, 100.0, 100.0, 0, 0)
     }

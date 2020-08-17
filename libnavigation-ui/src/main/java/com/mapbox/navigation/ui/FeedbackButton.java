@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -18,6 +19,7 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
  */
 public class FeedbackButton extends ConstraintLayout implements NavigationButton {
   private FloatingActionButton feedbackFab;
+  @Nullable
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
   private int primaryColor;

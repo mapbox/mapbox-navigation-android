@@ -2,6 +2,9 @@ package com.mapbox.navigation.ui.instruction;
 
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 import java.util.ArrayList;
@@ -44,7 +47,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
    * @param bannerComponents object holding the abbreviation information
    * @param index in the list of BannerComponentNodes
    */
-  private void addPriorityInfo(BannerComponents bannerComponents, int index) {
+  private void addPriorityInfo(@NonNull BannerComponents bannerComponents, int index) {
     Integer abbreviationPriority = bannerComponents.abbreviationPriority();
     if (abbreviations.get(abbreviationPriority) == null) {
       abbreviations.put(abbreviationPriority, new ArrayList<Integer>());
@@ -60,7 +63,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
    * @param bannerComponentNodes containing the text to construct
    * @return the properly abbreviated string that will fit in the TextView
    */
-  private String abbreviateBannerText(TextView textView, List<BannerComponentNode>
+  private String abbreviateBannerText(@NonNull TextView textView, @NonNull List<BannerComponentNode>
     bannerComponentNodes) {
     String bannerText = join(bannerComponentNodes);
 
@@ -74,8 +77,8 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     return bannerText;
   }
 
-  private String abbreviateUntilTextFits(TextView textView, String startingText,
-                                         List<BannerComponentNode> bannerComponentNodes) {
+  private String abbreviateUntilTextFits(@NonNull TextView textView, String startingText,
+                                         @NonNull List<BannerComponentNode> bannerComponentNodes) {
     int currAbbreviationPriority = 0;
     int maxAbbreviationPriority = Collections.max(abbreviations.keySet());
     String bannerText = startingText;
@@ -93,7 +96,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     return bannerText;
   }
 
-  private boolean shouldKeepAbbreviating(TextView textView, String bannerText,
+  private boolean shouldKeepAbbreviating(@NonNull TextView textView, String bannerText,
                                          int currAbbreviationPriority, int maxAbbreviationPriority) {
 
     boolean textFits = textViewUtils.textFits(textView, bannerText);
@@ -101,8 +104,8 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     return !textFits && abbreviationPrioritiesLeft;
   }
 
-  private boolean abbreviateAtAbbreviationPriority(List<BannerComponentNode> bannerComponentNodes,
-                                                   List<Integer> indices) {
+  private boolean abbreviateAtAbbreviationPriority(@NonNull List<BannerComponentNode> bannerComponentNodes,
+                                                   @Nullable List<Integer> indices) {
     if (indices == null || indices.isEmpty()) {
       return false;
     }
@@ -114,11 +117,12 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     return true;
   }
 
-  private void abbreviate(BannerComponentNode bannerComponentNode) {
+  private void abbreviate(@NonNull BannerComponentNode bannerComponentNode) {
     ((AbbreviationNode) bannerComponentNode).setAbbreviate(true);
   }
 
-  private String join(List<BannerComponentNode> tokens) {
+  @NonNull
+  private String join(@NonNull List<BannerComponentNode> tokens) {
     StringBuilder stringBuilder = new StringBuilder();
     Iterator<BannerComponentNode> iterator = tokens.iterator();
     BannerComponentNode bannerComponentNode;
@@ -139,15 +143,16 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
     return stringBuilder.toString();
   }
 
+  @NonNull
   @Override
-  AbbreviationNode setupNode(BannerComponents components, int index, int startIndex, String
+  AbbreviationNode setupNode(@NonNull BannerComponents components, int index, int startIndex, String
     modifier) {
     addPriorityInfo(components, index);
     return new AbbreviationNode(components, startIndex);
   }
 
   @Override
-  void preProcess(TextView textView, List<BannerComponentNode> bannerComponentNodes) {
+  void preProcess(@NonNull TextView textView, @NonNull List<BannerComponentNode> bannerComponentNodes) {
     String text = abbreviateBannerText(textView, bannerComponentNodes);
     textView.setText(text);
   }
@@ -162,6 +167,7 @@ class AbbreviationCreator extends NodeCreator<AbbreviationCreator.AbbreviationNo
       super(bannerComponents, startIndex);
     }
 
+    @NonNull
     @Override
     public String toString() {
       return abbreviate ? bannerComponents.abbreviation() : bannerComponents.text();

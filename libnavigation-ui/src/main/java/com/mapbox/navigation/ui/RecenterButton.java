@@ -25,6 +25,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
  * to be shown.
  */
 public class RecenterButton extends ConstraintLayout implements NavigationButton {
+  @Nullable
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
   private Animation slideUpBottom;
 

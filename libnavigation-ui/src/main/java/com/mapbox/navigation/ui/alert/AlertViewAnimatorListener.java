@@ -2,10 +2,13 @@ package com.mapbox.navigation.ui.alert;
 
 import android.animation.Animator;
 
+import androidx.annotation.NonNull;
+
 import java.lang.ref.WeakReference;
 
 class AlertViewAnimatorListener implements Animator.AnimatorListener {
 
+  @NonNull
   private final WeakReference<AlertView> alertViewWeakReference;
 
   AlertViewAnimatorListener(AlertView alertView) {

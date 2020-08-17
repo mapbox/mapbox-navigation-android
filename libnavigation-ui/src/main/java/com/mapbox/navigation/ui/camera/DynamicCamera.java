@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.camera;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.mapbox.api.directions.v5.models.LegStep;
 import com.mapbox.geojson.Point;
@@ -27,7 +28,9 @@ public class DynamicCamera extends SimpleCamera {
   private static final double MAX_CAMERA_ZOOM = 16d;
   private static final double MIN_CAMERA_ZOOM = 12d;
 
+  @Nullable
   private MapboxMap mapboxMap;
+  @Nullable
   private LegStep currentStep;
   private boolean hasPassedLowAlertLevel;
   private boolean hasPassedMediumAlertLevel;
@@ -108,7 +111,7 @@ public class DynamicCamera extends SimpleCamera {
    * @param routeInformation for current location and progress
    * @return zoom within set min / max bounds
    */
-  private double createZoom(RouteInformation routeInformation) {
+  private double createZoom(@NonNull RouteInformation routeInformation) {
     CameraPosition position = createCameraPosition(routeInformation.getLocation(), routeInformation.getRouteProgress());
     if (position == null) {
       return DEFAULT_ZOOM;
@@ -136,7 +139,8 @@ public class DynamicCamera extends SimpleCamera {
    * @param routeProgress for upcoming maneuver location
    * @return camera position that encompasses both locations
    */
-  private CameraPosition createCameraPosition(Location location, RouteProgress routeProgress) {
+  @Nullable
+  private CameraPosition createCameraPosition(Location location, @NonNull RouteProgress routeProgress) {
     LegStep upComingStep = routeProgress.getCurrentLegProgress().getUpcomingStep();
     if (upComingStep != null) {
       Point stepManeuverPoint = upComingStep.maneuver().location();
@@ -175,7 +179,7 @@ public class DynamicCamera extends SimpleCamera {
    * @param routeProgress provides updated step information
    * @return true if new step, false if not
    */
-  private boolean isNewStep(RouteProgress routeProgress) {
+  private boolean isNewStep(@NonNull RouteProgress routeProgress) {
     boolean isNewStep = currentStep == null
       || !currentStep.equals(routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep());
     currentStep = routeProgress.getCurrentLegProgress().getCurrentStepProgress().getStep();
@@ -191,11 +195,11 @@ public class DynamicCamera extends SimpleCamera {
     }
   }
 
-  private boolean validLocationAndProgress(RouteInformation routeInformation) {
+  private boolean validLocationAndProgress(@NonNull RouteInformation routeInformation) {
     return routeInformation.getLocation() != null && routeInformation.getRouteProgress() != null;
   }
 
-  private boolean shouldUpdateZoom(RouteInformation routeInformation) {
+  private boolean shouldUpdateZoom(@NonNull RouteInformation routeInformation) {
     RouteProgress progress = routeInformation.getRouteProgress();
     return isForceUpdate()
       || isNewStep(progress)
@@ -205,7 +209,7 @@ public class DynamicCamera extends SimpleCamera {
       || progress.getCurrentState() == RouteProgressState.ROUTE_UNCERTAIN;
   }
 
-  private boolean isLowAlert(RouteProgress progress) {
+  private boolean isLowAlert(@NonNull RouteProgress progress) {
     if (!hasPassedLowAlertLevel) {
       double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
       double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
@@ -219,7 +223,7 @@ public class DynamicCamera extends SimpleCamera {
     return false;
   }
 
-  private boolean isMediumAlert(RouteProgress progress) {
+  private boolean isMediumAlert(@NonNull RouteProgress progress) {
     if (!hasPassedMediumAlertLevel) {
       double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
       double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();
@@ -233,7 +237,7 @@ public class DynamicCamera extends SimpleCamera {
     return false;
   }
 
-  private boolean isHighAlert(RouteProgress progress) {
+  private boolean isHighAlert(@NonNull RouteProgress progress) {
     if (!hasPassedHighAlertLevel) {
       double durationRemaining = progress.getCurrentLegProgress().getCurrentStepProgress().getDurationRemaining();
       double stepDuration = progress.getCurrentLegProgress().getCurrentStepProgress().getStep().duration();

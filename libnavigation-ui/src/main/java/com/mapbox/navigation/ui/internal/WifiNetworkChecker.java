@@ -6,9 +6,10 @@ import java.util.HashMap;
 
 class WifiNetworkChecker {
 
+  @NonNull
   private final HashMap<Integer, Boolean> statusMap;
 
-  WifiNetworkChecker(HashMap<Integer, Boolean> statusMap) {
+  WifiNetworkChecker(@NonNull HashMap<Integer, Boolean> statusMap) {
     this.statusMap = statusMap;
     initialize(statusMap);
   }
@@ -22,7 +23,7 @@ class WifiNetworkChecker {
     return isConnectionFast;
   }
 
-  private void initialize(HashMap<Integer, Boolean> statusMap) {
+  private void initialize(@NonNull HashMap<Integer, Boolean> statusMap) {
     statusMap.put(5, true);
     statusMap.put(4, true);
     statusMap.put(3, true);

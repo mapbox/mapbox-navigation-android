@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.listeners;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
 
 /**
@@ -24,5 +26,6 @@ public interface SpeechAnnouncementListener {
    * @param announcement about to be announced
    * @return speech announcement to be played; null if should be ignored
    */
+  @NonNull
   VoiceInstructions willVoice(VoiceInstructions announcement);
 }

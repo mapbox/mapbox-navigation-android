@@ -60,6 +60,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private static final int GRID_SPAN_GUIDANCE_LAYOUT = 3;
   private static final int GRID_SPAN_NAVIGATION_LAYOUT = 3;
 
+  @Nullable
   private FeedbackBottomSheetListener feedbackBottomSheetListener;
   private TextView feedbackBottomSheetTitleText;
   private ImageButton cancelBtn;
@@ -69,6 +70,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private RecyclerView navigationIssueItems;
   private FeedbackAdapter notificationIssueAdapter;
   private RelativeLayout feedbackSubTypesLayout;
+  @Nullable
   private FeedbackSubTypeAdapter feedbackSubTypeAdapter;
   private RecyclerView feedbackSubTypeItems;
   private ProgressBar feedbackProgressBar;
@@ -76,17 +78,21 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private AppCompatButton reportIssueBtn;
   private @FeedbackFlowType int feedbackFlowType = FEEDBACK_MAIN_FLOW;
   private long duration;
+  @Nullable
   private CountDownTimer timer = null;
   private FeedbackItem selectedFeedbackItem;
   private Map<String, List<FeedbackSubTypeItem>> feedbackSubTypeMap;
   private Class<? extends FeedbackBottomSheetListener> listenerClass;
+  @Nullable
   private DismissCommand dismissCommand = null;
 
+  @NonNull
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 long duration) {
     return newInstance(feedbackBottomSheetListener, FEEDBACK_MAIN_FLOW, duration);
   }
 
+  @NonNull
   public static FeedbackBottomSheet newInstance(FeedbackBottomSheetListener feedbackBottomSheetListener,
                                                 @FeedbackFlowType int flowType, long duration) {
     FeedbackBottomSheet feedbackBottomSheet = new FeedbackBottomSheet();
@@ -210,7 +216,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     this.duration = duration;
   }
 
-  private void bind(View bottomSheetView) {
+  private void bind(@NonNull View bottomSheetView) {
     feedbackBottomSheetTitleText = bottomSheetView.findViewById(R.id.feedbackBottomSheetTitleText);
     cancelBtn = bottomSheetView.findViewById(R.id.cancelBtn);
 
@@ -307,6 +313,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     timer.start();
   }
 
+  @NonNull
   @SuppressLint("WrongConstant")
   private List<FeedbackItem> buildGuidanceIssueList() {
     List<FeedbackItem> list = new ArrayList<>();
@@ -327,9 +334,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private FeedbackClickListener.ClickCallback guidanceIssueClickCallback = new FeedbackClickListener.ClickCallback() {
     @Override
-    public void onFeedbackItemClick(ImageView view, int feedbackPosition) {
+    public void onFeedbackItemClick(@Nullable ImageView view, int feedbackPosition) {
       if (view != null) {
         view.setPressed(!view.isPressed());
       }
@@ -338,6 +346,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     }
   };
 
+  @NonNull
   @SuppressLint("WrongConstant")
   private List<FeedbackItem> buildNavigationIssueList() {
     List<FeedbackItem> list = new ArrayList<>();
@@ -358,9 +367,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private FeedbackClickListener.ClickCallback navigationIssueClickCallback = new FeedbackClickListener.ClickCallback() {
     @Override
-    public void onFeedbackItemClick(ImageView view, int feedbackPosition) {
+    public void onFeedbackItemClick(@Nullable ImageView view, int feedbackPosition) {
       if (view != null) {
         view.setPressed(!view.isPressed());
       }
@@ -369,7 +379,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     }
   };
 
-  private void onFeedbackSelected(FeedbackItem feedbackItem) {
+  private void onFeedbackSelected(@NonNull FeedbackItem feedbackItem) {
     if (feedbackFlowType == FEEDBACK_MAIN_FLOW
         || feedbackItem.getFeedbackType().equals(FeedbackEvent.POSITIONING_ISSUE)) {
       feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
@@ -390,7 +400,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     feedbackSubTypesLayout.setVisibility(View.VISIBLE);
   }
 
-  private void initFeedbackIssueDetailRecyclerView(FeedbackItem feedbackItem) {
+  private void initFeedbackIssueDetailRecyclerView(@NonNull FeedbackItem feedbackItem) {
     feedbackSubTypeAdapter = new FeedbackSubTypeAdapter(
       feedbackSubTypeMap.get(feedbackItem.getFeedbackType()), descriptionItemClickListener);
     feedbackSubTypeItems.setAdapter(feedbackSubTypeAdapter);
@@ -398,6 +408,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     feedbackSubTypeItems.setLayoutManager(new LinearLayoutManager(this.getContext()));
   }
 
+  @NonNull
   private FeedbackSubTypeAdapter.OnSubTypeItemClickListener descriptionItemClickListener =
     new FeedbackSubTypeAdapter.OnSubTypeItemClickListener() {
       @Override
@@ -414,6 +425,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
       }
     };
 
+  @NonNull
   private Map<String, List<FeedbackSubTypeItem>> buildFeedbackSubTypeMap() {
     final Map<String, List<FeedbackSubTypeItem>> map = new HashMap<>();
 
@@ -426,6 +438,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return map;
   }
 
+  @NonNull
   private List<FeedbackSubTypeItem> subTypeOfIncorrectVisualGuidance() {
     List<FeedbackSubTypeItem> list = new ArrayList<>();
 
@@ -457,6 +470,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private List<FeedbackSubTypeItem> subTypeOfIncorrectAudioGuidance() {
     List<FeedbackSubTypeItem> list = new ArrayList<>();
 
@@ -476,6 +490,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private List<FeedbackSubTypeItem> subTypeOfRoutingError() {
     List<FeedbackSubTypeItem> list = new ArrayList<>();
 
@@ -498,6 +513,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private List<FeedbackSubTypeItem> subTypeOfNotAllowed() {
     List<FeedbackSubTypeItem> list = new ArrayList<>();
 
@@ -517,6 +533,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
     return list;
   }
 
+  @NonNull
   private List<FeedbackSubTypeItem> subTypeOfRoadClosed() {
     List<FeedbackSubTypeItem> list = new ArrayList<>();
 

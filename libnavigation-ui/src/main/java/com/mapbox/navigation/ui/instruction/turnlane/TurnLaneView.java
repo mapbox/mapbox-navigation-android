@@ -29,15 +29,15 @@ public class TurnLaneView extends AppCompatImageView {
   private static final int SCALE_NORMAL = 1;
   private final TurnLaneDrawableMap laneDrawableMap = new TurnLaneDrawableMap();
 
-  public TurnLaneView(Context context) {
+  public TurnLaneView(@NonNull Context context) {
     super(context);
   }
 
-  public TurnLaneView(Context context, @Nullable AttributeSet attrs) {
+  public TurnLaneView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
   }
 
-  public TurnLaneView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public TurnLaneView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
 
@@ -78,7 +78,7 @@ public class TurnLaneView extends AppCompatImageView {
   }
 
   @Nullable
-  private Integer findDrawableResId(TurnLaneViewData drawData) {
+  private Integer findDrawableResId(@NonNull TurnLaneViewData drawData) {
     String drawMethod = drawData.getDrawMethod();
     Integer resId = laneDrawableMap.get(drawMethod);
     if (resId == null) {
@@ -88,7 +88,7 @@ public class TurnLaneView extends AppCompatImageView {
   }
 
   private void drawFor(@NonNull BannerComponents lane,
-      TurnLaneViewData drawData, Integer resId, @StyleRes int turnLaneViewStyle) {
+                       @NonNull TurnLaneViewData drawData, Integer resId, @StyleRes int turnLaneViewStyle) {
     final ContextThemeWrapper contextThemeWrapper =
         new ContextThemeWrapper(getContext(), turnLaneViewStyle);
     final Drawable turnLaneDrawable = VectorDrawableCompat.create(

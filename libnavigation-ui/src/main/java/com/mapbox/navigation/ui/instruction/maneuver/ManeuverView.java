@@ -33,8 +33,10 @@ import static com.mapbox.navigation.trip.notification.internal.maneuver.Maneuver
  */
 public class ManeuverView extends View {
 
+  @Nullable
   @StepManeuver.StepManeuverType
   private String maneuverType = null;
+  @Nullable
   @ManeuverModifier.Type
   private String maneuverModifier = null;
   @ColorInt
@@ -42,6 +44,7 @@ public class ManeuverView extends View {
   @ColorInt
   private int secondaryColor;
   private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
+  @Nullable
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;
   private String drivingSide = ManeuverModifier.RIGHT;
@@ -173,7 +176,7 @@ public class ManeuverView extends View {
   }
 
   @Override
-  protected void onDraw(Canvas canvas) {
+  protected void onDraw(@NonNull Canvas canvas) {
     super.onDraw(canvas);
 
     // TODO Abstract this "debug" code somehow?
@@ -204,7 +207,7 @@ public class ManeuverView extends View {
     typedArray.recycle();
   }
 
-  private boolean isNewTypeOrModifier(String maneuverType, String maneuverModifier) {
+  private boolean isNewTypeOrModifier(@Nullable String maneuverType, String maneuverModifier) {
     if (maneuverType == null) {
       return false;
     }
@@ -222,7 +225,7 @@ public class ManeuverView extends View {
   }
 
   @Nullable
-  private String checkManeuverModifier(String maneuverType, String maneuverModifier) {
+  private String checkManeuverModifier(@NonNull String maneuverType, @Nullable String maneuverModifier) {
     if (!maneuverType.contentEquals(StepManeuver.ARRIVE) && maneuverModifier != null) {
       maneuverType = null;
     }

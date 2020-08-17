@@ -25,15 +25,25 @@ import com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener;
  */
 class NavigationViewEventDispatcher {
 
+  @Nullable
   private RouteProgressObserver routeProgressObserver;
+  @Nullable
   private LocationObserver locationObserver;
+  @Nullable
   private FeedbackListener feedbackListener;
+  @Nullable
   private NavigationListener navigationListener;
+  @Nullable
   private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
+  @Nullable
   private InstructionListListener instructionListListener;
+  @Nullable
   private SpeechAnnouncementListener speechAnnouncementListener;
+  @Nullable
   private BannerInstructionsListener bannerInstructionsListener;
+  @Nullable
   private ArrivalObserver arrivalObserver;
+  @Nullable
   private MapboxNavigation navigation;
 
   /**
@@ -41,7 +51,10 @@ class NavigationViewEventDispatcher {
    *
    * @param navigationViewOptions that contains all listeners to attach
    */
-  void initializeListeners(NavigationViewOptions navigationViewOptions, NavigationViewModel navigationViewModel) {
+  void initializeListeners(
+          @NonNull NavigationViewOptions navigationViewOptions,
+          @NonNull NavigationViewModel navigationViewModel
+  ) {
     assignFeedbackListener(navigationViewOptions.feedbackListener());
     assignNavigationListener(navigationViewOptions.navigationListener(), navigationViewModel);
     assignBottomSheetCallback(navigationViewOptions.bottomSheetCallback());
@@ -73,7 +86,7 @@ class NavigationViewEventDispatcher {
   }
 
   void assignNavigationListener(@Nullable NavigationListener navigationListener,
-                                NavigationViewModel navigationViewModel) {
+                                @NonNull NavigationViewModel navigationViewModel) {
     this.navigationListener = navigationListener;
     if (navigationListener != null && navigationViewModel.isRunning()) {
       navigationListener.onNavigationRunning();
@@ -132,7 +145,7 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  void onBottomSheetStateChanged(View bottomSheet, int newState) {
+  void onBottomSheetStateChanged(@NonNull View bottomSheet, int newState) {
     if (bottomSheetCallback != null) {
       bottomSheetCallback.onStateChanged(bottomSheet, newState);
     }
@@ -159,15 +172,15 @@ class NavigationViewEventDispatcher {
   }
 
   private void assignRouteProgressChangeObserver(
-    NavigationViewOptions navigationViewOptions,
-    @NonNull MapboxNavigation navigation) {
+          @NonNull NavigationViewOptions navigationViewOptions,
+          @NonNull MapboxNavigation navigation) {
     this.routeProgressObserver = navigationViewOptions.routeProgressObserver();
     if (routeProgressObserver != null) {
       navigation.registerRouteProgressObserver(routeProgressObserver);
     }
   }
 
-  private void assignLocationObserver(NavigationViewOptions navigationViewOptions,
+  private void assignLocationObserver(@NonNull NavigationViewOptions navigationViewOptions,
                                       @NonNull MapboxNavigation navigation) {
     this.locationObserver = navigationViewOptions.locationObserver();
     if (locationObserver != null) {
@@ -175,7 +188,7 @@ class NavigationViewEventDispatcher {
     }
   }
 
-  private void assignArrivalObserver(NavigationViewOptions navigationViewOptions,
+  private void assignArrivalObserver(@NonNull NavigationViewOptions navigationViewOptions,
                                      @NonNull MapboxNavigation navigation) {
     arrivalObserver = navigationViewOptions.arrivalObserver();
     if (arrivalObserver != null) {

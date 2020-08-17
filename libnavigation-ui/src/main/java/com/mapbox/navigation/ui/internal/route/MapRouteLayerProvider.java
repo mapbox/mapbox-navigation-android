@@ -3,6 +3,9 @@ package com.mapbox.navigation.ui.internal.route;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
@@ -46,7 +49,8 @@ import static com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SO
 
 public class MapRouteLayerProvider {
 
-  public LineLayer initializePrimaryRouteCasingLayer(Style style, float routeScale, int routeCasingColor) {
+  @Nullable
+  public LineLayer initializePrimaryRouteCasingLayer(@NonNull Style style, float routeScale, int routeCasingColor) {
     LineLayer primaryCasingLayer = style.getLayerAs(PRIMARY_ROUTE_CASING_LAYER_ID);
     if (primaryCasingLayer != null) {
       style.removeLayer(primaryCasingLayer);
@@ -72,10 +76,11 @@ public class MapRouteLayerProvider {
     return primaryCasingLayer;
   }
 
+  @Nullable
   public LineLayer initializeAlternativeRouteCasingLayer(
-    Style style,
-    float alternativeRouteScale,
-    int alternativeRouteCasingColor) {
+          @NonNull Style style,
+          float alternativeRouteScale,
+          int alternativeRouteCasingColor) {
     LineLayer alternativeCasingLayer = style.getLayerAs(ALTERNATIVE_ROUTE_CASING_LAYER_ID);
     if (alternativeCasingLayer != null) {
       style.removeLayer(alternativeCasingLayer);
@@ -102,10 +107,11 @@ public class MapRouteLayerProvider {
     return alternativeCasingLayer;
   }
 
-  public LineLayer initializePrimaryRouteLayer(Style style,
-                                          boolean roundedLineCap,
-                                          float routeScale,
-                                          int routeDefaultColor) {
+  @Nullable
+  public LineLayer initializePrimaryRouteLayer(@NonNull Style style,
+                                               boolean roundedLineCap,
+                                               float routeScale,
+                                               int routeDefaultColor) {
     LineLayer primaryRouteLayer = style.getLayerAs(PRIMARY_ROUTE_LAYER_ID);
     if (primaryRouteLayer != null) {
       style.removeLayer(primaryRouteLayer);
@@ -137,10 +143,11 @@ public class MapRouteLayerProvider {
     return primaryRouteLayer;
   }
 
-  public LineLayer initializePrimaryRouteTrafficLayer(Style style,
-                                          boolean roundedLineCap,
-                                          float routeScale,
-                                          int routeDefaultColor) {
+  @Nullable
+  public LineLayer initializePrimaryRouteTrafficLayer(@NonNull Style style,
+                                                      boolean roundedLineCap,
+                                                      float routeScale,
+                                                      int routeDefaultColor) {
     LineLayer primaryRouteLayer = style.getLayerAs(PRIMARY_ROUTE_TRAFFIC_LAYER_ID);
     if (primaryRouteLayer != null) {
       style.removeLayer(primaryRouteLayer);
@@ -172,10 +179,11 @@ public class MapRouteLayerProvider {
     return primaryRouteLayer;
   }
 
-  public LineLayer initializeAlternativeRouteLayer(Style style,
-                                              boolean roundedLineCap,
-                                              float alternativeRouteScale,
-                                              int alternativeRouteDefaultColor) {
+  @Nullable
+  public LineLayer initializeAlternativeRouteLayer(@NonNull Style style,
+                                                   boolean roundedLineCap,
+                                                   float alternativeRouteScale,
+                                                   int alternativeRouteDefaultColor) {
     LineLayer alternativeRouteLayer = style.getLayerAs(ALTERNATIVE_ROUTE_LAYER_ID);
     if (alternativeRouteLayer != null) {
       style.removeLayer(alternativeRouteLayer);
@@ -207,8 +215,9 @@ public class MapRouteLayerProvider {
     return alternativeRouteLayer;
   }
 
-  public SymbolLayer initializeWayPointLayer(Style style, Drawable originIcon,
-                                        Drawable destinationIcon) {
+  @Nullable
+  public SymbolLayer initializeWayPointLayer(@NonNull Style style, Drawable originIcon,
+                                             Drawable destinationIcon) {
     SymbolLayer wayPointLayer = style.getLayerAs(WAYPOINT_LAYER_ID);
     if (wayPointLayer != null) {
       style.removeLayer(wayPointLayer);

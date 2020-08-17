@@ -3,6 +3,9 @@ package com.mapbox.navigation.ui.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 
 import static com.mapbox.navigation.ui.map.MapFpsDelegate.DEFAULT_MAX_FPS_THRESHOLD;
@@ -10,6 +13,7 @@ import static com.mapbox.navigation.ui.map.MapFpsDelegate.DEFAULT_MAX_FPS_THRESH
 class NavigationMapSettings implements Parcelable {
 
   private int cameraTrackingMode;
+  @Nullable
   private int[] currentPadding;
   private boolean shouldUseDefaultPadding;
   private int maxFps = DEFAULT_MAX_FPS_THRESHOLD;
@@ -34,6 +38,7 @@ class NavigationMapSettings implements Parcelable {
     this.currentPadding = currentPadding;
   }
 
+  @Nullable
   int[] retrieveCurrentPadding() {
     return currentPadding;
   }
@@ -86,7 +91,7 @@ class NavigationMapSettings implements Parcelable {
     return locationFpsEnabled;
   }
 
-  private NavigationMapSettings(Parcel in) {
+  private NavigationMapSettings(@NonNull Parcel in) {
     cameraTrackingMode = in.readInt();
     currentPadding = in.createIntArray();
     shouldUseDefaultPadding = in.readByte() != 0;
@@ -98,7 +103,7 @@ class NavigationMapSettings implements Parcelable {
   }
 
   @Override
-  public void writeToParcel(Parcel dest, int flags) {
+  public void writeToParcel(@NonNull Parcel dest, int flags) {
     dest.writeInt(cameraTrackingMode);
     dest.writeIntArray(currentPadding);
     dest.writeByte((byte) (shouldUseDefaultPadding ? 1 : 0));
@@ -115,11 +120,13 @@ class NavigationMapSettings implements Parcelable {
   }
 
   public static final Creator<NavigationMapSettings> CREATOR = new Creator<NavigationMapSettings>() {
+    @NonNull
     @Override
-    public NavigationMapSettings createFromParcel(Parcel in) {
+    public NavigationMapSettings createFromParcel(@NonNull Parcel in) {
       return new NavigationMapSettings(in);
     }
 
+    @NonNull
     @Override
     public NavigationMapSettings[] newArray(int size) {
       return new NavigationMapSettings[size];

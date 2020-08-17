@@ -3,6 +3,9 @@ package com.mapbox.navigation.ui;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 class NavigationViewInstanceState implements Parcelable {
 
   private int bottomSheetBehaviorState;
@@ -10,6 +13,7 @@ class NavigationViewInstanceState implements Parcelable {
   private boolean instructionViewVisible;
   private boolean isWayNameVisible;
   private boolean isMuted;
+  @Nullable
   private String wayNameText;
 
   NavigationViewInstanceState(int bottomSheetBehaviorState, int recenterButtonVisibility,
@@ -39,6 +43,7 @@ class NavigationViewInstanceState implements Parcelable {
     return isWayNameVisible;
   }
 
+  @Nullable
   String getWayNameText() {
     return wayNameText;
   }
@@ -47,7 +52,7 @@ class NavigationViewInstanceState implements Parcelable {
     return isMuted;
   }
 
-  private NavigationViewInstanceState(Parcel in) {
+  private NavigationViewInstanceState(@NonNull Parcel in) {
     bottomSheetBehaviorState = in.readInt();
     recenterButtonVisibility = in.readInt();
     instructionViewVisible = in.readByte() != 0;
@@ -57,7 +62,7 @@ class NavigationViewInstanceState implements Parcelable {
   }
 
   @Override
-  public void writeToParcel(Parcel dest, int flags) {
+  public void writeToParcel(@NonNull Parcel dest, int flags) {
     dest.writeInt(bottomSheetBehaviorState);
     dest.writeInt(recenterButtonVisibility);
     dest.writeByte((byte) (instructionViewVisible ? 1 : 0));
@@ -72,11 +77,13 @@ class NavigationViewInstanceState implements Parcelable {
   }
 
   public static final Creator<NavigationViewInstanceState> CREATOR = new Creator<NavigationViewInstanceState>() {
+    @NonNull
     @Override
-    public NavigationViewInstanceState createFromParcel(Parcel in) {
+    public NavigationViewInstanceState createFromParcel(@NonNull Parcel in) {
       return new NavigationViewInstanceState(in);
     }
 
+    @NonNull
     @Override
     public NavigationViewInstanceState[] newArray(int size) {
       return new NavigationViewInstanceState[size];

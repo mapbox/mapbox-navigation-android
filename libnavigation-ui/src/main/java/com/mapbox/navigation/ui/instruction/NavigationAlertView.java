@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -29,15 +30,15 @@ public class NavigationAlertView extends AlertView implements FeedbackBottomShee
   private NavigationViewModel navigationViewModel;
   private boolean isEnabled = true;
 
-  public NavigationAlertView(Context context) {
+  public NavigationAlertView(@NonNull Context context) {
     this(context, null);
   }
 
-  public NavigationAlertView(Context context, @Nullable AttributeSet attrs) {
+  public NavigationAlertView(@NonNull Context context, @Nullable AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public NavigationAlertView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public NavigationAlertView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
 

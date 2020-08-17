@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 
 import com.mapbox.api.directions.v5.models.VoiceInstructions;
@@ -33,6 +34,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   private static final VoiceInstructionMap VOICE_INSTRUCTION_MAP = new VoiceInstructionMap();
   private static final String MP3_POSTFIX = "mp3";
 
+  @Nullable
   private VoiceInstructions announcement;
   private VoiceListener voiceListener;
   private MediaPlayer mediaPlayer;
@@ -48,8 +50,8 @@ class MapboxSpeechPlayer implements SpeechPlayer {
    * @param context                to setup the caches
    * @param voiceInstructionLoader voice instruction loader
    */
-  MapboxSpeechPlayer(Context context, @NonNull VoiceListener voiceListener,
-      VoiceInstructionLoader voiceInstructionLoader) {
+  MapboxSpeechPlayer(@NonNull Context context, @NonNull VoiceListener voiceListener,
+                     VoiceInstructionLoader voiceInstructionLoader) {
     this.voiceListener = voiceListener;
     this.voiceInstructionLoader = voiceInstructionLoader;
     setupCaches(context);
@@ -62,7 +64,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
    * @param announcement with voice instruction to be synthesized and played
    */
   @Override
-  public void play(VoiceInstructions announcement) {
+  public void play(@Nullable VoiceInstructions announcement) {
     boolean isInvalidAnnouncement = announcement == null;
     if (isInvalidAnnouncement) {
       return;
@@ -94,12 +96,12 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     voiceInstructionLoader.flushCache();
   }
 
-  private void setupCaches(Context context) {
+  private void setupCaches(@NonNull Context context) {
     mapboxCache = new File(context.getCacheDir(), MAPBOX_INSTRUCTION_CACHE);
     mapboxCache.mkdirs();
   }
 
-  private void playAnnouncementTextAndTypeFrom(VoiceInstructions announcement) {
+  private void playAnnouncementTextAndTypeFrom(@NonNull VoiceInstructions announcement) {
     boolean hasSsmlAnnouncement = announcement.ssmlAnnouncement() != null;
     VoiceInstructionUpdate voiceInstructionUpdate = VOICE_INSTRUCTION_MAP.get(hasSsmlAnnouncement);
     Pair<String, String> textAndType = voiceInstructionUpdate.buildTextAndTypeFrom(announcement);
@@ -189,7 +191,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   private void addListeners() {
     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
-      public void onPrepared(MediaPlayer mp) {
+      public void onPrepared(@NonNull MediaPlayer mp) {
         voiceListener.onStart(SpeechPlayerState.ONLINE_PLAYING);
         isPlaying = true;
         mp.start();
@@ -197,7 +199,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     });
     mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
-      public void onCompletion(MediaPlayer mp) {
+      public void onCompletion(@NonNull MediaPlayer mp) {
         mp.release();
         isPlaying = false;
         voiceListener.onDone(SpeechPlayerState.IDLE);
@@ -244,7 +246,7 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     }).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, responseBody);
   }
 
-  private void playInstructionIfUpNext(File instructionFile) {
+  private void playInstructionIfUpNext(@NonNull File instructionFile) {
     if (instructionQueue.isEmpty()) {
       playInstruction(instructionFile);
     }

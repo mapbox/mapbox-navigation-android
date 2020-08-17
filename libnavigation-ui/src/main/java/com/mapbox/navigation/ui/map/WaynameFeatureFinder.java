@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.map;
 
 import android.graphics.PointF;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
@@ -15,7 +17,8 @@ class WaynameFeatureFinder {
     this.mapboxMap = mapboxMap;
   }
 
-  List<Feature> queryRenderedFeatures(PointF point, String[] layerIds) {
+  @NonNull
+  List<Feature> queryRenderedFeatures(@NonNull PointF point, String[] layerIds) {
     return mapboxMap.queryRenderedFeatures(point, layerIds);
   }
 }

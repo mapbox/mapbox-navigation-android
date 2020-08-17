@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.voice;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -23,10 +25,12 @@ import java.util.Queue;
  */
 public class NavigationSpeechPlayer implements SpeechPlayer {
 
+  @NonNull
   private Queue<VoiceInstructions> voiceInstructionsQueue = new ArrayDeque<>();
   private SpeechPlayerProvider speechPlayerProvider;
   private boolean isMuted;
 
+  @Nullable
   private SpeechPlayerStateChangeObserver observer = state -> {
     if (!voiceInstructionsQueue.isEmpty() && state == SpeechPlayerState.IDLE) {
       speechPlayerProvider.retrieveSpeechPlayer().play(voiceInstructionsQueue.poll());

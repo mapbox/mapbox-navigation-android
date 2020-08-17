@@ -12,6 +12,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -29,6 +30,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   private TextView soundChipText;
   private AnimationSet fadeInSlowOut;
   private boolean isMuted;
+  @Nullable
   private MultiOnClickListener multiOnClickListener = new MultiOnClickListener();
 
   private int primaryColor;

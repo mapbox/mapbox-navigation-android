@@ -25,7 +25,7 @@ public class WayNameView extends FrameLayout {
   private int primaryColor;
   private int secondaryColor;
 
-  public WayNameView(Context context) {
+  public WayNameView(@NonNull Context context) {
     this(context, null);
   }
 
@@ -55,6 +55,7 @@ public class WayNameView extends FrameLayout {
     this.wayNameText.setText(wayNameText);
   }
 
+  @NonNull
   public String retrieveWayNameText() {
     return wayNameText.getText().toString();
   }

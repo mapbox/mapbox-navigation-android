@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui;
 
+import androidx.annotation.NonNull;
+
 import java.util.Date;
 
 class RouteCallStatus {
@@ -16,14 +18,14 @@ class RouteCallStatus {
     this.responseReceived = true;
   }
 
-  boolean isRouting(Date currentDate) {
+  boolean isRouting(@NonNull Date currentDate) {
     if (responseReceived) {
       return false;
     }
     return diffInMilliseconds(callDate, currentDate) < FIVE_SECONDS_IN_MILLISECONDS;
   }
 
-  private long diffInMilliseconds(Date callDate, Date currentDate) {
+  private long diffInMilliseconds(@NonNull Date callDate, @NonNull Date currentDate) {
     return currentDate.getTime() - callDate.getTime();
   }
 }

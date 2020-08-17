@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
@@ -22,7 +23,7 @@ class FeedbackClickListener implements RecyclerView.OnItemTouchListener {
   }
 
   @Override
-  public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent motionEvent) {
+  public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent motionEvent) {
     View child = rv.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
     ViewGroup group = (ViewGroup) child;
     ImageView imageView = null;

@@ -28,6 +28,7 @@ public class SpeechPlayerProvider {
   private static final int FIRST_PLAYER = 0;
 
   private AndroidSpeechPlayer androidSpeechPlayer;
+  @NonNull
   private List<SpeechPlayer> speechPlayers = new ArrayList<>(2);
   private VoiceInstructionLoader voiceInstructionLoader;
   private ConnectivityStatusProvider connectivityStatus;
@@ -46,7 +47,7 @@ public class SpeechPlayerProvider {
    * @param voiceInstructionLoader voice instruction loader
    */
   public SpeechPlayerProvider(@NonNull Context context, String language,
-                              boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
+                              boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
     initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
@@ -66,12 +67,13 @@ public class SpeechPlayerProvider {
 
   // Package private (no modifier) for testing purposes
   SpeechPlayerProvider(@NonNull Context context, String language,
-                       boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader,
+                       boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader,
                        ConnectivityStatusProvider connectivityStatus) {
     this(context, language, voiceLanguageSupported, voiceInstructionLoader);
     this.connectivityStatus = connectivityStatus;
   }
 
+  @Nullable
   SpeechPlayer retrieveSpeechPlayer() {
     if (speechPlayerState == SpeechPlayerState.OFFLINE_PLAYING) {
       return null;
@@ -131,7 +133,7 @@ public class SpeechPlayerProvider {
   }
 
   private void initialize(@NonNull Context context, String language,
-                          boolean voiceLanguageSupported, VoiceInstructionLoader voiceInstructionLoader) {
+                          boolean voiceLanguageSupported, @NonNull VoiceInstructionLoader voiceInstructionLoader) {
     AudioFocusDelegateProvider provider = buildAudioFocusDelegateProvider(context);
     SpeechAudioFocusManager audioFocusManager = new SpeechAudioFocusManager(provider);
     VoiceListener voiceListener = new NavigationVoiceListener(this, audioFocusManager);
@@ -141,13 +143,18 @@ public class SpeechPlayerProvider {
     connectivityStatus = new ConnectivityStatusProvider(context);
   }
 
-  private AudioFocusDelegateProvider buildAudioFocusDelegateProvider(Context context) {
+  @NonNull
+  private AudioFocusDelegateProvider buildAudioFocusDelegateProvider(@NonNull Context context) {
     AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     return new AudioFocusDelegateProvider(audioManager);
   }
 
-  private void initializeMapboxSpeechPlayer(Context context, String language, boolean voiceLanguageSupported,
-                                            VoiceListener listener, VoiceInstructionLoader voiceInstructionLoader) {
+  private void initializeMapboxSpeechPlayer(
+          @NonNull Context context,
+          String language,
+          boolean voiceLanguageSupported,
+          @NonNull VoiceListener listener,
+          @NonNull VoiceInstructionLoader voiceInstructionLoader) {
     if (!voiceLanguageSupported) {
       return;
     }

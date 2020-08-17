@@ -7,6 +7,9 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.HashMap;
 
 /**
@@ -15,7 +18,9 @@ import java.util.HashMap;
 public class ConnectivityStatusProvider {
 
   private final Context context;
+  @NonNull
   private final WifiNetworkChecker wifiNetworkChecker;
+  @NonNull
   private final MobileNetworkChecker mobileNetworkChecker;
 
   public ConnectivityStatusProvider(Context applicationContext) {
@@ -37,14 +42,15 @@ public class ConnectivityStatusProvider {
     return (info != null && info.isConnected());
   }
 
+  @Nullable
   @SuppressLint("MissingPermission")
-  private NetworkInfo getNetworkInfo(Context context) {
+  private NetworkInfo getNetworkInfo(@NonNull Context context) {
     ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     return cm.getActiveNetworkInfo();
   }
 
   @SuppressLint({"MissingPermission", "WifiManagerPotentialLeak"})
-  private int getWifiLevel(Context context) {
+  private int getWifiLevel(@NonNull Context context) {
     WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     int numberOfLevels = 5;
     WifiInfo wifiInfo = wifiManager.getConnectionInfo();

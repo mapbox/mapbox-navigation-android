@@ -13,6 +13,7 @@ import com.mapbox.mapboxsdk.camera.CameraUpdate;
  */
 public class NavigationCameraUpdate {
 
+  @NonNull
   private final CameraUpdate cameraUpdate;
   private CameraUpdateMode mode = CameraUpdateMode.DEFAULT;
 

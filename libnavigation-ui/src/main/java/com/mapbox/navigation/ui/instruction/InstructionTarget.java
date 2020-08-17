@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.text.style.ImageSpan;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -45,7 +47,7 @@ class InstructionTarget implements Target {
   }
 
   @Override
-  public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+  public void onBitmapLoaded(@NonNull Bitmap bitmap, Picasso.LoadedFrom from) {
     Drawable drawable = textViewUtils.createDrawable(textView, bitmap);
     createAndSetImageSpan(drawable);
     sendInstructionLoadedCallback();
@@ -66,7 +68,7 @@ class InstructionTarget implements Target {
     void onInstructionLoaded(InstructionTarget target);
   }
 
-  private void createAndSetImageSpan(Drawable drawable) {
+  private void createAndSetImageSpan(@NonNull Drawable drawable) {
     instructionSpannable.setSpan(new ImageSpan(drawable),
         shield.getStartIndex(), shield.getEndIndex(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -82,7 +84,7 @@ class InstructionTarget implements Target {
     }
   }
 
-  private static CharSequence truncateImageSpan(Spannable instructionSpannable, TextView textView) {
+  private static CharSequence truncateImageSpan(Spannable instructionSpannable, @NonNull TextView textView) {
     int availableSpace = textView.getWidth() - textView.getPaddingRight() - textView.getPaddingLeft();
     if (availableSpace > 0) {
       return TextUtils.ellipsize(instructionSpannable, textView.getPaint(), availableSpace, TextUtils.TruncateAt.END);

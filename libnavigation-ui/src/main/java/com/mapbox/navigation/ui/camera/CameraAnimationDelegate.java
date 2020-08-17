@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.camera;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -12,7 +14,7 @@ class CameraAnimationDelegate {
     this.mapboxMap = mapboxMap;
   }
 
-  void render(NavigationCameraUpdate update, int durationMs, MapboxMap.CancelableCallback callback) {
+  void render(@NonNull NavigationCameraUpdate update, int durationMs, MapboxMap.CancelableCallback callback) {
     CameraUpdateMode mode = update.getMode();
     CameraUpdate cameraUpdate = update.getCameraUpdate();
     if (mode == CameraUpdateMode.OVERRIDE) {

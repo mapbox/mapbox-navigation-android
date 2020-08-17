@@ -17,6 +17,7 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 import androidx.cardview.widget.CardView;
@@ -44,15 +45,15 @@ public class AlertView extends CardView {
   private int progressBarColor;
   private int textColor;
 
-  public AlertView(Context context) {
+  public AlertView(@NonNull Context context) {
     this(context, null);
   }
 
-  public AlertView(Context context, @Nullable AttributeSet attrs) {
+  public AlertView(@NonNull Context context, @Nullable AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public AlertView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public AlertView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initAttributes(attrs);
     init();
@@ -130,6 +131,7 @@ public class AlertView extends CardView {
    *
    * @return current text in alertText {@link TextView}
    */
+  @NonNull
   public String getAlertText() {
     return alertText.getText().toString();
   }

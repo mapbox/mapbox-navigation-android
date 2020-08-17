@@ -2,6 +2,8 @@ package com.mapbox.navigation.ui.map;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.navigation.base.trip.model.RouteLegProgress;
@@ -52,7 +54,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     updateCameraTracking(trackingMode);
   }
 
-  void addProgressChangeListener(MapboxNavigation navigation) {
+  void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
     navigation.registerRouteProgressObserver(fpsProgressListener);
   }
@@ -87,7 +89,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     this.maxFpsThreshold = maxFps;
   }
 
-  void adjustFpsFor(RouteProgress routeProgress) {
+  void adjustFpsFor(@NonNull RouteProgress routeProgress) {
     if (!isEnabled || !isTracking) {
       return;
     }
@@ -107,7 +109,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     }
   }
 
-  private int determineMaxFpsFrom(RouteProgress routeProgress, Context context) {
+  private int determineMaxFpsFrom(@NonNull RouteProgress routeProgress, Context context) {
     final boolean isPluggedIn = batteryMonitor.isPluggedIn(context);
     RouteLegProgress routeLegProgress = routeProgress.getCurrentLegProgress();
 
@@ -120,7 +122,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     }
   }
 
-  private boolean validLowFpsManeuver(RouteLegProgress routeLegProgress) {
+  private boolean validLowFpsManeuver(@NonNull RouteLegProgress routeLegProgress) {
     if (routeLegProgress.getCurrentStepProgress() != null
         && routeLegProgress.getCurrentStepProgress().getStep() != null) {
       final String maneuverModifier = routeLegProgress.getCurrentStepProgress().getStep().maneuver().modifier();
@@ -132,7 +134,7 @@ class MapFpsDelegate implements OnTrackingModeChangedListener, OnTrackingModeTra
     return false;
   }
 
-  private boolean validLowFpsDuration(RouteLegProgress routeLegProgress) {
+  private boolean validLowFpsDuration(@NonNull RouteLegProgress routeLegProgress) {
     RouteStepProgress currentStepProgress = routeLegProgress.getCurrentStepProgress();
     if (currentStepProgress != null && currentStepProgress.getStep() != null) {
       final double expectedStepDuration = routeLegProgress.getCurrentStepProgress().getStep().duration();

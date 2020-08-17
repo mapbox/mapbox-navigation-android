@@ -7,13 +7,15 @@ import android.graphics.Canvas;
 import android.util.Base64;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import java.io.ByteArrayOutputStream;
 
 public class ViewUtils {
 
-  public static Bitmap captureView(View view) {
+  public static Bitmap captureView(@NonNull View view) {
     View rootView = view.getRootView();
     rootView.setDrawingCacheEnabled(true);
     Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
@@ -21,11 +23,11 @@ public class ViewUtils {
     return bitmap;
   }
 
-  public static String encodeView(Bitmap capture) {
+  public static String encodeView(@NonNull Bitmap capture) {
     return encodeView(capture, new BitmapEncodeOptions.Builder().build());
   }
 
-  public static String encodeView(Bitmap capture, BitmapEncodeOptions options) {
+  public static String encodeView(@NonNull Bitmap capture, @NonNull BitmapEncodeOptions options) {
     // Resize up to original width while keeping the aspect ratio
     int width = Math.min(capture.getWidth(), options.getWidth());
     int height = Math.round((float) width * capture.getHeight() / capture.getWidth());
@@ -40,7 +42,8 @@ public class ViewUtils {
     return Base64.encodeToString(data, Base64.DEFAULT);
   }
 
-  public static Bitmap loadBitmapFromView(View view) {
+  @Nullable
+  public static Bitmap loadBitmapFromView(@NonNull View view) {
     if (view.getMeasuredHeight() <= 0) {
       view.measure(CoordinatorLayout.LayoutParams.WRAP_CONTENT, CoordinatorLayout.LayoutParams.WRAP_CONTENT);
       Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
@@ -52,7 +55,7 @@ public class ViewUtils {
     return null;
   }
 
-  public static boolean isLandscape(Context context) {
+  public static boolean isLandscape(@NonNull Context context) {
     return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
   }
 }

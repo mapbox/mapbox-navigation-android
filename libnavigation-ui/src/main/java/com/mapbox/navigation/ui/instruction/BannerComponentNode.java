@@ -1,5 +1,7 @@
 package com.mapbox.navigation.ui.instruction;
 
+import androidx.annotation.NonNull;
+
 import com.mapbox.api.directions.v5.models.BannerComponents;
 
 /**
@@ -14,6 +16,7 @@ class BannerComponentNode {
     this.startIndex = startIndex;
   }
 
+  @NonNull
   @Override
   public String toString() {
     return bannerComponents.text();

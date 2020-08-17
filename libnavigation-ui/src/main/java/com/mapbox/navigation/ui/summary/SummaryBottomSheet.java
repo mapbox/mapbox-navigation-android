@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.content.ContextCompat;
@@ -67,19 +69,20 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   @SuppressLint("WrongConstant")
   @TimeFormat.Type
   private int timeFormatType = NONE_SPECIFIED;
+  @Nullable
   private DistanceFormatter distanceFormatter;
   private NavigationViewModel navigationViewModel;
   private LifecycleOwner lifecycleOwner;
 
-  public SummaryBottomSheet(Context context) {
+  public SummaryBottomSheet(@NonNull Context context) {
     this(context, null);
   }
 
-  public SummaryBottomSheet(Context context, AttributeSet attrs) {
+  public SummaryBottomSheet(@NonNull Context context, AttributeSet attrs) {
     this(context, attrs, -1);
   }
 
-  public SummaryBottomSheet(Context context, AttributeSet attrs, int defStyleAttr) {
+  public SummaryBottomSheet(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     initAttributes(attrs);
     initialize();
@@ -105,7 +108,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    *
    * @param navigationViewModel to which this View is subscribing
    */
-  public void subscribe(LifecycleOwner owner, NavigationViewModel navigationViewModel) {
+  public void subscribe(LifecycleOwner owner, @NonNull NavigationViewModel navigationViewModel) {
     lifecycleOwner = owner;
     lifecycleOwner.getLifecycle().addObserver(this);
     this.navigationViewModel = navigationViewModel;
@@ -143,7 +146,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    * @param routeProgress used to provide navigation / routeProgress data
    */
   @SuppressWarnings("UnusedDeclaration")
-  public void update(RouteProgress routeProgress) {
+  public void update(@Nullable RouteProgress routeProgress) {
     if (routeProgress != null && !isRerouting) {
       @SuppressLint("WrongConstant")
       SummaryModel model = SummaryModel.create(getContext().getApplicationContext(),
@@ -189,7 +192,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    *
    * @param distanceFormatter to set
    */
-  public void setDistanceFormatter(DistanceFormatter distanceFormatter) {
+  public void setDistanceFormatter(@Nullable DistanceFormatter distanceFormatter) {
     if (distanceFormatter != null && !distanceFormatter.equals(this.distanceFormatter)) {
       this.distanceFormatter = distanceFormatter;
     }
