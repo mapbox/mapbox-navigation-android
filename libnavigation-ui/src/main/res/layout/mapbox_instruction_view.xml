@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:keepScreenOn="true">
+
+    <include
+        android:id="@+id/instructionLayout"
+        layout="@layout/mapbox_partial_instruction_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/extraInstructionContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/instructionLayout"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/turnLaneLayout"
+            layout="@layout/mapbox_partial_instruction_turn_lane"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/subStepLayout"
+            layout="@layout/mapbox_partial_instruction_sub_instruction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/guidanceImageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <com.mapbox.navigation.ui.instruction.NavigationAlertView
+        android:id="@+id/alertView"
+        style="@style/MapboxStyleAlertView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/extraInstructionContentLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:visibility="invisible" />
+
+    <com.mapbox.navigation.ui.SoundButton
+        android:id="@+id/soundLayout"
+        style="@style/MapboxStyleSoundButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/extraInstructionContentLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <com.mapbox.navigation.ui.FeedbackButton
+        android:id="@+id/feedbackLayout"
+        style="@style/MapboxStyleFeedbackButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/soundLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true" />
+
+    <include
+        android:id="@+id/instructionListLayout"
+        layout="@layout/mapbox_partial_instruction_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/instructionLayout"
+        android:visibility="gone" />
+
+</RelativeLayout>

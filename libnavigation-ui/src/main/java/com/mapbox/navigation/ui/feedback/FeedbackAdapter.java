@@ -28,7 +28,7 @@ class FeedbackAdapter extends RecyclerView.Adapter<FeedbackViewHolder> {
   @NonNull
   public FeedbackViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-      .inflate(R.layout.feedback_viewholder_layout, parent, false);
+      .inflate(R.layout.mapbox_item_feedback, parent, false);
     return new FeedbackViewHolder(view);
   }
 

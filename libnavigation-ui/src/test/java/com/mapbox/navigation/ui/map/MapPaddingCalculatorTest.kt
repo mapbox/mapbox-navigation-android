@@ -14,8 +14,8 @@ class MapPaddingCalculatorTest {
     @Test
     fun calculateDefaultPaddingPortrait() {
         val resource: Resources = mockk {
-            every { getDimension(R.dimen.summary_bottomsheet_height) } returns 72f
-            every { getDimension(R.dimen.wayname_view_height) } returns 32f
+            every { getDimension(R.dimen.mapbox_summary_bottom_sheet_height) } returns 72f
+            every { getDimension(R.dimen.mapbox_wayname_view_height) } returns 32f
         }
         val ctx: Context = mockk {
             every { resources } returns resource
@@ -38,8 +38,8 @@ class MapPaddingCalculatorTest {
     @Test
     fun calculateDefaultPaddingLandscape() {
         val resource: Resources = mockk {
-            every { getDimension(R.dimen.summary_bottomsheet_height) } returns 56f
-            every { getDimension(R.dimen.wayname_view_height) } returns 24f
+            every { getDimension(R.dimen.mapbox_summary_bottom_sheet_height) } returns 56f
+            every { getDimension(R.dimen.mapbox_wayname_view_height) } returns 24f
         }
         val ctx: Context = mockk {
             every { resources } returns resource
@@ -62,7 +62,7 @@ class MapPaddingCalculatorTest {
     @Test
     fun calculateTopPaddingWithoutWaynamePortrait() {
         val resource: Resources = mockk {
-            every { getDimension(R.dimen.summary_bottomsheet_height) } returns 72f
+            every { getDimension(R.dimen.mapbox_summary_bottom_sheet_height) } returns 72f
         }
         val ctx: Context = mockk {
             every { resources } returns resource
@@ -81,7 +81,7 @@ class MapPaddingCalculatorTest {
     @Test
     fun calculateTopPaddingWithoutWaynameLandscape() {
         val resource: Resources = mockk {
-            every { getDimension(R.dimen.summary_bottomsheet_height) } returns 56f
+            every { getDimension(R.dimen.mapbox_summary_bottom_sheet_height) } returns 56f
         }
         val ctx: Context = mockk {
             every { resources } returns resource

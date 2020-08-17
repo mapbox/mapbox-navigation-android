@@ -88,14 +88,14 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
 
   @Override
   public void updateStyle(@StyleRes int styleRes) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.SoundButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.MapboxStyleSoundButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
       typedArray.getResourceId(
-        R.styleable.SoundButton_soundButtonPrimaryColor, R.color.mapbox_sound_button_primary));
+        R.styleable.MapboxStyleSoundButton_soundButtonPrimaryColor, R.color.mapbox_sound_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
       typedArray.getResourceId(
-        R.styleable.SoundButton_soundButtonSecondaryColor, R.color.mapbox_sound_button_secondary));
+        R.styleable.MapboxStyleSoundButton_soundButtonSecondaryColor, R.color.mapbox_sound_button_secondary));
 
     typedArray.recycle();
 
@@ -191,7 +191,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    */
   private boolean mute() {
     isMuted = true;
-    setSoundChipText(getContext().getString(R.string.muted));
+    setSoundChipText(getContext().getString(R.string.mapbox_muted));
     showSoundChip();
     soundFabOff();
     return isMuted;
@@ -210,7 +210,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    */
   private boolean unmute() {
     isMuted = false;
-    setSoundChipText(getContext().getString(R.string.unmuted));
+    setSoundChipText(getContext().getString(R.string.mapbox_unmuted));
     showSoundChip();
     soundFabOn();
     return isMuted;
@@ -238,19 +238,19 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.SoundButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleSoundButton);
     primaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.SoundButton_soundButtonPrimaryColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleSoundButton_soundButtonPrimaryColor,
         R.color.mapbox_sound_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.SoundButton_soundButtonSecondaryColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleSoundButton_soundButtonSecondaryColor,
         R.color.mapbox_sound_button_secondary));
 
     typedArray.recycle();
   }
 
   private void initialize(Context context) {
-    inflate(context, R.layout.sound_layout, this);
+    inflate(context, R.layout.mapbox_button_sound, this);
   }
 
   /**
@@ -258,7 +258,7 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    * {@link Drawable} to denote sound is on.
    */
   private void soundFabOn() {
-    soundFab.setImageResource(R.drawable.ic_sound_on);
+    soundFab.setImageResource(R.drawable.mapbox_ic_sound_on);
   }
 
   /**
@@ -266,6 +266,6 @@ public class SoundButton extends ConstraintLayout implements NavigationButton {
    * {@link Drawable} to denote sound is off.
    */
   private void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
+    soundFab.setImageResource(R.drawable.mapbox_ic_sound_off);
   }
 }

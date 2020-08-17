@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Đang Tìm Đường đi Mới…</string>
+    <string name="mapbox_rerouting">Đang Tìm Đường đi Mới…</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">Quay về Đường đi</string>
+    <string name="mapbox_re_center">Quay về Đường đi</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Tiếng Tắt</string>
+    <string name="mapbox_muted">Tiếng Tắt</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Tiếng Mở</string>
+    <string name="mapbox_unmuted">Tiếng Mở</string>
 
     <!-- Feedback -->
-    <string name="report_feedback">Gửi phản hồi</string>
+    <string name="mapbox_report_feedback">Gửi phản hồi</string>
 
     <!-- Shown after a feedback type has been submitted -->
-    <string name="feedback_submitted">Đã Gửi Phản hồi</string>
+    <string name="mapbox_feedback_submitted">Đã Gửi Phản hồi</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
-    <string name="report_problem">Báo cáo Sự cố</string>
+    <string name="mapbox_report_problem">Báo cáo Sự cố</string>
 
 </resources>

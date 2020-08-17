@@ -199,24 +199,29 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.SummaryBottomSheet);
+    TypedArray typedArray =
+        getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleSummaryBottomSheet);
     primaryBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetPrimaryColor, R.color.mapbox_summary_bottom_sheet_primary));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetPrimaryColor,
+        R.color.mapbox_summary_bottom_sheet_primary));
     secondaryBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetSecondaryColor, R.color.mapbox_summary_bottom_sheet_secondary));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetSecondaryColor,
+        R.color.mapbox_summary_bottom_sheet_secondary));
     dividerColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetDividerColor, R.color.mapbox_summary_bottom_sheet_divider));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetDividerColor,
+        R.color.mapbox_summary_bottom_sheet_divider));
     progressBarBackgroundColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetProgressBarColor,
-      R.color.mapbox_summary_bottom_sheet_progress_bar));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetProgressBarColor,
+        R.color.mapbox_summary_bottom_sheet_progress_bar));
     primaryTextColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetPrimaryTextColor,
-      R.color.mapbox_summary_bottom_sheet_primary_text));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetPrimaryTextColor,
+        R.color.mapbox_summary_bottom_sheet_primary_text));
     secondaryTextColor = ContextCompat.getColor(getContext(), typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetSecondaryTextColor,
-      R.color.mapbox_summary_bottom_sheet_secondary_text));
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetSecondaryTextColor,
+        R.color.mapbox_summary_bottom_sheet_secondary_text));
     routeOverviewDrawable = typedArray.getResourceId(
-      R.styleable.SummaryBottomSheet_summaryBottomSheetRouteOverviewDrawable, R.drawable.ic_route_preview);
+        R.styleable.MapboxStyleSummaryBottomSheet_summaryBottomSheetRouteOverviewDrawable,
+        R.drawable.mapbox_ic_route_preview);
 
     typedArray.recycle();
   }
@@ -226,7 +231,7 @@ public class SummaryBottomSheet extends FrameLayout implements LifecycleObserver
    */
   private void initialize() {
     initializeDistanceFormatter();
-    inflate(getContext(), R.layout.summary_bottomsheet_layout, this);
+    inflate(getContext(), R.layout.mapbox_summary_bottomsheet, this);
   }
 
   private void initializeDistanceFormatter() {

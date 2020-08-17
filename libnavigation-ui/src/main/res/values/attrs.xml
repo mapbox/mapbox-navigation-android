@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <declare-styleable name="NavigationMapRoute">
+  <declare-styleable name="MapboxStyleNavigationMapRoute">
     <!-- Primary route colors -->
     <attr name="routeColor" format="color"/>
     <attr name="routeUnknownCongestionColor" format="color"/>
@@ -37,7 +37,7 @@
     <attr name="roundedLineCap" format="boolean"/>
   </declare-styleable>
 
-  <declare-styleable name="NavigationView">
+  <declare-styleable name="MapboxStyleNavigationView">
     <!-- Colors -->
     <attr name="navigationViewPrimary" format="color"/>
     <attr name="navigationViewSecondary" format="color"/>
@@ -80,12 +80,12 @@
     <attr name="navigationDarkTheme" format="reference"/>
   </declare-styleable>
 
-  <declare-styleable name="ManeuverView">
+  <declare-styleable name="MapboxStyleManeuverView">
     <attr name="maneuverViewPrimaryColor" format="color"/>
     <attr name="maneuverViewSecondaryColor" format="color"/>
   </declare-styleable>
 
-  <declare-styleable name="InstructionView">
+  <declare-styleable name="MapboxStyleInstructionView">
     <attr name="instructionViewPrimaryBackgroundColor" format="reference|color"/>
     <attr name="instructionViewSecondaryBackgroundColor" format="reference|color"/>
     <attr name="instructionListViewBackgroundColor" format="reference|color"/>
@@ -97,34 +97,34 @@
     <attr name="instructionViewAlertViewStyle" format="reference"/>
   </declare-styleable>
 
-  <declare-styleable name="SoundButton">
+  <declare-styleable name="MapboxStyleSoundButton">
     <attr name="soundButtonPrimaryColor" format="reference|color"/>
     <attr name="soundButtonSecondaryColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="FeedbackButton">
+  <declare-styleable name="MapboxStyleFeedbackButton">
     <attr name="feedbackButtonPrimaryColor" format="reference|color"/>
     <attr name="feedbackButtonSecondaryColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="AlertView">
+  <declare-styleable name="MapboxStyleAlertView">
     <attr name="alertViewBackgroundColor" format="reference|color"/>
     <attr name="alertViewProgressBarBackgroundColor" format="reference|color"/>
     <attr name="alertViewProgressBarColor" format="reference|color"/>
     <attr name="alertViewTextColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="RecenterButton">
+  <declare-styleable name="MapboxStyleRecenterButton">
     <attr name="recenterButtonPrimaryColor" format="reference|color"/>
     <attr name="recenterButtonSecondaryColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="WayNameView">
+  <declare-styleable name="MapboxStyleWayNameView">
     <attr name="wayNameViewPrimaryColor" format="reference|color"/>
     <attr name="wayNameViewSecondaryColor" format="reference|color"/>
   </declare-styleable>
 
-  <declare-styleable name="SummaryBottomSheet">
+  <declare-styleable name="MapboxStyleSummaryBottomSheet">
     <attr name="summaryBottomSheetPrimaryColor" format="reference|color"/>
     <attr name="summaryBottomSheetSecondaryColor" format="reference|color"/>
     <attr name="summaryBottomSheetDividerColor" format="reference|color"/>

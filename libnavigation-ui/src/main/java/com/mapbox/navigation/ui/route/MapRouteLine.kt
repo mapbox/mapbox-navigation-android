@@ -140,7 +140,7 @@ internal class MapRouteLine(
 
     private val routeLineTraveledColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeLineTraveledColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineTraveledColor,
             R.color.mapbox_navigation_route_line_traveled_color,
             context,
             styleRes
@@ -149,7 +149,7 @@ internal class MapRouteLine(
 
     private val routeLineCasingTraveledColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeLineCasingTraveledColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineCasingTraveledColor,
             R.color.mapbox_navigation_route_casing_line_traveled_color,
             context,
             styleRes
@@ -158,7 +158,7 @@ internal class MapRouteLine(
 
     private val routeUnknownColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeUnknownCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeUnknownCongestionColor,
             R.color.mapbox_navigation_route_layer_congestion_unknown,
             context,
             styleRes
@@ -167,7 +167,7 @@ internal class MapRouteLine(
 
     private val routeDefaultColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeColor,
             R.color.mapbox_navigation_route_layer_blue,
             context,
             styleRes
@@ -176,7 +176,7 @@ internal class MapRouteLine(
 
     private val routeLowCongestionColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeLowCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLowCongestionColor,
             R.color.mapbox_navigation_route_traffic_layer_color,
             context,
             styleRes
@@ -185,7 +185,7 @@ internal class MapRouteLine(
 
     private val routeModerateColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeModerateCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeModerateCongestionColor,
             R.color.mapbox_navigation_route_layer_congestion_yellow,
             context,
             styleRes
@@ -194,7 +194,7 @@ internal class MapRouteLine(
 
     private val routeHeavyColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeHeavyCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeHeavyCongestionColor,
             R.color.mapbox_navigation_route_layer_congestion_heavy,
             context,
             styleRes
@@ -203,7 +203,7 @@ internal class MapRouteLine(
 
     private val routeSevereColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeSevereCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeSevereCongestionColor,
             R.color.mapbox_navigation_route_layer_congestion_red,
             context,
             styleRes
@@ -212,7 +212,7 @@ internal class MapRouteLine(
 
     private val routeCasingColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_routeCasingColor,
+            R.styleable.MapboxStyleNavigationMapRoute_routeCasingColor,
             R.color.mapbox_navigation_route_casing_layer_color,
             context,
             styleRes
@@ -221,7 +221,7 @@ internal class MapRouteLine(
 
     private val routeScale: Float by lazy {
         getFloatStyledValue(
-            R.styleable.NavigationMapRoute_routeScale,
+            R.styleable.MapboxStyleNavigationMapRoute_routeScale,
             1.0f,
             context,
             styleRes
@@ -230,7 +230,7 @@ internal class MapRouteLine(
 
     private val routeTrafficScale: Float by lazy {
         getFloatStyledValue(
-            R.styleable.NavigationMapRoute_routeTrafficScale,
+            R.styleable.MapboxStyleNavigationMapRoute_routeTrafficScale,
             1.0f,
             context,
             styleRes
@@ -239,7 +239,7 @@ internal class MapRouteLine(
 
     private val roundedLineCap: Boolean by lazy {
         getBooleanStyledValue(
-            R.styleable.NavigationMapRoute_roundedLineCap,
+            R.styleable.MapboxStyleNavigationMapRoute_roundedLineCap,
             true,
             context,
             styleRes
@@ -248,7 +248,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteUnknownColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteUnknownCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteUnknownCongestionColor,
             R.color.mapbox_navigation_route_alternative_congestion_unknown,
             context,
             styleRes
@@ -257,7 +257,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteDefaultColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteColor,
             R.color.mapbox_navigation_route_alternative_color,
             context,
             styleRes
@@ -266,7 +266,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteLowColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteLowCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteLowCongestionColor,
             R.color.mapbox_navigation_route_alternative_color,
             context,
             styleRes
@@ -275,7 +275,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteModerateColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteSevereCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteSevereCongestionColor,
             R.color.mapbox_navigation_route_alternative_congestion_red,
             context,
             styleRes
@@ -284,7 +284,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteHeavyColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteHeavyCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteHeavyCongestionColor,
             R.color.mapbox_navigation_route_alternative_congestion_heavy,
             context,
             styleRes
@@ -293,7 +293,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteSevereColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteSevereCongestionColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteSevereCongestionColor,
             R.color.mapbox_navigation_route_alternative_congestion_red,
             context,
             styleRes
@@ -302,7 +302,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteCasingColor: Int by lazy {
         getStyledColor(
-            R.styleable.NavigationMapRoute_alternativeRouteCasingColor,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteCasingColor,
             R.color.mapbox_navigation_route_alternative_casing_color,
             context,
             styleRes
@@ -311,7 +311,7 @@ internal class MapRouteLine(
 
     private val alternativeRouteScale: Float by lazy {
         getFloatStyledValue(
-            R.styleable.NavigationMapRoute_alternativeRouteScale,
+            R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteScale,
             1.0f,
             context,
             styleRes
@@ -375,15 +375,15 @@ internal class MapRouteLine(
         style.addSource(alternativeRouteLineSource)
 
         val originWaypointIcon = getResourceStyledValue(
-            R.styleable.NavigationMapRoute_originWaypointIcon,
-            R.drawable.ic_route_origin,
+            R.styleable.MapboxStyleNavigationMapRoute_originWaypointIcon,
+            R.drawable.mapbox_ic_route_origin,
             context,
             styleRes
         )
 
         val destinationWaypointIcon = getResourceStyledValue(
-            R.styleable.NavigationMapRoute_destinationWaypointIcon,
-            R.drawable.ic_route_destination,
+            R.styleable.MapboxStyleNavigationMapRoute_destinationWaypointIcon,
+            R.drawable.mapbox_ic_route_destination,
             context,
             styleRes
         )
@@ -923,7 +923,7 @@ internal class MapRouteLine(
          */
         fun getStyledColor(index: Int, colorResourceId: Int, context: Context, styleRes: Int): Int {
             val typedArray =
-                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+                context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
             return typedArray.getColor(
                 index,
                 ContextCompat.getColor(
@@ -951,7 +951,7 @@ internal class MapRouteLine(
             styleRes: Int
         ): Float {
             val typedArray =
-                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+                context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
             return typedArray.getFloat(index, defaultValue).also {
                 typedArray.recycle()
             }
@@ -973,7 +973,7 @@ internal class MapRouteLine(
             styleRes: Int
         ): Boolean {
             val typedArray =
-                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+                context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
             return typedArray.getBoolean(index, defaultValue).also {
                 typedArray.recycle()
             }
@@ -995,7 +995,7 @@ internal class MapRouteLine(
             styleRes: Int
         ): Int {
             val typedArray =
-                context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute)
+                context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute)
             return typedArray.getResourceId(
                 index,
                 defaultValue

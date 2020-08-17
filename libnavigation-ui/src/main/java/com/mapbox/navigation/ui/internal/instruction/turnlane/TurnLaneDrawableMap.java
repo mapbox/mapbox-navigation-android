@@ -14,11 +14,11 @@ import static com.mapbox.navigation.ui.internal.instruction.turnlane.TurnLaneVie
 public class TurnLaneDrawableMap extends HashMap<String, Integer> {
 
   public TurnLaneDrawableMap() {
-    put(DRAW_LANE_STRAIGHT, R.drawable.ic_lane_straight);
-    put(DRAW_LANE_UTURN, R.drawable.ic_lane_uturn);
-    put(DRAW_LANE_RIGHT, R.drawable.ic_lane_right);
-    put(DRAW_LANE_SLIGHT_RIGHT, R.drawable.ic_lane_slight_right);
-    put(DRAW_LANE_RIGHT_ONLY, R.drawable.ic_lane_right_only);
-    put(DRAW_LANE_STRAIGHT_ONLY, R.drawable.ic_lane_straight_only);
+    put(DRAW_LANE_STRAIGHT, R.drawable.mapbox_ic_lane_straight);
+    put(DRAW_LANE_UTURN, R.drawable.mapbox_ic_lane_uturn);
+    put(DRAW_LANE_RIGHT, R.drawable.mapbox_ic_lane_right);
+    put(DRAW_LANE_SLIGHT_RIGHT, R.drawable.mapbox_ic_lane_slight_right);
+    put(DRAW_LANE_RIGHT_ONLY, R.drawable.mapbox_ic_lane_right_only);
+    put(DRAW_LANE_STRAIGHT_ONLY, R.drawable.mapbox_ic_lane_straight_only);
   }
 }

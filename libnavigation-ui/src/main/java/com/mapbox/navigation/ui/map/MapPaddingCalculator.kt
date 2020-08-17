@@ -17,7 +17,7 @@ internal object MapPaddingCalculator {
     fun calculateDefaultPadding(mapView: MapView): IntArray {
         val defaultTopPadding = calculateTopPaddingWithoutWayname(mapView)
         val resources = mapView.context.resources
-        val waynameLayoutHeight = resources.getDimension(R.dimen.wayname_view_height).toInt()
+        val waynameLayoutHeight = resources.getDimension(R.dimen.mapbox_wayname_view_height).toInt()
         val topPadding =
             defaultTopPadding - waynameLayoutHeight * MapPaddingAdjustor.WAYNAME_PADDING_MULTIPLIER
         return intArrayOf(0, topPadding, 0, 0)
@@ -34,7 +34,7 @@ internal object MapPaddingCalculator {
     @JvmStatic
     fun calculateTopPaddingWithoutWayname(mapView: MapView): Int {
         val context = mapView.context
-        val bottomSheetHeight = context.resources.getDimension(R.dimen.summary_bottomsheet_height).toInt()
+        val bottomSheetHeight = context.resources.getDimension(R.dimen.mapbox_summary_bottom_sheet_height).toInt()
 
         return if (mapView.height > mapView.width) {
             mapView.height - bottomSheetHeight * MapPaddingAdjustor.BOTTOMSHEET_PADDING_MULTIPLIER_PORTRAIT

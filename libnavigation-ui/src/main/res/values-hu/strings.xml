@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Újratervezés...</string>
+    <string name="mapbox_rerouting">Újratervezés...</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">Középre</string>
+    <string name="mapbox_re_center">Középre</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Némítva</string>
+    <string name="mapbox_muted">Némítva</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Visszahangosítva</string>
+    <string name="mapbox_unmuted">Visszahangosítva</string>
 
     <!-- Shown after a feedback type has been submitted -->
-    <string name="feedback_submitted">Visszajelzés elküldve</string>
+    <string name="mapbox_feedback_submitted">Visszajelzés elküldve</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
-    <string name="report_problem">Probléma jelentése</string>
+    <string name="mapbox_report_problem">Probléma jelentése</string>
 
 </resources>

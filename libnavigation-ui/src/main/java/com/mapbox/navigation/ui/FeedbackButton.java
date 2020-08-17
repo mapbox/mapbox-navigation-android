@@ -82,14 +82,15 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
    */
   @Override
   public void updateStyle(@StyleRes int styleRes) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.FeedbackButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.MapboxStyleFeedbackButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.FeedbackButton_feedbackButtonPrimaryColor, R.color.mapbox_feedback_button_primary));
+            R.styleable.MapboxStyleFeedbackButton_feedbackButtonPrimaryColor, R.color.mapbox_feedback_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.FeedbackButton_feedbackButtonSecondaryColor, R.color.mapbox_feedback_button_secondary));
+            R.styleable.MapboxStyleFeedbackButton_feedbackButtonSecondaryColor,
+            R.color.mapbox_feedback_button_secondary));
 
     typedArray.recycle();
 
@@ -126,7 +127,7 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
   }
 
   private void initialize(Context context) {
-    inflate(context, R.layout.feedback_button_layout, this);
+    inflate(context, R.layout.mapbox_button_feedback, this);
   }
 
   private void bind() {
@@ -139,13 +140,13 @@ public class FeedbackButton extends ConstraintLayout implements NavigationButton
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.FeedbackButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleFeedbackButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonPrimaryColor,
+        typedArray.getResourceId(R.styleable.MapboxStyleFeedbackButton_feedbackButtonPrimaryColor,
             R.color.mapbox_feedback_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(R.styleable.FeedbackButton_feedbackButtonSecondaryColor,
+        typedArray.getResourceId(R.styleable.MapboxStyleFeedbackButton_feedbackButtonSecondaryColor,
             R.color.mapbox_feedback_button_secondary));
 
     typedArray.recycle();
