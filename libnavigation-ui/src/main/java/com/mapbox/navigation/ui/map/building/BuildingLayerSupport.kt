@@ -52,7 +52,7 @@ internal class BuildingLayerSupport {
                 }
             }
         }
-        return "0"
+        return DEFAULT_BUILDING_ID
     }
 
     /**
@@ -70,5 +70,6 @@ internal class BuildingLayerSupport {
         const val BUILDING_LAYER_ID = "building"
         const val DEFAULT_HIGHLIGHT_COLOR = Color.RED
         const val DEFAULT_HIGHLIGHT_OPACITY = 1f
+        private const val DEFAULT_BUILDING_ID = "0"
     }
 }
