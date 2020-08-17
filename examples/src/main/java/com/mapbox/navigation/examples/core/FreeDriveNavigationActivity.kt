@@ -21,7 +21,6 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import java.net.URI
 import kotlinx.android.synthetic.main.free_drive_navigation_layout.*
@@ -40,14 +39,13 @@ import timber.log.Timber
 class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
-        const val MAP_INSTANCE_STATE_KEY = "navigation_mapbox_map_instance_state"
         const val DEFAULT_INTERVAL_IN_MILLISECONDS = 1000L
         const val DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5
     }
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
-    private var mapInstanceState: NavigationMapboxMapInstanceState? = null
+    private var mapInstanceState: Bundle? = null
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +73,7 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
             mapInstanceState?.let { state ->
-                navigationMapboxMap?.restoreFrom(state)
+                navigationMapboxMap?.restoreStateFrom(state)
             }
             // center the map at current location
             LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
@@ -147,13 +145,13 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        navigationMapboxMap?.saveStateWith(MAP_INSTANCE_STATE_KEY, outState)
+        navigationMapboxMap?.saveStateWith(outState)
         mapView.onSaveInstanceState(outState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        mapInstanceState = savedInstanceState?.getParcelable(MAP_INSTANCE_STATE_KEY)
+        mapInstanceState = savedInstanceState
     }
 
     private fun updateCameraOnNavigationStateChange(

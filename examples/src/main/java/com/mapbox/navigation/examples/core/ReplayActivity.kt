@@ -34,7 +34,6 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_replay_route_layout.*
 
@@ -47,7 +46,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
-    private var mapInstanceState: NavigationMapboxMapInstanceState? = null
     private val firstLocationCallback = FirstLocationCallback(this)
 
     private val replayRouteMapper = ReplayRouteMapper()
@@ -79,9 +77,6 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
-            mapInstanceState?.let { state ->
-                navigationMapboxMap?.restoreFrom(state)
-            }
             initializeFirstLocation()
 
             mapboxNavigation?.attachFasterRouteObserver(object : FasterRouteObserver {

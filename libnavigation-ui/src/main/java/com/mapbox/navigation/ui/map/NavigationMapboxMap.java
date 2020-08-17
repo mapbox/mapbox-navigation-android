@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,7 +40,6 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
-import com.mapbox.navigation.ui.NavigationSnapshotReadyCallback;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
@@ -71,6 +71,7 @@ import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGA
 @UiThread
 public class NavigationMapboxMap implements LifecycleObserver {
 
+  private static final String STATE_BUNDLE_KEY = "mapbox_navigation_sdk_state_bundle";
   static final String STREETS_LAYER_ID = "streetsLayer";
   private static final String MAPBOX_STREETS_V7_URL = "mapbox.mapbox-streets-v7";
   private static final String MAPBOX_STREETS_V8_URL = "mapbox.mapbox-streets-v8";
@@ -447,17 +448,17 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * This method uses {@link NavigationMapboxMapInstanceState}, stored with the provided key.  This key
    * can also later be used to extract the {@link NavigationMapboxMapInstanceState}.
    *
-   * @param key used to store the state
    * @param outState to store state variables
+   * @see #restoreStateFrom(Bundle)
    */
-  public void saveStateWith(String key, Bundle outState) {
+  public void saveStateWith(Bundle outState) {
     settings.updateCurrentPadding(mapPaddingAdjustor.retrieveCurrentPadding());
     settings.updateShouldUseDefaultPadding(mapPaddingAdjustor.isUsingDefault());
     settings.updateCameraTrackingMode(mapCamera.getCameraTrackingMode());
     settings.updateLocationFpsEnabled(locationFpsDelegate.isEnabled());
     settings.updatePercentDistanceTraveled(mapRoute.getPercentDistanceTraveled());
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(settings);
-    outState.putParcelable(key, instanceState);
+    outState.putParcelable(STATE_BUNDLE_KEY, instanceState);
   }
 
   /**
@@ -465,16 +466,20 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * <p>
    * This cannot be called in {@link androidx.fragment.app.Fragment#onViewStateRestored(Bundle)}
    * because we cannot guarantee the map is re-initialized at that point.
-   * <p>
-   * You can extract the {@link NavigationMapboxMapInstanceState} in <tt>onRestoreInstanceState</tt> and then
-   * restore the map once it's ready.
    *
-   * @param instanceState to extract state variables
+   * @param inState to store state variables
+   * @see #saveStateWith(Bundle)
    */
-  public void restoreFrom(NavigationMapboxMapInstanceState instanceState) {
-    settings = instanceState.retrieveSettings();
-    restoreMapWith(settings);
-    restoreVanishingRouteLineSection(settings);
+  public void restoreStateFrom(Bundle inState) {
+    Parcelable parcelable = inState.getParcelable(STATE_BUNDLE_KEY);
+    if (parcelable instanceof NavigationMapboxMapInstanceState) {
+      NavigationMapboxMapInstanceState instanceState = (NavigationMapboxMapInstanceState) parcelable;
+      settings = instanceState.retrieveSettings();
+      restoreMapWith(settings);
+      restoreVanishingRouteLineSection(settings);
+    } else {
+      Timber.d("no instance state to restore");
+    }
   }
 
   /**
@@ -801,8 +806,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
   /**
    * Used to take the snapshot of the current state of the map.
    */
-  public void takeScreenshot(NavigationSnapshotReadyCallback navigationSnapshotReadyCallback) {
-    mapboxMap.snapshot(navigationSnapshotReadyCallback);
+  public void takeScreenshot(MapboxMap.SnapshotReadyCallback snapshotReadyCallback) {
+    mapboxMap.snapshot(snapshotReadyCallback);
   }
 
   /**

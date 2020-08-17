@@ -41,7 +41,6 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState
 import java.lang.ref.WeakReference
 import java.util.Collections
 import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.container
@@ -64,7 +63,6 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
-    private var mapInstanceState: NavigationMapboxMapInstanceState? = null
     private val firstLocationCallback = FirstLocationCallback(this)
     private val stopsController = StopsController()
 
@@ -97,9 +95,6 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
-            mapInstanceState?.let { state ->
-                navigationMapboxMap?.restoreFrom(state)
-            }
 
             // Center the map at current location. Using LocationEngineProvider because the
             // replay engine won't have your last location.

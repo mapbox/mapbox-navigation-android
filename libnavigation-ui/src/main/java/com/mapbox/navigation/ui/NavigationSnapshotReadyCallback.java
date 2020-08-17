@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Used to take a snapshot of the current map when sending the feedback event.
  */
-public class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
+class NavigationSnapshotReadyCallback implements MapboxMap.SnapshotReadyCallback {
 
   private NavigationView navigationView;
   private NavigationViewModel navigationViewModel;

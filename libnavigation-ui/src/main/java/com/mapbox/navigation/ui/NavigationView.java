@@ -45,7 +45,6 @@ import com.mapbox.navigation.ui.internal.NavigationContract;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
-import com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState;
 import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
@@ -76,7 +75,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class NavigationView extends CoordinatorLayout implements LifecycleOwner, OnMapReadyCallback,
     NavigationContract.View {
 
-  private static final String MAP_INSTANCE_STATE_KEY = "navigation_mapbox_map_instance_state";
   private static final int INVALID_STATE = 0;
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
   private static final long WAY_NAME_TRANSLATIONX_DURATION = 750L;
@@ -94,7 +92,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private NavigationViewModel navigationViewModel;
   private NavigationMapboxMap navigationMap;
   private NavigationOnCameraTrackingChangedListener onTrackingChangedListener;
-  private NavigationMapboxMapInstanceState mapInstanceState;
+  private Bundle mapInstanceState;
   private CameraPosition initialMapCameraPosition;
   private boolean isMapInitialized;
   private boolean isSubscribed;
@@ -183,7 +181,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
     updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
     restoreInstructionMutedState(navigationViewInstanceState.isMuted());
-    mapInstanceState = savedInstanceState.getParcelable(MAP_INSTANCE_STATE_KEY);
+    mapInstanceState = savedInstanceState;
   }
 
   public void onStart() {
@@ -736,7 +734,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationMap = new NavigationMapboxMap(mapView, map, this, null, false, false);
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
-      navigationMap.restoreFrom(mapInstanceState);
+      navigationMap.restoreStateFrom(mapInstanceState);
       return;
     }
   }
@@ -783,7 +781,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void saveNavigationMapInstanceState(Bundle outState) {
     if (navigationMap != null) {
-      navigationMap.saveStateWith(MAP_INSTANCE_STATE_KEY, outState);
+      navigationMap.saveStateWith(outState);
     }
   }
 
