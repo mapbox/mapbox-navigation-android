@@ -60,9 +60,9 @@ class ExitSignCreator extends NodeCreator<BannerComponentNode, ExitSignVerifier>
       TextView exitSignView;
 
       if (modifier.equals(LEFT)) {
-        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_left, root, false);
+        exitSignView = (TextView) inflater.inflate(R.layout.mapbox_exit_sign_view_left, root, false);
       } else {
-        exitSignView = (TextView) inflater.inflate(R.layout.exit_sign_view_right, root, false);
+        exitSignView = (TextView) inflater.inflate(R.layout.mapbox_exit_sign_view_right, root, false);
       }
 
       exitSignView.setText(exitNumber);

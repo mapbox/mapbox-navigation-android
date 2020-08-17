@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="NavigationMapRoute">
+    <style name="MapboxStyleNavigationMapRoute">
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
         <item name="routeLowCongestionColor">@color/mapbox_navigation_route_layer_blue</item>
@@ -57,7 +57,7 @@
         <item name="roundedLineCap">true</item>
     </style>
 
-    <style name="NavigationViewLight" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="MapboxStyleNavigationViewLight" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:colorPrimary" tools:targetApi="lollipop">@android:color/white</item>
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary</item>
@@ -93,18 +93,18 @@
             @color/mapbox_navigation_view_color_progress_background
         </item>
 
-        <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
+        <item name="navigationViewRouteStyle">@style/MapboxStyleNavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/NavigationLocationLayerStyle</item>
+        <item name="navigationViewLocationLayerStyle">@style/MapboxStyleNavigationLocationLayerStyle</item>
 
-        <item name="navigationViewDestinationMarker">@drawable/map_marker_light</item>
+        <item name="navigationViewDestinationMarker">@drawable/mapbox_ic_map_marker_light</item>
 
-        <item name="navigationViewRouteOverviewDrawable">@drawable/ic_route_preview</item>
+        <item name="navigationViewRouteOverviewDrawable">@drawable/mapbox_ic_route_preview</item>
 
-        <item name="navigationViewMapStyle">@string/navigation_guidance_day</item>
+        <item name="navigationViewMapStyle">@string/mapbox_navigation_guidance_day</item>
     </style>
 
-    <style name="NavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="MapboxStyleNavigationViewDark" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:colorPrimary" tools:targetApi="lollipop">@android:color/white</item>
         <item name="navigationViewPrimary">@color/mapbox_navigation_view_color_primary_dark</item>
         <item name="navigationViewSecondary">@color/mapbox_navigation_view_color_secondary_dark
@@ -143,24 +143,24 @@
             @color/mapbox_navigation_view_color_progress_background_dark
         </item>
 
-        <item name="navigationViewRouteStyle">@style/NavigationMapRoute</item>
+        <item name="navigationViewRouteStyle">@style/MapboxStyleNavigationMapRoute</item>
 
-        <item name="navigationViewLocationLayerStyle">@style/NavigationLocationLayerStyle</item>
+        <item name="navigationViewLocationLayerStyle">@style/MapboxStyleNavigationLocationLayerStyle</item>
 
-        <item name="navigationViewDestinationMarker">@drawable/map_marker_dark</item>
+        <item name="navigationViewDestinationMarker">@drawable/mapbox_ic_map_marker_dark</item>
 
-        <item name="navigationViewRouteOverviewDrawable">@drawable/ic_route_preview_dark</item>
+        <item name="navigationViewRouteOverviewDrawable">@drawable/mapbox_ic_route_preview_dark</item>
 
-        <item name="navigationViewMapStyle">@string/navigation_guidance_night</item>
+        <item name="navigationViewMapStyle">@string/mapbox_navigation_guidance_night</item>
     </style>
 
-    <style name="NavigationLocationLayerStyle" parent="@style/mapbox_LocationComponent">
+    <style name="MapboxStyleNavigationLocationLayerStyle" parent="@style/mapbox_LocationComponent">
         <item name="mapbox_trackingAnimationDurationMultiplier">2.0</item>
         <item name="mapbox_trackingGesturesManagement">true</item>
     </style>
 
     <!-- Default InstructionView style -->
-    <style name="InstructionView">
+    <style name="MapboxStyleInstructionView">
         <item name="instructionViewPrimaryBackgroundColor">?attr/navigationViewBannerBackground
         </item>
         <item name="instructionViewSecondaryBackgroundColor">?attr/navigationViewSecondary</item>
@@ -170,7 +170,7 @@
         </item>
     </style>
 
-    <style name="ManeuverView">
+    <style name="MapboxStyleManeuverView">
         <item name="maneuverViewPrimaryColor">
             ?attr/navigationViewBannerManeuverPrimary
         </item>
@@ -179,7 +179,7 @@
         </item>
     </style>
 
-    <style name="MapboxManeuverView">
+    <style name="MapboxStyleManeuverViewDefault">
         <item name="maneuverViewPrimaryColor">
             @color/mapbox_navigation_view_color_banner_maneuver_primary
         </item>
@@ -189,19 +189,19 @@
     </style>
 
     <!-- Default SoundButton style -->
-    <style name="SoundButton">
+    <style name="MapboxStyleSoundButton">
         <item name="soundButtonPrimaryColor">?attr/navigationViewPrimary</item>
         <item name="soundButtonSecondaryColor">?attr/navigationViewSecondary</item>
     </style>
 
     <!-- Default FeedbackButton style -->
-    <style name="FeedbackButton">
+    <style name="MapboxStyleFeedbackButton">
         <item name="feedbackButtonPrimaryColor">?attr/navigationViewPrimary</item>
         <item name="feedbackButtonSecondaryColor">?attr/navigationViewSecondary</item>
     </style>
 
     <!-- Default AlertView style -->
-    <style name="AlertView">
+    <style name="MapboxStyleAlertView">
         <item name="alertViewBackgroundColor">?attr/navigationViewBannerBackground</item>
         <item name="alertViewProgressBarBackgroundColor">?attr/navigationViewProgressBackground
         </item>
@@ -210,19 +210,19 @@
     </style>
 
     <!-- Default RecenterButton style -->
-    <style name="RecenterButton">
+    <style name="MapboxStyleRecenterButton">
         <item name="recenterButtonPrimaryColor">?attr/navigationViewPrimary</item>
         <item name="recenterButtonSecondaryColor">?attr/navigationViewSecondary</item>
     </style>
 
     <!-- Default WayNameView style -->
-    <style name="WayNameView">
+    <style name="MapboxStyleWayNameView">
         <item name="wayNameViewPrimaryColor">?attr/navigationViewPrimary</item>
         <item name="wayNameViewSecondaryColor">?attr/navigationViewAccent</item>
     </style>
 
     <!-- Default SummaryBottomSheet style -->
-    <style name="SummaryBottomSheet">
+    <style name="MapboxStyleSummaryBottomSheet">
         <item name="summaryBottomSheetPrimaryColor">?attr/navigationViewPrimary</item>
         <item name="summaryBottomSheetSecondaryColor">?attr/navigationViewSecondary</item>
         <item name="summaryBottomSheetDividerColor">?attr/navigationViewDivider</item>
@@ -234,9 +234,9 @@
         <item name="summaryBottomSheetSecondaryTextColor">?attr/navigationViewSecondaryText</item>
     </style>
 
-    <style name="MapboxTextViewStyle" parent="android:TextAppearance" />
+    <style name="MapboxStyleTextView" parent="android:TextAppearance" />
 
-    <style name="FeedbackBottomSheetTitle" parent="MapboxTextViewStyle">
+    <style name="MapboxStyleFeedbackBottomSheetTitle" parent="MapboxStyleTextView">
         <item name="android:maxLines">1</item>
         <item name="android:textSize">21sp</item>
         <item name="android:textStyle">bold</item>
@@ -246,46 +246,46 @@
         </item>
     </style>
 
-    <style name="FeedbackBottomSheetIssueListLayout">
-        <item name="android:background">@drawable/mapbox_feedback_bottom_issue_background</item>
+    <style name="MapboxStyleFeedbackBottomSheetIssueListLayout">
+        <item name="android:background">@drawable/mapbox_bg_feedback_issue_list</item>
         <item name="android:orientation">vertical</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingBottom">12dp</item>
     </style>
 
-    <style name="FeedbackBottomSheetIssueListTitle" parent="MapboxTextViewStyle">
+    <style name="MapboxStyleFeedbackBottomSheetIssueListTitle" parent="MapboxStyleTextView">
         <item name="android:textSize">21sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:maxLines">1</item>
-        <item name="android:paddingTop">@dimen/dimen_8dp</item>
-        <item name="android:paddingBottom">@dimen/dimen_8dp</item>
+        <item name="android:paddingTop">@dimen/mapbox_dimen_8dp</item>
+        <item name="android:paddingBottom">@dimen/mapbox_dimen_8dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
     </style>
 
-    <style name="FeedbackBottomSheetIssueDescriptionText" parent="MapboxTextViewStyle">
+    <style name="MapboxStyleFeedbackBottomSheetIssueDescriptionText" parent="MapboxStyleTextView">
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
     </style>
 
-    <style name="FeedbackBottomSheetTopBanner">
+    <style name="MapboxStyleFeedbackBottomSheetTopBanner">
         <item name="android:background">@color/mapbox_feedback_bottom_sheet_primary</item>
     </style>
 
-    <style name="FeedbackBottomSheetDescriptionItemViewHolder">
-        <item name="android:background">@drawable/mapbox_feedback_bottom_issue_background</item>
+    <style name="MapboxStyleFeedbackBottomSheetDescriptionItem">
+        <item name="android:background">@drawable/mapbox_bg_feedback_issue_list</item>
     </style>
 
-    <style name="FeedbackBottomSheetDescriptionItemText" parent="MapboxTextViewStyle">
+    <style name="MapboxStyleFeedbackBottomSheetDescriptionItemText" parent="MapboxStyleTextView">
         <item name="android:textSize">21sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/mapbox_feedback_bottom_sheet_secondary_text</item>
     </style>
 
-    <style name="FeedbackBottomSheetDescriptionItemCheckbox" parent="Theme.AppCompat.Light">
+    <style name="MapboxStyleFeedbackBottomSheetDescriptionItemCheckbox" parent="Theme.AppCompat.Light">
         <item name="colorControlNormal">@color/mapbox_feedback_bottom_sheet_icon_secondary</item>
         <item name="colorControlActivated">@color/mapbox_feedback_bottom_sheet_icon_secondary</item>
     </style>

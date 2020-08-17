@@ -31,7 +31,7 @@ public class TurnLaneAdapter extends RecyclerView.Adapter<TurnLaneViewHolder> {
   @Override
   public TurnLaneViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.turn_lane_listitem_layout, parent, false);
+        .inflate(R.layout.mapbox_item_instruction_turn_lane, parent, false);
 
     return new TurnLaneViewHolder(view);
   }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="mapbox_image_width_notification_maneuver">48dp</dimen>
-    <dimen name="mapbox_image_height_notification_maneuver">48dp</dimen>
+    <dimen name="mapbox_notification_maneuver_image_width">48dp</dimen>
+    <dimen name="mapbox_notification_maneuver_image_height">48dp</dimen>
 </resources>

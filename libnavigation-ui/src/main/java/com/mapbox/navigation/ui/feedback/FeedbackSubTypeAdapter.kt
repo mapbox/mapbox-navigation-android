@@ -19,7 +19,7 @@ internal class FeedbackSubTypeAdapter constructor(
     ): FeedbackSubTypeViewHolder {
         return FeedbackSubTypeViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.mapbox_feedback_detail_viewholder_layout, parent, false),
+                .inflate(R.layout.mapbox_item_feedback_detail, parent, false),
             itemClickListener
         )
     }

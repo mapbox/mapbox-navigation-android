@@ -160,9 +160,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     NavigationViewInstanceState navigationViewInstanceState = new NavigationViewInstanceState(
         bottomSheetBehaviorState, recenterBtn.getVisibility(), instructionView.isShowingInstructionList(),
         isWayNameVisible, wayNameView.retrieveWayNameText(), navigationViewModel.isMuted());
-    String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
+    String instanceKey = getContext().getString(R.string.mapbox_navigation_view_instance_state);
     outState.putParcelable(instanceKey, navigationViewInstanceState);
-    outState.putBoolean(getContext().getString(R.string.navigation_running), navigationViewModel.isRunning());
+    outState.putBoolean(getContext().getString(R.string.mapbox_navigation_running), navigationViewModel.isRunning());
     mapView.onSaveInstanceState(outState);
     saveNavigationMapInstanceState(outState);
   }
@@ -175,7 +175,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    * @param savedInstanceState to extract state variables
    */
   public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-    String instanceKey = getContext().getString(R.string.navigation_view_instance_state);
+    String instanceKey = getContext().getString(R.string.mapbox_navigation_view_instance_state);
     NavigationViewInstanceState navigationViewInstanceState = savedInstanceState.getParcelable(instanceKey);
     recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
     wayNameView.setVisibility(navigationViewInstanceState.isWayNameVisible() ? VISIBLE : INVISIBLE);
@@ -418,7 +418,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   @Override
   public void onFeedbackSent() {
-    Snackbar snackbar = Snackbar.make(this, R.string.feedback_reported, Snackbar.LENGTH_SHORT);
+    Snackbar snackbar = Snackbar.make(this, R.string.mapbox_feedback_reported, Snackbar.LENGTH_SHORT);
     if (!isSummaryBottomSheetHidden()) {
       snackbar.setAnchorView(summaryBottomSheet);
     }
@@ -681,7 +681,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   };
 
   private void initializeView() {
-    inflate(getContext(), R.layout.navigation_view_layout, this);
+    inflate(getContext(), R.layout.mapbox_navigation_view, this);
     bind();
     initializeNavigationViewModel();
     initializeNavigationEventDispatcher();
@@ -749,7 +749,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   private void moveMapboxLogoAboveBottomSheet() {
     int summaryBottomSheetHeight = (int) getContext().getResources()
-        .getDimension(R.dimen.summary_bottomsheet_height);
+        .getDimension(R.dimen.mapbox_summary_bottom_sheet_height);
     if (navigationMap != null && navigationMap.retrieveMap() != null) {
       UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
       updateMapboxLogoMargins(
@@ -767,7 +767,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   private void moveMapboxAttributionAboveBottomSheet() {
     int summaryBottomSheetHeight = (int) getContext().getResources()
-        .getDimension(R.dimen.summary_bottomsheet_height);
+        .getDimension(R.dimen.mapbox_summary_bottom_sheet_height);
     if (navigationMap != null && navigationMap.retrieveMap() != null) {
       UiSettings uiSettings = navigationMap.retrieveMap().getUiSettings();
       updateAttributionMargins(
@@ -813,10 +813,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   @NonNull
   private int[] buildRouteOverviewPadding(@NonNull Context context) {
     Resources resources = context.getResources();
-    int leftRightPadding = (int) resources.getDimension(R.dimen.route_overview_left_right_padding);
-    int paddingBuffer = (int) resources.getDimension(R.dimen.route_overview_buffer_padding);
-    int instructionHeight = (int) (resources.getDimension(R.dimen.instruction_layout_height) + paddingBuffer);
-    int summaryHeight = (int) resources.getDimension(R.dimen.summary_bottomsheet_height);
+    int leftRightPadding = (int) resources.getDimension(R.dimen.mapbox_route_overview_left_right_padding);
+    int paddingBuffer = (int) resources.getDimension(R.dimen.mapbox_route_overview_buffer_padding);
+    int instructionHeight = (int) (resources.getDimension(R.dimen.mapbox_instruction_content_height) + paddingBuffer);
+    int summaryHeight = (int) resources.getDimension(R.dimen.mapbox_summary_bottom_sheet_height);
     return new int[] { leftRightPadding, instructionHeight, leftRightPadding, summaryHeight };
   }
 
@@ -834,7 +834,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private void updatePresenterState(@Nullable Bundle savedInstanceState) {
     if (savedInstanceState != null) {
-      String navigationRunningKey = getContext().getString(R.string.navigation_running);
+      String navigationRunningKey = getContext().getString(R.string.mapbox_navigation_running);
       boolean resumeState = savedInstanceState.getBoolean(navigationRunningKey);
       navigationPresenter.updateResumeState(resumeState);
     }

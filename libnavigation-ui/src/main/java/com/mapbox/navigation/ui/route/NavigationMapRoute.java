@@ -511,7 +511,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     @NonNull private MapboxMap mapboxMap;
     @NonNull private LifecycleOwner lifecycleOwner;
     @Nullable private MapboxNavigation navigation;
-    @StyleRes private int styleRes = R.style.NavigationMapRoute;
+    @StyleRes private int styleRes = R.style.MapboxStyleNavigationMapRoute;
     @Nullable private String belowLayer;
     private boolean vanishRouteLineEnabled = false;
     @Nullable private MapRouteLineInitializedCallback routeLineInitializedCallback;

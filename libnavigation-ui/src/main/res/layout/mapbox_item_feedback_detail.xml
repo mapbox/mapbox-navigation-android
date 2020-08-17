@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/MapboxStyleFeedbackBottomSheetDescriptionItem"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/mapbox_feedback_description_item_view_height"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    tools:ignore="UnusedAttribute">
+
+    <androidx.appcompat.widget.AppCompatCheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:gravity="center"
+        android:scaleX="1.6"
+        android:scaleY="1.6"
+        android:theme="@style/MapboxStyleFeedbackBottomSheetDescriptionItemCheckbox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/feedbackSubType"
+        style="@style/MapboxStyleFeedbackBottomSheetDescriptionItemText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="@dimen/mapbox_dimen_8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/checkbox"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Feedback Text Feedback Text Feedback Text Feedback Text" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

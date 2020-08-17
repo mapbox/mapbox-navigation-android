@@ -37,9 +37,9 @@ public class ThemeSwitcher {
     int markerResId = destinationMarkerResId.resourceId;
     if (!isValid(markerResId)) {
       if (isNightModeEnabled(context)) {
-        markerResId = R.drawable.map_marker_dark;
+        markerResId = R.drawable.mapbox_ic_map_marker_dark;
       } else {
-        markerResId = R.drawable.map_marker_light;
+        markerResId = R.drawable.mapbox_ic_map_marker_light;
       }
     }
 
@@ -77,17 +77,17 @@ public class ThemeSwitcher {
     if (shouldSetThemeFromPreferences(context)) {
       int prefLightTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_LIGHT_THEME);
       int prefDarkTheme = retrieveThemeResIdFromPreferences(context, NavigationConstants.NAVIGATION_VIEW_DARK_THEME);
-      prefLightTheme = prefLightTheme == 0 ? R.style.NavigationViewLight : prefLightTheme;
-      prefDarkTheme = prefLightTheme == 0 ? R.style.NavigationViewDark : prefDarkTheme;
+      prefLightTheme = prefLightTheme == 0 ? R.style.MapboxStyleNavigationViewLight : prefLightTheme;
+      prefDarkTheme = prefLightTheme == 0 ? R.style.MapboxStyleNavigationViewDark : prefDarkTheme;
       context.setTheme(nightModeEnabled ? prefDarkTheme : prefLightTheme);
       return;
     }
 
-    TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.NavigationView);
-    int lightTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationLightTheme,
-      R.style.NavigationViewLight);
-    int darkTheme = styledAttributes.getResourceId(R.styleable.NavigationView_navigationDarkTheme,
-      R.style.NavigationViewDark);
+    TypedArray styledAttributes = context.obtainStyledAttributes(attrs, R.styleable.MapboxStyleNavigationView);
+    int lightTheme = styledAttributes.getResourceId(R.styleable.MapboxStyleNavigationView_navigationLightTheme,
+      R.style.MapboxStyleNavigationViewLight);
+    int darkTheme = styledAttributes.getResourceId(R.styleable.MapboxStyleNavigationView_navigationDarkTheme,
+      R.style.MapboxStyleNavigationViewDark);
     styledAttributes.recycle();
 
     context.setTheme(nightModeEnabled ? darkTheme : lightTheme);

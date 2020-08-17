@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Atunjade ...</string>
+    <string name="mapbox_rerouting">Atunjade ...</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">Tun-ile-iṣẹ</string>
+    <string name="mapbox_re_center">Tun-ile-iṣẹ</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Muted</string>
+    <string name="mapbox_muted">Muted</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Unmuted</string>
+    <string name="mapbox_unmuted">Unmuted</string>
 
     <!-- Shown after a feedback type has been submitted -->
-    <string name="feedback_submitted">Esi Firanṣẹ</string>
+    <string name="mapbox_feedback_submitted">Esi Firanṣẹ</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
-    <string name="report_problem">Sọkọ Iṣoro</string>
+    <string name="mapbox_report_problem">Sọkọ Iṣoro</string>
 
 </resources>

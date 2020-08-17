@@ -103,10 +103,10 @@ class MapRouteArrow {
     this.maneuverPoints = new ArrayList<>();
 
     Context context = mapView.getContext();
-    TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.NavigationMapRoute);
-    arrowColor = typedArray.getColor(R.styleable.NavigationMapRoute_upcomingManeuverArrowColor,
+    TypedArray typedArray = context.obtainStyledAttributes(styleRes, R.styleable.MapboxStyleNavigationMapRoute);
+    arrowColor = typedArray.getColor(R.styleable.MapboxStyleNavigationMapRoute_upcomingManeuverArrowColor,
             ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_color));
-    arrowBorderColor = typedArray.getColor(R.styleable.NavigationMapRoute_upcomingManeuverArrowBorderColor,
+    arrowBorderColor = typedArray.getColor(R.styleable.MapboxStyleNavigationMapRoute_upcomingManeuverArrowBorderColor,
             ContextCompat.getColor(context, R.color.mapbox_navigation_route_upcoming_maneuver_arrow_border_color));
     typedArray.recycle();
 
@@ -231,7 +231,7 @@ class MapRouteArrow {
   }
 
   private void addArrowHeadIcon() {
-    int headResId = R.drawable.ic_arrow_head;
+    int headResId = R.drawable.mapbox_ic_arrow_head;
     Drawable arrowHead = AppCompatResources.getDrawable(mapView.getContext(), headResId);
     if (arrowHead == null) {
       return;
@@ -243,7 +243,7 @@ class MapRouteArrow {
   }
 
   private void addArrowHeadIconCasing() {
-    int casingResId = R.drawable.ic_arrow_head_casing;
+    int casingResId = R.drawable.mapbox_ic_arrow_head_casing;
     Drawable arrowHeadCasing = AppCompatResources.getDrawable(mapView.getContext(), casingResId);
     if (arrowHeadCasing == null) {
       return;

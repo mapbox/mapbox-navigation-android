@@ -355,7 +355,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     rvInstructions.stopScroll();
     beginDelayedTransition();
     if (ViewUtils.isLandscape(getContext())) {
-      updateLandscapeConstraintsTo(R.layout.instruction_layout);
+      updateLandscapeConstraintsTo(R.layout.mapbox_partial_instruction_view);
       rerouteLayout.setBackgroundColor(primaryBackgroundColor);
     }
     instructionListLayout.setVisibility(GONE);
@@ -372,11 +372,12 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
     if (ViewUtils.isLandscape(getContext())) {
-      updateLandscapeConstraintsTo(R.layout.instruction_layout_alt);
+      updateLandscapeConstraintsTo(R.layout.mapbox_partial_instruction_view_alt);
       rerouteLayout.setBackgroundColor(secondaryBackgroundColor);
     }
 
-    final Animation animation = AnimationUtils.loadAnimation(this.getContext(), R.anim.instruction_view_fade_in);
+    final Animation animation =
+        AnimationUtils.loadAnimation(this.getContext(), R.anim.mapbox_animation_instruction_view_fade_in);
     animation.setAnimationListener(getInstructionListAnimationListener());
     instructionListLayout.setVisibility(VISIBLE);
     instructionListLayout.startAnimation(animation);
@@ -493,40 +494,40 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.InstructionView);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleInstructionView);
     primaryBackgroundColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.InstructionView_instructionViewPrimaryBackgroundColor,
+            R.styleable.MapboxStyleInstructionView_instructionViewPrimaryBackgroundColor,
             R.color.mapbox_instruction_view_primary_background));
 
     secondaryBackgroundColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.InstructionView_instructionViewSecondaryBackgroundColor,
+            R.styleable.MapboxStyleInstructionView_instructionViewSecondaryBackgroundColor,
             R.color.mapbox_instruction_view_secondary_background));
 
     listViewBackgroundColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.InstructionView_instructionListViewBackgroundColor,
+            R.styleable.MapboxStyleInstructionView_instructionListViewBackgroundColor,
             R.color.mapbox_instruction_list_view_background));
 
     primaryTextColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.InstructionView_instructionViewPrimaryTextColor,
+            R.styleable.MapboxStyleInstructionView_instructionViewPrimaryTextColor,
             R.color.mapbox_instruction_view_primary_text));
 
     secondaryTextColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.InstructionView_instructionViewSecondaryTextColor,
+            R.styleable.MapboxStyleInstructionView_instructionViewSecondaryTextColor,
             R.color.mapbox_instruction_view_secondary_text));
 
     maneuverViewStyle = typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewManeuverViewStyle, R.style.ManeuverView);
+        R.styleable.MapboxStyleInstructionView_instructionViewManeuverViewStyle, R.style.MapboxStyleManeuverView);
     soundButtonStyle = typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewSoundButtonStyle, -1);
+        R.styleable.MapboxStyleInstructionView_instructionViewSoundButtonStyle, -1);
     feedbackButtonStyle = typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewFeedbackButtonStyle, -1);
+        R.styleable.MapboxStyleInstructionView_instructionViewFeedbackButtonStyle, -1);
     alertViewStyle = typedArray.getResourceId(
-        R.styleable.InstructionView_instructionViewAlertViewStyle, -1);
+        R.styleable.MapboxStyleInstructionView_instructionViewAlertViewStyle, -1);
 
     typedArray.recycle();
 
@@ -536,21 +537,21 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @SuppressLint("CustomViewStyleable")
   private void initManeuverViewAttributes() {
     TypedArray maneuverViewTypedArray =
-        getContext().obtainStyledAttributes(maneuverViewStyle, R.styleable.ManeuverView);
+        getContext().obtainStyledAttributes(maneuverViewStyle, R.styleable.MapboxStyleManeuverView);
     @ColorRes int maneuverViewPrimaryColorRes = maneuverViewTypedArray.getResourceId(
-        R.styleable.ManeuverView_maneuverViewPrimaryColor,
+        R.styleable.MapboxStyleManeuverView_maneuverViewPrimaryColor,
         R.color.mapbox_instruction_maneuver_view_primary);
     maneuverViewPrimaryColor = ContextCompat.getColor(getContext(), maneuverViewPrimaryColorRes);
 
     @ColorRes int maneuverViewSecondaryColorRes = maneuverViewTypedArray.getResourceId(
-        R.styleable.ManeuverView_maneuverViewSecondaryColor,
+        R.styleable.MapboxStyleManeuverView_maneuverViewSecondaryColor,
         R.color.mapbox_instruction_maneuver_view_secondary);
     maneuverViewSecondaryColor = ContextCompat.getColor(getContext(), maneuverViewSecondaryColorRes);
 
     if (maneuverViewPrimaryColorRes == R.color.mapbox_instruction_maneuver_view_primary) {
       // Ref: https://github.com/mapbox/mapbox-navigation-android/issues/3133
       // if using default MapboxManeuverView, need to assign MapboxManeuverView style for turnLane view use.
-      maneuverViewStyle = R.style.MapboxManeuverView;
+      maneuverViewStyle = R.style.MapboxStyleManeuverViewDefault;
     }
 
     maneuverViewTypedArray.recycle();
@@ -568,7 +569,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         .roundingIncrement(roundingIncrement)
         .locale(locale)
         .build();
-    inflate(getContext(), R.layout.instruction_view_layout, this);
+    inflate(getContext(), R.layout.mapbox_instruction_view, this);
   }
 
   /**
@@ -691,8 +692,8 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    */
   private void initializeAnimations() {
     Context context = getContext();
-    rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
-    rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
+    rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.mapbox_animation_slide_down_top);
+    rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.mapbox_animation_slide_up_top);
   }
 
   private void updateBannerInstructions(@Nullable BannerText primaryBanner, BannerText secondaryBanner,
