@@ -10,7 +10,7 @@
     </style>
 
     <!-- Define your own style for each of the Mapbox Navigation UI SDK component -->
-    <style name="CustomInstructionView" parent="InstructionView">
+    <style name="CustomInstructionView" parent="MapboxStyleInstructionView">
         <!-- Color of the banner view background -->
         <item name="instructionViewPrimaryBackgroundColor">
             @color/navigation_instruction_view_primary_background
@@ -82,7 +82,7 @@
         <!-- Recenter button background color -->
         <item name="recenterButtonPrimaryColor">@color/navigation_primary_background</item>
         <!-- Recenter button text color -->
-        <item name="recenterButtonSecondaryColor">@color/navigation_accent</item>
+        <item name="recenterButtonSecondaryColor">@color/navigation_secondary_background</item>
     </style>
 
     <style name="CustomWayNameView">
@@ -107,11 +107,11 @@
         <item name="summaryBottomSheetSecondaryTextColor">@color/navigation_secondary_text</item>
     </style>
 
-    <style name="CustomRouteTheme" parent="NavigationViewLight">
+    <style name="CustomRouteTheme" parent="MapboxStyleNavigationViewLight">
         <item name="navigationViewRouteStyle">@style/CustomRouteStyle</item>
     </style>
 
-    <style name="CustomRouteStyle" parent="@style/NavigationMapRoute">
+    <style name="CustomRouteStyle" parent="@style/MapboxStyleNavigationMapRoute">
         <item name="routeColor">@color/customRouteColor</item>
         <item name="routeLowCongestionColor">@color/customRouteLowCongestionColor</item>
         <item name="routeUnknownCongestionColor">@color/customRouteUnknownCongestionColor</item>

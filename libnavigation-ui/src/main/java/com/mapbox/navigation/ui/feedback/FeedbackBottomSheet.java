@@ -111,7 +111,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.mapbox_feedback_bottom_sheet_layout, container, false);
+    return inflater.inflate(R.layout.mapbox_feedback_bottom_sheet, container, false);
   }
 
   @Override
@@ -232,7 +232,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   }
 
   private void initTitleTextView() {
-    feedbackBottomSheetTitleText.setText(R.string.report_feedback);
+    feedbackBottomSheetTitleText.setText(R.string.mapbox_report_feedback);
   }
 
   private void initButtons() {
@@ -318,16 +318,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private List<FeedbackItem> buildGuidanceIssueList() {
     List<FeedbackItem> list = new ArrayList<>();
 
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_looks_incorrect),
-      R.drawable.ic_feedback_looks_incorrect,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_looks_incorrect),
+      R.drawable.mapbox_ic_feedback_looks_incorrect,
       FeedbackEvent.INCORRECT_VISUAL_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_confusing_audio),
-      R.drawable.ic_feedback_confusing_audio,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_confusing_audio),
+      R.drawable.mapbox_ic_feedback_confusing_audio,
       FeedbackEvent.INCORRECT_AUDIO_GUIDANCE,
       EMPTY_FEEDBACK_DESCRIPTION));
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_positioning_issue),
-        R.drawable.ic_feedback_positioning_issue,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_positioning_issue),
+        R.drawable.mapbox_ic_feedback_positioning_issue,
         FeedbackEvent.POSITIONING_ISSUE,
         EMPTY_FEEDBACK_DESCRIPTION));
 
@@ -351,16 +351,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private List<FeedbackItem> buildNavigationIssueList() {
     List<FeedbackItem> list = new ArrayList<>();
 
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_route_quality),
-      R.drawable.ic_feedback_route_quality,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_route_quality),
+      R.drawable.mapbox_ic_feedback_route_quality,
       FeedbackEvent.ROUTING_ERROR,
       EMPTY_FEEDBACK_DESCRIPTION));
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_illegal_route),
-      R.drawable.ic_feedback_illegal_route,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_illegal_route),
+      R.drawable.mapbox_ic_feedback_illegal_route,
       FeedbackEvent.NOT_ALLOWED,
       EMPTY_FEEDBACK_DESCRIPTION));
-    list.add(new FeedbackItem(getResources().getString(R.string.feedback_type_road_closure),
-      R.drawable.ic_feedback_road_closure,
+    list.add(new FeedbackItem(getResources().getString(R.string.mapbox_feedback_type_road_closure),
+      R.drawable.mapbox_ic_feedback_road_closure,
       FeedbackEvent.ROAD_CLOSED,
       EMPTY_FEEDBACK_DESCRIPTION));
 
@@ -444,28 +444,28 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.TURN_ICON_INCORRECT,
-      R.string.feedback_description_turn_icon_incorrect));
+      R.string.mapbox_feedback_description_turn_icon_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.STREET_NAME_INCORRECT,
-      R.string.feedback_description_street_name_incorrect));
+      R.string.mapbox_feedback_description_street_name_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.INSTRUCTION_UNNECESSARY,
-      R.string.feedback_description_instruction_unnecessary));
+      R.string.mapbox_feedback_description_instruction_unnecessary));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.INSTRUCTION_MISSING,
-      R.string.feedback_description_instruction_missing));
+      R.string.mapbox_feedback_description_instruction_missing));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.MANEUVER_INCORRECT,
-      R.string.feedback_description_maneuver_incorrect));
+      R.string.mapbox_feedback_description_maneuver_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.EXIT_INFO_INCORRECT,
-      R.string.feedback_description_exit_info_incorrect));
+      R.string.mapbox_feedback_description_exit_info_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.LANE_GUIDANCE_INCORRECT,
-      R.string.feedback_description_lane_guidance_incorrect));
+      R.string.mapbox_feedback_description_lane_guidance_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROAD_KNOW_BY_DIFFERENT_NAME,
-      R.string.feedback_description_road_know_by_different_name));
+      R.string.mapbox_feedback_description_road_know_by_different_name));
 
     return list;
   }
@@ -476,16 +476,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.GUIDANCE_TOO_EARLY,
-      R.string.feedback_description_guidance_too_early));
+      R.string.mapbox_feedback_description_guidance_too_early));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.GUIDANCE_TOO_LATE,
-      R.string.feedback_description_guidance_too_late));
+      R.string.mapbox_feedback_description_guidance_too_late));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.PRONUNCIATION_INCORRECT,
-      R.string.feedback_description_pronunciation_incorrect));
+      R.string.mapbox_feedback_description_pronunciation_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROAD_NAME_REPEATED,
-      R.string.feedback_description_road_name_repeated));
+      R.string.mapbox_feedback_description_road_name_repeated));
 
     return list;
   }
@@ -496,19 +496,19 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROUTE_NOT_DRIVE_ABLE,
-      R.string.feedback_description_route_not_drive_able));
+      R.string.mapbox_feedback_description_route_not_drive_able));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROUTE_NOT_PREFERRED,
-      R.string.feedback_description_route_not_preferred));
+      R.string.mapbox_feedback_description_route_not_preferred));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ALTERNATIVE_ROUTE_NOT_EXPECTED,
-      R.string.feedback_description_alternative_route_not_expected));
+      R.string.mapbox_feedback_description_alternative_route_not_expected));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROUTE_INCLUDED_MISSING_ROADS,
-      R.string.feedback_description_route_included_missing_roads));
+      R.string.mapbox_feedback_description_route_included_missing_roads));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROUTE_HAD_ROADS_TOO_NARROW_TO_PASS,
-      R.string.feedback_description_route_had_roads_too_narrow_to_pass));
+      R.string.mapbox_feedback_description_route_had_roads_too_narrow_to_pass));
 
     return list;
   }
@@ -519,16 +519,16 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROUTED_DOWN_A_ONE_WAY,
-      R.string.feedback_description_routed_down_a_one_way));
+      R.string.mapbox_feedback_description_routed_down_a_one_way));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.TURN_WAS_NOT_ALLOWED,
-      R.string.feedback_description_turn_was_not_allowed));
+      R.string.mapbox_feedback_description_turn_was_not_allowed));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.CARS_NOT_ALLOWED_ON_STREET,
-      R.string.feedback_description_cars_not_allowed_on_street));
+      R.string.mapbox_feedback_description_cars_not_allowed_on_street));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.TURN_AT_INTERSECTION_WAS_UNPROTECTED,
-      R.string.feedback_description_turn_at_intersection_was_unprotected));
+      R.string.mapbox_feedback_description_turn_at_intersection_was_unprotected));
 
     return list;
   }
@@ -539,10 +539,10 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
 
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.STREET_PERMANENTLY_BLOCKED_OFF,
-      R.string.feedback_description_street_permanently_blocked_off));
+      R.string.mapbox_feedback_description_street_permanently_blocked_off));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROAD_IS_MISSING_FROM_MAP,
-      R.string.feedback_description_road_is_missing_from_map));
+      R.string.mapbox_feedback_description_road_is_missing_from_map));
 
     return list;
   }

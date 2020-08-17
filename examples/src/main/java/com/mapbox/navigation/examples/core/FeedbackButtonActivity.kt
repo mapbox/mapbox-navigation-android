@@ -336,7 +336,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 fun showFeedbackSentSnackBar(
     context: Context,
     view: View,
-    @StringRes message: Int = R.string.feedback_reported,
+    @StringRes message: Int = R.string.mapbox_feedback_reported,
     length: Int = LENGTH_SHORT,
     setAnchorView: Boolean = false
 ) {

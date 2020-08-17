@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Indicates that rerouting is in progress -->
-    <string name="rerouting">Пересчёт маршрута…</string>
+    <string name="mapbox_rerouting">Пересчёт маршрута…</string>
 
     <!-- Button title for re-centering tracking -->
-    <string name="re_center">По центру</string>
+    <string name="mapbox_re_center">По центру</string>
 
     <!-- Indicates voice instructions are muted -->
-    <string name="muted">Не проговаривать</string>
+    <string name="mapbox_muted">Не проговаривать</string>
 
     <!-- Indicates voice instructions are unmuted -->
-    <string name="unmuted">Проговаривать</string>
+    <string name="mapbox_unmuted">Проговаривать</string>
 
     <!-- Feedback -->
-    <string name="report_feedback">Сообщить об ошибке</string>
+    <string name="mapbox_report_feedback">Сообщить об ошибке</string>
 
     <!-- Shown after a feedback type has been submitted -->
-    <string name="feedback_submitted">Отзыв отправлен</string>
+    <string name="mapbox_feedback_submitted">Отзыв отправлен</string>
 
     <!-- Shown in off-route scenarios to provide feedback -->
-    <string name="report_problem">Сообщить о проблеме</string>
+    <string name="mapbox_report_problem">Сообщить о проблеме</string>
 
 </resources>

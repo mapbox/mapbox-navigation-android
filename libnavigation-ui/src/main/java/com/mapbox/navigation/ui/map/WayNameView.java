@@ -68,18 +68,18 @@ public class WayNameView extends FrameLayout {
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.WayNameView);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleWayNameView);
     primaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.WayNameView_wayNameViewPrimaryColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleWayNameView_wayNameViewPrimaryColor,
         R.color.mapbox_way_name_view_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-      typedArray.getResourceId(R.styleable.WayNameView_wayNameViewSecondaryColor,
+      typedArray.getResourceId(R.styleable.MapboxStyleWayNameView_wayNameViewSecondaryColor,
         R.color.mapbox_way_name_view_secondary));
 
     typedArray.recycle();
   }
 
   private void initialize() {
-    inflate(getContext(), R.layout.wayname_view_layout, this);
+    inflate(getContext(), R.layout.mapbox_wayname_view, this);
   }
 }

@@ -29,7 +29,7 @@ public class InstructionListAdapter extends RecyclerView.Adapter<InstructionView
   @Override
   public InstructionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext())
-      .inflate(R.layout.instruction_viewholder_layout, parent, false);
+      .inflate(R.layout.mapbox_item_instruction, parent, false);
     InstructionViewHolder viewHolder = new InstructionViewHolder(view);
     viewHolder.updateViewColors(
       primaryTextColor, secondaryTextColor, maneuverViewPrimaryColor, maneuverViewSecondaryColor);

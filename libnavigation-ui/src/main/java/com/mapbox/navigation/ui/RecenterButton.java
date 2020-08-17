@@ -96,14 +96,15 @@ public class RecenterButton extends ConstraintLayout implements NavigationButton
    */
   @Override
   public void updateStyle(int styleRes) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.RecenterButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(styleRes, R.styleable.MapboxStyleRecenterButton);
 
     primaryColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.RecenterButton_recenterButtonPrimaryColor, R.color.mapbox_recenter_button_primary));
+            R.styleable.MapboxStyleRecenterButton_recenterButtonPrimaryColor, R.color.mapbox_recenter_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
         typedArray.getResourceId(
-            R.styleable.RecenterButton_recenterButtonSecondaryColor, R.color.mapbox_recenter_button_secondary));
+            R.styleable.MapboxStyleRecenterButton_recenterButtonSecondaryColor,
+            R.color.mapbox_recenter_button_secondary));
 
     typedArray.recycle();
 
@@ -148,7 +149,7 @@ public class RecenterButton extends ConstraintLayout implements NavigationButton
    * Inflates the layout.
    */
   private void initialize(Context context) {
-    inflate(context, R.layout.recenter_button_layout, this);
+    inflate(context, R.layout.mapbox_button_recenter, this);
   }
 
   private void bind() {
@@ -161,12 +162,12 @@ public class RecenterButton extends ConstraintLayout implements NavigationButton
   }
 
   private void initAttributes(AttributeSet attributeSet) {
-    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.RecenterButton);
+    TypedArray typedArray = getContext().obtainStyledAttributes(attributeSet, R.styleable.MapboxStyleRecenterButton);
     primaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(R.styleable.RecenterButton_recenterButtonPrimaryColor,
+        typedArray.getResourceId(R.styleable.MapboxStyleRecenterButton_recenterButtonPrimaryColor,
             R.color.mapbox_recenter_button_primary));
     secondaryColor = ContextCompat.getColor(getContext(),
-        typedArray.getResourceId(R.styleable.RecenterButton_recenterButtonSecondaryColor,
+        typedArray.getResourceId(R.styleable.MapboxStyleRecenterButton_recenterButtonSecondaryColor,
             R.color.mapbox_recenter_button_secondary));
 
     typedArray.recycle();
