@@ -35,10 +35,6 @@ package com.mapbox.navigation.ui {
     field public static final String NAVIGATION_VIEW_PREFERENCE_SET_THEME = "navigation_view_theme_preference";
   }
 
-  public class NavigationSnapshotReadyCallback implements com.mapbox.mapboxsdk.maps.MapboxMap.SnapshotReadyCallback {
-    method public void onSnapshotReady(android.graphics.Bitmap);
-  }
-
   public class NavigationView extends androidx.coordinatorlayout.widget.CoordinatorLayout implements androidx.lifecycle.LifecycleOwner com.mapbox.mapboxsdk.maps.OnMapReadyCallback {
     ctor public NavigationView(android.content.Context!);
     ctor public NavigationView(android.content.Context!, android.util.AttributeSet?);
@@ -466,12 +462,12 @@ package com.mapbox.navigation.ui.map {
     method public void removeProgressChangeListener();
     method public void resetCameraPositionWith(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
     method public void resetPadding();
-    method public void restoreFrom(com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState!);
+    method public void restoreStateFrom(android.os.Bundle!);
     method public void resumeCamera(android.location.Location);
     method public com.mapbox.navigation.ui.camera.NavigationCamera! retrieveCamera();
     method public com.mapbox.mapboxsdk.maps.MapboxMap! retrieveMap();
     method public com.mapbox.navigation.ui.route.NavigationMapRoute! retrieveMapRoute();
-    method public void saveStateWith(String!, android.os.Bundle!);
+    method public void saveStateWith(android.os.Bundle!);
     method public void setCamera(com.mapbox.navigation.ui.camera.Camera!);
     method public void setOnRouteSelectionChangeListener(com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener);
     method public void setPuckDrawableSupplier(com.mapbox.navigation.ui.puck.PuckDrawableSupplier!);
@@ -479,7 +475,7 @@ package com.mapbox.navigation.ui.map {
     method public void showRoute();
     method public void showRouteOverview(int[]!);
     method public void startCamera(com.mapbox.api.directions.v5.models.DirectionsRoute);
-    method public void takeScreenshot(com.mapbox.navigation.ui.NavigationSnapshotReadyCallback!);
+    method public void takeScreenshot(com.mapbox.mapboxsdk.maps.MapboxMap.SnapshotReadyCallback!);
     method public void updateCameraTrackingMode(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
     method public void updateIncidentsVisibility(boolean);
     method public void updateLocation(android.location.Location?);
@@ -491,12 +487,6 @@ package com.mapbox.navigation.ui.map {
     method public void updateMapFpsThrottleEnabled(boolean);
     method public void updateTrafficVisibility(boolean);
     method public void updateWaynameQueryMap(boolean);
-  }
-
-  public class NavigationMapboxMapInstanceState implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel!, int);
-    field public static final android.os.Parcelable.Creator<com.mapbox.navigation.ui.map.NavigationMapboxMapInstanceState!>! CREATOR;
   }
 
   public interface OnWayNameChangedListener {
