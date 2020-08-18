@@ -21,6 +21,7 @@ class NavigationMapSettings implements Parcelable {
   private boolean mapWayNameEnabled;
   private boolean locationFpsEnabled = true;
   private float percentDistanceTraveled;
+  private boolean vanishingRouteLineEnabled;
 
   NavigationMapSettings() {
   }
@@ -91,6 +92,14 @@ class NavigationMapSettings implements Parcelable {
     return locationFpsEnabled;
   }
 
+  void updateVanishingRouteLineEnabled(final boolean enabled) {
+    this.vanishingRouteLineEnabled = enabled;
+  }
+
+  boolean retrieveVanishingRouteLineEnabled() {
+    return this.vanishingRouteLineEnabled;
+  }
+
   private NavigationMapSettings(@NonNull Parcel in) {
     cameraTrackingMode = in.readInt();
     currentPadding = in.createIntArray();
@@ -100,6 +109,7 @@ class NavigationMapSettings implements Parcelable {
     mapWayNameEnabled = in.readByte() != 0;
     locationFpsEnabled = in.readByte() != 0;
     percentDistanceTraveled = in.readFloat();
+    vanishingRouteLineEnabled = in.readByte() != 0;
   }
 
   @Override
@@ -112,6 +122,7 @@ class NavigationMapSettings implements Parcelable {
     dest.writeByte((byte) (mapWayNameEnabled ? 1 : 0));
     dest.writeByte((byte) (locationFpsEnabled ? 1 : 0));
     dest.writeFloat(percentDistanceTraveled);
+    dest.writeByte((byte) (vanishingRouteLineEnabled ? 1 : 0));
   }
 
   @Override

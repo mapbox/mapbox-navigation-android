@@ -23,7 +23,6 @@ import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
-import com.mapbox.navigation.ui.internal.route.RouteConstants;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
 
@@ -277,13 +276,14 @@ public class NavigationMapRoute implements LifecycleObserver {
    * This method will allow this class to listen to route progress and adapt the route line
    * whenever {@link TripSessionState#STARTED}.
    *
+   * In order to use the vanishing route line feature be sure to enable the feature before
+   * calling this method.
+   *
    * @param navigation to add the progress change listener
-   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck.
    * @see MapboxNavigation#startTripSession()
    */
-  public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
+  public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
-    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
   }
@@ -299,6 +299,14 @@ public class NavigationMapRoute implements LifecycleObserver {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
+  }
+
+  /**
+   * Determines whether or not the vanishing route line feature is enabled. This should be
+   * called prior to adding a ProgressChangeListener if this feature wasn't enabled via the builder.
+   */
+  public void setVanishRouteLineEnabled(boolean enabled) {
+    this.vanishRouteLineEnabled = enabled;
   }
 
   /**
@@ -463,7 +471,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     shutdownVanishingRouteLineAnimator();
     if (vanishRouteLineEnabled) {
       vanishingRouteLineAnimator = new RouteLineValueAnimator();
-      vanishingRouteLineAnimator.setAnimationDelay(RouteConstants.ROUTE_LINE_VANISH_ANIMATION_DELAY);
     } else {
       vanishingRouteLineAnimator = null;
     }
@@ -534,14 +541,21 @@ public class NavigationMapRoute implements LifecycleObserver {
      * An instance of the {@link MapboxNavigation} object. Default is null that means
      * your route won't consider rerouting during a navigation session.
      *
-     * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck
-     * during navigation. By default is `false`
      * @return the builder
      */
     @NonNull
-    public Builder withMapboxNavigation(@Nullable MapboxNavigation navigation, boolean vanishRouteLineEnabled) {
+    public Builder withMapboxNavigation(@Nullable MapboxNavigation navigation) {
       this.navigation = navigation;
-      this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+      return this;
+    }
+
+    /**
+     * @param enabled determines if the route line should vanish behind the puck
+     * during navigation. By default is `false`
+     */
+    @NonNull
+    public Builder withVanishRouteLineEnabled(boolean enabled) {
+      this.vanishRouteLineEnabled = enabled;
       return this;
     }
 
