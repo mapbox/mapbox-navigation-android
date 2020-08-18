@@ -2,7 +2,7 @@ package com.mapbox.navigation.core.telemetry
 
 import android.location.Location
 import com.google.gson.Gson
-import com.mapbox.navigation.core.telemetry.events.FeedbackLocation
+import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -28,20 +28,20 @@ class FeedbackLocationTest {
 
     @Test
     fun checkLocationSerialization() {
-        val feedbackLocation = FeedbackLocation(
+        val feedbackLocation = TelemetryLocation(
             location.latitude,
             location.longitude,
             location.speed,
             location.bearing,
             location.altitude,
-            location.time,
+            location.time.toString(),
             location.accuracy,
             location.verticalAccuracyMeters
         )
 
         val feedbackLocationJson = gson.toJson(feedbackLocation)
         val deserializedFeedbackLocation =
-            gson.fromJson(feedbackLocationJson, FeedbackLocation::class.java)
+            gson.fromJson(feedbackLocationJson, TelemetryLocation::class.java)
 
         deserializedFeedbackLocation.run {
             assertEquals(location.latitude, latitude, 0.0)
@@ -49,7 +49,7 @@ class FeedbackLocationTest {
             assertEquals(location.speed, speed)
             assertEquals(location.bearing, bearing)
             assertEquals(location.altitude, altitude, 0.0)
-            assertEquals(location.time, timestamp)
+            assertEquals(location.time.toString(), timestamp)
             assertEquals(location.accuracy, horizontalAccuracy)
             assertEquals(location.verticalAccuracyMeters, verticalAccuracy)
         }
