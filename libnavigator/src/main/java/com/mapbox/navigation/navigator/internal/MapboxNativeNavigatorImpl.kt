@@ -33,8 +33,6 @@ import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
 import java.util.Date
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * Default implementation of [MapboxNativeNavigator] interface.
@@ -52,7 +50,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var navigator: Navigator? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
-    private val mutex = Mutex()
 
     // Route following
 
@@ -74,10 +71,8 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return true if the raw location was usable, false if not.
      */
-    override suspend fun updateLocation(rawLocation: Location, date: Date): Boolean {
-        mutex.withLock {
-            return navigator!!.updateLocation(rawLocation.toFixLocation(date))
-        }
+    override fun updateLocation(rawLocation: Location, date: Date): Boolean {
+        return navigator!!.updateLocation(rawLocation.toFixLocation(date))
     }
 
     /**
@@ -105,16 +100,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
      * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
-    override suspend fun getStatus(date: Date): TripStatus {
-        mutex.withLock {
-            val status = navigator!!.getStatus(date)
-            return TripStatus(
-                status.location.toLocation(),
-                status.key_points.map { it.toLocation() },
-                status.getRouteProgress(),
-                status.routeState == RouteState.OFF_ROUTE
-            )
-        }
+    override fun getStatus(date: Date): TripStatus {
+        val status = navigator!!.getStatus(date)
+        return TripStatus(
+            status.location.toLocation(),
+            status.key_points.map { it.toLocation() },
+            status.getRouteProgress(),
+            status.routeState == RouteState.OFF_ROUTE
+        )
     }
 
     // Routing
@@ -130,18 +123,16 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * @return a [NavigationStatus] route state if no errors occurred.
      * Otherwise, it returns a invalid route state.
      */
-    override suspend fun setRoute(
+    override fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int
     ): NavigationStatus {
-        mutex.withLock {
-            MapboxNativeNavigatorImpl.route = route
-            val result = navigator!!.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
-            navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
-                routeBufferGeoJson = GeometryGeoJson.fromJson(it)
-            }
-            return result
+        MapboxNativeNavigatorImpl.route = route
+        val result = navigator!!.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
+        navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
+            routeBufferGeoJson = GeometryGeoJson.fromJson(it)
         }
+        return result
     }
 
     /**

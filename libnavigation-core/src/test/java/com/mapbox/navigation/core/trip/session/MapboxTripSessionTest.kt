@@ -87,8 +87,8 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        every { ThreadController.IODispatcher } returns coroutineRule.testDispatcher
-        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.NavigatorDispatcher } returns coroutineRule.testDispatcher
+        every { ThreadController.getNavigatorScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
         tripSession = MapboxTripSession(
