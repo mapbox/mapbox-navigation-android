@@ -1,4 +1,4 @@
-package com.mapbox.navigation.ui.internal.route
+package com.mapbox.navigation.ui.route
 
 import android.graphics.drawable.Drawable
 import com.mapbox.mapboxsdk.maps.Style
@@ -42,29 +42,24 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapImageUtils
-import com.mapbox.navigation.ui.route.RouteStyleDescriptor
+import kotlin.reflect.KProperty1
 
-interface MapboxRouteLayerProvider : RouteLayerProvider {
+internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     val routeStyleDescriptors: List<RouteStyleDescriptor>
 
-    fun getRouteLineColorExpressions(defaultColor: Int): List<Expression> {
+    fun getRouteLineColorExpressions(
+        defaultColor: Int,
+        routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
+    ): List<Expression> {
         val expressions = mutableListOf<Expression>(
             eq(get(DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER), true),
             color(defaultColor)
         )
         routeStyleDescriptors.forEach {
             expressions.add(eq(get(it.routeIdentifier), true))
-            expressions.add(color(it.lineColorResourceId))
-        }
-        return expressions.plus(color(defaultColor))
-    }
-
-    fun getRouteLineShieldColorExpressions(defaultColor: Int): List<Expression> {
-        val expressions = mutableListOf<Expression>()
-        routeStyleDescriptors.forEach {
-            expressions.add(eq(get(it.routeIdentifier), true))
-            expressions.add(color(it.lineShieldColorResourceId))
+            expressions.add(color(routeColorProvider.get(it)))
         }
         return expressions.plus(color(defaultColor))
     }
@@ -81,7 +76,7 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         )
     }
 
-    fun getShieldLineWidthExpression(scale: Float): Expression {
+    fun getCasingLineWidthExpression(scale: Float): Expression {
         return interpolate(
             exponential(1.5f), zoom(),
             stop(10f, 7f),
@@ -99,7 +94,7 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color)
+        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -116,7 +111,7 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color)
+        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -131,8 +126,8 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getShieldLineWidthExpression(scale)
-        val routeLineColorExpressions = getRouteLineShieldColorExpressions(color)
+        val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
+        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(
             style,
             true,
@@ -149,7 +144,7 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         color: Int
     ): LineLayer {
         val lineWidthExpression = getRouteLineWidthExpressions(scale)
-        val routeLineColorExpressions = getRouteLineColorExpressions(color)
+        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -164,8 +159,8 @@ interface MapboxRouteLayerProvider : RouteLayerProvider {
         scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getShieldLineWidthExpression(scale)
-        val routeLineColorExpressions = getRouteLineShieldColorExpressions(color)
+        val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
+        val routeLineColorExpressions = getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(
             style,
             true,

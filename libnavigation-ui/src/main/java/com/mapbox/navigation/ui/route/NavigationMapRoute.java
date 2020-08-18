@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.LAYER_ABOVE_UPCOMING_MANEUVER_ARROW;
-import static com.mapbox.navigation.ui.internal.route.MapboxRouteLayerProviderFactory.getLayerProvider;
+import static com.mapbox.navigation.ui.route.MapboxRouteLayerProviderFactory.getLayerProvider;
 
 /**
  * Provide a route using {@link NavigationMapRoute#addRoutes(List)} and a route will be drawn using
