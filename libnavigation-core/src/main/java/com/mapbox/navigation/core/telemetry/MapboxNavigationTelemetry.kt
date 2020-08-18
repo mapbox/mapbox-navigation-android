@@ -21,7 +21,6 @@ import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
-import com.mapbox.navigation.core.telemetry.events.FeedbackLocation
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
 import com.mapbox.navigation.core.telemetry.events.NavigationCancelEvent
@@ -32,6 +31,7 @@ import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.core.telemetry.events.PhoneState
 import com.mapbox.navigation.core.telemetry.events.RerouteEvent
 import com.mapbox.navigation.core.telemetry.events.SessionState
+import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import com.mapbox.navigation.utils.internal.JobControl
@@ -268,8 +268,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                     // Populate and then send a NavigationRerouteEvent
                     val metricsRouteProgress = MetricsRouteProgress(prevRoute.routeProgress)
                     val navigationRerouteEvent = NavigationRerouteEvent(PhoneState(context), rerouteEvent, metricsRouteProgress).apply {
-                        locationsBefore = preEventBuffer.toTypedArray()
-                        locationsAfter = postEventBuffer.toTypedArray()
+                        locationsBefore = preEventBuffer.toTelemetryLocations().toTypedArray()
+                        locationsAfter = postEventBuffer.toTelemetryLocations().toTypedArray()
                         secondsSinceLastReroute = dynamicValues.timeSinceLastReroute.get() / ONE_SECOND
                         distanceRemaining = dynamicValues.distanceRemaining.get().toInt()
                         distanceCompleted = dynamicValues.distanceCompleted.get().toInt()
@@ -438,8 +438,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 this.source = feedbackSource
                 this.description = description
                 this.screenshot = screenshot
-                this.locationsBefore = preEventBuffer.toFeedbackLocations().toTypedArray()
-                this.locationsAfter = postEventBuffer.toFeedbackLocations().toTypedArray()
+                this.locationsBefore = preEventBuffer.toTelemetryLocations().toTypedArray()
+                this.locationsAfter = postEventBuffer.toTelemetryLocations().toTypedArray()
                 this.feedbackSubType = feedbackSubType
                 this.appMetadata = appMetadata
             }
@@ -449,17 +449,17 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         })
     }
 
-    private fun ArrayDeque<Location>.toFeedbackLocations(): List<FeedbackLocation> {
-        val feedbackLocations = mutableListOf<FeedbackLocation>()
+    private fun ArrayDeque<Location>.toTelemetryLocations(): List<TelemetryLocation> {
+        val feedbackLocations = mutableListOf<TelemetryLocation>()
         this.forEach {
             feedbackLocations.add(
-                FeedbackLocation(
+                TelemetryLocation(
                     it.latitude,
                     it.longitude,
                     it.speed,
                     it.bearing,
                     it.altitude,
-                    it.time,
+                    it.time.toString(),
                     it.accuracy,
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) it.verticalAccuracyMeters else 0f
                 )
