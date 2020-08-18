@@ -118,7 +118,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements OnM
       mapCamera = new NavigationCamera(mapboxMap);
       mapCamera.addProgressChangeListener(mapboxNavigation);
       navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this)
-              .withMapboxNavigation(mapboxNavigation, true)
+              .withVanishRouteLineEnabled(true)
+              .withMapboxNavigation(mapboxNavigation)
               .build();
 
       mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
