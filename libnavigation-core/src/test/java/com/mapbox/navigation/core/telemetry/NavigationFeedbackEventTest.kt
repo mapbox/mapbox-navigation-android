@@ -2,10 +2,10 @@ package com.mapbox.navigation.core.telemetry
 
 import com.google.gson.Gson
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
-import com.mapbox.navigation.core.telemetry.events.FeedbackLocation
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.PhoneState
+import com.mapbox.navigation.core.telemetry.events.TelemetryLocation
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertArrayEquals
@@ -23,7 +23,7 @@ class NavigationFeedbackEventTest {
         .sessionId(APP_METADATA_SESSION_ID)
         .build()
 
-    private val locationBefore = FeedbackLocation(
+    private val locationBefore = TelemetryLocation(
         LOCATION_BEFORE_LATITUDE,
         LOCATION_BEFORE_LONGITUDE,
         LOCATION_BEFORE_SPEED,
@@ -33,7 +33,7 @@ class NavigationFeedbackEventTest {
         LOCATION_BEFORE_HORIZONTAL_ACCURACY,
         LOCATION_BEFORE_VERTICAL_ACCURACY
     )
-    private val locationAfter = FeedbackLocation(
+    private val locationAfter = TelemetryLocation(
         LOCATION_AFTER_LATITUDE,
         LOCATION_AFTER_LONGITUDE,
         LOCATION_AFTER_SPEED,
@@ -171,7 +171,7 @@ class NavigationFeedbackEventTest {
         private const val LOCATION_BEFORE_SPEED = 30f
         private const val LOCATION_BEFORE_BEARING = 200f
         private const val LOCATION_BEFORE_ALTITUDE = 10.0
-        private const val LOCATION_BEFORE_TIMESTAMP = 999999L
+        private const val LOCATION_BEFORE_TIMESTAMP = "999999"
         private const val LOCATION_BEFORE_HORIZONTAL_ACCURACY = 1f
         private const val LOCATION_BEFORE_VERTICAL_ACCURACY = 2f
 
@@ -181,7 +181,7 @@ class NavigationFeedbackEventTest {
         private const val LOCATION_AFTER_SPEED = 50f
         private const val LOCATION_AFTER_BEARING = 330f
         private const val LOCATION_AFTER_ALTITUDE = 17.0
-        private const val LOCATION_AFTER_TIMESTAMP = 55555555L
+        private const val LOCATION_AFTER_TIMESTAMP = "55555555"
         private const val LOCATION_AFTER_HORIZONTAL_ACCURACY = 55f
         private const val LOCATION_AFTER_VERTICAL_ACCURACY = 44f
     }
