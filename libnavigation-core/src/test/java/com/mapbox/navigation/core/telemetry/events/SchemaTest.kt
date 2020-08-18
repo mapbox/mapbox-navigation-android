@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.telemetry.events
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -138,6 +139,65 @@ class SchemaTest {
             if (thisSchema.has("type")) {
                 typesMatch(thisSchema, type)
             }
+            verifyProperty(thisSchema, fields[i].type, fields[i].name)
+        }
+    }
+
+    private fun verifyProperty(property: JsonObject, propertyImpl: Class<*>, fieldName: String) {
+        val propertyType = property.get("type")?.let { element ->
+            return@let if (element.isJsonArray) {
+                // filter out nullable options, and don't expect multiple types
+                (element as JsonArray).first { it.asString != "null" }.asString
+            } else {
+                element.asString
+            }
+        } ?: return
+
+        val expectedPropertyType: String = when {
+            Number::class.java.isAssignableFrom(propertyImpl) ||
+                propertyImpl.simpleName.equals("short", ignoreCase = true) ||
+                propertyImpl.simpleName.equals("int", ignoreCase = true) ||
+                propertyImpl.simpleName.equals("long", ignoreCase = true) ||
+                propertyImpl.simpleName.equals("float", ignoreCase = true) ||
+                propertyImpl.simpleName.equals("double", ignoreCase = true) -> "number"
+            Boolean::class.java.isAssignableFrom(propertyImpl) ||
+            propertyImpl.simpleName.equals("boolean", ignoreCase = true) -> "boolean"
+            String::class.java.isAssignableFrom(propertyImpl) -> "string"
+            propertyImpl.isArray || List::class.java.isAssignableFrom(propertyImpl) -> "array"
+            else -> "object"
+        }
+        assertEquals("Incorrect type for $fieldName", propertyType, expectedPropertyType)
+
+        if (propertyType == "object") {
+            val objectProperties = property.getAsJsonObject("properties")
+            // filtering out synthetic fields injected by jacoco,
+            // see https://github.com/jacoco/jacoco/issues/168
+            val propertyFields = propertyImpl.declaredFields.filter { it.isSynthetic.not() }
+            assertEquals(
+                "schema and impl fields count should match for $fieldName",
+                objectProperties.keySet().size, propertyFields.size
+            )
+
+            propertyFields.forEach { objectField ->
+                val name = objectField.getAnnotation(SerializedName::class.java)?.value ?: objectField.name
+                assertTrue(
+                    "schema and impl object $fieldName should both have a $name property",
+                    objectProperties.has(name)
+                )
+                val objectProperty = objectProperties.get(name).asJsonObject
+                verifyProperty(objectProperty, objectField.type, objectField.name)
+            }
+        } else if (propertyType == "array") {
+            val arrayItem = property.getAsJsonObject("items")
+            verifyProperty(arrayItem, propertyImpl.getGenericListImplClass(), fieldName)
+        }
+    }
+
+    private fun Class<*>.getGenericListImplClass(): Class<*> {
+        return if (this.typeName.endsWith("[]")) {
+            Class.forName(this.typeName.substring(0, this.typeName.length - 2))
+        } else {
+            throw IllegalArgumentException("${this.typeName} is not a list type")
         }
     }
 
@@ -146,20 +206,15 @@ class SchemaTest {
     }
 
     private fun typesMatch(schema: JsonObject, type: String) {
-        val eventType = if (type.equals("int", ignoreCase = true) ||
-            type.equals("integer", ignoreCase = true) ||
-            type.equals("double", ignoreCase = true) ||
-            type.equals("float", ignoreCase = true)
-        ) {
-            "number"
-        } else if (type.contains("[]")) {
-            "array"
-        } else if (type.equals("string", ignoreCase = true)) {
-            "string"
-        } else if (type.equals("AppMetadata", ignoreCase = true)) {
-            "object"
-        } else {
-            type
+        val eventType = when {
+            type.equals("int", ignoreCase = true) ||
+                type.equals("integer", ignoreCase = true) ||
+                type.equals("double", ignoreCase = true) ||
+                type.equals("float", ignoreCase = true) -> "number"
+            type.contains("[]") -> "array"
+            type.equals("string", ignoreCase = true) -> "string"
+            type.equals("boolean", ignoreCase = true) -> "boolean"
+            else -> "object"
         }
         val typeClass: Class<out JsonElement> = schema["type"].javaClass
         val jsonElement = JsonParser().parse(eventType.toLowerCase())
