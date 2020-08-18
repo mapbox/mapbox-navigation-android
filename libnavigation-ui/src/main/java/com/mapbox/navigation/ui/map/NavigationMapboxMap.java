@@ -385,7 +385,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
     this.navigation = navigation;
     initializeFpsDelegate(mapView);
-    mapRoute.addProgressChangeListener(navigation, vanishRouteLineEnabled);
+
+    mapRoute.setVanishRouteLineEnabled(vanishRouteLineEnabled);
+    mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
     navigation.registerLocationObserver(locationObserver);
@@ -459,6 +461,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     settings.updateCameraTrackingMode(mapCamera.getCameraTrackingMode());
     settings.updateLocationFpsEnabled(locationFpsDelegate.isEnabled());
     settings.updatePercentDistanceTraveled(mapRoute.getPercentDistanceTraveled());
+    settings.updateVanishingRouteLineEnabled(vanishRouteLineEnabled);
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(settings);
     outState.putParcelable(STATE_BUNDLE_KEY, instanceState);
   }
@@ -898,6 +901,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapRoute = new NavigationMapRoute.Builder(mapView, map, lifecycleOwner)
         .withStyle(routeStyleRes)
         .withBelowLayer(routeBelowLayerId)
+        .withVanishRouteLineEnabled(vanishRouteLineEnabled)
         .build();
   }
 
@@ -1007,6 +1011,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
       mapFpsDelegate.updateMaxFpsThreshold(settings.retrieveMaxFps());
       mapFpsDelegate.updateEnabled(settings.isMaxFpsEnabled());
     }
+
+    vanishRouteLineEnabled = settings.retrieveVanishingRouteLineEnabled();
   }
 
   private void handleWayNameOnStart() {

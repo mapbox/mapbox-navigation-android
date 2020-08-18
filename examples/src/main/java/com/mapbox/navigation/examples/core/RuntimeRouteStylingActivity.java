@@ -111,7 +111,7 @@ public class RuntimeRouteStylingActivity extends AppCompatActivity implements On
               getRouteStyleDescriptors(this);
 
       navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this)
-              .withMapboxNavigation(mapboxNavigation, true)
+              .withMapboxNavigation(mapboxNavigation)
               .withRouteStyleDescriptors(routeDescriptors)
               .build();
 
