@@ -95,13 +95,13 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * and verify that the user is still on the route. This method also determines
      * if an instruction needs to be called out for the user.
      *
-     * @param date the point in time to receive the status for.
+     * @param navigatorPredictionNano the point in time to receive the status for in nanoseconds.
      *
      * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
      * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
-    override fun getStatus(date: Date): TripStatus {
-        val status = navigator!!.getStatus(date)
+    override fun getStatus(navigatorPredictionNano: Long): TripStatus {
+        val status = navigator!!.getStatus(navigatorPredictionNano)
         return TripStatus(
             status.location.toLocation(),
             status.key_points.map { it.toLocation() },

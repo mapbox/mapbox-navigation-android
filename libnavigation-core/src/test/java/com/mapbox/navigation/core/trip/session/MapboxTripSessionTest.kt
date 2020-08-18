@@ -20,6 +20,7 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigator.NavigationStatus
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -33,7 +34,7 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
-import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -75,6 +76,7 @@ class MapboxTripSessionTest {
     private val navigationStatus: NavigationStatus = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
+    private val time: Time = mockk(relaxUnitFun = true)
 
     private val routeProgress: RouteProgress = mockk()
     private val navigatorPredictionMillis = 1500L
@@ -119,6 +121,8 @@ class MapboxTripSessionTest {
         every { locationEngineResult.locations } returns listOf(location)
 
         every { tripStatus.routeProgress } returns routeProgress
+
+        every { time.nanoTime() } returns 0L
     }
 
     @Test
@@ -250,15 +254,15 @@ class MapboxTripSessionTest {
 
     @Test
     fun getStatusImmediatelyAfterUpdateLocation() = coroutineRule.runBlockingTest {
+        val startTimeNanos = TimeUnit.MICROSECONDS.toNanos(2)
+        every { time.nanoTime() } returns startTimeNanos
         tripSession.start()
-        val currentDate = Date()
 
         updateLocationAndJoin()
-
-        val slot = slot<Date>()
+        val slot = slot<Long>()
         coVerify { navigator.getStatus(capture(slot)) }
-        assertTrue(slot.captured.time >= currentDate.time + navigatorPredictionMillis)
-        tripSession.stop()
+
+        assertTrue(slot.captured >= startTimeNanos + navigatorPredictionMillis)
     }
 
     @Test
@@ -308,6 +312,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -330,6 +335,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -351,6 +357,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -372,6 +379,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -393,6 +401,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -415,6 +424,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -442,6 +452,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -464,6 +475,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -495,6 +507,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -526,6 +539,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -547,6 +561,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -568,6 +583,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -728,6 +744,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -750,6 +767,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -798,6 +816,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -832,6 +851,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
@@ -872,6 +892,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = null
@@ -906,6 +927,7 @@ class MapboxTripSessionTest {
             locationEngine,
             navigatorPredictionMillis,
             navigator,
+            time,
             ThreadController,
             logger = logger,
             accessToken = "pk.1234"
