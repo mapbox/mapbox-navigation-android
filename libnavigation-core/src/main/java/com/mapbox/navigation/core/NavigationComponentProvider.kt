@@ -14,6 +14,7 @@ import com.mapbox.navigation.core.trip.session.MapboxTripSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigator.NavigatorConfig
 
 internal object NavigationComponentProvider {
@@ -40,12 +41,14 @@ internal object NavigationComponentProvider {
         locationEngine: LocationEngine,
         navigatorPredictionMillis: Long,
         navigator: MapboxNativeNavigator,
+        time: Time,
         logger: Logger,
         accessToken: String?
     ): TripSession = MapboxTripSession(
         tripService,
         locationEngine,
         navigatorPredictionMillis,
+        time = time,
         navigator = navigator,
         logger = logger,
         accessToken = accessToken

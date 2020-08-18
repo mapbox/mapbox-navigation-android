@@ -60,6 +60,7 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.NavigatorConfig
@@ -183,6 +184,7 @@ class MapboxNavigation(
             locationEngine = navigationOptions.locationEngine,
             navigatorPredictionMillis = navigationOptions.navigatorPredictionMillis,
             navigator = navigator,
+            time = Time.SystemImpl,
             logger = logger,
             accessToken = accessToken
         )

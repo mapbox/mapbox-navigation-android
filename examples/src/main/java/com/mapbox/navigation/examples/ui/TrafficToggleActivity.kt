@@ -119,7 +119,6 @@ class TrafficToggleActivity : AppCompatActivity(), OnNavigationReadyCallback,
     }
 
     override fun onNavigationRunning() {
-        
     }
 
     override fun onNavigationFinished() {
@@ -147,4 +146,3 @@ class TrafficToggleActivity : AppCompatActivity(), OnNavigationReadyCallback,
         return DirectionsRoute.fromJson(directionsRouteAsJson)
     }
 }
-

@@ -37,11 +37,7 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
 
     return FixLocation(
         Point.fromLngLat(longitude, latitude),
-        // TODO Replace by elapsedRealtimeNanos when monotonic approach is implemented
-        //  It turns out that if we send the elapsedRealtimeNanos NN expects clients to call
-        //  the overloaded getStatus method and if 0 is sent legacy getStatus is used instead
-        //  https://github.com/mapbox/mapbox-navigation-ios/pull/2477#issuecomment-665636356
-        0,
+        elapsedRealtimeNanos,
         date,
         if (hasSpeed()) speed else null,
         if (hasBearing()) bearing else null,

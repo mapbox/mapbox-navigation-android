@@ -22,11 +22,13 @@ import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
+import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.NavigationStatus
 import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
@@ -52,6 +54,7 @@ internal class MapboxTripSession(
     private val locationEngine: LocationEngine,
     private val navigatorPredictionMillis: Long,
     private val navigator: MapboxNativeNavigator = MapboxNativeNavigatorImpl,
+    private val time: Time = Time.SystemImpl,
     threadController: ThreadController = ThreadController,
     private val logger: Logger,
     private val accessToken: String?
@@ -79,7 +82,7 @@ internal class MapboxTripSession(
                 cancelOngoingUpdateNavigatorStatusDataJobs()
                 navigator.setRoute(value)
                 if (state == TripSessionState.STARTED) {
-                    updateDataFromNavigatorStatus(Date())
+                    updateDataFromNavigatorStatus(time.nanoTime())
                 }
             }
             isOffRoute = false
@@ -397,23 +400,23 @@ internal class MapboxTripSession(
         navigatorJobController.scope.launch {
             val currentDate = Date()
             navigator.updateLocation(rawLocation, currentDate)
-            updateDataFromNavigatorStatus(currentDate)
+            updateDataFromNavigatorStatus(time.nanoTime())
         }
 
         unconditionalStatusPollingJob = navigatorJobController.scope.launch {
             delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
             while (isActive) {
                 launch {
-                    updateDataFromNavigatorStatus(Date())
+                    updateDataFromNavigatorStatus(time.nanoTime())
                 }
                 delay(UNCONDITIONAL_STATUS_POLLING_INTERVAL)
             }
         }
     }
 
-    private fun updateDataFromNavigatorStatus(date: Date) {
+    private fun updateDataFromNavigatorStatus(nanoTime: Long) {
         val updateNavigatorStatusDataJob = mainJobController.scope.launch {
-            val status = getNavigatorStatus(date)
+            val status = getNavigatorStatus(nanoTime)
             if (!isActive) {
                 return@launch
             }
@@ -433,10 +436,10 @@ internal class MapboxTripSession(
         updateNavigatorStatusDataJobs.add(updateNavigatorStatusDataJob)
     }
 
-    private suspend fun getNavigatorStatus(date: Date): TripStatus =
+    private suspend fun getNavigatorStatus(nanoTime: Long): TripStatus =
         withContext(ThreadController.NavigatorDispatcher) {
-            date.time = date.time + navigatorPredictionMillis
-            navigator.getStatus(date)
+            val nanos = nanoTime + TimeUnit.MILLISECONDS.toNanos(navigatorPredictionMillis)
+            navigator.getStatus(nanos)
         }
 
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
