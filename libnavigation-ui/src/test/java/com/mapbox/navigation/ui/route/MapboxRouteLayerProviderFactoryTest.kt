@@ -1,6 +1,5 @@
-package com.mapbox.navigation.ui.internal.route
+package com.mapbox.navigation.ui.route
 
-import com.mapbox.navigation.ui.route.RouteStyleDescriptor
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

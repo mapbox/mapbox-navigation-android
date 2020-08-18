@@ -1,12 +1,10 @@
-package com.mapbox.navigation.ui.internal.route
-
-import com.mapbox.navigation.ui.route.RouteStyleDescriptor
+package com.mapbox.navigation.ui.route
 
 /**
  * An internal Mapbox factory for creating a LayerProvider used for creating the layers needed
  * to display route line related geometry on the map.
  */
-object MapboxRouteLayerProviderFactory {
+internal object MapboxRouteLayerProviderFactory {
 
     /**
      * Creates a MapboxRouteLayerProvider.
