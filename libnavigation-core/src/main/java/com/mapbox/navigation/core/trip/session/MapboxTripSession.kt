@@ -75,7 +75,7 @@ internal class MapboxTripSession(
         set(value) {
             field = value
             cancelOngoingUpdateNavigatorStatusDataJobs()
-            ioJobController.scope.launch {
+            navigatorJobController.scope.launch {
                 cancelOngoingUpdateNavigatorStatusDataJobs()
                 navigator.setRoute(value)
                 if (state == TripSessionState.STARTED) {
@@ -91,7 +91,7 @@ internal class MapboxTripSession(
         }
     }
 
-    private val ioJobController: JobControl = threadController.getIOScopeAndRootJob()
+    private val navigatorJobController: JobControl = threadController.getNavigatorScopeAndRootJob()
     private val mainJobController: JobControl = threadController.getMainScopeAndRootJob()
     private var unconditionalStatusPollingJob: Job? = null
 
@@ -177,7 +177,7 @@ internal class MapboxTripSession(
         }
         tripService.stopService()
         stopLocationUpdates()
-        ioJobController.job.cancelChildren()
+        navigatorJobController.job.cancelChildren()
         mainJobController.job.cancelChildren()
         reset()
         state = TripSessionState.STOPPED
@@ -394,13 +394,13 @@ internal class MapboxTripSession(
         unconditionalStatusPollingJob?.cancel()
         this.rawLocation = rawLocation
         locationObservers.forEach { it.onRawLocationChanged(rawLocation) }
-        ioJobController.scope.launch {
+        navigatorJobController.scope.launch {
             val currentDate = Date()
             navigator.updateLocation(rawLocation, currentDate)
             updateDataFromNavigatorStatus(currentDate)
         }
 
-        unconditionalStatusPollingJob = ioJobController.scope.launch {
+        unconditionalStatusPollingJob = navigatorJobController.scope.launch {
             delay(UNCONDITIONAL_STATUS_POLLING_PATIENCE)
             while (isActive) {
                 launch {
@@ -434,7 +434,7 @@ internal class MapboxTripSession(
     }
 
     private suspend fun getNavigatorStatus(date: Date): TripStatus =
-        withContext(ioJobController.scope.coroutineContext) {
+        withContext(ThreadController.NavigatorDispatcher) {
             date.time = date.time + navigatorPredictionMillis
             navigator.getStatus(date)
         }

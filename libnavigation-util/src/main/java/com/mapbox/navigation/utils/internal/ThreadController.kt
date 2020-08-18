@@ -47,7 +47,8 @@ fun Exception.ifChannelException(action: () -> Unit) {
 
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
-const val MAX_THREAD_COUNT = 2
+private const val MAX_THREAD_COUNT = 2
+private const val SINGLE_THREAD = 1
 
 object ThreadController {
     private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
@@ -55,22 +56,28 @@ object ThreadController {
     )
     val IODispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
+    val NavigatorDispatcher: CoroutineDispatcher =
+        Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
 
-    private var ioRootJob = SupervisorJob()
-    private var mainRootJob = SupervisorJob()
+    internal var ioRootJob = SupervisorJob()
+    internal var navigatorRootJob = SupervisorJob()
+    internal var mainRootJob = SupervisorJob()
 
     fun init() {
         ioRootJob = SupervisorJob()
+        navigatorRootJob = SupervisorJob()
         mainRootJob = SupervisorJob()
     }
 
     /**
-     * This method cancels all coroutines that are children of this job. The call affects
-     * all coroutines that where started via ThreadController.ioScope.launch(). It is basically
-     * a kill switch for all non-UI scoped coroutines.
+     * This method cancels all coroutines that are children of io and navigator jobs.
+     * The call affects all coroutines that where started via ThreadController.ioScope.launch() and
+     * ThreadController.navigatorScope.launch().
+     * It is basically a kill switch for all non-UI scoped coroutines.
      */
     fun cancelAllNonUICoroutines() {
         ioRootJob.cancelChildren()
+        navigatorRootJob.cancelChildren()
     }
 
     /**
@@ -101,6 +108,14 @@ object ThreadController {
     fun getIOScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(ioRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + IODispatcher))
+    }
+
+    /**
+     * Use this [JobControl] whenever interacting with the Navigator.
+     */
+    fun getNavigatorScopeAndRootJob(): JobControl {
+        val parentJob = SupervisorJob(navigatorRootJob)
+        return JobControl(parentJob, CoroutineScope(parentJob + NavigatorDispatcher))
     }
 
     /**

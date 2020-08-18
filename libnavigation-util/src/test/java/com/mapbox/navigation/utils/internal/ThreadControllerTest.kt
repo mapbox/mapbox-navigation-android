@@ -1,11 +1,19 @@
 package com.mapbox.navigation.utils.internal
 
+import io.mockk.mockk
+import io.mockk.verify
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
@@ -73,5 +81,61 @@ class ThreadControllerTest {
         }
 
         assertThat(msg, `is`("success"))
+    }
+
+    @Test
+    fun checksCancelAllNonUICoroutines() {
+        val mockedIORootJob: CompletableJob = mockk(relaxed = true)
+        val mockedNavigatorRootJob: CompletableJob = mockk(relaxed = true)
+        ThreadController.ioRootJob = mockedIORootJob
+        ThreadController.navigatorRootJob = mockedNavigatorRootJob
+
+        ThreadController.cancelAllNonUICoroutines()
+
+        verify { mockedIORootJob.cancelChildren() }
+        verify { mockedNavigatorRootJob.cancelChildren() }
+    }
+
+    @Test
+    fun checksCancelAllUICoroutines() {
+        val mockedMainRootJob: CompletableJob = mockk(relaxed = true)
+        ThreadController.mainRootJob = mockedMainRootJob
+
+        ThreadController.cancelAllUICoroutines()
+
+        verify { mockedMainRootJob.cancelChildren() }
+    }
+
+    @Test
+    fun checksGetIOScopeAndRootJob() {
+        val ioRootJob = SupervisorJob()
+        ThreadController.ioRootJob = ioRootJob
+
+        val ioJobController = ThreadController.getIOScopeAndRootJob()
+
+        assertEquals(ioRootJob.children.first(), ioJobController.job)
+        assertEquals(CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(), ioJobController.scope.toString())
+    }
+
+    @Test
+    fun checksGetNavigatorScopeAndRootJob() {
+        val navigatorRootJob = SupervisorJob()
+        ThreadController.navigatorRootJob = navigatorRootJob
+
+        val navigatorJobController = ThreadController.getNavigatorScopeAndRootJob()
+
+        assertEquals(navigatorRootJob.children.first(), navigatorJobController.job)
+        assertEquals(CoroutineScope(navigatorJobController.job + ThreadController.NavigatorDispatcher).toString(), navigatorJobController.scope.toString())
+    }
+
+    @Test
+    fun checksGetMainScopeAndRootJob() {
+        val mainRootJob = SupervisorJob()
+        ThreadController.mainRootJob = mainRootJob
+
+        val mainJobController = ThreadController.getMainScopeAndRootJob()
+
+        assertEquals(mainRootJob.children.first(), mainJobController.job)
+        assertEquals(CoroutineScope(mainJobController.job + Dispatchers.Main).toString(), mainJobController.scope.toString())
     }
 }
