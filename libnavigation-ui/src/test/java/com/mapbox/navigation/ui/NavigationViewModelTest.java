@@ -1,18 +1,14 @@
 package com.mapbox.navigation.ui;
 
 import android.app.Application;
-
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
