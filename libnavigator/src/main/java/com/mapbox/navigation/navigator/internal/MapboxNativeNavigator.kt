@@ -39,7 +39,7 @@ interface MapboxNativeNavigator {
      *
      * @return true if the raw location was usable, false if not.
      */
-    fun updateLocation(rawLocation: Location, date: Date): Boolean
+    suspend fun updateLocation(rawLocation: Location, date: Date): Boolean
 
     /**
      * Passes in the current sensor data of the user.
@@ -64,7 +64,7 @@ interface MapboxNativeNavigator {
      * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
      * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
-    fun getStatus(navigatorPredictionNano: Long): TripStatus
+    suspend fun getStatus(navigatorPredictionNano: Long): TripStatus
 
     // Routing
 
@@ -79,7 +79,7 @@ interface MapboxNativeNavigator {
      * @return a [NavigationStatus] route state if no errors occurred.
      * Otherwise, it returns a invalid route state.
      */
-    fun setRoute(
+    suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int = INDEX_FIRST_LEG
     ): NavigationStatus

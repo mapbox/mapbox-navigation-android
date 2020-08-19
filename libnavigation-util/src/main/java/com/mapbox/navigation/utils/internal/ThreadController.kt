@@ -48,7 +48,6 @@ fun Exception.ifChannelException(action: () -> Unit) {
 data class JobControl(val job: Job, val scope: CoroutineScope)
 
 private const val MAX_THREAD_COUNT = 2
-private const val SINGLE_THREAD = 1
 
 object ThreadController {
     private val maxCoresUsed = Runtime.getRuntime().availableProcessors().coerceAtMost(
@@ -56,16 +55,12 @@ object ThreadController {
     )
     val IODispatcher: CoroutineDispatcher =
         Executors.newFixedThreadPool(maxCoresUsed).asCoroutineDispatcher()
-    val NavigatorDispatcher: CoroutineDispatcher =
-        Executors.newFixedThreadPool(SINGLE_THREAD).asCoroutineDispatcher()
 
     internal var ioRootJob = SupervisorJob()
-    internal var navigatorRootJob = SupervisorJob()
     internal var mainRootJob = SupervisorJob()
 
     fun init() {
         ioRootJob = SupervisorJob()
-        navigatorRootJob = SupervisorJob()
         mainRootJob = SupervisorJob()
     }
 
@@ -77,7 +72,6 @@ object ThreadController {
      */
     fun cancelAllNonUICoroutines() {
         ioRootJob.cancelChildren()
-        navigatorRootJob.cancelChildren()
     }
 
     /**
@@ -108,14 +102,6 @@ object ThreadController {
     fun getIOScopeAndRootJob(): JobControl {
         val parentJob = SupervisorJob(ioRootJob)
         return JobControl(parentJob, CoroutineScope(parentJob + IODispatcher))
-    }
-
-    /**
-     * Use this [JobControl] whenever interacting with the Navigator.
-     */
-    fun getNavigatorScopeAndRootJob(): JobControl {
-        val parentJob = SupervisorJob(navigatorRootJob)
-        return JobControl(parentJob, CoroutineScope(parentJob + NavigatorDispatcher))
     }
 
     /**
