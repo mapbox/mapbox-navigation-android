@@ -55,6 +55,11 @@ internal class ReplayRouteDriver {
      * @return [ReplayRouteLocation] [List]
      */
     fun driveRouteLeg(routeLeg: RouteLeg): List<ReplayRouteLocation> {
+        check(routeLeg.annotation()?.distance()?.isNotEmpty() ?: false &&
+            routeLeg.annotation()?.speed()?.isNotEmpty() ?: false) {
+            "Directions request should include annotations DirectionsCriteria.ANNOTATION_SPEED and DirectionsCriteria.ANNOTATION_DISTANCE"
+        }
+
         val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
         val points = mutableListOf<Point>()
         routeLeg.steps()?.forEach { legStep ->
