@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="mapbox_fab_margin_bottom">2dp</dimen>
-    <dimen name="mapbox_fab_feedback_margin_top">4dp</dimen>
-</resources>
