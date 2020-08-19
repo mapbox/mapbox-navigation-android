@@ -2,6 +2,7 @@ package com.mapbox.navigation.ui.internal.route;
 
 public class RouteConstants {
   public static final String PRIMARY_ROUTE_SOURCE_ID = "mapbox-navigation-route-source";
+  public static final String PRIMARY_ROUTE_CASING_SOURCE_ID = "mapbox-navigation-route-casing-source";
   public static final String PRIMARY_ROUTE_TRAFFIC_SOURCE_ID = "mapbox-navigation-route-traffic-source";
   public static final String PRIMARY_ROUTE_LAYER_ID = "mapbox-navigation-route-layer";
   public static final String PRIMARY_ROUTE_TRAFFIC_LAYER_ID = "mapbox-navigation-route-traffic-layer";

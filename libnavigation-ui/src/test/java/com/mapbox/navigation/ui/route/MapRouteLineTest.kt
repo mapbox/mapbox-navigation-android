@@ -47,6 +47,7 @@ class MapRouteLineTest {
     var styleRes: Int = 0
     lateinit var wayPointSource: GeoJsonSource
     lateinit var primaryRouteLineSource: GeoJsonSource
+    lateinit var primaryRouteCasingSource: GeoJsonSource
     lateinit var primaryRouteLineTrafficSource: GeoJsonSource
     lateinit var alternativeRouteLineSource: GeoJsonSource
 
@@ -104,6 +105,7 @@ class MapRouteLineTest {
 
         wayPointSource = mockk(relaxUnitFun = true)
         primaryRouteLineSource = mockk(relaxUnitFun = true)
+        primaryRouteCasingSource = mockk(relaxUnitFun = true)
         primaryRouteLineTrafficSource = mockk(relaxUnitFun = true)
         alternativeRouteLineSource = mockk(relaxUnitFun = true)
 
@@ -112,6 +114,7 @@ class MapRouteLineTest {
             every { build(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any()) } returns primaryRouteLineSource
             every { build(RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID, any(), any()) } returns primaryRouteLineTrafficSource
             every { build(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID, any(), any()) } returns alternativeRouteLineSource
+            every { build(RouteConstants.PRIMARY_ROUTE_CASING_SOURCE_ID, any(), any()) } returns primaryRouteCasingSource
         }
         layerProvider = mockk {
             every {
