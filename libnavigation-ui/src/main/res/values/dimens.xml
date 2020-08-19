@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="mapbox_dimen_2dp">2dp</dimen>
+    <dimen name="mapbox_dimen_4dp">4dp</dimen>
     <dimen name="mapbox_dimen_8dp">8dp</dimen>
     <dimen name="mapbox_dimen_16dp">16dp</dimen>
-    <dimen name="mapbox_fab_margin_bottom">@dimen/mapbox_dimen_8dp</dimen>
-    <dimen name="mapbox_fab_feedback_margin_top">@dimen/mapbox_dimen_16dp</dimen>
+    <dimen name="mapbox_fab_margin_bottom">@dimen/mapbox_dimen_2dp</dimen>
+    <dimen name="mapbox_fab_feedback_margin_top">@dimen/mapbox_dimen_4dp</dimen>
     <dimen name="mapbox_wayname_view_padding_bottom">@dimen/mapbox_dimen_8dp</dimen>
     <dimen name="mapbox_wayname_view_height">24dp</dimen>
     <dimen name="mapbox_wayname_padding">@dimen/mapbox_dimen_16dp</dimen>
