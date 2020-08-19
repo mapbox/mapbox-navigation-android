@@ -8,7 +8,9 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +30,22 @@ public class NavigationSymbolManagerTest {
   }
 
   @Test
+  public void addDestinationMarkerFor_destinationSymbolRemovedIfPreviouslyAdded() {
+    SymbolManager symbolManager = mock(SymbolManager.class);
+    Symbol oldDestinationSymbol = mock(Symbol.class);
+    Symbol currentDestinationSymbol = mock(Symbol.class);
+    when(symbolManager.create(any(SymbolOptions.class))).thenReturn(oldDestinationSymbol, currentDestinationSymbol);
+    NavigationSymbolManager navigationSymbolManager = new NavigationSymbolManager(symbolManager);
+    Point position = Point.fromLngLat(1.2345, 1.3456);
+
+    navigationSymbolManager.addDestinationMarkerFor(position);
+    navigationSymbolManager.addDestinationMarkerFor(position);
+
+    verify(symbolManager, times(2)).create(any(SymbolOptions.class));
+    verify(symbolManager, times(1)).delete(eq(oldDestinationSymbol));
+  }
+
+  @Test
   public void removeAllMarkerSymbols_previouslyAddedMarkersRemoved() {
     SymbolManager symbolManager = mock(SymbolManager.class);
     Symbol symbol = mock(Symbol.class);
@@ -42,7 +60,7 @@ public class NavigationSymbolManagerTest {
   }
 
   @Test
-  public void addDestinationMarkerFor_previouslyAddedMarkersRemoved() {
+  public void addCustomSymbolFor_symbolManagerCreatesSymbol() {
     SymbolManager symbolManager = mock(SymbolManager.class);
     Symbol symbol = mock(Symbol.class);
     SymbolOptions symbolOptions = mock(SymbolOptions.class);
