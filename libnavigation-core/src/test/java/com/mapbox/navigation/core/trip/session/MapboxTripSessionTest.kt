@@ -89,8 +89,7 @@ class MapboxTripSessionTest {
     @Before
     fun setUp() {
         mockkObject(ThreadController)
-        every { ThreadController.NavigatorDispatcher } returns coroutineRule.testDispatcher
-        every { ThreadController.getNavigatorScopeAndRootJob() } returns JobControl(parentJob, testScope)
+        every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
         tripSession = MapboxTripSession(
@@ -661,7 +660,7 @@ class MapboxTripSessionTest {
 
         tripSession.route = null
 
-        verify(exactly = 2) { tripSession["cancelOngoingUpdateNavigatorStatusDataJobs"]() }
+        verify(exactly = 1) { tripSession["cancelOngoingUpdateNavigatorStatusDataJobs"]() }
     }
 
     @Test

@@ -86,14 +86,11 @@ class ThreadControllerTest {
     @Test
     fun checksCancelAllNonUICoroutines() {
         val mockedIORootJob: CompletableJob = mockk(relaxed = true)
-        val mockedNavigatorRootJob: CompletableJob = mockk(relaxed = true)
         ThreadController.ioRootJob = mockedIORootJob
-        ThreadController.navigatorRootJob = mockedNavigatorRootJob
 
         ThreadController.cancelAllNonUICoroutines()
 
         verify { mockedIORootJob.cancelChildren() }
-        verify { mockedNavigatorRootJob.cancelChildren() }
     }
 
     @Test
@@ -115,17 +112,6 @@ class ThreadControllerTest {
 
         assertEquals(ioRootJob.children.first(), ioJobController.job)
         assertEquals(CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(), ioJobController.scope.toString())
-    }
-
-    @Test
-    fun checksGetNavigatorScopeAndRootJob() {
-        val navigatorRootJob = SupervisorJob()
-        ThreadController.navigatorRootJob = navigatorRootJob
-
-        val navigatorJobController = ThreadController.getNavigatorScopeAndRootJob()
-
-        assertEquals(navigatorRootJob.children.first(), navigatorJobController.job)
-        assertEquals(CoroutineScope(navigatorJobController.job + ThreadController.NavigatorDispatcher).toString(), navigatorJobController.scope.toString())
     }
 
     @Test
