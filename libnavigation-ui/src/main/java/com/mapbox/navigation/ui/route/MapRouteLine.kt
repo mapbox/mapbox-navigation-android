@@ -125,6 +125,7 @@ internal class MapRouteLine(
 
     private var wayPointSource: GeoJsonSource
     private val primaryRouteLineSource: GeoJsonSource
+    private val primaryRouteLineCasingSource: GeoJsonSource
     private val primaryRouteLineTrafficSource: GeoJsonSource
     private val alternativeRouteLineSource: GeoJsonSource
     private val routeLayerIds = mutableSetOf<String>()
@@ -354,6 +355,13 @@ internal class MapRouteLine(
             routeLineGeoJsonOptions
         )
         style.addSource(primaryRouteLineSource)
+
+        primaryRouteLineCasingSource = mapRouteSourceProvider.build(
+            RouteConstants.PRIMARY_ROUTE_CASING_SOURCE_ID,
+            drawnPrimaryRouteFeatureCollection,
+            routeLineGeoJsonOptions
+        )
+        style.addSource(primaryRouteLineCasingSource)
 
         val routeLineTrafficGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
         primaryRouteLineTrafficSource = mapRouteSourceProvider.build(
@@ -783,6 +791,7 @@ internal class MapRouteLine(
 
     private fun setPrimaryRoutesSource(featureCollection: FeatureCollection) {
         drawnPrimaryRouteFeatureCollection = featureCollection
+        primaryRouteLineCasingSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
         primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
         primaryRouteLineTrafficSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
     }
