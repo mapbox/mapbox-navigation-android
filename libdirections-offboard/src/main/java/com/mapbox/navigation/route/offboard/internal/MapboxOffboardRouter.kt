@@ -3,7 +3,6 @@ package com.mapbox.navigation.route.offboard.internal
 import android.content.Context
 import com.mapbox.annotation.module.MapboxModule
 import com.mapbox.annotation.module.MapboxModuleType
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.MapboxDirections
 import com.mapbox.api.directions.v5.models.DirectionsResponse
 import com.mapbox.api.directions.v5.models.DirectionsRoute
@@ -54,7 +53,6 @@ class MapboxOffboardRouter(
     ) {
         mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, urlSkuTokenProvider)
             .routeOptions(routeOptions)
-            .enableRefresh(routeOptions.profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .build()
         mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
 

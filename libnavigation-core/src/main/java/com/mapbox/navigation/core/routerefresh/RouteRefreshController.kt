@@ -1,10 +1,9 @@
 package com.mapbox.navigation.core.routerefresh
 
-import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
+import com.mapbox.navigation.base.internal.extensions.supportsRefresh
 import com.mapbox.navigation.base.route.RouteRefreshCallback
 import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
@@ -50,18 +49,6 @@ internal class RouteRefreshController(
 
     fun stop() {
         routerRefreshTimer.stopJobs()
-    }
-
-    private fun RouteOptions?.supportsRefresh(): Boolean {
-        if (this == null) {
-            return false
-        }
-        val isTrafficProfile = profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
-        val isOverviewFull = overview() == DirectionsCriteria.OVERVIEW_FULL
-        val hasCongestionOrMaxSpeed = annotationsList()?.any {
-            it == DirectionsCriteria.ANNOTATION_CONGESTION || it == DirectionsCriteria.ANNOTATION_MAXSPEED
-        } ?: false
-        return isTrafficProfile && isOverviewFull && hasCongestionOrMaxSpeed
     }
 
     private val routeRefreshCallback = object : RouteRefreshCallback {
