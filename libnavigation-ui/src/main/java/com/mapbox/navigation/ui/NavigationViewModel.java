@@ -467,6 +467,10 @@ public class NavigationViewModel extends AndroidViewModel {
   private RoutesObserver routesObserver = routes -> {
     if (routes.size() > 0) {
       route.setValue(routes.get(0));
+      RouteOptions routeOptions = routes.get(0).routeOptions();
+      if (routeOptions != null) {
+        destination.setValue(routeOptions.coordinates().get(routes.get(0).routeOptions().coordinates().size() - 1));
+      }
     }
   };
 
