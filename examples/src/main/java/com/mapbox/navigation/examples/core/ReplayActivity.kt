@@ -94,6 +94,12 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                         .coordinates(originLocation.toPoint(), null, latLng.toPoint())
                         .alternatives(true)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                        .overview(DirectionsCriteria.OVERVIEW_FULL)
+                        .annotationsList(listOf(
+                            DirectionsCriteria.ANNOTATION_SPEED,
+                            DirectionsCriteria.ANNOTATION_DISTANCE,
+                            DirectionsCriteria.ANNOTATION_CONGESTION)
+                        )
                         .build(),
                     routesReqCallback
                 )
@@ -115,7 +121,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             if (routes.isNotEmpty()) {
                 navigationMapboxMap?.drawRoutes(routes)
 
-                val replayEvents = replayRouteMapper.mapGeometry(routes[0].geometry()!!)
+                val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(routes[0])
                 mapboxReplayer.pushEvents(replayEvents)
                 mapboxReplayer.seekTo(replayEvents.first())
 

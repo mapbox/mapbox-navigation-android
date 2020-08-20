@@ -5,14 +5,15 @@ import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
+import kotlin.math.min
 
 internal class ReplayRouteDriver {
 
     private val routeSmoother = ReplayRouteSmoother()
     private val routeInterpolator = ReplayRouteInterpolator()
+    private val replayRouteTraffic = ReplayRouteTraffic()
 
     private var timeMillis = 0L
 
@@ -36,7 +37,7 @@ internal class ReplayRouteDriver {
      * @return [ReplayRouteLocation] [List]
      */
     fun drivePointList(options: ReplayRouteOptions, points: List<Point>): List<ReplayRouteLocation> {
-        val distinctPoints = routeSmoother.distinctPoints(points, ReplayRouteSmoother.DISTINCT_POINT_METERS)
+        val distinctPoints = routeSmoother.distinctPoints(points)
         if (distinctPoints.size < 2) return emptyList()
 
         val smoothLocations = routeInterpolator.createSpeedProfile(options, distinctPoints)
@@ -55,32 +56,44 @@ internal class ReplayRouteDriver {
      * @return [ReplayRouteLocation] [List]
      */
     fun driveRouteLeg(routeLeg: RouteLeg): List<ReplayRouteLocation> {
-        check(routeLeg.annotation()?.distance()?.isNotEmpty() ?: false &&
-            routeLeg.annotation()?.speed()?.isNotEmpty() ?: false) {
+        val legAnnotation = routeLeg.annotation()
+        check(legAnnotation != null &&
+            legAnnotation.distance()?.isNotEmpty() ?: false &&
+            legAnnotation.speed()?.isNotEmpty() ?: false) {
             "Directions request should include annotations DirectionsCriteria.ANNOTATION_SPEED and DirectionsCriteria.ANNOTATION_DISTANCE"
         }
-
-        val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
-        val points = mutableListOf<Point>()
-        routeLeg.steps()?.forEach { legStep ->
-            val geometry = legStep.geometry() ?: return emptyList()
-            val coordinates = PolylineUtils.decode(geometry, 6)
-            coordinates.forEach { points.add(it) }
-        }
-        val annotation = routeLeg.annotation() ?: return emptyList()
-        var distanceTraveled = 0.0
-        annotation.distance()?.forEachIndexed { index, distance ->
-            distanceTraveled += distance
-            val point = TurfMeasurement.along(points, distanceTraveled, TurfConstants.UNIT_METERS)
-            val replayRouteLocation = ReplayRouteLocation(index, point)
-            replayRouteLocation.speedMps = annotation.speed()?.get(index)!!
-            replayRouteLocation.distance = annotation.distance()?.get(index)!!
-            replayRouteLocations.addLocation(replayRouteLocation)
-        }
-
+        val options = ReplayRouteOptions.Builder().build()
+        val routePoints = replayRouteTraffic.mapToDistinctRoutePoints(routeLeg)
+        val trafficLocations = replayRouteTraffic.trafficLocations(routePoints, legAnnotation.distance()!!, legAnnotation.speed()!!)
+        val replayRouteLocations = driveTraffic(options, routePoints, trafficLocations)
         routeInterpolator.createBearingProfile(replayRouteLocations)
 
         return replayRouteLocations
+    }
+
+    private fun driveTraffic(options: ReplayRouteOptions, routePoints: List<Point>, trafficLocations: List<ReplayRouteLocation>): List<ReplayRouteLocation> {
+        val replayRouteLocations = mutableListOf<ReplayRouteLocation>()
+        var segmentStart = replayRouteLocations.addFirstTrafficLocation(routePoints)
+        for (i in 0..trafficLocations.lastIndex) {
+            val segmentEnd = trafficLocations[i]
+            val segmentRoute = routeSmoother.segmentRoute(
+                routePoints,
+                segmentStart.routeIndex!!,
+                segmentEnd.routeIndex!!)
+            val segmentMaxSpeed = min(segmentEnd.speedMps, options.maxSpeedMps)
+            val segmentOptions = options.toBuilder().maxSpeedMps(segmentMaxSpeed).build()
+            replayRouteLocations.addInterpolatedLocations(segmentOptions, segmentRoute, segmentStart, segmentEnd)
+            segmentStart = segmentEnd
+        }
+
+        return replayRouteLocations
+    }
+
+    private fun MutableList<ReplayRouteLocation>.addFirstTrafficLocation(routePoints: List<Point>): ReplayRouteLocation {
+        val segmentStart = ReplayRouteLocation(0, routePoints[0])
+        segmentStart.speedMps = 0.0
+        addLocation(segmentStart)
+        return segmentStart
     }
 
     private fun interpolateLocations(options: ReplayRouteOptions, distinctPoints: List<Point>, smoothLocations: List<ReplayRouteLocation>): List<ReplayRouteLocation> {
@@ -106,11 +119,12 @@ internal class ReplayRouteDriver {
         segmentStart: ReplayRouteLocation,
         segmentEnd: ReplayRouteLocation
     ) {
+        val segmentDistance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
         val segment = routeInterpolator.interpolateSpeed(
             options,
             segmentStart.speedMps,
             segmentEnd.speedMps,
-            segmentStart.distance
+            segmentDistance
         )
 
         for (stepIndex in 1..segment.steps.lastIndex) {
