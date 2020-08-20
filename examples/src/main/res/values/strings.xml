@@ -96,19 +96,19 @@
     <string name="language">Language</string>
     <string name="unit_type">Unit Type</string>
     <string name="route_profile">Route Profile</string>
-    <string name="unit_type_key">unit_type</string>
-    <string name="simulate_route_key">simulate_route</string>
-    <string name="language_key">language</string>
-    <string name="route_profile_key">route_profile</string>
-    <string name="default_route_profile">driving-traffic</string>
-    <string name="git_hash_key">git_hash</string>
-    <string name="nav_native_history_retrieve_key">nav_native_history_retrieve</string>
-    <string name="nav_native_history_collect_key">nav_native_history_collect</string>
+    <string name="unit_type_key" translatable="false">unit_type</string>
+    <string name="simulate_route_key" translatable="false">simulate_route</string>
+    <string name="language_key" translatable="false">language</string>
+    <string name="route_profile_key" translatable="false">route_profile</string>
+    <string name="default_route_profile" translatable="false">driving-traffic</string>
+    <string name="git_hash_key" translatable="false">git_hash</string>
+    <string name="nav_native_history_retrieve_key" translatable="false">nav_native_history_retrieve</string>
+    <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
     <string name="nav_native_history_collect">Collect Nav Native history</string>
-    <string name="offline_version_key">offline_preference_key</string>
-    <string name="offline_enabled">offline_region_download</string>
-    <string name="default_locale">default_for_device</string>
-    <string name="default_unit_type">default_for_device</string>
+    <string name="offline_version_key" translatable="false">offline_preference_key</string>
+    <string name="offline_enabled" translatable="false">offline_region_download</string>
+    <string name="default_locale" translatable="false">default_for_device</string>
+    <string name="default_unit_type" translatable="false">default_for_device</string>
     <string name="start_navigation">Start Navigation</string>
     <string name="navigate_waypoints_next_stop">Next stop</string>
     <string name="play_history">Play history</string>
