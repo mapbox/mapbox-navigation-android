@@ -120,7 +120,7 @@ object FeedbackEvent {
     const val LANE_GUIDANCE_INCORRECT = "lane_guidance_incorrect"
 
     /**
-     * Feedback description for *looks incorrect*: road know by different name
+     * Feedback description for *looks incorrect*: road known by different name
      */
     const val ROAD_KNOW_BY_DIFFERENT_NAME = "road_know_by_different_name"
 

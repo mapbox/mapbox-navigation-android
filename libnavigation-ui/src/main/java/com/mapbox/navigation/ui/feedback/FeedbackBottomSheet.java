@@ -465,7 +465,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
       R.string.mapbox_feedback_description_lane_guidance_incorrect));
     list.add(new FeedbackSubTypeItem(
       FeedbackEvent.ROAD_KNOW_BY_DIFFERENT_NAME,
-      R.string.mapbox_feedback_description_road_know_by_different_name));
+      R.string.mapbox_feedback_description_road_known_by_different_name));
 
     return list;
   }

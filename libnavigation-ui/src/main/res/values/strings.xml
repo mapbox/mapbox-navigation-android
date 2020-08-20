@@ -50,7 +50,7 @@
     <string name="mapbox_feedback_description_maneuver_incorrect">Maneuver incorrect</string>
     <string name="mapbox_feedback_description_exit_info_incorrect">Exit info incorrect</string>
     <string name="mapbox_feedback_description_lane_guidance_incorrect">Lane guidance incorrect</string>
-    <string name="mapbox_feedback_description_road_know_by_different_name">Road know by different name</string>
+    <string name="mapbox_feedback_description_road_known_by_different_name">Road known by different name</string>
 
     <!-- Feedback description for Confusing Audio -->
     <string name="mapbox_feedback_description_guidance_too_early">Guidance too early</string>
