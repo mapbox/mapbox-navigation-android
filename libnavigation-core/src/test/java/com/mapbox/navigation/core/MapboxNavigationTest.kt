@@ -416,7 +416,6 @@ class MapboxNavigationTest {
                 tripService,
                 locationEngine,
                 any(),
-                time = any(),
                 navigator = navigator,
                 logger = logger,
                 accessToken = "pk.1234"

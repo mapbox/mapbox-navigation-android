@@ -12,7 +12,6 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
-import java.util.Date
 
 /**
  * Provides API to work with native Navigator class. Exposed for internal usage only.
@@ -39,7 +38,7 @@ interface MapboxNativeNavigator {
      *
      * @return true if the raw location was usable, false if not.
      */
-    suspend fun updateLocation(rawLocation: Location, date: Date): Boolean
+    suspend fun updateLocation(rawLocation: Location): Boolean
 
     /**
      * Passes in the current sensor data of the user.
@@ -59,12 +58,12 @@ interface MapboxNativeNavigator {
      * and verify that the user is still on the route. This method also determines
      * if an instruction needs to be called out for the user.
      *
-     * @param navigatorPredictionNano the point in time to receive the status for in nanoseconds.
+     * @param navigatorPredictionMillis millis for navigation status predictions.
      *
      * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
      * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
-    suspend fun getStatus(navigatorPredictionNano: Long): TripStatus
+    suspend fun getStatus(navigatorPredictionMillis: Long): TripStatus
 
     // Routing
 

@@ -1,6 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
+import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.BannerComponents
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
@@ -32,8 +33,8 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
-import java.util.Date
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -78,9 +79,9 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return true if the raw location was usable, false if not.
      */
-    override suspend fun updateLocation(rawLocation: Location, date: Date): Boolean =
+    override suspend fun updateLocation(rawLocation: Location): Boolean =
         withContext(NavigatorDispatcher) {
-            navigator!!.updateLocation(rawLocation.toFixLocation(date))
+            navigator!!.updateLocation(rawLocation.toFixLocation())
         }
 
     /**
@@ -103,14 +104,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      * and verify that the user is still on the route. This method also determines
      * if an instruction needs to be called out for the user.
      *
-     * @param navigatorPredictionNano the point in time to receive the status for in nanoseconds.
+     * @param navigatorPredictionMillis millis for navigation status predictions.
      *
      * @return the last [TripStatus] as a result of fixed location updates. If the timestamp
      * is earlier than a previous call, the last status will be returned. The function does not support re-winding time.
      */
-    override suspend fun getStatus(navigatorPredictionNano: Long): TripStatus =
+    override suspend fun getStatus(navigatorPredictionMillis: Long): TripStatus =
         withContext(NavigatorDispatcher) {
-            val status = navigator!!.getStatus(navigatorPredictionNano)
+            val nanos = SystemClock.elapsedRealtimeNanos() + TimeUnit.MILLISECONDS.toNanos(navigatorPredictionMillis)
+            val status = navigator!!.getStatus(nanos)
             TripStatus(
                 status.location.toLocation(),
                 status.key_points.map { it.toLocation() },

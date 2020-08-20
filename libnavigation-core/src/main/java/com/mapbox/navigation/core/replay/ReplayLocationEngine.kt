@@ -3,6 +3,7 @@ package com.mapbox.navigation.core.replay
 import android.app.PendingIntent
 import android.location.Location
 import android.os.Looper
+import android.os.SystemClock
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineRequest
@@ -90,7 +91,7 @@ class ReplayLocationEngine(
         location.longitude = eventLocation.lon
         location.latitude = eventLocation.lat
         location.time = Date().time
-        location.elapsedRealtimeNanos = System.nanoTime()
+        location.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
         eventLocation.accuracyHorizontal?.toFloat()?.let { location.accuracy = it }
         eventLocation.bearing?.toFloat()?.let { location.bearing = it }
         eventLocation.altitude?.let { location.altitude = it }

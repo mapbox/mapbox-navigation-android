@@ -18,7 +18,8 @@ class LocationExTest {
         val location = Location(PROVIDER).apply {
             latitude = LATITUDE
             longitude = LONGITUDE
-            elapsedRealtimeNanos = REAL_TIME
+            time = TIME
+            elapsedRealtimeNanos = ELAPSED_REAL_TIME
             speed = SPEED
             bearing = BEARING
             altitude = ALTITUDE
@@ -28,11 +29,11 @@ class LocationExTest {
             verticalAccuracyMeters = VERTICAL_ACCURACY
         }
 
-        location.toFixLocation(DATE).run {
+        location.toFixLocation().run {
             assertEquals(LATITUDE, coordinate.latitude(), .0)
             assertEquals(LONGITUDE, coordinate.longitude(), .0)
-            assertEquals(REAL_TIME, monotonicTimestampNanoseconds)
-            assertEquals(DATE, time)
+            assertEquals(ELAPSED_REAL_TIME, monotonicTimestampNanoseconds)
+            assertEquals(Date(TIME), time)
             assertEquals(SPEED, speed!!, .0f)
             assertEquals(BEARING, bearing!!, .0f)
             assertEquals(ALTITUDE, altitude!!.toDouble(), .0)
@@ -48,7 +49,7 @@ class LocationExTest {
     fun toLocation() {
         val fixLocation = FixLocation(
             Point.fromLngLat(LONGITUDE, LATITUDE),
-            REAL_TIME,
+            ELAPSED_REAL_TIME,
             DATE,
             SPEED,
             BEARING,
@@ -63,7 +64,7 @@ class LocationExTest {
         fixLocation.toLocation().run {
             assertEquals(LATITUDE, latitude, .0)
             assertEquals(LONGITUDE, longitude, .0)
-            assertEquals(REAL_TIME, elapsedRealtimeNanos)
+            assertEquals(ELAPSED_REAL_TIME, elapsedRealtimeNanos)
             assertEquals(DATE, Date(time))
             assertEquals(SPEED, speed, .0f)
             assertEquals(BEARING, bearing, .0f)
@@ -80,7 +81,7 @@ class LocationExTest {
     fun checkLocationWithZeroParams() {
         val fixLocation = FixLocation(
             Point.fromLngLat(LONGITUDE, LATITUDE),
-            REAL_TIME,
+            ELAPSED_REAL_TIME,
             DATE,
             NULL_VALUE,
             NULL_VALUE,
@@ -118,7 +119,8 @@ class LocationExTest {
         private const val PROVIDER = "Test"
         private const val LATITUDE = 11.0
         private const val LONGITUDE = 22.0
-        private const val REAL_TIME = 11111L
+        private const val TIME = 22222L
+        private const val ELAPSED_REAL_TIME = 11111L
         private const val SPEED = 10f
         private const val BEARING = 20f
         private const val ALTITUDE = 30.0

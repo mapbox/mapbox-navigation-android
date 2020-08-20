@@ -24,7 +24,7 @@ internal fun FixLocation.toLocation(): Location = Location(this.provider).also {
     }
 }
 
-internal fun Location.toFixLocation(date: Date): FixLocation {
+internal fun Location.toFixLocation(): FixLocation {
     var bearingAccuracy: Float? = null
     var speedAccuracy: Float? = null
     var verticalAccuracy: Float? = null
@@ -38,7 +38,7 @@ internal fun Location.toFixLocation(date: Date): FixLocation {
     return FixLocation(
         Point.fromLngLat(longitude, latitude),
         elapsedRealtimeNanos,
-        date,
+        Date(time),
         if (hasSpeed()) speed else null,
         if (hasBearing()) bearing else null,
         if (hasAltitude()) altitude.toFloat() else null,
