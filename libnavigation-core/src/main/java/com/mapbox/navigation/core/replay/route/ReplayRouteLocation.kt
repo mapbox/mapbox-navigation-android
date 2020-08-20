@@ -41,6 +41,7 @@ internal class ReplayRouteLocation(
 
     override fun toString(): String {
         return "ReplayRouteLocation(" +
+            "routeIndex=$routeIndex, " +
             "point=$point, " +
             "timeMillis=$timeMillis, " +
             "speedMps=$speedMps, " +
