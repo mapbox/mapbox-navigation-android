@@ -7,11 +7,10 @@ import androidx.multidex.MultiDexApplication
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.logger.MapboxLogger
 import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.navigation.base.options.DeviceProfile
+import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.MapboxNavigationProvider
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.DelegatesExt
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
-import com.mapbox.navigator.NavigatorConfig
 import timber.log.Timber
 
 private const val DEFAULT_MAPBOX_ACCESS_TOKEN = "YOUR_MAPBOX_ACCESS_TOKEN_GOES_HERE"
@@ -61,6 +60,6 @@ class NavigationApplication : MultiDexApplication() {
         }
 
         Mapbox.getInstance(applicationContext, mapboxAccessToken)
-        MapboxNativeNavigatorImpl.create(DeviceProfile.Builder().build(), NavigatorConfig(null), MapboxLogger)
+        MapboxNavigationProvider.create(MapboxNavigation.defaultNavigationOptionsBuilder(this, mapboxAccessToken).build())
     }
 }
