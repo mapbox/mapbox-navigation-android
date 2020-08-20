@@ -6,7 +6,6 @@ import android.content.res.TypedArray
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -1147,25 +1146,6 @@ class MapRouteLineTest {
             PRIMARY_ROUTE_LAYER_ID,
             listOf(ALTERNATIVE_ROUTE_LAYER_ID)
         )) }
-    }
-
-    @Test
-    fun swapProperties() {
-        val route = getDirectionsRoute(false)
-        val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
-        val featureA = Feature.fromGeometry(lineString).also {
-            it.addBooleanProperty("featureAProperty", true)
-        }
-        val featureB = Feature.fromGeometry(lineString).also {
-            it.addBooleanProperty("featureBProperty", true)
-        }
-        assertEquals(true, featureA.properties()?.get("featureAProperty")!!.asBoolean)
-        assertEquals(true, featureB.properties()?.get("featureBProperty")!!.asBoolean)
-
-        MapRouteLine.MapRouteLineSupport.swapProperties(featureA, featureB)
-
-        assertEquals(true, featureA.properties()?.get("featureBProperty")!!.asBoolean)
-        assertEquals(true, featureB.properties()?.get("featureAProperty")!!.asBoolean)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

@@ -47,9 +47,7 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBoolea
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getFloatStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.swapProperties
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
@@ -478,9 +476,6 @@ internal class MapRouteLine(
      */
     fun updatePrimaryRouteIndex(route: DirectionsRoute): Boolean {
         return if (route != this.primaryRoute) {
-            val primaryRouteFeatures = routeFeatureData.firstOrNull { it.route == primaryRoute }?.featureCollection?.features()?.firstOrNull()
-            val newPrimaryRouteFeatures = routeFeatureData.firstOrNull { it.route == route }?.featureCollection?.features()?.firstOrNull()
-            ifNonNull(primaryRouteFeatures, newPrimaryRouteFeatures, ::swapProperties)
             this.primaryRoute = route
             drawRoutes(routeFeatureData)
             true
@@ -1212,23 +1207,6 @@ internal class MapRouteLine(
                 val propValue =
                     if (index == 0) WAYPOINT_ORIGIN_VALUE else WAYPOINT_DESTINATION_VALUE
                 it.addStringProperty(WAYPOINT_PROPERTY_KEY, propValue)
-            }
-        }
-
-        fun swapProperties(featureA: Feature, featureB: Feature) {
-            val featureAProperties = featureA.properties()
-            val featureAKeySetToRemove = featureAProperties?.keySet()?.toList()
-            val featureBProperties = featureB.properties()
-            val featureBKeySetToRemove = featureBProperties?.keySet()?.toList()
-
-            featureAKeySetToRemove?.forEach { key ->
-                featureB.addBooleanProperty(key, featureAProperties[key].asBoolean)
-                featureA.removeProperty(key)
-            }
-
-            featureBKeySetToRemove?.forEach { key ->
-                featureA.addBooleanProperty(key, featureBProperties[key].asBoolean)
-                featureB.removeProperty(key)
             }
         }
     }
