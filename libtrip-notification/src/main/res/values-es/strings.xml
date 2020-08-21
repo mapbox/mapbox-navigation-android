@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
-    <string name="mapbox_end_navigation">Finaliza navegación</string>
+    <string name="mapbox_end_navigation">Salir de la navegación</string>
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
         <item quantity="one">día</item>

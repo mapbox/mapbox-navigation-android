@@ -1,6 +1,6 @@
 <resources>
-    <string name="mapbox_unit_kilometers">χλμ.</string>
-    <string name="mapbox_unit_meters">μέτρ.</string>
-    <string name="mapbox_unit_miles">μίλ.</string>
-    <string name="mapbox_unit_feet">πόδ.</string>
+    <string name="mapbox_unit_kilometers">χλμ</string>
+    <string name="mapbox_unit_meters">μ</string>
+    <string name="mapbox_unit_miles">μίλια</string>
+    <string name="mapbox_unit_feet">πόδια</string>
 </resources>
