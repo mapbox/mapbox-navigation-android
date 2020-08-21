@@ -706,7 +706,7 @@ internal class MapRouteLine(
         setPrimaryRoutesSource(routeData.featureCollection)
         updateRouteTrafficSegments(routeData)
         if (style.isFullyLoaded) {
-            val expression = getExpressionAtOffset(0f)
+            val expression = getExpressionAtOffset(vanishPointOffset)
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
         }
     }
