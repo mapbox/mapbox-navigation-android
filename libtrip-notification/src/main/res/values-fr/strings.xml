@@ -1,7 +1,6 @@
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Fin de navigation</string>
-
     <!-- Time formatting -->
     <plurals name="mapbox_number_of_days">
         <item quantity="one">jour</item>

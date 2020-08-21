@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Kết thúc Điều hướng</string>
+    <string name="mapbox_stop_session">Ngừng phiên điều hướng</string>
+    <string name="mapbox_free_drive_session">Phiên Lái xe Tự do</string>
     <string name="mapbox_eta_format">Đến %s</string>
 
     <!-- Time formatting -->
