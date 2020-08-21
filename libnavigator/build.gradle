@@ -43,7 +43,7 @@ dependencies {
     // Navigator
     api dependenciesList.mapboxNavigator
 
-    implementation dependenciesList.mapboxCommon
+    api dependenciesList.mapboxCommon
 
     // mapbox-java GeoJSON
     api dependenciesList.mapboxSdkGeoJSON
