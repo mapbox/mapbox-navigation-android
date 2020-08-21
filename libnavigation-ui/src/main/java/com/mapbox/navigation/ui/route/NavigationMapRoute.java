@@ -193,15 +193,16 @@ public class NavigationMapRoute implements LifecycleObserver {
    * the routes are considered alternatives.
    */
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
+    cancelVanishingRouteLineAnimator();
     if (directionsRoutes.isEmpty()) {
-      cancelVanishingRouteLineAnimator();
       routeLine.draw(directionsRoutes);
     } else if (!CompareUtils.areEqualContentsIgnoreOrder(
-        routeLine.retrieveDirectionsRoutes(),
-        directionsRoutes)
+      routeLine.retrieveDirectionsRoutes(),
+      directionsRoutes)
     ) {
-      cancelVanishingRouteLineAnimator();
       routeLine.draw(directionsRoutes);
+    } else {
+      routeLine.reinitializePrimaryRoute();
     }
   }
 
@@ -217,6 +218,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       routeList.add(identifiableRoute.getRoute());
     }
 
+    cancelVanishingRouteLineAnimator();
     if (directionsRoutes.isEmpty()) {
       routeLine.drawIdentifiableRoutes(directionsRoutes);
     } else if (!CompareUtils.areEqualContentsIgnoreOrder(
@@ -224,6 +226,8 @@ public class NavigationMapRoute implements LifecycleObserver {
             routeList)
     ) {
       routeLine.drawIdentifiableRoutes(directionsRoutes);
+    } else {
+      routeLine.reinitializePrimaryRoute();
     }
   }
 
