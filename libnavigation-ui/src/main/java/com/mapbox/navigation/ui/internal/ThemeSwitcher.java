@@ -9,16 +9,14 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-
 import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-
-import com.mapbox.navigation.ui.R;
+import androidx.appcompat.content.res.AppCompatResources;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
-import com.mapbox.navigation.ui.NavigationView;
 import com.mapbox.navigation.ui.NavigationConstants;
+import com.mapbox.navigation.ui.NavigationView;
+import com.mapbox.navigation.ui.R;
 
 /**
  * This class is used to switch theme colors in {@link NavigationView}.
@@ -43,7 +41,7 @@ public class ThemeSwitcher {
       }
     }
 
-    Drawable markerDrawable = ContextCompat.getDrawable(context, markerResId);
+    Drawable markerDrawable = AppCompatResources.getDrawable(context, markerResId);
     return BitmapUtils.getBitmapFromDrawable(markerDrawable);
   }
 
