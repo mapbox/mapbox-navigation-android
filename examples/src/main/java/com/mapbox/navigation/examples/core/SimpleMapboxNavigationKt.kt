@@ -309,7 +309,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         }
 
     private val fasterRouteObserver = object : FasterRouteObserver {
-        override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+        override fun onFasterRoute(
+            currentRoute: DirectionsRoute,
+            alternatives: List<DirectionsRoute>,
+            isAlternativeFaster: Boolean
+        ) {
             if (isAlternativeFaster) {
                 this@SimpleMapboxNavigationKt.fasterRoutes = alternatives
                 fasterRouteSelectionTimer.start()

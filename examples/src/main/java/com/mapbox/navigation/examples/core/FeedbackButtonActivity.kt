@@ -45,8 +45,8 @@ import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import kotlinx.android.synthetic.main.activity_feedback_button.*
 import java.lang.ref.WeakReference
+import kotlinx.android.synthetic.main.activity_feedback_button.*
 
 /**
  * This activity shows how to integrate the [com.mapbox.navigation.ui.FeedbackButton]'s

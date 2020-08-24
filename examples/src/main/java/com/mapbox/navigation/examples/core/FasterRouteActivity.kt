@@ -37,10 +37,10 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
 import kotlinx.android.synthetic.main.content_faster_route_layout.*
 import timber.log.Timber
-import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to use the Navigation SDK's [FasterRouteObserver]

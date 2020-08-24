@@ -21,7 +21,11 @@ class HistoryFilesViewController {
     private var viewAdapter: HistoryFileAdapter? = null
     private val historyFilesApi = HistoryFilesClient()
 
-    fun attach(context: Context, viewAdapter: HistoryFileAdapter, result: (ReplayHistoryDTO?) -> Unit) {
+    fun attach(
+        context: Context,
+        viewAdapter: HistoryFileAdapter,
+        result: (ReplayHistoryDTO?) -> Unit
+    ) {
         this.viewAdapter = viewAdapter
         viewAdapter.itemClicked = { historyFileItem ->
             if (historyFileItem.isOnDisk()) {
@@ -53,7 +57,11 @@ class HistoryFilesViewController {
         }
     }
 
-    private fun requestFromDisk(context: Context, historyFileItem: ReplayPath, result: (ReplayHistoryDTO?) -> Unit) {
+    private fun requestFromDisk(
+        context: Context,
+        historyFileItem: ReplayPath,
+        result: (ReplayHistoryDTO?) -> Unit
+    ) {
         CoroutineScope(Dispatchers.Main).launch {
             val data = loadFromDisk(context, historyFileItem)
             result(data)

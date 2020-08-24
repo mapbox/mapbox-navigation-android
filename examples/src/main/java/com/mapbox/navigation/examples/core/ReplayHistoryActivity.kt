@@ -172,7 +172,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
         })
 
         mapboxNavigation.attachFasterRouteObserver(object : FasterRouteObserver {
-            override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+            override fun onFasterRoute(
+                currentRoute: DirectionsRoute,
+                alternatives: List<DirectionsRoute>,
+                isAlternativeFaster: Boolean
+            ) {
                 navigationContext?.navigationMapboxMap?.drawRoutes(alternatives)
                 navigationContext?.mapboxNavigation?.setRoutes(alternatives)
             }

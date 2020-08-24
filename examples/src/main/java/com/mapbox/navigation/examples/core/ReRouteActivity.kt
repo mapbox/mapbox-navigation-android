@@ -44,12 +44,12 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_reroute_layout.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
-import java.lang.ref.WeakReference
 
 /**
  * This activity shows how to:
@@ -403,12 +403,16 @@ class ReRouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRouteObserve
             }
         }
 
-        override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun registerRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             rerouteStateObserver.onRerouteStateChanged(state)
             return stateObservers.add(rerouteStateObserver)
         }
 
-        override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun unregisterRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             return stateObservers.remove(rerouteStateObserver)
         }
     }

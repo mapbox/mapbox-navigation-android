@@ -54,7 +54,10 @@ class HistoryFilesClient {
                 cont.resume(emptyList())
             }
 
-            override fun onResponse(call: Call<List<ReplayPath>>, response: Response<List<ReplayPath>>) {
+            override fun onResponse(
+                call: Call<List<ReplayPath>>,
+                response: Response<List<ReplayPath>>
+            ) {
                 Timber.i("requestHistory onResponse")
                 val drives = if (response.isSuccessful) {
                     response.body() ?: emptyList()
@@ -78,7 +81,10 @@ class HistoryFilesClient {
                 cont.resume(null)
             }
 
-            override fun onResponse(call: Call<ReplayHistoryDTO>, response: Response<ReplayHistoryDTO>) {
+            override fun onResponse(
+                call: Call<ReplayHistoryDTO>,
+                response: Response<ReplayHistoryDTO>
+            ) {
                 Timber.i("requestData onResponse")
                 val data = if (response.isSuccessful) {
                     response.body()

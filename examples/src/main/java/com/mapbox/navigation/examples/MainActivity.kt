@@ -13,9 +13,7 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import java.util.ArrayList
-import kotlinx.android.synthetic.main.activity_main.cardCore
-import kotlinx.android.synthetic.main.activity_main.cardUI
-import kotlinx.android.synthetic.main.activity_main.settingsFab
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
@@ -57,7 +55,8 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         Toast
             .makeText(
                 this,
-                "This app needs location and storage permissions" + "in order to show its functionality.",
+                "This app needs location and storage permissions" +
+                    "in order to show its functionality.",
                 Toast.LENGTH_LONG
             ).show()
     }
@@ -70,11 +69,18 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == LOCATION_PERMISSIONS_REQUEST_CODE) {
             permissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
         } else {
-            when (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            when (
+                grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
                 true -> {
                     cardCore.isClickable = true
                 }

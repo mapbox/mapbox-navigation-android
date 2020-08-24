@@ -361,11 +361,15 @@ class MapMatchingActivity : AppCompatActivity(), OnMapReadyCallback {
             // do nothing
         }
 
-        override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun registerRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             throw Exception("Not yet implemented")
         }
 
-        override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+        override fun unregisterRerouteStateObserver(
+            rerouteStateObserver: RerouteController.RerouteStateObserver
+        ): Boolean {
             throw Exception("Not yet implemented")
         }
     }

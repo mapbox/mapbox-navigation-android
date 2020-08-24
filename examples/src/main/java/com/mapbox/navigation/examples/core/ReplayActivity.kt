@@ -80,7 +80,11 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
             initializeFirstLocation()
 
             mapboxNavigation?.attachFasterRouteObserver(object : FasterRouteObserver {
-                override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
+                override fun onFasterRoute(
+                    currentRoute: DirectionsRoute,
+                    alternatives: List<DirectionsRoute>,
+                    isAlternativeFaster: Boolean
+                ) {
                     navigationMapboxMap?.drawRoutes(alternatives)
                     mapboxNavigation?.setRoutes(alternatives)
                 }
