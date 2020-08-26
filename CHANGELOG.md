@@ -2,11 +2,62 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
-### v0.43.0 -
+### Mapbox Navigation SDK 1.0.0-rc.6 - August 26, 2020
+This release accelerates the version naming of the Navigation UI SDK to match the Navigation Core SDK artifact, both are named `1.0.0-rc.6`.
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
 
-* Fix Javadoc Kotlin issues [#2103](https://github.com/mapbox/mapbox-navigation-android/pull/2103)
-* Fix intermittent memory issues in CI [#2096](https://github.com/mapbox/mapbox-navigation-android/pull/2096)
-* Fix methods for recalculating waypoints coordinates, names, indices, approaches [#2066](https://github.com/mapbox/mapbox-navigation-android/pull/2066)
+#### Changelog
+Changes since the Mapbox Navigation UI `1.0.0-rc.1` and Core `1.0.0-rc.5`:
+* Adjusted RTL layout handling which fixed minor issues, especially in the `InstructionView` [#3426](https://github.com/mapbox/mapbox-navigation-android/pull/3426)
+* Merged onboard, offboard and hybrid routers together, leaving only one modular router component [#3498](https://github.com/mapbox/mapbox-navigation-android/pull/3498)
+* Resolved a bug where a route casing (route line border) was not visible [#3472](https://github.com/mapbox/mapbox-navigation-android/pull/3472)
+
+#### Known issues
+* Vanishing route line (deemphasizing the traveled portion of the route) can be slightly out of sync with the location puck.
+
+### Mapbox Navigation UI SDK 1.0.0-rc.1 & Mapbox Navigation Core SDK 1.0.0-rc.5 - August 19, 2020
+This version introduces a UI component of the SDK compatible with the 1.0.0 pre-release series.
+
+The `1.0` UI SDK release as compared to legacy offers all the features but with much finer control and granularity. This version mainly serves as a port of the legacy UI SDK implementation to use the `1.0` version of the Navigation Core SDK and its features. The `1.0` UI SDK also removes redundant methods & APIs while exposing new ones instead. The SDK also brings new features, including:
+
+- Two different ways of providing feedback during a trip session, thereby helping Mapbox provide better route quality, turn-by-turn experiences, traffic congestion, etc.
+
+- Allowing developers to deemphasize portions of the route line behind the puck, thereby reflecting route progress state.
+
+- Providing UI components that visualize a single building footprint or extrusion. Great to use for marking the final destination in an improved arrival experience.
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
+
+#### Changelog
+Changes since the `1.0.0-rc.4` release of the Mapbox Navigation Core SDK:
+* Updated Mapbox Gradle plugins and contributing docs [#3370](https://github.com/mapbox/mapbox-navigation-android/pull/3370)
+* Fixed route / isOffRoute race condition which resulted in occasional missed offroute events [#3424](https://github.com/mapbox/mapbox-navigation-android/pull/3424)
+* Improved the time to first banner instructions by updating data from navigator status right after a route is set [#3431](https://github.com/mapbox/mapbox-navigation-android/pull/3431)
+* Updated return types, class annotations and docs, exposed route options updater [#3429](https://github.com/mapbox/mapbox-navigation-android/pull/3429)
+* Bumped Kotlin version to 1.4.0 and Coroutines version to 1.3.9 [#3445](https://github.com/mapbox/mapbox-navigation-android/pull/3445)
+* Fixed incorrect telemetry location timestamp format which resulted in missing feedback events [#3456](https://github.com/mapbox/mapbox-navigation-android/pull/3456)
+
+#### Known issues
+All of the issues are targeted to be resolved before this version becomes stable:
+* Casing (a darker border color) of the primary route line is missing.
+* Vanishing route line (deemphasizing the traveled portion of the route) can be slightly out of sync with the location puck.
+
+### Mapbox Navigation Core SDK 1.0.0-rc.x series
+
+This upgrade features a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses, free-drive mode which enables accurate location positioning even without an active route for daily commuting, a new modular architecture that allows developers to customize the navigation experience for their use case, and MAUs-based billing that provides predictability in costs to developers.
+
+Please review the [developer documentation](https://docs.mapbox.com/android/beta/navigation/overview/#installation) to start building with the Mapbox Navigation SDK v1.0 for Android.
+
+Already use an older version of the Navigation SDK? Check out [the migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) to transition your project from the "legacy" core Navigation SDK to the 1.0 version.
+
+Let us know if you have any questions or run into issues and please open tickets in https://github.com/mapbox/mapbox-navigation-android/issues/new and we will take it from there! We would love your feedback.
+
+Thank you!
+
+- Mapbox Navigation Core SDK 1.0.0-rc.4 - August 6, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.3 - July 27, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.2 - June 17, 2020
+- Mapbox Navigation Core SDK 1.0.0-rc.1 - June 3, 2020
 
 ### v0.42.6 - March 16, 2020
 
