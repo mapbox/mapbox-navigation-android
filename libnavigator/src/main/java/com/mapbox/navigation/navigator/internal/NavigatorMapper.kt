@@ -76,14 +76,16 @@ internal class NavigatorMapper {
     fun getRouteProgress(
         directionsRoute: DirectionsRoute?,
         routeBufferGeoJson: Geometry?,
-        status: NavigationStatus
+        status: NavigationStatus,
+        remainingWaypoints: Int
     ): RouteProgress? {
-        return status.getRouteProgress(directionsRoute, routeBufferGeoJson)
+        return status.getRouteProgress(directionsRoute, routeBufferGeoJson, remainingWaypoints)
     }
 
     private fun NavigationStatus.getRouteProgress(
         route: DirectionsRoute?,
-        routeBufferGeoJson: Geometry?
+        routeBufferGeoJson: Geometry?,
+        remainingWaypoints: Int
     ): RouteProgress? {
         route?.let {
             val upcomingStepIndex = stepIndex + ONE_INDEX
@@ -125,7 +127,7 @@ internal class NavigatorMapper {
                         activeGuidanceInfo.routeProgress.fractionTraveled.toFloat()
                     )
 
-                    routeProgressBuilder.remainingWaypoints(legs.size - (legIndex + 1))
+                    routeProgressBuilder.remainingWaypoints(remainingWaypoints)
                 }
 
                 ifNonNull(currentLeg?.steps()) { steps ->

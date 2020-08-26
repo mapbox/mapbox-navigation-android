@@ -24,11 +24,26 @@ class MapboxDirectionsSessionTest {
     private val routeOptions: RouteOptions = mockk(relaxUnitFun = true)
     private val routesRequestCallback: RoutesRequestCallback = mockk(relaxUnitFun = true)
     private val observer: RoutesObserver = mockk(relaxUnitFun = true)
-    private val routes: List<DirectionsRoute> = listOf(mockk())
+    private val route: DirectionsRoute = mockk(relaxUnitFun = true)
+    private val routes: List<DirectionsRoute> = listOf(route)
     private lateinit var callback: Router.Callback
 
     @Before
     fun setUp() {
+        val routeOptionsBuilder: RouteOptions.Builder = mockk(relaxUnitFun = true)
+        every { routeOptionsBuilder.waypointIndices(any()) } returns routeOptionsBuilder
+        every { routeOptionsBuilder.waypointNames(any()) } returns routeOptionsBuilder
+        every { routeOptionsBuilder.waypointTargets(any()) } returns routeOptionsBuilder
+        every { routeOptionsBuilder.build() } returns routeOptions
+        every { routeOptions.toBuilder() } returns routeOptionsBuilder
+        every { routeOptions.waypointIndices() } returns ""
+        every { routeOptions.waypointNames() } returns ""
+        every { routeOptions.waypointTargets() } returns ""
+        val routeBuilder: DirectionsRoute.Builder = mockk(relaxUnitFun = true)
+        every { route.toBuilder() } returns routeBuilder
+        every { routeBuilder.routeOptions(any()) } returns routeBuilder
+        every { routeBuilder.build() } returns route
+
         val listener = slot<Router.Callback>()
         every { router.getRoute(routeOptions, capture(listener)) } answers {
             callback = listener.captured
@@ -54,6 +69,9 @@ class MapboxDirectionsSessionTest {
         callback.onResponse(routes)
 
         assertEquals(routes, session.routes)
+        session.routes.forEach { route ->
+            assertEquals(route.routeOptions(), routeOptions)
+        }
         verify(exactly = 1) { routesRequestCallback.onRoutesReady(routes) }
         verify(exactly = 1) { observer.onRoutesChanged(routes) }
     }

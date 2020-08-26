@@ -108,6 +108,15 @@
         </activity>
 
         <activity
+            android:name=".core.SilentWaypointsRerouteActivity"
+            android:label="@string/title_silent_waypoints_reroute"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity
             android:name=".core.ReplayActivity"
             android:label="@string/title_replay_route"
             android:screenOrientation="portrait">
