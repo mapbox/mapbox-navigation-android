@@ -30,6 +30,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -39,6 +40,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -53,6 +55,7 @@ import kotlinx.android.synthetic.main.activity_silent_waypoints_reroute_layout.m
 import kotlinx.android.synthetic.main.activity_silent_waypoints_reroute_layout.seekBar
 import kotlinx.android.synthetic.main.activity_silent_waypoints_reroute_layout.seekBarLayout
 import kotlinx.android.synthetic.main.activity_silent_waypoints_reroute_layout.seekBarText
+import kotlinx.android.synthetic.main.activity_silent_waypoints_reroute_layout.tvDebugInfo
 import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -102,7 +105,16 @@ class SilentWaypointsRerouteActivity :
             navigationMapboxMap.drawRoutes(routes)
         }
     }
-
+    private val routeProgressObserver = object : RouteProgressObserver {
+        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+            val routeOptions = routeProgress.route.routeOptions()
+            val waypoints = routeOptions?.coordinates()?.size ?: 0
+            val silentWaypoints = waypoints - (routeOptions?.waypointIndicesList()?.size ?: 0)
+            val remainingWaypoints = routeProgress.remainingWaypoints
+            tvDebugInfo.text = "Waypoints: $waypoints\nSilent waypoints: $silentWaypoints\n" +
+                "RemainingWaypoints: $remainingWaypoints"
+        }
+    }
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             Timber.d("route request success $routes")
@@ -144,6 +156,7 @@ class SilentWaypointsRerouteActivity :
         mapboxNavigation.run {
             registerTripSessionStateObserver(tripSessionStateObserver)
             registerRoutesObserver(routeObserver)
+            registerRouteProgressObserver(routeProgressObserver)
             registerOffRouteObserver(this@SilentWaypointsRerouteActivity)
             getRerouteController()?.registerRerouteStateObserver(
                 this@SilentWaypointsRerouteActivity
@@ -166,6 +179,7 @@ class SilentWaypointsRerouteActivity :
         stopLocationUpdates()
         mapboxNavigation.run {
             unregisterTripSessionStateObserver(tripSessionStateObserver)
+            unregisterRouteProgressObserver(routeProgressObserver)
             unregisterRoutesObserver(routeObserver)
             unregisterOffRouteObserver(this@SilentWaypointsRerouteActivity)
             getRerouteController()?.unregisterRerouteStateObserver(
@@ -236,6 +250,7 @@ class SilentWaypointsRerouteActivity :
                     RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(applicationContext))
                         .coordinates(waypointsController.coordinates(originLocation))
+                        .waypointNames("start;finish")
                         .waypointIndices("0;${waypointsController.waypoints.size}")
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .build(),
