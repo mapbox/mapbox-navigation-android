@@ -3,21 +3,16 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.jaredsburrows.license'
-apply plugin: 'com.mapbox.android.sdk.versions'
 apply from: "${rootDir}/gradle/ktlint.gradle"
-apply from: file("${rootDir}/gradle/artifact-settings.gradle")
-
-version = project.ext.versionName
-group = project.ext.mapboxArtifactGroupId
 
 dokka {
     outputDirectory = "$buildDir/kdoc"
     configuration {
-        moduleName = 'libnavigation-core'
+        moduleName = 'libnavigation-router'
         reportUndocumented = true
 
         perPackageOption {
-            prefix = "com.mapbox.navigation.core.internal"
+            prefix = "com.mapbox.navigation.route.internal"
             suppress = true
         }
     }
@@ -36,29 +31,23 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
-
-        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
-    }
-
-    testOptions {
-        unitTests.returnDefaultValues = true
-        unitTests.includeAndroidResources = true
     }
 }
 
 dependencies {
-    implementation dependenciesList.mapboxAnnotations
-    api dependenciesList.mapboxAndroidCommon
+    compileOnly dependenciesList.mapboxAnnotations
+    kapt dependenciesList.mapboxAnnotationsProcessor
+    implementation dependenciesList.mapboxAndroidCommon
 
     api project(':libnavigation-base')
-    implementation project(':libnavigation-util')
     implementation project(':libnavigator')
-    runtimeOnly project(':libnavigation-router')
-    runtimeOnly project(':libtrip-notification')
-    runtimeOnly dependenciesList.mapboxLogger
-    implementation project(':libnavigation-metrics')
-    implementation dependenciesList.mapboxAndroidAccounts
-    implementation dependenciesList.mapboxSdkTurf
+    implementation project(":libnavigation-util")
+
+    implementation dependenciesList.mapboxSdkServices
+
+    // Network
+    implementation(dependenciesList.okhttp)
+    implementation(dependenciesList.okhttpInterceptor)
 
     //ktlint
     ktlint dependenciesList.ktlint
@@ -66,17 +55,13 @@ dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
 
+    // I/O
+    implementation dependenciesList.okio
+
     testImplementation project(':libtesting-utils')
     apply from: "${rootDir}/gradle/unit-testing-dependencies.gradle"
-    testImplementation dependenciesList.commonsIO
-
-    testImplementation project(':libnavigation-router')
-    testImplementation project(':libtrip-notification')
-
-    androidTestImplementation project(':libtesting-ui')
 }
 
 apply from: "${rootDir}/gradle/track-public-apis.gradle"
-apply from: "${rootDir}/gradle/jacoco.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
-apply from: "${rootDir}/gradle/download-schema.gradle"
+apply from: "${rootDir}/gradle/jacoco.gradle"
