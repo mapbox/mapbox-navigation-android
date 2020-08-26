@@ -70,11 +70,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER =
-    "You need to provide an access token in NavigationOptions in order to use the default OffboardRouter. " +
-        "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
-private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER =
-    "You need to provide an access token in NavigationOptions in order to use the default OnboardRouter. " +
+private const val MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER =
+    "You need to provide an access token in NavigationOptions in order to use the default Router. " +
         "Also see MapboxNavigation#defaultNavigationOptionsBuilder"
 private const val MAPBOX_NAVIGATION_NOTIFICATION_PACKAGE_NAME =
     "com.mapbox.navigation.trip.notification.internal.MapboxTripNotification"
@@ -651,35 +648,23 @@ class MapboxNavigation(
     private fun paramsProvider(type: MapboxModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
             MapboxModuleType.NavigationRouter -> arrayOf(
-                Router::class.java to MapboxModuleProvider.createModule(
-                    MapboxModuleType.NavigationOnboardRouter,
-                    ::paramsProvider
-                ),
-                Router::class.java to MapboxModuleProvider.createModule(
-                    MapboxModuleType.NavigationOffboardRouter,
-                    ::paramsProvider
-                ),
+                String::class.java to (accessToken
+                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)),
+                Context::class.java to navigationOptions.applicationContext,
+                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext),
+                MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
+                Logger::class.java to logger,
                 NetworkStatusService::class.java to NetworkStatusService(navigationOptions.applicationContext)
             )
-            MapboxModuleType.NavigationOffboardRouter -> arrayOf(
-                String::class.java to (accessToken
-                    ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_OFFBOARD_ROUTER)),
-                Context::class.java to navigationOptions.applicationContext,
-                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
-            )
-            MapboxModuleType.NavigationOnboardRouter -> {
-                check(accessToken != null) { MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ONBOARD_ROUTER }
-                arrayOf(
-                    MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
-                    Logger::class.java to logger
-                )
-            }
             MapboxModuleType.NavigationTripNotification -> arrayOf(
                 NavigationOptions::class.java to navigationOptions
             )
             MapboxModuleType.CommonLogger -> arrayOf()
             MapboxModuleType.CommonLibraryLoader -> throw IllegalArgumentException("not supported: $type")
             MapboxModuleType.CommonHttpClient -> throw IllegalArgumentException("not supported: $type")
+            // to be removed with the upcoming common lib version
+            MapboxModuleType.NavigationOffboardRouter -> throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.NavigationOnboardRouter -> throw IllegalArgumentException("not supported: $type")
         }
     }
 
