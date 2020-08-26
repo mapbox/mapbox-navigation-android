@@ -40,6 +40,9 @@
     <string name="title_replay_waypoints">Replay waypoints</string>
     <string name="description_replay_waypoints">Shows how to use navigate to waypoints.</string>
 
+    <string name="title_waypoints_reroute" translatable="false">Waypoints reroute</string>
+    <string name="description_waypoints_reroute" translatable="false">Shows how to use navigate to waypoints with reroute.</string>
+
     <string name="title_reroute_view">Reroute events</string>
     <string name="description_reroute_view">Shows how to observe off-route events and how to implement custom re-route logic.</string>
 
