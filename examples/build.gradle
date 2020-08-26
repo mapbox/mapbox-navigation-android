@@ -78,9 +78,7 @@ android {
 dependencies {
     // Mapbox Navigation SDK
     implementation project(':libnavigation-metrics')
-    implementation project(':libdirections-offboard')
-    implementation project(':libdirections-onboard')
-    implementation project(':libdirections-hybrid')
+    implementation project(':libnavigation-router')
     implementation project(':libtrip-notification')
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')
