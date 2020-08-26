@@ -79,7 +79,7 @@ class WaypointsRerouteActivity : AppCompatActivity(), OnMapReadyCallback, OffRou
                 TripSessionState.STOPPED -> {
                     stopsController.clear()
                     startLocationUpdates()
-                    navigationMapboxMap?.removeRoute()
+                    navigationMapboxMap?.hideRoute()
                     updateCameraOnNavigationStateChange(false)
                 }
             }
