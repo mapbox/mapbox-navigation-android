@@ -133,7 +133,6 @@ class MapRouteLineTest {
             every {
                 initializeAlternativeRouteCasingLayer(
                     style,
-                    1.0f,
                     -9273715
                 )
             } returns alternativeRouteCasingLayer
@@ -141,14 +140,12 @@ class MapRouteLineTest {
                 initializeAlternativeRouteLayer(
                     style,
                     true,
-                    1.0f,
                     -7957339
                 )
             } returns alternativeRouteLayer
             every {
                 initializePrimaryRouteCasingLayer(
                     style,
-                    1.0f,
                     -13665594
                 )
             } returns primaryRouteCasingLayer
@@ -156,7 +153,6 @@ class MapRouteLineTest {
                 initializePrimaryRouteLayer(
                     style,
                     true,
-                    1.0f,
                     -11097861
                 )
             } returns primaryRouteLayer
@@ -165,7 +161,6 @@ class MapRouteLineTest {
                 initializePrimaryRouteTrafficLayer(
                     style,
                     true,
-                    1.0f,
                     -11097861
                 )
             } returns primaryRouteTrafficLayer
@@ -1292,6 +1287,53 @@ class MapRouteLineTest {
         )
 
         assertEquals(392.2066920656183, result, 0.0)
+    }
+
+    @Test
+    fun getStyledFloatArrayTest() {
+        val result = MapRouteLine.MapRouteLineSupport.getStyledFloatArray(
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
+            ctx,
+            styleRes,
+            R.styleable.MapboxStyleNavigationMapRoute
+        )
+
+        assertEquals(6, result.size)
+        assertEquals(4.0f, result[0])
+        assertEquals(10.0f, result[1])
+        assertEquals(13.0f, result[2])
+        assertEquals(16.0f, result[3])
+        assertEquals(19.0f, result[4])
+        assertEquals(22.0f, result[5])
+    }
+
+    @Test
+    fun getStyledFloatArrayWhenResourceNotFount() {
+        val result = MapRouteLine.MapRouteLineSupport.getStyledFloatArray(
+            0,
+            ctx,
+            styleRes,
+            R.styleable.MapboxStyleNavigationMapRoute
+        )
+
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun getRouteLineScalingValuesTest() {
+        val result = MapRouteLine.MapRouteLineSupport.getRouteLineScalingValues(
+            styleRes,
+            ctx,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleMultipliers,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScales,
+            R.styleable.MapboxStyleNavigationMapRoute
+        )
+
+        assertEquals(result.size, 6)
+        assertEquals(4.0f, result[0].scaleStop)
+        assertEquals(3.0f, result[0].scaleMultiplier)
+        assertEquals(1.0f, result[0].scale)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

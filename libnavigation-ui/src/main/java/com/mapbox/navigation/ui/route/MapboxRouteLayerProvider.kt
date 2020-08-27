@@ -47,6 +47,20 @@ import kotlin.reflect.KProperty1
 
 internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     val routeStyleDescriptors: List<RouteStyleDescriptor>
+    val routeLineScaleValues: List<RouteLineScaleValue>
+    val routeLineCasingScaleValues: List<RouteLineScaleValue>
+    val routeLineTrafficScaleValues: List<RouteLineScaleValue>
+
+    fun buildScalingExpression(scalingValues: List<RouteLineScaleValue>): Expression {
+        val stopExpressions = mutableListOf<Expression.Stop>()
+        scalingValues.forEach {
+            stopExpressions.add(
+                stop(it.scaleStop, product(literal(it.scaleMultiplier), literal(it.scale)))
+            )
+        }
+
+        return interpolate(exponential(1.5f), zoom(), *stopExpressions.toTypedArray())
+    }
 
     fun getRouteLineColorExpressions(
         defaultColor: Int,
@@ -63,38 +77,12 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         return expressions.plus(color(defaultColor))
     }
 
-    fun getRouteLineWidthExpressions(scale: Float): Expression {
-        return interpolate(
-            exponential(1.5f),
-            zoom(),
-            stop(4f, product(literal(3f), literal(scale))),
-            stop(10f, product(literal(4f), literal(scale))),
-            stop(13f, product(literal(6f), literal(scale))),
-            stop(16f, product(literal(10f), literal(scale))),
-            stop(19f, product(literal(14f), literal(scale))),
-            stop(22f, product(literal(18f), literal(scale)))
-        )
-    }
-
-    fun getCasingLineWidthExpression(scale: Float): Expression {
-        return interpolate(
-            exponential(1.5f),
-            zoom(),
-            stop(10f, 7f),
-            stop(14f, product(literal(10.5f), literal(scale))),
-            stop(16.5f, product(literal(15.5f), literal(scale))),
-            stop(19f, product(literal(24f), literal(scale))),
-            stop(22f, product(literal(29f), literal(scale)))
-        )
-    }
-
     override fun initializePrimaryRouteLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
+        val lineWidthScaleExpression = buildScalingExpression(routeLineScaleValues)
         val routeLineColorExpressions =
             getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
@@ -110,10 +98,9 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     override fun initializePrimaryRouteTrafficLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
+        val lineWidthScaleExpression = buildScalingExpression(routeLineTrafficScaleValues)
         val routeLineColorExpressions =
             getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
@@ -128,10 +115,9 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     override fun initializePrimaryRouteCasingLayer(
         style: Style,
-        scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
+        val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
         val routeLineColorExpressions =
             getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(
@@ -147,10 +133,9 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     override fun initializeAlternativeRouteLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthExpression = getRouteLineWidthExpressions(scale)
+        val lineWidthExpression = buildScalingExpression(routeLineScaleValues)
         val routeLineColorExpressions =
             getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
         return initializeRouteLayer(
@@ -165,10 +150,9 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     override fun initializeAlternativeRouteCasingLayer(
         style: Style,
-        scale: Float,
         color: Int
     ): LineLayer {
-        val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
+        val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
         val routeLineColorExpressions =
             getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
         return initializeRouteLayer(

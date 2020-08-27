@@ -1,7 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Route Line Scales -->
+    <string-array name="routeLineScaleStopsArray">
+        <item>4</item>
+        <item>10</item>
+        <item>13</item>
+        <item>16</item>
+        <item>19</item>
+        <item>22</item>
+    </string-array>
+
+    <string-array name="routeLineScaleMultiplierArray">
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>10</item>
+        <item>14</item>
+        <item>18</item>
+    </string-array>
+
+    <string-array name="routeLineScalesArray">
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="routeLineTrafficScaleStopsArray">
+        <item>4</item>
+        <item>10</item>
+        <item>13</item>
+        <item>16</item>
+        <item>19</item>
+        <item>22</item>
+    </string-array>
+
+    <string-array name="routeLineTrafficScaleMultiplierArray">
+        <item>3</item>
+        <item>4</item>
+        <item>6</item>
+        <item>10</item>
+        <item>14</item>
+        <item>18</item>
+    </string-array>
+
+    <string-array name="routeLineTrafficScalesArray">
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="routeLineCasingScaleStopsArray">
+        <item>10</item>
+        <item>14</item>
+        <item>16.5</item>
+        <item>19</item>
+        <item>22</item>
+    </string-array>
+
+    <string-array name="routeLineCasingScaleMultiplierArray">
+        <item>7</item>
+        <item>10.5</item>
+        <item>15.5</item>
+        <item>24</item>
+        <item>29</item>
+    </string-array>
+
+    <string-array name="routeLineCasingScalesArray">
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+        <item>1</item>
+    </string-array>
 
     <style name="MapboxStyleNavigationMapRoute">
+        <item name="routeLineScaleStops">@array/routeLineScaleStopsArray</item>
+        <item name="routeLineScaleMultipliers">@array/routeLineScaleMultiplierArray</item>
+        <item name="routeLineScales">@array/routeLineScalesArray</item>
+        <item name="routeLineTrafficScaleStops">@array/routeLineTrafficScaleStopsArray</item>
+        <item name="routeLineTrafficScaleMultipliers">@array/routeLineTrafficScaleMultiplierArray</item>
+        <item name="routeLineTrafficScales">@array/routeLineTrafficScalesArray</item>
+        <item name="routeLineCasingScaleStops">@array/routeLineCasingScaleStopsArray</item>
+        <item name="routeLineCasingScaleMultipliers">@array/routeLineCasingScaleMultiplierArray</item>
+        <item name="routeLineCasingScales">@array/routeLineCasingScalesArray</item>
+
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>
         <item name="routeLowCongestionColor">@color/mapbox_navigation_route_layer_blue</item>
@@ -42,10 +130,6 @@
         <item name="alternativeRouteCasingColor">
             @color/mapbox_navigation_route_alternative_casing_color
         </item>
-        <!-- Scales -->
-        <item name="routeScale">1.0</item>
-        <item name="routeTrafficScale">1.0</item>
-        <item name="alternativeRouteScale">1.0</item>
         <item name="upcomingManeuverArrowColor">
             @color/mapbox_navigation_route_upcoming_maneuver_arrow_color
         </item>

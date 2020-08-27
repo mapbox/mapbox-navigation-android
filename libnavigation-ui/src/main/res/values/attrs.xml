@@ -29,6 +29,15 @@
     <attr name="routeScale" format="float"/>
     <attr name="routeTrafficScale" format="float"/>
     <attr name="alternativeRouteScale" format="float"/>
+    <attr name="routeLineScaleStops" format="reference"/>
+    <attr name="routeLineScaleMultipliers" format="reference"/>
+    <attr name="routeLineScales" format="reference"/>
+    <attr name="routeLineTrafficScaleStops" format="reference"/>
+    <attr name="routeLineTrafficScaleMultipliers" format="reference"/>
+    <attr name="routeLineTrafficScales" format="reference"/>
+    <attr name="routeLineCasingScaleStops" format="reference"/>
+    <attr name="routeLineCasingScaleMultipliers" format="reference"/>
+    <attr name="routeLineCasingScales" format="reference"/>
 
     <attr name="upcomingManeuverArrowColor" format="color"/>
     <attr name="upcomingManeuverArrowBorderColor" format="color"/>

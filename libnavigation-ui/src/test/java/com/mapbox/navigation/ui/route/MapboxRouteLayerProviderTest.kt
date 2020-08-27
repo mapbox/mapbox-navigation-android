@@ -1,9 +1,62 @@
 package com.mapbox.navigation.ui.route
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.mapbox.navigation.ui.R
+import com.mapbox.navigation.ui.internal.ThemeSwitcher
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class MapboxRouteLayerProviderTest {
+
+    lateinit var ctx: Context
+    var styleRes: Int = 0
+    private lateinit var routeLineScaleValuesList: List<RouteLineScaleValue>
+    private lateinit var routeLineTrafficScaleValuesList: List<RouteLineScaleValue>
+    private lateinit var routeLineCasingScaleValuesList: List<RouteLineScaleValue>
+
+    @Before
+    fun setUp() {
+        ctx = ApplicationProvider.getApplicationContext()
+        styleRes = ThemeSwitcher.retrieveAttrResourceId(
+            ctx,
+            R.attr.navigationViewRouteStyle,
+            R.style.MapboxStyleNavigationMapRoute
+        )
+
+        routeLineScaleValuesList = MapRouteLine.MapRouteLineSupport.getRouteLineScalingValues(
+            styleRes,
+            ctx,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleMultipliers,
+            R.styleable.MapboxStyleNavigationMapRoute_routeLineScales,
+            R.styleable.MapboxStyleNavigationMapRoute
+        )
+
+        routeLineTrafficScaleValuesList =
+            MapRouteLine.MapRouteLineSupport.getRouteLineScalingValues(
+                styleRes,
+                ctx,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScaleStops,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScaleMultipliers,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScales,
+                R.styleable.MapboxStyleNavigationMapRoute
+            )
+
+        routeLineCasingScaleValuesList =
+            MapRouteLine.MapRouteLineSupport.getRouteLineScalingValues(
+                styleRes,
+                ctx,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScaleStops,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScaleMultipliers,
+                R.styleable.MapboxStyleNavigationMapRoute_routeLineTrafficScales,
+                R.styleable.MapboxStyleNavigationMapRoute
+            )
+    }
 
     @Test
     fun getRouteLineColorExpressions() {
@@ -16,6 +69,11 @@ class MapboxRouteLayerProviderTest {
                 RouteStyleDescriptor("myRouteId", 555, 999),
                 RouteStyleDescriptor("anotherRouteId", 111, 222)
             )
+            override val routeLineScaleValues: List<RouteLineScaleValue> = routeLineScaleValuesList
+            override val routeLineTrafficScaleValues: List<RouteLineScaleValue> =
+                routeLineTrafficScaleValuesList
+            override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
+                routeLineCasingScaleValuesList
         }
 
         val result =
@@ -33,6 +91,11 @@ class MapboxRouteLayerProviderTest {
             "true], [\"rgba\", 0.0, 8.0, 73.0, 0.0], [\"rgba\", 0.0, 8.0, 73.0, 0.0]]"
         val layerProvider = object : MapboxRouteLayerProvider {
             override val routeStyleDescriptors: List<RouteStyleDescriptor> = listOf()
+            override val routeLineScaleValues: List<RouteLineScaleValue> = routeLineScaleValuesList
+            override val routeLineTrafficScaleValues: List<RouteLineScaleValue> =
+                routeLineTrafficScaleValuesList
+            override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
+                routeLineCasingScaleValuesList
         }
 
         val result = layerProvider.getRouteLineColorExpressions(
@@ -54,6 +117,11 @@ class MapboxRouteLayerProviderTest {
                 RouteStyleDescriptor("myRouteId", 555, 999),
                 RouteStyleDescriptor("anotherRouteId", 111, 222)
             )
+            override val routeLineScaleValues: List<RouteLineScaleValue> = routeLineScaleValuesList
+            override val routeLineTrafficScaleValues: List<RouteLineScaleValue> =
+                routeLineTrafficScaleValuesList
+            override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
+                routeLineCasingScaleValuesList
         }
 
         val result = layerProvider.getRouteLineColorExpressions(
@@ -70,6 +138,11 @@ class MapboxRouteLayerProviderTest {
             "true], [\"rgba\", 0.0, 8.0, 73.0, 0.0], [\"rgba\", 0.0, 8.0, 73.0, 0.0]]"
         val layerProvider = object : MapboxRouteLayerProvider {
             override val routeStyleDescriptors: List<RouteStyleDescriptor> = listOf()
+            override val routeLineScaleValues: List<RouteLineScaleValue> = routeLineScaleValuesList
+            override val routeLineTrafficScaleValues: List<RouteLineScaleValue> =
+                routeLineTrafficScaleValuesList
+            override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
+                routeLineCasingScaleValuesList
         }
 
         val result = layerProvider.getRouteLineColorExpressions(
@@ -81,30 +154,30 @@ class MapboxRouteLayerProviderTest {
     }
 
     @Test
-    fun getRouteLineWidthExpressions() {
+    fun buildScalingExpressionTest() {
         val expectedResult = "[\"interpolate\", [\"exponential\", 1.5], [\"zoom\"], 4.0, " +
             "[\"*\", 3.0, 0.75], 10.0, [\"*\", 4.0, 0.75], 13.0, [\"*\", 6.0, 0.75], 16.0, " +
             "[\"*\", 10.0, 0.75], 19.0, [\"*\", 14.0, 0.75], 22.0, [\"*\", 18.0, 0.75]]"
         val layerProvider = object : MapboxRouteLayerProvider {
             override val routeStyleDescriptors: List<RouteStyleDescriptor> = listOf()
+            override val routeLineScaleValues: List<RouteLineScaleValue> = routeLineScaleValuesList
+            override val routeLineTrafficScaleValues: List<RouteLineScaleValue> =
+                routeLineTrafficScaleValuesList
+            override val routeLineCasingScaleValues: List<RouteLineScaleValue> =
+                routeLineCasingScaleValuesList
         }
 
-        val result = layerProvider.getRouteLineWidthExpressions(0.75f)
+        val scalingValues = listOf(
+            RouteLineScaleValue(4f, 3f, 0.75f),
+            RouteLineScaleValue(10f, 4f, 0.75f),
+            RouteLineScaleValue(13f, 6f, 0.75f),
+            RouteLineScaleValue(16f, 10f, 0.75f),
+            RouteLineScaleValue(19f, 14f, 0.75f),
+            RouteLineScaleValue(22f, 18f, 0.75f)
+        )
 
-        assertEquals(expectedResult, result.toString())
-    }
+        val expression = layerProvider.buildScalingExpression(scalingValues)
 
-    @Test
-    fun getCasingLineWidthExpression() {
-        val expectedResult = "[\"interpolate\", [\"exponential\", 1.5], [\"zoom\"], 10.0, 7.0, " +
-            "14.0, [\"*\", 10.5, 1.0], 16.5, [\"*\", 15.5, 1.0], 19.0, [\"*\", 24.0, 1.0], " +
-            "22.0, [\"*\", 29.0, 1.0]]"
-        val layerProvider = object : MapboxRouteLayerProvider {
-            override val routeStyleDescriptors: List<RouteStyleDescriptor> = listOf()
-        }
-
-        val result = layerProvider.getCasingLineWidthExpression(1f)
-
-        assertEquals(expectedResult, result.toString())
+        assertEquals(expectedResult, expression.toString())
     }
 }
