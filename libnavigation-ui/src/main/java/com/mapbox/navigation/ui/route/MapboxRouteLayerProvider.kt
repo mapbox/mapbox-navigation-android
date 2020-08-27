@@ -33,11 +33,9 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.DEFAULT_ROUTE_DESC
 import com.mapbox.navigation.ui.internal.route.RouteConstants.DESTINATION_MARKER_NAME
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ORIGIN_MARKER_NAME
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
@@ -117,7 +115,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             style,
             roundedLineCap,
             PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            PRIMARY_ROUTE_TRAFFIC_SOURCE_ID,
+            PRIMARY_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
             routeLineColorExpressions)
     }
@@ -133,7 +131,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             style,
             true,
             PRIMARY_ROUTE_CASING_LAYER_ID,
-            PRIMARY_ROUTE_CASING_SOURCE_ID,
+            PRIMARY_ROUTE_SOURCE_ID,
             lineWidthScaleExpression,
             routeLineColorExpressions)
     }
