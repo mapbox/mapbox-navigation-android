@@ -18,6 +18,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
@@ -248,7 +249,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param position the point at which the marker will be placed
    */
   public void addDestinationMarker(Point position) {
-    navigationSymbolManager.addDestinationMarkerFor(position);
+    if (navigationSymbolManager != null) {
+      navigationSymbolManager.addDestinationMarkerFor(position);
+    }
   }
 
   /**
@@ -258,9 +261,41 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * will clear all destination / custom markers that have been added to the map.
    *
    * @param options for the custom {@link com.mapbox.mapboxsdk.plugins.annotation.Symbol}
+   *
+   * @return the {@link com.mapbox.mapboxsdk.plugins.annotation.Symbol} that added to the map or null if adding fails
    */
-  public void addCustomMarker(SymbolOptions options) {
-    navigationSymbolManager.addCustomSymbolFor(options);
+  public Symbol addCustomMarker(SymbolOptions options) {
+    if (navigationSymbolManager != null) {
+      return navigationSymbolManager.addCustomSymbolFor(options);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Clears marker with the specified marker id.
+   * <p>
+   * Please note, this only clears the marker added by {@link NavigationMapboxMap#addCustomMarker(SymbolOptions)}
+   *
+   * @param markerId of the {@link com.mapbox.mapboxsdk.plugins.annotation.Symbol}
+   */
+  public void clearMarkerWithId(long markerId) {
+    if (navigationSymbolManager != null) {
+      navigationSymbolManager.clearSymbolWithId(markerId);
+    }
+  }
+
+  /**
+   * Clears all markers with the specified icon image.
+   * <p>
+   * Please note, this only clears the markers added by {@link NavigationMapboxMap#addCustomMarker(SymbolOptions)}
+   *
+   * @param markerIconImageProperty of the {@link com.mapbox.mapboxsdk.plugins.annotation.Symbol}
+   */
+  public void clearMarkersWithIconImageProperty(String markerIconImageProperty) {
+    if (navigationSymbolManager != null) {
+      navigationSymbolManager.clearSymbolsWithIconImageProperty(markerIconImageProperty);
+    }
   }
 
   /**
@@ -270,7 +305,9 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * if no markers have been added.
    */
   public void clearMarkers() {
-    navigationSymbolManager.removeAllMarkerSymbols();
+    if (navigationSymbolManager != null) {
+      navigationSymbolManager.clearAllMarkerSymbols();
+    }
   }
 
   /**
@@ -681,6 +718,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    *
    * @param isVisible true to show, false to hide
    */
+  @SuppressLint("MissingPermission")
   public void updateLocationVisibilityTo(boolean isVisible) {
     locationComponent.setLocationComponentEnabled(isVisible);
   }

@@ -9,6 +9,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
@@ -23,9 +24,13 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -54,8 +59,12 @@ import kotlinx.android.synthetic.main.activity_feedback_button.*
  * traffic incidents are just two of the several types of live navigation
  * feedback that can be reported.
  */
-class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
-    FeedbackBottomSheetListener {
+@SuppressLint("MissingPermission")
+class FeedbackButtonActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    FeedbackBottomSheetListener,
+    ArrivalObserver {
 
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
@@ -82,6 +91,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
 
         mapboxNavigation = MapboxNavigation(mapboxNavigationOptions).apply {
             registerTripSessionStateObserver(tripSessionStateObserver)
+            registerArrivalObserver(this@FeedbackButtonActivity)
         }
 
         initListeners()
@@ -115,6 +125,7 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onDestroy() {
         super.onDestroy()
         mapboxReplayer.finish()
+        mapboxNavigation?.unregisterArrivalObserver(this)
         mapboxNavigation?.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation?.stopTripSession()
         mapboxNavigation?.onDestroy()
@@ -152,12 +163,17 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 locationListenerCallback
             )
 
-            directionRoute?.let {
-                navigationMapboxMap?.drawRoute(it)
-                mapboxNavigation?.setRoutes(listOf(it))
+            directionRoute?.let { route ->
+                navigationMapboxMap?.drawRoute(route)
+                mapboxNavigation?.setRoutes(listOf(route))
                 startNavigation.visibility = VISIBLE
                 startNavigation.isEnabled = true
             }
+
+            it.addImage(
+                FEEDBACK_ICON_IMAGE_ID,
+                AppCompatResources.getDrawable(this, R.drawable.mapbox_ic_feedback)!!
+            )
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->
@@ -180,6 +196,14 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
             Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
                 .show()
         }
+    }
+
+    override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+        // Not needed in this example
+    }
+
+    override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+        navigationMapboxMap?.clearMarkersWithIconImageProperty(FEEDBACK_ICON_IMAGE_ID)
     }
 
     private fun initViews() {
@@ -216,6 +240,12 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         feedbackButton.addOnClickListener {
+            mapboxMap?.locationComponent?.lastKnownLocation?.let {
+                navigationMapboxMap?.addCustomMarker(
+                    SymbolOptions().withGeometry(it.toPoint()).withIconImage(FEEDBACK_ICON_IMAGE_ID)
+                )
+            }
+
             feedbackItem = null
             feedbackEncodedScreenShot = null
             feedbackButton.hide()
@@ -330,6 +360,10 @@ class FeedbackButtonActivity : AppCompatActivity(), OnMapReadyCallback,
                 updateLocationLayerRenderMode(RenderMode.COMPASS)
             }
         }
+    }
+
+    companion object {
+        private const val FEEDBACK_ICON_IMAGE_ID = "marker-feedback"
     }
 }
 
