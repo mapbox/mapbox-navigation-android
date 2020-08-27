@@ -50,7 +50,9 @@ import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
@@ -113,6 +115,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
     private lateinit var context: Context // Must be context.getApplicationContext
     private lateinit var telemetryThreadControl: JobControl
     private val telemetryScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var monitorSession: Job? = null
     private lateinit var metricsReporter: MetricsReporter
     private lateinit var navigationOptions: NavigationOptions
     private lateinit var localUserAgent: String
@@ -163,6 +166,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         sessionEndPredicate()
         sessionEndPredicate = {}
         postUserEventDelegate = postUserEventBeforeInit
+        monitorSession?.cancel()
+        monitorSession = null
     }
 
     private fun telemetryEventGate(event: MetricEvent) =
@@ -256,8 +261,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 ArrayDeque(callbackDispatcher.getCopyOfCurrentLocationBuffer()),
                 ArrayDeque()
             ) { preEventBuffer, postEventBuffer ->
-                telemetryThreadControl.scope.launch {
-
                     // Populate the RerouteEvent
                     val rerouteEvent = RerouteEvent(populateSessionState()).apply {
                         newDistanceRemaining = newRoute.route.distance()?.toInt() ?: -1
@@ -280,7 +283,6 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                         navigationRerouteEvent
                     )
                     Log.d(TAG, "REROUTE event sent $result")
-                }
             })
         }
     }
@@ -314,10 +316,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
      */
     private var postUserEventDelegate = postUserEventBeforeInit
 
-    /**
-     * One-time initializer. Called in response to initialize() and then replaced with a no-op lambda to prevent multiple initialize() calls
-     */
-    private val preInitializePredicate: (Context, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
+    private val initializer: (Context, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
         { context, mapboxNavigation, metricsReporter, name, jobControl, options, userAgent ->
             telemetryThreadControl = jobControl
             weakMapboxNavigation = WeakReference(mapboxNavigation)
@@ -330,23 +329,11 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             locationEngineNameExternal = name
             navigationOptions = options
             this.metricsReporter = metricsReporter
-            initializer =
-                postInitializePredicate // prevent primaryInitializer() from being called more than once.
             postTurnstileEvent()
             monitorJobCancelation()
             Log.i(TAG, "Valid initialization")
             true
         }
-
-    // Calling initialize multiple times does no harm. This call is a no-op.
-    private var postInitializePredicate: (Context, MapboxNavigation, MetricsReporter, String, JobControl, NavigationOptions, String) -> Boolean =
-        { _, _, _, _, _, _, _ ->
-            Log.i(TAG, "Already initialized")
-            false
-        }
-
-    private var initializer =
-        preInitializePredicate // The initialize dispatcher that points to either pre or post initialization lambda
 
     private var sessionEndPredicate = { }
 
@@ -365,15 +352,22 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         jobControl: JobControl,
         options: NavigationOptions,
         userAgent: String
-    ) = initializer(
-        context,
-        mapboxNavigation,
-        metricsReporter,
-        locationEngineName,
-        jobControl,
-        options,
-        userAgent
-    )
+    ) {
+        weakMapboxNavigation.get()?.let {
+            unregisterListeners(it)
+            telemetryThreadControl.job.cancelChildren()
+            telemetryThreadControl.job.cancel()
+        }
+        initializer(
+            context,
+            mapboxNavigation,
+            metricsReporter,
+            locationEngineName,
+            jobControl,
+            options,
+            userAgent
+        )
+    }
 
     private fun monitorOffRouteEvents() {
         telemetryThreadControl.scope.monitorChannelWithException(callbackDispatcher.getOffRouteEventChannel(), { offRoute ->
@@ -536,7 +530,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         dynamicValues.sessionId = TelemetryUtils.obtainUniversalUniqueIdentifier()
         dynamicValues.sessionStartTime = Date()
         dynamicValues.sessionStarted.set(true)
-        telemetryThreadControl.scope.launch {
+        monitorSession = telemetryThreadControl.scope.launch {
             val result = telemetryEventGate(telemetryDeparture(directionsRoute, callbackDispatcher.getFirstLocationAsync().await()))
             Log.d(TAG, "DEPARTURE event sent $result")
             monitorSession()
@@ -635,7 +629,7 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         mapboxNavigation.unregisterOffRouteObserver(callbackDispatcher)
         mapboxNavigation.unregisterNavigationSessionObserver(navigationSessionObserver)
         Log.d(TAG, "resetting Telemetry initialization")
-        initializer = preInitializePredicate
+        weakMapboxNavigation.clear()
     }
 
     private fun populateSessionState(newLocation: Location? = null): SessionState {
@@ -687,10 +681,10 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
         navigationEvent.percentTimeInForeground = lifecycleMonitor?.obtainForegroundPercentage() ?: 100
         navigationEvent.distanceCompleted = dynamicValues.distanceCompleted.get().toInt()
         navigationEvent.distanceRemaining = dynamicValues.distanceRemaining.get().toInt()
-        navigationEvent.durationRemaining = dynamicValues.durationRemaining.get().toInt()
+        navigationEvent.durationRemaining = dynamicValues.durationRemaining.get()
         navigationEvent.eventVersion = EVENT_VERSION
-        navigationEvent.estimatedDistance = directionsRoute?.distance()?.toInt() ?: 0
-        navigationEvent.estimatedDuration = directionsRoute?.duration()?.toInt() ?: 0
+        navigationEvent.estimatedDistance = directionsRoute.distance()?.toInt() ?: 0
+        navigationEvent.estimatedDuration = directionsRoute.duration()?.toInt() ?: 0
         navigationEvent.rerouteCount = dynamicValues.rerouteCount.get()
         navigationEvent.originalEstimatedDistance = callbackDispatcher.getOriginalRouteReadOnly()?.route?.distance()?.toInt() ?: 0
         navigationEvent.originalEstimatedDuration = callbackDispatcher.getOriginalRouteReadOnly()?.route?.duration()?.toInt() ?: 0

@@ -78,6 +78,11 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun onInit_registerNavigationSessionObserver_called() {
+        onInit { verify(exactly = 1) { mapboxNavigation.registerNavigationSessionObserver(any()) } }
+    }
+
+    @Test
     fun onInit_getRoutes_called() {
         onInit { verify(exactly = 1) { mapboxNavigation.getRoutes() } }
     }
@@ -103,6 +108,11 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun onUnregisterListener_unregisterNavigationSessionObserver_called() {
+        onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterNavigationSessionObserver(any()) } }
+    }
+
+    @Test
     fun after_unregister_onInit_registers_all_listeners_again() {
         initTelemetry()
         resetTelemetry()
@@ -112,7 +122,22 @@ class MapboxNavigationTelemetryTest {
         verify(exactly = 2) { mapboxNavigation.registerLocationObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerRoutesObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.registerOffRouteObserver(any()) }
+        verify(exactly = 2) { mapboxNavigation.registerNavigationSessionObserver(any()) }
         verify(exactly = 2) { mapboxNavigation.getRoutes() }
+
+        resetTelemetry()
+    }
+
+    @Test
+    fun onInitTwice_unregisters_all_listeners() {
+        initTelemetry()
+        initTelemetry()
+
+        verify(exactly = 1) { mapboxNavigation.unregisterRouteProgressObserver(any()) }
+        verify(exactly = 1) { mapboxNavigation.unregisterLocationObserver(any()) }
+        verify(exactly = 1) { mapboxNavigation.unregisterRoutesObserver(any()) }
+        verify(exactly = 1) { mapboxNavigation.unregisterOffRouteObserver(any()) }
+        verify(exactly = 1) { mapboxNavigation.unregisterNavigationSessionObserver(any()) }
 
         resetTelemetry()
     }
