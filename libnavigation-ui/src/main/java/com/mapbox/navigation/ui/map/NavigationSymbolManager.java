@@ -1,8 +1,8 @@
 package com.mapbox.navigation.ui.map;
 
-
 import androidx.annotation.NonNull;
 
+import androidx.collection.LongSparseArray;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
@@ -15,7 +15,7 @@ import java.util.List;
 class NavigationSymbolManager {
 
   static final String MAPBOX_NAVIGATION_MARKER_NAME = "mapbox-navigation-marker";
-  private final List<Symbol> mapMarkersSymbols = new ArrayList<>();
+  private final LongSparseArray<Symbol> markersSymbols = new LongSparseArray<>();
   private Symbol destinationSymbol = null;
   @NonNull
   private final SymbolManager symbolManager;
@@ -29,36 +29,61 @@ class NavigationSymbolManager {
   void addDestinationMarkerFor(@NonNull Point position) {
     if (destinationSymbol != null) {
       symbolManager.delete(destinationSymbol);
-      mapMarkersSymbols.remove(destinationSymbol);
+      markersSymbols.remove(destinationSymbol.getId());
     }
+
     SymbolOptions options = createSymbolOptionsFor(position);
     destinationSymbol = createSymbolFrom(options);
   }
 
-  void addCustomSymbolFor(@NonNull SymbolOptions options) {
-    createSymbolFrom(options);
+  Symbol addCustomSymbolFor(@NonNull SymbolOptions options) {
+    return createSymbolFrom(options);
   }
 
-  void removeAllMarkerSymbols() {
-    for (Symbol markerSymbol : mapMarkersSymbols) {
-      symbolManager.delete(markerSymbol);
+  void clearSymbolWithId(long symbolId) {
+    Symbol symbol = markersSymbols.get(symbolId);
+    if (symbol != null) {
+      symbolManager.delete(symbol);
+      markersSymbols.remove(symbolId);
     }
-    mapMarkersSymbols.clear();
+  }
+
+  void clearSymbolsWithIconImageProperty(@NonNull String symbolIconImageProperty) {
+    List<Symbol> toDelete = new ArrayList<>();
+    for (int i = 0; i < markersSymbols.size(); i++) {
+      Symbol symbol = markersSymbols.valueAt(i);
+      if (symbolIconImageProperty.equals(symbol.getIconImage())) {
+        symbolManager.delete(symbol);
+        toDelete.add(symbol);
+      }
+    }
+
+    for (Symbol symbol : toDelete) {
+      markersSymbols.remove(symbol.getId());
+    }
+  }
+
+  void clearAllMarkerSymbols() {
+    for (int i = 0; i < markersSymbols.size(); i++) {
+      Symbol symbol = markersSymbols.valueAt(i);
+      symbolManager.delete(symbol);
+    }
+    markersSymbols.clear();
     destinationSymbol = null;
   }
 
   @NonNull
   private SymbolOptions createSymbolOptionsFor(@NonNull Point position) {
     LatLng markerPosition = new LatLng(position.latitude(),
-      position.longitude());
+        position.longitude());
     return new SymbolOptions()
-      .withLatLng(markerPosition)
-      .withIconImage(MAPBOX_NAVIGATION_MARKER_NAME);
+        .withLatLng(markerPosition)
+        .withIconImage(MAPBOX_NAVIGATION_MARKER_NAME);
   }
 
   private Symbol createSymbolFrom(@NonNull SymbolOptions options) {
     Symbol symbol = symbolManager.create(options);
-    mapMarkersSymbols.add(symbol);
+    markersSymbols.put(symbol.getId(), symbol);
     return symbol;
   }
 }
