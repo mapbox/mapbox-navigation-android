@@ -30,13 +30,14 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_V
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
@@ -125,8 +126,6 @@ internal class MapRouteLine(
 
     private var wayPointSource: GeoJsonSource
     private val primaryRouteLineSource: GeoJsonSource
-    private val primaryRouteLineCasingSource: GeoJsonSource
-    private val primaryRouteLineTrafficSource: GeoJsonSource
     private val alternativeRouteLineSource: GeoJsonSource
     private val routeLayerIds = mutableSetOf<String>()
     private val directionsRoutes = mutableListOf<DirectionsRoute>()
@@ -342,7 +341,7 @@ internal class MapRouteLine(
 
         val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
         wayPointSource = mapRouteSourceProvider.build(
-            RouteConstants.WAYPOINT_SOURCE_ID,
+            WAYPOINT_SOURCE_ID,
             drawnWaypointsFeatureCollection,
             wayPointGeoJsonOptions
         )
@@ -350,26 +349,11 @@ internal class MapRouteLine(
 
         val routeLineGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
         primaryRouteLineSource = mapRouteSourceProvider.build(
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            PRIMARY_ROUTE_SOURCE_ID,
             drawnPrimaryRouteFeatureCollection,
             routeLineGeoJsonOptions
         )
         style.addSource(primaryRouteLineSource)
-
-        primaryRouteLineCasingSource = mapRouteSourceProvider.build(
-            RouteConstants.PRIMARY_ROUTE_CASING_SOURCE_ID,
-            drawnPrimaryRouteFeatureCollection,
-            routeLineGeoJsonOptions
-        )
-        style.addSource(primaryRouteLineCasingSource)
-
-        val routeLineTrafficGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
-        primaryRouteLineTrafficSource = mapRouteSourceProvider.build(
-            PRIMARY_ROUTE_TRAFFIC_SOURCE_ID,
-            drawnPrimaryRouteFeatureCollection,
-            routeLineTrafficGeoJsonOptions
-        )
-        style.addSource(primaryRouteLineTrafficSource)
 
         val alternativeRouteLineGeoJsonOptions =
             GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
@@ -791,9 +775,7 @@ internal class MapRouteLine(
 
     private fun setPrimaryRoutesSource(featureCollection: FeatureCollection) {
         drawnPrimaryRouteFeatureCollection = featureCollection
-        primaryRouteLineCasingSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
         primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
-        primaryRouteLineTrafficSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
     }
 
     private fun setAlternativeRoutesSource(featureCollection: FeatureCollection) {

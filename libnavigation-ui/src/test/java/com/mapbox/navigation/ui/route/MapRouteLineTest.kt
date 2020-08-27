@@ -111,9 +111,7 @@ class MapRouteLineTest {
         mapRouteSourceProvider = mockk {
             every { build(RouteConstants.WAYPOINT_SOURCE_ID, any(), any()) } returns wayPointSource
             every { build(RouteConstants.PRIMARY_ROUTE_SOURCE_ID, any(), any()) } returns primaryRouteLineSource
-            every { build(RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID, any(), any()) } returns primaryRouteLineTrafficSource
             every { build(RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID, any(), any()) } returns alternativeRouteLineSource
-            every { build(RouteConstants.PRIMARY_ROUTE_CASING_SOURCE_ID, any(), any()) } returns primaryRouteCasingSource
         }
         layerProvider = mockk {
             every {
