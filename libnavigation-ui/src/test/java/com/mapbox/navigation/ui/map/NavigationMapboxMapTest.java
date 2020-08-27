@@ -3,9 +3,7 @@ package com.mapbox.navigation.ui.map;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.location.LocationComponent;
-import com.mapbox.mapboxsdk.location.LocationComponentOptions;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
-import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
@@ -323,6 +321,38 @@ public class NavigationMapboxMapTest {
     map.addCustomMarker(options);
 
     verify(navigationSymbolManager).addCustomSymbolFor(options);
+  }
+
+  @Test
+  public void clearMarkerWithId_navigationSymbolManagerReceivesId() {
+    long  markerId = 911L;
+    NavigationSymbolManager navigationSymbolManager = mock(NavigationSymbolManager.class);
+    NavigationMapboxMap map = new NavigationMapboxMap(navigationSymbolManager);
+
+    map.clearMarkerWithId(markerId);
+
+    verify(navigationSymbolManager).clearSymbolWithId(markerId);
+  }
+
+  @Test
+  public void clearMarkersWithIconImageProperty_navigationSymbolManagerReceivesIconImage() {
+    String markerIconImage = "icon-image";
+    NavigationSymbolManager navigationSymbolManager = mock(NavigationSymbolManager.class);
+    NavigationMapboxMap map = new NavigationMapboxMap(navigationSymbolManager);
+
+    map.clearMarkersWithIconImageProperty(markerIconImage);
+
+    verify(navigationSymbolManager).clearSymbolsWithIconImageProperty(markerIconImage);
+  }
+
+  @Test
+  public void clearMarkers_navigationSymbolManagerClearAllMarkerSymbols() {
+    NavigationSymbolManager navigationSymbolManager = mock(NavigationSymbolManager.class);
+    NavigationMapboxMap map = new NavigationMapboxMap(navigationSymbolManager);
+
+    map.clearMarkers();
+
+    verify(navigationSymbolManager).clearAllMarkerSymbols();
   }
 
   @Test

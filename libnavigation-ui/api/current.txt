@@ -439,14 +439,16 @@ package com.mapbox.navigation.ui.map {
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, boolean);
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?);
     ctor public NavigationMapboxMap(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner, String?, boolean, boolean);
-    method public void addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
+    method public com.mapbox.mapboxsdk.plugins.annotation.Symbol! addCustomMarker(com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions!);
     method public void addDestinationMarker(com.mapbox.geojson.Point!);
     method public void addOnCameraTrackingChangedListener(com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener);
     method public boolean addOnWayNameChangedListener(com.mapbox.navigation.ui.map.OnWayNameChangedListener!);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation);
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation, boolean);
     method public void adjustLocationIconWith(int[]);
+    method public void clearMarkerWithId(long);
     method public void clearMarkers();
+    method public void clearMarkersWithIconImageProperty(String!);
     method public void drawIdentifiableRoute(com.mapbox.navigation.ui.route.IdentifiableRoute);
     method public void drawIdentifiableRoutes(java.util.List<com.mapbox.navigation.ui.route.IdentifiableRoute!>);
     method public void drawRoute(com.mapbox.api.directions.v5.models.DirectionsRoute);
