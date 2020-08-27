@@ -161,6 +161,8 @@ class MapboxNavigationTest {
     @Test
     fun sanity() {
         assertNotNull(mapboxNavigation)
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -171,8 +173,58 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun init_registerOffRouteObserver_internalOffRouteObserver() {
-        verify(exactly = 1) { tripSession.registerOffRouteObserver(any()) }
+    fun init_registerOffRouteObserver() {
+        verify(exactly = 2) { tripSession.registerOffRouteObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun destroy_unregisterOffRouteObserver() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
+        ThreadController.cancelAllUICoroutines()
+        val navigationOptions = NavigationOptions
+            .Builder(applicationContext)
+            .accessToken(accessToken)
+            .distanceFormatter(distanceFormatter)
+            .navigatorPredictionMillis(1500L)
+            .onboardRouterOptions(onBoardRouterOptions)
+            .timeFormatType(NONE_SPECIFIED)
+            .locationEngine(locationEngine)
+            .build()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        verify(exactly = 4) { tripSession.registerOffRouteObserver(any()) }
+
+        mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun destroy_unregisterOffRouteObserver_MapboxNavigation_recreated() {
+        ThreadController.cancelAllUICoroutines()
+        val navigationOptions = NavigationOptions
+            .Builder(applicationContext)
+            .accessToken(accessToken)
+            .distanceFormatter(distanceFormatter)
+            .navigatorPredictionMillis(1500L)
+            .onboardRouterOptions(onBoardRouterOptions)
+            .timeFormatType(NONE_SPECIFIED)
+            .locationEngine(locationEngine)
+            .build()
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 2) { tripSession.unregisterOffRouteObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
@@ -272,12 +324,16 @@ class MapboxNavigationTest {
     fun fasterRoute_noRouteOptions_noRequest() {
         every { directionsSession.getRouteOptions() } returns null
         verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
     fun fasterRoute_noEnhancedLocation_noRequest() {
         every { tripSession.getEnhancedLocation() } returns null
         verify(exactly = 0) { directionsSession.requestFasterRoute(any(), any()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -287,6 +343,8 @@ class MapboxNavigationTest {
         mapboxNavigation.setArrivalController(arrivalController)
 
         verify { tripSession.registerRouteProgressObserver(any<ArrivalProgressObserver>()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -296,6 +354,8 @@ class MapboxNavigationTest {
         mapboxNavigation.setArrivalController(arrivalController)
 
         verify { tripSession.unregisterRouteProgressObserver(any<ArrivalProgressObserver>()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -312,6 +372,8 @@ class MapboxNavigationTest {
             tripSession.registerOffRouteObserver(any())
             rerouteController.reroute(any())
         }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -322,6 +384,8 @@ class MapboxNavigationTest {
         offRouteObserverSlot.captured.onOffRouteStateChanged(false)
 
         verify(exactly = 0) { rerouteController.reroute(any()) }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -337,6 +401,8 @@ class MapboxNavigationTest {
         }
 
         verify { tripSession.route = primary }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -350,6 +416,7 @@ class MapboxNavigationTest {
         }
 
         verify { tripSession.route = null }
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -357,6 +424,8 @@ class MapboxNavigationTest {
         mapboxNavigation.requestRoutes(mockk())
 
         verify(exactly = 1) { rerouteController.interrupt() }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -364,6 +433,8 @@ class MapboxNavigationTest {
         mapboxNavigation.setRoutes(mockk())
 
         verify(exactly = 1) { rerouteController.interrupt() }
+
+        mapboxNavigation.onDestroy()
     }
 
     @Test
@@ -386,6 +457,8 @@ class MapboxNavigationTest {
             rerouteController.interrupt()
             newRerouteController.reroute(any())
         }
+
+        mapboxNavigation.onDestroy()
     }
 
     private fun mockLocation() {
