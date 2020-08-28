@@ -2,6 +2,29 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.1.0-alpha.1 - August 27, 2020
+[Changes since Mapbox Navigation SDK 1.0.0-rc.6](https://github.com/mapbox/mapbox-navigation-android/compare/release_ui_1.0.0-rc.6_core_1.0.0-rc.6...release_ui_1.1.0-alpha.1_core_1.1.0-alpha.1):
+#### Features
+- Updated Feedback UI icons which also fixes minor rendering artifacts on some devices. ([#3453](https://github.com/mapbox/mapbox-navigation-android/pull/3453), [#3470](https://github.com/mapbox/mapbox-navigation-android/pull/3470))
+- Upgraded to Maps SDK v9.4.0-beta.2. ([#3489](https://github.com/mapbox/mapbox-navigation-android/pull/3489))
+- Switched all location timestamps management to an on-device monotonic timeclock to avoid phantom location updates, or edge cases when switching timezones or cell towers. ([#422](https://github.com/mapbox/navigation-sdks/issues/422))
+- Pulled in latest [Transifex](https://www.transifex.com/mapbox/mapbox-navigation-sdk-for-android/) translations. ([#3491](https://github.com/mapbox/mapbox-navigation-android/pull/3491))
+- Added `ReplayRouteTraffic` to route replayer that can simulate traffic congestion from the route response. ([#3478](https://github.com/mapbox/mapbox-navigation-android/pull/3478))
+#### Bug fixes
+- Fixed a regression where a destination marker was not shown when using the Drop-in UI. ([#3462](https://github.com/mapbox/mapbox-navigation-android/pull/3462))
+- Fixed a bug where route refresh feature was automatically enabled if `PROFILE_DRIVING_TRAFFIC` was used, regardless of the `supportsRefresh` setting used for the original request.
+- Fixed a bug where custom coloring of alternative route lines was not preserved when selected and deselected, or when the alternative routes' casing turned grey. ([#3485](https://github.com/mapbox/mapbox-navigation-android/pull/3485), [#3458](https://github.com/mapbox/mapbox-navigation-android/pull/3458))
+- Updated typo in "Road known by different name" feedback sub-type string. ([#3481](https://github.com/mapbox/mapbox-navigation-android/pull/3481))
+- Realigned positioning of the recenter button. ([#3487](https://github.com/mapbox/mapbox-navigation-android/pull/3487))
+
+#### Other
+- Removed redundant dimen values in different screen configurations. ([#3453](https://github.com/mapbox/mapbox-navigation-android/pull/3453))
+- Improved `ReplayRouteDriver` error message when expected route annotations are missing. ([#3475](https://github.com/mapbox/mapbox-navigation-android/pull/3475))
+- Changed destination marker to SVG format. ([#3487](https://github.com/mapbox/mapbox-navigation-android/pull/3487), [#3494](https://github.com/mapbox/mapbox-navigation-android/pull/3494))
+
+#### Known issues
+- Vanishing route line (deemphasizing the traveled portion of the route) can be slightly out of sync with the location puck.
+
 ### Mapbox Navigation SDK 1.0.0-rc.6 - August 26, 2020
 This release accelerates the version naming of the Navigation UI SDK to match the Navigation Core SDK artifact, both are named `1.0.0-rc.6`.
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
