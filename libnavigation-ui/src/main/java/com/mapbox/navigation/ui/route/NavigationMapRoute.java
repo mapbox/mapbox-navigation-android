@@ -608,7 +608,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     /**
      * Build an instance of {@link NavigationMapRoute}
      */
-    @Nullable
+    @NonNull
     public NavigationMapRoute build() {
       return new NavigationMapRoute(
           navigation,
