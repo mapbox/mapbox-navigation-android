@@ -51,27 +51,39 @@ class BuildingHighlightTest {
     fun buildingFootprintHighlightLayerDefaultColor() {
         val mapboxMap = mockk<MapboxMap>()
         val buildingFootprintHighlightLayer = BuildingFootprintHighlightLayer(mapboxMap)
-        assertEquals(BuildingLayerSupport.DEFAULT_HIGHLIGHT_COLOR, buildingFootprintHighlightLayer.color)
+        assertEquals(
+            BuildingLayerSupport.DEFAULT_HIGHLIGHT_COLOR,
+            buildingFootprintHighlightLayer.color
+        )
     }
 
     @Test
     fun buildingExtrusionHighlightLayerDefaultColor() {
         val mapboxMap = mockk<MapboxMap>()
         val buildingExtrusionHighlightLayer = BuildingExtrusionHighlightLayer(mapboxMap)
-        assertEquals(BuildingLayerSupport.DEFAULT_HIGHLIGHT_COLOR, buildingExtrusionHighlightLayer.color)
+        assertEquals(
+            BuildingLayerSupport.DEFAULT_HIGHLIGHT_COLOR,
+            buildingExtrusionHighlightLayer.color
+        )
     }
 
     @Test
     fun buildingFootprintHighlightLayerDefaultOpacity() {
         val mapboxMap = mockk<MapboxMap>()
         val buildingFootprintHighlightLayer = BuildingFootprintHighlightLayer(mapboxMap)
-        assertEquals(BuildingLayerSupport.DEFAULT_HIGHLIGHT_OPACITY, buildingFootprintHighlightLayer.opacity)
+        assertEquals(
+            BuildingLayerSupport.DEFAULT_HIGHLIGHT_OPACITY,
+            buildingFootprintHighlightLayer.opacity
+        )
     }
 
     @Test
     fun buildingExtrusionHighlightLayerDefaultOpacity() {
         val mapboxMap = mockk<MapboxMap>()
         val buildingExtrusionHighlightLayer = BuildingExtrusionHighlightLayer(mapboxMap)
-        assertEquals(BuildingLayerSupport.DEFAULT_HIGHLIGHT_OPACITY, buildingExtrusionHighlightLayer.opacity)
+        assertEquals(
+            BuildingLayerSupport.DEFAULT_HIGHLIGHT_OPACITY,
+            buildingExtrusionHighlightLayer.opacity
+        )
     }
 }

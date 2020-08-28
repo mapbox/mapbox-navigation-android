@@ -23,18 +23,26 @@ internal class ReplayRouteSmoother {
      * Take a list of coordinates and return a list of locations where there are significant
      * changes in bearing. Each location will have a bearing and a distance.
      */
-    fun smoothRoute(distinctPoints: List<Point>, thresholdMeters: Double): List<ReplayRouteLocation> {
+    fun smoothRoute(
+        distinctPoints: List<Point>,
+        thresholdMeters: Double
+    ): List<ReplayRouteLocation> {
         val smoothIndices = smoothRouteIndices(distinctPoints, thresholdMeters)
         val smoothLocations = smoothIndices.map { ReplayRouteLocation(it, distinctPoints[it]) }
 
-        val bearing = smoothSegmentBearingDistance(distinctPoints, smoothLocations[0], smoothLocations[1])
+        val bearing =
+            smoothSegmentBearingDistance(distinctPoints, smoothLocations[0], smoothLocations[1])
         smoothRouteBearingDistance(distinctPoints, smoothLocations, bearing)
 
         return smoothLocations
     }
 
     // Find the bearing and distance for each replay route location in the smoothed route (excluding first and last)
-    private fun smoothRouteBearingDistance(distinctPoints: List<Point>, smoothLocations: List<ReplayRouteLocation>, startBearing: Double) {
+    private fun smoothRouteBearingDistance(
+        distinctPoints: List<Point>,
+        smoothLocations: List<ReplayRouteLocation>,
+        startBearing: Double
+    ) {
         var bearing = startBearing
         for (i in 1 until smoothLocations.lastIndex) {
             val segmentStart = smoothLocations[i]
@@ -48,8 +56,13 @@ internal class ReplayRouteSmoother {
     }
 
     // Find the bearing and distance for a segment and apply it to the segmentStart
-    private fun smoothSegmentBearingDistance(distinctPoints: List<Point>, segmentStart: ReplayRouteLocation, segmentEnd: ReplayRouteLocation): Double {
-        val segmentRoute = segmentRoute(distinctPoints, segmentStart.routeIndex!!, segmentEnd.routeIndex!!)
+    private fun smoothSegmentBearingDistance(
+        distinctPoints: List<Point>,
+        segmentStart: ReplayRouteLocation,
+        segmentEnd: ReplayRouteLocation
+    ): Double {
+        val segmentRoute =
+            segmentRoute(distinctPoints, segmentStart.routeIndex!!, segmentEnd.routeIndex!!)
         val distance = TurfMeasurement.length(segmentRoute, TurfConstants.UNIT_METERS)
         val bearing = TurfMeasurement.bearing(segmentStart.point, segmentEnd.point)
         segmentStart.apply {
@@ -176,7 +189,9 @@ internal class ReplayRouteSmoother {
     }
 
     private fun dotProduct(lhsVector3: DoubleArray, rhsVector3: DoubleArray): Double {
-        return lhsVector3[0] * rhsVector3[0] + lhsVector3[1] * rhsVector3[1] + lhsVector3[2] * rhsVector3[2]
+        return lhsVector3[0].times(rhsVector3[0])
+            .plus(lhsVector3[1].times(rhsVector3[1]))
+            .plus(lhsVector3[2].times(rhsVector3[2]))
     }
 
     private fun crossProduct(lhs: DoubleArray, rhs: DoubleArray): DoubleArray {

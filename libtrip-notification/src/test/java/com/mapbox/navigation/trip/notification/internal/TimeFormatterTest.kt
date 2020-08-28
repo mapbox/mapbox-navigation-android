@@ -8,14 +8,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import java.util.GregorianCalendar
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.util.GregorianCalendar
-import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)

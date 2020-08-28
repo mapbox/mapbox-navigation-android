@@ -98,7 +98,9 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // Center the map at current location. Using LocationEngineProvider because the
             // replay engine won't have your last location.
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(firstLocationCallback)
+            LocationEngineProvider
+                .getBestLocationEngine(this)
+                .getLastLocation(firstLocationCallback)
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             stopsController.add(latLng)

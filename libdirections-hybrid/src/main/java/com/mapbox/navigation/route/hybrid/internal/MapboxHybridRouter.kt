@@ -84,7 +84,8 @@ class MapboxHybridRouter(
         private lateinit var options: RouteOptions
         private lateinit var callback: Router.Callback
         private var fetchingInProgress = false
-        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> = CopyOnWriteArrayList()
+        private var pendingRequests: MutableList<Pair<RouteOptions, Router.Callback>> =
+            CopyOnWriteArrayList()
 
         override fun onResponse(routes: List<DirectionsRoute>) {
             fetchingInProgress = false
@@ -127,11 +128,18 @@ class MapboxHybridRouter(
             handleRouteRequest(routeOptions, clientCallback)
         }
 
-        override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+        override fun getRouteRefresh(
+            route: DirectionsRoute,
+            legIndex: Int,
+            callback: RouteRefreshCallback
+        ) {
             mainRouter.getRouteRefresh(route, legIndex, callback)
         }
 
-        private fun handleRouteRequest(routeOptions: RouteOptions, clientCallback: Router.Callback) {
+        private fun handleRouteRequest(
+            routeOptions: RouteOptions,
+            clientCallback: Router.Callback
+        ) {
             if (fetchingInProgress) {
                 pendingRequests.add(Pair(routeOptions, clientCallback))
             } else {
@@ -172,7 +180,11 @@ class MapboxHybridRouter(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         routeDispatchHandler.get().getRouteRefresh(route, legIndex, callback)
     }
 

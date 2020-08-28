@@ -14,15 +14,15 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.Time
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import java.util.Collections
+import java.util.Date
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
-import java.util.Collections
-import java.util.Date
-import java.util.concurrent.atomic.AtomicReference
 
 private typealias RouteProgressReference = (RouteProgress) -> Unit
 
@@ -30,7 +30,12 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     RouteProgressObserver, LocationObserver, RoutesObserver, OffRouteObserver {
     private var lastLocation: AtomicReference<Location?> = AtomicReference(null)
     private var routeProgress: AtomicReference<RouteProgressWithTimestamp> =
-        AtomicReference(RouteProgressWithTimestamp(0, RouteProgress.Builder(DirectionsRoute.builder().build()).build()))
+        AtomicReference(
+            RouteProgressWithTimestamp(
+                0,
+                RouteProgress.Builder(DirectionsRoute.builder().build()).build()
+            )
+        )
     private val channelOffRouteEvent = Channel<Boolean>(Channel.CONFLATED)
     private val channelNewRouteAvailable = Channel<RouteAvailable>(Channel.CONFLATED)
     private val channelLocationReceived = Channel<Location>(Channel.CONFLATED)
@@ -40,7 +45,8 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     private var originalRoute = AtomicReference<RouteAvailable?>(null)
     private var accumulationJob: Job = Job()
     private val currentLocationBuffer = SynchronizedItemBuffer<Location>()
-    private val locationEventBuffer = SynchronizedItemBuffer<ItemAccumulationEventDescriptor<Location>>()
+    private val locationEventBuffer =
+        SynchronizedItemBuffer<ItemAccumulationEventDescriptor<Location>>()
     private val originalRoutePreInit = { routes: List<DirectionsRoute> ->
         if (originalRoute.get() == null) {
             originalRoute.set(RouteAvailable(routes[0], Date()))
@@ -65,7 +71,8 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
      * This class provides thread-safe access to a mutable list of locations
      */
     private class SynchronizedItemBuffer<T> {
-        private val synchronizedCollection: MutableList<T> = Collections.synchronizedList(mutableListOf<T>())
+        private val synchronizedCollection: MutableList<T> =
+            Collections.synchronizedList(mutableListOf<T>())
 
         fun addItem(item: T) {
             synchronized(synchronizedCollection) {
@@ -160,7 +167,10 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
      * Once this limit is reached, an item is removed before another is added. The method returns true if the queue reaches capacity,
      * false otherwise
      */
-    private fun accumulateLocationAsync(location: Location, queue: SynchronizedItemBuffer<Location>): Boolean {
+    private fun accumulateLocationAsync(
+        location: Location,
+        queue: SynchronizedItemBuffer<Location>
+    ): Boolean {
         var result = false
         when (queue.size() >= LOCATION_BUFFER_MAX_SIZE) {
             true -> {
@@ -209,6 +219,7 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     }
 
     fun getOffRouteEventChannel(): ReceiveChannel<Boolean> = channelOffRouteEvent
+
     /**
      * This method is called for any state change, excluding RouteProgressState.ROUTE_ARRIVED.
      * It forwards the route progress data to a listener and saves it to a local variable

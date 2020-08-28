@@ -15,6 +15,11 @@ import com.mapbox.common.HttpResponseCallback
 import com.mapbox.common.HttpResponseData
 import com.mapbox.common.HttpServiceInterface
 import com.mapbox.common.ResultCallback
+import java.io.IOException
+import java.util.HashMap
+import java.util.Locale
+import java.util.UUID
+import java.util.concurrent.locks.ReentrantLock
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Headers
@@ -22,11 +27,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
-import java.io.IOException
-import java.util.HashMap
-import java.util.Locale
-import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
 
 internal class NavigationOkHttpService(
     private val httpClientBuilder: OkHttpClient.Builder,
@@ -111,7 +111,8 @@ internal class NavigationOkHttpService(
     }
 
     override fun download(options: DownloadOptions, callback: DownloadStatusCallback): Long {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        // To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented")
     }
 
     internal inner class HttpCallback constructor(

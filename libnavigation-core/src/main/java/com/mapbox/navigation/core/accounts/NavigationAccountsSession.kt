@@ -5,7 +5,8 @@ import com.mapbox.navigation.core.NavigationSession
 import com.mapbox.navigation.core.NavigationSessionStateObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 
-internal class NavigationAccountsSession(private val context: Context) : NavigationSessionStateObserver {
+internal class NavigationAccountsSession(private val context: Context) :
+    NavigationSessionStateObserver {
 
     private var state = NavigationSession.State.IDLE
         set(value) {
@@ -16,12 +17,14 @@ internal class NavigationAccountsSession(private val context: Context) : Navigat
             field = value
 
             when {
-                previousValue == NavigationSession.State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
-                    context.applicationContext
-                ).navigationStopped()
-                value == NavigationSession.State.ACTIVE_GUIDANCE -> MapboxNavigationAccounts.getInstance(
-                    context.applicationContext
-                ).navigationStarted()
+                previousValue == NavigationSession.State.ACTIVE_GUIDANCE ->
+                    MapboxNavigationAccounts.getInstance(
+                        context.applicationContext
+                    ).navigationStopped()
+                value == NavigationSession.State.ACTIVE_GUIDANCE ->
+                    MapboxNavigationAccounts.getInstance(
+                        context.applicationContext
+                    ).navigationStarted()
             }
         }
 

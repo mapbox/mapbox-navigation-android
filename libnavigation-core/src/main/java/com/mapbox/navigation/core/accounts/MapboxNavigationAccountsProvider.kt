@@ -13,13 +13,16 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
 
     companion object {
         private const val TAG = "MapboxNavigationAccountsProvider"
-        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY = "com.mapbox.navigation.core.accounts.MapboxNavigationAccountsProvider"
+        private const val EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY =
+            "com.mapbox.navigation.core.accounts.MapboxNavigationAccountsProvider"
     }
 
     override fun onCreate(): Boolean {
         try {
             ifNonNull(context, context?.applicationContext) { _, applicationContext ->
-                if (Billing.getInstance(applicationContext).getBillingType() == Billing.BillingModel.MAU) {
+                if (Billing.getInstance(applicationContext).getBillingType()
+                    == Billing.BillingModel.MAU
+                ) {
                     MapboxNavigationAccounts.getInstance(applicationContext).initializeSku()
                 }
             }
@@ -37,7 +40,13 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
         super.attachInfo(context, info)
     }
 
-    override fun query(uri: Uri, projection: Array<String>?, selection: String?, selectionArgs: Array<String>?, sortOrder: String?): Cursor? {
+    override fun query(
+        uri: Uri,
+        projection: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<String>?,
+        sortOrder: String?
+    ): Cursor? {
         return null
     }
 
@@ -45,7 +54,12 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
         return null
     }
 
-    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?): Int {
+    override fun update(
+        uri: Uri,
+        values: ContentValues?,
+        selection: String?,
+        selectionArgs: Array<String>?
+    ): Int {
         return 0
     }
 
@@ -57,7 +71,8 @@ internal class MapboxNavigationAccountsProvider : ContentProvider() {
         checkNotNull(info) { throw IllegalStateException("$TAG: ProviderInfo cannot be null.") }
         check(EMPTY_APPLICATION_ID_PROVIDER_AUTHORITY != info.authority) {
             throw IllegalStateException(
-                "Incorrect provider authority in manifest. Most likely due to a missing " + "applicationId variable in application's build.gradle."
+                "Incorrect provider authority in manifest. Most likely due to a missing " +
+                    "applicationId variable in application's build.gradle."
             )
         }
     }

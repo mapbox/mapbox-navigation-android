@@ -72,7 +72,9 @@ class HistoryFilesClient {
     suspend fun requestJsonFile(filename: String): ReplayHistoryDTO? =
         withContext(Dispatchers.IO) { requestJsonFileCall(filename) }
 
-    private suspend fun requestJsonFileCall(filename: String): ReplayHistoryDTO? = suspendCoroutine { cont ->
+    private suspend fun requestJsonFileCall(
+        filename: String
+    ): ReplayHistoryDTO? = suspendCoroutine { cont ->
         val historyDrives = retrofit.create(LocalhostFiles::class.java)
 
         historyDrives.jsonFile(filename).enqueue(object : Callback<ReplayHistoryDTO> {

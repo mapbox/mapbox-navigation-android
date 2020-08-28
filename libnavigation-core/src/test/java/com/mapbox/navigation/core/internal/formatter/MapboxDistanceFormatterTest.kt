@@ -25,11 +25,13 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-class MapboxDistanceFormatterTest : BuilderTest<MapboxDistanceFormatter, MapboxDistanceFormatter.Builder>() {
+class MapboxDistanceFormatterTest :
+    BuilderTest<MapboxDistanceFormatter, MapboxDistanceFormatter.Builder>() {
 
     private lateinit var ctx: Context
 
-    override fun getImplementationClass(): KClass<MapboxDistanceFormatter> = MapboxDistanceFormatter::class
+    override fun getImplementationClass(): KClass<MapboxDistanceFormatter> =
+        MapboxDistanceFormatter::class
 
     override fun getFilledUpBuilder(): MapboxDistanceFormatter.Builder {
         return MapboxDistanceFormatter.Builder(ctx)
@@ -197,7 +199,10 @@ class MapboxDistanceFormatterTest : BuilderTest<MapboxDistanceFormatter, MapboxD
             .build()
             .getSpannableDistanceString(input)
 
-        assertEquals(Typeface.BOLD, (result.getSpans(0, result.count(), Object::class.java)[0] as StyleSpan).style)
+        assertEquals(
+            Typeface.BOLD,
+            (result.getSpans(0, result.count(), Object::class.java)[0] as StyleSpan).style
+        )
     }
 
     @Test
@@ -210,7 +215,14 @@ class MapboxDistanceFormatterTest : BuilderTest<MapboxDistanceFormatter, MapboxD
             .build()
             .getSpannableDistanceString(input)
 
-        assertEquals(0.65f, (result.getSpans(0, result.count(), Object::class.java)[1] as RelativeSizeSpan).sizeChange)
+        assertEquals(
+            0.65f,
+            (result.getSpans(
+                0,
+                result.count(),
+                Object::class.java
+            )[1] as RelativeSizeSpan).sizeChange
+        )
     }
 
     @Config(qualifiers = "en")

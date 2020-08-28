@@ -98,7 +98,8 @@ class TrafficToggleActivity : AppCompatActivity(), OnNavigationReadyCallback,
                  * congestion layers' visibility.
                  */
                 toggle_traffic_button.setOnClickListener {
-                    navigationMapboxMap.updateTrafficVisibility(!navigationMapboxMap.isTrafficVisible)
+                    navigationMapboxMap
+                        .updateTrafficVisibility(!navigationMapboxMap.isTrafficVisible)
                 }
 
                 this.navigationMapboxMap.updateLocationLayerRenderMode(RenderMode.NORMAL)

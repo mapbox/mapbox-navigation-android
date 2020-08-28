@@ -62,6 +62,11 @@ class NavigationApplication : MultiDexApplication() {
         }
 
         Mapbox.getInstance(applicationContext, mapboxAccessToken)
-        MapboxNavigationProvider.create(MapboxNavigation.defaultNavigationOptionsBuilder(this, mapboxAccessToken).build())
+        MapboxNavigationProvider
+            .create(
+                MapboxNavigation
+                    .defaultNavigationOptionsBuilder(this, mapboxAccessToken)
+                    .build()
+            )
     }
 }

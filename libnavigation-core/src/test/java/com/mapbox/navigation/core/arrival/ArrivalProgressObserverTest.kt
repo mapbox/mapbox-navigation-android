@@ -89,7 +89,9 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(mockk {
@@ -119,7 +121,9 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns 10.0
             }
         }
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
         val routeProgress: RouteProgress = mockk {
             every { currentState } returns RouteProgressState.ROUTE_COMPLETE
             every { route } returns mockk {
@@ -403,8 +407,12 @@ internal class ArrivalProgressObserverTest {
     fun `navigateNextRouteLeg should notify next route leg start`() {
         val onNavigateNextRouteLegCalls = slot<RouteLegProgress>()
         val onFinalDestinationArrivalCalls = slot<RouteProgress>()
-        every { arrivalObserver.onNextRouteLegStart(capture(onNavigateNextRouteLegCalls)) } returns Unit
-        every { arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls)) } returns Unit
+        every {
+            arrivalObserver.onNextRouteLegStart(capture(onNavigateNextRouteLegCalls))
+        } returns Unit
+        every {
+            arrivalObserver.onFinalDestinationArrival(capture(onFinalDestinationArrivalCalls))
+        } returns Unit
         every { tripSession.getRouteProgress() } returns mockk {
             every { currentState } returns RouteProgressState.LOCATION_TRACKING
             every { route } returns mockk {

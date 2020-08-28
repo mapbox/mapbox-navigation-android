@@ -18,7 +18,8 @@ class NavigationSessionTest {
 
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
 
-        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+        verify(exactly = 1) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
     }
 
     @Test
@@ -31,7 +32,8 @@ class NavigationSessionTest {
 
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
 
-        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+        verify(exactly = 1) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
     }
 
     @Test
@@ -41,7 +43,8 @@ class NavigationSessionTest {
 
         navigationSession.registerNavigationSessionStateObserver(stateObserver)
 
-        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+        verify(exactly = 1) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
     }
 
     @Test
@@ -52,7 +55,8 @@ class NavigationSessionTest {
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
         navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
 
-        verify(exactly = 2) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+        verify(exactly = 2) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
     }
 
     @Test
@@ -65,7 +69,8 @@ class NavigationSessionTest {
         navigationSession.onRoutesChanged(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
-        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+        verify(exactly = 1) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
     }
 
     @Test
@@ -75,7 +80,8 @@ class NavigationSessionTest {
 
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
-        verify(exactly = 1) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+        verify(exactly = 1) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
     }
 
     @Test
@@ -87,7 +93,8 @@ class NavigationSessionTest {
 
         navigationSession.onSessionStateChanged(TripSessionState.STOPPED)
 
-        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
+        verify(exactly = 0) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.IDLE) }
     }
 
     @Test
@@ -102,7 +109,9 @@ class NavigationSessionTest {
         navigationSession.onRoutesChanged(routes)
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
-        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE) }
+        verify(exactly = 0) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        }
     }
 
     @Test
@@ -114,7 +123,9 @@ class NavigationSessionTest {
 
         navigationSession.onSessionStateChanged(TripSessionState.STARTED)
 
-        verify(exactly = 0) { stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE) }
+        verify(exactly = 0) {
+            stateObserver.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        }
     }
 
     @Test

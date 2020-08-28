@@ -40,7 +40,10 @@ class HistoryFilesViewController {
         requestHistory(context, connectionCallback)
     }
 
-    private fun requestHistoryData(replayPath: ReplayPath, result: (ReplayHistoryDTO?) -> Unit): Job {
+    private fun requestHistoryData(
+        replayPath: ReplayPath,
+        result: (ReplayHistoryDTO?) -> Unit
+    ): Job {
         return CoroutineScope(Dispatchers.Main).launch {
             val replayHistoryDTO = historyFilesApi.requestJsonFile(replayPath.path)
             result.invoke(replayHistoryDTO)
@@ -68,7 +71,9 @@ class HistoryFilesViewController {
         }
     }
 
-    private suspend fun requestHistoryDisk(context: Context): List<ReplayPath> = withContext(Dispatchers.IO) {
+    private suspend fun requestHistoryDisk(
+        context: Context
+    ): List<ReplayPath> = withContext(Dispatchers.IO) {
         val historyFiles: List<String> = context.assets.list("")?.toList()
             ?: Collections.emptyList()
 
@@ -82,13 +87,19 @@ class HistoryFilesViewController {
             }
     }
 
-    private suspend fun loadFromDisk(context: Context, historyFileItem: ReplayPath): ReplayHistoryDTO? = withContext(Dispatchers.IO) {
+    private suspend fun loadFromDisk(
+        context: Context,
+        historyFileItem: ReplayPath
+    ): ReplayHistoryDTO? = withContext(Dispatchers.IO) {
         val fileName = historyFileItem.path.removePrefix(LOCAL_FILE_PREFIX)
         val historyData = loadHistoryJsonFromAssets(context, fileName)
         Gson().fromJson(historyData, ReplayHistoryDTO::class.java)
     }
 
-    private suspend fun loadHistoryJsonFromAssets(context: Context, fileName: String): String = withContext(Dispatchers.IO) {
+    private suspend fun loadHistoryJsonFromAssets(
+        context: Context,
+        fileName: String
+    ): String = withContext(Dispatchers.IO) {
         // This stores the whole file in memory and causes OutOfMemoryExceptions if the file
         // is too large. Larger project move the file into something like a Room database
         // and then read it from there.

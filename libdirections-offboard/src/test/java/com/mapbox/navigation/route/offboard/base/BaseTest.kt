@@ -25,7 +25,9 @@ open class BaseTest {
     @Throws(Exception::class)
     protected fun buildMultipleLegRoute(): DirectionsRoute {
         val body = loadJsonFixture(MULTI_LEG_ROUTE_FIXTURE)
-        val gson = GsonBuilder().registerTypeAdapterFactory(DirectionsAdapterFactory.create()).create()
+        val gson = GsonBuilder()
+            .registerTypeAdapterFactory(DirectionsAdapterFactory.create())
+            .create()
         val response = gson.fromJson(body, DirectionsResponse::class.java)
         return response.routes()[0]
     }

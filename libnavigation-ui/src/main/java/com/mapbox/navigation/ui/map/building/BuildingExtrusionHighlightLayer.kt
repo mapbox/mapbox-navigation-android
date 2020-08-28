@@ -11,6 +11,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionHeight
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillExtrusionOpacity
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility
 import com.mapbox.navigation.ui.internal.utils.MapUtils
+import java.lang.ref.WeakReference
 
 /**
  * This layer handles the creation and customization of a [FillExtrusionLayer]
@@ -34,12 +35,19 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
          */
         set(value) {
             field = value
-            mapboxMap.getStyle { style ->
+            mapboxMap.getStyle { stl ->
                 value?.let { newLatLng ->
-                    val buildingExtrusionLayer = style.getLayerAs<FillExtrusionLayer>(HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID)
-                    buildingExtrusionLayer?.setFilter(buildingLayerSupport.getBuildingFilterExpression(
-                            buildingLayerSupport.getBuildingId(mapboxMap, newLatLng)))
+                    val buildingExtrusionLayer =
+                        stl
+                            .getLayerAs<FillExtrusionLayer>(HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID)
+                    buildingExtrusionLayer?.setFilter(
+                        buildingLayerSupport.getBuildingFilterExpression(
+                            buildingLayerSupport.getBuildingId(mapboxMap, newLatLng)
+                        )
+                    )
                 }
+                val k = WeakReference<Any>(Any())
+                k.get()
             }
         }
 
@@ -56,7 +64,11 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
          */
         set(value) {
             field = value
-            buildingLayerSupport.updateLayerProperty(fillExtrusionColor(value), mapboxMap, HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID)
+            buildingLayerSupport.updateLayerProperty(
+                fillExtrusionColor(value),
+                mapboxMap,
+                HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID
+            )
         }
 
     /**
@@ -72,7 +84,11 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
          */
         set(value) {
             field = value
-            buildingLayerSupport.updateLayerProperty(fillExtrusionOpacity(value), mapboxMap, HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID)
+            buildingLayerSupport.updateLayerProperty(
+                fillExtrusionOpacity(value),
+                mapboxMap,
+                HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID
+            )
         }
 
     /**
@@ -81,11 +97,20 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
      * @param visible true if the layer should be displayed. False if it should be hidden.
      */
     fun updateVisibility(visible: Boolean) {
-        mapboxMap.getStyle { style ->
-            if (style.getLayerAs<FillExtrusionLayer>(HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID) == null && visible) {
+        mapboxMap.getStyle { stl ->
+            if (stl.getLayerAs<FillExtrusionLayer>(
+                    HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID
+                ) == null &&
+                visible
+            ) {
                 addHighlightExtrusionLayerToMap(queryLatLng)
-            } else buildingLayerSupport.updateLayerProperty(visibility(
-                    if (visible) VISIBLE else NONE), mapboxMap, HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID)
+            } else {
+                buildingLayerSupport.updateLayerProperty(
+                    visibility(
+                        if (visible) VISIBLE else NONE
+                    ), mapboxMap, HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID
+                )
+            }
         }
     }
 
@@ -95,18 +120,23 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
      */
     private fun addHighlightExtrusionLayerToMap(queryLatLng: LatLng?) {
         mapboxMap.getStyle { style ->
-            val fillExtrusionLayer = FillExtrusionLayer(HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID, BuildingLayerSupport.COMPOSITE_SOURCE_ID)
+            val fillExtrusionLayer = FillExtrusionLayer(
+                HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID,
+                BuildingLayerSupport.COMPOSITE_SOURCE_ID
+            )
             fillExtrusionLayer.apply {
                 sourceLayer = BuildingLayerSupport.BUILDING_LAYER_ID
                 queryLatLng?.let {
                     setFilter(
-                            buildingLayerSupport.getBuildingFilterExpression(
-                                    buildingLayerSupport.getBuildingId(mapboxMap, it)))
+                        buildingLayerSupport.getBuildingFilterExpression(
+                            buildingLayerSupport.getBuildingId(mapboxMap, it)
+                        )
+                    )
                 }
                 withProperties(
-                        fillExtrusionColor(color),
-                        fillExtrusionOpacity(opacity),
-                        fillExtrusionHeight(get("height"))
+                    fillExtrusionColor(color),
+                    fillExtrusionOpacity(opacity),
+                    fillExtrusionHeight(get("height"))
                 )
             }
             MapUtils.addLayerToMap(style, fillExtrusionLayer, null)
@@ -121,6 +151,7 @@ class BuildingExtrusionHighlightLayer(private val mapboxMap: MapboxMap) {
          * A constant String that serves as a layer id for the [FillExtrusionLayer] that
          * this class adds to the [MapboxMap]'s Style object.
          */
-        const val HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID = "highlighted-building-extrusion-layer-id"
+        const val HIGHLIGHTED_BUILDING_EXTRUSION_LAYER_ID =
+            "highlighted-building-extrusion-layer-id"
     }
 }

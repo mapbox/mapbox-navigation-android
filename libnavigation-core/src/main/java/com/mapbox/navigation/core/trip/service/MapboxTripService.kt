@@ -9,9 +9,9 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.utils.internal.ifChannelException
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Default [TripService] implementation

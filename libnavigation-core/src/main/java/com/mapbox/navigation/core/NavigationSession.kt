@@ -46,12 +46,16 @@ internal class NavigationSession :
         }
     }
 
-    internal fun registerNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun registerNavigationSessionStateObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         stateObservers.add(navigationSessionStateObserver)
         navigationSessionStateObserver.onNavigationSessionStateChanged(state)
     }
 
-    internal fun unregisterNavigationSessionStateObserver(navigationSessionStateObserver: NavigationSessionStateObserver) {
+    internal fun unregisterNavigationSessionStateObserver(
+        navigationSessionStateObserver: NavigationSessionStateObserver
+    ) {
         stateObservers.remove(navigationSessionStateObserver)
     }
 

@@ -161,7 +161,7 @@ class SchemaTest {
                 propertyImpl.simpleName.equals("float", ignoreCase = true) ||
                 propertyImpl.simpleName.equals("double", ignoreCase = true) -> "number"
             Boolean::class.java.isAssignableFrom(propertyImpl) ||
-            propertyImpl.simpleName.equals("boolean", ignoreCase = true) -> "boolean"
+                propertyImpl.simpleName.equals("boolean", ignoreCase = true) -> "boolean"
             String::class.java.isAssignableFrom(propertyImpl) -> "string"
             propertyImpl.isArray || List::class.java.isAssignableFrom(propertyImpl) -> "array"
             else -> "object"
@@ -179,7 +179,9 @@ class SchemaTest {
             )
 
             propertyFields.forEach { objectField ->
-                val name = objectField.getAnnotation(SerializedName::class.java)?.value ?: objectField.name
+                val name = objectField
+                    .getAnnotation(SerializedName::class.java)
+                    ?.value ?: objectField.name
                 assertTrue(
                     "schema and impl object $fieldName should both have a $name property",
                     objectProperties.has(name)
@@ -235,11 +237,14 @@ class SchemaTest {
                 val dataFields =
                     field.type.declaredFields
                 for (dataField in dataFields) {
-                    if (Modifier.isPrivate(dataField.modifiers) && !Modifier.isStatic(dataField.modifiers)) {
+                    if (Modifier.isPrivate(dataField.modifiers) &&
+                        !Modifier.isStatic(dataField.modifiers)) {
                         fields.add(dataField)
                     }
                 }
-            } else if (Modifier.isPrivate(field.modifiers) && !Modifier.isStatic(field.modifiers)) {
+            } else if (
+                Modifier.isPrivate(field.modifiers) && !Modifier.isStatic(field.modifiers)
+            ) {
                 fields.add(field)
             }
         }
@@ -259,10 +264,14 @@ class SchemaTest {
         eventSchemas.filter { it.name == eventName && it.version == version }.let {
             when {
                 it.isEmpty() -> {
-                    throw IllegalArgumentException("missing $eventName schema for version $version")
+                    throw IllegalArgumentException(
+                        "missing $eventName schema for version $version"
+                    )
                 }
                 it.size > 1 -> {
-                    throw IllegalArgumentException("multiple $eventName schemas for version $version")
+                    throw IllegalArgumentException(
+                        "multiple $eventName schemas for version $version"
+                    )
                 }
                 else -> {
                     it.first()
@@ -273,7 +282,8 @@ class SchemaTest {
     @Throws(IOException::class)
     private fun unpackSchemas(): List<EventSchema> {
         val inputStream =
-            SchemaTest::class.java.classLoader!!.getResourceAsStream("mobile-event-schemas.jsonl.gz")
+            SchemaTest::class.java.classLoader!!
+                .getResourceAsStream("mobile-event-schemas.jsonl.gz")
         val byteOut = IOUtils.toByteArray(inputStream)
         val schemaFileStream = ByteArrayInputStream(byteOut)
         val gzis = GZIPInputStream(schemaFileStream)

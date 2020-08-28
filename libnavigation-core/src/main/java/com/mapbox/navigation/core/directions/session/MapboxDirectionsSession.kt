@@ -58,7 +58,11 @@ internal class MapboxDirectionsSession(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun requestRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun requestRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         router.getRouteRefresh(route, legIndex, callback)
     }
 

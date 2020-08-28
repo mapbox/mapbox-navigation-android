@@ -89,7 +89,16 @@ class RouteLegProgress private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "RouteLegProgress(legIndex=$legIndex, routeLeg=$routeLeg, distanceTraveled=$distanceTraveled, distanceRemaining=$distanceRemaining, durationRemaining=$durationRemaining, fractionTraveled=$fractionTraveled, currentStepProgress=$currentStepProgress, upcomingStep=$upcomingStep)"
+        return "RouteLegProgress(" +
+            "legIndex=$legIndex, " +
+            "routeLeg=$routeLeg, " +
+            "distanceTraveled=$distanceTraveled, " +
+            "distanceRemaining=$distanceRemaining, " +
+            "durationRemaining=$durationRemaining, " +
+            "fractionTraveled=$fractionTraveled, " +
+            "currentStepProgress=$currentStepProgress, " +
+            "upcomingStep=$upcomingStep" +
+            ")"
     }
 
     /**

@@ -83,7 +83,8 @@ internal class MapRouteProgressChangeListener(
             routeLine.reinitializeWithRoutes(listOf(currentRoute))
             shouldReInitializePrimaryRoute = true
 
-            restoreRouteArrowVisibilityFun = getRestoreArrowVisibilityFun(routeArrow.routeArrowIsVisible())
+            restoreRouteArrowVisibilityFun =
+                getRestoreArrowVisibilityFun(routeArrow.routeArrowIsVisible())
             routeArrow.updateVisibilityTo(false)
 
             this.lastDistanceValue = routeLine.vanishPointOffset

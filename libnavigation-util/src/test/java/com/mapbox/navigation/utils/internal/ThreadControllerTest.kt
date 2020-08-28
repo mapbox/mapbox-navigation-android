@@ -111,7 +111,10 @@ class ThreadControllerTest {
         val ioJobController = ThreadController.getIOScopeAndRootJob()
 
         assertEquals(ioRootJob.children.first(), ioJobController.job)
-        assertEquals(CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(), ioJobController.scope.toString())
+        assertEquals(
+            CoroutineScope(ioJobController.job + ThreadController.IODispatcher).toString(),
+            ioJobController.scope.toString()
+        )
     }
 
     @Test
@@ -122,6 +125,9 @@ class ThreadControllerTest {
         val mainJobController = ThreadController.getMainScopeAndRootJob()
 
         assertEquals(mainRootJob.children.first(), mainJobController.job)
-        assertEquals(CoroutineScope(mainJobController.job + Dispatchers.Main).toString(), mainJobController.scope.toString())
+        assertEquals(
+            CoroutineScope(mainJobController.job + Dispatchers.Main).toString(),
+            mainJobController.scope.toString()
+        )
     }
 }

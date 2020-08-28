@@ -401,7 +401,11 @@ internal class MapRouteLine(
         }
 
         routeLineInitializedCallback?.onInitialized(
-            RouteLineLayerIds(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, PRIMARY_ROUTE_LAYER_ID, listOf(ALTERNATIVE_ROUTE_LAYER_ID))
+            RouteLineLayerIds(
+                PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                PRIMARY_ROUTE_LAYER_ID,
+                listOf(ALTERNATIVE_ROUTE_LAYER_ID)
+            )
         )
     }
 
@@ -440,7 +444,10 @@ internal class MapRouteLine(
         reinitializeWithRoutes(directionsRoutes, featureDataProvider)
     }
 
-    private fun reinitializeWithRoutes(directionsRoutes: List<DirectionsRoute>, getRouteFeatureData: () -> List<RouteFeatureData>) {
+    private fun reinitializeWithRoutes(
+        directionsRoutes: List<DirectionsRoute>,
+        getRouteFeatureData: () -> List<RouteFeatureData>
+    ) {
         if (directionsRoutes.isNotEmpty()) {
             clearRouteData()
             this.directionsRoutes.addAll(directionsRoutes)
@@ -574,14 +581,18 @@ internal class MapRouteLine(
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
     }
 
-    private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>): () -> List<RouteFeatureData> = {
+    private fun getIdentifiableRouteFeatureDataProvider(
+        directionsRoutes: List<IdentifiableRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
         )
     }
 
-    private fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>): () -> List<RouteFeatureData> = {
+    private fun getRouteFeatureDataProvider(
+        directionsRoutes: List<DirectionsRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
@@ -1036,7 +1047,10 @@ internal class MapRouteLine(
         fun generateFeatureCollection(routeData: IdentifiableRoute): RouteFeatureData =
             generateFeatureCollection(routeData.route, routeData.routeIdentifier)
 
-        private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?): RouteFeatureData {
+        private fun generateFeatureCollection(
+            route: DirectionsRoute,
+            identifier: String?
+        ): RouteFeatureData {
             val routeGeometry = LineString.fromPolyline(
                 route.geometry() ?: "",
                 Constants.PRECISION_6

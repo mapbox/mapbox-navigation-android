@@ -77,7 +77,9 @@ class MapboxNavigationTest {
 
     private val applicationContext: Context = mockk(relaxed = true) {
         every { inferDeviceLocale() } returns Locale.US
-        every { getSystemService(Context.NOTIFICATION_SERVICE) } returns mockk<NotificationManager>()
+        every {
+            getSystemService(Context.NOTIFICATION_SERVICE)
+        } returns mockk<NotificationManager>()
         every { getSystemService(Context.ALARM_SERVICE) } returns mockk<AlarmManager>()
         every {
             getSharedPreferences(
@@ -164,7 +166,7 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun init_registerRoutesObservers_internalRoutesObserver_navigationSession_and_TelemetryLocationAndProgressDispatcher() {
+    fun init_routesObs_internalRouteObs_navigationSession_and_TelemetryLocAndProgressDisptchr() {
         verify(exactly = 3) { directionsSession.registerRoutesObserver(any()) }
 
         mapboxNavigation.onDestroy()

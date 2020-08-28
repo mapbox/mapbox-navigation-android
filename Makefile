@@ -12,6 +12,9 @@ libnavigation-core \
 UI_MODULES = \
 libnavigation-ui \
 
+APPLICATION_MODULES = \
+examples \
+
 define run-gradle-tasks
 	for module in $(1) ; do \
 		./gradlew $$module:$(2) || exit 1 ; \
@@ -22,7 +25,8 @@ endef
 check:
 	$(call run-gradle-tasks,$(CORE_MODULES),ktlint) \
 	&& $(call run-gradle-tasks,$(UI_MODULES),ktlint) \
-	&& $(call run-gradle-tasks,$(UI_MODULES),checkstyle)
+	&& $(call run-gradle-tasks,$(UI_MODULES),checkstyle) \
+	&& $(call run-gradle-tasks,$(APPLICATION_MODULES),ktlint)
 
 .PHONY: license-verification
 license-verification:

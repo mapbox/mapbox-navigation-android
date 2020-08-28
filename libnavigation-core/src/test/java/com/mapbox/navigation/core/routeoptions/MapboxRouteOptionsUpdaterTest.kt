@@ -98,11 +98,14 @@ class MapboxRouteOptionsUpdaterTest {
 
         invalidInput.forEach { (routeOptions, routeProgress, location) ->
             val message =
-                """routeOptions is ${routeOptions.isNullToString()}; routeProgress is ${routeProgress.isNullToString()}; location is ${location.isNullToString()}"""
+                "routeOptions is ${routeOptions.isNullToString()}; routeProgress is " +
+                    "${routeProgress.isNullToString()}; location is ${location.isNullToString()}"
 
             assertTrue(
                 message,
-                routeRefreshAdapter.update(routeOptions, routeProgress, location) is RouteOptionsUpdater.RouteOptionsResult.Error
+                routeRefreshAdapter
+                    .update(routeOptions, routeProgress, location)
+                    is RouteOptionsUpdater.RouteOptionsResult.Error
             )
         }
     }

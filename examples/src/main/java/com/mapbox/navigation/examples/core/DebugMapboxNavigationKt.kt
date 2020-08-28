@@ -115,10 +115,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
                 originalRoute?.let {
                     val routes = mapboxNavigation.getRoutes()
                     if (routes.isNotEmpty()) {
-                        mapboxNavigation.setRoutes(mapboxNavigation.getRoutes().toMutableList().apply {
-                            removeAt(0)
-                            add(0, it)
-                        })
+                        mapboxNavigation
+                            .setRoutes(
+                                mapboxNavigation.getRoutes().toMutableList().apply {
+                                    removeAt(0)
+                                    add(0, it)
+                                })
                     } else {
                         mapboxNavigation.setRoutes(listOf(it))
                     }
@@ -142,10 +144,12 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
         val optionsBuilder = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
-            .onboardRouterOptions(OnboardRouterOptions.Builder()
-                .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
-                .tilesVersion("2020_02_02-03_00_00")
-                .build())
+            .onboardRouterOptions(
+                OnboardRouterOptions.Builder()
+                    .tilesUri(URI("https://api-routing-tiles-staging.tilestream.net"))
+                    .tilesVersion("2020_02_02-03_00_00")
+                    .build()
+            )
             .navigatorPredictionMillis(1000L)
 
         mapboxNavigation = getMapboxNavigation(optionsBuilder)
@@ -357,7 +361,9 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
-        if (mapboxNavigation.getRoutes().isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED) {
+        if (mapboxNavigation.getRoutes()
+                .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
+        ) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel
             mapboxNavigation.unregisterVoiceInstructionsObserver(this)

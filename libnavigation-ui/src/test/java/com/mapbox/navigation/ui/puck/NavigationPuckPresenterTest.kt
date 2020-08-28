@@ -21,7 +21,7 @@ class NavigationPuckPresenterTest {
     @Test
     fun puckDrawableUpdatesOnRouteProgress() {
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
-        val mapboxNavigation = mockk< MapboxNavigation>(relaxUnitFun = true)
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
         val puckDrawableSupplier = DefaultMapboxPuckDrawableSupplier()
         val presenter = NavigationPuckPresenter(mapboxMap, puckDrawableSupplier)
         val routeProgressObserverSlot = slot<RouteProgressObserver>()
@@ -39,7 +39,9 @@ class NavigationPuckPresenterTest {
         every { builder.build() } returns locationComponentOptions
         every { mapboxMap.cameraPosition } returns CameraPosition.DEFAULT
         presenter.addProgressChangeListener(mapboxNavigation)
-        verify { mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot)) }
+        verify {
+            mapboxNavigation.registerRouteProgressObserver(capture(routeProgressObserverSlot))
+        }
 
         routeProgressObserverSlot.captured.onRouteProgressChanged(routeProgress)
 
@@ -50,7 +52,7 @@ class NavigationPuckPresenterTest {
     @Test
     fun onStop() {
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
-        val mapboxNavigation = mockk< MapboxNavigation>(relaxUnitFun = true)
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
         val puckDrawableSupplier = DefaultMapboxPuckDrawableSupplier()
         val presenter = NavigationPuckPresenter(mapboxMap, puckDrawableSupplier)
         presenter.addProgressChangeListener(mapboxNavigation)
@@ -63,7 +65,7 @@ class NavigationPuckPresenterTest {
     @Test
     fun onStart() {
         val mapboxMap = mockk<MapboxMap>(relaxUnitFun = true)
-        val mapboxNavigation = mockk< MapboxNavigation>(relaxUnitFun = true)
+        val mapboxNavigation = mockk<MapboxNavigation>(relaxUnitFun = true)
         val puckDrawableSupplier = DefaultMapboxPuckDrawableSupplier()
         val presenter = NavigationPuckPresenter(mapboxMap, puckDrawableSupplier)
         presenter.addProgressChangeListener(mapboxNavigation)

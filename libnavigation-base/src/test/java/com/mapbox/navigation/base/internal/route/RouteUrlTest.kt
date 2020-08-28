@@ -20,7 +20,11 @@ class RouteUrlTest {
     @Test
     fun checkBaseUrl() {
         setupRouteUrl()
-            .checkContain("${RouteUrl.BASE_URL}/${RouteUrl.BASE_URL_API_NAME}/${RouteUrl.BASE_URL_API_VERSION}/")
+            .checkContain(
+                RouteUrl.BASE_URL +
+                    "/${RouteUrl.BASE_URL_API_NAME}" +
+                    "/${RouteUrl.BASE_URL_API_VERSION}/"
+            )
     }
 
     @Test

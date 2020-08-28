@@ -16,7 +16,13 @@ class ReplayHistoryMapperTest {
     @Test
     fun `should map events`() {
         val historyString =
-            """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0}],"version":"6.2.1","history_version":"1.0.0"}"""
+            "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1580744200.379," +
+                "\"event_timestamp\":1580744198.879556,\"delta_ms\":0},{\"type\":" +
+                "\"updateLocation\",\"location\":{\"lat\":50.1232182,\"lon\":8.6343946,\"time\"" +
+                ":1580744199.406,\"speed\":0.02246818132698536,\"bearing\":33.55318069458008," +
+                "\"altitude\":162.8000030517578,\"accuracyHorizontal\":14.710000038146973," +
+                "\"provider\":\"fused\"},\"event_timestamp\":1580744199.407049,\"delta_ms\":0}]" +
+                ",\"version\":\"6.2.1\",\"history_version\":\"1.0.0\"}"
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
@@ -26,7 +32,13 @@ class ReplayHistoryMapperTest {
     @Test
     fun `should map get status values`() {
         val historyString =
-            """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0}],"version":"6.2.1","history_version":"1.0.0"}"""
+            "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1580744200.379," +
+                "\"event_timestamp\":1580744198.879556,\"delta_ms\":0},{\"type\":" +
+                "\"updateLocation\",\"location\":{\"lat\":50.1232182,\"lon\":8.6343946,\"time\":" +
+                "1580744199.406,\"speed\":0.02246818132698536,\"bearing\":33.55318069458008," +
+                "\"altitude\":162.8000030517578,\"accuracyHorizontal\":14.710000038146973," +
+                "\"provider\":\"fused\"},\"event_timestamp\":1580744199.407049,\"delta_ms\":0}]," +
+                "\"version\":\"6.2.1\",\"history_version\":\"1.0.0\"}"
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
@@ -37,7 +49,13 @@ class ReplayHistoryMapperTest {
     @Test
     fun `should map location values`() {
         val historyString =
-            """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0}],"version":"6.2.1","history_version":"1.0.0"}"""
+            "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1580744200.379,\"event_timestamp" +
+                "\":1580744198.879556,\"delta_ms\":0},{\"type\":\"updateLocation\",\"location\":" +
+                "{\"lat\":50.1232182,\"lon\":8.6343946,\"time\":1580744199.406,\"speed\"" +
+                ":0.02246818132698536,\"bearing\":33.55318069458008,\"altitude\"" +
+                ":162.8000030517578,\"accuracyHorizontal\":14.710000038146973,\"provider\"" +
+                ":\"fused\"},\"event_timestamp\":1580744199.407049,\"delta_ms\":0}],\"version\"" +
+                ":\"6.2.1\",\"history_version\":\"1.0.0\"}"
 
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
 
@@ -57,8 +75,19 @@ class ReplayHistoryMapperTest {
     @Test
     fun `should map custom event`() {
         val historyString =
-            """{"events":[{"type":"getStatus","timestamp":1580744200.379,"event_timestamp":1580744198.879556,"delta_ms":0},{"type":"updateLocation","location":{"lat":50.1232182,"lon":8.6343946,"time":1580744199.406,"speed":0.02246818132698536,"bearing":33.55318069458008,"altitude":162.8000030517578,"accuracyHorizontal":14.710000038146973,"provider":"fused"},"event_timestamp":1580744199.407049,"delta_ms":0},{"type":"getStatus","timestamp":1580744213.506,"event_timestamp":1580744212.006626,"delta_ms":0},{"type":"end_transit","properties":1580744212.223,"event_timestamp":1580744212.223644}],"version":"6.2.1","history_version":"1.0.0"}"""
-        val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper(), logger = logger)
+            "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1580744200.379," +
+                "\"event_timestamp\":1580744198.879556,\"delta_ms\":0},{\"type\":" +
+                "\"updateLocation\",\"location\":{\"lat\":50.1232182,\"lon\":8.6343946," +
+                "\"time\":1580744199.406,\"speed\":0.02246818132698536,\"bearing\":" +
+                "33.55318069458008,\"altitude\":162.8000030517578,\"accuracyHorizontal\":" +
+                "14.710000038146973,\"provider\":\"fused\"},\"event_timestamp\":" +
+                "1580744199.407049,\"delta_ms\":0},{\"type\":\"getStatus\",\"timestamp\":" +
+                "1580744213.506,\"event_timestamp\":1580744212.006626,\"delta_ms\":0}," +
+                "{\"type\":\"end_transit\",\"properties\":1580744212.223,\"event_timestamp\":" +
+                "1580744212.223644}],\"version\":\"6.2.1\",\"history_version\":\"1.0.0\"}"
+        val replayHistoryMapper = ReplayHistoryMapper(
+            customEventMapper = ExampleCustomEventMapper(), logger = logger
+        )
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
         assertEquals(4, historyEvents.size)
     }
@@ -66,8 +95,10 @@ class ReplayHistoryMapperTest {
     @Test
     fun `old versions of history are missing event_timestamp`() {
         val historyString =
-            """{"events":[{"type":"getStatus","timestamp":1551460823.922}],"version":"5.0.0","history_version":"1.0.0"}"""
-        val replayHistoryMapper = ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper(), logger = logger)
+            "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1551460823.922}]," +
+                "\"version\":\"5.0.0\",\"history_version\":\"1.0.0\"}"
+        val replayHistoryMapper =
+            ReplayHistoryMapper(customEventMapper = ExampleCustomEventMapper(), logger = logger)
         val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
         assertEquals(1, historyEvents.size)
     }

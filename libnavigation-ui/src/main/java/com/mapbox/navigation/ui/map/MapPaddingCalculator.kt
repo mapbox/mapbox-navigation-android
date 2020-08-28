@@ -34,12 +34,21 @@ internal object MapPaddingCalculator {
     @JvmStatic
     fun calculateTopPaddingWithoutWayname(mapView: MapView): Int {
         val context = mapView.context
-        val bottomSheetHeight = context.resources.getDimension(R.dimen.mapbox_summary_bottom_sheet_height).toInt()
+        val bottomSheetHeight =
+            context.resources.getDimension(R.dimen.mapbox_summary_bottom_sheet_height).toInt()
 
         return if (mapView.height > mapView.width) {
-            mapView.height - bottomSheetHeight * MapPaddingAdjustor.BOTTOMSHEET_PADDING_MULTIPLIER_PORTRAIT
+            mapView.height
+                .minus(
+                    bottomSheetHeight
+                        .times(MapPaddingAdjustor.BOTTOMSHEET_PADDING_MULTIPLIER_PORTRAIT)
+                )
         } else {
-            mapView.height - bottomSheetHeight * MapPaddingAdjustor.BOTTOMSHEET_PADDING_MULTIPLIER_LANDSCAPE
+            mapView.height
+                .minus(
+                    bottomSheetHeight
+                        .times(MapPaddingAdjustor.BOTTOMSHEET_PADDING_MULTIPLIER_LANDSCAPE)
+                )
         }
     }
 }

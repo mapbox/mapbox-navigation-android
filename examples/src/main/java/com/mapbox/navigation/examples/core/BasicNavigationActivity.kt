@@ -99,12 +99,19 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
             when (directionRoute) {
                 null -> {
                     if (shouldSimulateRoute()) {
-                        mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxNavigation
+                            ?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
-                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    mapboxNavigation
+                        ?.navigationOptions
+                        ?.locationEngine
+                        ?.getLastLocation(locationListenerCallback)
+                    Snackbar
+                        .make(
+                            container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT
+                        )
                         .show()
                 }
                 else -> restoreNavigation()
@@ -246,7 +253,10 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun stopLocationUpdates() {
         if (!shouldSimulateRoute()) {
-            mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+            mapboxNavigation
+                ?.navigationOptions
+                ?.locationEngine
+                ?.removeLocationUpdates(locationListenerCallback)
         }
     }
 

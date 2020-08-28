@@ -41,7 +41,8 @@ class NavigationAccountsSessionTest {
     fun previousIdleCurrentFreeDriveNeitherStartedNorStoppedAreCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
         verify(exactly = 0) { accounts.navigationStarted() }
         verify(exactly = 0) { accounts.navigationStopped() }
@@ -51,7 +52,8 @@ class NavigationAccountsSessionTest {
     fun previousIdleCurrentActiveGuidanceStartedIsCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
         verify(exactly = 1) { accounts.navigationStarted() }
     }
@@ -60,7 +62,8 @@ class NavigationAccountsSessionTest {
     fun previousIdleCurrentActiveGuidanceStoppedIsNotCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
         verify(exactly = 0) { accounts.navigationStopped() }
     }
@@ -68,7 +71,8 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousActiveGuidanceCurrentIdleStoppedIsCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
         navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.IDLE)
 
@@ -78,9 +82,11 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousActiveGuidanceCurrentFreeDriveStoppedIsCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
         verify(exactly = 1) { accounts.navigationStopped() }
     }
@@ -88,9 +94,11 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousActiveGuidanceCurrentActiveGuidanceStartedOnce() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
         verify(exactly = 1) { accounts.navigationStarted() }
         verify(exactly = 0) { accounts.navigationStopped() }
@@ -99,7 +107,8 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousFreeDriveCurrentIdleNeitherStartedNorStoppedAreCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
         navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.IDLE)
 
@@ -110,9 +119,11 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousFreeDriveCurrentFreeDriveNeitherStartedNorStoppedAreCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
         verify(exactly = 0) { accounts.navigationStarted() }
         verify(exactly = 0) { accounts.navigationStopped() }
@@ -121,9 +132,11 @@ class NavigationAccountsSessionTest {
     @Test
     fun previousFreeDriveCurrentActiveGuidanceNeitherStartedNorStoppedAreCalled() {
         val navigationAccountsSession = NavigationAccountsSession(context)
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.FREE_DRIVE)
 
-        navigationAccountsSession.onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
+        navigationAccountsSession
+            .onNavigationSessionStateChanged(NavigationSession.State.ACTIVE_GUIDANCE)
 
         verify(exactly = 1) { accounts.navigationStarted() }
         verify(exactly = 0) { accounts.navigationStopped() }

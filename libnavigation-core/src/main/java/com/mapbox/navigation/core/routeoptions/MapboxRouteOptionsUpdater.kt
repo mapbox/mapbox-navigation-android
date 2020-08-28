@@ -52,8 +52,9 @@ class MapboxRouteOptionsUpdater(
                     let {
                         val bearings = mutableListOf<List<Double>?>()
 
-                        val originTolerance = routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
-                            ?: DEFAULT_REROUTE_BEARING_TOLERANCE
+                        val originTolerance =
+                            routeOptions.bearingsList()?.getOrNull(0)?.getOrNull(1)
+                                ?: DEFAULT_REROUTE_BEARING_TOLERANCE
                         val currentAngle = location.bearing.toDouble()
 
                         bearings.add(listOf(currentAngle, originTolerance))
@@ -74,7 +75,9 @@ class MapboxRouteOptionsUpdater(
                             return@radiusesList emptyList<Double>()
                         }
                         mutableListOf<Double>().also {
-                            it.addAll(routeOptions.radiusesList()!!.subList(index, coordinates.size))
+                            it.addAll(
+                                routeOptions.radiusesList()!!.subList(index, coordinates.size)
+                            )
                         }
                     }
                 )
@@ -84,7 +87,9 @@ class MapboxRouteOptionsUpdater(
                             return@approachesList emptyList<String>()
                         }
                         mutableListOf<String>().also {
-                            it.addAll(routeOptions.approachesList()!!.subList(index, coordinates.size))
+                            it.addAll(
+                                routeOptions.approachesList()!!.subList(index, coordinates.size)
+                            )
                         }
                     }
                 )

@@ -42,7 +42,9 @@ class MapboxNavigationTelemetryTest {
         mockkObject(ThreadController)
 
         val alarmManager = mockk<AlarmManager>()
-        every { applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager } returns alarmManager
+        every {
+            applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        } returns alarmManager
         every { context.applicationContext } returns applicationContext
 
         val sharedPreferences = mockk<SharedPreferences>(relaxed = true)
@@ -52,7 +54,9 @@ class MapboxNavigationTelemetryTest {
                 Context.MODE_PRIVATE
             )
         } returns sharedPreferences
-        every { sharedPreferences.getString("mapboxTelemetryState", "ENABLED"); } returns "DISABLED"
+        every {
+            sharedPreferences.getString("mapboxTelemetryState", "ENABLED")
+        } returns "DISABLED"
 
         MapboxMetricsReporter.init(context, token, "userAgent")
     }
@@ -84,7 +88,9 @@ class MapboxNavigationTelemetryTest {
 
     @Test
     fun onUnregisterListener_unregisterRouteProgressObserver_called() {
-        onUnregister { verify(exactly = 1) { mapboxNavigation.unregisterRouteProgressObserver(any()) } }
+        onUnregister {
+            verify(exactly = 1) { mapboxNavigation.unregisterRouteProgressObserver(any()) }
+        }
     }
 
     @Test

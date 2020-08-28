@@ -81,7 +81,8 @@ internal class FasterRouteController(
             val routeProgress = tripSession.getRouteProgress()
                 ?: return
             jobControl.scope.launch {
-                val isAlternativeFaster = fasterRouteDetector.isRouteFaster(routes[0], routeProgress)
+                val isAlternativeFaster =
+                    fasterRouteDetector.isRouteFaster(routes[0], routeProgress)
                 fasterRouteObserver?.onFasterRoute(currentRoute, routes, isAlternativeFaster)
             }
         }

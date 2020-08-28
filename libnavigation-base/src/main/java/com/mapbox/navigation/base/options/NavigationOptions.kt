@@ -103,7 +103,18 @@ class NavigationOptions private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "NavigationOptions(applicationContext=$applicationContext, accessToken=$accessToken, locationEngine=$locationEngine, timeFormatType=$timeFormatType, navigatorPredictionMillis=$navigatorPredictionMillis, distanceFormatter=$distanceFormatter, onboardRouterOptions=$onboardRouterOptions, isFromNavigationUi=$isFromNavigationUi, isDebugLoggingEnabled=$isDebugLoggingEnabled, deviceProfile=$deviceProfile)"
+        return "NavigationOptions(" +
+            "applicationContext=$applicationContext, " +
+            "accessToken=$accessToken, " +
+            "locationEngine=$locationEngine, " +
+            "timeFormatType=$timeFormatType, " +
+            "navigatorPredictionMillis=$navigatorPredictionMillis, " +
+            "distanceFormatter=$distanceFormatter, " +
+            "onboardRouterOptions=$onboardRouterOptions, " +
+            "isFromNavigationUi=$isFromNavigationUi, " +
+            "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
+            "deviceProfile=$deviceProfile" +
+            ")"
     }
 
     /**
@@ -116,7 +127,8 @@ class NavigationOptions private constructor(
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED
         private var navigatorPredictionMillis: Long = DEFAULT_NAVIGATOR_PREDICTION_MILLIS
         private var distanceFormatter: DistanceFormatter? = null
-        private var onboardRouterOptions: OnboardRouterOptions = OnboardRouterOptions.Builder().build()
+        private var onboardRouterOptions: OnboardRouterOptions =
+            OnboardRouterOptions.Builder().build()
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
@@ -183,7 +195,8 @@ class NavigationOptions private constructor(
             return NavigationOptions(
                 applicationContext = applicationContext,
                 accessToken = accessToken,
-                locationEngine = locationEngine ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
+                locationEngine = locationEngine
+                    ?: LocationEngineProvider.getBestLocationEngine(applicationContext),
                 timeFormatType = timeFormatType,
                 navigatorPredictionMillis = navigatorPredictionMillis,
                 distanceFormatter = distanceFormatter,

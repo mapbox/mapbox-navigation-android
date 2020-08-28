@@ -16,7 +16,8 @@ fun RouteOptions?.supportsRefresh(): Boolean {
     val isTrafficProfile = profile() == DirectionsCriteria.PROFILE_DRIVING_TRAFFIC
     val isOverviewFull = overview() == DirectionsCriteria.OVERVIEW_FULL
     val hasCongestionOrMaxSpeed = annotationsList()?.any {
-        it == DirectionsCriteria.ANNOTATION_CONGESTION || it == DirectionsCriteria.ANNOTATION_MAXSPEED
+        it == DirectionsCriteria.ANNOTATION_CONGESTION ||
+            it == DirectionsCriteria.ANNOTATION_MAXSPEED
     } ?: false
     return isTrafficProfile && isOverviewFull && hasCongestionOrMaxSpeed
 }

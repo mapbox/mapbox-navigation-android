@@ -271,7 +271,10 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation.navigationOptions.locationEngine.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation
+            .navigationOptions
+            .locationEngine
+            .removeLocationUpdates(locationListenerCallback)
     }
 
     @SuppressLint("RestrictedApi")
@@ -287,7 +290,10 @@ class FasterRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationListenerCallback,
                 mainLooper
             )
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
+            mapboxNavigation
+                .navigationOptions
+                .locationEngine
+                .getLastLocation(locationListenerCallback)
         } catch (exception: SecurityException) {
             Timber.e(exception)
         }

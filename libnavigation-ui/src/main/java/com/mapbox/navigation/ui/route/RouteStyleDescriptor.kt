@@ -8,4 +8,8 @@ package com.mapbox.navigation.ui.route
  * @param lineShieldColorResourceId the color of the shield line which appears below the route line
  * and is normally wider providing a visual border for the route line.
  */
-data class RouteStyleDescriptor(val routeIdentifier: String, val lineColorResourceId: Int, val lineShieldColorResourceId: Int)
+data class RouteStyleDescriptor(
+    val routeIdentifier: String,
+    val lineColorResourceId: Int,
+    val lineShieldColorResourceId: Int
+)

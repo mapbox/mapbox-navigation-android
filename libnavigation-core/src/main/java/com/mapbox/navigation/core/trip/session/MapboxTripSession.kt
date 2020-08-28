@@ -297,7 +297,9 @@ internal class MapboxTripSession(
     /**
      * Register [BannerInstructionsObserver]
      */
-    override fun registerBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    override fun registerBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         bannerInstructionsObservers.add(bannerInstructionsObserver)
         routeProgress?.let {
             checkBannerInstructionEvent(it) { bannerInstruction ->
@@ -318,14 +320,18 @@ internal class MapboxTripSession(
     /**
      * Unregister [BannerInstructionsObserver]
      */
-    override fun unregisterBannerInstructionsObserver(bannerInstructionsObserver: BannerInstructionsObserver) {
+    override fun unregisterBannerInstructionsObserver(
+        bannerInstructionsObserver: BannerInstructionsObserver
+    ) {
         bannerInstructionsObservers.remove(bannerInstructionsObserver)
     }
 
     /**
      * Register [VoiceInstructionsObserver]
      */
-    override fun registerVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
+    override fun registerVoiceInstructionsObserver(
+        voiceInstructionsObserver: VoiceInstructionsObserver
+    ) {
         voiceInstructionsObservers.add(voiceInstructionsObserver)
         routeProgress?.let {
             checkVoiceInstructionEvent(it) { voiceInstruction ->
@@ -337,7 +343,9 @@ internal class MapboxTripSession(
     /**
      * Unregister [VoiceInstructionsObserver]
      */
-    override fun unregisterVoiceInstructionsObserver(voiceInstructionsObserver: VoiceInstructionsObserver) {
+    override fun unregisterVoiceInstructionsObserver(
+        voiceInstructionsObserver: VoiceInstructionsObserver
+    ) {
         voiceInstructionsObservers.remove(voiceInstructionsObserver)
     }
 

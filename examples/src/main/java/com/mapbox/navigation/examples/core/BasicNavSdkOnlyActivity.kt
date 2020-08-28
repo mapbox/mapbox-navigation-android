@@ -53,7 +53,9 @@ import timber.log.Timber
  * ONLY the Navigation SDK. There is no Navigation UI SDK code
  * of any kind in this example.
  */
-class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxMap.OnMapLongClickListener {
+class BasicNavSdkOnlyActivity : AppCompatActivity(),
+    OnMapReadyCallback,
+    MapboxMap.OnMapLongClickListener {
 
     private var mapboxNavigation: MapboxNavigation? = null
     private var mapboxMap: MapboxMap? = null
@@ -83,7 +85,11 @@ class BasicNavSdkOnlyActivity : AppCompatActivity(), OnMapReadyCallback, MapboxM
 
             // Add the click and route sources
             it.addSource(GeoJsonSource("CLICK_SOURCE"))
-            it.addSource(GeoJsonSource("ROUTE_LINE_SOURCE_ID", GeoJsonOptions().withLineMetrics(true)))
+            it.addSource(
+                GeoJsonSource(
+                    "ROUTE_LINE_SOURCE_ID", GeoJsonOptions().withLineMetrics(true)
+                )
+            )
 
             // Add the destination marker image
             it.addImage("ICON_ID", BitmapUtils.getBitmapFromDrawable(

@@ -224,11 +224,15 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
             }
 
             if (shouldSimulateRoute()) {
-                mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                mapboxNavigation
+                    .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                 mapboxReplayer.pushRealLocation(requireContext(), 0.0)
                 mapboxReplayer.play()
             }
-            mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationListenerCallback)
+            mapboxNavigation
+                .navigationOptions
+                .locationEngine
+                .getLastLocation(locationListenerCallback)
 
             directionRoute?.let {
                 navigationMapboxMap?.drawRoute(it)
@@ -309,7 +313,8 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                 summaryBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 showWayNameView()
                 navigationMapboxMap?.resetPadding()
-                navigationMapboxMap?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+                navigationMapboxMap
+                    ?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             }
         }
 
@@ -452,7 +457,11 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
             )
             showFeedbackSentSnackBar(
                 context = requireContext(),
-                view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) recenterBtn else summaryBottomSheet,
+                view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                    recenterBtn
+                } else {
+                    summaryBottomSheet
+                },
                 setAnchorView = true
             )
         }
@@ -479,15 +488,26 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
 
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding
+                )
                 .toInt()
         val paddingBuffer =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding
+                )
                 .toInt()
         val instructionHeight =
-            (resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height) + paddingBuffer).toInt()
+            (resources
+                .getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height) +
+                paddingBuffer
+                )
+                .toInt()
         val summaryHeight =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
+            resources
+                .getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
                 .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }
@@ -535,7 +555,8 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                 TripSessionState.STARTED -> {
                     updateViews(TripSessionState.STARTED)
 
-                    navigationMapboxMap?.addOnWayNameChangedListener(this@BasicNavigationFragment)
+                    navigationMapboxMap
+                        ?.addOnWayNameChangedListener(this@BasicNavigationFragment)
                     navigationMapboxMap?.updateWaynameQueryMap(true)
                 }
                 TripSessionState.STOPPED -> {
@@ -545,7 +566,8 @@ class BasicNavigationFragment : Fragment(), OnMapReadyCallback, FeedbackBottomSh
                         navigationMapboxMap?.hideRoute()
                     }
 
-                    navigationMapboxMap?.removeOnWayNameChangedListener(this@BasicNavigationFragment)
+                    navigationMapboxMap
+                        ?.removeOnWayNameChangedListener(this@BasicNavigationFragment)
                     navigationMapboxMap?.updateWaynameQueryMap(false)
 
                     updateCameraOnNavigationStateChange(false)

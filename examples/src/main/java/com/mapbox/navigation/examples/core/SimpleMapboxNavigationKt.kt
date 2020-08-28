@@ -183,7 +183,9 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             symbolManager = SymbolManager(mapView, mapboxMap, style)
             style.addImage("marker", IconFactory.getInstance(this).defaultMarker().bitmap)
 
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap(
+                mapView, mapboxMap, this, true
+            )
             navigationMapboxMap.setCamera(DynamicCamera(mapboxMap))
             navigationMapboxMap.addProgressChangeListener(mapboxNavigation)
             navigationMapboxMap.setOnRouteSelectionChangeListener { route ->
@@ -197,11 +199,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
             when (originalRoute) {
                 null -> {
                     if (shouldSimulateRoute()) {
-                        mapboxNavigation.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxNavigation
+                            .registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    Snackbar.make(container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    Snackbar
+                        .make(
+                            container, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT
+                        )
                         .show()
                 }
                 else -> restoreNavigation()

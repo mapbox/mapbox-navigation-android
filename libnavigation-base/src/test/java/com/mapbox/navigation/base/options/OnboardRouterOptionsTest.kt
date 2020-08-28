@@ -13,7 +13,8 @@ import org.junit.Test
 
 class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouterOptions.Builder>() {
 
-    override fun getImplementationClass(): KClass<OnboardRouterOptions> = OnboardRouterOptions::class
+    override fun getImplementationClass(): KClass<OnboardRouterOptions> =
+        OnboardRouterOptions::class
 
     override fun getFilledUpBuilder(): OnboardRouterOptions.Builder {
         return OnboardRouterOptions.Builder()
@@ -27,7 +28,8 @@ class OnboardRouterOptionsTest : BuilderTest<OnboardRouterOptions, OnboardRouter
         // only used to trigger JUnit4 to run this class if all test cases come from the parent
     }
 
-    private val validFilePath = """/data/user/0/com.mapbox.navigation.examples/files/Offline/api.mapbox.com/2020_02_02-03_00_00/tiles"""
+    private val validFilePath = "/data/user/0/com.mapbox.navigation.examples/files/" +
+        "Offline/api.mapbox.com/2020_02_02-03_00_00/tiles"
 
     @Test
     fun `filePath should build with defaults`() {

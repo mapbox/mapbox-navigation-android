@@ -27,7 +27,11 @@ interface MapboxNativeNavigator {
     /**
      * Initialize the navigator with a device profile
      */
-    fun create(deviceProfile: DeviceProfile, navigatorConfig: NavigatorConfig, logger: Logger?): MapboxNativeNavigator
+    fun create(
+        deviceProfile: DeviceProfile,
+        navigatorConfig: NavigatorConfig,
+        logger: Logger?
+    ): MapboxNativeNavigator
 
     // Route following
 

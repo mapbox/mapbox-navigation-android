@@ -9,8 +9,8 @@ import com.mapbox.navigation.base.route.RouteRefreshError
 import com.mapbox.navigation.core.directions.session.DirectionsSession
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.utils.internal.MapboxTimer
-import kotlinx.coroutines.Job
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Job
 
 /**
  * This class is responsible for refreshing the current direction route's traffic.

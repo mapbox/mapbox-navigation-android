@@ -328,13 +328,18 @@ class MapboxRerouteControllerTest {
         assertFalse(rerouteController.unregisterRerouteStateObserver(primaryRerouteObserver))
     }
 
-    private fun addRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver = primaryRerouteObserver): Boolean {
+    private fun addRerouteStateObserver(
+        rerouteStateObserver: RerouteController.RerouteStateObserver = primaryRerouteObserver
+    ): Boolean {
         return rerouteController.registerRerouteStateObserver(rerouteStateObserver)
     }
 
-    private fun mockRouteOptionsResult(_routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult) {
+    private fun mockRouteOptionsResult(
+        _routeOptionsResult: RouteOptionsUpdater.RouteOptionsResult
+    ) {
         assertFalse(
-            "routeOptionsResult mustn't be the *RouteOptionsProvider.RouteOptionsResult*, subclass is applied only",
+            "routeOptionsResult mustn't be the *RouteOptionsProvider.RouteOptionsResult*, " +
+                "subclass is applied only",
             _routeOptionsResult::class.isAbstract
         )
         every {

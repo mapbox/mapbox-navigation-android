@@ -76,7 +76,9 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
                 navigationMapboxMap?.restoreStateFrom(state)
             }
             // center the map at current location
-            LocationEngineProvider.getBestLocationEngine(this).getLastLocation(locationListenerCallback)
+            LocationEngineProvider
+                .getBestLocationEngine(this)
+                .getLastLocation(locationListenerCallback)
         }
     }
 
@@ -170,7 +172,9 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val locationListenerCallback = MyLocationEngineCallback(this)
 
-    private class MyLocationEngineCallback(activity: FreeDriveNavigationActivity) : LocationEngineCallback<LocationEngineResult> {
+    private class MyLocationEngineCallback(
+        activity: FreeDriveNavigationActivity
+    ) : LocationEngineCallback<LocationEngineResult> {
 
         private val activityRef = WeakReference(activity)
 
@@ -184,7 +188,10 @@ class FreeDriveNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun stopLocationUpdates() {
-        mapboxNavigation?.navigationOptions?.locationEngine?.removeLocationUpdates(locationListenerCallback)
+        mapboxNavigation
+            ?.navigationOptions
+            ?.locationEngine
+            ?.removeLocationUpdates(locationListenerCallback)
     }
 
     private val tripSessionStateObserver = object : TripSessionStateObserver {

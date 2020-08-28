@@ -39,7 +39,10 @@ internal class Billing private constructor() {
         private fun setBillingType(context: Context) {
             getApplicationInfo(context)?.let { appInfo ->
                 appInfo.metaData?.let { metadata ->
-                    billingType = when (metadata.getBoolean(KEY_META_DATA_MANAGE_SKU, DEFAULT_TOKEN_MANAGE_SKU)) {
+                    billingType = when (metadata.getBoolean(
+                        KEY_META_DATA_MANAGE_SKU,
+                        DEFAULT_TOKEN_MANAGE_SKU
+                    )) {
                         true -> BillingModel.NO_SKU
                         else -> BillingModel.MAU
                     }

@@ -95,11 +95,16 @@ class MapboxDistanceFormatter private constructor(
         val resources = applicationContext.resourcesWithLocale(locale)
         val unitStringSuffix = getUnitString(resources, smallUnit)
         val roundedNumber = distanceUnit.roundToInt() / roundingIncrement * roundingIncrement
-        val roundedValue = (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber).toString()
+        val roundedValue =
+            (if (roundedNumber < roundingIncrement) roundingIncrement else roundedNumber)
+                .toString()
         return Pair(roundedValue, unitStringSuffix)
     }
 
-    private fun formatDistanceAndSuffixForLargeUnit(distance: Double, maxFractionDigits: Int): Pair<String, String> {
+    private fun formatDistanceAndSuffixForLargeUnit(
+        distance: Double,
+        maxFractionDigits: Int
+    ): Pair<String, String> {
         val resources = applicationContext.resourcesWithLocale(locale)
         val unitStringSuffix = getUnitString(resources, largeUnit)
         val distanceUnit =
@@ -118,8 +123,11 @@ class MapboxDistanceFormatter private constructor(
      * from TurfConstants. This will be converted to the abbreviated form.
      * @return [SpannableString] with bolded distance and shrunken units
      */
-    internal fun getSpannableDistanceString(distanceAndSuffix: Pair<String, String>): SpannableString {
-        val spannableString = SpannableString("${distanceAndSuffix.first} ${distanceAndSuffix.second}")
+    internal fun getSpannableDistanceString(
+        distanceAndSuffix: Pair<String, String>
+    ): SpannableString {
+        val spannableString =
+            SpannableString("${distanceAndSuffix.first} ${distanceAndSuffix.second}")
 
         spannableString.setSpan(
             StyleSpan(Typeface.BOLD),
@@ -135,13 +143,14 @@ class MapboxDistanceFormatter private constructor(
         return spannableString
     }
 
-    private fun getUnitString(resources: Resources, @TurfConstants.TurfUnitCriteria unit: String) = when (unit) {
-        TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.mapbox_unit_kilometers)
-        TurfConstants.UNIT_METERS -> resources.getString(R.string.mapbox_unit_meters)
-        TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
-        TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
-        else -> ""
-    }
+    private fun getUnitString(resources: Resources, @TurfConstants.TurfUnitCriteria unit: String) =
+        when (unit) {
+            TurfConstants.UNIT_KILOMETERS -> resources.getString(R.string.mapbox_unit_kilometers)
+            TurfConstants.UNIT_METERS -> resources.getString(R.string.mapbox_unit_meters)
+            TurfConstants.UNIT_MILES -> resources.getString(R.string.mapbox_unit_miles)
+            TurfConstants.UNIT_FEET -> resources.getString(R.string.mapbox_unit_feet)
+            else -> ""
+        }
 
     private fun Context.resourcesWithLocale(locale: Locale?): Resources {
         val config = Configuration(this.resources.configuration).also {
@@ -177,7 +186,13 @@ class MapboxDistanceFormatter private constructor(
     }
 
     override fun toString(): String {
-        return "MapboxDistanceFormatter(applicationContext=$applicationContext, locale=$locale, unitType='$unitType', roundingIncrement=$roundingIncrement, smallUnit='$smallUnit', largeUnit='$largeUnit')"
+        return "MapboxDistanceFormatter(" +
+            "applicationContext=$applicationContext, " +
+            "locale=$locale, unitType='$unitType', " +
+            "roundingIncrement=$roundingIncrement, " +
+            "smallUnit='$smallUnit', " +
+            "largeUnit='$largeUnit'" +
+            ")"
     }
 
     /**
@@ -233,7 +248,8 @@ class MapboxDistanceFormatter private constructor(
                 applicationContext = applicationContext,
                 locale = localeToUse,
                 unitType = unitTypeToUse,
-                roundingIncrement = roundingIncrement)
+                roundingIncrement = roundingIncrement
+            )
         }
     }
 }

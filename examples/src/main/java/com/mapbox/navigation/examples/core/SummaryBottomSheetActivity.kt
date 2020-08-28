@@ -141,17 +141,27 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap(
+                mapView,
+                mapboxMap,
+                this,
+                true
+            )
 
             when (directionRoute) {
                 null -> {
                     if (shouldSimulateRoute()) {
-                        mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
+                        mapboxNavigation
+                            ?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
                         mapboxReplayer.pushRealLocation(this, 0.0)
                         mapboxReplayer.play()
                     }
-                    mapboxNavigation?.navigationOptions?.locationEngine?.getLastLocation(locationListenerCallback)
-                    Snackbar.make(mapView, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
+                    mapboxNavigation
+                        ?.navigationOptions
+                        ?.locationEngine
+                        ?.getLastLocation(locationListenerCallback)
+                    Snackbar
+                        .make(mapView, R.string.msg_long_press_map_to_place_waypoint, LENGTH_SHORT)
                         .show()
                 }
                 else -> restoreNavigation()
@@ -235,7 +245,8 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
         recenterBtn.addOnClickListener {
             recenterBtn.hide()
             navigationMapboxMap?.resetPadding()
-            navigationMapboxMap?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
+            navigationMapboxMap
+                ?.resetCameraPositionWith(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
         }
 
         cancelBtn.setOnClickListener {
@@ -246,15 +257,26 @@ class SummaryBottomSheetActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun buildRouteOverviewPadding(): IntArray {
         val leftRightPadding =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_left_right_padding
+                )
                 .toInt()
         val paddingBuffer =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding)
+            resources
+                .getDimension(
+                    com.mapbox.navigation.ui.R.dimen.mapbox_route_overview_buffer_padding
+                )
                 .toInt()
         val instructionHeight =
-            (resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height) + paddingBuffer).toInt()
+            (resources
+                .getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_instruction_content_height) +
+                paddingBuffer
+                )
+                .toInt()
         val summaryHeight =
-            resources.getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
+            resources
+                .getDimension(com.mapbox.navigation.ui.R.dimen.mapbox_summary_bottom_sheet_height)
                 .toInt()
         return intArrayOf(leftRightPadding, instructionHeight, leftRightPadding, summaryHeight)
     }

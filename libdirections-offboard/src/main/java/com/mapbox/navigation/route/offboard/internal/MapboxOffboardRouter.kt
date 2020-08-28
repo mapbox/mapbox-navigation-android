@@ -51,7 +51,8 @@ class MapboxOffboardRouter(
         routeOptions: RouteOptions,
         callback: Router.Callback
     ) {
-        mapboxDirections = RouteBuilderProvider.getBuilder(accessToken, context, urlSkuTokenProvider)
+        mapboxDirections = RouteBuilderProvider
+            .getBuilder(accessToken, context, urlSkuTokenProvider)
             .routeOptions(routeOptions)
             .build()
         mapboxDirections?.enqueueCall(object : Callback<DirectionsResponse> {
@@ -103,7 +104,11 @@ class MapboxOffboardRouter(
      * @param legIndex Int the index of the current leg in the route
      * @param callback Callback that gets notified with the results of the request
      */
-    override fun getRouteRefresh(route: DirectionsRoute, legIndex: Int, callback: RouteRefreshCallback) {
+    override fun getRouteRefresh(
+        route: DirectionsRoute,
+        legIndex: Int,
+        callback: RouteRefreshCallback
+    ) {
         try {
             val refreshBuilder = MapboxDirectionsRefresh.builder()
                 .accessToken(accessToken)
@@ -112,12 +117,15 @@ class MapboxOffboardRouter(
                 .interceptor {
                     val httpUrl = it.request().url()
                     val skuUrl =
-                        urlSkuTokenProvider.obtainUrlWithSkuToken(httpUrl.toString(), httpUrl.querySize())
+                        urlSkuTokenProvider.obtainUrlWithSkuToken(
+                            httpUrl.toString(), httpUrl.querySize()
+                        )
                     it.proceed(it.request().newBuilder().url(skuUrl).build())
                 }
 
             mapboxDirectionsRefresh = refreshBuilder.build()
-            mapboxDirectionsRefresh?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
+            mapboxDirectionsRefresh
+                ?.enqueueCall(RouteRefreshCallbackMapper(route, legIndex, callback))
         } catch (throwable: Throwable) {
             callback.onError(
                 RouteRefreshError(

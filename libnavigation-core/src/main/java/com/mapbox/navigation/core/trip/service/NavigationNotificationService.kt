@@ -53,7 +53,10 @@ internal class NavigationNotificationService : Service() {
             MapboxTripService.getNotificationDataChannel(),
             { notificationResponse ->
                 notificationResponse.notification.flags = Notification.FLAG_FOREGROUND_SERVICE
-                startForeground(notificationResponse.notificationId, notificationResponse.notification)
+                startForeground(
+                    notificationResponse.notificationId,
+                    notificationResponse.notification
+                )
             }
         )
     }

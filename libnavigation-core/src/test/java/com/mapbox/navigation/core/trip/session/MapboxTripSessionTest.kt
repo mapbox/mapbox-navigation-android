@@ -859,7 +859,9 @@ class MapboxTripSessionTest {
 
         every { routeProgress.bannerInstructions } returns bannerInstructions
         every { routeProgress.bannerInstructions?.view() } returns bannerView
-        every { routeProgress.bannerInstructions?.view()?.components() } returns bannerComponentsList
+        every {
+            routeProgress.bannerInstructions?.view()?.components()
+        } returns bannerComponentsList
         every { routeProgress.voiceInstructions } returns null
         every { tripStatus.offRoute } returns true
 
@@ -877,7 +879,11 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        assertEquals("https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=CB21110A&access_token=null", bannerComponentsList[0].imageUrl())
+        assertEquals(
+            "https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=" +
+                "CB21110A&access_token=null",
+            bannerComponentsList[0].imageUrl()
+        )
 
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.stop()
@@ -893,7 +899,9 @@ class MapboxTripSessionTest {
 
         every { routeProgress.bannerInstructions } returns bannerInstructions
         every { routeProgress.bannerInstructions?.view() } returns bannerView
-        every { routeProgress.bannerInstructions?.view()?.components() } returns bannerComponentsList
+        every {
+            routeProgress.bannerInstructions?.view()?.components()
+        } returns bannerComponentsList
         every { routeProgress.voiceInstructions } returns null
         every { tripStatus.offRoute } returns true
 
@@ -911,7 +919,11 @@ class MapboxTripSessionTest {
 
         updateLocationAndJoin()
 
-        assertEquals("https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=CB21110A&access_token=pk.1234", bannerComponentsList[0].imageUrl())
+        assertEquals(
+            "https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=" +
+                "CB21110A&access_token=pk.1234",
+            bannerComponentsList[0].imageUrl()
+        )
 
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.stop()
@@ -931,6 +943,9 @@ class MapboxTripSessionTest {
         BannerComponents.builder()
             .text("some text")
             .type("guidance-view")
-            .imageUrl("https://api.mapbox.com/guidance-views/v1/1580515200/jct/CB211101?arrow_ids=CB21110A")
+            .imageUrl(
+                "https://api.mapbox.com/guidance-views/v1/1580515200/" +
+                    "jct/CB211101?arrow_ids=CB21110A"
+            )
             .build()
 }

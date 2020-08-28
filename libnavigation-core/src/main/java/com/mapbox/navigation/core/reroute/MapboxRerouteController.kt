@@ -72,7 +72,8 @@ internal class MapboxRerouteController(
     @MainThread
     override fun interrupt() {
         if (state == RerouteState.FetchingRoute) {
-            directionsSession.cancel() // do not change state here because it's changed into onRoutesRequestCanceled callback
+            // do not change state here because it's changed into onRoutesRequestCanceled callback
+            directionsSession.cancel()
             logger.d(
                 Tag(TAG),
                 Message("Route request interrupted")
@@ -80,14 +81,18 @@ internal class MapboxRerouteController(
         }
     }
 
-    override fun registerRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+    override fun registerRerouteStateObserver(
+        rerouteStateObserver: RerouteController.RerouteStateObserver
+    ): Boolean {
         mainJobController.scope.launch {
             rerouteStateObserver.onRerouteStateChanged(state)
         }
         return observers.add(rerouteStateObserver)
     }
 
-    override fun unregisterRerouteStateObserver(rerouteStateObserver: RerouteController.RerouteStateObserver): Boolean {
+    override fun unregisterRerouteStateObserver(
+        rerouteStateObserver: RerouteController.RerouteStateObserver
+    ): Boolean {
         return observers.remove(rerouteStateObserver)
     }
 

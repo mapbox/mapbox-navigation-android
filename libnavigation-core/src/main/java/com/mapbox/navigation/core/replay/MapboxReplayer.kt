@@ -167,7 +167,10 @@ class MapboxReplayer {
         val offsetTime = replayTime + firstEventTime
         val indexOfEvent = replayEvents.events
             .indexOfFirst { offsetTime <= it.eventTimestamp }
-        check(indexOfEvent >= 0) { "Make sure your replayTime is less than replayDurationSeconds $replayTime > ${durationSeconds()}: " }
+        check(indexOfEvent >= 0) {
+            "Make sure your replayTime is less than replayDurationSeconds " +
+                "$replayTime > ${durationSeconds()}: "
+        }
 
         replayEventSimulator.seekTo(indexOfEvent)
     }

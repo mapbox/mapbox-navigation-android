@@ -67,7 +67,9 @@ class GuidanceViewImageProviderTest {
     @Test
     fun `when guidance view url is null`() {
         val messageSlot = slot<String>()
-        every { bannerView.components() } returns mutableListOf(bannerComponentsWithNullGuidanceUrl())
+        every {
+            bannerView.components()
+        } returns mutableListOf(bannerComponentsWithNullGuidanceUrl())
 
         guidanceViewImageProvider.renderGuidanceView(bannerInstructions, callback)
 

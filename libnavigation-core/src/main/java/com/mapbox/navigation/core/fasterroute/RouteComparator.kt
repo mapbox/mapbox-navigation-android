@@ -18,7 +18,10 @@ internal class RouteComparator {
      * @return true when the alternative route has different
      * geometry from the current route progress
      */
-    fun isRouteDescriptionDifferent(routeProgress: RouteProgress, alternativeRoute: DirectionsRoute): Boolean {
+    fun isRouteDescriptionDifferent(
+        routeProgress: RouteProgress,
+        alternativeRoute: DirectionsRoute
+    ): Boolean {
         val currentDescription = routeDescription(routeProgress)
         val alternativeDescription = alternativeDescription(alternativeRoute)
         alternativeDescription.ifEmpty {
