@@ -16,10 +16,6 @@
             android:key="@string/nav_native_history_collect_key"
             android:title="@string/nav_native_history_collect"/>
 
-        <Preference
-            android:key="@string/nav_native_history_retrieve_key"
-            android:title="Save Nav Native history"/>
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/simulate_route_key"

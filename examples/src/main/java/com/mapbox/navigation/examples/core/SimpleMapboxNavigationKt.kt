@@ -52,6 +52,7 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.history.HistoryRecorder
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
 import com.mapbox.navigation.examples.utils.extensions.toPoint
@@ -144,6 +145,9 @@ class SimpleMapboxNavigationKt :
         val mapboxNavigationOptions = MapboxNavigation
             .defaultNavigationOptionsBuilder(this, Utils.getMapboxAccessToken(this))
         mapboxNavigation = getMapboxNavigation(mapboxNavigationOptions)
+        if (shouldRecordHistory()) {
+            mapboxNavigation.registerTripSessionStateObserver(HistoryRecorder(mapboxNavigation))
+        }
         initViews()
     }
 
@@ -517,6 +521,11 @@ class SimpleMapboxNavigationKt :
     private fun shouldSimulateRoute(): Boolean {
         return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
             .getBoolean(this.getString(R.string.simulate_route_key), false)
+    }
+
+    private fun shouldRecordHistory(): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(this.applicationContext)
+            .getBoolean(this.getString(R.string.nav_native_history_collect_key), false)
     }
 
     @SuppressLint("MissingPermission")

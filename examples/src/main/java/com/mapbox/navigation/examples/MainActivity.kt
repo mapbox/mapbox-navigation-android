@@ -8,17 +8,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.preference.PreferenceManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.ArrayList
 
 class MainActivity : AppCompatActivity(), PermissionsListener {
 
     private val permissionsHelper = LocationPermissionsHelper(this)
-    private val CHANGE_SETTING_REQUEST_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,10 +26,7 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
         }
 
         settingsFab.setOnClickListener {
-            startActivityForResult(
-                Intent(this@MainActivity, NavigationSettingsActivity::class.java),
-                CHANGE_SETTING_REQUEST_CODE
-            )
+            startActivity(Intent(this@MainActivity, NavigationSettingsActivity::class.java))
         }
 
         cardCore.setOnClickListener {
@@ -41,13 +35,6 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
 
         cardUI.setOnClickListener {
             startActivity(Intent(this@MainActivity, UIActivity::class.java))
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CHANGE_SETTING_REQUEST_CODE) {
-            updateNavNativeHistoryCollection()
         }
     }
 
@@ -104,12 +91,5 @@ class MainActivity : AppCompatActivity(), PermissionsListener {
             permissionsNeeded.add(permission)
             ActivityCompat.requestPermissions(this, permissionsNeeded.toTypedArray(), 10)
         }
-    }
-
-    private fun updateNavNativeHistoryCollection() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        MapboxNativeNavigatorImpl.toggleHistory(
-            prefs.getBoolean(getString(R.string.nav_native_history_collect_key), false)
-        )
     }
 }
