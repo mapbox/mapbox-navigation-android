@@ -102,9 +102,8 @@
     <string name="route_profile_key" translatable="false">route_profile</string>
     <string name="default_route_profile" translatable="false">driving-traffic</string>
     <string name="git_hash_key" translatable="false">git_hash</string>
-    <string name="nav_native_history_retrieve_key" translatable="false">nav_native_history_retrieve</string>
     <string name="nav_native_history_collect_key" translatable="false">nav_native_history_collect</string>
-    <string name="nav_native_history_collect">Collect Nav Native history</string>
+    <string name="nav_native_history_collect">Record history</string>
     <string name="offline_version_key" translatable="false">offline_preference_key</string>
     <string name="offline_enabled" translatable="false">offline_region_download</string>
     <string name="default_locale" translatable="false">default_for_device</string>
@@ -127,5 +126,6 @@
     <string name="history_failed_to_load_item">History failed to load item</string>
     <string name="history_failed_to_load_list">Failed to load list</string>
     <string name="history_local_history_file">Local history file</string>
+    <string name="history_recorded_history_file">Recorded history file</string>
 
 </resources>

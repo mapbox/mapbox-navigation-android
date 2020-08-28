@@ -111,6 +111,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 navigationMapboxMap,
                 mapboxReplay
             )
+
             callback(navigationContext)
         }
     }

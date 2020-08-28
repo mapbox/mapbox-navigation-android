@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -14,17 +13,11 @@ import androidx.preference.PreferenceManager;
 
 import com.mapbox.navigation.examples.BuildConfig;
 import com.mapbox.navigation.examples.R;
-import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import timber.log.Timber;
 
 public class NavigationSettingsActivity extends FragmentActivity {
 
@@ -58,25 +51,6 @@ public class NavigationSettingsActivity extends FragmentActivity {
 
       String gitHashTitle = String.format("Last Commit Hash: %s", BuildConfig.GIT_HASH);
       findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
-      findPreference(getString(R.string.nav_native_history_retrieve_key)).setOnPreferenceClickListener(preference -> {
-        String history = MapboxNativeNavigatorImpl.INSTANCE.getHistory();
-        File path = Environment.getExternalStoragePublicDirectory("navigation_debug");
-        if (!path.exists()) {
-          path.mkdirs();
-        }
-        File file = new File(
-            Environment.getExternalStoragePublicDirectory("navigation_debug"),
-            "history_" + System.currentTimeMillis() + ".json"
-        );
-        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(file))) {
-          outputStreamWriter.write(history);
-          Toast.makeText(getActivity(), "Saved to " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
-          Timber.i("History file saved to %s", file.getAbsolutePath());
-        } catch (IOException ex) {
-          Timber.e("History file write failed: %s", ex.toString());
-        }
-        return true;
-      });
     }
 
     @Override

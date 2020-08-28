@@ -21,8 +21,16 @@ data class ReplayPath(
     @SerializedName("description")
     val description: String,
     @SerializedName("path")
-    val path: String
+    val path: String,
+    @SerializedName("data_source")
+    val dataSource: ReplayDataSource
 )
+
+enum class ReplayDataSource {
+    HTTP_SERVER,
+    ASSETS_DIRECTORY,
+    HISTORY_RECORDER
+}
 
 class HistoryFilesClient {
 
