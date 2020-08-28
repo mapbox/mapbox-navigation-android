@@ -593,7 +593,7 @@ package com.mapbox.navigation.ui.route {
 
   public static class NavigationMapRoute.Builder {
     ctor public NavigationMapRoute.Builder(com.mapbox.mapboxsdk.maps.MapView, com.mapbox.mapboxsdk.maps.MapboxMap, androidx.lifecycle.LifecycleOwner);
-    method public com.mapbox.navigation.ui.route.NavigationMapRoute? build();
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute build();
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withBelowLayer(String?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withMapboxNavigation(com.mapbox.navigation.core.MapboxNavigation?);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteLineInitializedCallback(com.mapbox.navigation.ui.route.MapRouteLineInitializedCallback?);
