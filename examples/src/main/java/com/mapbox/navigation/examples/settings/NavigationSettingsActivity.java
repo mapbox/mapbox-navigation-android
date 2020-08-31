@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.ListPreference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.preference.ListPreference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import com.mapbox.navigation.examples.BuildConfig;
 import com.mapbox.navigation.examples.R;
@@ -26,7 +26,7 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class NavigationSettingsActivity extends PreferenceActivity {
+public class NavigationSettingsActivity extends FragmentActivity {
 
   public static final String UNIT_TYPE_CHANGED = "unit_type_changed";
   public static final String LANGUAGE_CHANGED = "language_changed";
@@ -45,26 +45,19 @@ public class NavigationSettingsActivity extends PreferenceActivity {
     };
 
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
-    getFragmentManager().beginTransaction().replace(
+    getSupportFragmentManager().beginTransaction().replace(
       android.R.id.content, new NavigationViewPreferenceFragment()
     ).commit();
   }
 
-  @Override
-  protected boolean isValidFragment(String fragmentName) {
-    return super.isValidFragment(fragmentName);
-  }
-
-  public static class NavigationViewPreferenceFragment extends PreferenceFragment {
+  public static class NavigationViewPreferenceFragment extends PreferenceFragmentCompat {
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
-      super.onCreate(savedInstanceState);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
       addPreferencesFromResource(R.xml.fragment_navigation_preferences);
 
       String gitHashTitle = String.format("Last Commit Hash: %s", BuildConfig.GIT_HASH);
       findPreference(getString(R.string.git_hash_key)).setTitle(gitHashTitle);
-
       findPreference(getString(R.string.nav_native_history_retrieve_key)).setOnPreferenceClickListener(preference -> {
         String history = MapboxNativeNavigatorImpl.INSTANCE.getHistory();
         File path = Environment.getExternalStoragePublicDirectory("navigation_debug");
