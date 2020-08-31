@@ -55,7 +55,7 @@ allprojects {
       }
     }
     // uncomment if snapshots access is needed
-    /*maven {
+    maven {
       url 'https://api.mapbox.com/downloads/v2/snapshots/maven'
       authentication {
         basic(BasicAuthentication)
@@ -64,7 +64,7 @@ allprojects {
         username = "mapbox"
         password = project.hasProperty('SDK_REGISTRY_TOKEN') ? project.property('SDK_REGISTRY_TOKEN') : System.getenv('SDK_REGISTRY_TOKEN')
       }
-    }*/
+    }
     /*maven {
       url 'https://mapbox.bintray.com/mapbox_internal'
       credentials {

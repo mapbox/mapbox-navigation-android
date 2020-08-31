@@ -11,7 +11,7 @@ ext {
       mapboxSdkServices         : '5.4.1',
       mapboxEvents              : '6.1.0',
       mapboxCore                : '3.0.0',
-      mapboxNavigator           : '19.0.0',
+      mapboxNavigator           : 'sf-run-loop-poc-6-SNAPSHOT',
       mapboxCommon              : '5.1.0',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
