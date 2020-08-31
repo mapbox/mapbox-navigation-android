@@ -4,11 +4,11 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.navigation.examples.settings.NavigationSettingsActivity
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigatorImpl

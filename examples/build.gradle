@@ -107,6 +107,7 @@ dependencies {
     implementation dependenciesList.materialDesign
     implementation dependenciesList.androidXAppCompat
     implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXPreference
 
     implementation dependenciesList.gmsLocation
 

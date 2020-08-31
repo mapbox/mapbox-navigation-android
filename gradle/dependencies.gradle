@@ -109,6 +109,7 @@ ext {
       androidXRecyclerView      : "androidx.recyclerview:recyclerview:${version.recyclerViewVersion}",
       androidXCardView          : "androidx.cardview:cardview:${version.cardViewVersion}",
       androidXConstraintLayout  : "androidx.constraintlayout:constraintlayout:${version.constraintLayout}",
+      androidXPreference        : "androidx.preference:preference-ktx:${version.androidXAppCompatVersion}",
 
       // architecture
       lifecycleViewModelKtx     : "androidx.lifecycle:lifecycle-viewmodel-ktx:${version.lifecycleViewModelKtx}",
