@@ -30,6 +30,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_V
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
@@ -37,6 +38,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
+import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
@@ -47,9 +49,7 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBoolea
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getFloatStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.swapProperties
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfMeasurement
 import java.math.BigDecimal
@@ -344,7 +344,7 @@ internal class MapRouteLine(
 
         val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
         wayPointSource = mapRouteSourceProvider.build(
-            RouteConstants.WAYPOINT_SOURCE_ID,
+            WAYPOINT_SOURCE_ID,
             drawnWaypointsFeatureCollection,
             wayPointGeoJsonOptions
         )
@@ -352,7 +352,7 @@ internal class MapRouteLine(
 
         val routeLineGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
         primaryRouteLineSource = mapRouteSourceProvider.build(
-            RouteConstants.PRIMARY_ROUTE_SOURCE_ID,
+            PRIMARY_ROUTE_SOURCE_ID,
             drawnPrimaryRouteFeatureCollection,
             routeLineGeoJsonOptions
         )
@@ -411,7 +411,11 @@ internal class MapRouteLine(
         }
 
         routeLineInitializedCallback?.onInitialized(
-            RouteLineLayerIds(PRIMARY_ROUTE_TRAFFIC_LAYER_ID, PRIMARY_ROUTE_LAYER_ID, listOf(ALTERNATIVE_ROUTE_LAYER_ID))
+            RouteLineLayerIds(
+                PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                PRIMARY_ROUTE_LAYER_ID,
+                listOf(ALTERNATIVE_ROUTE_LAYER_ID)
+            )
         )
     }
 
@@ -450,7 +454,10 @@ internal class MapRouteLine(
         reinitializeWithRoutes(directionsRoutes, featureDataProvider)
     }
 
-    private fun reinitializeWithRoutes(directionsRoutes: List<DirectionsRoute>, getRouteFeatureData: () -> List<RouteFeatureData>) {
+    private fun reinitializeWithRoutes(
+        directionsRoutes: List<DirectionsRoute>,
+        getRouteFeatureData: () -> List<RouteFeatureData>
+    ) {
         if (directionsRoutes.isNotEmpty()) {
             clearRouteData()
             this.directionsRoutes.addAll(directionsRoutes)
@@ -484,17 +491,9 @@ internal class MapRouteLine(
      *
      * @param route the DirectionsRoute which should be designated as the primary
      */
-    fun updatePrimaryRouteIndex(route: DirectionsRoute): Boolean {
-        return if (route != this.primaryRoute) {
-            val primaryRouteFeatures = routeFeatureData.firstOrNull { it.route == primaryRoute }?.featureCollection?.features()?.firstOrNull()
-            val newPrimaryRouteFeatures = routeFeatureData.firstOrNull { it.route == route }?.featureCollection?.features()?.firstOrNull()
-            ifNonNull(primaryRouteFeatures, newPrimaryRouteFeatures, ::swapProperties)
-            this.primaryRoute = route
-            drawRoutes(routeFeatureData)
-            true
-        } else {
-            false
-        }
+    fun updatePrimaryRouteIndex(route: DirectionsRoute) {
+        this.primaryRoute = route
+        drawRoutes(routeFeatureData)
     }
 
     /**
@@ -587,14 +586,18 @@ internal class MapRouteLine(
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
     }
 
-    private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>): () -> List<RouteFeatureData> = {
+    private fun getIdentifiableRouteFeatureDataProvider(
+        directionsRoutes: List<IdentifiableRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
         )
     }
 
-    private fun getRouteFeatureDataProvider(directionsRoutes: List<DirectionsRoute>): () -> List<RouteFeatureData> = {
+    private fun getRouteFeatureDataProvider(
+        directionsRoutes: List<DirectionsRoute>
+    ): () -> List<RouteFeatureData> = {
         directionsRoutes.parallelMap(
             ::generateFeatureCollection,
             ThreadController.getMainScopeAndRootJob().scope
@@ -688,7 +691,9 @@ internal class MapRouteLine(
         }
 
         layerProvider.initializeWayPointLayer(
-            style, originIcon, destinationIcon
+            style,
+            originIcon,
+            destinationIcon
         ).apply {
             MapUtils.addLayerToMap(
                 style,
@@ -719,7 +724,7 @@ internal class MapRouteLine(
         setPrimaryRoutesSource(routeData.featureCollection)
         updateRouteTrafficSegments(routeData)
         if (style.isFullyLoaded) {
-            val expression = getExpressionAtOffset(0f)
+            val expression = getExpressionAtOffset(vanishPointOffset)
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
         }
     }
@@ -784,8 +789,9 @@ internal class MapRouteLine(
         )
     }
 
-    private fun clearRouteData() {
+    fun clearRouteData() {
         vanishPointOffset = 0f
+        primaryRoute = null
         directionsRoutes.clear()
         routeFeatureData.clear()
         routeLineExpressionData.clear()
@@ -1049,7 +1055,10 @@ internal class MapRouteLine(
         fun generateFeatureCollection(routeData: IdentifiableRoute): RouteFeatureData =
             generateFeatureCollection(routeData.route, routeData.routeIdentifier)
 
-        private fun generateFeatureCollection(route: DirectionsRoute, identifier: String?): RouteFeatureData {
+        private fun generateFeatureCollection(
+            route: DirectionsRoute,
+            identifier: String?
+        ): RouteFeatureData {
             val routeGeometry = LineString.fromPolyline(
                 route.geometry() ?: "",
                 Constants.PRECISION_6
@@ -1137,10 +1146,12 @@ internal class MapRouteLine(
             var distanceTraveled = 0.0
             for (i in 0 until numCongestionPoints) {
                 if (i + 1 < lineString.coordinates().size) {
-                    distanceTraveled += (TurfMeasurement.distance(
-                        lineString.coordinates()[i],
-                        lineString.coordinates()[i + 1]
-                    ) * 1000)
+                    distanceTraveled += (
+                        TurfMeasurement.distance(
+                            lineString.coordinates()[i],
+                            lineString.coordinates()[i + 1]
+                        ) * 1000
+                        )
 
                     if (congestionSections[i] == previousCongestion) {
                         continue
@@ -1221,23 +1232,6 @@ internal class MapRouteLine(
                 val propValue =
                     if (index == 0) WAYPOINT_ORIGIN_VALUE else WAYPOINT_DESTINATION_VALUE
                 it.addStringProperty(WAYPOINT_PROPERTY_KEY, propValue)
-            }
-        }
-
-        fun swapProperties(featureA: Feature, featureB: Feature) {
-            val featureAProperties = featureA.properties()
-            val featureAKeySetToRemove = featureAProperties?.keySet()?.toList()
-            val featureBProperties = featureB.properties()
-            val featureBKeySetToRemove = featureBProperties?.keySet()?.toList()
-
-            featureAKeySetToRemove?.forEach { key ->
-                featureB.addBooleanProperty(key, featureAProperties[key].asBoolean)
-                featureA.removeProperty(key)
-            }
-
-            featureBKeySetToRemove?.forEach { key ->
-                featureA.addBooleanProperty(key, featureBProperties[key].asBoolean)
-                featureB.removeProperty(key)
             }
         }
     }

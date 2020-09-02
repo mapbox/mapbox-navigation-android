@@ -27,7 +27,6 @@ public class MapRouteClickListenerTest {
     HashMap<LineString, DirectionsRoute> anyLineStringDirectionsRouteMap =
       buildLineStringDirectionsRouteHashMap(anyRoute, anyRouteGeometry);
     MapRouteLine mockedMapRouteLine = buildMockMapRouteLine(true, anyLineStringDirectionsRouteMap);
-    when(mockedMapRouteLine.updatePrimaryRouteIndex(anyRoute)).thenReturn(true);
     when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(anyDirectionsRoutes);
     MapRouteClickListener theMapRouteClickListener = new MapRouteClickListener(mockedMapRouteLine);
     OnRouteSelectionChangeListener mockedOnRouteSelectionChangeListener =
@@ -37,6 +36,24 @@ public class MapRouteClickListenerTest {
     theMapRouteClickListener.onMapClick(mockedPoint);
 
     verify(mockedOnRouteSelectionChangeListener).onNewPrimaryRouteSelected(any(DirectionsRoute.class));
+  }
+
+  @Test
+  public void updatesPrimaryRouteIndexWhenClickedRouteIsFound() {
+    DirectionsRoute anyRoute = buildMockDirectionsRoute();
+    List<DirectionsRoute> anyDirectionsRoutes = buildDirectionsRoutes(anyRoute);
+    LineString anyRouteGeometry = LineString.fromPolyline(anyRoute.geometry(), Constants.PRECISION_6);
+    HashMap<LineString, DirectionsRoute> anyLineStringDirectionsRouteMap =
+            buildLineStringDirectionsRouteHashMap(anyRoute, anyRouteGeometry);
+    MapRouteLine mockedMapRouteLine = buildMockMapRouteLine(true, anyLineStringDirectionsRouteMap);
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(anyDirectionsRoutes);
+    MapRouteClickListener theMapRouteClickListener = new MapRouteClickListener(mockedMapRouteLine);
+    buildMockOnRouteSelectionChangeListener(theMapRouteClickListener);
+    LatLng mockedPoint = mock(LatLng.class);
+
+    theMapRouteClickListener.onMapClick(mockedPoint);
+
+    verify(mockedMapRouteLine).updatePrimaryRouteIndex(anyRoute);
   }
 
   @Test
