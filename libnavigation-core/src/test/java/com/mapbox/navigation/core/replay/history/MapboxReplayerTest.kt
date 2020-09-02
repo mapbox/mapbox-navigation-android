@@ -3,7 +3,6 @@ package com.mapbox.navigation.core.replay.history
 import android.os.SystemClock
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.testing.MainCoroutineRule
-import io.mockk.Called
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -273,7 +272,7 @@ class MapboxReplayerTest {
 
         mapboxReplayer.playFirstLocation()
 
-        verify { replayEventsObserver wasNot Called }
+        verify(exactly = 0) { replayEventsObserver.replayEvents(any()) }
     }
 
     @Test

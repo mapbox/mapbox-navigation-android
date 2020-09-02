@@ -69,6 +69,13 @@
                 android:paddingTop="6dp"
                 />
 
+            <TextView
+                android:id="@+id/playerStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:text="Paused"/>
+
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

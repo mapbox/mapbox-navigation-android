@@ -144,6 +144,7 @@ package com.mapbox.navigation.core.replay {
     ctor public MapboxReplayer();
     method public void clearEvents();
     method public double durationSeconds();
+    method public double eventSeconds(double eventTimestamp);
     method public void finish();
     method public void play();
     method public void playFirstLocation();

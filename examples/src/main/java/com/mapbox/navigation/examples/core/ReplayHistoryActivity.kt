@@ -177,6 +177,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
                             }
                         }
                     }
+                    updateReplayStatus(events)
                 }
             }
         )
@@ -197,6 +198,15 @@ class ReplayHistoryActivity : AppCompatActivity() {
         playReplay.setOnClickListener {
             mapboxReplayer.play()
             mapboxNavigation.startTripSession()
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun ReplayNavigationContext.updateReplayStatus(playbackEvents: List<ReplayEventBase>) {
+        playbackEvents.lastOrNull()?.eventTimestamp?.let {
+            val currentSecond = mapboxReplayer.eventSeconds(it).toInt()
+            val durationSecond = mapboxReplayer.durationSeconds().toInt()
+            playerStatus.text = "$currentSecond:$durationSecond"
         }
     }
 
