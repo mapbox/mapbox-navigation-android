@@ -406,7 +406,7 @@ public class NavigationViewModel extends AndroidViewModel {
 
   private synchronized void sendFeedback() {
     if (feedbackItem != null && !TextUtils.isEmpty(feedbackEncodedScreenShot)) {
-      MapboxNavigation.postUserFeedback(feedbackItem.getFeedbackType(),
+      navigation.postUserFeedback(feedbackItem.getFeedbackType(),
               feedbackItem.getDescription(), UI, feedbackEncodedScreenShot,
               feedbackItem.getFeedbackSubType().toArray(new String[0]), null);
 
