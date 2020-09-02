@@ -473,14 +473,9 @@ internal class MapRouteLine(
      *
      * @param route the DirectionsRoute which should be designated as the primary
      */
-    fun updatePrimaryRouteIndex(route: DirectionsRoute): Boolean {
-        return if (route != this.primaryRoute) {
-            this.primaryRoute = route
-            drawRoutes(routeFeatureData)
-            true
-        } else {
-            false
-        }
+    fun updatePrimaryRouteIndex(route: DirectionsRoute) {
+        this.primaryRoute = route
+        drawRoutes(routeFeatureData)
     }
 
     /**
@@ -776,8 +771,9 @@ internal class MapRouteLine(
         )
     }
 
-    private fun clearRouteData() {
+    fun clearRouteData() {
         vanishPointOffset = 0f
+        primaryRoute = null
         directionsRoutes.clear()
         routeFeatureData.clear()
         routeLineExpressionData.clear()

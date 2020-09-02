@@ -10,6 +10,7 @@ import com.mapbox.navigation.core.MapboxNavigation;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -207,7 +208,7 @@ public class NavigationMapRouteTest {
   }
 
   @Test
-  public void addRoutes() {
+  public void addRoutes_whenInputEmptyList() {
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -236,11 +237,11 @@ public class NavigationMapRouteTest {
 
     theNavigationMapRoute.addRoutes(routes);
 
-    verify(mockedMapRouteLine).draw(eq(routes));
+    verify(mockedMapRouteLine).clearRouteData();
   }
 
   @Test
-  public void addRoutes_drawNotCalled() {
+  public void addRoutes_updatesPrimaryRouteIndex() {
     DirectionsRoute mockRoute = mock(DirectionsRoute.class);
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
@@ -261,11 +262,11 @@ public class NavigationMapRouteTest {
 
     theNavigationMapRoute.addRoutes(routes);
 
-    verify(mockedMapRouteLine, never()).draw(eq(routes));
+    verify(mockedMapRouteLine).updatePrimaryRouteIndex(routes.get(0));
   }
 
   @Test
-  public void addRoutes_reInitializePrimaryRoute() {
+  public void addRoutes_drawWhenNewRoutes() {
     DirectionsRoute mockRoute = mock(DirectionsRoute.class);
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
@@ -282,11 +283,11 @@ public class NavigationMapRouteTest {
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
             mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
-    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mockRoute));
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mock(DirectionsRoute.class)));
 
     theNavigationMapRoute.addRoutes(routes);
 
-    verify(mockedMapRouteLine).reinitializePrimaryRoute();
+    verify(mockedMapRouteLine).draw(routes);
   }
 
   @Test
@@ -313,7 +314,7 @@ public class NavigationMapRouteTest {
   }
 
   @Test
-  public void addIdentifiableRoutes() {
+  public void addIdentifiableRoutes_whenInputEmptyList() {
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -337,8 +338,9 @@ public class NavigationMapRouteTest {
   }
 
   @Test
-  public void addIdentifiableRoutes_drawNotCalled() {
+  public void addIdentifiableRoutes_whenNewRoutes() {
     DirectionsRoute mockRoute = mock(DirectionsRoute.class);
+    DirectionsRoute anotherMockRoute = mock(DirectionsRoute.class);
     IdentifiableRoute mockIdentifiableRoute = new IdentifiableRoute(mockRoute, "foobar");
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
@@ -355,17 +357,19 @@ public class NavigationMapRouteTest {
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
             mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
-    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mockRoute));
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(anotherMockRoute));
 
     theNavigationMapRoute.addIdentifiableRoutes(routes);
 
-    verify(mockedMapRouteLine, never()).drawIdentifiableRoutes(eq(routes));
+    verify(mockedMapRouteLine).drawIdentifiableRoutes(eq(routes));
   }
 
   @Test
-  public void addIdentifiableRoutes_reInitializePrimaryRoute() {
+  public void addIdentifiableRoutes_updatePrimaryRouteIndexWhenSameRoutes() {
     DirectionsRoute mockRoute = mock(DirectionsRoute.class);
+    DirectionsRoute anotherMockRoute = mock(DirectionsRoute.class);
     IdentifiableRoute mockIdentifiableRoute = new IdentifiableRoute(mockRoute, "foobar");
+    IdentifiableRoute anotherMockIdentifiableRoute = new IdentifiableRoute(anotherMockRoute, "potHoleRoad");
     MapboxNavigation mockedNavigation = mock(MapboxNavigation.class);
     MapView mockedMapView = mock(MapView.class);
     MapboxMap mockedMapboxMap = mock(MapboxMap.class);
@@ -377,15 +381,15 @@ public class NavigationMapRouteTest {
     MapRouteLine mockedMapRouteLine = mock(MapRouteLine.class);
     MapRouteArrow mockedMapRouteArrow = mock(MapRouteArrow.class);
     LifecycleOwner mockedLifecycleOwner = mock(LifecycleOwner.class);
-    List<IdentifiableRoute> routes = Collections.singletonList(mockIdentifiableRoute);
+    List<IdentifiableRoute> routes = Arrays.asList(anotherMockIdentifiableRoute, mockIdentifiableRoute);
     NavigationMapRoute theNavigationMapRoute = new NavigationMapRoute(mockedNavigation, mockedMapView, mockedMapboxMap,
             mockedLifecycleOwner, mockedStyleRes, "", mockedMapClickListener, mockedDidFinishLoadingStyleListener,
             mockedProgressChangeListener, mockedMapRouteLine, mockedMapRouteArrow);
-    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Collections.singletonList(mockRoute));
+    when(mockedMapRouteLine.retrieveDirectionsRoutes()).thenReturn(Arrays.asList(mockRoute, anotherMockRoute));
 
     theNavigationMapRoute.addIdentifiableRoutes(routes);
 
-    verify(mockedMapRouteLine).reinitializePrimaryRoute();
+    verify(mockedMapRouteLine).updatePrimaryRouteIndex(routes.get(0).getRoute());
   }
 
   @Test
