@@ -72,7 +72,8 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
 
     DirectionsRoute clickedRoute = routeDistancesAwayFromClick.get(distancesAwayFromClick.get(0));
     int newPrimaryRouteIndex = directionsRoutes.indexOf(clickedRoute);
-    if (routeLine.updatePrimaryRouteIndex(clickedRoute) && onRouteSelectionChangeListener != null) {
+    if (clickedRoute != routeLine.getPrimaryRoute() && onRouteSelectionChangeListener != null) {
+      routeLine.updatePrimaryRouteIndex(clickedRoute);
       DirectionsRoute selectedRoute = directionsRoutes.get(newPrimaryRouteIndex);
       onRouteSelectionChangeListener.onNewPrimaryRouteSelected(selectedRoute);
     }

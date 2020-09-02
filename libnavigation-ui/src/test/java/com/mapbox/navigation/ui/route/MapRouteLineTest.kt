@@ -6,7 +6,6 @@ import android.content.res.TypedArray
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -67,7 +66,8 @@ class MapRouteLineTest {
         ctx = ApplicationProvider.getApplicationContext()
         styleRes = ThemeSwitcher.retrieveAttrResourceId(
             ctx,
-            R.attr.navigationViewRouteStyle, R.style.MapboxStyleNavigationMapRoute
+            R.attr.navigationViewRouteStyle,
+            R.style.MapboxStyleNavigationMapRoute
         )
         alternativeRouteCasingLayer = mockk {
             every { id } returns ALTERNATIVE_ROUTE_CASING_LAYER_ID
@@ -377,39 +377,6 @@ class MapRouteLineTest {
         val result = mapRouteLine.getPrimaryRoute()
 
         assertEquals(result, directionsRoute2)
-    }
-
-    @Test
-    fun updatePrimaryRouteIndexSwapsProperties() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
-        val alternativeRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.drawIdentifiableRoutes(listOf(
-            IdentifiableRoute(
-                primaryRoute,
-                "isPrimary"
-            ),
-            IdentifiableRoute(
-                alternativeRoute,
-                "isAlternative"
-            )
-        ))
-        }
-        assertEquals(mapRouteLine.getPrimaryRoute(), primaryRoute)
-        mapRouteLine.updatePrimaryRouteIndex(alternativeRoute)
-
-        val hasPrimaryProperty = mapRouteLine.retrieveRouteFeatureData()
-            .first { it.route == alternativeRoute }.featureCollection.features()!![0].properties()!!.get("isPrimary").asBoolean
-
-        assertTrue(hasPrimaryProperty)
     }
 
     @Test
@@ -1097,7 +1064,8 @@ class MapRouteLineTest {
     @Test
     fun getExpressionAtOffsetWhenExpressionDataEmpty() {
         every { style.layers } returns listOf(primaryRouteLayer)
-        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, " +
+            "0.0], 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
             ctx,
@@ -1145,30 +1113,15 @@ class MapRouteLineTest {
             callback
         )
 
-        verify { callback.onInitialized(RouteLineLayerIds(
-            PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
-            PRIMARY_ROUTE_LAYER_ID,
-            listOf(ALTERNATIVE_ROUTE_LAYER_ID)
-        )) }
-    }
-
-    @Test
-    fun swapProperties() {
-        val route = getDirectionsRoute(false)
-        val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
-        val featureA = Feature.fromGeometry(lineString).also {
-            it.addBooleanProperty("featureAProperty", true)
+        verify {
+            callback.onInitialized(
+                RouteLineLayerIds(
+                    PRIMARY_ROUTE_TRAFFIC_LAYER_ID,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    listOf(ALTERNATIVE_ROUTE_LAYER_ID)
+                )
+            )
         }
-        val featureB = Feature.fromGeometry(lineString).also {
-            it.addBooleanProperty("featureBProperty", true)
-        }
-        assertEquals(true, featureA.properties()?.get("featureAProperty")!!.asBoolean)
-        assertEquals(true, featureB.properties()?.get("featureBProperty")!!.asBoolean)
-
-        MapRouteLine.MapRouteLineSupport.swapProperties(featureA, featureB)
-
-        assertEquals(true, featureA.properties()?.get("featureBProperty")!!.asBoolean)
-        assertEquals(true, featureB.properties()?.get("featureAProperty")!!.asBoolean)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
