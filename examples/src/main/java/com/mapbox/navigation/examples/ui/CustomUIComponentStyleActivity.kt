@@ -406,7 +406,7 @@ class CustomUIComponentStyleActivity : AppCompatActivity(), OnMapReadyCallback,
         val feedback = feedbackItem
         val screenShot = feedbackEncodedScreenShot
         if (feedback != null && !screenShot.isNullOrEmpty()) {
-            MapboxNavigation.postUserFeedback(
+            mapboxNavigation.postUserFeedback(
                 feedback.feedbackType,
                 feedback.description,
                 UI,

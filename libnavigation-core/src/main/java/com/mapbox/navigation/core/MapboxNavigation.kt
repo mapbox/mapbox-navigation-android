@@ -571,6 +571,34 @@ class MapboxNavigation(
     }
 
     /**
+     * Send user feedback about an issue or problem with the Navigation SDK.
+     *
+     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param description description message
+     * @param feedbackSource one of [FeedbackEvent.Source]
+     * @param screenshot encoded screenshot (optional)
+     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param appMetadata [AppMetadata] information (optional)
+     */
+    fun postUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String>? = emptyArray(),
+        appMetadata: AppMetadata? = null
+    ) {
+        MapboxNavigationTelemetry.postUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        )
+    }
+
+    /**
      * Start observing faster routes for a trip session via [FasterRouteObserver]
      *
      * @param fasterRouteObserver FasterRouteObserver
@@ -705,35 +733,6 @@ class MapboxNavigation(
     companion object {
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
-
-        /**
-         * Send user feedback about an issue or problem with the Navigation SDK.
-         *
-         * @param feedbackType one of [FeedbackEvent.Type]
-         * @param description description message
-         * @param feedbackSource one of [FeedbackEvent.Source]
-         * @param screenshot encoded screenshot (optional)
-         * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
-         * @param appMetadata [AppMetadata] information (optional)
-         */
-        @JvmStatic
-        fun postUserFeedback(
-            @FeedbackEvent.Type feedbackType: String,
-            description: String,
-            @FeedbackEvent.Source feedbackSource: String,
-            screenshot: String?,
-            feedbackSubType: Array<String>? = emptyArray(),
-            appMetadata: AppMetadata? = null
-        ) {
-            MapboxNavigationTelemetry.postUserFeedback(
-                feedbackType,
-                description,
-                feedbackSource,
-                screenshot,
-                feedbackSubType,
-                appMetadata
-            )
-        }
 
         /**
          * Returns a pre-build set of [NavigationOptions] with smart defaults.

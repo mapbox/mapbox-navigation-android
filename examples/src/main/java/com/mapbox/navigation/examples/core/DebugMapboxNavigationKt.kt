@@ -102,7 +102,7 @@ class DebugMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         setContentView(R.layout.activity_debug_mapbox_navigation)
         findViewById<Button>(R.id.btn_send_user_feedback)?.let { button ->
             button.setOnClickListener {
-                MapboxNavigation.postUserFeedback(
+                mapboxNavigation.postUserFeedback(
                     FeedbackEvent.GENERAL_ISSUE,
                     "User feedback test at: ${Date().time}",
                     FeedbackEvent.UI,
