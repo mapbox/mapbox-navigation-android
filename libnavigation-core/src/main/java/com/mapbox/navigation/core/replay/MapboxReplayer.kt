@@ -21,7 +21,7 @@ class MapboxReplayer {
     private val replayEvents = ReplayEvents(mutableListOf())
     private val replayEventSimulator = ReplayEventSimulator(replayEvents)
 
-    private val replayEventsObservers: MutableList<ReplayEventsObserver> = mutableListOf()
+    private val replayEventsObservers: MutableSet<ReplayEventsObserver> = mutableSetOf()
 
     /**
      * Appends events to be replayed. Notice the basis of your [ReplayEventBase.eventTimestamp].
@@ -156,6 +156,15 @@ class MapboxReplayer {
             ?: return 0.0
         val lastEvent = replayEvents.events.last()
         return lastEvent.eventTimestamp - firstEvent.eventTimestamp
+    }
+
+    /**
+     * The time of an event, relative to the duration of the replay.
+     */
+    fun eventSeconds(eventTimestamp: Double): Double {
+        val firstEvent = replayEvents.events.firstOrNull()
+            ?: return 0.0
+        return eventTimestamp - firstEvent.eventTimestamp
     }
 
     /**
