@@ -399,43 +399,6 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updatePrimaryRouteIndexSwapsProperties() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
-        val alternativeRoute: DirectionsRoute = getDirectionsRoute(true)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also {
-            it.drawIdentifiableRoutes(
-                listOf(
-                    IdentifiableRoute(
-                        primaryRoute,
-                        "isPrimary"
-                    ),
-                    IdentifiableRoute(
-                        alternativeRoute,
-                        "isAlternative"
-                    )
-                )
-            )
-        }
-        assertEquals(mapRouteLine.getPrimaryRoute(), primaryRoute)
-        mapRouteLine.updatePrimaryRouteIndex(alternativeRoute)
-
-        val hasPrimaryProperty = mapRouteLine.retrieveRouteFeatureData()
-            .first { it.route == alternativeRoute }.featureCollection.features()!![0].properties()!!
-            .get("isPrimary").asBoolean
-
-        assertTrue(hasPrimaryProperty)
-    }
-
-    @Test
     fun getStyledColorRecyclesAttributes() {
         val context = mockk<Context>()
         val resources = mockk<Resources>()
