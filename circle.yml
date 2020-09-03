@@ -8,19 +8,45 @@ workflows:
   version: 2
   default:
     jobs:
-      - build
+      - assemble-debug
+      - assemble-release
+      - static-analysis:
+          requires:
+            - assemble-debug
+      - unit-tests:
+          requires:
+            - assemble-debug
+      - ui-robo-tests:
+          requires:
+            - assemble-release
+            - assemble-debug
+            - static-analysis
+            - unit-tests
+      - ui-intrumentation-tests:
+          requires:
+            - assemble-release
+            - assemble-debug
+            - static-analysis
+            - unit-tests
       - release-snapshot:
+          requires:
+            - assemble-release
+            - static-analysis
+            - unit-tests
           filters:
             branches:
               only:
                 - master
       - release:
+          requires:
+            - assemble-release
+            - static-analysis
+            - unit-tests
           filters:
             tags:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - ui-tests
 
 commands:
   restore-gradle-cache:
@@ -43,7 +69,7 @@ commands:
           name: Check codebase
           command: make check
 
-  build-module:
+  assemble-module:
     parameters:
       module_target:
         description: module target
@@ -53,30 +79,30 @@ commands:
         type: string
     steps:
       - run:
-          name: Build << parameters.module_target >> APK in << parameters.variant >> mode
+          name: Assemble << parameters.module_target >> APK in << parameters.variant >> mode
           command: |
             ./gradlew << parameters.module_target >>:assemble<< parameters.variant >>
 
-  build-example-app:
+  assemble-example-app:
     parameters:
       variant:
         description: debug or release
         type: string
     steps:
       - run:
-          name: Build examples APK in << parameters.variant >> mode
+          name: Assemble examples APK in << parameters.variant >> mode
           command: |
             echo "${MAPBOX_DEVELOPER_CONFIG}" > /root/code/examples/src/main/res/values/mapbox_access_token.xml
             ./gradlew examples:assemble<< parameters.variant >>
 
-  build-instrumentation-test:
+  assemble-instrumentation-test:
     parameters:
       module_target:
         description: module target
         type: string
     steps:
       - run:
-          name: Build Instrumentation Test APK
+          name: Assemble Instrumentation Test APK
           command: |
             ./gradlew << parameters.module_target >>:assembleAndroidTest
 
@@ -102,36 +128,36 @@ commands:
       - store_test_results:
           path: << parameters.module_target >>/build/test-results
 
-  build-core-debug:
+  assemble-core-debug:
     steps:
       - run:
-          name: Build Navigation Core SDK (debug)
-          command: make build-core-debug
+          name: Assemble Navigation Core SDK (debug)
+          command: make assemble-core-debug
 
-  build-ui-debug:
+  assemble-ui-debug:
     steps:
       - run:
-          name: Build Navigation UI SDK(debug)
-          command: make build-ui-debug
+          name: Assemble Navigation UI SDK(debug)
+          command: make assemble-ui-debug
 
-  build-release-core:
+  assemble-core-release:
     steps:
       - run:
-          name: Build Navigation Core SDK (release)
-          command: make build-core-release
+          name: Assemble Navigation Core SDK (release)
+          command: make assemble-core-release
 
-  build-release-ui:
+  assemble-ui-release:
     steps:
       - run:
-          name: Build Navigation UI SDK (release)
-          command: make build-ui-release
+          name: Assemble Navigation UI SDK (release)
+          command: make assemble-ui-release
 
   check-api-core:
     steps:
       - run:
           name: Check Navigation Core SDK public API
           command: |
-            make build-core-release
+            make assemble-core-release
             make core-check-api
 
   check-api-ui:
@@ -139,7 +165,7 @@ commands:
       - run:
           name: Check Navigation UI SDK public API
           command: |
-            make build-ui-release
+            make assemble-ui-release
             make ui-check-api
 
   unit-tests-core:
@@ -284,7 +310,34 @@ commands:
             fi
 
 jobs:
-  build:
+  assemble-debug:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - assemble-core-debug
+      - assemble-ui-debug
+
+  assemble-release:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - assemble-core-release
+      - assemble-ui-release
+
+  unit-tests:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - unit-tests-core
+      - unit-tests-ui
+
+  static-analysis:
     working_directory: ~/code
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
@@ -292,15 +345,11 @@ jobs:
       - checkout
       - restore-gradle-cache
       - verify
-      - check-public-documentation
       - check-api-core
       - check-api-ui
-      - build-core-debug
-      - build-ui-debug
-      - unit-tests-core
-      - unit-tests-ui
+      - check-public-documentation
 
-  ui-tests:
+  ui-robo-tests:
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     working_directory: ~/code
@@ -311,23 +360,36 @@ jobs:
     steps:
       - checkout
       - restore-gradle-cache
-      - build-module:
+      - assemble-example-app:
+          variant: "Release"
+      - login-google-cloud-platform
+      - run-firebase-robo:
+          variant: "release"
+
+  ui-intrumentation-tests:
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    working_directory: ~/code
+    environment:
+      JVM_OPTS: -Xmx3200m
+      BUILDTYPE: Debug
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process
+    steps:
+      - checkout
+      - restore-gradle-cache
+      - assemble-module:
           module_target: "app-tests-wrapper"
           variant: "Debug"
-      - build-module:
+      - assemble-module:
           module_target: "libnavigation-core"
           variant: "Debug"
-      - build-instrumentation-test:
+      - assemble-instrumentation-test:
           module_target: "libnavigation-core"
       - login-google-cloud-platform
       - run-firebase-instrumentation:
           module_target: "libnavigation-core"
           module_wrapper: "app-tests-wrapper"
           variant: "debug"
-      - build-example-app:
-          variant: "Release"
-      - run-firebase-robo:
-          variant: "release"
 
   release-snapshot:
     working_directory: ~/code
@@ -351,8 +413,8 @@ jobs:
     steps:
       - generate-version-name
       - checkout
-      - build-release-core
-      - build-release-ui
+      - assemble-core-release
+      - assemble-ui-release
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
