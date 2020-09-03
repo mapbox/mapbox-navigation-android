@@ -171,6 +171,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private int soundButtonStyle;
   private int feedbackButtonStyle;
   private int alertViewStyle;
+  private boolean disableInstructionViewList;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -369,7 +370,6 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    * can be animated appropriately.
    */
   public void showInstructionList() {
-    onInstructionListVisibilityChanged(true);
     instructionLayout.requestFocus();
     if (ViewUtils.isLandscape(getContext())) {
       updateLandscapeConstraintsTo(R.layout.mapbox_partial_instruction_view_alt);
@@ -381,6 +381,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     animation.setAnimationListener(getInstructionListAnimationListener());
     instructionListLayout.setVisibility(VISIBLE);
     instructionListLayout.startAnimation(animation);
+    onInstructionListVisibilityChanged(true);
   }
 
   /**
@@ -528,6 +529,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
         R.styleable.MapboxStyleInstructionView_instructionViewFeedbackButtonStyle, -1);
     alertViewStyle = typedArray.getResourceId(
         R.styleable.MapboxStyleInstructionView_instructionViewAlertViewStyle, -1);
+
+    disableInstructionViewList =
+        typedArray.getBoolean(R.styleable.MapboxStyleInstructionView_instructionViewDisableList, false);
 
     typedArray.recycle();
 
@@ -737,6 +741,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   }
 
   private void initializeStepListClickListener() {
+    if (disableInstructionViewList) {
+      return;
+    }
     if (ViewUtils.isLandscape(getContext())) {
       initializeLandscapeListListener();
     } else {
