@@ -9,26 +9,15 @@ workflows:
   default:
     jobs:
       - build
-      - release-core-snapshot:
+      - release-snapshot:
           filters:
             branches:
               only:
                 - master
-      - release-ui-snapshot:
-          filters:
-            branches:
-              only:
-                - master
-      - release-core:
+      - release:
           filters:
             tags:
-              only: /^release_core_.*/
-            branches:
-              ignore: /.*/
-      - release-ui:
-          filters:
-            tags:
-              only: /^release_ui_.*_core_.*/
+              only: /^v.*/
             branches:
               ignore: /.*/
       - ui-tests
@@ -181,43 +170,19 @@ commands:
       - store-results:
           module_target: "libnavigation-ui"
 
-  generate-core-version-name:
+  generate-version-name:
     steps:
       - run:
           name: Generate Core version name
           command: |
             if [[ -n "$CIRCLE_TAG" ]]; then
-              if [[ $CIRCLE_TAG == release_core_* ]]; then
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
-              elif [[ $CIRCLE_TAG == qa_release_core_*
-                        || $CIRCLE_TAG == prod_release_core_* ]]; then
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
+              if [[ $CIRCLE_TAG == v* ]]; then
+                POM_VERSION_NAME=`echo $CIRCLE_TAG | sed s/v//`
               else
                 echo "Exiting the job as this is not a release TAG"
                 exit 1
               fi
-              echo "export POM_CORE_VERSION_NAME=$POM_CORE_VERSION_NAME" >> $BASH_ENV
-            fi
-
-  generate-ui-version-name:
-    steps:
-      - run:
-          name: Generate UI version name
-          command: |
-            if [[ -n "$CIRCLE_TAG" ]]; then
-              if [[ $CIRCLE_TAG == release_ui_*_core_* ]]; then
-                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 3`
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 5`
-              elif [[ $CIRCLE_TAG == qa_release_ui_*_core_*
-                        || $CIRCLE_TAG == prod_release_ui_*_core_* ]]; then
-                POM_UI_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 4`
-                POM_CORE_VERSION_NAME=`echo $CIRCLE_TAG | cut -d '_' -f 6`
-              else
-                echo "Exiting the job as this is not a release TAG"
-                exit 1
-              fi
-              echo "export POM_UI_VERSION_NAME=$POM_UI_VERSION_NAME" >> $BASH_ENV
-              echo "export POM_CORE_VERSION_NAME=$POM_CORE_VERSION_NAME" >> $BASH_ENV
+              echo "export POM_VERSION_NAME=$POM_VERSION_NAME" >> $BASH_ENV
             fi
 
   run-firebase-instrumentation:
@@ -364,54 +329,33 @@ jobs:
       - run-firebase-robo:
           variant: "release"
 
-  release-core-snapshot:
+  release-snapshot:
     working_directory: ~/code
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     steps:
       - checkout
-      - generate-core-version-name
+      - generate-version-name
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
           artifact-type: "core"
-      - track-performance
-
-  release-core:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    steps:
-      - generate-core-version-name
-      - checkout
-      - build-release-core
-      - check-public-documentation
-      - generate-documentation
-      - publish-artifacts:
-          artifact-type: "core"
-
-  release-ui-snapshot:
-    working_directory: ~/code
-    docker:
-      - image: << pipeline.parameters.docker-image-tag >>
-    steps:
-      - generate-ui-version-name
-      - checkout
-      - check-public-documentation
-      - generate-documentation
       - publish-artifacts:
           artifact-type: "ui"
       - track-performance
 
-  release-ui:
+  release:
     working_directory: ~/code
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     steps:
-      - generate-ui-version-name
+      - generate-version-name
       - checkout
+      - build-release-core
       - build-release-ui
       - check-public-documentation
       - generate-documentation
+      - publish-artifacts:
+          artifact-type: "core"
       - publish-artifacts:
           artifact-type: "ui"

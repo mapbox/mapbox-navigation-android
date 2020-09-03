@@ -10,11 +10,5 @@ ext {
     mapboxArtifactScmUrl = 'scm:git@github.com:mapbox/mapbox-navigation-android.git'
     mapboxArtifactLicenseName = 'BSD'
     mapboxArtifactLicenseUrl = 'https://opensource.org/licenses/BSD-2-Clause'
-    releaseSdk = project.property('RELEASE_SDK')
-    if ( releaseSdk == 'core' ) {
-        versionName = System.getenv('POM_CORE_VERSION_NAME') ?: project.property('POM_CORE_SNAPSHOT_VERSION_NAME')
-    }
-    else if ( releaseSdk == 'ui' ) {
-        versionName = System.getenv('POM_UI_VERSION_NAME') ?: project.property('POM_UI_SNAPSHOT_VERSION_NAME')
-    }
+    versionName = System.getenv('POM_VERSION_NAME') ?: project.property('POM_SNAPSHOT_VERSION_NAME')
 }
