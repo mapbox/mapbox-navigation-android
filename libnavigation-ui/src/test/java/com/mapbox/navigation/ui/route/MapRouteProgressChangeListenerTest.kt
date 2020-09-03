@@ -65,7 +65,10 @@ class MapRouteProgressChangeListenerTest {
 
     @Test
     fun `should not draw route without directions route`() {
-        val routeWithNoGeometry = DirectionsRoute.builder().build()
+        val routeWithNoGeometry = DirectionsRoute.builder()
+            .distance(.0)
+            .duration(.0)
+            .build()
         every { routeLine.getPrimaryRoute() } returns null
         val routeProgress: RouteProgress = mockk {
             every { route } returns routeWithNoGeometry

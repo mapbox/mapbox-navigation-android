@@ -56,18 +56,6 @@ class FasterRouteDetectorTest {
     }
 
     @Test
-    fun shouldDefaultToFalseWhenDurationIsNull() = runBlocking {
-        val newRoute: DirectionsRoute = mockk()
-        every { newRoute.duration() } returns null
-        val routeProgress: RouteProgress = mockk()
-        every { routeProgress.durationRemaining } returns 727.228
-
-        val isFasterRoute = fasterRouteDetector.isRouteFaster(newRoute, routeProgress)
-
-        assertFalse(isFasterRoute)
-    }
-
-    @Test
     fun shouldNotAllowSlightlyFasterRoutes() = runBlocking {
         val newRoute: DirectionsRoute = mockk()
         every { newRoute.duration() } returns 634.7
