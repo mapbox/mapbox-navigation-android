@@ -63,12 +63,12 @@ core-publish-local:
 ui-publish-local:
 	$(call run-gradle-tasks,$(UI_MODULES),publishToMavenLocal)
 
-.PHONY: build-core-debug
-build-core-debug:
+.PHONY: assemble-core-debug
+assemble-core-debug:
 	$(call run-gradle-tasks,$(CORE_MODULES),assembleDebug)
 
-.PHONY: build-core-release
-build-core-release:
+.PHONY: assemble-core-release
+assemble-core-release:
 	$(call run-gradle-tasks,$(CORE_MODULES),assembleRelease)
 
 .PHONY: core-unit-tests
@@ -103,12 +103,12 @@ core-update-api:
 	./gradlew :libtrip-notification:updateApi -PhidePackage=com.mapbox.navigation.trip.notification.internal
 	./gradlew :libnavigation-core:updateApi -PhidePackage=com.mapbox.navigation.core.internal
 
-.PHONY: build-ui-debug
-build-ui-debug:
+.PHONY: assemble-ui-debug
+assemble-ui-debug:
 	$(call run-gradle-tasks,$(UI_MODULES),assembleDebug)
 
-.PHONY: build-ui-release
-build-ui-release:
+.PHONY: assemble-ui-release
+assemble-ui-release:
 	$(call run-gradle-tasks,$(UI_MODULES),assembleRelease)
 
 .PHONY: ui-unit-tests
