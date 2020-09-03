@@ -11,6 +11,7 @@ import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.SettingsProfile
+import com.mapbox.navigator.TilesConfig
 import okhttp3.OkHttpClient
 
 /**
@@ -27,13 +28,15 @@ internal object NavigatorLoader {
     fun createNavigator(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
         logger: Logger?
     ): Navigator {
         HttpServiceFactory.setUserDefined(NavigationOkHttpService(OkHttpClient.Builder(), logger))
         return Navigator(
             settingsProfile(deviceProfile),
             navigatorConfig,
-            customConfig(deviceProfile)
+            customConfig(deviceProfile),
+            tilesConfig
         )
     }
 

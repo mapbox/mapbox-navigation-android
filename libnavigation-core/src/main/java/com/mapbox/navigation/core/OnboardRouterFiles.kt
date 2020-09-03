@@ -12,7 +12,7 @@ internal class OnboardRouterFiles(
     val logger: Logger
 ) {
 
-    fun absolutePath(options: OnboardRouterOptions): String? {
+    fun absolutePath(options: OnboardRouterOptions): String {
         val fileDirectory = options.filePath ?: defaultFilePath(options)
         val tileDir = File(fileDirectory)
         if (!tileDir.exists()) {
@@ -29,7 +29,7 @@ internal class OnboardRouterFiles(
                         tileDir.absolutePath
                 )
             )
-            null
+            ""
         }
     }
 

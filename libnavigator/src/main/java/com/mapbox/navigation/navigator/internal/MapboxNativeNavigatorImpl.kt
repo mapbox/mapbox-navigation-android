@@ -19,6 +19,7 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.ifNonNull
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
@@ -29,9 +30,9 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouteState
-import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
+import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VoiceInstruction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -68,9 +69,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
         logger: Logger?
     ): MapboxNativeNavigator {
-        navigator = NavigatorLoader.createNavigator(deviceProfile, navigatorConfig, logger)
+        navigator = NavigatorLoader.createNavigator(
+            deviceProfile,
+            navigatorConfig,
+            tilesConfig,
+            logger
+        )
         route = null
         routeBufferGeoJson = null
         return this
@@ -143,14 +150,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int
-    ): NavigationStatus =
+    ): Boolean =
         withContext(NavigatorDispatcher) {
             MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(
                 route?.toJson()
                     ?: "{}",
                 PRIMARY_ROUTE_INDEX,
-                legIndex
+                legIndex,
+                ActiveGuidanceOptionsMapper.mapFrom(route)
             )
             navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
@@ -208,7 +216,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(legIndex: Int): NavigationStatus =
+    override fun updateLegIndex(legIndex: Int): Boolean =
         navigator!!.changeRouteLeg(PRIMARY_ROUTE_INDEX, legIndex)
 
     // Offline
@@ -219,17 +227,6 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun cacheLastRoute() {
         navigator!!.cacheLastRoute()
     }
-
-    /**
-     * Configures routers for getting routes offline.
-     *
-     * @param routerParams Optional [RouterParams] object which contains router configurations for
-     * getting routes offline.
-     *
-     * @return number of tiles founded in the directory
-     */
-    override fun configureRouter(routerParams: RouterParams) =
-        navigator!!.configureRouter(routerParams)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
