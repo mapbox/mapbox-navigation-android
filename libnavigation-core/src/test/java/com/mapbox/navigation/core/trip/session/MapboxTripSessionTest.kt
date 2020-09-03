@@ -20,7 +20,6 @@ import com.mapbox.navigation.navigator.internal.TripStatus
 import com.mapbox.navigation.testing.MainCoroutineRule
 import com.mapbox.navigation.utils.internal.JobControl
 import com.mapbox.navigation.utils.internal.ThreadController
-import com.mapbox.navigator.NavigationStatus
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -71,7 +70,6 @@ class MapboxTripSessionTest {
     private val keyPoints: List<Location> = listOf(mockk(relaxUnitFun = true))
 
     private val navigator: MapboxNativeNavigator = mockk(relaxUnitFun = true)
-    private val navigationStatus: NavigationStatus = mockk(relaxUnitFun = true)
     private val tripStatus: TripStatus = mockk(relaxUnitFun = true)
     private val logger: Logger = mockk(relaxUnitFun = true)
 
@@ -100,7 +98,7 @@ class MapboxTripSessionTest {
 
         coEvery { navigator.getStatus(any()) } returns tripStatus
         coEvery { navigator.updateLocation(any()) } returns false
-        coEvery { navigator.setRoute(any()) } returns navigationStatus
+        coEvery { navigator.setRoute(any()) } returns true
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false

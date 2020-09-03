@@ -63,8 +63,8 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
 import com.mapbox.navigator.NavigatorConfig
-import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.TileEndpointConfiguration
+import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.ReceiveChannel
 import java.lang.reflect.Field
 
@@ -155,9 +155,9 @@ class MapboxNavigation(
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
+            createTilesConfig(),
             logger
         )
-        configureRouter()
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
             MapboxModuleProvider.createModule(MapboxModuleType.NavigationRouter, ::paramsProvider)
@@ -343,7 +343,12 @@ class MapboxNavigation(
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
-        navigator.create(navigationOptions.deviceProfile, navigatorConfig, logger)
+        navigator.create(
+            navigationOptions.deviceProfile,
+            navigatorConfig,
+            createTilesConfig(),
+            logger
+        )
 
         navigationSession.unregisterAllNavigationSessionStateObservers()
         fasterRouteController.stop()
@@ -728,31 +733,26 @@ class MapboxNavigation(
         tripSession.updateSensorEvent(sensorEvent)
     }
 
-    private fun configureRouter() {
-        with(navigationOptions) {
-            // TODO StrictMode may report a violation as we're creating a File from the Main
-            val offlineFilesPath = OnboardRouterFiles(applicationContext, logger)
-                .absolutePath(onboardRouterOptions)
-            offlineFilesPath?.let { path ->
-                val routerParams = RouterParams(
-                    path,
-                    null,
-                    null,
-                    THREADS_COUNT,
-                    TileEndpointConfiguration(
-                        onboardRouterOptions.tilesUri.toString(),
-                        onboardRouterOptions.tilesVersion,
-                        accessToken ?: "",
-                        USER_AGENT,
-                        "",
-                        NativeSkuTokenProvider(
-                            MapboxNavigationAccounts.getInstance(applicationContext)
-                        )
-                    )
+    private fun createTilesConfig(): TilesConfig {
+        // TODO StrictMode may report a violation as we're creating a File from the Main
+        val offlineFilesPath = OnboardRouterFiles(navigationOptions.applicationContext, logger)
+            .absolutePath(navigationOptions.onboardRouterOptions)
+        return TilesConfig(
+            offlineFilesPath,
+            null,
+            null,
+            THREADS_COUNT,
+            TileEndpointConfiguration(
+                navigationOptions.onboardRouterOptions.tilesUri.toString(),
+                navigationOptions.onboardRouterOptions.tilesVersion,
+                navigationOptions.accessToken ?: "",
+                USER_AGENT,
+                "",
+                NativeSkuTokenProvider(
+                    MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
                 )
-                navigator.configureRouter(routerParams)
-            }
-        }
+            )
+        )
     }
 
     companion object {

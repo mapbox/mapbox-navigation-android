@@ -376,7 +376,7 @@ internal class MapboxTripSession(
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    override fun updateLegIndex(legIndex: Int): NavigationStatus {
+    override fun updateLegIndex(legIndex: Int): Boolean {
         return navigator.updateLegIndex(legIndex)
     }
 
