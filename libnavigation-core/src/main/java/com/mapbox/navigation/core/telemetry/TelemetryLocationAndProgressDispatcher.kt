@@ -268,15 +268,11 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
     }
 
     override fun onRawLocationChanged(rawLocation: Location) {
-        // Do nothing
-    }
-
-    override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
-        channelLocationReceived.offer(enhancedLocation)
-        lastLocation.set(enhancedLocation)
+        channelLocationReceived.offer(rawLocation)
+        lastLocation.set(rawLocation)
         when (firstLocationValue) {
             null -> {
-                firstLocationValue = enhancedLocation
+                firstLocationValue = rawLocation
                 firstLocationValue?.let { location ->
                     firstLocation.complete(location)
                 }
@@ -287,6 +283,10 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
                 }
             }
         }
+    }
+
+    override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
+        // Do nothing
     }
 
     fun getFirstLocationAsync() = firstLocation
