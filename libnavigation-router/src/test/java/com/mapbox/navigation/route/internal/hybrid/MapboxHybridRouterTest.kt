@@ -197,7 +197,10 @@ class MapboxHybridRouterTest {
         val additionalCallbackSecond: Router.Callback = mockk(relaxUnitFun = true)
         val additionalCallbackThird: Router.Callback = mockk(relaxUnitFun = true)
 
-        val originalResult = listOf<DirectionsRoute>(DirectionsRoute.builder().build())
+        val originalResult = listOf<DirectionsRoute>(
+            DirectionsRoute.builder().distance(.0).duration(.0).build()
+        )
+
         val additionalResultFirst = emptyList<DirectionsRoute>()
         val additionalResultSecond = emptyList<DirectionsRoute>()
         val additionalResultThird = emptyList<DirectionsRoute>()

@@ -33,7 +33,12 @@ internal class TelemetryLocationAndProgressDispatcher(scope: CoroutineScope) :
         AtomicReference(
             RouteProgressWithTimestamp(
                 0,
-                RouteProgress.Builder(DirectionsRoute.builder().build()).build()
+                RouteProgress.Builder(
+                    DirectionsRoute.builder()
+                        .distance(.0)
+                        .duration(.0)
+                        .build()
+                ).build()
             )
         )
     private val channelOffRouteEvent = Channel<Boolean>(Channel.CONFLATED)

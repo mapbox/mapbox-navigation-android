@@ -192,8 +192,8 @@ class MapboxOnboardRouterTest {
         // route
         assertEquals(ROUTE_SIZE, routesSlot.captured.size)
         val route = routesSlot.captured[0]
-        assertEquals(ROUTE_DISTANCE, route.distance())
-        assertEquals(ROUTE_DURATION, route.duration())
+        assertEquals(ROUTE_DISTANCE, route.distance(), delta)
+        assertEquals(ROUTE_DURATION, route.duration(), delta)
         assertEquals(ROUTE_WEIGHT_NAME, route.weightName())
         assertEquals(ROUTE_VOICE_LANGUAGE, route.voiceLanguage())
         assertEquals(ROUTE_WEIGHT, route.weight())
