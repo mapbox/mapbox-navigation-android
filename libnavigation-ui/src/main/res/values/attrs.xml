@@ -95,6 +95,7 @@
     <attr name="instructionViewFeedbackButtonStyle" format="reference"/>
     <attr name="instructionViewSoundButtonStyle" format="reference"/>
     <attr name="instructionViewAlertViewStyle" format="reference"/>
+    <attr name="instructionViewDisableList" format="boolean"/>
   </declare-styleable>
 
   <declare-styleable name="MapboxStyleSoundButton">
