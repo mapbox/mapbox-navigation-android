@@ -426,9 +426,6 @@ package com.mapbox.navigation.core.sensors {
 
 package com.mapbox.navigation.core.telemetry {
 
-  public final class TelemetryLocationAndProgressDispatcherKt {
-  }
-
   public final class TelemetryUtilsKt {
   }
 

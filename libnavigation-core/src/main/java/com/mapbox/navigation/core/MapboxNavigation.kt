@@ -12,7 +12,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
-import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
 import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.internal.VoiceUnit
@@ -192,7 +191,7 @@ class MapboxNavigation(
         navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
         ifNonNull(accessToken) { token ->
             logger.d(
-                Tag(MapboxNavigationTelemetry.TAG),
+                MapboxNavigationTelemetry.TAG,
                 Message("MapboxMetricsReporter.init from MapboxNavigation main")
             )
             MapboxMetricsReporter.init(
@@ -202,13 +201,10 @@ class MapboxNavigation(
             )
             MapboxMetricsReporter.toggleLogging(navigationOptions.isDebugLoggingEnabled)
             MapboxNavigationTelemetry.initialize(
-                navigationOptions.applicationContext,
                 this,
-                MapboxMetricsReporter,
-                navigationOptions.locationEngine.javaClass.name,
-                ThreadController.getMainScopeAndRootJob(),
                 navigationOptions,
-                obtainUserAgent(navigationOptions.isFromNavigationUi)
+                MapboxMetricsReporter,
+                logger
             )
         }
 
@@ -331,8 +327,8 @@ class MapboxNavigation(
      */
     fun onDestroy() {
         logger.d(
-            Tag(MapboxNavigationTelemetry.TAG),
-            Message("onDestroy")
+            MapboxNavigationTelemetry.TAG,
+            Message("MapboxNavigation onDestroy")
         )
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         directionsSession.shutdown()

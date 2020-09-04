@@ -6,17 +6,16 @@ import com.mapbox.navigation.base.metrics.NavigationMetrics
 @SuppressLint("ParcelCreator")
 internal class NavigationRerouteEvent(
     phoneState: PhoneState,
-    rerouteEvent: RerouteEvent,
     metricsRouteProgress: MetricsRouteProgress
 ) : NavigationEvent(phoneState) {
     /*
      * Don't remove any fields, cause they are should match with
      * the schema downloaded from S3. Look at {@link SchemaTest}
      */
-    val newDistanceRemaining: Int = rerouteEvent.newDistanceRemaining
-    val newDurationRemaining: Int = rerouteEvent.newDurationRemaining
+    var newDistanceRemaining: Int = 0
+    var newDurationRemaining: Int = 0
     val feedbackId: String = phoneState.feedbackId
-    val newGeometry: String = rerouteEvent.newRouteGeometry
+    var newGeometry: String? = null
     val step: NavigationStepData = NavigationStepData(metricsRouteProgress)
     var secondsSinceLastReroute: Int = 0
     var locationsBefore: Array<TelemetryLocation>? = emptyArray()
