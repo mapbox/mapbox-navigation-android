@@ -227,7 +227,7 @@ class MapboxNavigationTest {
 
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 2) { tripSession.unregisterOffRouteObserver(any()) }
+        verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
 
         mapboxNavigation.onDestroy()
     }
