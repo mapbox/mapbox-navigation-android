@@ -286,7 +286,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
-   * clears all markers with the specified icon image.
+   * Clears all markers with the specified icon image.
    * <p>
    * Please note, this only clears the markers added by {@link NavigationMapboxMap#addCustomMarker(SymbolOptions)}
    *
