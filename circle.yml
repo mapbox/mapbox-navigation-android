@@ -22,7 +22,7 @@ workflows:
             - assemble-debug
             - static-analysis
             - unit-tests
-      - ui-intrumentation-tests:
+      - ui-instrumentation-tests:
           requires:
             - assemble-release
             - assemble-debug
@@ -366,7 +366,7 @@ jobs:
       - run-firebase-robo:
           variant: "release"
 
-  ui-intrumentation-tests:
+  ui-instrumentation-tests:
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     working_directory: ~/code
