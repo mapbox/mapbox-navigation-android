@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Mapbox 1.0 Navigation SDK pro Android</string>
+
+    <string name="settings">Nastavení</string>
+    <string name="simulate_route">Simulovat trasu</string>
+    <string name="language">Jazyk</string>
+    <string name="unit_type">Jednotka</string>
+    <string name="route_profile">Profil trasy</string>
+</resources>

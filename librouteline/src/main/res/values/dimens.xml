@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mapbox_dimen_2dp">2dp</dimen>
+    <dimen name="mapbox_dimen_4dp">4dp</dimen>
+    <dimen name="mapbox_dimen_8dp">8dp</dimen>
+    <dimen name="mapbox_dimen_16dp">16dp</dimen>
+    <dimen name="mapbox_fab_margin_bottom">@dimen/mapbox_dimen_2dp</dimen>
+    <dimen name="mapbox_fab_feedback_margin_top">@dimen/mapbox_dimen_4dp</dimen>
+    <dimen name="mapbox_wayname_view_padding_bottom">@dimen/mapbox_dimen_8dp</dimen>
+    <dimen name="mapbox_wayname_view_height">24dp</dimen>
+    <dimen name="mapbox_wayname_padding">@dimen/mapbox_dimen_16dp</dimen>
+    <dimen name="mapbox_wayname_padding_bottom">@dimen/mapbox_dimen_2dp</dimen>
+
+    <!-- Feedback bottom sheet -->
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_height">50dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_margin">@dimen/mapbox_dimen_8dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_title_margin_start">28dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_top_banner_close_icon_padding">10dp</dimen>
+    <dimen name="mapbox_feedback_bottom_sheet_content_height">420dp</dimen>
+    <dimen name="mapbox_feedback_item_margin">@dimen/mapbox_dimen_8dp</dimen>
+    <dimen name="mapbox_feedback_item_image_size">70dp</dimen>
+    <dimen name="mapbox_feedback_description_item_view_height">110dp</dimen>
+    <dimen name="mapbox_feedback_report_button_height">110dp</dimen>
+
+    <dimen name="mapbox_instruction_content_height">64dp</dimen>
+    <dimen name="mapbox_instruction_content_width">150dp</dimen>
+    <dimen name="mapbox_instruction_sub_view_height">40dp</dimen>
+    <dimen name="mapbox_summary_bottom_sheet_height">56dp</dimen>
+    <dimen name="mapbox_summary_bottom_sheet_shadow_height">6dp</dimen>
+    <dimen name="mapbox_route_overview_left_right_padding">15dp</dimen>
+    <dimen name="mapbox_route_overview_buffer_padding">15dp</dimen>
+</resources>

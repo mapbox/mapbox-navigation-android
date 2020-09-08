@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Újratervezés...</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Középre</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Némítva</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Visszahangosítva</string>
+
+    <!-- Feedback -->
+    <string name="mapbox_report_feedback">Visszajelzés küldése</string>
+
+    <!-- Feedback Guidance Issue -->
+    <string name="mapbox_feedback_guidance_issue">Útmutatási probléma</string>
+
+    <!-- Feedback type for Looks Incorrect -->
+    <string name="mapbox_feedback_type_looks_incorrect">Hibásnak\ntűnik</string>
+
+    <!-- Feedback type for Confusing Audio -->
+    <string name="mapbox_feedback_type_confusing_audio">Megtévesztő\nbemondás</string>
+
+    <!-- Feedback type for Positioning Issue -->
+    <string name="mapbox_feedback_type_positioning_issue">Helymegállapítási\nprobléma</string>
+
+    <!-- Feedback Navigation Issue -->
+    <string name="mapbox_feedback_navigation_issue">Navigációs probléma</string>
+
+    <!-- Feedback type for Route Quality -->
+    <string name="mapbox_feedback_type_route_quality">Útvonal\nminősége</string>
+
+    <!-- Feedback type for Illegal Route -->
+    <string name="mapbox_feedback_type_illegal_route">Érvénytelen\nútvonal</string>
+
+    <!-- Feedback type for Road Closure -->
+    <string name="mapbox_feedback_type_road_closure">Útlezárás</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_reported">Köszönjük! Hiba jelentve.</string>
+
+    <!-- Feedback description for Looks Incorrect -->
+    <string name="mapbox_feedback_description_turn_icon_incorrect">Hibás kanyarodás ikon</string>
+    <string name="mapbox_feedback_description_street_name_incorrect">Hibás utcanév</string>
+    <string name="mapbox_feedback_description_instruction_unnecessary">Felesleges utasítás</string>
+    <string name="mapbox_feedback_description_instruction_missing">Hiányzó utasítás</string>
+    <string name="mapbox_feedback_description_maneuver_incorrect">Hibás manőver</string>
+    <string name="mapbox_feedback_description_exit_info_incorrect">Hibás kijárati infó</string>
+    <string name="mapbox_feedback_description_lane_guidance_incorrect">Hibás sávbeli útmutatás</string>
+    <string name="mapbox_feedback_description_road_known_by_different_name">Más néven ismert út/utca</string>
+
+    <!-- Feedback description for Confusing Audio -->
+    <string name="mapbox_feedback_description_guidance_too_early">Túl korai bemondás</string>
+    <string name="mapbox_feedback_description_guidance_too_late">Túl kései bemondás</string>
+    <string name="mapbox_feedback_description_pronunciation_incorrect">Hibás kiejtés</string>
+    <string name="mapbox_feedback_description_road_name_repeated">Megismételt utcanév</string>
+
+    <!-- Feedback description for Route Quality -->
+    <string name="mapbox_feedback_description_route_not_drive_able">Vezetésre alkalmatlan útvonal</string>
+    <string name="mapbox_feedback_description_route_not_preferred">Nem ajánlott útvonal</string>
+    <string name="mapbox_feedback_description_alternative_route_not_expected">Nem várt alternatív útvonal</string>
+    <string name="mapbox_feedback_description_route_included_missing_roads">Hiányzó utak az útvonalon</string>
+    <string name="mapbox_feedback_description_route_had_roads_too_narrow_to_pass">Túl szűk utakat tartalmazó útvonal</string>
+
+    <!-- Feedback description for Illegal Route -->
+    <string name="mapbox_feedback_description_routed_down_a_one_way">Szembe tervezett egyirányú úton</string>
+    <string name="mapbox_feedback_description_turn_was_not_allowed">Nem engedélyezett kanyarodás</string>
+    <string name="mapbox_feedback_description_cars_not_allowed_on_street">Autók által nem használható utca</string>
+    <string name="mapbox_feedback_description_turn_at_intersection_was_unprotected">Nem védett kanyarodás a kereszteződésben</string>
+
+    <!-- Feedback description for Road Closure -->
+    <string name="mapbox_feedback_description_street_permanently_blocked_off">Véglegesen lezárt út</string>
+    <string name="mapbox_feedback_description_road_is_missing_from_map">Térképről hiányzó út</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">Visszajelzés elküldve</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">Probléma jelentése</string>
+
+    </resources>

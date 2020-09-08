@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Зміна маршруту…</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Центрувати</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Вимкнено</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Увімкнено</string>
+
+    <!-- Feedback -->
+    <string name="mapbox_report_feedback">Надіслати відгук</string>
+
+    <!-- Feedback Guidance Issue -->
+    <string name="mapbox_feedback_guidance_issue">Вади супроводження</string>
+
+    <!-- Feedback type for Confusing Audio -->
+    <string name="mapbox_feedback_type_confusing_audio">Голосова\nпідказка</string>
+
+    <!-- Feedback Navigation Issue -->
+    <string name="mapbox_feedback_navigation_issue">Вади навігації</string>
+
+    <!-- Feedback type for Route Quality -->
+    <string name="mapbox_feedback_type_route_quality">Якість\nмаршруту</string>
+
+    <!-- Feedback type for Illegal Route -->
+    <string name="mapbox_feedback_type_illegal_route">Заборонений\nмаршрут</string>
+
+    <!-- Feedback type for Road Closure -->
+    <string name="mapbox_feedback_type_road_closure">Перекриття\nдороги</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">Відгук надіслано</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">Повідомити про проблему</string>
+
+    </resources>
