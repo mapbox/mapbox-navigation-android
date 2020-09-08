@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mapbox_instruction_content_height">64dp</dimen>
+    <dimen name="mapbox_summary_bottom_sheet_height">56dp</dimen>
+    <dimen name="mapbox_wayname_view_height">24dp</dimen>
+
+    <dimen name="mapbox_route_overview_left_right_padding">15dp</dimen>
+    <dimen name="mapbox_route_overview_buffer_padding">15dp</dimen>
+
+    <dimen name="mapbox_feedback_bottom_sheet_content_height">250dp</dimen>
+    <dimen name="mapbox_feedback_description_item_view_height">90dp</dimen>
+    <dimen name="mapbox_feedback_report_button_height">70dp</dimen>
+</resources>
