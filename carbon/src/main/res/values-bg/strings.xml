@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MapBox 1.0 Пакет за разработка на навигация</string>
+
+    <string name="settings">Настройки </string>
+    <string name="simulate_route">Симулиране на маршрута</string>
+    <string name="language">Език</string>
+    <string name="unit_type">Мерни Единици</string>
+    <string name="route_profile">Профил на Маршрута </string>
+</resources>

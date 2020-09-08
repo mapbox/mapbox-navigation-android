@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Beregner ny rute...</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Genoptag</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Dæmpet </string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Genaktiveret </string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">Feedback indsendt</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">Indmeld et problem</string>
+
+</resources>

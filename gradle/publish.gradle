@@ -57,6 +57,7 @@ sdkNameMap["libtrip-notification"] = "mobile-navigation-notification"
 sdkNameMap["libnavigation-router"] = "mobile-navigation-router"
 sdkNameMap["libnavigation-util"] = "mobile-navigation-utils"
 sdkNameMap["libnavigation-ui"] = "mobile-navigation-ui"
+sdkNameMap["librouteline"] = "mobile-navigation-ui-routeline"
 
 registry {
     sdkName = sdkNameMap[project.name]
