@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">اعادة توجيه...</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">اعادة التمركز</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">صامت</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">غير صامت</string>
+
+</resources>

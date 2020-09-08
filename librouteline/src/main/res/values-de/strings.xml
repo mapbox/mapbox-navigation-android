@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Routenneuberechnung...</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Neu zentrieren</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Stumm</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Ton an</string>
+
+    <!-- Feedback -->
+    <string name="mapbox_report_feedback">Feedback geben</string>
+
+    <!-- Feedback Guidance Issue -->
+    <string name="mapbox_feedback_guidance_issue">Problem bei der Routenführung</string>
+
+    <!-- Feedback type for Looks Incorrect -->
+    <string name="mapbox_feedback_type_looks_incorrect">Sieht falsch aus</string>
+
+    <!-- Feedback type for Confusing Audio -->
+    <string name="mapbox_feedback_type_confusing_audio">Verwirrende\nSprachanweisung</string>
+
+    <!-- Feedback type for Positioning Issue -->
+    <string name="mapbox_feedback_type_positioning_issue">Falsche\nPositionierung</string>
+
+    <!-- Feedback Navigation Issue -->
+    <string name="mapbox_feedback_navigation_issue">Navigationsproblem</string>
+
+    <!-- Feedback type for Route Quality -->
+    <string name="mapbox_feedback_type_route_quality">Routenqualität</string>
+
+    <!-- Feedback type for Illegal Route -->
+    <string name="mapbox_feedback_type_illegal_route">Unerlaubte\nRoute</string>
+
+    <!-- Feedback type for Road Closure -->
+    <string name="mapbox_feedback_type_road_closure">Straße\ngesperrt</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_reported">Vielen Dank! Problem wurde gemeldet.</string>
+
+    <!-- Feedback description for Looks Incorrect -->
+    <string name="mapbox_feedback_description_turn_icon_incorrect">Wende-Bild falsch</string>
+    <string name="mapbox_feedback_description_street_name_incorrect">Straßenname falsch</string>
+    <string name="mapbox_feedback_description_instruction_unnecessary">Anweisung überflüssig</string>
+    <string name="mapbox_feedback_description_instruction_missing">Anweisung fehlt</string>
+    <string name="mapbox_feedback_description_maneuver_incorrect">Falsches Manöver</string>
+    <string name="mapbox_feedback_description_exit_info_incorrect">Falsche Ausfahrt</string>
+    <string name="mapbox_feedback_description_lane_guidance_incorrect">Falsche Spuranweisung</string>
+    <string name="mapbox_feedback_description_road_known_by_different_name">Straße ist unter einem anderen Namen bekannt</string>
+
+    <!-- Feedback description for Confusing Audio -->
+    <string name="mapbox_feedback_description_guidance_too_early">Anweisung erfolgt zu früh</string>
+    <string name="mapbox_feedback_description_guidance_too_late">Anweisung erfolgt zu spät</string>
+    <string name="mapbox_feedback_description_pronunciation_incorrect">Falsche Aussprache</string>
+    <string name="mapbox_feedback_description_road_name_repeated">Straßenname wiederholt</string>
+
+    <!-- Feedback description for Route Quality -->
+    <string name="mapbox_feedback_description_route_not_drive_able">Straße ist nicht befahrbar</string>
+    <string name="mapbox_feedback_description_route_not_preferred">Keine bevorzugte Route</string>
+    <string name="mapbox_feedback_description_alternative_route_not_expected">Unerwartete alternative Route</string>
+    <string name="mapbox_feedback_description_route_included_missing_roads">Route enthält fehlende Straßen</string>
+    <string name="mapbox_feedback_description_route_had_roads_too_narrow_to_pass">Route enthält zu enge Straßen, um zu passieren</string>
+
+    <!-- Feedback description for Illegal Route -->
+    <string name="mapbox_feedback_description_routed_down_a_one_way">Weitergeleitet auf Einbahnstraße</string>
+    <string name="mapbox_feedback_description_turn_was_not_allowed">Wenden war nicht erlaubt</string>
+    <string name="mapbox_feedback_description_cars_not_allowed_on_street">Autos auf der Straße nicht erlaubt</string>
+    <string name="mapbox_feedback_description_turn_at_intersection_was_unprotected">Abbiegung an der Kreuzung war ungeschützt</string>
+
+    <!-- Feedback description for Road Closure -->
+    <string name="mapbox_feedback_description_street_permanently_blocked_off">Straße dauerhaft gesperrt</string>
+    <string name="mapbox_feedback_description_road_is_missing_from_map">Straße fehlt auf Karte</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">Rückmeldung gesendet</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">Problem melden</string>
+
+    </resources>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Навигация 1.0 Mapbox для Android</string>
+
+    <string name="settings">Настройки</string>
+    <string name="simulate_route">Моделирование маршрута</string>
+    <string name="language">Язык</string>
+    <string name="unit_type">Единицы измерения</string>
+    <string name="route_profile">Тип маршрута</string>
+</resources>

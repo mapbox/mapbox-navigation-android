@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Estase a enrotar...</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Centrando</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Silenciado</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Sen silenciar</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">Opinión invada</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">Informar dun problema</string>
+
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">再ルーティング…</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">再センタリング</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">ミュート</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">ミュート解除</string>
+
+    <!-- Feedback -->
+    <string name="mapbox_report_feedback">フィードバックを報告する</string>
+
+    <!-- Shown after a feedback type has been submitted -->
+    <string name="mapbox_feedback_submitted">フィードバックを送信しました</string>
+
+    <!-- Shown in off-route scenarios to provide feedback -->
+    <string name="mapbox_report_problem">問題を報告する</string>
+
+</resources>

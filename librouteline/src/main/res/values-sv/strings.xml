@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indicates that rerouting is in progress -->
+    <string name="mapbox_rerouting">Uppdaterar rutt…</string>
+
+    <!-- Button title for re-centering tracking -->
+    <string name="mapbox_re_center">Centrera</string>
+
+    <!-- Indicates voice instructions are muted -->
+    <string name="mapbox_muted">Tyst</string>
+
+    <!-- Indicates voice instructions are unmuted -->
+    <string name="mapbox_unmuted">Ej tyst</string>
+
+</resources>
