@@ -1,9 +1,14 @@
 package com.mapbox.navigation.core.replay.history
 
 import com.google.gson.annotations.SerializedName
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
 import io.mockk.mockk
+import io.mockk.verify
+import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -73,6 +78,51 @@ class ReplayHistoryMapperTest {
     }
 
     @Test
+    fun `should map setRoute`() {
+        val historyString = resourceAsString("set_route_event_valid.txt")
+
+        val replayHistoryMapper = ReplayHistoryMapper()
+        val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
+
+        assertEquals(1, historyEvents.size)
+        (historyEvents[0] as ReplaySetRoute).let {
+            assertEquals(821.8, it.route!!.distance(), 0.00001)
+            assertEquals(
+                DirectionsCriteria.PROFILE_DRIVING_TRAFFIC,
+                it.route!!.routeOptions()?.profile()
+            )
+            val origin = it.route!!.routeOptions()?.coordinates()?.get(0)
+            val destination = it.route!!.routeOptions()?.coordinates()?.get(1)
+            assertEquals(38.5629951, origin!!.latitude(), 0.000001)
+            assertEquals(-121.4668578, origin.longitude(), 0.000001)
+            assertEquals(38.5572468, destination!!.latitude(), 0.000001)
+            assertEquals(-121.4680411, destination.longitude(), 0.000001)
+        }
+    }
+
+    @Test
+    fun `should not map setRoute and log a warning when parsing fails`() {
+        val historyString = resourceAsString("set_route_event_invalid.txt")
+        val replayHistoryMapper = ReplayHistoryMapper(logger = logger)
+
+        val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
+
+        assertTrue(historyEvents.isEmpty())
+        verify { logger.w(msg = Message("Unable to setRoute from history file"), tr = any()) }
+    }
+
+    @Test
+    fun `should map setRoute when route is empty to support "clear route"`() {
+        val historyString = resourceAsString("set_route_event_cleared.txt")
+        val replayHistoryMapper = ReplayHistoryMapper(logger = logger)
+
+        val historyEvents = replayHistoryMapper.mapToReplayEvents(historyString)
+
+        assertEquals(1, historyEvents.size)
+        assertNull((historyEvents[0] as ReplaySetRoute).route)
+    }
+
+    @Test
     fun `should map custom event`() {
         val historyString =
             "{\"events\":[{\"type\":\"getStatus\",\"timestamp\":1580744200.379," +
@@ -120,5 +170,13 @@ class ReplayHistoryMapperTest {
                 else -> null
             }
         }
+    }
+
+    private fun resourceAsString(
+        name: String,
+        packageName: String = "com.mapbox.navigation.core.replay.history"
+    ): String {
+        val inputStream = javaClass.classLoader?.getResourceAsStream("$packageName/$name")
+        return IOUtils.toString(inputStream, "UTF-8")
     }
 }

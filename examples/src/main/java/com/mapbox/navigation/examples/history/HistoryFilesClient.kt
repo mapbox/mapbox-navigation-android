@@ -69,7 +69,7 @@ class HistoryFilesClient {
                 ) {
                     Timber.i("requestHistory onResponse")
                     val drives = if (response.isSuccessful) {
-                        response.body() ?: emptyList()
+                        response.body()?.map(::withHttpDataSource) ?: emptyList()
                     } else {
                         emptyList()
                     }
@@ -78,6 +78,13 @@ class HistoryFilesClient {
             }
         )
     }
+
+    private fun withHttpDataSource(replayPath: ReplayPath) = ReplayPath(
+        title = replayPath.title,
+        description = replayPath.description,
+        path = replayPath.path,
+        dataSource = ReplayDataSource.HTTP_SERVER
+    )
 
     suspend fun requestJsonFile(filename: String): ReplayHistoryDTO? =
         withContext(Dispatchers.IO) { requestJsonFileCall(filename) }
