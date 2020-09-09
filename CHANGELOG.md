@@ -2,6 +2,18 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.0.0-rc.8 - September 9, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
+
+#### Changelog
+Changes since Mapbox Navigation SDK `1.0.0-rc.7`:
+* Move post user feedback out of companion [#3529](https://github.com/mapbox/mapbox-navigation-android/pull/3529)
+* Fix missing destination marker regression when using the Drop-in UI [#3462](https://github.com/mapbox/mapbox-navigation-android/pull/3462)
+
+#### Known issues
+* Vanishing route line (deemphasizing the traveled portion of the route) can be slightly out of sync with the location puck.
+
 ### Mapbox Navigation SDK 1.0.0-rc.7 - September 2, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
