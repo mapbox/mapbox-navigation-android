@@ -30,6 +30,7 @@ import com.mapbox.navigation.core.replay.history.CustomEventMapper
 import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
+import com.mapbox.navigation.core.replay.history.ReplaySetRoute
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.history.HistoryFilesActivity
 import com.mapbox.navigation.examples.utils.Utils
@@ -49,6 +50,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset.forName
+import java.util.Collections
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -170,9 +172,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 override fun replayEvents(events: List<ReplayEventBase>) {
                     events.forEach { event ->
                         when (event) {
-                            is ReplayEventInitialRoute -> {
-                                event.coordinates.lastOrNull()?.let { latLng ->
-                                    selectMapLocation(latLng)
+                            is ReplaySetRoute -> {
+                                event.route?.let { directionsRoute ->
+                                    val routes = Collections.singletonList(directionsRoute)
+                                    mapboxNavigation.setRoutes(routes)
+                                    navigationContext?.startNavigation()
                                 }
                             }
                         }
@@ -361,16 +365,6 @@ private class ReplayCustomEventMapper : CustomEventMapper {
                 eventTimestamp = properties["event_timestamp"] as Double,
                 properties = properties["properties"] as Double
             )
-            "initial_route" -> {
-                val eventProperties = properties["properties"] as Map<*, *>
-                val routeOptions = eventProperties["routeOptions"] as Map<*, *>
-                val coordinates = routeOptions["coordinates"] as List<List<Double>>
-                val coordinatesLatLng = coordinates.map { LatLng(it[1], it[0]) }
-                ReplayEventInitialRoute(
-                    eventTimestamp = properties["event_timestamp"] as Double,
-                    coordinates = coordinatesLatLng
-                )
-            }
             else -> null
         }
     }
@@ -379,9 +373,4 @@ private class ReplayCustomEventMapper : CustomEventMapper {
 private data class ReplayEventStartTransit(
     override val eventTimestamp: Double,
     val properties: Double
-) : ReplayEventBase
-
-private data class ReplayEventInitialRoute(
-    override val eventTimestamp: Double,
-    val coordinates: List<LatLng>
 ) : ReplayEventBase

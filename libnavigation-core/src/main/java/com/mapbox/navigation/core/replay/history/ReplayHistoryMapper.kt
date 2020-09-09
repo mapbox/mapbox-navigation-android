@@ -2,6 +2,7 @@ package com.mapbox.navigation.core.replay.history
 
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
+import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -74,6 +75,25 @@ class ReplayHistoryMapper @JvmOverloads constructor(
                 } as Double
                 ReplayEventGetStatus(
                     eventTimestamp = eventTimestamp
+                )
+            }
+            "setRoute" -> {
+                val directionsRoute = try {
+                    if (event["route"] == "{}") {
+                        null
+                    } else {
+                        DirectionsRoute.fromJson(event["route"] as String)
+                    }
+                } catch (throwable: Throwable) {
+                    logger?.w(
+                        msg = Message("Unable to setRoute from history file"),
+                        tr = throwable
+                    )
+                    return null
+                }
+                ReplaySetRoute(
+                    eventTimestamp = event["event_timestamp"] as Double,
+                    route = directionsRoute
                 )
             }
             else -> {

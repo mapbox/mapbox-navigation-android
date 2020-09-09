@@ -251,6 +251,15 @@ package com.mapbox.navigation.core.replay.history {
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapToReplayEvents(com.mapbox.navigation.core.replay.history.ReplayHistoryDTO historyDTO);
   }
 
+  public final class ReplaySetRoute implements com.mapbox.navigation.core.replay.history.ReplayEventBase {
+    ctor public ReplaySetRoute(double eventTimestamp, com.mapbox.api.directions.v5.models.DirectionsRoute? route);
+    method public double component1();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute? component2();
+    method public com.mapbox.navigation.core.replay.history.ReplaySetRoute copy(double eventTimestamp, com.mapbox.api.directions.v5.models.DirectionsRoute? route);
+    method public double getEventTimestamp();
+    method public com.mapbox.api.directions.v5.models.DirectionsRoute? getRoute();
+  }
+
 }
 
 package com.mapbox.navigation.core.replay.route {
