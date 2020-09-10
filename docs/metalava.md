@@ -1,10 +1,10 @@
 ## [Metalava](https://android.googlesource.com/platform/tools/metalava/) setup
 
-Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/master/Makefile) to interact. Make sure to run `$> make build-core-release` (Core) and `$> make build-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
+Use `$> make core-check-api` / `$> make core-update-api` (Core) `$> make ui-check-api` / `$> make ui-update-api` (UI) from the [`Makefile`](https://github.com/mapbox/mapbox-navigation-android/blob/master/Makefile) to interact. Make sure to run `$> make assemble-core-release` (Core) and `$> make assemble-ui-release` (UI) first so all deps (`jar`s) are available in the `classpath` and no errors are thrown i.e.
 
 ```
-$> make build-core-release
-$> make build-ui-release
+$> make assemble-core-release
+$> make assemble-ui-release
 $> make core-check-api / make core-update-api
 $> make ui-check-api / make ui-update-api
 ```
