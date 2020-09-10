@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/feedbackArrivalBottomSheet"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/mapbox_feedback_arrival_bottom_sheet_height"
+    android:background="@color/mapbox_feedback_bottom_sheet_background"
+    android:keepScreenOn="true"
+    app:behavior_peekHeight="@dimen/mapbox_feedback_arrival_bottom_sheet_height"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <TextView
+        android:id="@+id/provideFeedbackArrivalTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:maxLines="5"
+        android:paddingTop="30dp"
+        android:paddingBottom="16dp"
+        android:text="@string/mapbox_feedback_arrival_experience_question"
+        android:textAlignment="center"
+        android:textColor="#273d56"
+        android:textSize="21sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/feedbackArrivalBottomSheetTopBanner" />
+
+    <include
+        android:id="@+id/feedbackOptionalCommentLayout"
+        layout="@layout/mapbox_edit_text_feedback_optional_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/provideFeedbackArrivalTextView"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/feedbackArrivalBottomSheetTopBanner"
+        layout="@layout/mapbox_partial_feedback_bottom_sheet_top_banner"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mapbox_feedback_bottom_sheet_top_banner_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

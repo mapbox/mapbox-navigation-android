@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
-import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
+import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME;
 
 class SymbolOnStyleLoadedListener implements MapView.OnDidFinishLoadingStyleListener {
 
@@ -19,6 +19,6 @@ class SymbolOnStyleLoadedListener implements MapView.OnDidFinishLoadingStyleList
 
   @Override
   public void onDidFinishLoadingStyle() {
-    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_MARKER_NAME, markerBitmap);
+    mapboxMap.getStyle().addImage(MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME, markerBitmap);
   }
 }

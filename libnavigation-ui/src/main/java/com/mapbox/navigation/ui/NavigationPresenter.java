@@ -97,8 +97,12 @@ class NavigationPresenter {
     }
   }
 
-  void onFeedbackSent() {
-    view.onFeedbackSent();
+  void onFeedbackFlowStatusChanged(int status) {
+    view.onFeedbackFlowStatusChanged(status);
+  }
+
+  void onFinalDestinationArrival() {
+    view.onFinalDestinationArrival();
   }
 
   void onGuidanceViewChange(int left, int top, int width, int height) {

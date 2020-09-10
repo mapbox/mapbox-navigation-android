@@ -15,6 +15,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.ui.camera.Camera;
+import com.mapbox.navigation.ui.feedback.NavigationFeedbackOptions;
 import com.mapbox.navigation.ui.listeners.BannerInstructionsListener;
 import com.mapbox.navigation.ui.listeners.FeedbackListener;
 import com.mapbox.navigation.ui.listeners.InstructionListListener;
@@ -86,6 +87,8 @@ public abstract class NavigationViewOptions {
   public abstract Integer roundingIncrement();
 
   public abstract boolean enableVanishingRouteLine();
+
+  public abstract NavigationFeedbackOptions navigationFeedbackOptions();
 
   @AutoValue.Builder
   public abstract static class Builder {
@@ -178,6 +181,12 @@ public abstract class NavigationViewOptions {
      */
     public abstract Builder isFallbackAlwaysEnabled(boolean isFallbackAlwaysEnabled);
 
+    /**
+     * Set various feedback options to customize the feedback experience during and after
+     * turn-by-turn navigation.
+     */
+    public abstract Builder navigationFeedbackOptions(NavigationFeedbackOptions navigationFeedbackOptions);
+
     @NonNull
     public abstract NavigationViewOptions build();
   }
@@ -190,6 +199,7 @@ public abstract class NavigationViewOptions {
         .waynameChipEnabled(true)
         .muteVoiceGuidance(false)
         .isFallbackAlwaysEnabled(true)
-        .enableVanishingRouteLine(false);
+        .enableVanishingRouteLine(false)
+        .navigationFeedbackOptions(new NavigationFeedbackOptions.Builder().build());
   }
 }
