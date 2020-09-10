@@ -29,19 +29,11 @@ workflows:
             - static-analysis
             - unit-tests
       - release-snapshot:
-          requires:
-            - assemble-release
-            - static-analysis
-            - unit-tests
           filters:
             branches:
               only:
                 - master
       - release:
-          requires:
-            - assemble-release
-            - static-analysis
-            - unit-tests
           filters:
             tags:
               only: /^v.*/
@@ -398,6 +390,8 @@ jobs:
     steps:
       - checkout
       - generate-version-name
+      - assemble-core-release
+      - assemble-ui-release
       - check-public-documentation
       - generate-documentation
       - publish-artifacts:
@@ -411,8 +405,8 @@ jobs:
     docker:
       - image: << pipeline.parameters.docker-image-tag >>
     steps:
-      - generate-version-name
       - checkout
+      - generate-version-name
       - assemble-core-release
       - assemble-ui-release
       - check-public-documentation
