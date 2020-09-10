@@ -30,8 +30,9 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.UiSettings;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
@@ -51,6 +52,8 @@ import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import static com.mapbox.navigation.ui.map.NavigationMapboxMap.MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME;
 
 /**
  * View that creates the drop-in UI.
@@ -77,7 +80,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
 
   private static final int INVALID_STATE = 0;
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
-  private static final long WAY_NAME_TRANSLATIONX_DURATION = 750L;
+  private static final long WAY_NAME_TRANSLATION_X_DURATION = 750L;
   private MapView mapView;
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
@@ -86,6 +89,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private RecenterButton recenterBtn;
   private WayNameView wayNameView;
   private ImageButton routeOverviewBtn;
+  private Symbol feedbackSymbol;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
@@ -236,17 +240,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   @Override
   public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-    mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), new Style.OnStyleLoaded() {
-      @Override
-      public void onStyleLoaded(@NonNull Style style) {
-        initializeNavigationMap(mapView, mapboxMap);
-        moveMapboxLogoAboveBottomSheet();
-        moveMapboxAttributionAboveBottomSheet();
-        logoAndAttributionShownForFirstTime = true;
-        initializeWayNameListener();
-        updateNavigationReadyListeners(navigationViewModel.isRunning());
-        isMapInitialized = true;
-      }
+    mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), style -> {
+      initializeNavigationMap(mapView, mapboxMap);
+      moveMapboxLogoAboveBottomSheet();
+      moveMapboxAttributionAboveBottomSheet();
+      logoAndAttributionShownForFirstTime = true;
+      initializeWayNameListener();
+      updateNavigationReadyListeners(navigationViewModel.isRunning());
+      isMapInitialized = true;
     });
   }
 
@@ -435,7 +436,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (ViewUtils.isLandscape(getContext())) {
       navigationMap.adjustLocationIconWith(new int[] { width, 0, 0, 0 });
       ObjectAnimator animator = ObjectAnimator.ofFloat(wayNameView, "translationX", (float) width / 2);
-      animator.setDuration(WAY_NAME_TRANSLATIONX_DURATION);
+      animator.setDuration(WAY_NAME_TRANSLATION_X_DURATION);
       animator.start();
     } else {
       navigationMap.adjustLocationIconWith(new int[] { 0, height, 0, 0 });
@@ -883,7 +884,19 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     cancelBtn.setOnClickListener(new CancelBtnClickListener(navigationViewEventDispatcher));
     recenterBtn.addOnClickListener(new RecenterBtnClickListener(navigationPresenter));
     routeOverviewBtn.setOnClickListener(new RouteOverviewBtnClickListener(navigationPresenter));
-    retrieveFeedbackButton().addOnClickListener(view -> navigationViewModel.takeScreenshot());
+    retrieveFeedbackButton().addOnClickListener(view -> {
+      if (navigationMap!= null) {
+        Location location = navigationMap.retrieveMap().getLocationComponent().getLastKnownLocation();
+        if (location != null) {
+          SymbolOptions symbolOptions = new SymbolOptions();
+          symbolOptions.withGeometry(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
+          .withIconImage(MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME);
+          feedbackSymbol = navigationMap.addCustomMarker(symbolOptions);
+        }
+      }
+
+      navigationViewModel.takeScreenshot();
+    });
   }
 
   private void initializeOnCameraTrackingChangedListener() {

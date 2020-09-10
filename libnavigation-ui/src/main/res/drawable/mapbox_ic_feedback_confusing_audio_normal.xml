@@ -1,18 +1,18 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="70dp"
     android:height="70dp"
+    android:viewportHeight="70"
     android:viewportWidth="70"
-    android:viewportHeight="70">
+    android:width="70dp">
     <path
-        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_background"
         android:fillType="evenOdd"
         android:pathData="M70,35C70,54.3305 54.327,70 35,70C15.673,70 0,54.3305 0,35C0,15.6695 15.673,0 35,0C54.327,0 70,15.6695 70,35Z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:strokeColor="#00000000"
+        android:strokeWidth="1" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
         android:fillType="nonZero"
         android:pathData="M19,29.5268L19,40.4732L26.3333,40.4732L35.5,49.5952L35.5,20.4048L26.3333,29.5268L19,29.5268ZM43.75,35C43.75,31.7708 41.88,28.9977 39.1667,27.6477L39.1667,42.3341C41.88,41.0023 43.75,38.2292 43.75,35ZM39.1667,19L39.1667,22.7583C44.465,24.3272 48.3333,29.2166 48.3333,35C48.3333,40.7834 44.465,45.6728 39.1667,47.2417L39.1667,51C46.5183,49.3398 52,42.8084 52,35C52,27.1916 46.5183,20.6602 39.1667,19Z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:strokeColor="#00000000"
+        android:strokeWidth="1" />
 </vector>

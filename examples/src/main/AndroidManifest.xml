@@ -196,8 +196,8 @@
 
         <activity
             android:name=".core.FeedbackButtonActivity"
-            android:label="@string/title_feedback_button"
-            android:screenOrientation="portrait">
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/title_feedback_button">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />

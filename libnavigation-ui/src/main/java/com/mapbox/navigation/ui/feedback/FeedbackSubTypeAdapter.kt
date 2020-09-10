@@ -1,7 +1,11 @@
 package com.mapbox.navigation.ui.feedback
 
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.mapbox.navigation.ui.R
 
@@ -10,9 +14,9 @@ import com.mapbox.navigation.ui.R
  * to [FeedbackSubTypeViewHolder] that are displayed within a [RecyclerView].
  */
 internal class FeedbackSubTypeAdapter constructor(
-    private val feedbackSubTypeItems: List<FeedbackSubTypeItem>,
     private val itemClickListener: OnSubTypeItemClickListener
-) : RecyclerView.Adapter<FeedbackSubTypeViewHolder>() {
+) : ListAdapter<FeedbackSubTypeItem, FeedbackSubTypeViewHolder>(DiffCallback()) {
+
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -28,18 +32,26 @@ internal class FeedbackSubTypeAdapter constructor(
         holder: FeedbackSubTypeViewHolder,
         position: Int
     ) {
-        holder.setFeedbackSubTypeInfo(feedbackSubTypeItems[position])
-    }
-
-    override fun getItemCount(): Int {
-        return feedbackSubTypeItems.size
+        holder.setFeedbackSubTypeInfo(getItem(position))
     }
 
     fun getFeedbackSubTypeItem(position: Int): FeedbackSubTypeItem {
-        return feedbackSubTypeItems[position]
+        return getItem(position)
     }
 
     internal interface OnSubTypeItemClickListener {
         fun onItemClick(position: Int): Boolean
     }
+
+    class DiffCallback : DiffUtil.ItemCallback<FeedbackSubTypeItem>() {
+        override fun areItemsTheSame(oldItem: FeedbackSubTypeItem, newItem: FeedbackSubTypeItem): Boolean {
+            return oldItem.feedbackDescription == newItem.feedbackDescription && oldItem.isChecked == newItem.isChecked
+        }
+
+        override fun areContentsTheSame(oldItem: FeedbackSubTypeItem, newItem: FeedbackSubTypeItem): Boolean {
+            return oldItem.feedbackDescription == newItem.feedbackDescription && oldItem.isChecked == newItem.isChecked
+        }
+
+    }
+
 }

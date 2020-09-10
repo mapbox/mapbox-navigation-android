@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/feedbackDetailsBottomSheet"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/mapbox_feedback_bottom_sheet_background"
+    android:keepScreenOn="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    app:behavior_peekHeight="@dimen/mapbox_feedback_details_bottom_sheet_initial_peek_height"
+    >
+
+  <TextView
+      android:id="@+id/provideFeedbackDetailTextView"
+      android:layout_width="match_parent"
+      android:layout_height="110dp"
+      android:layout_marginEnd="38dp"
+      android:layout_marginStart="38dp"
+      android:clickable="true"
+      android:focusable="true"
+      android:maxLines="5"
+      android:paddingBottom="30dp"
+      android:paddingTop="30dp"
+      android:text="@string/mapbox_feedback_provide_details"
+      android:textAlignment="center"
+      android:textColor="#273d56"
+      android:textSize="21sp"
+      android:textStyle="bold"
+      app:layout_constraintTop_toBottomOf="@id/feedbackDetailBottomSheetTopBanner"
+      />
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/feedbackDetailsBottomSheetLayout"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/feedbackDetailBottomSheetTopBanner"
+      tools:visibility="visible"
+      >
+
+    <TextView
+        android:id="@+id/addMoreFeedbackCommentsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingBottom="40dp"
+        android:paddingTop="40dp"
+        android:text="@string/mapbox_feedback_add_more_comments"
+        android:textAlignment="center"
+        android:textColor="#2b91ff"
+        android:textSize="21sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/feedbackOptionalCommentLayout"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/feedbackSubTypes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_centerVertical="true"
+        android:fadeScrollbars="false"
+        android:scrollbarThumbVertical="@drawable/mapbox_drawable_feedback_subtype_scrollbar_thumb"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toTopOf="@id/addMoreFeedbackCommentsTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <include
+        layout="@layout/mapbox_edit_text_feedback_optional_comment"
+        android:id="@+id/feedbackOptionalCommentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <include
+      layout="@layout/mapbox_partial_feedback_bottom_sheet_top_banner"
+      android:id="@+id/feedbackDetailBottomSheetTopBanner"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/mapbox_feedback_bottom_sheet_top_banner_height"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

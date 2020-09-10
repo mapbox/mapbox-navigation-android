@@ -21,7 +21,7 @@ public class FeedbackItem {
   private int feedbackImage;
   private Set<String> feedbackSubType;
 
-  FeedbackItem(String feedbackText,
+  public FeedbackItem(String feedbackText,
       int feedbackImage,
       @FeedbackEvent.Type
           String feedbackType,
@@ -48,6 +48,10 @@ public class FeedbackItem {
 
   public String getDescription() {
     return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public Set<String> getFeedbackSubType() {
