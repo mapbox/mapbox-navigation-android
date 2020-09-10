@@ -3,20 +3,12 @@
     android:viewportHeight="70"
     android:viewportWidth="70"
     android:width="70dp">
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillType="evenOdd"
-        android:pathData="M69.9,32.7C68.8,15.3 54.7,1.2 37.3,0.1C16.2,-1.3 -1.3,16.2 0.1,37.3c1.1,17.4 15.2,31.6 32.7,32.7C53.8,71.3 71.3,53.8 69.9,32.7z" />
-    <path
-        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
-        android:fillType="evenOdd"
-        android:pathData="M35,18.9c-3,0 -5.8,0.8 -8.2,2.3L47.6,45c2.2,-2.7 3.5,-6.2 3.5,-10C51.1,26.1 43.9,18.9 35,18.9z" />
-    <path
-        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
-        android:fillType="evenOdd"
-        android:pathData="M69.9,32.7C68.8,15.3 54.7,1.2 37.3,0.1C16.2,-1.3 -1.3,16.2 0.1,37.3c1.1,17.4 15.2,31.6 32.7,32.7C53.8,71.3 71.3,53.8 69.9,32.7zM35,56.9c-12.1,0 -21.9,-9.8 -21.9,-21.9c0,-12.1 9.8,-21.9 21.9,-21.9c12.1,0 21.9,9.8 21.9,21.9C56.9,47.1 47.1,56.9 35,56.9z" />
-    <path
-        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
-        android:fillType="evenOdd"
-        android:pathData="M18.9,35c0,8.9 7.2,16.1 16.1,16.1c3,0 5.8,-0.8 8.2,-2.3L22.4,25C20.2,27.8 18.9,31.2 18.9,35z" />
+  <path
+      android:fillColor="@color/mapbox_feedback_bottom_sheet_background"
+      android:fillType="evenOdd"
+      android:pathData="M69.9,32.7C68.8,15.3 54.7,1.2 37.3,0.1C16.2,-1.3 -1.3,16.2 0.1,37.3C1.2,54.7 15.3,68.9 32.8,70C53.8,71.3 71.3,53.8 69.9,32.7z" />
+  <path
+      android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
+      android:fillType="evenOdd"
+      android:pathData="M35,13.1c-12.1,0 -21.9,9.8 -21.9,21.9S22.9,56.9 35,56.9S56.9,47.1 56.9,35S47.1,13.1 35,13.1zM35,51.1c-8.9,0 -16.1,-7.2 -16.1,-16.1c0,-3.8 1.3,-7.2 3.5,-10l20.8,23.8C40.8,50.3 38,51.1 35,51.1zM47.6,45L26.8,21.2c2.4,-1.5 5.2,-2.3 8.2,-2.3c8.9,0 16.1,7.2 16.1,16.1C51.1,38.8 49.8,42.3 47.6,45z" />
 </vector>

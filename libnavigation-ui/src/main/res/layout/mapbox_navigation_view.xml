@@ -1,55 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/navigationLayout"
+    android:id="@+id/feedbackFrameLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/navigationMapView"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/navigationLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:mapbox_uiCompass="false" />
+        android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/screenshotView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" />
+        <com.mapbox.mapboxsdk.maps.MapView
+            android:id="@+id/navigationMapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:mapbox_uiCompass="false" />
 
-    <com.mapbox.navigation.ui.summary.SummaryBottomSheet
-        android:id="@+id/summaryBottomSheet"
-        style="@style/MapboxStyleSummaryBottomSheet"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+        <ImageView
+            android:id="@+id/screenshotView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible" />
 
-    <com.mapbox.navigation.ui.RecenterButton
-        android:id="@+id/recenterBtn"
-        style="@style/MapboxStyleRecenterButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:paddingTop="@dimen/mapbox_dimen_8dp"
-        android:visibility="invisible"
-        app:layout_anchor="@id/feedbackLayout"
-        app:layout_anchorGravity="bottom|right" />
+        <com.mapbox.navigation.ui.summary.SummaryBottomSheet
+            android:id="@+id/summaryBottomSheet"
+            style="@style/MapboxStyleSummaryBottomSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 
-    <com.mapbox.navigation.ui.map.WayNameView
-        android:id="@+id/wayNameView"
-        style="@style/MapboxStyleWayNameView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|top"
-        android:visibility="invisible"
-        app:layout_anchor="@id/summaryBottomSheet"
-        app:layout_anchorGravity="center|top" />
+        <com.mapbox.navigation.ui.RecenterButton
+            android:id="@+id/recenterBtn"
+            style="@style/MapboxStyleRecenterButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingTop="@dimen/mapbox_dimen_8dp"
+            android:visibility="invisible"
+            app:layout_anchor="@id/feedbackLayout"
+            app:layout_anchorGravity="bottom|right" />
 
-    <com.mapbox.navigation.ui.instruction.InstructionView
-        android:id="@+id/instructionView"
-        style="@style/MapboxStyleInstructionView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <com.mapbox.navigation.ui.map.WayNameView
+            android:id="@+id/wayNameView"
+            style="@style/MapboxStyleWayNameView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|top"
+            android:visibility="invisible"
+            app:layout_anchor="@id/summaryBottomSheet"
+            app:layout_anchorGravity="center|top" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <com.mapbox.navigation.ui.instruction.InstructionView
+            android:id="@+id/instructionView"
+            style="@style/MapboxStyleInstructionView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

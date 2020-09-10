@@ -7,7 +7,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 
 import org.junit.Test;
 
-import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_MARKER_NAME;
+import static com.mapbox.navigation.ui.map.NavigationSymbolManager.MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,6 +25,6 @@ public class SymbolOnStyleLoadedListenerTest {
 
     listener.onDidFinishLoadingStyle();
 
-    verify(style).addImage(eq(MAPBOX_NAVIGATION_MARKER_NAME), eq(markerBitmap));
+    verify(style).addImage(eq(MAPBOX_NAVIGATION_DESTINATION_MARKER_NAME), eq(markerBitmap));
   }
 }
