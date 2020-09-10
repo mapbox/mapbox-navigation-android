@@ -334,12 +334,9 @@
         </item>
     </style>
 
-    <style name="MapboxStyleFeedbackBottomSheetIssueListLayout">
-        <item name="android:background">@drawable/mapbox_bg_feedback_issue_list</item>
+    <style name="MapboxStyleFeedbackBottomSheetCategoryListLayout">
+        <item name="android:background">@color/mapbox_feedback_bottom_sheet_background</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:gravity">center</item>
-        <item name="android:paddingTop">6dp</item>
-        <item name="android:paddingBottom">12dp</item>
     </style>
 
     <style name="MapboxStyleFeedbackBottomSheetIssueListTitle" parent="MapboxStyleTextView">

@@ -198,7 +198,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
-    navigationViewModel.updateFeedback(feedbackItem);
+    if (navigationViewModel != null) {
+      navigationViewModel.updateFeedback(feedbackItem);
+    }
   }
 
   @Override
@@ -485,7 +487,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    addBottomSheetListener();
+    addBottomSheetListeners();
   }
 
   @Override
@@ -715,7 +717,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private void addBottomSheetListener() {
+  private void addBottomSheetListeners() {
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
       String tag = FeedbackBottomSheet.TAG;

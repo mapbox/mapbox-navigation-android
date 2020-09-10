@@ -39,8 +39,14 @@
     <!-- Feedback type for Road Closure -->
     <string name="mapbox_feedback_type_road_closure">Road\nClosure</string>
 
-    <!-- Shown after a feedback type has been submitted -->
-    <string name="mapbox_feedback_reported">Thank you! Issue reported.</string>
+    <!-- Feedback type general feedback, such as final arrival experience feedback -->
+    <string name="mapbox_feedback_type_general">General</string>
+
+    <!-- Shown after a feedback type or final arrival experience feedback has been submitted -->
+    <string name="mapbox_feedback_reported">Thank you for your feedback</string>
+
+    <!-- Shown if final arrival experience feedback text is empty upon submission -->
+    <string name="mapbox_feedback_arrival_experience_empty">Feedback is empty</string>
 
     <!-- Feedback description for Looks Incorrect -->
     <string name="mapbox_feedback_description_turn_icon_incorrect">Turn icon incorrect</string>
@@ -78,8 +84,29 @@
     <!-- Shown after a feedback type has been submitted -->
     <string name="mapbox_feedback_submitted">Feedback Submitted</string>
 
+    <string name="mapbox_feedback_details_flow_title">You have arrived</string>
+    <string name="mapbox_feedback_details_flow_start">Start</string>
+    <string name="mapbox_feedback_details_flow_back">Back</string>
+    <string name="mapbox_feedback_details_flow_next">Next</string>
+    <string name="mapbox_feedback_details_flow_done">Done</string>
+    <string name="mapbox_feedback_arrival_finish">Finish</string>
+
+    <!-- Add more feedback comments TextView text -->
+    <string name="mapbox_feedback_add_more_comments">Add more comments</string>
+    <!-- Description for the feedback comment EditText View -->
+    <string name="mapbox_feedback_comment_edit_text_description">(Optional)</string>
+    <!-- Provide feedback details TextView text  -->
+    <string name="mapbox_feedback_provide_details">Please provide details on your reported issues</string>
+
+    <!-- Provide arrival experience TextView texts  -->
+    <string name="mapbox_feedback_arrival_feedback">Arrival Feedback</string>
+    <string name="mapbox_feedback_arrival_experience_question">How was your arrival\nexperience today?</string>
+
     <!-- Shown in off-route scenarios to provide feedback -->
     <string name="mapbox_report_problem">Report Problem</string>
+
+    <!-- Feedback screenshot image view content description -->
+    <string name="mapbox_feedback_screenshot_content_description">This is a feedback screenshot image view.</string>
 
     <!-- Should not be translated -->
     <string name="mapbox_navigation_guidance_day"
