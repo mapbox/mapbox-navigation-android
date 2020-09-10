@@ -19,7 +19,7 @@
 
   <!-- Default FeedbackBottomSheet -->
   <color name="mapbox_feedback_bottom_sheet_primary">#99143C6D</color>
-  <color name="mapbox_feedback_bottom_sheet_secondary">#E56C83</color>
+  <color name="mapbox_feedback_bottom_sheet_secondary">#2B91FF</color>
   <color name="mapbox_feedback_bottom_sheet_primary_text">#FFFFFF</color>
   <color name="mapbox_feedback_bottom_sheet_secondary_text">#273D56</color>
   <color name="mapbox_feedback_bottom_sheet_icon_primary">#143C6D</color>

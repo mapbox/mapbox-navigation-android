@@ -7,12 +7,12 @@ package com.mapbox.navigation.ui
 object NavigationConstants {
 
     /**
-     * Duration in which the AlertView is shown with the "Report Problem" text.
+     * Milliseconds duration in which the AlertView is shown with the "Report Problem" text.
      */
     const val ALERT_VIEW_PROBLEM_DURATION: Long = 10000
 
     /**
-     * Duration in which the feedback BottomSheet is shown.
+     * Milliseconds duration in which the feedback BottomSheet is shown.
      */
     const val FEEDBACK_BOTTOM_SHEET_DURATION: Long = 10000
 
@@ -53,17 +53,17 @@ object NavigationConstants {
     const val NAVIGATION_HIGH_ALERT_DURATION = 15
 
     /**
-     * Maximum duration of the zoom/tilt adjustment animation while tracking.
+     * Maximum milliseconds duration of the zoom/tilt adjustment animation while tracking.
      */
     const val NAVIGATION_MAX_CAMERA_ADJUSTMENT_ANIMATION_DURATION = 1500L
 
     /**
-     * Minimum duration of the zoom adjustment animation while tracking.
+     * Minimum milliseconds duration of the zoom adjustment animation while tracking.
      */
     const val NAVIGATION_MIN_CAMERA_ZOOM_ADJUSTMENT_ANIMATION_DURATION = 300L
 
     /**
-     * Minimum duration of the tilt adjustment animation while tracking.
+     * Minimum milliseconds duration of the tilt adjustment animation while tracking.
      */
     const val NAVIGATION_MIN_CAMERA_TILT_ADJUSTMENT_ANIMATION_DURATION = 750L
 

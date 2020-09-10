@@ -4,11 +4,11 @@
     android:viewportWidth="70"
     android:viewportHeight="70">
     <path
-        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_background"
         android:fillType="evenOdd"
         android:pathData="M70,35C70,54.3305 54.327,70 35,70C15.673,70 0,54.3305 0,35C0,15.6695 15.673,0 35,0C54.327,0 70,15.6695 70,35Z" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/mapbox_feedback_bottom_sheet_icon_primary"
         android:fillType="nonZero"
         android:pathData="M15.438,29.5873L28.9492,20.1977C29.6501,19.7015 30.6235,20.1977 30.6235,21.0374L30.6235,26.7246L37.4765,26.7246C45.4975,26.7246 52,33.0988 52,40.9998L52,49.9694C52,50.542 51.5328,51 50.9487,51L45.4975,51C44.9134,51 44.4462,50.542 44.4462,49.9694L44.4462,40.9998C44.4462,37.221 41.3312,34.1675 37.4765,34.1675L30.6235,34.1675L30.6235,39.8547C30.6235,40.6944 29.6501,41.1906 28.9492,40.6944L15.438,31.3049C14.854,30.885 14.854,30.0071 15.438,29.5873Z" />
 </vector>
