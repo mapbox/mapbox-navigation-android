@@ -9,6 +9,5 @@ internal class FeedbackSubTypeItem(
     @field:StringRes @get:StringRes
     @param:StringRes val feedbackDescriptionResourceId: Int
 ) {
-
     var isChecked = false
 }

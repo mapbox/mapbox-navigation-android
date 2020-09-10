@@ -3,16 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/mapbox_feedback_item_view_height"
+    android:layout_marginBottom="@dimen/mapbox_feedback_item_margin"
+    android:layout_marginEnd="@dimen/mapbox_feedback_item_margin"
     android:layout_marginStart="@dimen/mapbox_feedback_item_margin"
     android:layout_marginTop="@dimen/mapbox_feedback_item_margin"
-    android:layout_marginEnd="@dimen/mapbox_feedback_item_margin"
-    android:layout_marginBottom="@dimen/mapbox_feedback_item_margin">
+    android:background="@android:color/white">
 
     <ImageView
         android:id="@+id/feedbackImage"
         android:layout_width="@dimen/mapbox_feedback_item_image_size"
         android:layout_height="@dimen/mapbox_feedback_item_image_size"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,8 +24,7 @@
         style="@style/MapboxStyleFeedbackBottomSheetIssueDescriptionText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/mapbox_feedback_item_margin"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/feedbackImage"

@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet;
 import com.mapbox.navigation.ui.internal.NavigationContract;
 
 class NavigationPresenter {
@@ -97,8 +98,12 @@ class NavigationPresenter {
     }
   }
 
-  void onFeedbackSent() {
-    view.onFeedbackSent();
+  void onFeedbackFlowStatusChanged(@FeedbackBottomSheet.FeedbackFlowStatus int status) {
+    view.onFeedbackFlowStatusChanged(status);
+  }
+
+  void onFinalDestinationArrival() {
+    view.onFinalDestinationArrival();
   }
 
   void onGuidanceViewChange(int left, int top, int width, int height) {

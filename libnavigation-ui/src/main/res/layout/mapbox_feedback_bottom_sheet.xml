@@ -4,118 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/mapbox_feedback_bottom_sheet_background"
     android:keepScreenOn="true">
 
     <include
-        android:id="@+id/topBanner"
+        android:id="@+id/feedbackDetailBottomSheetTopBanner"
         layout="@layout/mapbox_partial_feedback_bottom_sheet_top_banner"
         android:layout_width="match_parent"
         android:layout_height="@dimen/mapbox_feedback_bottom_sheet_top_banner_height"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
-        android:id="@+id/feedbackSubTypesLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/mapbox_feedback_bottom_sheet_content_height"
-        android:background="@android:color/white"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topBanner"
-        tools:visibility="visible">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/feedbackSubTypeItems"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/buttonLayout"
-            android:layout_centerVertical="true" />
-
-        <RelativeLayout
-            android:id="@+id/buttonLayout"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/mapbox_feedback_report_button_height"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/mapbox_bg_feedback_report_issue_button_layout">
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/reportIssueBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="45dp"
-                android:layout_centerInParent="true"
-                android:background="@drawable/mapbox_bg_feedback_report_issue_button"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
-                android:text="@string/mapbox_report_feedback"
-                android:textColor="@android:color/white"
-                android:textSize="18sp" />
-
-            <ProgressBar
-                android:id="@+id/feedbackProgress"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="10dp"
-                android:layout_alignParentBottom="true"
-                android:max="5000"
-                android:progress="5000"
-                android:progressDrawable="@drawable/mapbox_drawable_feedback_progress_bar" />
-        </RelativeLayout>
-    </RelativeLayout>
-
     <LinearLayout
         android:id="@+id/feedbackMainLayout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/mapbox_feedback_bottom_sheet_content_height"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topBanner"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/feedbackDetailBottomSheetTopBanner"
         tools:visibility="gone">
 
-        <LinearLayout
-            style="@style/MapboxStyleFeedbackBottomSheetIssueListLayout"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/feedbackCategories"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="6dp" />
 
-            <TextView
-                style="@style/MapboxStyleFeedbackBottomSheetIssueListTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mapbox_feedback_guidance_issue" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/guidanceIssueItems"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mapbox_feedback_item_margin"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="@dimen/mapbox_feedback_item_margin" />
-        </LinearLayout>
-
-        <LinearLayout
-            style="@style/MapboxStyleFeedbackBottomSheetIssueListLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <TextView
-                style="@style/MapboxStyleFeedbackBottomSheetIssueListTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mapbox_feedback_navigation_issue" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/navigationIssueItems"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mapbox_feedback_item_margin"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="@dimen/mapbox_feedback_item_margin" />
-        </LinearLayout>
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/feedbackProgress"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_marginTop="28dp"
+        android:max="5000"
+        android:progress="5000"
+        android:progressDrawable="@drawable/mapbox_drawable_feedback_progress_bar"
+        app:layout_constraintTop_toBottomOf="@id/feedbackMainLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

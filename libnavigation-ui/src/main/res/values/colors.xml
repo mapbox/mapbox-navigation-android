@@ -88,11 +88,13 @@
 
   <!-- Default FeedbackBottomSheet -->
   <color name="mapbox_feedback_bottom_sheet_primary">#99143C6D</color>
-  <color name="mapbox_feedback_bottom_sheet_secondary">#E56C83</color>
+  <color name="mapbox_feedback_bottom_sheet_secondary">#2B91FF</color>
+  <color name="mapbox_feedback_bottom_sheet_tertiary">#CCE24A69</color>
   <color name="mapbox_feedback_bottom_sheet_primary_text">#FFFFFF</color>
   <color name="mapbox_feedback_bottom_sheet_secondary_text">#273D56</color>
-  <color name="mapbox_feedback_bottom_sheet_icon_primary">#143C6D</color>
+  <color name="mapbox_feedback_bottom_sheet_icon_primary">#2A4E7A</color>
   <color name="mapbox_feedback_bottom_sheet_icon_secondary">#2B91FF</color>
+  <color name="mapbox_feedback_bottom_sheet_background">#F0F3F8</color>
 
   <!-- Default AlertView -->
   <color name="mapbox_alert_view_background">@color/mapbox_navigation_view_color_banner_background</color>
