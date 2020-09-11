@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
 import com.mapbox.navigation.examples.core.BasicNavSdkOnlyActivity
 import com.mapbox.navigation.examples.core.BasicNavigationActivity
 import com.mapbox.navigation.examples.core.BasicNavigationFragmentActivity
+import com.mapbox.navigation.examples.core.CustomAlternativeRouteClickPaddingActivity
 import com.mapbox.navigation.examples.core.CustomRouteStylingActivity
 import com.mapbox.navigation.examples.core.DebugMapboxNavigationKt
 import com.mapbox.navigation.examples.core.FasterRouteActivity
@@ -155,7 +156,13 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_route_alerts),
                 getString(R.string.description_route_alerts),
                 RouteAlertsActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_alternative_route_custom_click_padding),
+                getString(R.string.description_alternative_route_custom_click_padding),
+                CustomAlternativeRouteClickPaddingActivity::class.java
             )
+
         )
     }
 }

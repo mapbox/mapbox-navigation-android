@@ -3,14 +3,20 @@ package com.mapbox.navigation.ui.route
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.TypedArray
+import android.graphics.PointF
+import android.graphics.RectF
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
+import com.mapbox.mapboxsdk.maps.MapboxMap
+import com.mapbox.mapboxsdk.maps.Projection
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
@@ -2052,6 +2058,331 @@ class MapRouteLineTest {
         assertEquals(1168.3000000000002, result[6].distanceFromOrigin, 0.0)
         assertEquals("severe", result[6].trafficCongestionIdentifier)
         assertEquals("motorway", result[6].roadClass)
+    }
+
+    @Test
+    fun findClosestRouteWhenMapQueryReturnsPrimaryViaPoint() {
+        val clickPoint = PointF(200f, 200f)
+        val targetPoint = LatLng(37.97, -122.52)
+        val mockProjection = mockk<Projection> {
+            every { toScreenLocation(targetPoint) } returns clickPoint
+        }
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val alternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(primaryRoute, alternativeRoute)) }
+        val featurePrimary = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[0]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val featureAlternative = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[1]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val mockMap = mockk<MapboxMap> {
+            every { projection } returns mockProjection
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featurePrimary)
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+        }
+
+        val result = mapRouteLine.findClosestRoute(targetPoint, mockMap, 40f)
+
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun findClosestRouteWhenMapQueryReturnsPrimaryInRect() {
+        val clickPoint = PointF(200f, 200f)
+        val targetPoint = LatLng(37.97, -122.52)
+        val mockProjection = mockk<Projection> {
+            every { toScreenLocation(targetPoint) } returns clickPoint
+        }
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val alternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(primaryRoute, alternativeRoute)) }
+        val featurePrimary = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[0]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val featureAlternative = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[1]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val mockMap = mockk<MapboxMap> {
+            every { projection } returns mockProjection
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featurePrimary)
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+        }
+
+        val result = mapRouteLine.findClosestRoute(targetPoint, mockMap, 40f)
+
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun findClosestRouteWhenMapQueryReturnsAlternativeViaPoint() {
+        val clickPoint = PointF(200f, 200f)
+        val targetPoint = LatLng(37.97, -122.52)
+        val mockProjection = mockk<Projection> {
+            every { toScreenLocation(targetPoint) } returns clickPoint
+        }
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val firstAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
+        val featureAlternative = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[2]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val mockMap = mockk<MapboxMap> {
+            every { projection } returns mockProjection
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+        }
+
+        val result = mapRouteLine.findClosestRoute(targetPoint, mockMap, 40f)
+
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun findClosestRouteWhenMapQueryReturnsAlternativeInRect() {
+        val clickPoint = PointF(200f, 200f)
+        val targetPoint = LatLng(37.97, -122.52)
+        val mockProjection = mockk<Projection> {
+            every { toScreenLocation(targetPoint) } returns clickPoint
+        }
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val firstAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
+        val featureAlternative = mockk<Feature> {
+            every { id() } returns mapRouteLine.retrieveRouteFeatureData()[2]
+                .featureCollection
+                .features()!![0]
+                .id()
+        }
+        val mockMap = mockk<MapboxMap> {
+            every { projection } returns mockProjection
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+        }
+
+        val result = mapRouteLine.findClosestRoute(targetPoint, mockMap, 40f)
+
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun findClosestRouteWhenNotFound() {
+        val clickPoint = PointF(200f, 200f)
+        val targetPoint = LatLng(37.97, -122.52)
+        val mockProjection = mockk<Projection> {
+            every { toScreenLocation(targetPoint) } returns clickPoint
+        }
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val primaryRoute: DirectionsRoute = getDirectionsRoute(true)
+        val firstAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondAlternativeRoute: DirectionsRoute = getDirectionsRoute(true)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(primaryRoute, firstAlternativeRoute, secondAlternativeRoute)) }
+        val featurePrimary = mockk<Feature> {
+            every { id() } returns "whatever"
+        }
+        val featureAlternative = mockk<Feature> {
+            every { id() } returns "foobar"
+        }
+        val mockMap = mockk<MapboxMap> {
+            every { projection } returns mockProjection
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featurePrimary)
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    PRIMARY_ROUTE_LAYER_ID,
+                    PRIMARY_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+            every {
+                queryRenderedFeatures(
+                    clickPoint,
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf(featureAlternative)
+            every {
+                queryRenderedFeatures(
+                    any<RectF>(),
+                    ALTERNATIVE_ROUTE_LAYER_ID,
+                    ALTERNATIVE_ROUTE_CASING_LAYER_ID
+                )
+            } returns listOf()
+        }
+
+        val result = mapRouteLine.findClosestRoute(targetPoint, mockMap, 40f)
+
+        assertEquals(-1, result)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

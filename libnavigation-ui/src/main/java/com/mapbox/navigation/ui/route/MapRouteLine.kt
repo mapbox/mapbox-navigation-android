@@ -1,6 +1,8 @@
 package com.mapbox.navigation.ui.route
 
 import android.content.Context
+import android.graphics.PointF
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.util.SparseArray
 import androidx.annotation.AnyRes
@@ -16,7 +18,9 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
+import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Layer
@@ -32,12 +36,14 @@ import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
@@ -67,6 +73,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
+import java.util.UUID
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.sin
@@ -697,6 +704,78 @@ internal class MapRouteLine(
         return routeFeatureData.firstOrNull {
             it.route == route
         }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+    }
+
+    /**
+     * The map will be queried for a route line feature at the target point or a bounding box
+     * centered at the target point with a padding value determining the box's size. If a route
+     * feature is found the index of that route in this class's route collection is returned. The
+     * primary route is given precedence if more than one route is found.
+     *
+     * @param target a target latitude/longitude serving as the search point
+     * @param mapboxMap a reference to the MapboxMap that will be queried
+     * @param padding a sizing value added to all sides of the target point  for creating a bounding
+     * box to search in.
+     *
+     * @return the index of the route in this class's route collection or -1 if no routes found.
+     */
+    fun findClosestRoute(
+        target: LatLng,
+        mapboxMap: MapboxMap,
+        padding: Float
+    ): Int {
+        val mapClickPointF = mapboxMap.projection.toScreenLocation(target)
+        val leftFloat = (mapClickPointF.x - padding)
+        val rightFloat = (mapClickPointF.x + padding)
+        val topFloat = (mapClickPointF.y - padding)
+        val bottomFloat = (mapClickPointF.y + padding)
+        val clickRectF = RectF(leftFloat, topFloat, rightFloat, bottomFloat)
+
+        val featureIndex = queryMapForFeatureIndex(
+            mapboxMap,
+            mapClickPointF,
+            clickRectF,
+            listOf(PRIMARY_ROUTE_LAYER_ID, PRIMARY_ROUTE_CASING_LAYER_ID)
+        )
+
+        if (featureIndex >= 0) {
+            return featureIndex
+        }
+
+        return queryMapForFeatureIndex(
+            mapboxMap,
+            mapClickPointF,
+            clickRectF,
+            listOf(ALTERNATIVE_ROUTE_LAYER_ID, ALTERNATIVE_ROUTE_CASING_LAYER_ID)
+        )
+    }
+
+    private fun queryMapForFeatureIndex(
+        mapboxMap: MapboxMap,
+        mapClickPointF: PointF,
+        clickRectF: RectF,
+        layerIds: List<String>
+    ): Int {
+        val featureIndex = mapboxMap.queryRenderedFeatures(
+            mapClickPointF,
+            *layerIds.toTypedArray()
+        ).run { getIndexOfFirstFeature(this) }
+
+        return when (featureIndex >= 0) {
+            true -> featureIndex
+            false -> mapboxMap.queryRenderedFeatures(
+                clickRectF,
+                *layerIds.toTypedArray()
+            ).run { getIndexOfFirstFeature(this) }
+        }
+    }
+
+    private fun getIndexOfFirstFeature(features: List<Feature>): Int {
+        return features.distinct().run {
+            routeFeatureData.indexOfFirst {
+                it.featureCollection.features()?.get(0) ?.id() ?: 0 == this.firstOrNull()?.id()
+            }
+        }
     }
 
     private fun getIdentifiableRouteFeatureDataProvider(directionsRoutes: List<IdentifiableRoute>):
@@ -1390,11 +1469,23 @@ internal class MapRouteLine(
                     route.geometry() ?: "",
                     Constants.PRECISION_6
                 )
-
+                val randomId = UUID.randomUUID().toString()
                 val routeFeature = when (identifier) {
-                    null -> Feature.fromGeometry(routeGeometry)
-                    else -> Feature.fromGeometry(routeGeometry).also {
-                        it.addBooleanProperty(identifier, true)
+                    null -> {
+                        Feature.fromGeometry(
+                            routeGeometry,
+                            null,
+                            randomId
+                        )
+                    }
+                    else -> {
+                        Feature.fromGeometry(
+                            routeGeometry,
+                            null,
+                            randomId
+                        ).also {
+                            it.addBooleanProperty(identifier, true)
+                        }
                     }
                 }
 

@@ -42,7 +42,6 @@ import com.mapbox.navigation.examples.utils.Utils;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 
-
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -52,10 +51,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import timber.log.Timber;
-
 import static com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY;
 import static com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle;
+import timber.log.Timber;
 
 /**
  * This activity demonstrates turn by turn navigation using the NavigationMapRoute class. This can
