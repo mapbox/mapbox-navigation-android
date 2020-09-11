@@ -460,7 +460,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
     settings.updateShouldUseDefaultPadding(mapPaddingAdjustor.isUsingDefault());
     settings.updateCameraTrackingMode(mapCamera.getCameraTrackingMode());
     settings.updateLocationFpsEnabled(locationFpsDelegate.isEnabled());
-    settings.updatePercentDistanceTraveled(mapRoute.getPercentDistanceTraveled());
     settings.updateVanishingRouteLineEnabled(vanishRouteLineEnabled);
     NavigationMapboxMapInstanceState instanceState = new NavigationMapboxMapInstanceState(settings);
     outState.putParcelable(STATE_BUNDLE_KEY, instanceState);
@@ -481,7 +480,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
       NavigationMapboxMapInstanceState instanceState = (NavigationMapboxMapInstanceState) parcelable;
       settings = instanceState.retrieveSettings();
       restoreMapWith(settings);
-      restoreVanishingRouteLineSection(settings);
     } else {
       Timber.d("no instance state to restore");
     }
@@ -986,14 +984,6 @@ public class NavigationMapboxMap implements LifecycleObserver {
     LatLng latLng = new LatLng(location);
     PointF mapPoint = mapboxMap.getProjection().toScreenLocation(latLng);
     mapWayName.updateWayNameWithPoint(mapPoint);
-  }
-
-  private void restoreVanishingRouteLineSection(@NonNull NavigationMapSettings settings) {
-    float percentDistanceTraveled = settings.retrievePercentDistanceTraveled();
-    if (percentDistanceTraveled > 0) {
-      mapRoute.updateRouteLineWithDistanceTraveled(percentDistanceTraveled);
-      settings.updatePercentDistanceTraveled(0);
-    }
   }
 
   private void restoreMapWith(@NonNull NavigationMapSettings settings) {
