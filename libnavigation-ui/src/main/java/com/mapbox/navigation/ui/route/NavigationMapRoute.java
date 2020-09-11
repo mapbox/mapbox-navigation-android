@@ -491,30 +491,6 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * Returns the percentage of the distance traveled that was last calculated. This is only
-   * calculated if the vanishing route line feature is enabled.
-   *
-   * @return the value calculated during the last progress update event or 0 if not enabled.
-   */
-  public float getPercentDistanceTraveled() {
-    return mapRouteProgressChangeListener.getPercentDistanceTraveled();
-  }
-
-  /**
-   * Can be used to manually update the percentage of route traveled.
-   *
-   * This is also invoked automatically when the vanishing route line feature is enabled and
-   * a new route progress update is delivered.
-   * @see #addProgressChangeListener(MapboxNavigation, boolean)
-   * @see #onNewRouteProgress(RouteProgress)
-   */
-  public void updateRouteLineWithDistanceTraveled(float distanceTraveled) {
-    routeLine.hideCasingLineAtOffset(distanceTraveled);
-    routeLine.hideRouteLineAtOffset(distanceTraveled);
-    mapRouteProgressChangeListener.updatePercentDistanceTraveled(distanceTraveled);
-  }
-
-  /**
    * The Builder of {@link NavigationMapRoute}.
    */
   public static class Builder {
