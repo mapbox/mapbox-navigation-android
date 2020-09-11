@@ -580,7 +580,6 @@ package com.mapbox.navigation.ui.route {
     method public void addProgressChangeListener(com.mapbox.navigation.core.MapboxNavigation);
     method public void addRoute(com.mapbox.api.directions.v5.models.DirectionsRoute!);
     method public void addRoutes(@Size(min=1) java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute>);
-    method public float getPercentDistanceTraveled();
     method public void onNewRouteProgress(com.mapbox.navigation.base.trip.model.RouteProgress);
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_START) protected void onStart();
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_STOP) protected void onStop();
@@ -589,7 +588,6 @@ package com.mapbox.navigation.ui.route {
     method public void setVanishRouteLineEnabled(boolean);
     method public void showAlternativeRoutes(boolean);
     method public void updateRouteArrowVisibilityTo(boolean);
-    method public void updateRouteLineWithDistanceTraveled(float);
     method public void updateRouteVisibilityTo(boolean);
   }
 
