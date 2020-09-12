@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.route
 
-
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.appcompat.content.res.AppCompatResources
@@ -13,33 +12,20 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.location.LocationComponentConstants
-import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.LineLayer
-import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineGradient
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer
-import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.location.LocationComponentConstants
+import com.mapbox.maps.plugin.style.expressions.Expression
+import com.mapbox.maps.plugin.style.expressions.dsl.rgba
+import com.mapbox.maps.plugin.style.expressions.dsl.step
+import com.mapbox.maps.plugin.style.layers.LineLayer
+import com.mapbox.maps.plugin.style.layers.getLayer
+import com.mapbox.maps.plugin.style.layers.properties.Visibility
+import com.mapbox.maps.plugin.style.sources.GeojsonSource
+import com.mapbox.maps.plugin.style.sources.geojsonSource
+import com.mapbox.maps.plugin.style.sources.updateGeoJSON
 import com.mapbox.navigation.ui.R
-import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
-import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
-import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_ORIGIN_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_KEY
-import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.*
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
@@ -82,7 +68,6 @@ internal class MapRouteLine(
     routeExpressionData: List<RouteLineExpressionData>,
     allRoutesVisible: Boolean,
     alternativesVisible: Boolean,
-    mapRouteSourceProvider: MapRouteSourceProvider,
     vanishPoint: Float,
     routeLineInitializedCallback: MapRouteLineInitializedCallback?
 ) {
@@ -101,7 +86,6 @@ internal class MapRouteLine(
         @androidx.annotation.StyleRes styleRes: Int,
         belowLayerId: String?,
         layerProvider: RouteLayerProvider,
-        mapRouteSourceProvider: MapRouteSourceProvider,
         routeLineInitializedCallback: MapRouteLineInitializedCallback?
     ) : this(
         context,
@@ -126,9 +110,9 @@ internal class MapRouteLine(
         FeatureCollection.fromFeatures(arrayOf())
     private val routeLineExpressionData = mutableListOf<RouteLineExpressionData>()
 
-    private var wayPointSource: GeoJsonSource
-    private val primaryRouteLineSource: GeoJsonSource
-    private val alternativeRouteLineSource: GeoJsonSource
+    private var wayPointSource: GeojsonSource
+    private val primaryRouteLineSource: GeojsonSource
+    private val alternativeRouteLineSource: GeojsonSource
     private val routeLayerIds = mutableSetOf<String>()
     private val directionsRoutes = mutableListOf<DirectionsRoute>()
     private val routeFeatureData = mutableListOf<RouteFeatureData>()
@@ -219,22 +203,22 @@ internal class MapRouteLine(
         )
     }
 
-    private val routeScale: Float by lazy {
+    private val routeScale: Double by lazy {
         getFloatStyledValue(
             R.styleable.MapboxStyleNavigationMapRoute_routeScale,
             1.0f,
             context,
             styleRes
-        )
+        ).toDouble()
     }
 
-    private val routeTrafficScale: Float by lazy {
+    private val routeTrafficScale: Double by lazy {
         getFloatStyledValue(
             R.styleable.MapboxStyleNavigationMapRoute_routeTrafficScale,
             1.0f,
             context,
             styleRes
-        )
+        ).toDouble()
     }
 
     private val roundedLineCap: Boolean by lazy {
@@ -309,13 +293,13 @@ internal class MapRouteLine(
         )
     }
 
-    private val alternativeRouteScale: Float by lazy {
+    private val alternativeRouteScale: Double by lazy {
         getFloatStyledValue(
             R.styleable.MapboxStyleNavigationMapRoute_alternativeRouteScale,
             1.0f,
             context,
             styleRes
-        )
+        ).toDouble()
     }
 
     /**
@@ -341,29 +325,24 @@ internal class MapRouteLine(
                 buildWayPointFeatureCollection(routeFeatureData.first().route)
         }
 
-        val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
-        wayPointSource = mapRouteSourceProvider.build(
-            WAYPOINT_SOURCE_ID,
-            drawnWaypointsFeatureCollection,
-            wayPointGeoJsonOptions
-        )
-        style.addSource(wayPointSource)
+        wayPointSource = geojsonSource(WAYPOINT_SOURCE_ID) {
+            featureCollection(drawnWaypointsFeatureCollection)
+            maxzoom(16)
+        }
+        style.addSource(WAYPOINT_SOURCE_ID, wayPointSource)
 
-        val routeLineGeoJsonOptions = GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
-        primaryRouteLineSource = mapRouteSourceProvider.build(
-            PRIMARY_ROUTE_SOURCE_ID,
-            drawnPrimaryRouteFeatureCollection,
-            routeLineGeoJsonOptions
-        )
-        style.addSource(primaryRouteLineSource)
+        primaryRouteLineSource = geojsonSource(PRIMARY_ROUTE_SOURCE_ID) {
+            featureCollection(drawnPrimaryRouteFeatureCollection)
+            maxzoom(16)
+            lineMetrics(true)
+        }
+        style.addSource(PRIMARY_ROUTE_SOURCE_ID, primaryRouteLineSource)
 
-        val alternativeRouteLineGeoJsonOptions =
-            GeoJsonOptions().withMaxZoom(16).withLineMetrics(true)
-        alternativeRouteLineSource = mapRouteSourceProvider.build(
-            ALTERNATIVE_ROUTE_SOURCE_ID,
-            drawnAlternativeRouteFeatureCollection,
-            alternativeRouteLineGeoJsonOptions
-        )
+        alternativeRouteLineSource = geojsonSource(ALTERNATIVE_ROUTE_SOURCE_ID) {
+            featureCollection(drawnAlternativeRouteFeatureCollection)
+            maxzoom(16)
+            lineMetrics(true)
+        }
         style.addSource(alternativeRouteLineSource)
 
         val originWaypointIcon = getResourceStyledValue(
@@ -387,9 +366,12 @@ internal class MapRouteLine(
         updateAlternativeLayersVisibility(alternativesVisible, routeLayerIds)
         updateAllLayersVisibility(allLayersAreVisible)
 
-        if (style.isFullyLoaded && routeFeatureData.isNotEmpty()) {
+        if (style.isFullyLoaded() && routeFeatureData.isNotEmpty()) {
             val expression = getExpressionAtOffset(vanishPointOffset)
-            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
+
+            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.let {
+                (it as LineLayer).lineGradient(expression)
+            }
             hideRouteLineAtOffset(vanishPointOffset)
             hideCasingLineAtOffset(vanishPointOffset)
         }
@@ -616,7 +598,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
 
         layerProvider.initializeAlternativeRouteLayer(
@@ -630,7 +612,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
 
         layerProvider.initializePrimaryRouteCasingLayer(
@@ -643,7 +625,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
 
         layerProvider.initializePrimaryRouteLayer(
@@ -657,7 +639,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
 
         layerProvider.initializePrimaryRouteTrafficLayer(
@@ -671,7 +653,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
 
         layerProvider.initializeWayPointLayer(
@@ -684,7 +666,7 @@ internal class MapRouteLine(
                 this,
                 belowLayerId
             )
-            routeLayerIds.add(this.id)
+            routeLayerIds.add(this.layerId)
         }
     }
 
@@ -707,9 +689,9 @@ internal class MapRouteLine(
     private fun drawPrimaryRoute(routeData: RouteFeatureData) {
         setPrimaryRoutesSource(routeData.featureCollection)
         updateRouteTrafficSegments(routeData)
-        if (style.isFullyLoaded) {
+        if (style.isFullyLoaded()) {
             val expression = getExpressionAtOffset(vanishPointOffset)
-            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
+            (style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) as LineLayer).lineGradient(expression)
         }
     }
 
@@ -760,15 +742,28 @@ internal class MapRouteLine(
                 listOf(fillerItem.copy(offset = distanceOffset)).plus(filteredItems)
             }
         }.map {
-            Expression.stop(
-                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+
+            // SBNOTE: this was a stop so I don't know if this will work.
+            // Mabye I need to create a step with a stop inside it
+            step {
+                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
                 Expression.color(it.segmentColor)
-            )
+            }
+
+//            Expression.stop(
+//                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+//                Expression.color(it.segmentColor)
+//            )
         }
 
         return Expression.step(
             Expression.lineProgress(),
-            Expression.rgba(0, 0, 0, 0),
+            rgba {
+                literal(0)
+                literal(0)
+                literal(0)
+                literal(0)
+            },
             *trafficExpressions.toTypedArray()
         )
     }
@@ -786,39 +781,39 @@ internal class MapRouteLine(
 
     private fun setPrimaryRoutesSource(featureCollection: FeatureCollection) {
         drawnPrimaryRouteFeatureCollection = featureCollection
-        primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
+        primaryRouteLineSource.updateGeoJSON(drawnPrimaryRouteFeatureCollection)
     }
 
     private fun setAlternativeRoutesSource(featureCollection: FeatureCollection) {
         drawnAlternativeRouteFeatureCollection = featureCollection
-        alternativeRouteLineSource.setGeoJson(drawnAlternativeRouteFeatureCollection)
+        alternativeRouteLineSource.updateGeoJSON(drawnAlternativeRouteFeatureCollection)
     }
 
     private fun setWaypointsSource(featureCollection: FeatureCollection) {
         drawnWaypointsFeatureCollection = featureCollection
-        wayPointSource.setGeoJson(drawnWaypointsFeatureCollection)
+        wayPointSource.updateGeoJSON(drawnWaypointsFeatureCollection)
     }
 
     private fun updateAlternativeLayersVisibility(
         isAlternativeVisible: Boolean,
         routeLayerIds: Set<String>
     ) {
-        if (style.isFullyLoaded) {
+        if (style.isFullyLoaded()) {
             routeLayerIds.filter {
                 it == RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID ||
                     it == RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
             }.mapNotNull { style.getLayer(it) }.forEach {
-                (it as LineLayer).setFilter(Expression.literal(isAlternativeVisible))
+                (it as LineLayer).filter(Expression.literal(isAlternativeVisible))
             }
         }
     }
 
     private fun updateAllLayersVisibility(areVisible: Boolean) {
-        val visPropertyValue = if (areVisible) Property.VISIBLE else Property.NONE
+        val visPropertyValue = if (areVisible) Visibility.VISIBLE else Visibility.NONE
 
-        if (style.isFullyLoaded) {
+        if (style.isFullyLoaded()) {
             routeLayerIds.mapNotNull { style.getLayer(it) }.map {
-                it.setProperties(PropertyFactory.visibility(visPropertyValue))
+                it.visibility(visPropertyValue)
             }
         }
     }
@@ -858,14 +853,21 @@ internal class MapRouteLine(
         val expression = Expression.step(
             Expression.lineProgress(),
             Expression.color(routeLineCasingTraveledColor),
-            Expression.stop(
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+
+            step {
+                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
                 Expression.color(routeCasingColor)
-            )
+            }
+//
+//            Expression.stop(
+//                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+//                Expression.color(routeCasingColor)
+//            )
         )
-        if (style.isFullyLoaded) {
-            style.getLayerAs<LineLayer>(RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID)
-                ?.setProperties(lineGradient(expression))
+        if (style.isFullyLoaded()) {
+            if (style.layerExists(PRIMARY_ROUTE_CASING_LAYER_ID)) {
+                (style.getLayer(PRIMARY_ROUTE_CASING_LAYER_ID) as LineLayer).lineGradient(expression)
+            }
         }
     }
 
@@ -878,17 +880,21 @@ internal class MapRouteLine(
         val expression = Expression.step(
             Expression.lineProgress(),
             Expression.color(routeLineTraveledColor),
-            Expression.stop(
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+
+            step {
+                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
                 Expression.color(routeDefaultColor)
-            )
+            }
+
+//            Expression.stop(
+//                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+//                Expression.color(routeDefaultColor)
+//            )
         )
-        if (style.isFullyLoaded) {
-            style.getLayer(PRIMARY_ROUTE_LAYER_ID)?.setProperties(
-                lineGradient(
-                    expression
-                )
-            )
+        if (style.isFullyLoaded()) {
+            if (style.layerExists(PRIMARY_ROUTE_LAYER_ID)) {
+                (style.getLayer(PRIMARY_ROUTE_LAYER_ID) as LineLayer).lineGradient(expression)
+            }
         }
     }
 
@@ -898,12 +904,10 @@ internal class MapRouteLine(
      * @param expression the Expression to apply to the layer properties
      */
     fun decorateRouteLine(expression: Expression) {
-        if (style.isFullyLoaded) {
-            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(
-                lineGradient(
-                    expression
-                )
-            )
+        if (style.isFullyLoaded()) {
+            if (style.layerExists(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)) {
+                (style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID) as LineLayer).lineGradient(expression)
+            }
         }
     }
 
@@ -1010,10 +1014,9 @@ internal class MapRouteLine(
          */
         fun getBelowLayer(layerId: String?, style: Style): String {
             return when (layerId.isNullOrEmpty()) {
-                false -> style.layers.firstOrNull { it.id == layerId }?.id
-                true ->
-                    style.layers.reversed().filter { it !is SymbolLayer }
-                        .firstOrNull { !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) }
+                false -> style.getLayers().firstOrNull { it.id == layerId }?.id
+                true -> style.getLayers().reversed().filterNot { it.type.toLowerCase() == "symbol" }
+                        .firstOrNull { !it.id.contains(MAPBOX_LOCATION_ID) }
                         ?.id
             } ?: LocationComponentConstants.SHADOW_LAYER
         }
