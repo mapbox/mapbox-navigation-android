@@ -85,7 +85,7 @@ dependencies {
     implementation project(':librouteline')
     implementation dependenciesList.mapboxAndroidCommon
     implementation dependenciesList.mapboxLogger
-    implementation dependenciesList.mapboxAnnotationPlugin
+    //implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxSdkTurf
 
     // test

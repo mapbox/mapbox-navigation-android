@@ -1,31 +1,18 @@
 package com.mapbox.navigation.ui.route
 
 import android.graphics.drawable.Drawable
-import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.expressions.Expression.color
-import com.mapbox.mapboxsdk.style.expressions.Expression.eq
-import com.mapbox.mapboxsdk.style.expressions.Expression.exponential
-import com.mapbox.mapboxsdk.style.expressions.Expression.get
-import com.mapbox.mapboxsdk.style.expressions.Expression.interpolate
-import com.mapbox.mapboxsdk.style.expressions.Expression.literal
-import com.mapbox.mapboxsdk.style.expressions.Expression.match
-import com.mapbox.mapboxsdk.style.expressions.Expression.product
-import com.mapbox.mapboxsdk.style.expressions.Expression.stop
-import com.mapbox.mapboxsdk.style.expressions.Expression.switchCase
-import com.mapbox.mapboxsdk.style.expressions.Expression.zoom
-import com.mapbox.mapboxsdk.style.layers.LineLayer
-import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconPitchAlignment
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineCap
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineColor
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineJoin
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineWidth
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.maps.Style
+import com.mapbox.maps.plugin.style.expressions.Expression
+import com.mapbox.maps.plugin.style.expressions.Expression.Companion.color
+import com.mapbox.maps.plugin.style.expressions.Expression.Companion.switchCase
+import com.mapbox.maps.plugin.style.expressions.dsl.eq
+import com.mapbox.maps.plugin.style.expressions.dsl.interpolate
+import com.mapbox.maps.plugin.style.expressions.dsl.match
+import com.mapbox.maps.plugin.style.layers.LineLayer
+import com.mapbox.maps.plugin.style.layers.SymbolLayer
+import com.mapbox.maps.plugin.style.layers.properties.IconPitchAlignment
+import com.mapbox.maps.plugin.style.layers.properties.LineCap
+import com.mapbox.maps.plugin.style.layers.properties.LineJoin
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
@@ -53,45 +40,116 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
     ): List<Expression> {
         val expressions = mutableListOf<Expression>(
-            eq(get(DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER), true),
+            eq {
+                get { DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER }
+                literal(true)
+            },
             color(defaultColor)
         )
         routeStyleDescriptors.forEach {
-            expressions.add(eq(get(it.routeIdentifier), true))
+            expressions.add(eq {
+                get { it.routeIdentifier }
+                literal(true)
+            })
             expressions.add(color(routeColorProvider.get(it)))
         }
         return expressions.plus(color(defaultColor))
     }
 
-    fun getRouteLineWidthExpressions(scale: Float): Expression {
-        return interpolate(
-            exponential(1.5f),
-            zoom(),
-            stop(4f, product(literal(3f), literal(scale))),
-            stop(10f, product(literal(4f), literal(scale))),
-            stop(13f, product(literal(6f), literal(scale))),
-            stop(16f, product(literal(10f), literal(scale))),
-            stop(19f, product(literal(14f), literal(scale))),
-            stop(22f, product(literal(18f), literal(scale)))
-        )
+    fun getRouteLineWidthExpressions(scale: Double): Expression {
+        return interpolate {
+            exponential { literal(1.5) }
+            zoom()
+            stop {
+               literal(4.0)
+               product {
+                   literal(3.0)
+                   literal(scale)
+               }
+            }
+            stop {
+                literal(10.0)
+                product {
+                    literal(4.0)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(13.0)
+                product {
+                    literal(6.0)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(16.0)
+                product {
+                    literal(10.0)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(19.0)
+                product {
+                    literal(14.0)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(22.0)
+                product {
+                    literal(18.0)
+                    literal(scale)
+                }
+            }
+        }
     }
 
-    fun getCasingLineWidthExpression(scale: Float): Expression {
-        return interpolate(
-            exponential(1.5f),
-            zoom(),
-            stop(10f, 7f),
-            stop(14f, product(literal(10.5f), literal(scale))),
-            stop(16.5f, product(literal(15.5f), literal(scale))),
-            stop(19f, product(literal(24f), literal(scale))),
-            stop(22f, product(literal(29f), literal(scale)))
-        )
+    fun getCasingLineWidthExpression(scale: Double): Expression {
+        return interpolate {
+            exponential {
+                literal(1.5)
+            }
+            zoom()
+            stop {
+                literal(10.0)
+                literal(7.0)
+            }
+            stop {
+                literal(14.0)
+                product {
+                    literal(10.5)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(16.5)
+                product {
+                    literal(15.5)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(19.0)
+                product {
+                    literal(24.0)
+                    literal(scale)
+                }
+            }
+            stop {
+                literal(22.0)
+                product {
+                    literal(29.0)
+                    literal(scale)
+                }
+            }
+        }
     }
 
     override fun initializePrimaryRouteLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
+        scale: Double,
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
@@ -110,7 +168,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     override fun initializePrimaryRouteTrafficLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
+        scale: Double,
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getRouteLineWidthExpressions(scale)
@@ -128,7 +186,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     override fun initializePrimaryRouteCasingLayer(
         style: Style,
-        scale: Float,
+        scale: Double,
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
@@ -147,7 +205,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     override fun initializeAlternativeRouteLayer(
         style: Style,
         roundedLineCap: Boolean,
-        scale: Float,
+        scale: Double,
         color: Int
     ): LineLayer {
         val lineWidthExpression = getRouteLineWidthExpressions(scale)
@@ -165,7 +223,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
 
     override fun initializeAlternativeRouteCasingLayer(
         style: Style,
-        scale: Float,
+        scale: Double,
         color: Int
     ): LineLayer {
         val lineWidthScaleExpression = getCasingLineWidthExpression(scale)
@@ -186,7 +244,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         originIcon: Drawable,
         destinationIcon: Drawable
     ): SymbolLayer {
-        style.getLayerAs<SymbolLayer>(WAYPOINT_LAYER_ID)?.let {
+        if (style.layerExists(WAYPOINT_LAYER_ID)) {
             style.removeLayer(WAYPOINT_LAYER_ID)
         }
 
@@ -198,29 +256,48 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             style.addImage(DESTINATION_MARKER_NAME, it)
         }
 
-        return SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID).withProperties(
-            iconImage(
-                match(
-                    Expression.toString(get(WAYPOINT_PROPERTY_KEY)),
-                    literal(ORIGIN_MARKER_NAME),
-                    stop(WAYPOINT_ORIGIN_VALUE, literal(ORIGIN_MARKER_NAME)),
-                    stop(WAYPOINT_DESTINATION_VALUE, literal(DESTINATION_MARKER_NAME))
-                )
-            ),
-            iconSize(
-                interpolate(
-                    exponential(1.5f),
-                    zoom(),
-                    stop(0f, 0.6f),
-                    stop(10f, 0.8f),
-                    stop(12f, 1.3f),
-                    stop(22f, 2.8f)
-                )
-            ),
-            iconPitchAlignment(Property.ICON_PITCH_ALIGNMENT_MAP),
-            iconAllowOverlap(true),
-            iconIgnorePlacement(true)
-        )
+        return SymbolLayer(WAYPOINT_LAYER_ID, WAYPOINT_SOURCE_ID)
+            .iconImage(
+                match {
+                    toString {
+                        get { literal(WAYPOINT_PROPERTY_KEY) }
+                    }
+                    literal(ORIGIN_MARKER_NAME)
+                    stop {
+                        WAYPOINT_ORIGIN_VALUE
+                        literal(ORIGIN_MARKER_NAME)
+                    }
+                    stop {
+                        WAYPOINT_DESTINATION_VALUE
+                        literal(DESTINATION_MARKER_NAME)
+                    }
+                }
+            )
+            .iconSize(
+                interpolate {
+                    exponential { literal(1.5) }
+                    zoom()
+                    stop {
+                        literal(0.0)
+                        literal(0.6)
+                    }
+                    stop {
+                        literal(10.0)
+                        literal(0.8)
+                    }
+                    stop {
+                        literal(12.0)
+                        literal(1.3)
+                    }
+                    stop {
+                        literal(22.0)
+                        literal(2.8)
+                    }
+                }
+            )
+            .iconPitchAlignment(IconPitchAlignment.MAP)
+            .iconAllowOverlap(true)
+            .iconIgnorePlacement(true)
     }
 
     private fun initializeRouteLayer(
@@ -231,29 +308,26 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         lineWidthExpression: Expression,
         colorExpressions: List<Expression>
     ): LineLayer {
-        style.getLayerAs<LineLayer>(layerId)?.let {
-            style.removeLayer(it)
+        if (style.layerExists(layerId)) {
+            style.removeLayer(layerId)
         }
 
         val lineCapValue = when (roundedLineCap) {
-            true -> Property.LINE_CAP_ROUND
-            false -> Property.LINE_CAP_BUTT
+            true -> LineCap.ROUND
+            false -> LineCap.BUTT
         }
 
         val lineJoinValue = when (roundedLineCap) {
-            true -> Property.LINE_JOIN_ROUND
-            false -> Property.LINE_JOIN_BEVEL
+            true -> LineJoin.ROUND
+            false -> LineJoin.BEVEL
         }
 
-        return LineLayer(layerId, layerSourceId).withProperties(
-            lineCap(lineCapValue),
-            lineJoin(lineJoinValue),
-            lineWidth(lineWidthExpression),
-            lineColor(
-                switchCase(
-                    *colorExpressions.toTypedArray()
-                )
+        return LineLayer(layerId, layerSourceId)
+            .lineCap(lineCapValue)
+            .lineJoin(lineJoinValue)
+            .lineWidth(lineWidthExpression)
+            .lineColor(
+                switchCase(*colorExpressions.toTypedArray())
             )
-        )
     }
 }
