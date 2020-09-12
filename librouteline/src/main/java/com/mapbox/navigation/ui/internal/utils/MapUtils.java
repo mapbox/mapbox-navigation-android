@@ -2,9 +2,8 @@ package com.mapbox.navigation.ui.internal.utils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.maps.Style;
+import com.mapbox.maps.plugin.style.layers.Layer;
 
 /**
  * Utils class useful for performing map operations such as adding sources, layers, and more.
@@ -25,6 +24,10 @@ public final class MapUtils {
    */
   public static void addLayerToMap(@NonNull Style style, @NonNull Layer layer,
       @Nullable String idBelowLayer) {
+
+    style.addLayer()
+
+
     if (layer != null && style.getLayer(layer.getId()) != null) {
       return;
     }

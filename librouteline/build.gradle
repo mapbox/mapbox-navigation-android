@@ -71,7 +71,9 @@ dependencies {
     implementation dependenciesList.mapboxSdkTurf
 
     // Mapbox Maps SDK
-    api "com.mapbox.maps:android:10.0.0-beta.2"
+    api "com.mapbox.maps:android:10.0.0-beta.3"
+    api "com.mapbox.plugin:maps-style:10.0.0-beta.3"
+    api "com.mapbox.plugin:maps-location:10.0.0-beta.3"
 
     //implementation dependenciesList.mapboxAnnotationPlugin
 
