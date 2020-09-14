@@ -12,6 +12,7 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.maps.plugin.style.expressions.Expression
@@ -97,7 +98,6 @@ internal class MapRouteLine(
         listOf(),
         true,
         true,
-        mapRouteSourceProvider,
         0f,
         routeLineInitializedCallback
     )
@@ -329,21 +329,21 @@ internal class MapRouteLine(
             featureCollection(drawnWaypointsFeatureCollection)
             maxzoom(16)
         }
-        style.addSource(WAYPOINT_SOURCE_ID, wayPointSource)
+        wayPointSource.bindTo(style)
 
         primaryRouteLineSource = geojsonSource(PRIMARY_ROUTE_SOURCE_ID) {
             featureCollection(drawnPrimaryRouteFeatureCollection)
             maxzoom(16)
             lineMetrics(true)
         }
-        style.addSource(PRIMARY_ROUTE_SOURCE_ID, primaryRouteLineSource)
+        primaryRouteLineSource.bindTo(style)
 
         alternativeRouteLineSource = geojsonSource(ALTERNATIVE_ROUTE_SOURCE_ID) {
             featureCollection(drawnAlternativeRouteFeatureCollection)
             maxzoom(16)
             lineMetrics(true)
         }
-        style.addSource(alternativeRouteLineSource)
+        alternativeRouteLineSource.bindTo(style)
 
         val originWaypointIcon = getResourceStyledValue(
             R.styleable.MapboxStyleNavigationMapRoute_originWaypointIcon,
@@ -467,7 +467,7 @@ internal class MapRouteLine(
      */
     fun getTopLayerId(): String {
         return if (routeLayerIds.isEmpty()) {
-            LocationComponentConstants.SHADOW_LAYER
+            LocationComponentConstants.FOREGROUND_LAYER //fixme is this correct???
         } else {
             routeLayerIds.last()
         }
@@ -593,11 +593,15 @@ internal class MapRouteLine(
             alternativeRouteScale,
             alternativeRouteCasingColor
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+
+            this.bindTo(style)
+
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
 
@@ -607,11 +611,12 @@ internal class MapRouteLine(
             alternativeRouteScale,
             alternativeRouteDefaultColor
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
 
@@ -634,11 +639,12 @@ internal class MapRouteLine(
             routeScale,
             routeDefaultColor
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
 
@@ -648,11 +654,12 @@ internal class MapRouteLine(
             routeTrafficScale,
             routeDefaultColor
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
 
@@ -661,11 +668,12 @@ internal class MapRouteLine(
             originIcon,
             destinationIcon
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
     }
@@ -1018,7 +1026,7 @@ internal class MapRouteLine(
                 true -> style.getLayers().reversed().filterNot { it.type.toLowerCase() == "symbol" }
                         .firstOrNull { !it.id.contains(MAPBOX_LOCATION_ID) }
                         ?.id
-            } ?: LocationComponentConstants.SHADOW_LAYER
+            } ?: LocationComponentConstants.FOREGROUND_LAYER //fixme is this the correct layer???
         }
 
         /**
