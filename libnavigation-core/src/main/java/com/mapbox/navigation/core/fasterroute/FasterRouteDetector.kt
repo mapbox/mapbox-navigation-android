@@ -13,7 +13,7 @@ internal class FasterRouteDetector(
         alternativeRoute: DirectionsRoute,
         routeProgress: RouteProgress
     ): Boolean = withContext(ThreadController.IODispatcher) {
-        val alternativeDuration = alternativeRoute.duration() ?: return@withContext false
+        val alternativeDuration = alternativeRoute.duration()
         val weightedDuration = routeProgress.durationRemaining * PERCENTAGE_THRESHOLD
         val isRouteFaster = alternativeDuration < weightedDuration
         return@withContext isRouteFaster && routeComparator.isRouteDescriptionDifferent(
