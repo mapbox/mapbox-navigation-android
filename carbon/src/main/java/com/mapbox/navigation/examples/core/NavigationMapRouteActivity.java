@@ -9,29 +9,31 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.maps.*;
-import com.mapbox.maps.plugin.delegates.MapPluginProviderDelegate;
 import com.mapbox.maps.plugin.gesture.GesturePluginImpl;
 import com.mapbox.maps.plugin.gesture.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
 import com.mapbox.maps.plugin.location.LocationComponentPlugin;
 import com.mapbox.maps.plugin.location.modes.CameraMode;
 import com.mapbox.maps.plugin.location.modes.RenderMode;
+import com.mapbox.navigation.base.internal.route.RouteUrl;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
@@ -59,11 +61,16 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
   private NavigationMapRoute navigationMapRoute;
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
   private MapboxNavigation mapboxNavigation;
+  private Button startNavigation;
+  private ProgressBar routeLoading;
+  private DirectionsRoute activeRoute;
 
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
     mapView = findViewById(R.id.mapView);
+    startNavigation = findViewById(R.id.startNavigation);
+    routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
 
     if (LocationPermissionsHelper.areLocationPermissionsGranted(this) == true) {
@@ -84,6 +91,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
       //mapboxNavigation = new MapboxNavigation(navigationOptions);
       //mapboxNavigation.registerLocationObserver(locationObserver);
       //mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
+
       //mapboxReplayer.pushRealLocation(this, 0.0);
       //mapboxReplayer.play();
 
@@ -94,13 +102,16 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
           .withMapboxNavigation(mapboxNavigation)
           .build();
 
-      CameraOptions cameraOptions = new CameraOptions.Builder().center(Point.fromLngLat(-122.396817, 37.788009)).zoom(13.0).build();
-      mapboxMap.jumpTo(cameraOptions);
-      navigationMapRoute.addRoute(getRoute());
-
 
       //getLocationComponent().getLocationEngine().getLastLocation(locationEngineCallback);
       //getGesturePlugin().addOnMapLongClickListener(this);
+
+
+      //fixme temporary
+      CameraOptions cameraOptions = new CameraOptions.Builder().center(Point.fromLngLat(-122.396817, 37.788009)).zoom(13.0).build();
+      mapboxMap.jumpTo(cameraOptions);
+      navigationMapRoute.addRoute(getRoute());
+      //fixme end temporary
 
     }, (mapLoadError, s) -> Timber.e("Error loading map: " + mapLoadError.name()));
   }
@@ -121,10 +132,60 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
   }
 
   @Override public boolean onMapLongClick(@NotNull Point point) {
-    //CameraOptions cameraOptions = new CameraOptions.Builder().center(point).zoom(15.0).build();
-    //mapboxMap.jumpTo(cameraOptions);
+    vibrate();
+    hideRoute();
+
+    Location currentLocation = getLocationComponent().getLastKnownLocation();
+    if (currentLocation != null) {
+      Point originPoint = Point.fromLngLat(
+          currentLocation.getLongitude(),
+          currentLocation.getLatitude()
+      );
+      findRoute(originPoint, point);
+      routeLoading.setVisibility(View.VISIBLE);
+    }
     return false;
   }
+
+  public void findRoute(Point origin, Point destination) {
+    RouteOptions routeOptions = RouteOptions.builder()
+        .baseUrl(RouteUrl.BASE_URL)
+        .user(RouteUrl.PROFILE_DEFAULT_USER)
+        .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
+        .geometries(RouteUrl.GEOMETRY_POLYLINE6)
+        .requestUuid("")
+        .accessToken(getMapboxAccessTokenFromResources())
+        .coordinates(Arrays.asList(origin, destination))
+        .alternatives(false)
+        .build();
+
+    mapboxNavigation.requestRoutes(
+        routeOptions,
+        routesReqCallback
+    );
+  }
+
+  private RoutesRequestCallback routesReqCallback = new RoutesRequestCallback() {
+    @Override
+    public void onRoutesReady(@NotNull List<? extends DirectionsRoute> routes) {
+      if (!routes.isEmpty()) {
+        activeRoute = routes.get(0);
+        navigationMapRoute.addRoutes(routes);
+        routeLoading.setVisibility(View.INVISIBLE);
+        startNavigation.setVisibility(View.VISIBLE);
+      }
+    }
+
+    @Override
+    public void onRoutesRequestFailure(@NotNull Throwable throwable, @NotNull RouteOptions routeOptions) {
+      Timber.e("route request failure %s", throwable.toString());
+    }
+
+    @Override
+    public void onRoutesRequestCanceled(@NotNull RouteOptions routeOptions) {
+      Timber.d("route request canceled");
+    }
+  };
 
   @SuppressLint("MissingPermission")
   private void vibrate() {
@@ -137,6 +198,11 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
     } else {
       vibrator.vibrate(ONE_HUNDRED_MILLISECONDS);
     }
+  }
+
+  private void hideRoute() {
+    navigationMapRoute.updateRouteVisibilityTo(false);
+    startNavigation.setVisibility(View.GONE);
   }
 
   @SuppressWarnings("MissingPermission")
