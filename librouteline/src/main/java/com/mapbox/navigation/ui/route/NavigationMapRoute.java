@@ -9,6 +9,7 @@ import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +46,9 @@ public class NavigationMapRoute implements LifecycleObserver {
   @NonNull
   private final MapView mapView;
   private MapRouteLine routeLine;
+
+  @Nullable
+  private MapboxNavigation navigation;
 
   @NonNull
   private final LifecycleOwner lifecycleOwner;
@@ -160,6 +164,15 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   private void registerLifecycleObserver() {
     lifecycleOwner.getLifecycle().addObserver(this);
+  }
+
+  /**
+   * Hides all routes on the map drawn by this class.
+   *
+   * @param isVisible true to show routes, false to hide
+   */
+  public void updateRouteVisibilityTo(boolean isVisible) {
+    routeLine.updateVisibilityTo(isVisible);
   }
 
   /**
