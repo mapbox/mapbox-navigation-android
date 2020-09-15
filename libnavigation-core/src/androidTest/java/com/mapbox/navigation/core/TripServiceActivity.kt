@@ -8,7 +8,6 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
-import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
 import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
 import com.mapbox.navigation.base.internal.extensions.inferDeviceLocale
@@ -67,24 +66,19 @@ internal class TripServiceActivity : AppCompatActivity() {
         }
     }
 
-    private fun paramsProvider(type: MapboxModuleType): Array<ModuleProviderArgument> {
-        return when (type) {
-            MapboxModuleType.NavigationTripNotification -> {
-                val formatter = MapboxDistanceFormatter.Builder(this)
-                    .roundingIncrement(Rounding.INCREMENT_FIFTY)
-                    .unitType(METRIC)
-                    .locale(inferDeviceLocale())
-                    .build()
+    private fun paramsProvider(type: MapboxModuleType): Array<Pair<Class<*>?, Any?>> {
+        val formatter = MapboxDistanceFormatter.Builder(this)
+            .roundingIncrement(Rounding.INCREMENT_FIFTY)
+            .unitType(METRIC)
+            .locale(inferDeviceLocale())
+            .build()
 
-                val options = NavigationOptions.Builder(applicationContext)
-                    .distanceFormatter(formatter)
-                    .timeFormatType(TWENTY_FOUR_HOURS)
-                    .build()
+        val options = NavigationOptions.Builder(applicationContext)
+            .distanceFormatter(formatter)
+            .timeFormatType(TWENTY_FOUR_HOURS)
+            .build()
 
-                arrayOf(ModuleProviderArgument(NavigationOptions::class.java, options))
-            }
-            else -> throw IllegalArgumentException("not supported: $type")
-        }
+        return arrayOf(NavigationOptions::class.java to options)
     }
 
     private fun stopService() {
