@@ -61,7 +61,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             expressions.add(color(routeColorProvider.get(it)))
         }
         return expressions.plus(color(defaultColor))
-    }
+    } //[["==", ["get", "mapboxDescriptorPlaceHolderUnused"], true], ["rgba", 114.0, 126.0, 141.0, 1.0], ["rgba", 114.0, 126.0, 141.0, 1.0]]
 
     fun getRouteLineWidthExpressions(scale: Float): Expression {
         return interpolate(
