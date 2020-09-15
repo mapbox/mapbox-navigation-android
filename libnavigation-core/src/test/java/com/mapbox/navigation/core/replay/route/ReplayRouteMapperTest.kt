@@ -4,6 +4,7 @@ import android.location.Location
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.geojson.Point
 import com.mapbox.navigation.core.replay.history.ReplayEventUpdateLocation
 import io.mockk.every
 import io.mockk.mockk
@@ -101,6 +102,25 @@ class ReplayRouteMapperTest {
                 " and DirectionsCriteria.ANNOTATION_DISTANCE",
             failureMessage
         )
+    }
+
+    @Test
+    fun `should convert point to replay location`() {
+        val point: Point = mockk {
+            every { latitude() } returns 34.691564
+            every { longitude() } returns 135.491059
+        }
+
+        val replayLocation = ReplayRouteMapper.mapToUpdateLocation(100.0, point)
+
+        assertEquals(100.0, replayLocation.eventTimestamp, 0.01)
+        assertEquals(34.691564, replayLocation.location.lat, 0.000001)
+        assertEquals(135.491059, replayLocation.location.lon, 0.000001)
+        assertEquals("ReplayRoute", replayLocation.location.provider)
+        assertNull(replayLocation.location.altitude)
+        assertNull(replayLocation.location.accuracyHorizontal)
+        assertNull(replayLocation.location.bearing)
+        assertNull(replayLocation.location.speed)
     }
 
     private fun resourceAsString(
