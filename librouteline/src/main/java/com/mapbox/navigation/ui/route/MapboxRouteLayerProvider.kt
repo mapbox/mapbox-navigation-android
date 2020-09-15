@@ -41,7 +41,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): List<Expression> {
         val expressions = mutableListOf<Expression>(
             eq {
-                get { DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER }
+                get { literal(DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
                 literal(true)
             },
             color(defaultColor)
