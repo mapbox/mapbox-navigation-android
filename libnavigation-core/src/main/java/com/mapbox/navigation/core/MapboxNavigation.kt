@@ -14,7 +14,6 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.common.module.provider.MapboxModuleProvider
-import com.mapbox.common.module.provider.ModuleProviderArgument
 import com.mapbox.navigation.base.internal.VoiceUnit
 import com.mapbox.navigation.base.internal.accounts.UrlSkuTokenProvider
 import com.mapbox.navigation.base.options.NavigationOptions
@@ -750,37 +749,37 @@ class MapboxNavigation(
     /**
      * Provides parameters for Mapbox default modules, recursively if a module depends on other Mapbox modules.
      */
-    private fun paramsProvider(type: MapboxModuleType): Array<ModuleProviderArgument> {
+    private fun paramsProvider(type: MapboxModuleType): Array<Pair<Class<*>?, Any?>> {
         return when (type) {
             MapboxModuleType.NavigationRouter -> arrayOf(
-                ModuleProviderArgument(
-                    String::class.java,
-                    accessToken ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)
+                String::class.java to (
+                    accessToken
+                        ?: throw RuntimeException(MAPBOX_NAVIGATION_TOKEN_EXCEPTION_ROUTER)
+                    ),
+                Context::class.java to navigationOptions.applicationContext,
+                UrlSkuTokenProvider::class.java to MapboxNavigationAccounts.getInstance(
+                    navigationOptions.applicationContext
                 ),
-                ModuleProviderArgument(Context::class.java, navigationOptions.applicationContext),
-                ModuleProviderArgument(
-                    UrlSkuTokenProvider::class.java,
-                    MapboxNavigationAccounts.getInstance(navigationOptions.applicationContext)
-                ),
-                ModuleProviderArgument(
-                    MapboxNativeNavigator::class.java,
-                    MapboxNativeNavigatorImpl
-                ),
-                ModuleProviderArgument(Logger::class.java, logger),
-                ModuleProviderArgument(
-                    NetworkStatusService::class.java,
-                    NetworkStatusService(navigationOptions.applicationContext)
-                )
+                MapboxNativeNavigator::class.java to MapboxNativeNavigatorImpl,
+                Logger::class.java to logger,
+                NetworkStatusService::class.java
+                    to NetworkStatusService(navigationOptions.applicationContext)
             )
             MapboxModuleType.NavigationTripNotification -> arrayOf(
-                ModuleProviderArgument(NavigationOptions::class.java, navigationOptions)
+                NavigationOptions::class.java to navigationOptions
             )
             MapboxModuleType.CommonLogger -> arrayOf()
             MapboxModuleType.CommonLibraryLoader ->
                 throw IllegalArgumentException("not supported: $type")
             MapboxModuleType.CommonHttpClient ->
                 throw IllegalArgumentException("not supported: $type")
-            MapboxModuleType.MapTelemetry -> throw IllegalArgumentException("not supported: $type")
+            // to be removed with the upcoming common lib version
+            MapboxModuleType.NavigationOffboardRouter ->
+                throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.NavigationOnboardRouter ->
+                throw IllegalArgumentException("not supported: $type")
+            MapboxModuleType.MapTelemetry ->
+                throw IllegalArgumentException("not supported: $type")
         }
     }
 

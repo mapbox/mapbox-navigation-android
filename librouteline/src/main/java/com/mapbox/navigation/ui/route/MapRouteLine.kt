@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.DirectionsRoute.IdentifiableRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
@@ -16,6 +15,8 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.maps.plugin.style.expressions.Expression
+import com.mapbox.maps.plugin.style.expressions.dsl.interpolate
+import com.mapbox.maps.plugin.style.expressions.dsl.literal
 import com.mapbox.maps.plugin.style.expressions.dsl.rgba
 import com.mapbox.maps.plugin.style.expressions.dsl.step
 import com.mapbox.maps.plugin.style.layers.LineLayer
@@ -549,7 +550,7 @@ internal class MapRouteLine(
     fun getLineStringForRoute(route: DirectionsRoute): LineString {
         return routeFeatureData.firstOrNull {
             it.route == route
-        }?.lineString ?: LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+        }?.lineString ?: LineString.fromPolyline(route.geometry()!!, 6) //Constants.PRECISION_6
     }
 
     private fun getIdentifiableRouteFeatureDataProvider(
@@ -594,8 +595,6 @@ internal class MapRouteLine(
             alternativeRouteCasingColor
         ).apply {
             this.bindTo(style, LayerPosition(null, belowLayerId, null))
-
-            this.bindTo(style)
 
 //            MapUtils.addLayerToMap(
 //                style,
@@ -733,9 +732,19 @@ internal class MapRouteLine(
      * @return the Expression that can be used in a Layer's properties.
      */
     fun getExpressionAtOffset(distanceOffset: Float): Expression {
+        val expressionBuilder = Expression.ExpressionBuilder("step")
+        expressionBuilder.lineProgress()
+        expressionBuilder.stop {
+            rgba {
+                literal(0.0)
+                literal(0.0)
+                literal(0.0)
+                literal(0.0)
+            }
+        }
         vanishPointOffset = distanceOffset
         val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
-        val trafficExpressions = when (filteredItems.isEmpty()) {
+        when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
                 true -> listOf(RouteLineExpressionData(distanceOffset, routeUnknownColor))
                 false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
@@ -749,31 +758,14 @@ internal class MapRouteLine(
                 }
                 listOf(fillerItem.copy(offset = distanceOffset)).plus(filteredItems)
             }
-        }.map {
-
-            // SBNOTE: this was a stop so I don't know if this will work.
-            // Mabye I need to create a step with a stop inside it
-            step {
-                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
-                Expression.color(it.segmentColor)
+        }.forEach {
+            expressionBuilder.stop {
+                literal(it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN).toDouble())
+                color(it.segmentColor)
             }
-
-//            Expression.stop(
-//                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
-//                Expression.color(it.segmentColor)
-//            )
         }
 
-        return Expression.step(
-            Expression.lineProgress(),
-            rgba {
-                literal(0)
-                literal(0)
-                literal(0)
-                literal(0)
-            },
-            *trafficExpressions.toTypedArray()
-        )
+        return expressionBuilder.build()
     }
 
     fun clearRouteData() {
@@ -806,12 +798,14 @@ internal class MapRouteLine(
         isAlternativeVisible: Boolean,
         routeLayerIds: Set<String>
     ) {
+        val visPropertyValue = if (isAlternativeVisible) Visibility.VISIBLE else Visibility.NONE
+
         if (style.isFullyLoaded()) {
             routeLayerIds.filter {
                 it == RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID ||
                     it == RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
             }.mapNotNull { style.getLayer(it) }.forEach {
-                (it as LineLayer).filter(Expression.literal(isAlternativeVisible))
+                it.visibility(visPropertyValue)
             }
         }
     }
@@ -858,20 +852,14 @@ internal class MapRouteLine(
      * @param offset the offset of the visibility in the expression
      */
     fun hideCasingLineAtOffset(offset: Float) {
-        val expression = Expression.step(
-            Expression.lineProgress(),
-            Expression.color(routeLineCasingTraveledColor),
-
-            step {
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
-                Expression.color(routeCasingColor)
-            }
-//
-//            Expression.stop(
-//                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
-//                Expression.color(routeCasingColor)
-//            )
-        )
+        val expressionBuilder = Expression.ExpressionBuilder("step")
+        expressionBuilder.lineProgress()
+        expressionBuilder.color(routeLineCasingTraveledColor)
+        expressionBuilder.stop {
+            literal(offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN).toDouble())
+            color(routeCasingColor)
+        }
+        val expression = expressionBuilder.build()
         if (style.isFullyLoaded()) {
             if (style.layerExists(PRIMARY_ROUTE_CASING_LAYER_ID)) {
                 (style.getLayer(PRIMARY_ROUTE_CASING_LAYER_ID) as LineLayer).lineGradient(expression)
@@ -885,20 +873,15 @@ internal class MapRouteLine(
      * @param offset the offset of the visibility in the expression
      */
     fun hideRouteLineAtOffset(offset: Float) {
-        val expression = Expression.step(
-            Expression.lineProgress(),
-            Expression.color(routeLineTraveledColor),
+        val expressionBuilder = Expression.ExpressionBuilder("step")
+        expressionBuilder.lineProgress()
+        expressionBuilder.color(routeLineTraveledColor)
+        expressionBuilder.stop {
+            literal(offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN).toDouble())
+            color(routeDefaultColor)
+        }
+        val expression = expressionBuilder.build()
 
-            step {
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN)
-                Expression.color(routeDefaultColor)
-            }
-
-//            Expression.stop(
-//                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
-//                Expression.color(routeDefaultColor)
-//            )
-        )
         if (style.isFullyLoaded()) {
             if (style.layerExists(PRIMARY_ROUTE_LAYER_ID)) {
                 (style.getLayer(PRIMARY_ROUTE_LAYER_ID) as LineLayer).lineGradient(expression)
@@ -1055,7 +1038,7 @@ internal class MapRouteLine(
         ): RouteFeatureData {
             val routeGeometry = LineString.fromPolyline(
                 route.geometry() ?: "",
-                Constants.PRECISION_6
+                6
             )
 
             val routeFeature = when (identifier) {
