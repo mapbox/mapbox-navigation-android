@@ -10,26 +10,21 @@ import androidx.annotation.StyleRes;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
-import com.mapbox.bindgen.Expected;
+import com.mapbox.bindgen.Value;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
-//import com.mapbox.mapboxsdk.maps.MapView;
-//import com.mapbox.mapboxsdk.maps.MapboxMap;
-//import com.mapbox.mapboxsdk.maps.Style;
-//import com.mapbox.mapboxsdk.style.layers.*;
-//import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
-//import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-//import com.mapbox.mapboxsdk.utils.MathUtils;
+import com.mapbox.maps.LayerPosition;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
 import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.style.expressions.Expression;
-import com.mapbox.maps.plugin.style.layers.Layer;
 import com.mapbox.maps.plugin.style.layers.LineLayer;
 import com.mapbox.maps.plugin.style.layers.SymbolLayer;
 import com.mapbox.maps.plugin.style.layers.properties.IconRotationAlignment;
+import com.mapbox.maps.plugin.style.layers.properties.LineCap;
+import com.mapbox.maps.plugin.style.layers.properties.LineJoin;
 import com.mapbox.maps.plugin.style.layers.properties.Visibility;
 import com.mapbox.maps.plugin.style.sources.GeojsonSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
@@ -38,18 +33,9 @@ import com.mapbox.navigation.ui.internal.utils.MapImageUtils;
 import com.mapbox.turf.TurfConstants;
 import com.mapbox.turf.TurfMeasurement;
 import com.mapbox.turf.TurfMisc;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-//import static com.mapbox.mapboxsdk.style.expressions.Expression.*;
-//import static com.mapbox.mapboxsdk.style.layers.Property.*;
-//import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
 import static com.mapbox.navigation.ui.internal.route.RouteConstants.*;
 import static com.mapbox.navigation.ui.internal.utils.CompareUtils.areEqualContentsIgnoreOrder;
 
@@ -114,14 +100,8 @@ class MapRouteArrow {
     mapboxMap.getStyle(style -> {
       for (String layerId : arrowLayerIds) {
         if (style.layerExists(layerId)) {
-          Expected expectedLayer = style.getLayerProperties(layerId);
-          if (expectedLayer.isValue()) {
-            Layer layer = (Layer)expectedLayer.getValue();
-            Visibility targetVisibility = visible ? Visibility.VISIBLE : Visibility.NONE;
-            if (targetVisibility != layer.getVisibility()) {
-              layer.visibility(targetVisibility);
-            }
-          }
+          Visibility targetVisibility = visible ? Visibility.VISIBLE : Visibility.NONE;
+          style.setLayerProperty(layerId, "visibility", new Value(targetVisibility.getValue()));
         }
       }
     });
@@ -156,36 +136,36 @@ class MapRouteArrow {
   private void updateArrowShaftWith(@NonNull List<Point> points) {
     LineString shaft = LineString.fromLngLats(points);
     Feature arrowShaftGeoJsonFeature = Feature.fromGeometry(shaft);
-
-    //fixme arrowShaftGeoJsonSource.updateGeoJSON(arrowShaftGeoJsonFeature);
+    arrowShaftGeoJsonSource.feature(arrowShaftGeoJsonFeature);
   }
 
   private void updateArrowHeadWith(@NonNull List<Point> points) {
     double azimuth = TurfMeasurement.bearing(points.get(points.size() - 2), points.get(points.size() - 1));
     Feature arrowHeadGeoJsonFeature = Feature.fromGeometry(points.get(points.size() - 1));
-    //arrowHeadGeoJsonFeature.addNumberProperty(ARROW_BEARING, (float) MathUtils.wrap(azimuth, 0, MAX_DEGREES));
-    //fixme arrowHeadGeoJsonSource.setGeoJson(arrowHeadGeoJsonFeature);
+    arrowHeadGeoJsonFeature.addNumberProperty(ARROW_BEARING, (float) wrap(azimuth, 0, MAX_DEGREES));
+    arrowHeadGeoJsonSource.feature(arrowHeadGeoJsonFeature);
   }
 
   private void initialize(@NonNull String aboveLayer) {
     initializeArrowShaft();
     initializeArrowHead();
 
-    //addArrowHeadIcon();
-    //addArrowHeadIconCasing();
+    addArrowHeadIcon();
+    addArrowHeadIconCasing();
 
-    //LineLayer shaftLayer = createArrowShaftLayer();
-    //LineLayer shaftCasingLayer = createArrowShaftCasingLayer();
-    //SymbolLayer headLayer = createArrowHeadLayer();
-    //SymbolLayer headCasingLayer = createArrowHeadCasingLayer();
+    mapboxMap.getStyle(style -> {
+      LineLayer shaftLayer = createArrowShaftLayer(style);
+      LineLayer shaftCasingLayer = createArrowShaftCasingLayer(style);
+      SymbolLayer headLayer = createArrowHeadLayer(style);
+      SymbolLayer headCasingLayer = createArrowHeadCasingLayer(style);
 
-    //mapboxMap.getStyle().addLayerAbove(shaftCasingLayer, aboveLayer);
-    //mapboxMap.getStyle().addLayerAbove(headCasingLayer, shaftCasingLayer.getId());
-    //
-    //mapboxMap.getStyle().addLayerAbove(shaftLayer, headCasingLayer.getId());
-    //mapboxMap.getStyle().addLayerAbove(headLayer, shaftLayer.getId());
+      shaftCasingLayer.bindTo(style, new LayerPosition(aboveLayer, null, null));
+      headCasingLayer.bindTo(style, new LayerPosition(shaftCasingLayer.getLayerId(), null, null));
+      shaftLayer.bindTo(style, new LayerPosition(headCasingLayer.getLayerId(), null, null));
+      headLayer.bindTo(style, new LayerPosition(shaftLayer.getLayerId(), null, null));
 
-    //createArrowLayerList(shaftLayer, shaftCasingLayer, headLayer, headCasingLayer);
+      createArrowLayerList(shaftLayer, shaftCasingLayer, headLayer, headCasingLayer);
+    });
   }
 
   private void initializeArrowShaft() {
@@ -210,186 +190,163 @@ class MapRouteArrow {
     });
   }
 
-  //private void addArrowHeadIcon() {
-  //  int headResId = R.drawable.mapbox_ic_arrow_head;
-  //  Drawable arrowHead = AppCompatResources.getDrawable(mapView.getContext(), headResId);
-  //  if (arrowHead == null) {
-  //    return;
-  //  }
-  //  Drawable head = DrawableCompat.wrap(arrowHead);
-  //  DrawableCompat.setTint(head.mutate(), arrowColor);
-  //  Bitmap icon = MapImageUtils.getBitmapFromDrawable(head);
-  //  mapboxMap.getStyle().addImage(ARROW_HEAD_ICON, icon);
-  //}
-  //
-  //private void addArrowHeadIconCasing() {
-  //  int casingResId = R.drawable.mapbox_ic_arrow_head_casing;
-  //  Drawable arrowHeadCasing = AppCompatResources.getDrawable(mapView.getContext(), casingResId);
-  //  if (arrowHeadCasing == null) {
-  //    return;
-  //  }
-  //  Drawable headCasing = DrawableCompat.wrap(arrowHeadCasing);
-  //  DrawableCompat.setTint(headCasing.mutate(), arrowBorderColor);
-  //  Bitmap icon = MapImageUtils.getBitmapFromDrawable(headCasing);
-  //  mapboxMap.getStyle().addImage(ARROW_HEAD_ICON_CASING, icon);
-  //}
+  private void addArrowHeadIcon() {
+    int headResId = R.drawable.mapbox_ic_arrow_head;
+    Drawable arrowHead = AppCompatResources.getDrawable(mapView.getContext(), headResId);
+    if (arrowHead == null) {
+      return;
+    }
+    Drawable head = DrawableCompat.wrap(arrowHead);
+    DrawableCompat.setTint(head.mutate(), arrowColor);
+    Bitmap icon = MapImageUtils.getBitmapFromDrawable(head);
+    mapboxMap.getStyle(style -> style.addImage(ARROW_HEAD_ICON, icon));
+  }
 
-  //@NonNull
-  //private LineLayer createArrowShaftLayer() {
-  //  LineLayer shaftLayer = (LineLayer) mapboxMap.getStyle().getLayer(ARROW_SHAFT_LINE_LAYER_ID);
-  //  if (shaftLayer != null) {
-  //    mapboxMap.getStyle().removeLayer(shaftLayer);
-  //  }
-  //  return new LineLayer(ARROW_SHAFT_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
-  //          PropertyFactory.lineColor(color(arrowColor)),
-  //          PropertyFactory.lineWidth(
-  //                  interpolate(linear(), zoom(),
-  //                          stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_SCALE),
-  //                          stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_SCALE)
-  //                  )
-  //          ),
-  //          PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-  //          PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-  //          PropertyFactory.visibility(NONE),
-  //          PropertyFactory.lineOpacity(
-  //                  step(zoom(), OPAQUE,
-  //                          stop(
-  //                                  ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-  //                          )
-  //                  )
-  //          )
-  //  );
-  //}
-
-  //@NonNull
-  //private LineLayer createArrowShaftCasingLayer() {
-  //  LineLayer shaftCasingLayer = (LineLayer) mapboxMap.getStyle().getLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID);
-  //  if (shaftCasingLayer != null) {
-  //    mapboxMap.getStyle().removeLayer(shaftCasingLayer);
-  //  }
-  //  return new LineLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID).withProperties(
-  //          PropertyFactory.lineColor(color(arrowBorderColor)),
-  //          PropertyFactory.lineWidth(
-  //                  interpolate(linear(), zoom(),
-  //                          stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_SHAFT_CASING_SCALE),
-  //                          stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_SHAFT_CASING_SCALE)
-  //                  )
-  //          ),
-  //          PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
-  //          PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-  //          PropertyFactory.visibility(NONE),
-  //          PropertyFactory.lineOpacity(
-  //                  step(zoom(), OPAQUE,
-  //                          stop(
-  //                                  ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-  //                          )
-  //                  )
-  //          )
-  //  );
-  //}
-
-  //@NonNull
-  //private SymbolLayer createArrowHeadLayer() {
-  //  SymbolLayer headLayer = (SymbolLayer) mapboxMap.getStyle().getLayer(ARROW_HEAD_LAYER_ID);
-  //  if (headLayer != null) {
-  //    mapboxMap.getStyle().removeLayer(headLayer);
-  //  }
-  //  return new SymbolLayer(ARROW_HEAD_LAYER_ID, ARROW_HEAD_SOURCE_ID)
-  //          .withProperties(
-  //                  PropertyFactory.iconImage(ARROW_HEAD_ICON),
-  //                  iconAllowOverlap(true),
-  //                  iconIgnorePlacement(true),
-  //                  PropertyFactory.iconSize(interpolate(linear(), zoom(),
-  //                          stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_SCALE),
-  //                          stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_SCALE)
-  //                          )
-  //                  ),
-  //                  PropertyFactory.iconOffset(ARROW_HEAD_OFFSET),
-  //                  PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
-  //                  PropertyFactory.iconRotate(get(ARROW_BEARING)),
-  //                  PropertyFactory.visibility(NONE),
-  //                  PropertyFactory.iconOpacity(
-  //                          step(zoom(), OPAQUE,
-  //                                  stop(
-  //                                          ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-  //                                  )
-  //                          )
-  //                  )
-  //          );
-  //}
+  private void addArrowHeadIconCasing() {
+    int casingResId = R.drawable.mapbox_ic_arrow_head_casing;
+    Drawable arrowHeadCasing = AppCompatResources.getDrawable(mapView.getContext(), casingResId);
+    if (arrowHeadCasing == null) {
+      return;
+    }
+    Drawable headCasing = DrawableCompat.wrap(arrowHeadCasing);
+    DrawableCompat.setTint(headCasing.mutate(), arrowBorderColor);
+    Bitmap icon = MapImageUtils.getBitmapFromDrawable(headCasing);
+    mapboxMap.getStyle(style -> style.addImage(ARROW_HEAD_ICON_CASING, icon));
+  }
 
   @NonNull
-  private SymbolLayer createArrowHeadCasingLayer() {
-    return null;
+  private LineLayer createArrowShaftLayer(final Style style) {
+    if (style.layerExists(ARROW_SHAFT_LINE_LAYER_ID)) {
+      style.removeLayer(ARROW_SHAFT_LINE_LAYER_ID);
+    }
 
-    //mapboxMap.getStyle(style -> {
-    //  if (style.layerExists(ARROW_HEAD_CASING_LAYER_ID)) {
-    //    style.removeLayer(ARROW_HEAD_CASING_LAYER_ID);
-    //  }
-    //
-    //  Expression.ExpressionBuilder iconSizeExpressionBuilder = new Expression.ExpressionBuilder("interpolate");
-    //  iconSizeExpressionBuilder.literal("linear");
-    //  iconSizeExpressionBuilder.zoom();
-    //  iconSizeExpressionBuilder.stop(expressionBuilderRef -> {
-    //    expressionBuilderRef.literal(MIN_ARROW_ZOOM);
-    //    expressionBuilderRef.literal(MIN_ZOOM_ARROW_HEAD_CASING_SCALE);
-    //    return null;
-    //  });
-    //  iconSizeExpressionBuilder.stop(expressionBuilderRef -> {
-    //    expressionBuilderRef.literal(MAX_ARROW_ZOOM);
-    //    expressionBuilderRef.literal(MAX_ZOOM_ARROW_HEAD_CASING_SCALE);
-    //    return null;
-    //  });
-    //
-    //  Expression.ExpressionBuilder iconRotateExpressionBuilder = new Expression.ExpressionBuilder("get");
-    //  iconRotateExpressionBuilder.literal(ARROW_BEARING);
-    //
-    //  Expression.ExpressionBuilder iconOpacityExpressionBuilder = new Expression.ExpressionBuilder("step");
-    //  iconOpacityExpressionBuilder.zoom();
-    //  iconOpacityExpressionBuilder.stop(expressionBuilder -> {
-    //    expressionBuilder.literal(ARROW_HIDDEN_ZOOM_LEVEL);
-    //    expressionBuilder.literal(TRANSPARENT);
-    //    return null;
-    //  });
-    //
-    //  SymbolLayer casingLayer = new SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID);
-    //  casingLayer.iconImage(ARROW_HEAD_ICON_CASING);
-    //  casingLayer.iconAllowOverlap(true);
-    //  casingLayer.iconSize(iconSizeExpressionBuilder.build());
-    //  casingLayer.iconOffset(Arrays.asList(ARROW_HEAD_CASING_OFFSET));
-    //  casingLayer.iconRotationAlignment(IconRotationAlignment.MAP);
-    //  casingLayer.iconRotate(iconRotateExpressionBuilder.build());
-    //  casingLayer.visibility(Visibility.NONE);
-    //  casingLayer.iconOpacity(iconOpacityExpressionBuilder.build()); //["step", ["zoom"], 0.0, 14.0, 1.0]
-    //});
+    LineLayer shaftLayer = new LineLayer(ARROW_SHAFT_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID);
+    shaftLayer.lineColor(Expression.color(arrowColor));
+    shaftLayer.lineWidth(getArrowShaftWidthExpression());
+    shaftLayer.lineCap(LineCap.ROUND);
+    shaftLayer.lineJoin(LineJoin.ROUND);
+    shaftLayer.visibility(Visibility.NONE);
+    shaftLayer.lineOpacity(getArrowShaftOpacityExpression());
+    return shaftLayer;
+  }
 
+  @NonNull
+  private LineLayer createArrowShaftCasingLayer(final Style style) {
+    if (style.layerExists(ARROW_SHAFT_LINE_LAYER_ID)) {
+      style.removeLayer(ARROW_SHAFT_LINE_LAYER_ID);
+    }
 
+    LineLayer shaftCasingLayer = new LineLayer(ARROW_SHAFT_CASING_LINE_LAYER_ID, ARROW_SHAFT_SOURCE_ID);
+    shaftCasingLayer.lineColor(Expression.color(arrowBorderColor));
+    shaftCasingLayer.lineWidth(getArrowShaftWidthExpression());
+    shaftCasingLayer.lineCap(LineCap.ROUND);
+    shaftCasingLayer.lineJoin(LineJoin.ROUND);
+    shaftCasingLayer.visibility(Visibility.NONE);
+    shaftCasingLayer.lineOpacity(getArrowShaftOpacityExpression());
+    return shaftCasingLayer;
+  }
 
-    //SymbolLayer headCasingLayer = (SymbolLayer) mapboxMap.getStyle().getLayer(ARROW_HEAD_CASING_LAYER_ID);
-    //if (headCasingLayer != null) {
-    //  mapboxMap.getStyle().removeLayer(headCasingLayer);
-    //}
-    //return new SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID).withProperties(
-    //        PropertyFactory.iconImage(ARROW_HEAD_ICON_CASING),
-    //        iconAllowOverlap(true),
-    //        iconIgnorePlacement(true),
-    //        PropertyFactory.iconSize(interpolate(
-    //                linear(), zoom(),
-    //                stop(MIN_ARROW_ZOOM, MIN_ZOOM_ARROW_HEAD_CASING_SCALE),
-    //                stop(MAX_ARROW_ZOOM, MAX_ZOOM_ARROW_HEAD_CASING_SCALE)
-    //        )),
-    //        PropertyFactory.iconOffset(ARROW_HEAD_CASING_OFFSET),
-    //        PropertyFactory.iconRotationAlignment(ICON_ROTATION_ALIGNMENT_MAP),
-    //        PropertyFactory.iconRotate(get(ARROW_BEARING)),
-    //        PropertyFactory.visibility(NONE),
-    //        PropertyFactory.iconOpacity(
-    //                step(zoom(), OPAQUE,
-    //                        stop(
-    //                                ARROW_HIDDEN_ZOOM_LEVEL, TRANSPARENT
-    //                        )
-    //                )
-    //        )
-    //);
+  @NonNull
+  private SymbolLayer createArrowHeadLayer(final Style style) {
+    if (style.layerExists(ARROW_HEAD_LAYER_ID)) {
+      style.removeLayer(ARROW_HEAD_LAYER_ID);
+    }
+
+    SymbolLayer arrowHeadLayer = new SymbolLayer(ARROW_HEAD_LAYER_ID, ARROW_HEAD_SOURCE_ID);
+    arrowHeadLayer.iconImage(ARROW_HEAD_ICON);
+    arrowHeadLayer.iconAllowOverlap(true);
+    arrowHeadLayer.iconIgnorePlacement(true);
+    arrowHeadLayer.iconSize(getArrowHeadIconSizeExpression());
+    arrowHeadLayer.iconOffset(Arrays.asList(ARROW_HEAD_OFFSET));
+    arrowHeadLayer.iconRotationAlignment(IconRotationAlignment.MAP);
+    arrowHeadLayer.iconRotate(getArrowHeadIconRotateExpression());
+    arrowHeadLayer.visibility(Visibility.NONE);
+    arrowHeadLayer.iconOpacity(getArrowHeadIconOpacityExpression());
+    return arrowHeadLayer;
+  }
+
+  @NonNull
+  private SymbolLayer createArrowHeadCasingLayer(final Style style) {
+    if (style.layerExists(ARROW_HEAD_CASING_LAYER_ID)) {
+      style.removeLayer(ARROW_HEAD_CASING_LAYER_ID);
+    }
+
+    SymbolLayer casingLayer = new SymbolLayer(ARROW_HEAD_CASING_LAYER_ID, ARROW_HEAD_SOURCE_ID);
+    casingLayer.iconImage(ARROW_HEAD_ICON_CASING);
+    casingLayer.iconAllowOverlap(true);
+    casingLayer.iconSize(getArrowHeadIconSizeExpression());
+    casingLayer.iconOffset(Arrays.asList(ARROW_HEAD_CASING_OFFSET));
+    casingLayer.iconRotationAlignment(IconRotationAlignment.MAP);
+    casingLayer.iconRotate(getArrowHeadIconRotateExpression());
+    casingLayer.visibility(Visibility.NONE);
+    casingLayer.iconOpacity(getArrowHeadIconOpacityExpression()); //["step", ["zoom"], 0.0, 14.0, 1.0]
+    return casingLayer;
+  }
+
+  private Expression getArrowShaftOpacityExpression() {
+    Expression.ExpressionBuilder lineOpacityExpressionBuilder = new Expression.ExpressionBuilder("step");
+    lineOpacityExpressionBuilder.zoom();
+    lineOpacityExpressionBuilder.literal(OPAQUE);
+    lineOpacityExpressionBuilder.stop(expressionBuilder -> {
+      expressionBuilder.literal(ARROW_HIDDEN_ZOOM_LEVEL);
+      expressionBuilder.literal(TRANSPARENT);
+      return null;
+    });
+
+    return lineOpacityExpressionBuilder.build(); //[step, [zoom], 0.0, 14, 1.0]
+  }
+
+  private Expression getArrowShaftWidthExpression() {
+    Expression.ExpressionBuilder lineWidthExpressionBuilder = new Expression.ExpressionBuilder("interpolate");
+    lineWidthExpressionBuilder.addArgument(Expression.linear());
+    lineWidthExpressionBuilder.zoom();
+    lineWidthExpressionBuilder.stop(expressionBuilder -> {
+      expressionBuilder.literal(MIN_ARROW_ZOOM);
+      expressionBuilder.literal(MIN_ZOOM_ARROW_SHAFT_SCALE);
+      return null;
+    });
+    lineWidthExpressionBuilder.stop(expressionBuilder -> {
+      expressionBuilder.literal(MAX_ARROW_ZOOM);
+      expressionBuilder.literal(MAX_ZOOM_ARROW_SHAFT_SCALE);
+      return null;
+    });
+
+    return lineWidthExpressionBuilder.build();
+  }
+
+  private Expression getArrowHeadIconOpacityExpression() {
+    Expression.ExpressionBuilder iconOpacityExpressionBuilder = new Expression.ExpressionBuilder("step");
+    iconOpacityExpressionBuilder.zoom();
+    iconOpacityExpressionBuilder.literal(OPAQUE);
+    iconOpacityExpressionBuilder.stop(expressionBuilder -> {
+      expressionBuilder.literal(ARROW_HIDDEN_ZOOM_LEVEL);
+      expressionBuilder.literal(TRANSPARENT);
+      return null;
+    });
+    return iconOpacityExpressionBuilder.build(); //[step, [zoom], 0.0, 14, 1.0]
+  }
+
+  private Expression getArrowHeadIconRotateExpression() {
+    Expression.ExpressionBuilder iconRotateExpressionBuilder = new Expression.ExpressionBuilder("get");
+    iconRotateExpressionBuilder.literal(ARROW_BEARING);
+    return iconRotateExpressionBuilder.build();
+  }
+
+  private Expression getArrowHeadIconSizeExpression() {
+    Expression.ExpressionBuilder iconSizeExpressionBuilder = new Expression.ExpressionBuilder("interpolate");
+    iconSizeExpressionBuilder.addArgument(Expression.linear());
+    iconSizeExpressionBuilder.zoom();
+    iconSizeExpressionBuilder.stop(expressionBuilderRef -> {
+      expressionBuilderRef.literal(MIN_ARROW_ZOOM);
+      expressionBuilderRef.literal(MIN_ZOOM_ARROW_HEAD_CASING_SCALE);
+      return null;
+    });
+    iconSizeExpressionBuilder.stop(expressionBuilderRef -> {
+      expressionBuilderRef.literal(MAX_ARROW_ZOOM);
+      expressionBuilderRef.literal(MAX_ZOOM_ARROW_HEAD_CASING_SCALE);
+      return null;
+    });
+    return iconSizeExpressionBuilder.build();
   }
 
   private void createArrowLayerList(
@@ -402,5 +359,15 @@ class MapRouteArrow {
     arrowLayerIds.add(shaftLayer.getLayerId());
     arrowLayerIds.add(headCasingLayer.getLayerId());
     arrowLayerIds.add(headLayer.getLayerId());
+  }
+
+  // This came from MathUtils which may have been removed
+  private double wrap(double value, double min, double max) {
+    double delta = max - min;
+
+    double firstMod = (value - min) % delta;
+    double secondMod = (firstMod + delta) % delta;
+
+    return secondMod + min;
   }
 }
