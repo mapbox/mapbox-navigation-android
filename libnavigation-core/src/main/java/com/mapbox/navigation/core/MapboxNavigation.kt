@@ -21,6 +21,7 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.route.Router
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.base.trip.notification.NotificationAction
 import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
@@ -50,6 +51,7 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.core.trip.session.TripSessionState
@@ -341,6 +343,7 @@ class MapboxNavigation(
         tripSession.unregisterAllStateObservers()
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
+        tripSession.unregisterAllRouteAlertsObservers()
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
@@ -579,6 +582,27 @@ class MapboxNavigation(
      */
     fun navigateNextRouteLeg(): Boolean {
         return arrivalProgressObserver.navigateNextRouteLeg()
+    }
+
+    /**
+     * Registers an observer that gets notified whenever the route changes and provides the list
+     * of alerts on this new route, if there are any. The alerts returned here are equal to the ones
+     * available in [RouteProgress.upcomingRouteAlerts], but they capture the whole route
+     * (not only what's ahead of us) and don't have the [UpcomingRouteAlert.distanceToStart] data.
+     *
+     * @see unregisterRouteAlertsObserver
+     */
+    fun registerRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
+        tripSession.registerRouteAlertsObserver(routeAlertsObserver)
+    }
+
+    /**
+     * Unregisters the route alerts observer.
+     *
+     * @see registerRouteAlertsObserver
+     */
+    fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
+        tripSession.unregisterRouteAlertsObserver(routeAlertsObserver)
     }
 
     /**

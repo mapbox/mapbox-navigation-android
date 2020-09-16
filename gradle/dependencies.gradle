@@ -8,11 +8,10 @@ ext {
 
   version = [
       mapboxMapSdk              : '9.4.0',
-      mapboxSdkServices         : '5.5.0',
+      mapboxSdkServices         : '5.6.0',
       mapboxEvents              : '6.1.0',
       mapboxCore                : '3.0.0',
-      mapboxNavigator           : '20.0.0',
-      mapboxCommon              : '6.1.0',
+      mapboxNavigator           : '20.1.1',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.0',
@@ -58,13 +57,13 @@ ext {
       // mapbox
       mapboxMapSdk              : "com.mapbox.mapboxsdk:mapbox-android-sdk:${version.mapboxMapSdk}",
       mapboxSdkServices         : "com.mapbox.mapboxsdk:mapbox-sdk-services:${version.mapboxSdkServices}",
+      mapboxSdkServicesCore     : "com.mapbox.mapboxsdk:mapbox-sdk-core:${version.mapboxSdkServices}",
       mapboxSdkGeoJSON          : "com.mapbox.mapboxsdk:mapbox-sdk-geojson:${version.mapboxSdkServices}",
       mapboxSdkTurf             : "com.mapbox.mapboxsdk:mapbox-sdk-turf:${version.mapboxSdkServices}",
       mapboxSdkDirectionsModels : "com.mapbox.mapboxsdk:mapbox-sdk-directions-models:${version.mapboxSdkServices}",
       mapboxEvents              : "com.mapbox.mapboxsdk:mapbox-android-telemetry:${version.mapboxEvents}",
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
-      mapboxCommon              : "com.mapbox.common:common:${version.mapboxCommon}",
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",

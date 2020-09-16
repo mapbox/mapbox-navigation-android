@@ -96,7 +96,7 @@ package com.mapbox.navigation.base.options {
   }
 
   public static final class NavigationOptions.Builder {
-    ctor public NavigationOptions.Builder(android.content.Context context);
+    ctor public NavigationOptions.Builder(android.content.Context applicationContext);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder accessToken(String? accessToken);
     method public com.mapbox.navigation.base.options.NavigationOptions build();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder deviceProfile(com.mapbox.navigation.base.options.DeviceProfile deviceProfile);
@@ -201,6 +201,7 @@ package com.mapbox.navigation.base.trip.model {
     method public int getRemainingWaypoints();
     method public com.mapbox.api.directions.v5.models.DirectionsRoute getRoute();
     method public com.mapbox.geojson.Geometry? getRouteGeometryWithBuffer();
+    method public java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> getUpcomingRouteAlerts();
     method public java.util.List<com.mapbox.geojson.Point>? getUpcomingStepPoints();
     method public com.mapbox.api.directions.v5.models.VoiceInstructions? getVoiceInstructions();
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder toBuilder();
@@ -219,6 +220,7 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder inTunnel(boolean inTunnel);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder remainingWaypoints(int remainingWaypoints);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder routeGeometryWithBuffer(com.mapbox.geojson.Geometry? routeGeometryWithBuffer);
+    method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingRouteAlerts(java.util.List<com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert> upcomingRouteAlerts);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder upcomingStepPoints(java.util.List<com.mapbox.geojson.Point>? upcomingStepPoints);
     method public com.mapbox.navigation.base.trip.model.RouteProgress.Builder voiceInstructions(com.mapbox.api.directions.v5.models.VoiceInstructions? voiceInstructions);
   }
@@ -254,6 +256,66 @@ package com.mapbox.navigation.base.trip.model {
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder step(com.mapbox.api.directions.v5.models.LegStep? step);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepIndex(int stepIndex);
     method public com.mapbox.navigation.base.trip.model.RouteStepProgress.Builder stepPoints(java.util.List<com.mapbox.geojson.Point>? stepPoints);
+  }
+
+}
+
+package com.mapbox.navigation.base.trip.model.alert {
+
+  public abstract sealed class RouteAlert<Metadata> {
+    method public final com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? getAlertGeometry();
+    method public final com.mapbox.geojson.Point getCoordinate();
+    method public final double getDistance();
+    method public final Metadata! getMetadata();
+    method public final com.mapbox.navigation.base.trip.model.alert.RouteAlertType getType();
+  }
+
+  public final class RouteAlertGeometry {
+    method public com.mapbox.geojson.Point getEndCoordinate();
+    method public int getEndGeometryIndex();
+    method public double getLength();
+    method public com.mapbox.geojson.Point getStartCoordinate();
+    method public int getStartGeometryIndex();
+    method public com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry.Builder toBuilder();
+  }
+
+  public static final class RouteAlertGeometry.Builder {
+    ctor public RouteAlertGeometry.Builder(double length, com.mapbox.geojson.Point startCoordinate, int startGeometryIndex, com.mapbox.geojson.Point endCoordinate, int endGeometryIndex);
+    method public com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry build();
+  }
+
+  public enum RouteAlertType {
+    enum_constant public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType TunnelEntrance;
+  }
+
+  public final class RouteAlertUtils {
+    method public static com.mapbox.geojson.LineString toLineString(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry, com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute, @IntRange(from=5, to=6) int precision);
+    method public static com.mapbox.geojson.LineString toLineString(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry, com.mapbox.geojson.LineString routeLineString);
+  }
+
+  public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata> {
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder toBuilder();
+  }
+
+  public static final class TunnelEntranceAlert.Builder {
+    ctor public TunnelEntranceAlert.Builder(com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert build();
+  }
+
+  public static final class TunnelEntranceAlert.Metadata {
+    ctor public TunnelEntranceAlert.Metadata();
+  }
+
+  public final class UpcomingRouteAlert {
+    method public double getDistanceToStart();
+    method public com.mapbox.navigation.base.trip.model.alert.RouteAlert<?> getRouteAlert();
+    method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert.Builder toBuilder();
+  }
+
+  public static final class UpcomingRouteAlert.Builder {
+    ctor public UpcomingRouteAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RouteAlert<?> routeAlert, double distanceRemaining);
+    method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert build();
   }
 
 }

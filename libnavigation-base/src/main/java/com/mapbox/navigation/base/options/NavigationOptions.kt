@@ -47,7 +47,7 @@ class NavigationOptions private constructor(
     /**
      * Get a builder to customize a subset of current options.
      */
-    fun toBuilder(): Builder = Builder(context = applicationContext).apply {
+    fun toBuilder(): Builder = Builder(applicationContext).apply {
         accessToken(accessToken)
         locationEngine(locationEngine)
         timeFormatType(timeFormatType)
@@ -120,8 +120,8 @@ class NavigationOptions private constructor(
     /**
      * Build a new [NavigationOptions]
      */
-    class Builder(context: Context) {
-        private val applicationContext = context.applicationContext
+    class Builder(applicationContext: Context) {
+        private val applicationContext = applicationContext.applicationContext
         private var accessToken: String? = null
         private var locationEngine: LocationEngine? = null // Default is created when built
         private var timeFormatType: Int = TimeFormat.NONE_SPECIFIED

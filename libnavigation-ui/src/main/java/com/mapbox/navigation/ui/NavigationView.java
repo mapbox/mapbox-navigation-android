@@ -856,6 +856,12 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
       navigationMap.setCamera(options.camera());
     }
 
+    if (options.enableVanishingRouteLine()) {
+      navigationMap.enableVanishingRouteLine();
+    } else {
+      navigationMap.disableVanishingRouteLine();
+    }
+
     initializeVoiceGuidanceMuteState(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
@@ -907,8 +913,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
           @NonNull NavigationViewModel navigationViewModel
   ) {
     navigationMap.addProgressChangeListener(
-        navigationViewModel.retrieveNavigation(),
-        options.enableVanishingRouteLine()
+        navigationViewModel.retrieveNavigation()
     );
     navigationViewEventDispatcher.initializeListeners(options, navigationViewModel);
   }

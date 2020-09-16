@@ -230,6 +230,23 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @TestOnly
+  NavigationMapboxMap(@NonNull MapWayName mapWayName,
+                      @NonNull MapFpsDelegate mapFpsDelegate,
+                      NavigationMapRoute mapRoute,
+                      NavigationCamera mapCamera,
+                      LocationFpsDelegate locationFpsDelegate,
+                      LocationComponent locationComponent,
+                      boolean vanishRouteLineEnabled) {
+    this.mapWayName = mapWayName;
+    this.mapFpsDelegate = mapFpsDelegate;
+    this.mapRoute = mapRoute;
+    this.mapCamera = mapCamera;
+    this.locationFpsDelegate = locationFpsDelegate;
+    this.locationComponent = locationComponent;
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+  }
+
+  @TestOnly
   NavigationMapboxMap(
           @NonNull MapboxMap mapboxMap,
           MapLayerInteractor layerInteractor,
@@ -435,6 +452,8 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
+   * @deprecated Use {@link #addProgressChangeListener(MapboxNavigation)}
+   *
    * Can be used to automatically drive the map camera, puck and route updates
    * when {@link TripSessionState#STARTED}.
    * <p>
@@ -444,6 +463,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * @param enableVanishingRouteLine determines if the route line should vanish behind the puck.
    * @see MapboxNavigation#startTripSession()
    */
+  @Deprecated
   public void addProgressChangeListener(@NonNull MapboxNavigation navigation, boolean enableVanishingRouteLine) {
     this.vanishRouteLineEnabled = enableVanishingRouteLine;
     addProgressChangeListener(navigation);
@@ -853,6 +873,28 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   /**
+   * This will enable the feature to change the appearance of the route line behind the
+   * puck as it moves across the map.
+   */
+  public void enableVanishingRouteLine() {
+    if (!vanishRouteLineEnabled) {
+      vanishRouteLineEnabled = true;
+      mapRoute.setVanishRouteLineEnabled(true);
+    }
+  }
+
+  /**
+   * This will disable the feature to change the appearance of the route line behind the
+   * puck as it moves across the map.
+   */
+  public void disableVanishingRouteLine() {
+    if (vanishRouteLineEnabled) {
+      vanishRouteLineEnabled = false;
+      mapRoute.setVanishRouteLineEnabled(false);
+    }
+  }
+
+  /**
    * Called during the onStart event of the Lifecycle owner to initialize resources.
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
@@ -1040,7 +1082,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
       mapFpsDelegate.updateEnabled(settings.isMaxFpsEnabled());
     }
 
-    vanishRouteLineEnabled = settings.retrieveVanishingRouteLineEnabled();
+    mapRoute.setVanishRouteLineEnabled(settings.retrieveVanishingRouteLineEnabled());
   }
 
   private void handleWayNameOnStart() {

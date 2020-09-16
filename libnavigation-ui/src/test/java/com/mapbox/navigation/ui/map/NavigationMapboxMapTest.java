@@ -3,6 +3,8 @@ package com.mapbox.navigation.ui.map;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentOptions;
+import com.mapbox.mapboxsdk.location.OnIndicatorPositionChangedListener;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
@@ -369,6 +371,50 @@ public class NavigationMapboxMapTest {
     theNavigationMap.setCamera(simpleCamera);
 
     verify(mapCamera).setCamera(simpleCamera);
+  }
+
+  @Test
+  public void enableVanishingRouteLine() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(
+            mapWayName,
+            mapFpsDelegate,
+            mapRoute,
+            mapCamera,
+            locationFpsDelegate,
+            locationComponent,
+            false);
+
+    theNavigationMap.enableVanishingRouteLine();
+
+    verify(mapRoute).setVanishRouteLineEnabled(true);
+  }
+
+  @Test
+  public void disableVanishingRouteLine() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(
+            mapWayName,
+            mapFpsDelegate,
+            mapRoute,
+            mapCamera,
+            locationFpsDelegate,
+            locationComponent,
+            true);
+
+    theNavigationMap.disableVanishingRouteLine();
+
+    verify(mapRoute).setVanishRouteLineEnabled(false);
   }
 
   private List<Source> buildMockSourcesWith(String url) {

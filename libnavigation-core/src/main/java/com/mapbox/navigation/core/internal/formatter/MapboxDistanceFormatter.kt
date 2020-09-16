@@ -199,10 +199,10 @@ class MapboxDistanceFormatter private constructor(
 
     /**
      * Builder of [MapboxDistanceFormatter]
-     * @param context converted to applicationContext to save memory leaks
+     * @param applicationContext converted to applicationContext to save memory leaks
      */
-    class Builder(context: Context) {
-        private val applicationContext: Context = context.applicationContext
+    class Builder(applicationContext: Context) {
+        private val applicationContext: Context = applicationContext.applicationContext
         private var unitType: String = VoiceUnit.UNDEFINED
         private var locale: Locale? = null
         private var roundingIncrement = Rounding.INCREMENT_FIFTY

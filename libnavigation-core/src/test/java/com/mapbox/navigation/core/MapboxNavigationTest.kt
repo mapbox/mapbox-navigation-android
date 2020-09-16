@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
+import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.TripSession
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
 import com.mapbox.navigation.testing.MainCoroutineRule
@@ -281,6 +282,13 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun onDestroy_unregisters_TripSession_routeAlerts_observers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllRouteAlertsObservers() }
+    }
+
+    @Test
     fun onDestroySetsRouteToNullInTripSession() {
         mapboxNavigation.onDestroy()
 
@@ -461,6 +469,24 @@ class MapboxNavigationTest {
         }
 
         mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun `route alerts observer is registered in the trip session`() {
+        val observer: RouteAlertsObserver = mockk()
+
+        mapboxNavigation.registerRouteAlertsObserver(observer)
+
+        verify(exactly = 1) { tripSession.registerRouteAlertsObserver(observer) }
+    }
+
+    @Test
+    fun `route alerts observer is unregistered in the trip session`() {
+        val observer: RouteAlertsObserver = mockk()
+
+        mapboxNavigation.unregisterRouteAlertsObserver(observer)
+
+        verify(exactly = 1) { tripSession.unregisterRouteAlertsObserver(observer) }
     }
 
     private fun mockLocation() {
