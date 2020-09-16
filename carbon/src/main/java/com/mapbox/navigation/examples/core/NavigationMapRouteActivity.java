@@ -12,18 +12,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
-import com.mapbox.maps.*;
+import com.mapbox.maps.CameraOptions;
+import com.mapbox.maps.MapView;
+import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.Style;
 import com.mapbox.maps.plugin.gesture.GesturePluginImpl;
 import com.mapbox.maps.plugin.gesture.OnMapLongClickListener;
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions;
@@ -40,19 +45,21 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.examples.LocationPermissionsHelper;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
+
 import org.jetbrains.annotations.NotNull;
-import timber.log.Timber;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import timber.log.Timber;
+
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.mapbox.navigation.examples.LocationPermissionsHelperKt.LOCATION_PERMISSIONS_REQUEST_CODE;
 
 public class NavigationMapRouteActivity extends AppCompatActivity implements PermissionsListener,
-    OnMapLongClickListener {
+  OnMapLongClickListener {
 
   private static final int ONE_HUNDRED_MILLISECONDS = 100;
   private LocationPermissionsHelper permissionsHelper = new LocationPermissionsHelper(this);
@@ -65,7 +72,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
   private ProgressBar routeLoading;
   private DirectionsRoute activeRoute;
 
-  @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
+  @Override
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_navigation_map_route);
     mapView = findViewById(R.id.mapView);
@@ -73,73 +81,73 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
     routeLoading = findViewById(R.id.routeLoadingProgressBar);
     mapboxMap = mapView.getMapboxMap();
 
-    if (LocationPermissionsHelper.areLocationPermissionsGranted(this) == true) {
+    if (LocationPermissionsHelper.areLocationPermissionsGranted(this)) {
       requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
     } else {
       permissionsHelper.requestLocationPermissions(this);
     }
-
   }
 
-  @SuppressLint("MissingPermission") public void initStyle() {
+  @SuppressLint("MissingPermission")
+  public void initStyle() {
     mapboxMap.loadStyleUri(Style.MAPBOX_STREETS, style -> {
       initializeLocationComponent(style);
       NavigationOptions navigationOptions = MapboxNavigation
-          .defaultNavigationOptionsBuilder(NavigationMapRouteActivity.this, getMapboxAccessTokenFromResources())
-          .locationEngine(new ReplayLocationEngine(mapboxReplayer))
-          .build();
-      //mapboxNavigation = new MapboxNavigation(navigationOptions);
-      //mapboxNavigation.registerLocationObserver(locationObserver);
-      //mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
+        .defaultNavigationOptionsBuilder(NavigationMapRouteActivity.this, getMapboxAccessTokenFromResources())
+        .locationEngine(new ReplayLocationEngine(mapboxReplayer))
+        .build();
+      mapboxNavigation = new MapboxNavigation(navigationOptions);
+      mapboxNavigation.registerLocationObserver(locationObserver);
+      mapboxNavigation.registerRouteProgressObserver(replayProgressObserver);
 
-      //mapboxReplayer.pushRealLocation(this, 0.0);
-      //mapboxReplayer.play();
+      mapboxReplayer.pushRealLocation(this, 0.0);
+      mapboxReplayer.play();
 
-      //mapCamera = new NavigationCamera(mapboxMap);
-      //mapCamera.addProgressChangeListener(mapboxNavigation);
       navigationMapRoute = new NavigationMapRoute.Builder(mapView, mapboxMap, this)
-          .withVanishRouteLineEnabled(true)
-          .withMapboxNavigation(mapboxNavigation)
-          .build();
+        .withVanishRouteLineEnabled(true)
+        .withMapboxNavigation(mapboxNavigation)
+        .build();
 
-
-      //getLocationComponent().getLocationEngine().getLastLocation(locationEngineCallback);
-      //getGesturePlugin().addOnMapLongClickListener(this);
-
+      mapboxNavigation.getNavigationOptions().getLocationEngine().getLastLocation(locationEngineCallback);
+      getGesturePlugin().addOnMapLongClickListener(this);
 
       //fixme temporary
-      CameraOptions cameraOptions = new CameraOptions.Builder().center(Point.fromLngLat(-122.396817, 37.788009)).zoom(13.0).build();
-      mapboxMap.jumpTo(cameraOptions);
-      navigationMapRoute.addRoute(getRoute());
+//      CameraOptions cameraOptions = new CameraOptions.Builder().center(Point.fromLngLat(-122.396817, 37.788009)).zoom(13.0).build();
+//      mapboxMap.jumpTo(cameraOptions);
+//      navigationMapRoute.addRoute(getRoute());
       //fixme end temporary
 
     }, (mapLoadError, s) -> Timber.e("Error loading map: " + mapLoadError.name()));
   }
 
-  @Override protected void onStart() {
+  @Override
+  protected void onStart() {
     super.onStart();
     mapView.onStart();
   }
 
-  @Override protected void onStop() {
+  @Override
+  protected void onStop() {
     super.onStop();
     mapView.onStop();
   }
 
-  @Override protected void onDestroy() {
+  @Override
+  protected void onDestroy() {
     super.onDestroy();
     mapView.onDestroy();
   }
 
-  @Override public boolean onMapLongClick(@NotNull Point point) {
+  @Override
+  public boolean onMapLongClick(@NotNull Point point) {
     vibrate();
     hideRoute();
 
     Location currentLocation = getLocationComponent().getLastKnownLocation();
     if (currentLocation != null) {
       Point originPoint = Point.fromLngLat(
-          currentLocation.getLongitude(),
-          currentLocation.getLatitude()
+        currentLocation.getLongitude(),
+        currentLocation.getLatitude()
       );
       findRoute(originPoint, point);
       routeLoading.setVisibility(View.VISIBLE);
@@ -149,19 +157,19 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
 
   public void findRoute(Point origin, Point destination) {
     RouteOptions routeOptions = RouteOptions.builder()
-        .baseUrl(RouteUrl.BASE_URL)
-        .user(RouteUrl.PROFILE_DEFAULT_USER)
-        .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
-        .geometries(RouteUrl.GEOMETRY_POLYLINE6)
-        .requestUuid("")
-        .accessToken(getMapboxAccessTokenFromResources())
-        .coordinates(Arrays.asList(origin, destination))
-        .alternatives(false)
-        .build();
+      .baseUrl(RouteUrl.BASE_URL)
+      .user(RouteUrl.PROFILE_DEFAULT_USER)
+      .profile(RouteUrl.PROFILE_DRIVING_TRAFFIC)
+      .geometries(RouteUrl.GEOMETRY_POLYLINE6)
+      .requestUuid("")
+      .accessToken(getMapboxAccessTokenFromResources())
+      .coordinates(Arrays.asList(origin, destination))
+      .alternatives(false)
+      .build();
 
     mapboxNavigation.requestRoutes(
-        routeOptions,
-        routesReqCallback
+      routeOptions,
+      routesReqCallback
     );
   }
 
@@ -208,17 +216,17 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
   @SuppressWarnings("MissingPermission")
   private void initializeLocationComponent(Style style) {
     LocationComponentActivationOptions activationOptions = LocationComponentActivationOptions.builder(this, style)
-        .useDefaultLocationEngine(false) //SBNOTE: I think this should be false eventually
-        .build();
+      .useDefaultLocationEngine(false) //SBNOTE: I think this should be false eventually
+      .build();
     LocationComponentPlugin locationComponent = getLocationComponent();
     locationComponent.activateLocationComponent(activationOptions);
     locationComponent.setEnabled(true);
     locationComponent.setRenderMode(RenderMode.COMPASS);
-    locationComponent.setCameraMode(CameraMode.TRACKING);
+    locationComponent.setCameraMode(CameraMode.TRACKING, 0, 16.0, null, 45.0, null);
   }
 
   private String getMapboxAccessTokenFromResources() {
-    return getString(this.getResources().getIdentifier("mapbox_access_token","string", getPackageName()));
+    return getString(this.getResources().getIdentifier("mapbox_access_token", "string", getPackageName()));
   }
 
   private LocationObserver locationObserver = new LocationObserver() {
@@ -229,8 +237,8 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
 
     @Override
     public void onEnhancedLocationChanged(
-        @NotNull Location enhancedLocation,
-        @NotNull List<? extends Location> keyPoints
+      @NotNull Location enhancedLocation,
+      @NotNull List<? extends Location> keyPoints
     ) {
       if (keyPoints.isEmpty()) {
         updateLocation(enhancedLocation);
@@ -286,15 +294,17 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
     } else if (grantResults.length > 0) {
       initStyle();
     } else {
-        Toast.makeText(this, "You didn't grant storage and/or location permissions.", Toast.LENGTH_LONG).show();
+      Toast.makeText(this, "You didn't grant storage and/or location permissions.", Toast.LENGTH_LONG).show();
     }
   }
 
-  @Override public void onExplanationNeeded(List<String> permissionsToExplain) {
+  @Override
+  public void onExplanationNeeded(List<String> permissionsToExplain) {
     Toast.makeText(this, "This app needs location and storage permissions in order to show its functionality.", Toast.LENGTH_LONG).show();
   }
 
-  @Override public void onPermissionResult(boolean granted) {
+  @Override
+  public void onPermissionResult(boolean granted) {
     if (granted) {
       requestPermissionIfNotGranted(WRITE_EXTERNAL_STORAGE);
     } else {
@@ -304,7 +314,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
 
   private void requestPermissionIfNotGranted(String permission) {
     List<String> permissionsNeeded = new ArrayList<>();
-    if(ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
       permissionsNeeded.add(permission);
       ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[0]), 10);
     } else {
