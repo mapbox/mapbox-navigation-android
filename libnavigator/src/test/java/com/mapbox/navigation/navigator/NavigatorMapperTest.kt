@@ -103,7 +103,7 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TunnelEntranceAlert.Builder(
-            TunnelEntranceAlert.Metadata.Builder().tunnelName("tunnelName").build(),
+            TunnelEntranceAlert.Metadata(),
             Point.fromLngLat(10.0, 20.0),
             123.0
         ).alertGeometry(
@@ -189,8 +189,7 @@ class NavigatorMapperTest {
     )
 
     private val tunnelEntrancePassiveManeuver = createPassiveManeuver(
-        type = PassiveManeuverType.KTUNNEL_ENTRANCE,
-        tunnelInfo = PassiveManeuverTunnelInfo("tunnelName")
+        type = PassiveManeuverType.KTUNNEL_ENTRANCE
     )
 
     private val borderCrossingPassiveManeuver = createPassiveManeuver(
