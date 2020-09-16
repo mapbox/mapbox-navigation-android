@@ -261,14 +261,8 @@ internal class NavigatorMapper {
         val maneuver = this
         return when (maneuver.type) {
             PassiveManeuverType.KTUNNEL_ENTRANCE -> {
-                val metadata = TunnelEntranceAlert.Metadata.Builder().apply {
-                    ifNonNull(maneuver.tunnelInfo) { tunnelInfo ->
-                        tunnelName(tunnelInfo.name)
-                    }
-                }.build()
-
                 TunnelEntranceAlert.Builder(
-                    metadata,
+                    TunnelEntranceAlert.Metadata(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )

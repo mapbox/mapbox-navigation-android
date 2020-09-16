@@ -135,37 +135,9 @@ class TunnelEntranceAlert private constructor(
     }
 
     /**
-     * Metadata specific to this alert.
-     *
-     * @param tunnelName name of the tunnel if available.
+     * Metadata specific to this alert. Currently contains no additional data.
      */
-    class Metadata private constructor(
-        val tunnelName: String?
-    ) {
-
-        /**
-         * Transform this object into a builder to mutate the values.
-         */
-        fun toBuilder(): Builder = Builder().tunnelName(tunnelName)
-
-        /**
-         * Use to create a new instance.
-         *
-         * @see TunnelEntranceAlert.Metadata
-         */
-        class Builder {
-            private var tunnelName: String? = null
-
-            /**
-             * Add optional tunnel name if available.
-             */
-            fun tunnelName(tunnelName: String?): Builder = apply { this.tunnelName = tunnelName }
-
-            /**
-             * Build the object instance.
-             */
-            fun build() = Metadata(tunnelName)
-        }
+    class Metadata {
 
         /**
          * Indicates whether some other object is "equal to" this one.
@@ -173,11 +145,6 @@ class TunnelEntranceAlert private constructor(
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
-
-            other as Metadata
-
-            if (tunnelName != other.tunnelName) return false
-
             return true
         }
 
@@ -185,14 +152,14 @@ class TunnelEntranceAlert private constructor(
          * Returns a hash code value for the object.
          */
         override fun hashCode(): Int {
-            return tunnelName?.hashCode() ?: 0
+            return javaClass.hashCode()
         }
 
         /**
          * Returns a string representation of the object.
          */
         override fun toString(): String {
-            return "Metadata(tunnelName=$tunnelName)"
+            return "Metadata()"
         }
     }
 }
