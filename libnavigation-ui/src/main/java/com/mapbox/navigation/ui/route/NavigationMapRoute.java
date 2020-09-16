@@ -358,7 +358,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     final Context context = mapView.getContext();
     final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
             ? Collections.emptyList() : routeStyleDescriptors;
-    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse);
+    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse, context, styleRes);
 
     return new MapRouteLine(
         context,
@@ -431,7 +431,7 @@ public class NavigationMapRoute implements LifecycleObserver {
     final Context context = mapView.getContext();
     final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
             ? Collections.emptyList() : routeStyleDescriptors;
-    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse);
+    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse, context, styleRes);
 
     final float vanishingPointOffset = routeLine.getVanishPointOffset();
     routeLine = new MapRouteLine(
