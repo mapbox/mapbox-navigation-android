@@ -36,6 +36,7 @@ android {
 dependencies {
     api dependenciesList.mapboxCore
     api dependenciesList.mapboxSdkDirectionsModels
+    api dependenciesList.mapboxSdkServicesCore
 
     implementation dependenciesList.androidXAnnotation
 

@@ -13,16 +13,30 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.navigator.ifNonNull
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry
+import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
+import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerComponent
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
+import com.mapbox.navigator.PassiveManeuver
+import com.mapbox.navigator.PassiveManeuverType
+import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
+import com.mapbox.navigator.UpcomingPassiveManeuver
 import com.mapbox.navigator.VoiceInstruction
 
-internal class RouteProgressMapper {
+private val SUPPORTED_PASSIVE_MANEUVERS = arrayOf(
+    PassiveManeuverType.KTUNNEL_ENTRANCE
+)
+
+internal class NavigatorMapper {
+
+    fun getRouteInitInfo(routeInfo: RouteInfo?) = routeInfo.toRouteInitInfo()
 
     /**
      * Builds [RouteProgress] object based on [NavigationStatus] returned by [Navigator]
@@ -157,6 +171,10 @@ internal class RouteProgressMapper {
 
             routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 
+            routeProgressBuilder.upcomingRouteAlerts(
+                upcomingPassiveManeuvers.toUpcomingRouteAlerts()
+            )
+
             return routeProgressBuilder.build()
         }
         return null
@@ -219,6 +237,66 @@ internal class RouteProgressMapper {
             RouteState.STALE -> RouteProgressState.LOCATION_STALE
             RouteState.UNCERTAIN -> RouteProgressState.ROUTE_UNCERTAIN
         }
+    }
+
+    private fun RouteInfo?.toRouteInitInfo(): RouteInitInfo? {
+        return if (this != null) {
+            RouteInitInfo(
+                passiveManeuvers
+                    .filter { SUPPORTED_PASSIVE_MANEUVERS.contains(it.type) }
+                    .map { it.toRouteAlert() }
+            )
+        } else null
+    }
+
+    private fun List<UpcomingPassiveManeuver>.toUpcomingRouteAlerts(): List<UpcomingRouteAlert> {
+        return this
+            .filter { SUPPORTED_PASSIVE_MANEUVERS.contains(it.maneuver.type) }
+            .map {
+                UpcomingRouteAlert.Builder(it.maneuver.toRouteAlert(), it.distanceToStart).build()
+            }
+    }
+
+    private fun PassiveManeuver.toRouteAlert(): RouteAlert<*> {
+        val maneuver = this
+        return when (maneuver.type) {
+            PassiveManeuverType.KTUNNEL_ENTRANCE -> {
+                val metadata = TunnelEntranceAlert.Metadata.Builder().apply {
+                    ifNonNull(maneuver.tunnelInfo) { tunnelInfo ->
+                        tunnelName(tunnelInfo.name)
+                    }
+                }.build()
+
+                TunnelEntranceAlert.Builder(
+                    metadata,
+                    maneuver.beginCoordinate,
+                    maneuver.distance
+                )
+                    .alertGeometry(maneuver.getAlertGeometry())
+                    .build()
+            }
+            else -> throw IllegalArgumentException("not supported type: ${maneuver.type}")
+        }
+    }
+
+    private fun PassiveManeuver.getAlertGeometry(): RouteAlertGeometry? = ifNonNull(
+        this.length,
+        this.beginCoordinate,
+        this.beginGeometryIndex,
+        this.endCoordinate,
+        this.endGeometryIndex
+    ) { length,
+        beginCoordinate,
+        beginGeometryIndex,
+        endCoordinate,
+        endGeometryIndex ->
+        RouteAlertGeometry.Builder(
+            length = length,
+            startCoordinate = beginCoordinate,
+            startGeometryIndex = beginGeometryIndex,
+            endCoordinate = endCoordinate,
+            endGeometryIndex = endGeometryIndex,
+        ).build()
     }
 
     companion object {

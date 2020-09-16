@@ -249,10 +249,10 @@ abstract class BuilderTest<Implementation : Any, Builder> {
 
         val requiredFields =
             builderClass.members.filter { it is KProperty && it !is KMutableProperty } as List<KProperty<*>>
-        val requiredValues = mutableListOf<Any>()
+        val requiredFieldValues = mutableListOf<Pair<KProperty<*>, Any>>()
         requiredFields.forEachIndexed { index, kProperty ->
             kProperty.isAccessible = true
-            requiredValues.add(kProperty.getter.call(builderInstance)!!)
+            requiredFieldValues.add(Pair(kProperty, kProperty.getter.call(builderInstance)!!))
         }
 
         val optionalFieldValues = mutableListOf<Pair<KProperty<*>, Any>>()
@@ -260,14 +260,30 @@ abstract class BuilderTest<Implementation : Any, Builder> {
             builderClass.members.filter { it is KProperty && it is KMutableProperty } as List<KProperty<*>>
         optionalFields.forEach { kProperty ->
             kProperty.isAccessible = true
-            optionalFieldValues.add(Pair(kProperty, kProperty.getter.call(builderInstance)!!))
+            optionalFieldValues.add(
+                Pair(
+                    kProperty,
+                    kProperty.getter.call(builderInstance) ?: throw RuntimeException("optional value of ${kProperty.name} not provided for equality test")
+                )
+            )
         }
 
         optionalFieldValues.forEach { exclude ->
             val field = exclude.first
             val value = exclude.second
+            val builderConstructor = builderClass.constructors.first()
+            val sortedRequiredFieldValues = mutableListOf<Any>()
+            builderConstructor.parameters.forEach { constructorParam ->
+                // the reflection used to retrieve the fields returns them in an alphabetical order
+                // so this function sorts the argument values to be provided in an order that matches the constructor declaration
+                sortedRequiredFieldValues.add(
+                    requiredFieldValues.find { it.first.name == constructorParam.name }?.second
+                        ?: throw NullPointerException("Your builder constructor argument name probably doesn't match with the field name it's assigned to. " +
+                            "Constructor param name is \"${constructorParam.name}\".")
+                )
+            }
             val newBuilderInstance =
-                builderClass.constructors.first().call(*requiredValues.toTypedArray())
+                builderClass.constructors.first().call(*sortedRequiredFieldValues.toTypedArray())
             field.isAccessible = true
             val defaultValue = field.getter.call(newBuilderInstance)
             if (defaultValue == value) {

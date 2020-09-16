@@ -41,7 +41,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     private var navigator: Navigator? = null
     private var route: DirectionsRoute? = null
     private var routeBufferGeoJson: Geometry? = null
-    private val routeProgressMapper = RouteProgressMapper()
+    private val navigatorMapper = NavigatorMapper()
 
     // Route following
 
@@ -112,7 +112,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
             TripStatus(
                 status.location.toLocation(),
                 status.key_points.map { it.toLocation() },
-                routeProgressMapper.getRouteProgress(route, routeBufferGeoJson, status),
+                navigatorMapper.getRouteProgress(route, routeBufferGeoJson, status),
                 status.routeState == RouteState.OFF_ROUTE
             )
         }
@@ -133,7 +133,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int
-    ): Boolean =
+    ): RouteInitInfo? =
         withContext(NavigatorDispatcher) {
             MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(
@@ -142,7 +142,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 PRIMARY_ROUTE_INDEX,
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
-            )
+            ).let { navigatorMapper.getRouteInitInfo(it) }
             navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
                 routeBufferGeoJson = GeometryGeoJson.fromJson(it)
             }
