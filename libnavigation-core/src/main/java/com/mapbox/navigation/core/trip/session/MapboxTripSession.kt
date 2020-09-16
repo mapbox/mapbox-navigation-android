@@ -15,6 +15,7 @@ import com.mapbox.base.common.logger.Logger
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -72,9 +73,14 @@ internal class MapboxTripSession(
     override var route: DirectionsRoute? = null
         set(value) {
             field = value
+            if (value == null) {
+                routeAlerts = null
+            }
             cancelOngoingUpdateNavigatorStatusDataJobs()
             mainJobController.scope.launch {
-                navigator.setRoute(value)
+                navigator.setRoute(value)?.let {
+                    routeAlerts = it.routeAlerts
+                }
                 if (state == TripSessionState.STARTED) {
                     updateDataFromNavigatorStatus()
                 }
@@ -98,6 +104,7 @@ internal class MapboxTripSession(
     private val stateObservers = CopyOnWriteArraySet<TripSessionStateObserver>()
     private val bannerInstructionsObservers = CopyOnWriteArraySet<BannerInstructionsObserver>()
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
+    private val routeAlertsObservers = CopyOnWriteArraySet<RouteAlertsObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
@@ -123,6 +130,14 @@ internal class MapboxTripSession(
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
+    private var routeAlerts: List<RouteAlert<*>>? = null
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            routeAlertsObservers.forEach { it.onNewRouteAlerts(value) }
+        }
 
     /**
      * Return raw location
@@ -378,6 +393,19 @@ internal class MapboxTripSession(
      */
     override fun updateLegIndex(legIndex: Int): Boolean {
         return navigator.updateLegIndex(legIndex)
+    }
+
+    override fun registerRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
+        routeAlertsObservers.add(routeAlertsObserver)
+        routeAlertsObserver.onNewRouteAlerts(routeAlerts)
+    }
+
+    override fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver) {
+        routeAlertsObservers.remove(routeAlertsObserver)
+    }
+
+    override fun unregisterAllRouteAlertsObservers() {
+        routeAlertsObservers.clear()
     }
 
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {

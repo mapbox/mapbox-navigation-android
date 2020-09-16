@@ -6,6 +6,9 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.LegAnnotation
 import com.mapbox.api.directions.v5.models.LegStep
 import com.mapbox.api.directions.v5.models.RouteLeg
+import com.mapbox.base.common.logger.Logger
+import com.mapbox.base.common.logger.model.Message
+import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -24,7 +27,19 @@ class ReplayRouteMapper @JvmOverloads constructor(
     var options: ReplayRouteOptions = ReplayRouteOptions.Builder().build()
 ) {
 
+    private val tag = Tag("MapboxReplayRouteMapper")
     private val replayRouteDriver = ReplayRouteDriver()
+    private var logger: Logger? = null
+
+    /**
+     * @see ReplayRouteMapper
+     */
+    constructor(
+        options: ReplayRouteOptions = ReplayRouteOptions.Builder().build(),
+        logger: Logger
+    ) : this(options) {
+        this.logger = logger
+    }
 
     /**
      * Take a [DirectionsRoute] and map it to events that can be replayed by the [MapboxReplayer].
@@ -38,8 +53,9 @@ class ReplayRouteMapper @JvmOverloads constructor(
         val geometries = directionsRoute.routeOptions()?.geometries()
         val usesPolyline6 = geometries?.contains(DirectionsCriteria.GEOMETRY_POLYLINE6) ?: false
         if (!usesPolyline6) {
-            throw IllegalStateException(
-                "Add .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6) to your directions request"
+            logger?.w(
+                tag,
+                Message("Make sure that the route's geometry is encoded with polyline6'")
             )
         }
         val geometry = directionsRoute.geometry() ?: return emptyList()

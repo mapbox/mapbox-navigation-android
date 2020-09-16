@@ -299,6 +299,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".UIActivity" />
         </activity>
+
+        <activity
+            android:name=".core.RouteAlertsActivity"
+            android:label="@string/title_route_alerts"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
         
         <meta-data
             android:name="com.mapbox.TestEventsServer"

@@ -86,7 +86,7 @@ interface MapboxNativeNavigator {
     suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int = INDEX_FIRST_LEG
-    ): Boolean
+    ): RouteInitInfo?
 
     /**
      * Updates annotations so that subsequent calls to getStatus will

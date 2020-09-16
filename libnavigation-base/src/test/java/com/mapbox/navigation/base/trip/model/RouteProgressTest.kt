@@ -22,6 +22,7 @@ class RouteProgressTest : BuilderTest<RouteProgress, RouteProgress.Builder>() {
             .durationRemaining(789.0)
             .fractionTraveled(101112f)
             .remainingWaypoints(131415)
+            .upcomingRouteAlerts(mockk(relaxed = true))
     }
 
     @Test
