@@ -9,13 +9,10 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
-import com.mapbox.maps.Style;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
-import org.jetbrains.annotations.NotNull;
 
 
 import java.util.ArrayList;
@@ -104,7 +101,7 @@ public class NavigationMapRoute implements LifecycleObserver {
         routeStyleDescriptors,
         routeLineInitializedCallback
     );
-    //this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
+    this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
     //this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     this.routeLineInitializedCallback = routeLineInitializedCallback;
@@ -134,7 +131,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * the routes are considered alternatives.
    */
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
-    //cancelVanishingRouteLineAnimator();
+    cancelVanishingRouteLineAnimator();
     if (directionsRoutes.isEmpty()) {
       routeLine.clearRouteData();
     } else if (CompareUtils.areEqualContentsIgnoreOrder(

@@ -23,7 +23,7 @@ public class RouteConstants {
   public static final String ARROW_HEAD_CASING_LAYER_ID = "mapbox-navigation-arrow-head-casing-layer";
   public static final Double[] ARROW_HEAD_CASING_OFFSET = {0.0, -7.0};
   public static final String ARROW_HEAD_LAYER_ID = "mapbox-navigation-arrow-head-layer";
-  public static final Float[] ARROW_HEAD_OFFSET = {0f, -7f};
+  public static final Double[] ARROW_HEAD_OFFSET = {0.0, -7.0};
   public static final int MIN_ARROW_ZOOM = 10;
   public static final int MAX_ARROW_ZOOM = 22;
   public static final float MIN_ZOOM_ARROW_SHAFT_SCALE = 2.6f;
