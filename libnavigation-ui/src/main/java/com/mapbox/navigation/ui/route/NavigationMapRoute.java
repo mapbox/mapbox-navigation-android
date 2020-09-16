@@ -13,8 +13,8 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.mapboxsdk.location.OnIndicatorPositionChangedListener;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
-import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -24,7 +24,6 @@ import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
-import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
 
 import org.jetbrains.annotations.TestOnly;
 
@@ -75,9 +74,6 @@ public class NavigationMapRoute implements LifecycleObserver {
   private boolean vanishRouteLineEnabled;
   @Nullable
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
-  @Nullable
-  private RouteLineValueAnimator vanishingRouteLineAnimator;
-  @Nullable
   private List<RouteStyleDescriptor> routeStyleDescriptors;
 
   /**
@@ -90,7 +86,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param lifecycleOwner provides lifecycle for the component
    * @param styleRes a style resource with custom route colors, scale, etc.
    * @param belowLayer optionally pass in a layer id to place the route line below
-   * @param vanishRouteLineEnabled determines if the route line should vanish behind the puck during navigation.
    * @param routeLineInitializedCallback indicates that the route line layer has been added to the current style
    * @param routeStyleDescriptors optionally describes the styling of the route lines
    */
@@ -193,7 +188,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    * the routes are considered alternatives.
    */
   public void addRoutes(@NonNull @Size(min = 1) List<? extends DirectionsRoute> directionsRoutes) {
-    cancelVanishingRouteLineAnimator();
     if (directionsRoutes.isEmpty()) {
       routeLine.clearRouteData();
     } else if (CompareUtils.areEqualContentsIgnoreOrder(
@@ -218,7 +212,6 @@ public class NavigationMapRoute implements LifecycleObserver {
       routeList.add(identifiableRoute.getRoute());
     }
 
-    cancelVanishingRouteLineAnimator();
     if (directionsRoutes.isEmpty()) {
       routeLine.drawIdentifiableRoutes(directionsRoutes);
     } else if (CompareUtils.areEqualContentsIgnoreOrder(
@@ -299,7 +292,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    * @param navigation to remove the progress change listener
    */
   public void removeProgressChangeListener(@Nullable MapboxNavigation navigation) {
-    shutdownVanishingRouteLineAnimator();
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
     }
@@ -311,6 +303,11 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void setVanishRouteLineEnabled(boolean enabled) {
     this.vanishRouteLineEnabled = enabled;
+    if (vanishRouteLineEnabled) {
+      mapboxMap.getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
+    } else {
+      mapboxMap.getLocationComponent().removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
+    }
   }
 
   /**
@@ -328,6 +325,10 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
+  private OnIndicatorPositionChangedListener onIndicatorPositionChangedListener = point -> {
+    routeLine.updateTraveledRouteLine(point);
+  };
+
   /**
    * Called during the onStart event of the Lifecycle owner to initialize resources.
    */
@@ -342,7 +343,6 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   protected void onStop() {
-    shutdownVanishingRouteLineAnimator();
     removeListeners();
   }
 
@@ -397,6 +397,10 @@ public class NavigationMapRoute implements LifecycleObserver {
       mapView.addOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
       isDidFinishLoadingStyleListenerAdded = true;
     }
+
+    if (vanishRouteLineEnabled) {
+      mapboxMap.getLocationComponent().addOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
+    }
   }
 
   private void removeListeners() {
@@ -411,19 +415,8 @@ public class NavigationMapRoute implements LifecycleObserver {
       mapView.removeOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
       isDidFinishLoadingStyleListenerAdded = false;
     }
-  }
 
-  private void shutdownVanishingRouteLineAnimator() {
-    if (this.vanishingRouteLineAnimator != null) {
-      this.vanishingRouteLineAnimator.setValueAnimatorHandler(null);
-      cancelVanishingRouteLineAnimator();
-    }
-  }
-
-  private void cancelVanishingRouteLineAnimator() {
-    if (this.vanishingRouteLineAnimator != null) {
-      this.vanishingRouteLineAnimator.cancelAnimationCallbacks();
-    }
+    mapboxMap.getLocationComponent().removeOnIndicatorPositionChangedListener(onIndicatorPositionChangedListener);
   }
 
   private void redraw(@NonNull Style style) {
@@ -472,22 +465,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   @Nullable
   private MapRouteProgressChangeListener buildMapRouteProgressChangeListener() {
-    shutdownVanishingRouteLineAnimator();
-    if (vanishRouteLineEnabled) {
-      vanishingRouteLineAnimator = new RouteLineValueAnimator();
-    } else {
-      vanishingRouteLineAnimator = null;
-    }
-
-    float vanishingPoint = (this.mapRouteProgressChangeListener != null)
-            ? this.mapRouteProgressChangeListener.getPercentDistanceTraveled() : 0f;
-    MapRouteProgressChangeListener newListener = new MapRouteProgressChangeListener(
-            this.routeLine,
-            routeArrow,
-            vanishingRouteLineAnimator
-    );
-    newListener.updatePercentDistanceTraveled(vanishingPoint);
-    return newListener;
+    return new MapRouteProgressChangeListener(this.routeLine, routeArrow);
   }
 
   /**
