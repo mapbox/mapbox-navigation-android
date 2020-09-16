@@ -15,10 +15,6 @@ import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.maps.plugin.style.expressions.Expression
-import com.mapbox.maps.plugin.style.expressions.dsl.interpolate
-import com.mapbox.maps.plugin.style.expressions.dsl.literal
-import com.mapbox.maps.plugin.style.expressions.dsl.rgba
-import com.mapbox.maps.plugin.style.expressions.dsl.step
 import com.mapbox.maps.plugin.style.layers.LineLayer
 import com.mapbox.maps.plugin.style.layers.getLayer
 import com.mapbox.maps.plugin.style.layers.properties.Visibility
