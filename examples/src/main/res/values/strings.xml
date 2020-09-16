@@ -58,6 +58,9 @@
     <string name="title_guidance_view">GuidanceView</string>
     <string name="description_guidance_view">Demonstrates the use of a GuidanceView to show an instructional image at proper junctions.</string>
 
+    <string name="title_junction_snapshot_sample">Snapshotter Sample(POC)</string>
+    <string name="description_junction_snapshot_sample">Demonstrates junction view snapshot.</string>
+
     <string name="title_faster_route">Faster route</string>
     <string name="description_faster_route">Demonstrate how to use the MapboxNavigation class to listen for a faster route.</string>
 

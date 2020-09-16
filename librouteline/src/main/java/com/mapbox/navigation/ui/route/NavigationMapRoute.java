@@ -46,12 +46,14 @@ public class NavigationMapRoute implements LifecycleObserver {
   @NonNull
   private final MapView mapView;
   private MapRouteLine routeLine;
-
+  private boolean vanishRouteLineEnabled;
   @Nullable
   private MapboxNavigation navigation;
 
   @NonNull
   private final LifecycleOwner lifecycleOwner;
+  //@Nullable
+  //private MapRouteProgressChangeListener mapRouteProgressChangeListener;
 
   @Nullable
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
@@ -80,12 +82,12 @@ public class NavigationMapRoute implements LifecycleObserver {
       @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback,
       @Nullable List<RouteStyleDescriptor> routeStyleDescriptors) {
     //this.routeStyleDescriptors = routeStyleDescriptors;
-    //this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
     this.mapView = mapView;
     this.mapboxMap = mapboxMap;
-    //this.navigation = navigation;
+    this.navigation = navigation;
     buildMapRouteLine(
         mapView,
         mapboxMap,

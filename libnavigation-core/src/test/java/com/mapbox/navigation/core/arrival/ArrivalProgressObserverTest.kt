@@ -305,9 +305,7 @@ internal class ArrivalProgressObserverTest {
             }
         }
         every { tripSession.getRouteProgress() } returns routeProgress
-        every { tripSession.updateLegIndex(2) } returns mockk {
-            every { legIndex } returns 2
-        }
+        every { tripSession.updateLegIndex(2) } returns true
 
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
 
@@ -341,9 +339,7 @@ internal class ArrivalProgressObserverTest {
                 every { arrivalInMeters } returns null
             }
         }
-        every { tripSession.updateLegIndex(any()) } returns mockk {
-            every { legIndex } returns 1
-        }
+        every { tripSession.updateLegIndex(1) } returns true
 
         arrivalProgressObserver.attach(customArrivalController)
         arrivalProgressObserver.onRouteProgressChanged(routeProgress)
@@ -399,9 +395,7 @@ internal class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(2) } returns mockk {
-            every { legIndex } returns 2
-        }
+        every { tripSession.updateLegIndex(2) } returns true
 
         val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
 
@@ -424,9 +418,7 @@ internal class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(3) } returns mockk {
-            every { legIndex } returns 2
-        }
+        every { tripSession.updateLegIndex(3) } returns false
 
         val didNavigate = arrivalProgressObserver.navigateNextRouteLeg()
 
@@ -457,9 +449,7 @@ internal class ArrivalProgressObserverTest {
                 }
             }
         }
-        every { tripSession.updateLegIndex(2) } returns mockk {
-            every { legIndex } returns 2
-        }
+        every { tripSession.updateLegIndex(2) } returns true
 
         arrivalProgressObserver.navigateNextRouteLeg()
 

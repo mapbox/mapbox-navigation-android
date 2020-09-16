@@ -36,13 +36,15 @@ class NavigationOkHttpServiceTest {
     private val httpClientBuilder: OkHttpClient.Builder = mockk(relaxUnitFun = true)
     private val httpClient: OkHttpClient = mockk(relaxUnitFun = true)
     private val httpDispatcher: Dispatcher = mockk(relaxUnitFun = true)
+    private val body: ByteArray = byteArrayOf()
 
     private val nativeRequest = HttpRequest(
         HttpMethod.GET,
         "https://api.mapbox.com/xyz",
         hashMapOf("User-Agent" to "MapboxNavigationNative/X.Y.Z MapboxNavigationNative"),
         true,
-        UserAgentComponents.Builder().build()
+        UserAgentComponents.Builder().build(),
+        body
     )
     private val nativeCallback: HttpResponseCallback = mockk(relaxUnitFun = true)
 

@@ -8,9 +8,9 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
-import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
+import com.mapbox.navigator.TilesConfig
 import com.mapbox.navigator.VoiceInstruction
 
 /**
@@ -30,6 +30,7 @@ interface MapboxNativeNavigator {
     fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
+        tilesConfig: TilesConfig,
         logger: Logger?
     ): MapboxNativeNavigator
 
@@ -85,7 +86,7 @@ interface MapboxNativeNavigator {
     suspend fun setRoute(
         route: DirectionsRoute?,
         legIndex: Int = INDEX_FIRST_LEG
-    ): NavigationStatus
+    ): Boolean
 
     /**
      * Updates annotations so that subsequent calls to getStatus will
@@ -134,7 +135,7 @@ interface MapboxNativeNavigator {
      *
      * @return an initialized [NavigationStatus] if no errors, invalid otherwise
      */
-    fun updateLegIndex(legIndex: Int): NavigationStatus
+    fun updateLegIndex(legIndex: Int): Boolean
 
     // Offline
 
@@ -142,14 +143,6 @@ interface MapboxNativeNavigator {
      * Caches tiles around the last set route
      */
     fun cacheLastRoute()
-
-    /**
-     * Configures routers for getting routes offline.
-     *
-     * @param routerParams Optional [RouterParams] object which contains router configurations for
-     * getting routes offline.
-     */
-    fun configureRouter(routerParams: RouterParams)
 
     /**
      * Uses valhalla and local tile data to generate mapbox-directions-api-like json.
