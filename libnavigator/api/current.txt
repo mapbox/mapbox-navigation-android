@@ -7,8 +7,5 @@ package com.mapbox.navigation.navigator {
   public final class NavigationOkHttpServiceKt {
   }
 
-  public final class NullUtilsKt {
-  }
-
 }
 
