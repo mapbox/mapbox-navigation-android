@@ -620,11 +620,12 @@ internal class MapRouteLine(
             routeScale,
             routeCasingColor
         ).apply {
-            MapUtils.addLayerToMap(
-                style,
-                this,
-                belowLayerId
-            )
+            this.bindTo(style, LayerPosition(null, belowLayerId, null))
+//            MapUtils.addLayerToMap(
+//                style,
+//                this,
+//                belowLayerId
+//            )
             routeLayerIds.add(this.layerId)
         }
 
