@@ -18,6 +18,7 @@ package com.mapbox.navigation.core {
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method public void registerRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method public void registerRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void registerTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -38,6 +39,7 @@ package com.mapbox.navigation.core {
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
+    method public void unregisterRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
     method public void unregisterRoutesObserver(com.mapbox.navigation.core.directions.session.RoutesObserver routesObserver);
     method public void unregisterTripSessionStateObserver(com.mapbox.navigation.core.trip.session.TripSessionStateObserver tripSessionStateObserver);
@@ -273,6 +275,7 @@ package com.mapbox.navigation.core.replay.route {
   public final class ReplayRouteMapper {
     ctor public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options);
     ctor public ReplayRouteMapper();
+    ctor public ReplayRouteMapper(com.mapbox.navigation.core.replay.route.ReplayRouteOptions options, com.mapbox.base.common.logger.Logger logger);
     method public com.mapbox.navigation.core.replay.route.ReplayRouteOptions getOptions();
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteGeometry(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
     method public java.util.List<com.mapbox.navigation.core.replay.history.ReplayEventBase> mapDirectionsRouteLegAnnotation(com.mapbox.api.directions.v5.models.DirectionsRoute directionsRoute);
@@ -512,6 +515,10 @@ package com.mapbox.navigation.core.trip.session {
 
   public interface OffRouteObserver {
     method public void onOffRouteStateChanged(boolean offRoute);
+  }
+
+  public interface RouteAlertsObserver {
+    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<?>>? routeAlerts);
   }
 
   public interface RouteProgressObserver {
