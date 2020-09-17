@@ -47,7 +47,6 @@ import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.internal.utils.MemoizeUtils.memoize
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.generateFeatureCollection
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBelowLayer
@@ -146,7 +145,6 @@ internal class MapRouteLine(
     var vanishPointOffset: Float = 0f
         private set
     private var vanishingPointUpdateInhibited: Boolean = false
-    private val distanceRemainingCache = LruCache<DirectionsRoute, Float>(2)
 
     @get:ColorInt
     private val routeLineTraveledColor: Int by lazy {
@@ -399,10 +397,6 @@ internal class MapRouteLine(
                 listOf(ALTERNATIVE_ROUTE_LAYER_ID)
             )
         )
-    }
-
-    fun updateDistanceRemainingCache(route: DirectionsRoute, distanceRemaining: Float) {
-        distanceRemainingCache.put(route, distanceRemaining)
     }
 
     fun inhibitVanishingPointUpdate(inhibitVanishingPointUpdate: Boolean) {
@@ -928,14 +922,11 @@ internal class MapRouteLine(
                 return
             }
 
-            val distanceRemainingFromCache: Float = distanceRemainingCache[primaryRoute] ?: 0f
-            val distanceRemaining = calculatePreciseDistanceTraveledAlongLine(
+            val distanceTraveled = MapRouteLineSupport.findDistanceOfPointAlongLine(
                 lineString,
-                distanceRemainingFromCache,
                 point
             )
-            val auxDistanceTraveled = (routeDistance - distanceRemaining)
-            val percentTraveled = (auxDistanceTraveled / routeDistance).toFloat()
+            val percentTraveled = (distanceTraveled / routeDistance).toFloat()
 
             if (percentTraveled > MINIMUM_ROUTE_LINE_OFFSET) {
                 val expression = getExpressionAtOffset(percentTraveled)
@@ -1336,39 +1327,69 @@ internal class MapRouteLine(
                 TurfMeasurement.distance(firstPoint, secondPoint, TurfConstants.UNIT_METERS)
             }.memoize(POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE)
 
-        val getReversedCoordinates: (line: LineString) -> List<Point> = { line: LineString ->
-            line.coordinates().reversed()
-        }.memoize(1)
+        private val lineStringPointCache = LruCache<LineString, Int>(1)
 
-        fun calculatePreciseDistanceTraveledAlongLine(
-            line: LineString,
-            targetDistance: Float,
-            targetPoint: Point
-        ): Double {
-            val linePoints = getReversedCoordinates(line)
-            var runningDistance = 0.0
-            var lastPointIndex = 0
+        fun getDistanceSum(points: List<Point>): Double {
+            var previousPoint = points[0]
+            var distance = 0.0
+            for (index in 1 until points.size) {
+                distance += getDistanceBetweenPoints(previousPoint, points[index])
+                previousPoint = points[index]
+            }
+            return distance
+        }
 
-            for (currentIndex in linePoints.indices) {
-                if (currentIndex + 1 < linePoints.size) {
-                    val nextSectionDistance = getDistanceBetweenPoints(
-                        linePoints[currentIndex],
-                        linePoints[currentIndex + 1]
-                    )
-                    if (runningDistance + nextSectionDistance > targetDistance) {
-                        lastPointIndex = currentIndex
-                        break
-                    } else {
-                        runningDistance += nextSectionDistance
-                    }
-                }
+        fun findDistanceOfPointAlongLine(line: LineString, point: Point): Double {
+            val lastPointIndexFromCache = lineStringPointCache[line] ?: 0
+            val distFromPointToOrigin = TurfMeasurement.distance(
+                point,
+                line.coordinates().first(),
+                TurfConstants.UNIT_METERS
+            )
+            val distFromPointToIndex = TurfMeasurement.distance(
+                point,
+                line.coordinates()[lastPointIndexFromCache],
+                TurfConstants.UNIT_METERS
+            )
+
+            val lastPointIndex = if (distFromPointToOrigin < distFromPointToIndex) {
+                0
+            } else {
+                lastPointIndexFromCache
             }
 
-            return runningDistance + getDistanceBetweenPoints(
-                linePoints[lastPointIndex],
-                targetPoint
+            val points = getClosestPointAlongLine(line, point, lastPointIndex)
+            val coordinatesTraveled = line.coordinates().subList(0, points.first).plus(
+                points.second
             )
+            return getDistanceSum(coordinatesTraveled).also {
+                lineStringPointCache.put(line, points.first)
+            }
         }
+
+        private fun getClosestPointAlongLine(line: LineString, endPoint: Point, startingIndex: Int):
+            Pair<Int, Point> {
+                var closestPointIndex = startingIndex
+
+                for (currentIndex in startingIndex + 1 until line.coordinates().size) {
+                    val distanceToNextPoint = TurfMeasurement.distance(
+                        line.coordinates()[currentIndex],
+                        endPoint,
+                        TurfConstants.UNIT_METERS
+                    )
+                    val distanceToEndPoint = TurfMeasurement.distance(
+                        line.coordinates()[closestPointIndex],
+                        endPoint,
+                        TurfConstants.UNIT_METERS
+                    )
+                    if (distanceToEndPoint < distanceToNextPoint) {
+                        return Pair(closestPointIndex, endPoint)
+                    } else {
+                        closestPointIndex = currentIndex
+                    }
+                }
+                return Pair(closestPointIndex, endPoint)
+            }
     }
 }
 

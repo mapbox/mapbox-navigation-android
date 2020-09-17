@@ -26,7 +26,8 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.findDistanceOfPointAlongLine
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getDistanceSum
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
@@ -1248,48 +1249,6 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun calculatePreciseDistanceTraveledAlongLineTest() {
-        val route = getDirectionsRoute()
-        val lineString = LineString.fromPolyline(
-            route.geometry()!!,
-            Constants.PRECISION_6
-        )
-        val targetPoint = TurfMeasurement.midpoint(
-            lineString.coordinates()[6],
-            lineString.coordinates()[7]
-        )
-
-        val result = calculatePreciseDistanceTraveledAlongLine(
-            lineString,
-            (route.distance() / 2).toFloat(),
-            targetPoint
-        )
-
-        assertEquals(620.1892777997383, result, 0.0)
-    }
-
-    @Test
-    fun calculatePreciseDistanceTraveledAlongLineWhenTargetDistanceZero() {
-        val route = getDirectionsRoute()
-        val lineString = LineString.fromPolyline(
-            route.geometry()!!,
-            Constants.PRECISION_6
-        )
-        val targetPoint = TurfMeasurement.midpoint(
-            lineString.coordinates()[6],
-            lineString.coordinates()[7]
-        )
-
-        val result = calculatePreciseDistanceTraveledAlongLine(
-            lineString,
-            0f,
-            targetPoint
-        )
-
-        assertEquals(392.2066920656183, result, 0.0)
-    }
-
-    @Test
     fun getStyledFloatArrayTest() {
         val result = MapRouteLine.MapRouteLineSupport.getStyledFloatArray(
             R.styleable.MapboxStyleNavigationMapRoute_routeLineScaleStops,
@@ -1334,6 +1293,33 @@ class MapRouteLineTest {
         assertEquals(4.0f, result[0].scaleStop)
         assertEquals(3.0f, result[0].scaleMultiplier)
         assertEquals(1.0f, result[0].scale)
+    }
+
+    @Test
+    fun findDistanceOfPointAlongLineTest() {
+        val route = getDirectionsRoute()
+        val routeLineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+        val testPoint = TurfMeasurement.midpoint(
+            routeLineString.coordinates()[8],
+            routeLineString.coordinates()[9]
+        )
+
+        val result = findDistanceOfPointAlongLine(
+            routeLineString,
+            testPoint
+        )
+
+        assertEquals(266.122135806527, result, 0.0)
+    }
+
+    @Test
+    fun getDistanceSumTest() {
+        val route = getDirectionsRoute()
+        val routeLineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+
+        val result = getDistanceSum(routeLineString.coordinates())
+
+        assertEquals(route.distance(), result, .1)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

@@ -30,8 +30,6 @@ internal class MapRouteProgressChangeListener(
     }
 
     private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
-        routeLine.updateDistanceRemainingCache(routeProgress.route, routeProgress.distanceRemaining)
-
         val currentRoute = routeProgress.route
         val hasGeometry = currentRoute.geometry()?.isNotEmpty() ?: false
         if (hasGeometry && currentRoute != directionsRoute) {
