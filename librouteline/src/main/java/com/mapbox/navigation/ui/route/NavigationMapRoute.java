@@ -7,13 +7,18 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.OnLifecycleEvent;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.maps.MapChange;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.Style;
+import com.mapbox.maps.plugin.gesture.GesturePluginImpl;
+import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
 import com.mapbox.navigation.ui.internal.utils.RouteLineValueAnimator;
-
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,20 +53,25 @@ public class NavigationMapRoute implements LifecycleObserver {
   private MapRouteLine routeLine;
   private MapRouteArrow routeArrow;
   private boolean vanishRouteLineEnabled;
-  //private MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener;
+  private MapboxMap.OnMapChangedListener mapChangedListener;
   @Nullable
   private MapboxNavigation navigation;
 
   @NonNull
   private final LifecycleOwner lifecycleOwner;
   @Nullable
+  private MapRouteClickListener mapRouteClickListener;
+  private boolean isMapClickListenerAdded = false;
+  @Nullable
   private MapRouteProgressChangeListener mapRouteProgressChangeListener;
-
+  private boolean isDidFinishLoadingStyleListenerAdded = false;
   @Nullable
   private RouteLineValueAnimator vanishingRouteLineAnimator;
 
   @Nullable
   private MapRouteLineInitializedCallback routeLineInitializedCallback;
+  @Nullable
+  private List<RouteStyleDescriptor> routeStyleDescriptors;
 
   /**
    * Construct an instance of {@link NavigationMapRoute}.
@@ -86,7 +96,7 @@ public class NavigationMapRoute implements LifecycleObserver {
       boolean vanishRouteLineEnabled,
       @Nullable MapRouteLineInitializedCallback routeLineInitializedCallback,
       @Nullable List<RouteStyleDescriptor> routeStyleDescriptors) {
-    //this.routeStyleDescriptors = routeStyleDescriptors;
+    this.routeStyleDescriptors = routeStyleDescriptors;
     this.vanishRouteLineEnabled = vanishRouteLineEnabled;
     this.styleRes = styleRes;
     this.belowLayer = belowLayer;
@@ -102,11 +112,11 @@ public class NavigationMapRoute implements LifecycleObserver {
         routeLineInitializedCallback
     );
     this.routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, LAYER_ABOVE_UPCOMING_MANEUVER_ARROW);
-    //this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
+    this.mapRouteClickListener = new MapRouteClickListener(this.routeLine);
     this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
     this.routeLineInitializedCallback = routeLineInitializedCallback;
     this.lifecycleOwner = lifecycleOwner;
-    //initializeDidFinishLoadingStyleListener();
+    initializeDidFinishLoadingStyleListener();
     registerLifecycleObserver();
   }
 
@@ -200,20 +210,6 @@ public class NavigationMapRoute implements LifecycleObserver {
     removeListeners();
   }
 
-  private void removeListeners() {
-    //if (isMapClickListenerAdded) {
-    //  mapboxMap.removeOnMapClickListener(mapRouteClickListener);
-    //  isMapClickListenerAdded = false;
-    //}
-    if (navigation != null) {
-      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
-    }
-    //if (isDidFinishLoadingStyleListenerAdded) {
-    //  mapView.removeOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
-    //  isDidFinishLoadingStyleListenerAdded = false;
-    //}
-  }
-
   private void updateProgressChangeListener() {
     if (navigation != null) {
       navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
@@ -225,17 +221,32 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   private void addListeners() {
-    //if (!isMapClickListenerAdded) {
-    //  mapboxMap.addOnMapClickListener(mapRouteClickListener);
-    //  isMapClickListenerAdded = true;
-    //}
+    if (!isMapClickListenerAdded) {
+      getGesturePlugin().addOnMapClickListener(mapRouteClickListener);
+      isMapClickListenerAdded = true;
+    }
     if (navigation != null) {
       navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
     }
-    //if (!isDidFinishLoadingStyleListenerAdded) {
-    //  mapView.addOnDidFinishLoadingStyleListener(didFinishLoadingStyleListener);
-    //  isDidFinishLoadingStyleListenerAdded = true;
-    //}
+    if (!isDidFinishLoadingStyleListenerAdded && mapChangedListener != null) {
+      mapboxMap.addOnMapChangedListener(mapChangedListener);
+      isDidFinishLoadingStyleListenerAdded = true;
+    }
+  }
+
+  private void removeListeners() {
+    if (isMapClickListenerAdded) {
+      getGesturePlugin().removeOnMapClickListener(mapRouteClickListener);
+
+      isMapClickListenerAdded = false;
+    }
+    if (navigation != null) {
+      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
+    }
+    if (isDidFinishLoadingStyleListenerAdded && mapChangedListener != null) {
+      mapboxMap.removeOnMapChangedListener(mapChangedListener);
+      isDidFinishLoadingStyleListenerAdded = false;
+    }
   }
 
   @Nullable
@@ -269,6 +280,140 @@ public class NavigationMapRoute implements LifecycleObserver {
    */
   public void updateRouteVisibilityTo(boolean isVisible) {
     routeLine.updateVisibilityTo(isVisible);
+  }
+
+  /**
+   * Hides the progress arrow on the map drawn by this class.
+   *
+   * @param isVisible true to show routes, false to hide
+   */
+  public void updateRouteArrowVisibilityTo(boolean isVisible) {
+    routeArrow.updateVisibilityTo(isVisible);
+  }
+
+  /**
+   * Add a {@link OnRouteSelectionChangeListener} to know which route the user has currently
+   * selected as their primary route.
+   *
+   * @param onRouteSelectionChangeListener a listener which lets you know when the user has changed
+   * the primary route and provides the current direction
+   * route which the user has selected
+   */
+  public void setOnRouteSelectionChangeListener(
+      @Nullable OnRouteSelectionChangeListener onRouteSelectionChangeListener
+  ) {
+    mapRouteClickListener.setOnRouteSelectionChangeListener(onRouteSelectionChangeListener);
+  }
+
+  /**
+   * Toggle whether or not you'd like the map to display the alternative routes. This options great
+   * for when the user actually begins the navigation session and alternative routes aren't needed
+   * anymore.
+   *
+   * @param alternativesVisible true if you'd like alternative routes to be displayed on the map,
+   * else false
+   */
+  public void showAlternativeRoutes(boolean alternativesVisible) {
+    mapRouteClickListener.updateAlternativesVisible(alternativesVisible);
+    routeLine.toggleAlternativeVisibilityWith(alternativesVisible);
+  }
+
+  /**
+   * This method will allow this class to listen to route progress and adapt the route line
+   * whenever {@link TripSessionState#STARTED}.
+   *
+   * In order to use the vanishing route line feature be sure to enable the feature before
+   * calling this method.
+   *
+   * @param navigation to add the progress change listener
+   * @see MapboxNavigation#startTripSession()
+   */
+  public void addProgressChangeListener(@NonNull MapboxNavigation navigation) {
+    this.navigation = navigation;
+    this.mapRouteProgressChangeListener = buildMapRouteProgressChangeListener();
+    navigation.registerRouteProgressObserver(mapRouteProgressChangeListener);
+  }
+
+  /**
+   * Should be called if {@link #addProgressChangeListener(MapboxNavigation, boolean)} was
+   * called to prevent leaking.
+   *
+   * @param navigation to remove the progress change listener
+   */
+  public void removeProgressChangeListener(@Nullable MapboxNavigation navigation) {
+    shutdownVanishingRouteLineAnimator();
+    if (navigation != null) {
+      navigation.unregisterRouteProgressObserver(mapRouteProgressChangeListener);
+    }
+  }
+
+  /**
+   * Determines whether or not the vanishing route line feature is enabled. This should be
+   * called prior to adding a ProgressChangeListener if this feature wasn't enabled via the builder.
+   */
+  public void setVanishRouteLineEnabled(boolean enabled) {
+    this.vanishRouteLineEnabled = enabled;
+  }
+
+  /**
+   * Can be used to manually update the route progress.
+   * <p>
+   * {@link NavigationMapRoute} automatically listens to
+   * {@link RouteProgressObserver#onRouteProgressChanged(RouteProgress)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation, boolean)}
+   * and invoking this method in that scenario will lead to competing updates.
+   * @param routeProgress current progress
+   */
+  public void onNewRouteProgress(@NonNull RouteProgress routeProgress) {
+    if (mapRouteProgressChangeListener != null) {
+      mapRouteProgressChangeListener.onRouteProgressChanged(routeProgress);
+    }
+  }
+
+  private void initializeDidFinishLoadingStyleListener() {
+    mapChangedListener = mapChange -> {
+      if (mapChange == MapChange.DID_FINISH_LOADING_STYLE) {
+        mapboxMap.getStyle(this::redraw);
+      }
+    };
+  }
+
+  private void redraw(@NonNull Style style) {
+    recreateRouteLine(style);
+    boolean arrowVisibility = routeArrow.routeArrowIsVisible();
+    routeArrow = new MapRouteArrow(mapView, mapboxMap, styleRes, routeLine.getTopLayerId());
+    routeArrow.updateVisibilityTo(arrowVisibility);
+    updateProgressChangeListener();
+  }
+
+  private void recreateRouteLine(@NonNull final Style style) {
+    final Context context = mapView.getContext();
+    final List<RouteStyleDescriptor> routeStyleDescriptorsToUse = routeStyleDescriptors == null
+        ? Collections.emptyList() : routeStyleDescriptors;
+    final RouteLayerProvider layerProvider = getLayerProvider(routeStyleDescriptorsToUse);
+
+    final float vanishingPointOffset = routeLine.getVanishPointOffset();
+    routeLine = new MapRouteLine(
+        context,
+        style,
+        styleRes,
+        belowLayer,
+        layerProvider,
+        routeLine.retrieveRouteFeatureData(),
+        routeLine.retrieveRouteExpressionData(),
+        routeLine.retrieveVisibility(),
+        routeLine.retrieveAlternativesVisible(),
+        vanishingPointOffset,
+        routeLineInitializedCallback
+    );
+
+    getGesturePlugin().removeOnMapClickListener(mapRouteClickListener);
+    mapRouteClickListener = new MapRouteClickListener(routeLine);
+    getGesturePlugin().addOnMapClickListener(mapRouteClickListener);
+  }
+
+  private GesturePluginImpl getGesturePlugin() {
+    return mapView.getPlugin(GesturePluginImpl.class);
   }
 
   /**

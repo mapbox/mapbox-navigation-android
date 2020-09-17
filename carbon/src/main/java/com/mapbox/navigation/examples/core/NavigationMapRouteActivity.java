@@ -182,7 +182,7 @@ public class NavigationMapRouteActivity extends AppCompatActivity implements Per
       .requestUuid("")
       .accessToken(getMapboxAccessTokenFromResources())
       .coordinates(Arrays.asList(origin, destination))
-      .alternatives(false)
+      .alternatives(true)
       .build();
 
     mapboxNavigation.requestRoutes(
