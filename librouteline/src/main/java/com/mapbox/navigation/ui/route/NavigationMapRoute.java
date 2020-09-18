@@ -408,7 +408,9 @@ public class NavigationMapRoute implements LifecycleObserver {
     );
 
     getGesturePlugin().removeOnMapClickListener(mapRouteClickListener);
+    OnRouteSelectionChangeListener externalClickListener = mapRouteClickListener.getOnRouteSelectionChangeListener();
     mapRouteClickListener = new MapRouteClickListener(routeLine);
+    mapRouteClickListener.setOnRouteSelectionChangeListener(externalClickListener);
     getGesturePlugin().addOnMapClickListener(mapRouteClickListener);
   }
 
