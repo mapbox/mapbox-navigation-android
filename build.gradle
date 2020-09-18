@@ -30,6 +30,7 @@ buildscript {
     classpath pluginDependencies.dokka
     classpath pluginDependencies.mapboxSdkRegistry
     classpath pluginDependencies.mapboxAccessToken
+    classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
   }
 }
 
