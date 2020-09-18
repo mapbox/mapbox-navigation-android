@@ -41,6 +41,10 @@ public class MapRouteClickListener implements OnMapClickListener {
     onRouteSelectionChangeListener = listener;
   }
 
+  public OnRouteSelectionChangeListener getOnRouteSelectionChangeListener() {
+    return onRouteSelectionChangeListener;
+  }
+
   void updateAlternativesVisible(boolean alternativesVisible) {
     this.alternativesVisible = alternativesVisible;
   }
