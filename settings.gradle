@@ -1,4 +1,5 @@
 include ':examples',
+        ':carbon',
         ':app-tests-wrapper',
         ':libnavigator',
         ':libnavigation-base',
@@ -9,4 +10,7 @@ include ':examples',
         ':libnavigation-core',
         ':libnavigation-ui',
         ':libtesting-ui',
-        ':libtesting-utils'
+        ':libtesting-utils',
+        ':libnavui-base',
+        ':libnavui-maps',
+        ':libnavui-util'

@@ -48,6 +48,7 @@ import static com.mapbox.navigation.ui.route.MapboxRouteLayerProviderFactory.get
  * applications {@code style.xml} file, you extend {@code <style name="NavigationMapRoute">} and
  * change some or all the options currently offered. If no style files provided in the constructor,
  * the default style will be used.
+ *
  */
 @UiThread
 public class NavigationMapRoute implements LifecycleObserver {

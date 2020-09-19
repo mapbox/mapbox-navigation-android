@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="MapboxStyleNavigationMapRoute">
+    <!-- Primary route colors -->
+    <attr name="routeColor" format="color"/>
+    <attr name="routeUnknownCongestionColor" format="color"/>
+    <attr name="routeLowCongestionColor" format="color"/>
+    <attr name="routeModerateCongestionColor" format="color"/>
+    <attr name="routeHeavyCongestionColor" format="color"/>
+    <attr name="routeSevereCongestionColor" format="color"/>
+    <attr name="routeCasingColor" format="color"/>
+    <attr name="routeLineTraveledColor" format="color"/>
+    <attr name="routeLineCasingTraveledColor" format="color"/>
+
+    <!-- Alternative route colors -->
+    <attr name="alternativeRouteColor" format="color"/>
+    <attr name="alternativeRouteUnknownCongestionColor" format="color"/>
+    <attr name="alternativeRouteLowCongestionColor" format="color"/>
+    <attr name="alternativeRouteModerateCongestionColor" format="color"/>
+    <attr name="alternativeRouteHeavyCongestionColor" format="color"/>
+    <attr name="alternativeRouteSevereCongestionColor" format="color"/>
+    <attr name="alternativeRouteCasingColor" format="color"/>
+
+    <!-- Origin/Destination waypoint drawables -->
+    <attr name="originWaypointIcon" format="reference"/>
+    <attr name="destinationWaypointIcon" format="reference"/>
+
+    <!-- Route Scales -->
+    <attr name="routeScale" format="float"/>
+    <attr name="routeTrafficScale" format="float"/>
+    <attr name="alternativeRouteScale" format="float"/>
+    <attr name="routeLineScaleStops" format="reference"/>
+    <attr name="routeLineScaleMultipliers" format="reference"/>
+    <attr name="routeLineScales" format="reference"/>
+    <attr name="routeLineTrafficScaleStops" format="reference"/>
+    <attr name="routeLineTrafficScaleMultipliers" format="reference"/>
+    <attr name="routeLineTrafficScales" format="reference"/>
+    <attr name="routeLineCasingScaleStops" format="reference"/>
+    <attr name="routeLineCasingScaleMultipliers" format="reference"/>
+    <attr name="routeLineCasingScales" format="reference"/>
+    <attr name="trafficBackFillRoadClasses" format="reference"/>
+
+    <attr name="upcomingManeuverArrowColor" format="color"/>
+    <attr name="upcomingManeuverArrowBorderColor" format="color"/>
+
+    <!-- Rounded route line cap -->
+    <attr name="roundedLineCap" format="boolean"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleNavigationView">
+    <!-- Colors -->
+    <attr name="navigationViewPrimary" format="color"/>
+    <attr name="navigationViewSecondary" format="color"/>
+    <attr name="navigationViewAccent" format="color"/>
+    <attr name="navigationViewPrimaryText" format="color"/>
+    <attr name="navigationViewSecondaryText" format="color"/>
+    <attr name="navigationViewDivider" format="color"/>
+
+    <!-- Instruction List -->
+    <attr name="navigationViewListBackground" format="color"/>
+
+    <!-- Banner -->
+    <attr name="navigationViewBannerBackground" format="color"/>
+    <attr name="navigationViewBannerPrimaryText" format="color"/>
+    <attr name="navigationViewBannerSecondaryText" format="color"/>
+    <attr name="navigationViewBannerManeuverPrimary" format="color"/>
+    <attr name="navigationViewBannerManeuverSecondary" format="color"/>
+
+    <!-- Progress Bars -->
+    <attr name="navigationViewProgress" format="color"/>
+    <attr name="navigationViewProgressBackground" format="color"/>
+
+    <!-- Map style -->
+    <attr name="navigationViewMapStyle" format="string"/>
+
+    <!-- Route style -->
+    <attr name="navigationViewRouteStyle" format="reference"/>
+
+    <!-- Location layer style -->
+    <attr name="navigationViewLocationLayerStyle" format="reference"/>
+
+    <!-- Destination marker drawable -->
+    <attr name="navigationViewDestinationMarker" format="reference"/>
+
+    <!-- Route overview drawable -->
+    <attr name="navigationViewRouteOverviewDrawable" format="reference"/>
+
+    <!-- For setting the styles in XML -->
+    <attr name="navigationLightTheme" format="reference"/>
+    <attr name="navigationDarkTheme" format="reference"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleManeuverView">
+    <attr name="maneuverViewPrimaryColor" format="color"/>
+    <attr name="maneuverViewSecondaryColor" format="color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleInstructionView">
+    <attr name="instructionViewPrimaryBackgroundColor" format="reference|color"/>
+    <attr name="instructionViewSecondaryBackgroundColor" format="reference|color"/>
+    <attr name="instructionListViewBackgroundColor" format="reference|color"/>
+    <attr name="instructionViewPrimaryTextColor" format="reference|color"/>
+    <attr name="instructionViewSecondaryTextColor" format="reference|color"/>
+    <attr name="instructionViewManeuverViewStyle" format="reference"/>
+    <attr name="instructionViewFeedbackButtonStyle" format="reference"/>
+    <attr name="instructionViewSoundButtonStyle" format="reference"/>
+    <attr name="instructionViewAlertViewStyle" format="reference"/>
+    <attr name="instructionViewDisableList" format="boolean"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleSoundButton">
+    <attr name="soundButtonPrimaryColor" format="reference|color"/>
+    <attr name="soundButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleFeedbackButton">
+    <attr name="feedbackButtonPrimaryColor" format="reference|color"/>
+    <attr name="feedbackButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleAlertView">
+    <attr name="alertViewBackgroundColor" format="reference|color"/>
+    <attr name="alertViewProgressBarBackgroundColor" format="reference|color"/>
+    <attr name="alertViewProgressBarColor" format="reference|color"/>
+    <attr name="alertViewTextColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleRecenterButton">
+    <attr name="recenterButtonPrimaryColor" format="reference|color"/>
+    <attr name="recenterButtonSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleWayNameView">
+    <attr name="wayNameViewPrimaryColor" format="reference|color"/>
+    <attr name="wayNameViewSecondaryColor" format="reference|color"/>
+  </declare-styleable>
+
+  <declare-styleable name="MapboxStyleSummaryBottomSheet">
+    <attr name="summaryBottomSheetPrimaryColor" format="reference|color"/>
+    <attr name="summaryBottomSheetSecondaryColor" format="reference|color"/>
+    <attr name="summaryBottomSheetDividerColor" format="reference|color"/>
+    <attr name="summaryBottomSheetProgressBarColor" format="reference|color"/>
+    <attr name="summaryBottomSheetRouteOverviewDrawable" format="reference"/>
+    <attr name="summaryBottomSheetPrimaryTextColor" format="reference|color"/>
+    <attr name="summaryBottomSheetSecondaryTextColor" format="reference|color"/>
+  </declare-styleable>
+</resources>
