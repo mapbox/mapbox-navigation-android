@@ -164,6 +164,28 @@ class ReplayRouteInterpolatorTest {
     }
 
     @Test
+    fun `should reduce speed for turns`() {
+        val options = ReplayRouteOptions.Builder()
+            .maxSpeedMps(30.0)
+            .turnSpeedMps(3.0)
+            .build()
+        val coordinates = listOf(
+            Point.fromLngLat(-121.466857, 38.562993),
+            Point.fromLngLat(-121.466765, 38.563205),
+            Point.fromLngLat(-121.465571, 38.562884),
+            Point.fromLngLat(-121.465435, 38.563267),
+            Point.fromLngLat(-121.466527, 38.564469),
+            Point.fromLngLat(-121.466363, 38.564845)
+        )
+
+        val speedProfile = routeInterpolator.createSpeedProfile(options, coordinates)
+        assertEquals(3.0, speedProfile[1].speedMps, 0.0001)
+        assertEquals(3.0, speedProfile[2].speedMps, 0.0001)
+        assertTrue("${speedProfile[3].speedMps} < 10.0", speedProfile[3].speedMps < 10.0)
+        assertTrue("${speedProfile[4].speedMps} < 10.0", speedProfile[4].speedMps < 10.0)
+    }
+
+    @Test
     fun `should profile u turns to be very slow`() {
         val coordinates = listOf(
             Point.fromLngLat(-121.470231, 38.550964),

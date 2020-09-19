@@ -6,6 +6,7 @@ import com.mapbox.turf.TurfMeasurement
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.pow
 
 internal class ReplayRouteInterpolator {
 
@@ -105,7 +106,7 @@ internal class ReplayRouteInterpolator {
             val speedMps = if (deltaBearing > 150) {
                 options.uTurnSpeedMps
             } else {
-                val velocityFraction = 1.0 - min(1.0, deltaBearing / 90.0)
+                val velocityFraction = (1.0 - min(1.0, deltaBearing / 90.0)).pow(2.0)
                 val offsetToMaxVelocity = options.maxSpeedMps - options.turnSpeedMps
                 (options.turnSpeedMps + (velocityFraction * offsetToMaxVelocity))
             }
