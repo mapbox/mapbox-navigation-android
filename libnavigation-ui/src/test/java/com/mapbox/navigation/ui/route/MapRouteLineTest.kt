@@ -27,6 +27,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAF
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
+import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
@@ -1200,6 +1201,49 @@ class MapRouteLineTest {
         verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
     }
 
+    @Test
+    fun updateVanishingPointWhenLineCoordinatesIsLessThanTwoPoints() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        every { style.isFullyLoaded } returnsMany listOf(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true
+        )
+        every {
+            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
+        } returns primaryRouteCasingLayer
+        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
+        every {
+            style.getLayer("mapbox-navigation-route-traffic-layer")
+        } returns primaryRouteTrafficLayer
+        val route = getSingleCoordinateDirectionsRoute()
+
+        val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(route)) }
+
+        mapRouteLine.updateTraveledRouteLine(inputPoint)
+
+        verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
+        verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
+        verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
+    }
+
     private fun getDirectionsRoute(includeCongestion: Boolean): DirectionsRoute {
         val congestionValue = when (includeCongestion) {
             true -> "\"unknown\",\"heavy\",\"low\""
@@ -1216,6 +1260,14 @@ class MapRouteLineTest {
     private fun getDirectionsRoute(): DirectionsRoute {
         val tokenHere = "someToken"
         val directionsRouteAsJson = loadJsonFixture("vanish_point_test.txt")
+            ?.replace("tokenHere", tokenHere)
+
+        return DirectionsRoute.fromJson(directionsRouteAsJson)
+    }
+
+    private fun getSingleCoordinateDirectionsRoute(): DirectionsRoute {
+        val tokenHere = "someToken"
+        val directionsRouteAsJson = loadJsonFixture("single_coordinate_route.json")
             ?.replace("tokenHere", tokenHere)
 
         return DirectionsRoute.fromJson(directionsRouteAsJson)
@@ -1258,26 +1310,57 @@ class MapRouteLineTest {
             lineString.coordinates()[6],
             lineString.coordinates()[7]
         )
+        val subCoordinates = lineString.coordinates().subList(7, lineString.coordinates().size)
+        val length = TurfMeasurement.length(
+            listOf(targetPoint).plus(subCoordinates),
+            TurfConstants.UNIT_METERS
+        )
 
         val result = calculatePreciseDistanceTraveledAlongLine(
             lineString,
-            (route.distance() / 2).toFloat(),
+            length.toFloat() - 50,
             targetPoint
         )
 
-        assertEquals(620.1892777997383, result, 0.0)
+        assertEquals(length, result, 0.01)
     }
 
     @Test
-    fun calculatePreciseDistanceTraveledAlongLineWhenTargetDistanceZero() {
+    fun calculatePreciseDistanceTraveledAlongLineWhenTargetFirstPoint() {
         val route = getDirectionsRoute()
         val lineString = LineString.fromPolyline(
             route.geometry()!!,
             Constants.PRECISION_6
         )
+        val targetPoint = lineString.coordinates().first()
+        val length = TurfMeasurement.length(lineString.coordinates(), TurfConstants.UNIT_METERS)
+
+        val result = calculatePreciseDistanceTraveledAlongLine(
+            lineString,
+            length.toFloat() - 50,
+            targetPoint
+        )
+
+        assertEquals(length, result, 0.01)
+    }
+
+    @Test
+    fun calculatePreciseDistanceTraveledAlongLineWhenTargetLastPoint() {
+        val route = getDirectionsRoute()
+        val lineString = LineString.fromPolyline(
+            route.geometry()!!,
+            Constants.PRECISION_6
+        )
+        val lineCoordinates = lineString.coordinates()
+
         val targetPoint = TurfMeasurement.midpoint(
-            lineString.coordinates()[6],
-            lineString.coordinates()[7]
+            lineCoordinates[lineCoordinates.lastIndex - 1],
+            lineCoordinates[lineCoordinates.lastIndex]
+        )
+        val expectedLength = TurfMeasurement.distance(
+            lineCoordinates.last(),
+            targetPoint,
+            TurfConstants.UNIT_METERS
         )
 
         val result = calculatePreciseDistanceTraveledAlongLine(
@@ -1286,7 +1369,7 @@ class MapRouteLineTest {
             targetPoint
         )
 
-        assertEquals(392.2066920656183, result, 0.0)
+        assertEquals(expectedLength, result, 0.01)
     }
 
     @Test
