@@ -136,7 +136,7 @@ class SimpleMapboxNavigationKt :
                 }
             }
         }
-        findViewById<Button>(R.id.btn_clear_routes)?.let { button ->
+        findViewById<Button>(R.id.btnClearRoutes)?.let { button ->
             button.setOnClickListener {
                 mapboxNavigation.setRoutes(emptyList())
             }

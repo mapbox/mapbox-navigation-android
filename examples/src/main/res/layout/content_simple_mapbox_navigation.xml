@@ -26,7 +26,7 @@
     </com.mapbox.mapboxsdk.maps.MapView>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_clear_routes"
+        android:id="@+id/btnClearRoutes"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

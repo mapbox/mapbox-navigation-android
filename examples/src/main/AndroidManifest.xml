@@ -293,6 +293,15 @@
         </activity>
 
         <activity
+            android:name=".core.TimeBasedRoutingActivity"
+            android:label="@string/title_time_based_routing_activity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreActivity" />
+        </activity>
+
+        <activity
             android:name=".ui.TrafficToggleActivity"
             android:label="@string/title_traffic_toggle">
             <meta-data

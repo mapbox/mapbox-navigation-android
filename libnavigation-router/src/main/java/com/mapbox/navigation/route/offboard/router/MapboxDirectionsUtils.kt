@@ -100,6 +100,9 @@ internal fun MapboxDirections.Builder.routeOptions(
 
     enableRefresh(options.supportsRefresh())
 
+    departAt(options.departAt())
+    arriveBy(options.arriveBy())
+
     eventListener(EVENT_LISTENER)
 
     return this

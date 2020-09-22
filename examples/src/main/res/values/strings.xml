@@ -91,6 +91,9 @@
     <string name="title_runtime_styling">Runtime Route Styling</string>
     <string name="description_runtime_styling">An example using RuntimeRouteStyling</string>
 
+    <string name="title_time_based_routing_activity">Time based routing</string>
+    <string name="description_time_based_routing_activity">Routing might be different depends on time, because of different route satiation like traffic jam, road repair, and etc.</string>
+
     <string name="title_map_matching">Map Matching</string>
     <string name="description_map_matching">Use MapMatching to fetch DirectionsRoute</string>
 
@@ -133,5 +136,7 @@
     <string name="history_failed_to_load_list">Failed to load list</string>
     <string name="history_local_history_file">Local history file</string>
     <string name="history_recorded_history_file">Recorded history file</string>
+    <string name="time_based_routing_selected_date_and_time_label">Selected time \n%s</string>
+    <string name="time_based_routing_selected_clear_routes">Clear routes</string>
 
 </resources>

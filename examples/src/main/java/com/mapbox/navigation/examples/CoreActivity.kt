@@ -27,6 +27,7 @@ import com.mapbox.navigation.examples.core.RouteAlertsActivity
 import com.mapbox.navigation.examples.core.RuntimeRouteStylingActivity
 import com.mapbox.navigation.examples.core.SimpleMapboxNavigationKt
 import com.mapbox.navigation.examples.core.SummaryBottomSheetActivity
+import com.mapbox.navigation.examples.core.TimeBasedRoutingActivity
 import kotlinx.android.synthetic.main.activity_core.*
 
 class CoreActivity : AppCompatActivity() {
@@ -65,6 +66,11 @@ class CoreActivity : AppCompatActivity() {
                 getString(R.string.title_junction_snapshot_sample),
                 getString(R.string.description_junction_snapshot_sample),
                 JunctionSnapshotActivity::class.java
+            ),
+            SampleItem(
+                getString(R.string.title_time_based_routing_activity),
+                getString(R.string.description_time_based_routing_activity),
+                TimeBasedRoutingActivity::class.java
             ),
             SampleItem(
                 getString(R.string.title_reroute_view),

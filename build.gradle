@@ -88,7 +88,7 @@ allprojects {
     }*/
     maven { url 'https://mapbox.bintray.com/mapbox' }
     // uncomment if snapshots access is needed
-    // maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+     maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
   }
 }
 
