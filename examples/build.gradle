@@ -59,11 +59,11 @@ android {
         }
         release {
             minifyEnabled true
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
             signingConfig signingConfigs.release
             manifestPlaceholders = [enableCrashReporting: "true"]
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
-            }
         }
     }
 
