@@ -4,8 +4,5 @@ package com.mapbox.navigation.navigator {
   public final class LocationExKt {
   }
 
-  public final class NavigationOkHttpServiceKt {
-  }
-
 }
 

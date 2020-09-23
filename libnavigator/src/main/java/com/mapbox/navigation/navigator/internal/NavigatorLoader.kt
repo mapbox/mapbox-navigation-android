@@ -1,10 +1,7 @@
 package com.mapbox.navigation.navigator.internal
 
-import com.mapbox.base.common.logger.Logger
-import com.mapbox.common.HttpServiceFactory
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.base.options.DeviceType
-import com.mapbox.navigation.navigator.NavigationOkHttpService
 import com.mapbox.navigation.navigator.internal.NavigatorLoader.customConfig
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
@@ -12,7 +9,6 @@ import com.mapbox.navigator.ProfileApplication
 import com.mapbox.navigator.ProfilePlatform
 import com.mapbox.navigator.SettingsProfile
 import com.mapbox.navigator.TilesConfig
-import okhttp3.OkHttpClient
 
 /**
  * This class is expected to gain more responsibility as we define [customConfig].
@@ -20,18 +16,11 @@ import okhttp3.OkHttpClient
  */
 internal object NavigatorLoader {
 
-    init {
-        System.loadLibrary("mapbox-common")
-        System.loadLibrary("navigator-android")
-    }
-
     fun createNavigator(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig,
-        logger: Logger?
+        tilesConfig: TilesConfig
     ): Navigator {
-        HttpServiceFactory.setUserDefined(NavigationOkHttpService(OkHttpClient.Builder(), logger))
         return Navigator(
             settingsProfile(deviceProfile),
             navigatorConfig,
