@@ -25,6 +25,7 @@ buildscript {
     classpath pluginDependencies.dependencyUpdates
     classpath pluginDependencies.jacoco
     classpath pluginDependencies.googleServices
+    classpath pluginDependencies.firebaseGradle
     classpath pluginDependencies.license
     classpath pluginDependencies.mapboxSdkVersions
     classpath pluginDependencies.dokka

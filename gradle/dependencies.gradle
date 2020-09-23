@@ -145,6 +145,8 @@ ext {
       // play services
       gmsLocation               : "com.google.android.gms:play-services-location:${version.gmsLocation}",
 
+      firebaseCrashlytics       : "com.google.firebase:firebase-crashlytics:${version.firebaseCrashlytics}",
+
       multidex                  : "androidx.multidex:multidex:${version.multidex}",
   ]
 
@@ -158,6 +160,7 @@ ext {
       license            : '0.8.5',
       jacoco             : '0.2',
       googleServices     : '4.3.3',
+      firebaseCrashlytics: '2.3.0',
       mapboxSdkVersions  : '1.1.0',
       dokka              : '0.10.1',
       mapbox             : '0.2.1'
@@ -172,6 +175,7 @@ ext {
       dependencyUpdates  : "com.github.ben-manes:gradle-versions-plugin:${pluginVersion.dependencyUpdates}",
       jacoco             : "com.hiya:jacoco-android:${pluginVersion.jacoco}",
       googleServices     : "com.google.gms:google-services:${pluginVersion.googleServices}",
+      firebaseGradle     : "com.google.firebase:firebase-crashlytics-gradle:${pluginVersion.firebaseCrashlytics}",
       mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
       mapboxSdkRegistry  : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapbox}",

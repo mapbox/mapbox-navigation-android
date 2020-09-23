@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.mapbox.maps.token'
 apply from: "${rootDir}/gradle/script-git-version.gradle"
 apply from: "${rootDir}/gradle/ktlint.gradle"
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion androidVersions.compileSdkVersion
@@ -59,6 +61,9 @@ android {
         }
         release {
             minifyEnabled true
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
             signingConfig signingConfigs.release
             manifestPlaceholders = [enableCrashReporting: "true"]
         }
@@ -82,6 +87,7 @@ dependencies {
     implementation dependenciesList.mapboxLogger
     implementation dependenciesList.mapboxAnnotationPlugin
     implementation dependenciesList.mapboxSdkTurf
+    implementation dependenciesList.firebaseCrashlytics
 
     // test
     androidTestImplementation project(':libtesting-ui')
@@ -123,4 +129,6 @@ dependencies {
     implementation(dependenciesList.okhttp) {
         force = true
     }
+
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
 }
