@@ -918,6 +918,11 @@ internal class MapRouteLine(
 
         ifNonNull(primaryRoute, primaryRoute?.distance()) { primaryRoute, routeDistance ->
             val lineString = getLineStringForRoute(primaryRoute)
+
+            if (lineString.coordinates().size < 2) {
+                return
+            }
+
             val nearestPointOnLineDistance = TurfMisc.nearestPointOnLine(
                 point,
                 lineString.coordinates(),
@@ -934,8 +939,8 @@ internal class MapRouteLine(
                 distanceRemainingFromCache,
                 point
             )
-            val auxDistanceTraveled = (routeDistance - distanceRemaining)
-            val percentTraveled = (auxDistanceTraveled / routeDistance).toFloat()
+            val distanceTraveled = (routeDistance - distanceRemaining)
+            val percentTraveled = (distanceTraveled / routeDistance).toFloat()
 
             if (percentTraveled > MINIMUM_ROUTE_LINE_OFFSET) {
                 val expression = getExpressionAtOffset(percentTraveled)
@@ -1356,7 +1361,19 @@ internal class MapRouteLine(
                         linePoints[currentIndex + 1]
                     )
                     if (runningDistance + nextSectionDistance > targetDistance) {
-                        lastPointIndex = currentIndex
+                        val currentPointToTargetPointDist =
+                            TurfMeasurement.distance(
+                                linePoints[currentIndex],
+                                targetPoint,
+                                TurfConstants.UNIT_METERS
+                            )
+
+                        if (currentPointToTargetPointDist > nextSectionDistance) {
+                            runningDistance += nextSectionDistance
+                            lastPointIndex = currentIndex + 1
+                        } else {
+                            lastPointIndex = currentIndex
+                        }
                         break
                     } else {
                         runningDistance += nextSectionDistance
@@ -1364,10 +1381,16 @@ internal class MapRouteLine(
                 }
             }
 
-            return runningDistance + getDistanceBetweenPoints(
+            val distFromTargetToLastIndexPoint = getDistanceBetweenPoints(
                 linePoints[lastPointIndex],
                 targetPoint
             )
+
+            return if (lastPointIndex == 0) {
+                distFromTargetToLastIndexPoint
+            } else {
+                runningDistance + distFromTargetToLastIndexPoint
+            }
         }
     }
 }
