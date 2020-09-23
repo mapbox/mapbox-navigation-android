@@ -73,6 +73,11 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    packagingOptions {
+        // temporary workaround for https://github.com/mapbox/mapbox-base-android/issues/53
+        exclude 'META-INF/*.kotlin_module'
+    }
 }
 
 dependencies {

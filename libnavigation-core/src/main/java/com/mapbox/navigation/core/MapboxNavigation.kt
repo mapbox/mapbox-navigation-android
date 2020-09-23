@@ -158,8 +158,7 @@ class MapboxNavigation(
         navigator = NavigationComponentProvider.createNativeNavigator(
             navigationOptions.deviceProfile,
             navigatorConfig,
-            createTilesConfig(),
-            logger
+            createTilesConfig()
         )
         navigationSession = NavigationComponentProvider.createNavigationSession()
         directionsSession = NavigationComponentProvider.createDirectionsSession(
@@ -350,8 +349,7 @@ class MapboxNavigation(
         navigator.create(
             navigationOptions.deviceProfile,
             navigatorConfig,
-            createTilesConfig(),
-            logger
+            createTilesConfig()
         )
 
         navigationSession.unregisterAllNavigationSessionStateObservers()

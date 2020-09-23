@@ -134,7 +134,7 @@ class MapboxNavigationTest {
         mockDirectionSession()
         mockNavigationSession()
 
-        every { navigator.create(any(), any(), any(), logger) } returns navigator
+        every { navigator.create(any(), any(), any()) } returns navigator
 
         val navigationOptions = NavigationOptions
             .Builder(applicationContext)
@@ -306,7 +306,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsNativeNavigatorReset() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.create(any(), any(), any(), logger) }
+        verify(exactly = 1) { navigator.create(any(), any(), any()) }
     }
 
     @Test
@@ -497,7 +497,7 @@ class MapboxNavigationTest {
 
     private fun mockNativeNavigator() {
         every {
-            NavigationComponentProvider.createNativeNavigator(any(), any(), any(), logger)
+            NavigationComponentProvider.createNativeNavigator(any(), any(), any())
         } returns navigator
     }
 

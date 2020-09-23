@@ -3,7 +3,6 @@ package com.mapbox.navigation.navigator.internal
 import android.location.Location
 import android.os.SystemClock
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.gson.GeometryGeoJson
@@ -52,14 +51,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     override fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig,
-        logger: Logger?
+        tilesConfig: TilesConfig
     ): MapboxNativeNavigator {
         navigator = NavigatorLoader.createNavigator(
             deviceProfile,
             navigatorConfig,
-            tilesConfig,
-            logger
+            tilesConfig
         )
         route = null
         routeBufferGeoJson = null

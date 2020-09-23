@@ -2,7 +2,6 @@ package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.api.directions.v5.models.DirectionsRoute
-import com.mapbox.base.common.logger.Logger
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigator.BannerInstruction
@@ -30,8 +29,7 @@ interface MapboxNativeNavigator {
     fun create(
         deviceProfile: DeviceProfile,
         navigatorConfig: NavigatorConfig,
-        tilesConfig: TilesConfig,
-        logger: Logger?
+        tilesConfig: TilesConfig
     ): MapboxNativeNavigator
 
     // Route following
