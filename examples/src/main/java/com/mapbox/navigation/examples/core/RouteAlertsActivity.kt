@@ -182,7 +182,7 @@ class RouteAlertsActivity : AppCompatActivity() {
                     // the distance to the start of the upcoming tunnel
                     val upcomingTunnel = routeProgress
                         .upcomingRouteAlerts
-                        .firstOrNull { it.routeAlert.type == RouteAlertType.TunnelEntrance }
+                        .firstOrNull { it.routeAlert.alertType == RouteAlertType.TunnelEntrance }
                     if (upcomingTunnel != null) {
                         val distanceToStart = upcomingTunnel.distanceToStart.roundToInt()
                         if (distanceToStart > 0) {
@@ -209,7 +209,7 @@ class RouteAlertsActivity : AppCompatActivity() {
 
         mapboxNavigation.registerRouteAlertsObserver(
             object : RouteAlertsObserver {
-                override fun onNewRouteAlerts(routeAlerts: List<RouteAlert<*>>) {
+                override fun onNewRouteAlerts(routeAlerts: List<RouteAlert>) {
                     // in this part of the example we're listening for the full list of alerts
                     // whenever a new route is set and marking all of the tunnels on the map
                     val tunnelFeatures = mutableListOf<Feature>()
@@ -232,8 +232,8 @@ class RouteAlertsActivity : AppCompatActivity() {
                                 }
                             }
                             is BorderCrossingAlert -> {
-                                val from = routeAlert.metadata.from!!.countryCodeAlpha3
-                                val to = routeAlert.metadata.to!!.countryCodeAlpha3
+                                val from = routeAlert.from!!.countryCodeAlpha3
+                                val to = routeAlert.to!!.countryCodeAlpha3
                                 val feature = Feature.fromGeometry(routeAlert.coordinate)
                                 feature.addStringProperty(
                                     borderCrossingsTextPropertyId,
@@ -242,7 +242,7 @@ class RouteAlertsActivity : AppCompatActivity() {
                                 borderCrossingsFeatures.add(feature)
                             }
                             is TollCollectionAlert -> {
-                                val typeString = when (routeAlert.metadata.type) {
+                                val typeString = when (routeAlert.tollCollectionType) {
                                     TollCollectionType.TollGantry -> {
                                         "toll gantry"
                                     }
@@ -266,7 +266,7 @@ class RouteAlertsActivity : AppCompatActivity() {
                                 tollCollectionFeatures.add(feature)
                             }
                             is RestStopAlert -> {
-                                val typeString = when (routeAlert.metadata.type) {
+                                val typeString = when (routeAlert.restStopType) {
                                     RestStopType.RestArea -> {
                                         "rest area"
                                     }

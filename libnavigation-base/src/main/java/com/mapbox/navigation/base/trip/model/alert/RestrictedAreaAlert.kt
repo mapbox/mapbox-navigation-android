@@ -9,13 +9,11 @@ import com.mapbox.geojson.Point
  * @see RouteAlertType.RestrictedArea
  */
 class RestrictedAreaAlert private constructor(
-    metadata: Metadata,
     coordinate: Point,
     distance: Double,
     alertGeometry: RouteAlertGeometry?
-) : RouteAlert<RestrictedAreaAlert.Metadata>(
+) : RouteAlert(
     RouteAlertType.RestrictedArea,
-    metadata,
     coordinate,
     distance,
     alertGeometry
@@ -24,7 +22,7 @@ class RestrictedAreaAlert private constructor(
     /**
      * Transform this object into a builder to mutate the values.
      */
-    fun toBuilder(): Builder = Builder(metadata, coordinate, distance).alertGeometry(alertGeometry)
+    fun toBuilder(): Builder = Builder(coordinate, distance).alertGeometry(alertGeometry)
 
     /**
      * Returns a string representation of the object.
@@ -39,7 +37,6 @@ class RestrictedAreaAlert private constructor(
      * @see RestrictedAreaAlert
      */
     class Builder(
-        private val metadata: Metadata,
         private val coordinate: Point,
         private val distance: Double
     ) {
@@ -57,57 +54,9 @@ class RestrictedAreaAlert private constructor(
          */
         fun build() =
             RestrictedAreaAlert(
-                metadata,
                 coordinate,
                 distance,
                 alertGeometry
             )
-    }
-
-    /**
-     * Metadata specific to this alert. Currently contains no additional data.
-     */
-    class Metadata private constructor() {
-
-        /**
-         * Transform this object into a builder to mutate the values.
-         */
-        fun toBuilder(): Builder = Builder()
-
-        /**
-         * Indicates whether some other object is "equal to" this one.
-         */
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            return true
-        }
-
-        /**
-         * Returns a hash code value for the object.
-         */
-        override fun hashCode(): Int {
-            return javaClass.hashCode()
-        }
-
-        /**
-         * Returns a string representation of the object.
-         */
-        override fun toString(): String {
-            return "Metadata()"
-        }
-
-        /**
-         * Use to create a new instance.
-         *
-         * @see Metadata
-         */
-        class Builder {
-
-            /**
-             * Build the object instance.
-             */
-            fun build() = Metadata()
-        }
     }
 }

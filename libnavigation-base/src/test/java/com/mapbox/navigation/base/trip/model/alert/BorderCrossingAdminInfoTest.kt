@@ -8,8 +8,8 @@ class BorderCrossingAdminInfoTest :
     override fun getImplementationClass() = BorderCrossingAdminInfo::class
 
     override fun getFilledUpBuilder() = BorderCrossingAdminInfo.Builder(
-        "code",
-        "codeAlpha3"
+        "US",
+        "USA"
     )
 
     @Test

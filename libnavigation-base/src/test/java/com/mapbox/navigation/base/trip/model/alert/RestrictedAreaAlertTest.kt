@@ -9,7 +9,6 @@ class RestrictedAreaAlertTest : BuilderTest<RestrictedAreaAlert, RestrictedAreaA
     override fun getImplementationClass() = RestrictedAreaAlert::class
 
     override fun getFilledUpBuilder() = RestrictedAreaAlert.Builder(
-        RestrictedAreaAlert.Metadata.Builder().build(),
         Point.fromLngLat(10.0, 20.0),
         123.0
     ).alertGeometry(

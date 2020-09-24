@@ -9,10 +9,9 @@ class BorderCrossingAlertTest : BuilderTest<BorderCrossingAlert, BorderCrossingA
     override fun getImplementationClass() = BorderCrossingAlert::class
 
     override fun getFilledUpBuilder() = BorderCrossingAlert.Builder(
-        mockk(relaxed = true),
         Point.fromLngLat(0.0, 0.0),
         1.0
-    ).alertGeometry(mockk(relaxed = true))
+    ).alertGeometry(mockk(relaxed = true)).from(mockk(relaxed = true)).to(mockk(relaxed = true))
 
     @Test
     override fun trigger() {
