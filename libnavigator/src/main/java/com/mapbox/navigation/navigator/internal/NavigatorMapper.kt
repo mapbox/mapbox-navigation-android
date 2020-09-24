@@ -13,8 +13,15 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
+import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo
+import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
+import com.mapbox.navigation.base.trip.model.alert.RestStopType
+import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry
+import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
+import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
 import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.utils.internal.ifNonNull
@@ -24,6 +31,11 @@ import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.PassiveManeuver
+import com.mapbox.navigator.PassiveManeuverAdminInfo
+import com.mapbox.navigator.PassiveManeuverServiceAreaInfo
+import com.mapbox.navigator.PassiveManeuverServiceAreaType
+import com.mapbox.navigator.PassiveManeuverTollCollectionInfo
+import com.mapbox.navigator.PassiveManeuverTollCollectionType
 import com.mapbox.navigator.PassiveManeuverType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
@@ -31,7 +43,11 @@ import com.mapbox.navigator.UpcomingPassiveManeuver
 import com.mapbox.navigator.VoiceInstruction
 
 private val SUPPORTED_PASSIVE_MANEUVERS = arrayOf(
-    PassiveManeuverType.KTUNNEL_ENTRANCE
+    PassiveManeuverType.KTUNNEL_ENTRANCE,
+    PassiveManeuverType.KBORDER_CROSSING,
+    PassiveManeuverType.KTOLL_COLLECTION_POINT,
+    PassiveManeuverType.KSERVICE_AREA,
+    PassiveManeuverType.KRESTRICTED_AREA
 )
 
 internal class NavigatorMapper {
@@ -262,7 +278,56 @@ internal class NavigatorMapper {
         return when (maneuver.type) {
             PassiveManeuverType.KTUNNEL_ENTRANCE -> {
                 TunnelEntranceAlert.Builder(
-                    TunnelEntranceAlert.Metadata(),
+                    TunnelEntranceAlert.Metadata.Builder().build(),
+                    maneuver.beginCoordinate,
+                    maneuver.distance
+                )
+                    .alertGeometry(maneuver.getAlertGeometry())
+                    .build()
+            }
+            PassiveManeuverType.KBORDER_CROSSING -> {
+                BorderCrossingAlert.Builder(
+                    BorderCrossingAlert.Metadata.Builder()
+                        .from(maneuver.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
+                        .to(maneuver.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
+                        .build(),
+                    maneuver.beginCoordinate,
+                    maneuver.distance
+                )
+                    .alertGeometry(maneuver.getAlertGeometry())
+                    .build()
+            }
+            PassiveManeuverType.KTOLL_COLLECTION_POINT -> {
+                TollCollectionAlert.Builder(
+                    TollCollectionAlert.Metadata.Builder().apply {
+                        val type = maneuver.tollCollectionInfo.toTollCollectionType()
+                        if (type != null) {
+                            type(type)
+                        }
+                    }.build(),
+                    maneuver.beginCoordinate,
+                    maneuver.distance
+                )
+                    .alertGeometry(maneuver.getAlertGeometry())
+                    .build()
+            }
+            PassiveManeuverType.KSERVICE_AREA -> {
+                RestStopAlert.Builder(
+                    RestStopAlert.Metadata.Builder().apply {
+                        val type = maneuver.serviceAreaInfo.toRestStopType()
+                        if (type != null) {
+                            type(type)
+                        }
+                    }.build(),
+                    maneuver.beginCoordinate,
+                    maneuver.distance
+                )
+                    .alertGeometry(maneuver.getAlertGeometry())
+                    .build()
+            }
+            PassiveManeuverType.KRESTRICTED_AREA -> {
+                RestrictedAreaAlert.Builder(
+                    RestrictedAreaAlert.Metadata.Builder().build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
@@ -298,5 +363,32 @@ internal class NavigatorMapper {
         private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
         private const val FIRST_BANNER_INSTRUCTION = 0
         private const val TWO_LEGS: Short = 2
+    }
+
+    private fun PassiveManeuverAdminInfo?.toBorderCrossingAdminInfo() = ifNonNull(
+        this?.iso_3166_1,
+        this?.iso_3166_1_alpha3,
+    ) { countryCode, CountryCodeAlpha3 ->
+        BorderCrossingAdminInfo.Builder(
+            countryCode = countryCode,
+            countryCodeAlpha3 = CountryCodeAlpha3
+        ).build()
+    }
+
+    private fun PassiveManeuverTollCollectionInfo?.toTollCollectionType() = ifNonNull(
+        this?.type
+    ) { type ->
+        when (type) {
+            PassiveManeuverTollCollectionType.KTOLL_BOOTH -> TollCollectionType.TollBooth
+            PassiveManeuverTollCollectionType.KTOLL_GANTRY -> TollCollectionType.TollGantry
+        }
+    }
+
+    private fun PassiveManeuverServiceAreaInfo?.toRestStopType() = ifNonNull(
+        this?.type
+    ) { type ->
+        when (type) {
+            PassiveManeuverServiceAreaType.KREST_AREA -> RestStopType.RestArea
+        }
     }
 }

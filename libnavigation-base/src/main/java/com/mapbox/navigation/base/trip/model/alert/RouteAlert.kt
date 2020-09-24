@@ -5,15 +5,21 @@ import com.mapbox.geojson.Point
 /**
  * Abstract class that serves as a base for all route alerts.
  *
- * @param type type constant describing the alert, especially useful for Java integration.
- * Kotlin integration can be based on inheritance types.
+ * Available alert types are:
+ * - [TunnelEntranceAlert]
+ * - [BorderCrossingAlert]
+ * - [TollCollectionAlert]
+ * - [RestStopAlert]
+ * - [RestrictedAreaAlert]
+ *
+ * @param type constant describing the alert type, see [RouteAlertType].
  * @param metadata type-safe metadata of each of the event.
  * @param coordinate location of the alert or its start point in case it has a length
  * @param distance distance to this alert since the start of the route
  * @param alertGeometry optional geometry details of the alert if it has a length
  */
-sealed class RouteAlert<Metadata>(
-    val type: RouteAlertType,
+abstract class RouteAlert<Metadata>(
+    val type: Int,
     val metadata: Metadata,
     val coordinate: Point,
     val distance: Double,
@@ -59,107 +65,5 @@ sealed class RouteAlert<Metadata>(
             "coordinate=$coordinate, " +
             "distance=$distance, " +
             "alertGeometry=$alertGeometry)"
-    }
-}
-
-/**
- * Route alert type that provides an information about tunnels on the route.
- *
- * @see RouteAlert
- */
-class TunnelEntranceAlert private constructor(
-    metadata: Metadata,
-    coordinate: Point,
-    distance: Double,
-    alertGeometry: RouteAlertGeometry?
-) : RouteAlert<TunnelEntranceAlert.Metadata>(
-    RouteAlertType.TunnelEntrance,
-    metadata,
-    coordinate,
-    distance,
-    alertGeometry
-) {
-
-    /**
-     * Transform this object into a builder to mutate the values.
-     */
-    fun toBuilder(): Builder = Builder(metadata, coordinate, distance).alertGeometry(alertGeometry)
-
-    /**
-     * Returns a string representation of the object.
-     */
-    override fun toString(): String {
-        return "TunnelEntranceAlert() ${super.toString()}"
-    }
-
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
-        return true
-    }
-
-    /**
-     * Returns a hash code value for the object.
-     */
-    override fun hashCode(): Int {
-        return super.hashCode()
-    }
-
-    /**
-     * Use to create a new instance.
-     *
-     * @see TunnelEntranceAlert
-     */
-    class Builder(
-        private val metadata: Metadata,
-        private val coordinate: Point,
-        private val distance: Double
-    ) {
-        private var alertGeometry: RouteAlertGeometry? = null
-
-        /**
-         * Add optional geometry if the alert has a length.
-         */
-        fun alertGeometry(alertGeometry: RouteAlertGeometry?): Builder = apply {
-            this.alertGeometry = alertGeometry
-        }
-
-        /**
-         * Build the object instance.
-         */
-        fun build() = TunnelEntranceAlert(metadata, coordinate, distance, alertGeometry)
-    }
-
-    /**
-     * Metadata specific to this alert. Currently contains no additional data.
-     */
-    class Metadata {
-
-        /**
-         * Indicates whether some other object is "equal to" this one.
-         */
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            return true
-        }
-
-        /**
-         * Returns a hash code value for the object.
-         */
-        override fun hashCode(): Int {
-            return javaClass.hashCode()
-        }
-
-        /**
-         * Returns a string representation of the object.
-         */
-        override fun toString(): String {
-            return "Metadata()"
-        }
     }
 }
