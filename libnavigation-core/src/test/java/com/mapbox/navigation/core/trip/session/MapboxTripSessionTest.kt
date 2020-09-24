@@ -363,6 +363,29 @@ class MapboxTripSessionTest {
     }
 
     @Test
+    fun routeProgressObserverImmediateEmittedBelongsToCurrentRoute() =
+        coroutineRule.runBlockingTest {
+            tripSession = MapboxTripSession(
+                tripService,
+                locationEngine,
+                navigatorPredictionMillis,
+                navigator,
+                ThreadController,
+                logger = logger,
+                accessToken = "pk.1234"
+            )
+            tripSession.start()
+            updateLocationAndJoin()
+            tripSession.route = null
+            val observer: RouteProgressObserver = mockk(relaxUnitFun = true)
+            tripSession.registerRouteProgressObserver(observer)
+
+            verify(exactly = 0) { observer.onRouteProgressChanged(routeProgress) }
+            assertEquals(null, tripSession.getRouteProgress())
+            tripSession.stop()
+        }
+
+    @Test
     fun routeProgressObserverUnregister() = coroutineRule.runBlockingTest {
         tripSession = MapboxTripSession(
             tripService,
