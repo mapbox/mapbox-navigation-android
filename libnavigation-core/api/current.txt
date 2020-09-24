@@ -518,7 +518,7 @@ package com.mapbox.navigation.core.trip.session {
   }
 
   public interface RouteAlertsObserver {
-    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<?>> routeAlerts);
+    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert> routeAlerts);
   }
 
   public interface RouteProgressObserver {

@@ -273,12 +273,11 @@ internal class NavigatorMapper {
             }
     }
 
-    private fun PassiveManeuver.toRouteAlert(): RouteAlert<*> {
+    private fun PassiveManeuver.toRouteAlert(): RouteAlert {
         val maneuver = this
         return when (maneuver.type) {
             PassiveManeuverType.KTUNNEL_ENTRANCE -> {
                 TunnelEntranceAlert.Builder(
-                    TunnelEntranceAlert.Metadata.Builder().build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
@@ -287,47 +286,44 @@ internal class NavigatorMapper {
             }
             PassiveManeuverType.KBORDER_CROSSING -> {
                 BorderCrossingAlert.Builder(
-                    BorderCrossingAlert.Metadata.Builder()
-                        .from(maneuver.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
-                        .to(maneuver.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
-                        .build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
                     .alertGeometry(maneuver.getAlertGeometry())
+                    .from(maneuver.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
+                    .to(maneuver.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
                     .build()
             }
             PassiveManeuverType.KTOLL_COLLECTION_POINT -> {
                 TollCollectionAlert.Builder(
-                    TollCollectionAlert.Metadata.Builder().apply {
-                        val type = maneuver.tollCollectionInfo.toTollCollectionType()
-                        if (type != null) {
-                            type(type)
-                        }
-                    }.build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
                     .alertGeometry(maneuver.getAlertGeometry())
+                    .apply {
+                        val type = maneuver.tollCollectionInfo.toTollCollectionType()
+                        if (type != null) {
+                            tollCollectionType(type)
+                        }
+                    }
                     .build()
             }
             PassiveManeuverType.KSERVICE_AREA -> {
                 RestStopAlert.Builder(
-                    RestStopAlert.Metadata.Builder().apply {
-                        val type = maneuver.serviceAreaInfo.toRestStopType()
-                        if (type != null) {
-                            type(type)
-                        }
-                    }.build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
                     .alertGeometry(maneuver.getAlertGeometry())
+                    .apply {
+                        val type = maneuver.serviceAreaInfo.toRestStopType()
+                        if (type != null) {
+                            restStopType(type)
+                        }
+                    }
                     .build()
             }
             PassiveManeuverType.KRESTRICTED_AREA -> {
                 RestrictedAreaAlert.Builder(
-                    RestrictedAreaAlert.Metadata.Builder().build(),
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )

@@ -9,7 +9,6 @@ class TunnelEntranceAlertTest : BuilderTest<TunnelEntranceAlert, TunnelEntranceA
     override fun getImplementationClass() = TunnelEntranceAlert::class
 
     override fun getFilledUpBuilder() = TunnelEntranceAlert.Builder(
-        TunnelEntranceAlert.Metadata.Builder().build(),
         Point.fromLngLat(10.0, 20.0),
         123.0
     ).alertGeometry(

@@ -273,48 +273,30 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo build();
   }
 
-  public final class BorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata> {
+  public final class BorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getFrom();
+    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getTo();
     method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder toBuilder();
   }
 
   public static final class BorderCrossingAlert.Builder {
-    ctor public BorderCrossingAlert.Builder(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    ctor public BorderCrossingAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert build();
+    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder from(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? from);
+    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? to);
   }
 
-  public static final class BorderCrossingAlert.Metadata {
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getFrom();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getTo();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata.Builder toBuilder();
-  }
-
-  public static final class BorderCrossingAlert.Metadata.Builder {
-    ctor public BorderCrossingAlert.Metadata.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata build();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata.Builder from(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? from);
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Metadata.Builder to(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? to);
-  }
-
-  public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Metadata> {
+  public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public int getRestStopType();
     method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder toBuilder();
   }
 
   public static final class RestStopAlert.Builder {
-    ctor public RestStopAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    ctor public RestStopAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert build();
-  }
-
-  public static final class RestStopAlert.Metadata {
-    method public int getType();
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Metadata.Builder toBuilder();
-  }
-
-  public static final class RestStopAlert.Metadata.Builder {
-    ctor public RestStopAlert.Metadata.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Metadata build();
-    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Metadata.Builder type(int type);
+    method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder restStopType(int restStopType);
   }
 
   public final class RestStopType {
@@ -323,32 +305,22 @@ package com.mapbox.navigation.base.trip.model.alert {
     field public static final int Unknown = -1; // 0xffffffff
   }
 
-  public final class RestrictedAreaAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Metadata> {
+  public final class RestrictedAreaAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Builder toBuilder();
   }
 
   public static final class RestrictedAreaAlert.Builder {
-    ctor public RestrictedAreaAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    ctor public RestrictedAreaAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert build();
   }
 
-  public static final class RestrictedAreaAlert.Metadata {
-    method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Metadata.Builder toBuilder();
-  }
-
-  public static final class RestrictedAreaAlert.Metadata.Builder {
-    ctor public RestrictedAreaAlert.Metadata.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert.Metadata build();
-  }
-
-  public abstract class RouteAlert<Metadata> {
-    ctor public RouteAlert(int type, Metadata! metadata, com.mapbox.geojson.Point coordinate, double distance, com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
+  public abstract class RouteAlert {
+    ctor public RouteAlert(int alertType, com.mapbox.geojson.Point coordinate, double distance, com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public final com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? getAlertGeometry();
+    method public final int getAlertType();
     method public final com.mapbox.geojson.Point getCoordinate();
     method public final double getDistance();
-    method public final Metadata! getMetadata();
-    method public final int getType();
   }
 
   public final class RouteAlertGeometry {
@@ -379,25 +351,16 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public static com.mapbox.geojson.LineString toLineString(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry, com.mapbox.geojson.LineString routeLineString);
   }
 
-  public final class TollCollectionAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Metadata> {
+  public final class TollCollectionAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public int getTollCollectionType();
     method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder toBuilder();
   }
 
   public static final class TollCollectionAlert.Builder {
-    ctor public TollCollectionAlert.Builder(com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    ctor public TollCollectionAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert build();
-  }
-
-  public static final class TollCollectionAlert.Metadata {
-    method public int getType();
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Metadata.Builder toBuilder();
-  }
-
-  public static final class TollCollectionAlert.Metadata.Builder {
-    ctor public TollCollectionAlert.Metadata.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Metadata build();
-    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Metadata.Builder type(int type);
+    method public com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert.Builder tollCollectionType(int tollCollectionType);
   }
 
   public final class TollCollectionType {
@@ -407,33 +370,24 @@ package com.mapbox.navigation.base.trip.model.alert {
     field public static final int Unknown = -1; // 0xffffffff
   }
 
-  public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert<com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata> {
+  public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder toBuilder();
   }
 
   public static final class TunnelEntranceAlert.Builder {
-    ctor public TunnelEntranceAlert.Builder(com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata metadata, com.mapbox.geojson.Point coordinate, double distance);
+    ctor public TunnelEntranceAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert build();
   }
 
-  public static final class TunnelEntranceAlert.Metadata {
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata.Builder toBuilder();
-  }
-
-  public static final class TunnelEntranceAlert.Metadata.Builder {
-    ctor public TunnelEntranceAlert.Metadata.Builder();
-    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Metadata build();
-  }
-
   public final class UpcomingRouteAlert {
     method public double getDistanceToStart();
-    method public com.mapbox.navigation.base.trip.model.alert.RouteAlert<?> getRouteAlert();
+    method public com.mapbox.navigation.base.trip.model.alert.RouteAlert getRouteAlert();
     method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert.Builder toBuilder();
   }
 
   public static final class UpcomingRouteAlert.Builder {
-    ctor public UpcomingRouteAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RouteAlert<?> routeAlert, double distanceRemaining);
+    ctor public UpcomingRouteAlert.Builder(com.mapbox.navigation.base.trip.model.alert.RouteAlert routeAlert, double distanceRemaining);
     method public com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert build();
   }
 

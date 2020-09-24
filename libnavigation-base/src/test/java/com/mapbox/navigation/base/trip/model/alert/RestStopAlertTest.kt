@@ -9,10 +9,9 @@ class RestStopAlertTest : BuilderTest<RestStopAlert, RestStopAlert.Builder>() {
     override fun getImplementationClass() = RestStopAlert::class
 
     override fun getFilledUpBuilder() = RestStopAlert.Builder(
-        RestStopAlert.Metadata.Builder().type(RestStopType.RestArea).build(),
         Point.fromLngLat(1.0, 2.0),
         123.0
-    ).alertGeometry(mockk(relaxed = true))
+    ).alertGeometry(mockk(relaxed = true)).restStopType(RestStopType.RestArea)
 
     @Test
     override fun trigger() {

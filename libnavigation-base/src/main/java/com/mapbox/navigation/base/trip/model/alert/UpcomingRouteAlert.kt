@@ -12,7 +12,7 @@ package com.mapbox.navigation.base.trip.model.alert
  * can be used to calculate the distance since the start of an alert.
  */
 class UpcomingRouteAlert private constructor(
-    val routeAlert: RouteAlert<*>,
+    val routeAlert: RouteAlert,
     val distanceToStart: Double
 ) {
 
@@ -58,7 +58,7 @@ class UpcomingRouteAlert private constructor(
      * @see UpcomingRouteAlert
      */
     class Builder(
-        private val routeAlert: RouteAlert<*>,
+        private val routeAlert: RouteAlert,
         private val distanceRemaining: Double
     ) {
 

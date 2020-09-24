@@ -75,7 +75,7 @@ class NavigatorMapperTest {
         val result = navigatorMapper.getRouteInitInfo(routeInfo)!!
 
         assertEquals(1, result.routeAlerts.size)
-        assertEquals(RouteAlertType.TunnelEntrance, result.routeAlerts[0].type)
+        assertEquals(RouteAlertType.TunnelEntrance, result.routeAlerts[0].alertType)
     }
 
     @Test
@@ -110,7 +110,6 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TunnelEntranceAlert.Builder(
-            TunnelEntranceAlert.Metadata.Builder().build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
         ).alertGeometry(
@@ -125,7 +124,7 @@ class NavigatorMapperTest {
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.TunnelEntrance)
+        assertEquals(expected.alertType, RouteAlertType.TunnelEntrance)
     }
 
     @Test
@@ -167,17 +166,16 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = BorderCrossingAlert.Builder(
-            BorderCrossingAlert.Metadata.Builder()
-                .from(BorderCrossingAdminInfo.Builder("from", "fromAlpha").build())
-                .to(BorderCrossingAdminInfo.Builder("to", "toAlpha").build())
-                .build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
-        ).build()
+        )
+            .from(BorderCrossingAdminInfo.Builder("US", "USA").build())
+            .to(BorderCrossingAdminInfo.Builder("CA", "CAN").build())
+            .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.BorderCrossing)
+        assertEquals(expected.alertType, RouteAlertType.BorderCrossing)
     }
 
     @Test
@@ -199,16 +197,15 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TollCollectionAlert.Builder(
-            TollCollectionAlert.Metadata.Builder()
-                .type(TollCollectionType.TollGantry)
-                .build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
-        ).build()
+        )
+            .tollCollectionType(TollCollectionType.TollGantry)
+            .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.TollCollection)
+        assertEquals(expected.alertType, RouteAlertType.TollCollection)
     }
 
     @Test
@@ -230,14 +227,13 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = TollCollectionAlert.Builder(
-            TollCollectionAlert.Metadata.Builder().build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
         ).build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.TollCollection)
+        assertEquals(expected.alertType, RouteAlertType.TollCollection)
     }
 
     @Test
@@ -259,16 +255,15 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = RestStopAlert.Builder(
-            RestStopAlert.Metadata.Builder()
-                .type(RestStopType.RestArea)
-                .build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
-        ).build()
+        )
+            .restStopType(RestStopType.RestArea)
+            .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.RestStop)
+        assertEquals(expected.alertType, RouteAlertType.RestStop)
     }
 
     @Test
@@ -290,14 +285,13 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = RestStopAlert.Builder(
-            RestStopAlert.Metadata.Builder().build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
         ).build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.RestStop)
+        assertEquals(expected.alertType, RouteAlertType.RestStop)
     }
 
     @Test
@@ -319,7 +313,6 @@ class NavigatorMapperTest {
             .00001
         )
         val expected = RestrictedAreaAlert.Builder(
-            RestrictedAreaAlert.Metadata.Builder().build(),
             Point.fromLngLat(10.0, 20.0),
             123.0
         ).alertGeometry(
@@ -334,7 +327,7 @@ class NavigatorMapperTest {
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.type, RouteAlertType.RestrictedArea)
+        assertEquals(expected.alertType, RouteAlertType.RestrictedArea)
     }
 
     @Test
@@ -394,8 +387,8 @@ class NavigatorMapperTest {
         hasLength = false,
         type = PassiveManeuverType.KBORDER_CROSSING,
         borderCrossingInfo = PassiveManeuverBorderCrossingInfo(
-            PassiveManeuverAdminInfo("fromAlpha", "from"),
-            PassiveManeuverAdminInfo("toAlpha", "to")
+            PassiveManeuverAdminInfo("USA", "US"),
+            PassiveManeuverAdminInfo("CAN", "CA")
         )
     )
 

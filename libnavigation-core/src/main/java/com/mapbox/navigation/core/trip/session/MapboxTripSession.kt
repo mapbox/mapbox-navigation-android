@@ -130,7 +130,7 @@ internal class MapboxTripSession(
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
-    private var routeAlerts: List<RouteAlert<*>> = emptyList()
+    private var routeAlerts: List<RouteAlert> = emptyList()
         set(value) {
             if (field == value) {
                 return
