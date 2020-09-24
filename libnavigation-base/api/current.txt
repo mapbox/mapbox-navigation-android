@@ -302,6 +302,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class RestStopType {
     field public static final com.mapbox.navigation.base.trip.model.alert.RestStopType! INSTANCE;
     field public static final int RestArea = 1; // 0x1
+    field public static final int ServiceArea = 2; // 0x2
     field public static final int Unknown = -1; // 0xffffffff
   }
 

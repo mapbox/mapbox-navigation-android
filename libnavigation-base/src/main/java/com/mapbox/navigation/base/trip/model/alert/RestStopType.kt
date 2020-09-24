@@ -16,4 +16,9 @@ object RestStopType {
      * Describes a rest area.
      */
     const val RestArea = 1
+
+    /**
+     * Describes a service area.
+     */
+    const val ServiceArea = 2
 }
