@@ -271,7 +271,7 @@ public class NavigationMapRoute implements LifecycleObserver {
 
   /**
    * This method will allow this class to listen to route progress and adapt the route line
-   * whenever {@link TripSessionState#STARTED}.
+   * whenever {@link com.mapbox.navigation.core.trip.session.TripSessionState#STARTED}.
    *
    * In order to use the vanishing route line feature be sure to enable the feature before
    * calling this method.
@@ -286,7 +286,7 @@ public class NavigationMapRoute implements LifecycleObserver {
   }
 
   /**
-   * Should be called if {@link #addProgressChangeListener(MapboxNavigation, boolean)} was
+   * Should be called if {@link #addProgressChangeListener(MapboxNavigation)} was
    * called to prevent leaking.
    *
    * @param navigation to remove the progress change listener
@@ -315,7 +315,7 @@ public class NavigationMapRoute implements LifecycleObserver {
    * <p>
    * {@link NavigationMapRoute} automatically listens to
    * {@link RouteProgressObserver#onRouteProgressChanged(RouteProgress)} when a progress observer
-   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation, boolean)}
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
    * and invoking this method in that scenario will lead to competing updates.
    * @param routeProgress current progress
    */
@@ -449,7 +449,9 @@ public class NavigationMapRoute implements LifecycleObserver {
         routeLineInitializedCallback
     );
     mapboxMap.removeOnMapClickListener(mapRouteClickListener);
+    OnRouteSelectionChangeListener listener = mapRouteClickListener.getOnRouteSelectionChangeListener();
     mapRouteClickListener = new MapRouteClickListener(routeLine);
+    mapRouteClickListener.setOnRouteSelectionChangeListener(listener);
     mapboxMap.addOnMapClickListener(mapRouteClickListener);
   }
 
