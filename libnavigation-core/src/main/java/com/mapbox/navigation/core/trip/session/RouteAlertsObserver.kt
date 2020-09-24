@@ -14,7 +14,7 @@ interface RouteAlertsObserver {
      * Invoked when the route has changed and new route alerts are available,
      * or when the route is cleared.
      *
-     * @param routeAlerts route alerts for the current route, or null if the route is cleared.
+     * @param routeAlerts route alerts for the current route, or empty list if the route is cleared.
      */
-    fun onNewRouteAlerts(routeAlerts: List<RouteAlert<*>>?)
+    fun onNewRouteAlerts(routeAlerts: List<RouteAlert<*>>)
 }

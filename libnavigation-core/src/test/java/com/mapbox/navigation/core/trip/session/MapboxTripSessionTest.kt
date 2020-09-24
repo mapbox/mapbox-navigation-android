@@ -853,7 +853,7 @@ class MapboxTripSessionTest {
     @Test
     fun `route alerts observer gets successfully called`() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert<*>> = mockk()
+        val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
         coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
         tripSession = MapboxTripSession(
             tripService,
@@ -875,7 +875,7 @@ class MapboxTripSessionTest {
     fun `route alerts observer gets called only one on duplicate updates`() =
         coroutineRule.runBlockingTest {
             val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-            val routeAlerts: List<RouteAlert<*>> = mockk()
+            val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
             coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
             tripSession = MapboxTripSession(
                 tripService,
@@ -898,7 +898,7 @@ class MapboxTripSessionTest {
     fun `route alerts observer doesn't get called when unregistered`() =
         coroutineRule.runBlockingTest {
             val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-            val routeAlerts: List<RouteAlert<*>> = mockk()
+            val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
             coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
             tripSession = MapboxTripSession(
                 tripService,
@@ -921,7 +921,7 @@ class MapboxTripSessionTest {
     @Test
     fun `route alerts observer gets immediately notified`() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert<*>> = mockk()
+        val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
         coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
         tripSession = MapboxTripSession(
             tripService,
@@ -940,9 +940,9 @@ class MapboxTripSessionTest {
     }
 
     @Test
-    fun `route alerts get cleared whjen route is cleared`() = coroutineRule.runBlockingTest {
+    fun `route alerts get cleared when route is cleared`() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert<*>> = mockk()
+        val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
         tripSession = MapboxTripSession(
             tripService,
             locationEngine,
@@ -961,7 +961,7 @@ class MapboxTripSessionTest {
 
         verifySequence {
             routeAlertsObserver.onNewRouteAlerts(routeAlerts)
-            routeAlertsObserver.onNewRouteAlerts(null)
+            routeAlertsObserver.onNewRouteAlerts(emptyList())
         }
     }
 
@@ -981,13 +981,13 @@ class MapboxTripSessionTest {
 
             tripSession.registerRouteAlertsObserver(routeAlertsObserver)
 
-            verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(null) }
+            verify(exactly = 1) { routeAlertsObserver.onNewRouteAlerts(emptyList()) }
         }
 
     @Test
     fun unregisterAllRouteAlertsObservers() = coroutineRule.runBlockingTest {
         val routeAlertsObserver: RouteAlertsObserver = mockk(relaxUnitFun = true)
-        val routeAlerts: List<RouteAlert<*>> = mockk()
+        val routeAlerts: List<RouteAlert<*>> = listOf(mockk())
         coEvery { navigator.setRoute(any(), any()) } returns RouteInitInfo(routeAlerts)
         tripSession = MapboxTripSession(
             tripService,

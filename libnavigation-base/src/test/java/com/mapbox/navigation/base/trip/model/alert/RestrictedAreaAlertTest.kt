@@ -4,12 +4,12 @@ import com.mapbox.geojson.Point
 import com.mapbox.navigation.testing.BuilderTest
 import org.junit.Test
 
-class TunnelEntranceAlertTest : BuilderTest<TunnelEntranceAlert, TunnelEntranceAlert.Builder>() {
+class RestrictedAreaAlertTest : BuilderTest<RestrictedAreaAlert, RestrictedAreaAlert.Builder>() {
 
-    override fun getImplementationClass() = TunnelEntranceAlert::class
+    override fun getImplementationClass() = RestrictedAreaAlert::class
 
-    override fun getFilledUpBuilder() = TunnelEntranceAlert.Builder(
-        TunnelEntranceAlert.Metadata.Builder().build(),
+    override fun getFilledUpBuilder() = RestrictedAreaAlert.Builder(
+        RestrictedAreaAlert.Metadata.Builder().build(),
         Point.fromLngLat(10.0, 20.0),
         123.0
     ).alertGeometry(

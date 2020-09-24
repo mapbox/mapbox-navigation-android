@@ -74,7 +74,7 @@ internal class MapboxTripSession(
         set(value) {
             field = value
             if (value == null) {
-                routeAlerts = null
+                routeAlerts = emptyList()
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
             mainJobController.scope.launch {
@@ -130,7 +130,7 @@ internal class MapboxTripSession(
     private var rawLocation: Location? = null
     private var enhancedLocation: Location? = null
     private var routeProgress: RouteProgress? = null
-    private var routeAlerts: List<RouteAlert<*>>? = null
+    private var routeAlerts: List<RouteAlert<*>> = emptyList()
         set(value) {
             if (field == value) {
                 return
