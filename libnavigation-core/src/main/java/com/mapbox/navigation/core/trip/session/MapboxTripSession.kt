@@ -75,6 +75,7 @@ internal class MapboxTripSession(
             field = value
             if (value == null) {
                 routeAlerts = emptyList()
+                routeProgress = null
             }
             cancelOngoingUpdateNavigatorStatusDataJobs()
             mainJobController.scope.launch {
