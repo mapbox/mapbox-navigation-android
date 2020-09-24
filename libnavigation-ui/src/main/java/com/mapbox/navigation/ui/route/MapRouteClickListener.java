@@ -48,6 +48,10 @@ class MapRouteClickListener implements MapboxMap.OnMapClickListener {
     onRouteSelectionChangeListener = listener;
   }
 
+  OnRouteSelectionChangeListener getOnRouteSelectionChangeListener() {
+    return onRouteSelectionChangeListener;
+  }
+
   void updateAlternativesVisible(boolean alternativesVisible) {
     this.alternativesVisible = alternativesVisible;
   }

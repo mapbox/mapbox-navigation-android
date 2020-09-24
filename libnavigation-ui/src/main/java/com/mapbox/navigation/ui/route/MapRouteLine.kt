@@ -553,6 +553,7 @@ internal class MapRouteLine(
      * @param isVisible true indicates all of the route layers will become visible.
      */
     fun updateVisibilityTo(isVisible: Boolean) {
+        allLayersAreVisible = isVisible
         updateAllLayersVisibility(isVisible)
     }
 
