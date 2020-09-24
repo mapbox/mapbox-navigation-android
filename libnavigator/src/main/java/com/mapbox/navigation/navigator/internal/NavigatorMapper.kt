@@ -385,6 +385,7 @@ internal class NavigatorMapper {
     ) { type ->
         when (type) {
             PassiveManeuverServiceAreaType.KREST_AREA -> RestStopType.RestArea
+            PassiveManeuverServiceAreaType.KSERVICE_AREA -> RestStopType.ServiceArea
         }
     }
 }
