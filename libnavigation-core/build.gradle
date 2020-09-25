@@ -53,6 +53,7 @@ dependencies {
     api project(':libnavigation-base')
     implementation project(':libnavigation-util')
     implementation project(':libnavigator')
+    api dependenciesList.mapboxCommonNative
     runtimeOnly project(':libnavigation-router')
     runtimeOnly project(':libtrip-notification')
     runtimeOnly dependenciesList.mapboxLogger
