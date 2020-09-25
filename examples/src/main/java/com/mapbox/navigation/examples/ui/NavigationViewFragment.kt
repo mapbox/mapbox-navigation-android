@@ -11,11 +11,11 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.utils.extensions.ifNonNull
 import com.mapbox.navigation.ui.NavigationViewOptions
 import com.mapbox.navigation.ui.OnNavigationReadyCallback
 import com.mapbox.navigation.ui.listeners.NavigationListener
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.navigation_view_fragment_layout.*
 
 class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, NavigationListener {
