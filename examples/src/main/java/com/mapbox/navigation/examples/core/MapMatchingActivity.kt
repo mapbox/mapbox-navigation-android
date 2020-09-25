@@ -36,11 +36,11 @@ import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.Utils.PRIMARY_ROUTE_BUNDLE_KEY
 import com.mapbox.navigation.examples.utils.Utils.getRouteFromBundle
+import com.mapbox.navigation.examples.utils.extensions.ifNonNull
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.DynamicCamera
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.utils.internal.ifNonNull
 import kotlinx.android.synthetic.main.activity_basic_navigation_layout.*
 import retrofit2.Call
 import retrofit2.Callback
