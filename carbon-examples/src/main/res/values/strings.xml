@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Carbon 2.0 Examples NavSDK</string>
+    <string name="camera_animations_activity" translatable="false">Camera Animations Example</string>
+</resources>

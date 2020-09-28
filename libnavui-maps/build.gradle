@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka'
+apply plugin: 'com.jaredsburrows.license'
+apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+apply from: file("${rootDir}/gradle/artifact-settings.gradle")
+
+version = project.ext.versionName
+group = project.ext.mapboxArtifactGroupId
+
+dokka {
+    outputDirectory = "$buildDir/kdoc"
+    configuration {
+        moduleName = 'libnavui-maps'
+        reportUndocumented = true
+
+        perPackageOption {
+            prefix = "com.mapbox.navigation.ui.maps"
+            suppress = true
+        }
+    }
+}
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'proguard-rules.pro', "${rootDir}/proguard/proguard-project.pro"
+
+        buildConfigField 'String', "MAPBOX_NAVIGATION_VERSION_NAME", String.format("\"%s\"", project.ext.versionName)
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    api project(":libnavui-base")
+    api project(":libnavigation-core")
+    implementation dependenciesList.kotlinStdLib
+    implementation dependenciesList.mapboxSdkTurf
+    api 'com.mapbox.maps:android:10.0.0-beta.4'
+    api 'com.mapbox.plugin:maps-style:10.0.0-beta.4'
+    api 'com.mapbox.plugin:maps-gesture:10.0.0-beta.4'
+    api 'com.mapbox.plugin:maps-location:10.0.0-beta.4'
+}
