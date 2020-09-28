@@ -51,7 +51,7 @@ class RouteAlertsActivity : AppCompatActivity() {
 
     private val directionsRoute: DirectionsRoute by lazy {
         val directionsResponseJson = resources.openRawResource(
-            R.raw.mock_response_all_passive_maneuvers_polyline6
+            R.raw.mock_response_all_route_alerts_polyline6
         )
             .bufferedReader()
             .use { it.readText() }

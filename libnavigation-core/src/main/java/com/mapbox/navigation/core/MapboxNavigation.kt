@@ -142,7 +142,7 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val navigatorConfig = NavigatorConfig(null)
+    private val navigatorConfig = NavigatorConfig(null, null)
 
     private var notificationChannelField: Field? = null
 

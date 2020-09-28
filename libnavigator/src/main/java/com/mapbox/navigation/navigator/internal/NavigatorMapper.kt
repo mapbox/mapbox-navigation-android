@@ -31,25 +31,23 @@ import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.BannerSection
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
-import com.mapbox.navigator.PassiveManeuver
-import com.mapbox.navigator.PassiveManeuverAdminInfo
-import com.mapbox.navigator.PassiveManeuverServiceAreaInfo
-import com.mapbox.navigator.PassiveManeuverServiceAreaType
-import com.mapbox.navigator.PassiveManeuverTollCollectionInfo
-import com.mapbox.navigator.PassiveManeuverTollCollectionType
-import com.mapbox.navigator.PassiveManeuverTunnelInfo
-import com.mapbox.navigator.PassiveManeuverType
+import com.mapbox.navigator.RouteAlertAdminInfo
+import com.mapbox.navigator.RouteAlertServiceAreaInfo
+import com.mapbox.navigator.RouteAlertServiceAreaType
+import com.mapbox.navigator.RouteAlertTollCollectionInfo
+import com.mapbox.navigator.RouteAlertTollCollectionType
+import com.mapbox.navigator.RouteAlertTunnelInfo
+import com.mapbox.navigator.RouteAlertType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
-import com.mapbox.navigator.UpcomingPassiveManeuver
 import com.mapbox.navigator.VoiceInstruction
 
-private val SUPPORTED_PASSIVE_MANEUVERS = arrayOf(
-    PassiveManeuverType.KTUNNEL_ENTRANCE,
-    PassiveManeuverType.KBORDER_CROSSING,
-    PassiveManeuverType.KTOLL_COLLECTION_POINT,
-    PassiveManeuverType.KSERVICE_AREA,
-    PassiveManeuverType.KRESTRICTED_AREA
+private val SUPPORTED_ROUTE_ALERTS = arrayOf(
+    RouteAlertType.KTUNNEL_ENTRANCE,
+    RouteAlertType.KBORDER_CROSSING,
+    RouteAlertType.KTOLL_COLLECTION_POINT,
+    RouteAlertType.KSERVICE_AREA,
+    RouteAlertType.KRESTRICTED_AREA
 )
 
 internal class NavigatorMapper {
@@ -190,7 +188,7 @@ internal class NavigatorMapper {
             routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 
             routeProgressBuilder.upcomingRouteAlerts(
-                upcomingPassiveManeuvers.toUpcomingRouteAlerts()
+                upcomingRouteAlerts.toUpcomingRouteAlerts()
             )
 
             return routeProgressBuilder.build()
@@ -260,84 +258,85 @@ internal class NavigatorMapper {
     private fun RouteInfo?.toRouteInitInfo(): RouteInitInfo? {
         return if (this != null) {
             RouteInitInfo(
-                passiveManeuvers
-                    .filter { SUPPORTED_PASSIVE_MANEUVERS.contains(it.type) }
+                alerts
+                    .filter { SUPPORTED_ROUTE_ALERTS.contains(it.type) }
                     .map { it.toRouteAlert() }
             )
         } else null
     }
 
-    private fun List<UpcomingPassiveManeuver>.toUpcomingRouteAlerts(): List<UpcomingRouteAlert> {
-        return this
-            .filter { SUPPORTED_PASSIVE_MANEUVERS.contains(it.maneuver.type) }
-            .map {
-                UpcomingRouteAlert.Builder(it.maneuver.toRouteAlert(), it.distanceToStart).build()
-            }
-    }
+    private fun List<com.mapbox.navigator.UpcomingRouteAlert>.toUpcomingRouteAlerts():
+        List<UpcomingRouteAlert> {
+            return this
+                .filter { SUPPORTED_ROUTE_ALERTS.contains(it.alert.type) }
+                .map {
+                    UpcomingRouteAlert.Builder(it.alert.toRouteAlert(), it.distanceToStart).build()
+                }
+        }
 
-    private fun PassiveManeuver.toRouteAlert(): RouteAlert {
-        val maneuver = this
-        return when (maneuver.type) {
-            PassiveManeuverType.KTUNNEL_ENTRANCE -> {
+    private fun com.mapbox.navigator.RouteAlert.toRouteAlert(): RouteAlert {
+        val alert = this
+        return when (alert.type) {
+            RouteAlertType.KTUNNEL_ENTRANCE -> {
                 TunnelEntranceAlert.Builder(
-                    maneuver.beginCoordinate,
-                    maneuver.distance
+                    alert.beginCoordinate,
+                    alert.distance
                 )
-                    .alertGeometry(maneuver.getAlertGeometry())
-                    .info(maneuver.tunnelInfo?.toTunnelInfo())
+                    .alertGeometry(alert.getAlertGeometry())
+                    .info(alert.tunnelInfo?.toTunnelInfo())
                     .build()
             }
-            PassiveManeuverType.KBORDER_CROSSING -> {
+            RouteAlertType.KBORDER_CROSSING -> {
                 CountryBorderCrossingAlert.Builder(
-                    maneuver.beginCoordinate,
-                    maneuver.distance
+                    alert.beginCoordinate,
+                    alert.distance
                 )
-                    .alertGeometry(maneuver.getAlertGeometry())
-                    .from(maneuver.borderCrossingInfo?.from.toCountryBorderCrossingAdminInfo())
-                    .to(maneuver.borderCrossingInfo?.to.toCountryBorderCrossingAdminInfo())
+                    .alertGeometry(alert.getAlertGeometry())
+                    .from(alert.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
+                    .to(alert.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
                     .build()
             }
-            PassiveManeuverType.KTOLL_COLLECTION_POINT -> {
+            RouteAlertType.KTOLL_COLLECTION_POINT -> {
                 TollCollectionAlert.Builder(
-                    maneuver.beginCoordinate,
-                    maneuver.distance
+                    alert.beginCoordinate,
+                    alert.distance
                 )
-                    .alertGeometry(maneuver.getAlertGeometry())
+                    .alertGeometry(alert.getAlertGeometry())
                     .apply {
-                        val type = maneuver.tollCollectionInfo.toTollCollectionType()
+                        val type = alert.tollCollectionInfo.toTollCollectionType()
                         if (type != null) {
                             tollCollectionType(type)
                         }
                     }
                     .build()
             }
-            PassiveManeuverType.KSERVICE_AREA -> {
+            RouteAlertType.KSERVICE_AREA -> {
                 RestStopAlert.Builder(
-                    maneuver.beginCoordinate,
-                    maneuver.distance
+                    alert.beginCoordinate,
+                    alert.distance
                 )
-                    .alertGeometry(maneuver.getAlertGeometry())
+                    .alertGeometry(alert.getAlertGeometry())
                     .apply {
-                        val type = maneuver.serviceAreaInfo.toRestStopType()
+                        val type = alert.serviceAreaInfo.toRestStopType()
                         if (type != null) {
                             restStopType(type)
                         }
                     }
                     .build()
             }
-            PassiveManeuverType.KRESTRICTED_AREA -> {
+            RouteAlertType.KRESTRICTED_AREA -> {
                 RestrictedAreaAlert.Builder(
-                    maneuver.beginCoordinate,
-                    maneuver.distance
+                    alert.beginCoordinate,
+                    alert.distance
                 )
-                    .alertGeometry(maneuver.getAlertGeometry())
+                    .alertGeometry(alert.getAlertGeometry())
                     .build()
             }
-            else -> throw IllegalArgumentException("not supported type: ${maneuver.type}")
+            else -> throw IllegalArgumentException("not supported type: ${alert.type}")
         }
     }
 
-    private fun PassiveManeuver.getAlertGeometry(): RouteAlertGeometry? = ifNonNull(
+    private fun com.mapbox.navigator.RouteAlert.getAlertGeometry(): RouteAlertGeometry? = ifNonNull(
         this.length,
         this.beginCoordinate,
         this.beginGeometryIndex,
@@ -365,7 +364,7 @@ internal class NavigatorMapper {
         private const val TWO_LEGS: Short = 2
     }
 
-    private fun PassiveManeuverTunnelInfo?.toTunnelInfo() = ifNonNull(
+    private fun RouteAlertTunnelInfo?.toTunnelInfo() = ifNonNull(
         this?.name,
     ) { name ->
         TunnelInfo.Builder(
@@ -373,7 +372,7 @@ internal class NavigatorMapper {
         ).build()
     }
 
-    private fun PassiveManeuverAdminInfo?.toCountryBorderCrossingAdminInfo() = ifNonNull(
+    private fun RouteAlertAdminInfo?.toBorderCrossingAdminInfo() = ifNonNull(
         this?.iso_3166_1,
         this?.iso_3166_1_alpha3,
     ) { countryCode, countryCodeAlpha3 ->
@@ -383,21 +382,21 @@ internal class NavigatorMapper {
         ).build()
     }
 
-    private fun PassiveManeuverTollCollectionInfo?.toTollCollectionType() = ifNonNull(
+    private fun RouteAlertTollCollectionInfo?.toTollCollectionType() = ifNonNull(
         this?.type
     ) { type ->
         when (type) {
-            PassiveManeuverTollCollectionType.KTOLL_BOOTH -> TollCollectionType.TollBooth
-            PassiveManeuverTollCollectionType.KTOLL_GANTRY -> TollCollectionType.TollGantry
+            RouteAlertTollCollectionType.KTOLL_BOOTH -> TollCollectionType.TollBooth
+            RouteAlertTollCollectionType.KTOLL_GANTRY -> TollCollectionType.TollGantry
         }
     }
 
-    private fun PassiveManeuverServiceAreaInfo?.toRestStopType() = ifNonNull(
+    private fun RouteAlertServiceAreaInfo?.toRestStopType() = ifNonNull(
         this?.type
     ) { type ->
         when (type) {
-            PassiveManeuverServiceAreaType.KREST_AREA -> RestStopType.RestArea
-            PassiveManeuverServiceAreaType.KSERVICE_AREA -> RestStopType.ServiceArea
+            RouteAlertServiceAreaType.KREST_AREA -> RestStopType.RestArea
+            RouteAlertServiceAreaType.KSERVICE_AREA -> RestStopType.ServiceArea
         }
     }
 }
