@@ -1151,12 +1151,59 @@ class MapRouteLineTest {
             mapRouteSourceProvider,
             null
         ).also { it.draw(listOf(route)) }
+        mapRouteLine.inhibitVanishingPointUpdate(false)
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
         verify { primaryRouteCasingLayer.setProperties(any()) }
         verify { primaryRouteLayer.setProperties(any()) }
         verify { primaryRouteTrafficLayer.setProperties(any()) }
+    }
+
+    @Test
+    fun updateVanishingPointInhibitedByDefault() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        every { style.isFullyLoaded } returnsMany listOf(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true
+        )
+        every {
+            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
+        } returns primaryRouteCasingLayer
+        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
+        every {
+            style.getLayer("mapbox-navigation-route-traffic-layer")
+        } returns primaryRouteTrafficLayer
+        val route = getDirectionsRoute()
+        val coordinates = LineString.fromPolyline(
+            route.geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPoint = TurfMeasurement.midpoint(coordinates[4], coordinates[5])
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        ).also { it.draw(listOf(route)) }
+
+        mapRouteLine.updateTraveledRouteLine(inputPoint)
+
+        verify(exactly = 0) { primaryRouteCasingLayer.setProperties(any()) }
+        verify(exactly = 0) { primaryRouteLayer.setProperties(any()) }
+        verify(exactly = 0) { primaryRouteTrafficLayer.setProperties(any()) }
     }
 
     @Test

@@ -145,7 +145,7 @@ internal class MapRouteLine(
     private var primaryRoute: DirectionsRoute? = null
     var vanishPointOffset: Float = 0f
         private set
-    private var vanishingPointUpdateInhibited: Boolean = false
+    private var vanishingPointUpdateInhibited: Boolean = true
     private val distanceRemainingCache = LruCache<DirectionsRoute, Float>(2)
 
     @get:ColorInt
