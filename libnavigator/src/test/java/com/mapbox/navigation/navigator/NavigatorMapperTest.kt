@@ -15,19 +15,18 @@ import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.navigator.internal.NavigatorMapper
 import com.mapbox.navigator.NavigationStatus
-import com.mapbox.navigator.PassiveManeuver
-import com.mapbox.navigator.PassiveManeuverAdminInfo
-import com.mapbox.navigator.PassiveManeuverBorderCrossingInfo
-import com.mapbox.navigator.PassiveManeuverIncidentInfo
-import com.mapbox.navigator.PassiveManeuverServiceAreaInfo
-import com.mapbox.navigator.PassiveManeuverServiceAreaType
-import com.mapbox.navigator.PassiveManeuverTollCollectionInfo
-import com.mapbox.navigator.PassiveManeuverTollCollectionType
-import com.mapbox.navigator.PassiveManeuverTunnelInfo
-import com.mapbox.navigator.PassiveManeuverType
+import com.mapbox.navigator.RouteAlert
+import com.mapbox.navigator.RouteAlertAdminInfo
+import com.mapbox.navigator.RouteAlertBorderCrossingInfo
+import com.mapbox.navigator.RouteAlertIncidentInfo
+import com.mapbox.navigator.RouteAlertServiceAreaInfo
+import com.mapbox.navigator.RouteAlertServiceAreaType
+import com.mapbox.navigator.RouteAlertTollCollectionInfo
+import com.mapbox.navigator.RouteAlertTollCollectionType
+import com.mapbox.navigator.RouteAlertTunnelInfo
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
-import com.mapbox.navigator.UpcomingPassiveManeuver
+import com.mapbox.navigator.UpcomingRouteAlert
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -71,7 +70,7 @@ class NavigatorMapperTest {
 
     @Test
     fun `alerts are present in the route init info is they are delivered from native`() {
-        val routeInfo = RouteInfo(listOf(tunnelEntrancePassiveManeuver))
+        val routeInfo = RouteInfo(listOf(tunnelEntranceRouteAlert))
 
         val result = navigatorMapper.getRouteInitInfo(routeInfo)!!
 
@@ -83,7 +82,7 @@ class NavigatorMapperTest {
     fun `unsupported alert types are ignored in the route init info`() {
         val routeInfo = RouteInfo(
             listOf(
-                incidentPassiveManeuver
+                incidentRouteAlert
             )
         )
 
@@ -94,8 +93,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `tunnel entrance alert is parsed correctly`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            tunnelEntrancePassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            tunnelEntranceRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -132,9 +131,9 @@ class NavigatorMapperTest {
 
     @Test
     fun `parsing multiple tunnel entrances returns multiple alerts`() {
-        val firstEntrance = tunnelEntrancePassiveManeuver.toUpcomingManeuver(100.0)
-        val secondEntrance = tunnelEntrancePassiveManeuver.toUpcomingManeuver(200.0)
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
+        val firstEntrance = tunnelEntranceRouteAlert.toUpcomingRouteAlert(100.0)
+        val secondEntrance = tunnelEntranceRouteAlert.toUpcomingRouteAlert(200.0)
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
             firstEntrance,
             secondEntrance
         )
@@ -152,8 +151,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `country border crossing alert is parsed correctly`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            countryBorderCrossingPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            countryBorderCrossingRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -183,8 +182,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `toll collection alert is parsed correctly (gantry)`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            tollCollectionGantryPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            tollCollectionGantryRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -213,8 +212,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `toll collection alert is parsed correctly (booth)`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            tollCollectionBoothPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            tollCollectionBoothRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -243,8 +242,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `unknown toll collection alert is parsed correctly`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            unknownTollCollectionPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            unknownTollCollectionRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -271,8 +270,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `rest stop alert is parsed correctly (rest)`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            restStopRestPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            restStopRestRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -301,8 +300,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `rest stop alert is parsed correctly (service)`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            restStopServicePassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            restStopServiceRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -331,8 +330,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `unknown rest stop alert is parsed correctly`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            unknownRestStopPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            unknownRestStopRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -359,8 +358,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `restricted area alert is parsed correctly`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            restrictedAreaPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            restrictedAreaRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -395,8 +394,8 @@ class NavigatorMapperTest {
 
     @Test
     fun `unsupported alert types are ignored in the progress update`() {
-        every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            incidentPassiveManeuver.toUpcomingManeuver()
+        every { navigationStatus.upcomingRouteAlerts } returns listOf(
+            incidentRouteAlert.toUpcomingRouteAlert()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -433,87 +432,87 @@ class NavigatorMapperTest {
         every { bannerInstruction } returns null
         every { voiceInstruction } returns null
         every { inTunnel } returns false
-        every { upcomingPassiveManeuvers } returns emptyList()
+        every { upcomingRouteAlerts } returns emptyList()
     }
 
-    private val incidentPassiveManeuver = createPassiveManeuver(
+    private val incidentRouteAlert = createRouteAlert(
         hasLength = true,
-        type = PassiveManeuverType.KINCIDENT
+        type = com.mapbox.navigator.RouteAlertType.KINCIDENT
     )
 
-    private val tunnelEntrancePassiveManeuver = createPassiveManeuver(
+    private val tunnelEntranceRouteAlert = createRouteAlert(
         hasLength = true,
-        type = PassiveManeuverType.KTUNNEL_ENTRANCE,
-        tunnelInfo = PassiveManeuverTunnelInfo(
+        type = com.mapbox.navigator.RouteAlertType.KTUNNEL_ENTRANCE,
+        tunnelInfo = RouteAlertTunnelInfo(
             "Ted Williams Tunnel"
         )
     )
 
-    private val countryBorderCrossingPassiveManeuver = createPassiveManeuver(
+    private val countryBorderCrossingRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KBORDER_CROSSING,
-        countryBorderCrossingInfo = PassiveManeuverBorderCrossingInfo(
-            PassiveManeuverAdminInfo("USA", "US"),
-            PassiveManeuverAdminInfo("CAN", "CA")
+        type = com.mapbox.navigator.RouteAlertType.KBORDER_CROSSING,
+        countryBorderCrossingInfo = RouteAlertBorderCrossingInfo(
+            RouteAlertAdminInfo("USA", "US"),
+            RouteAlertAdminInfo("CAN", "CA")
         )
     )
 
-    private val tollCollectionGantryPassiveManeuver = createPassiveManeuver(
+    private val tollCollectionGantryRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KTOLL_COLLECTION_POINT,
-        tollCollectionInfo = PassiveManeuverTollCollectionInfo(
-            PassiveManeuverTollCollectionType.KTOLL_GANTRY
+        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
+        tollCollectionInfo = RouteAlertTollCollectionInfo(
+            RouteAlertTollCollectionType.KTOLL_GANTRY
         )
     )
 
-    private val tollCollectionBoothPassiveManeuver = createPassiveManeuver(
+    private val tollCollectionBoothRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KTOLL_COLLECTION_POINT,
-        tollCollectionInfo = PassiveManeuverTollCollectionInfo(
-            PassiveManeuverTollCollectionType.KTOLL_BOOTH
+        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
+        tollCollectionInfo = RouteAlertTollCollectionInfo(
+            RouteAlertTollCollectionType.KTOLL_BOOTH
         )
     )
 
-    private val unknownTollCollectionPassiveManeuver = createPassiveManeuver(
+    private val unknownTollCollectionRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KTOLL_COLLECTION_POINT,
+        type = com.mapbox.navigator.RouteAlertType.KTOLL_COLLECTION_POINT,
         tollCollectionInfo = null
     )
 
-    private val restStopRestPassiveManeuver = createPassiveManeuver(
+    private val restStopRestRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KSERVICE_AREA,
-        serviceAreaInfo = PassiveManeuverServiceAreaInfo(PassiveManeuverServiceAreaType.KREST_AREA)
+        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
+        serviceAreaInfo = RouteAlertServiceAreaInfo(RouteAlertServiceAreaType.KREST_AREA)
     )
 
-    private val restStopServicePassiveManeuver = createPassiveManeuver(
+    private val restStopServiceRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KSERVICE_AREA,
-        serviceAreaInfo = PassiveManeuverServiceAreaInfo(
-            PassiveManeuverServiceAreaType.KSERVICE_AREA
+        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
+        serviceAreaInfo = RouteAlertServiceAreaInfo(
+            RouteAlertServiceAreaType.KSERVICE_AREA
         )
     )
 
-    private val unknownRestStopPassiveManeuver = createPassiveManeuver(
+    private val unknownRestStopRouteAlert = createRouteAlert(
         hasLength = false,
-        type = PassiveManeuverType.KSERVICE_AREA,
+        type = com.mapbox.navigator.RouteAlertType.KSERVICE_AREA,
         serviceAreaInfo = null
     )
 
-    private val restrictedAreaPassiveManeuver = createPassiveManeuver(
+    private val restrictedAreaRouteAlert = createRouteAlert(
         hasLength = true,
-        type = PassiveManeuverType.KRESTRICTED_AREA
+        type = com.mapbox.navigator.RouteAlertType.KRESTRICTED_AREA
     )
 
-    private fun createPassiveManeuver(
+    private fun createRouteAlert(
         hasLength: Boolean,
-        type: PassiveManeuverType,
-        incidentInfo: PassiveManeuverIncidentInfo? = null,
-        tunnelInfo: PassiveManeuverTunnelInfo? = null,
-        countryBorderCrossingInfo: PassiveManeuverBorderCrossingInfo? = null,
-        tollCollectionInfo: PassiveManeuverTollCollectionInfo? = null,
-        serviceAreaInfo: PassiveManeuverServiceAreaInfo? = null
-    ) = PassiveManeuver(
+        type: com.mapbox.navigator.RouteAlertType,
+        incidentInfo: RouteAlertIncidentInfo? = null,
+        tunnelInfo: RouteAlertTunnelInfo? = null,
+        countryBorderCrossingInfo: RouteAlertBorderCrossingInfo? = null,
+        tollCollectionInfo: RouteAlertTollCollectionInfo? = null,
+        serviceAreaInfo: RouteAlertServiceAreaInfo? = null
+    ) = RouteAlert(
         type,
         123.0,
         if (hasLength) 456.0 else null,
@@ -525,7 +524,7 @@ class NavigatorMapperTest {
     )
 
     private val defaultDistanceToStart = 1234.0
-    private fun PassiveManeuver.toUpcomingManeuver(
+    private fun RouteAlert.toUpcomingRouteAlert(
         distanceToStart: Double = defaultDistanceToStart
-    ) = UpcomingPassiveManeuver(this, distanceToStart)
+    ) = UpcomingRouteAlert(this, distanceToStart)
 }
