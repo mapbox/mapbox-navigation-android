@@ -262,29 +262,29 @@ package com.mapbox.navigation.base.trip.model {
 
 package com.mapbox.navigation.base.trip.model.alert {
 
-  public final class BorderCrossingAdminInfo {
-    method public String getCountryCode();
-    method public String getCountryCodeAlpha3();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo.Builder toBuilder();
+  public final class CountryBorderCrossingAdminInfo {
+    method public String getCode();
+    method public String getCodeAlpha3();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo.Builder toBuilder();
   }
 
-  public static final class BorderCrossingAdminInfo.Builder {
-    ctor public BorderCrossingAdminInfo.Builder(String countryCode, String countryCodeAlpha3);
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo build();
+  public static final class CountryBorderCrossingAdminInfo.Builder {
+    ctor public CountryBorderCrossingAdminInfo.Builder(String code, String codeAlpha3);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo build();
   }
 
-  public final class BorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getFrom();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? getTo();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder toBuilder();
+  public final class CountryBorderCrossingAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getFrom();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? getTo();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder toBuilder();
   }
 
-  public static final class BorderCrossingAlert.Builder {
-    ctor public BorderCrossingAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert build();
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder from(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? from);
-    method public com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo? to);
+  public static final class CountryBorderCrossingAlert.Builder {
+    ctor public CountryBorderCrossingAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert build();
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder from(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? from);
+    method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
   }
 
   public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
@@ -339,7 +339,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   }
 
   public final class RouteAlertType {
-    field public static final int BorderCrossing = 1; // 0x1
+    field public static final int CountryBorderCrossing = 1; // 0x1
     field public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType! INSTANCE;
     field public static final int RestStop = 3; // 0x3
     field public static final int RestrictedArea = 4; // 0x4
