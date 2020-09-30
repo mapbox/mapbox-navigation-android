@@ -13,8 +13,8 @@ import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
-import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo
-import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
@@ -285,13 +285,13 @@ internal class NavigatorMapper {
                     .build()
             }
             PassiveManeuverType.KBORDER_CROSSING -> {
-                BorderCrossingAlert.Builder(
+                CountryBorderCrossingAlert.Builder(
                     maneuver.beginCoordinate,
                     maneuver.distance
                 )
                     .alertGeometry(maneuver.getAlertGeometry())
-                    .from(maneuver.borderCrossingInfo?.from.toBorderCrossingAdminInfo())
-                    .to(maneuver.borderCrossingInfo?.to.toBorderCrossingAdminInfo())
+                    .from(maneuver.borderCrossingInfo?.from.toCountryBorderCrossingAdminInfo())
+                    .to(maneuver.borderCrossingInfo?.to.toCountryBorderCrossingAdminInfo())
                     .build()
             }
             PassiveManeuverType.KTOLL_COLLECTION_POINT -> {
@@ -355,19 +355,20 @@ internal class NavigatorMapper {
     }
 
     companion object {
+
         private const val ONE_INDEX = 1
         private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
         private const val FIRST_BANNER_INSTRUCTION = 0
         private const val TWO_LEGS: Short = 2
     }
 
-    private fun PassiveManeuverAdminInfo?.toBorderCrossingAdminInfo() = ifNonNull(
+    private fun PassiveManeuverAdminInfo?.toCountryBorderCrossingAdminInfo() = ifNonNull(
         this?.iso_3166_1,
         this?.iso_3166_1_alpha3,
     ) { countryCode, CountryCodeAlpha3 ->
-        BorderCrossingAdminInfo.Builder(
-            countryCode = countryCode,
-            countryCodeAlpha3 = CountryCodeAlpha3
+        CountryBorderCrossingAdminInfo.Builder(
+            code = countryCode,
+            codeAlpha3 = CountryCodeAlpha3
         ).build()
     }
 

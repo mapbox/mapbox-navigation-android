@@ -21,7 +21,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
@@ -47,6 +47,7 @@ import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class RouteAlertsActivity : AppCompatActivity() {
+
     private val directionsRoute: DirectionsRoute by lazy {
         val directionsResponseJson = resources.openRawResource(
             R.raw.mock_response_all_passive_maneuvers_polyline6
@@ -70,14 +71,14 @@ class RouteAlertsActivity : AppCompatActivity() {
             *generateLineLayerProperties(Color.DKGRAY)
         )
 
-    // border crossings
-    private val borderCrossingsTextPropertyId = "border_crossings_text_property"
-    private val borderCrossingsSource = GeoJsonSource("border_crossings_source")
-    private val borderCrossingsLayer = SymbolLayer(
-        "border_crossings_layer",
-        "border_crossings_source"
+    // country border crossings
+    private val countryBorderCrossingsTextPropertyId = "country_border_crossings_text_property"
+    private val countryBorderCrossingsSource = GeoJsonSource("country_border_crossings_source")
+    private val countryBorderCrossingsLayer = SymbolLayer(
+        "country_border_crossings_layer",
+        "country_border_crossings_source"
     ).withProperties(
-        *generateSymbolLayerProperties(blueCircleImageId, borderCrossingsTextPropertyId)
+        *generateSymbolLayerProperties(blueCircleImageId, countryBorderCrossingsTextPropertyId)
     )
 
     // toll collection
@@ -162,8 +163,8 @@ class RouteAlertsActivity : AppCompatActivity() {
                 )
                 style.addSource(tunnelSource)
                 style.addLayer(tunnelLayer)
-                style.addSource(borderCrossingsSource)
-                style.addLayer(borderCrossingsLayer)
+                style.addSource(countryBorderCrossingsSource)
+                style.addLayer(countryBorderCrossingsLayer)
                 style.addSource(tollCollectionSource)
                 style.addLayer(tollCollectionLayer)
                 style.addSource(restStopSource)
@@ -213,7 +214,7 @@ class RouteAlertsActivity : AppCompatActivity() {
                     // in this part of the example we're listening for the full list of alerts
                     // whenever a new route is set and marking all of the tunnels on the map
                     val tunnelFeatures = mutableListOf<Feature>()
-                    val borderCrossingsFeatures = mutableListOf<Feature>()
+                    val countryBorderCrossingsFeatures = mutableListOf<Feature>()
                     val tollCollectionFeatures = mutableListOf<Feature>()
                     val restStopsFeatures = mutableListOf<Feature>()
                     val restrictedAreasFeatures = mutableListOf<Feature>()
@@ -231,15 +232,15 @@ class RouteAlertsActivity : AppCompatActivity() {
                                     throw IllegalArgumentException("missing tunnel geometry")
                                 }
                             }
-                            is BorderCrossingAlert -> {
-                                val from = routeAlert.from!!.countryCodeAlpha3
-                                val to = routeAlert.to!!.countryCodeAlpha3
+                            is CountryBorderCrossingAlert -> {
+                                val from = routeAlert.from!!.codeAlpha3
+                                val to = routeAlert.to!!.codeAlpha3
                                 val feature = Feature.fromGeometry(routeAlert.coordinate)
                                 feature.addStringProperty(
-                                    borderCrossingsTextPropertyId,
+                                    countryBorderCrossingsTextPropertyId,
                                     "$from -> $to"
                                 )
-                                borderCrossingsFeatures.add(feature)
+                                countryBorderCrossingsFeatures.add(feature)
                             }
                             is TollCollectionAlert -> {
                                 val typeString = when (routeAlert.tollCollectionType) {
@@ -305,8 +306,8 @@ class RouteAlertsActivity : AppCompatActivity() {
 
                     // update all sources
                     tunnelSource.setGeoJson(FeatureCollection.fromFeatures(tunnelFeatures))
-                    borderCrossingsSource.setGeoJson(
-                        FeatureCollection.fromFeatures(borderCrossingsFeatures)
+                    countryBorderCrossingsSource.setGeoJson(
+                        FeatureCollection.fromFeatures(countryBorderCrossingsFeatures)
                     )
                     tollCollectionSource.setGeoJson(
                         FeatureCollection.fromFeatures(tollCollectionFeatures)

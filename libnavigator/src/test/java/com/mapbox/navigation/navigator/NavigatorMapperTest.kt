@@ -2,8 +2,8 @@ package com.mapbox.navigation.navigator
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
-import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAdminInfo
-import com.mapbox.navigation.base.trip.model.alert.BorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
+import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
@@ -148,9 +148,9 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `border crossing alert is parsed correctly`() {
+    fun `country border crossing alert is parsed correctly`() {
         every { navigationStatus.upcomingPassiveManeuvers } returns listOf(
-            borderCrossingPassiveManeuver.toUpcomingManeuver()
+            countryBorderCrossingPassiveManeuver.toUpcomingManeuver()
         )
 
         val routeProgress = navigatorMapper.getRouteProgress(
@@ -165,17 +165,17 @@ class NavigatorMapperTest {
             upcomingRouteAlert.distanceToStart,
             .00001
         )
-        val expected = BorderCrossingAlert.Builder(
+        val expected = CountryBorderCrossingAlert.Builder(
             Point.fromLngLat(10.0, 20.0),
             123.0
         )
-            .from(BorderCrossingAdminInfo.Builder("US", "USA").build())
-            .to(BorderCrossingAdminInfo.Builder("CA", "CAN").build())
+            .from(CountryBorderCrossingAdminInfo.Builder("US", "USA").build())
+            .to(CountryBorderCrossingAdminInfo.Builder("CA", "CAN").build())
             .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
-        assertEquals(expected.alertType, RouteAlertType.BorderCrossing)
+        assertEquals(expected.alertType, RouteAlertType.CountryBorderCrossing)
     }
 
     @Test
@@ -443,10 +443,10 @@ class NavigatorMapperTest {
         type = PassiveManeuverType.KTUNNEL_ENTRANCE
     )
 
-    private val borderCrossingPassiveManeuver = createPassiveManeuver(
+    private val countryBorderCrossingPassiveManeuver = createPassiveManeuver(
         hasLength = false,
         type = PassiveManeuverType.KBORDER_CROSSING,
-        borderCrossingInfo = PassiveManeuverBorderCrossingInfo(
+        countryBorderCrossingInfo = PassiveManeuverBorderCrossingInfo(
             PassiveManeuverAdminInfo("USA", "US"),
             PassiveManeuverAdminInfo("CAN", "CA")
         )
@@ -504,7 +504,7 @@ class NavigatorMapperTest {
         type: PassiveManeuverType,
         incidentInfo: PassiveManeuverIncidentInfo? = null,
         tunnelInfo: PassiveManeuverTunnelInfo? = null,
-        borderCrossingInfo: PassiveManeuverBorderCrossingInfo? = null,
+        countryBorderCrossingInfo: PassiveManeuverBorderCrossingInfo? = null,
         tollCollectionInfo: PassiveManeuverTollCollectionInfo? = null,
         serviceAreaInfo: PassiveManeuverServiceAreaInfo? = null
     ) = PassiveManeuver(
@@ -515,7 +515,7 @@ class NavigatorMapperTest {
         1,
         if (hasLength) Point.fromLngLat(33.0, 44.0) else Point.fromLngLat(10.0, 20.0),
         if (hasLength) 2 else 1,
-        incidentInfo, tunnelInfo, borderCrossingInfo, tollCollectionInfo, serviceAreaInfo
+        incidentInfo, tunnelInfo, countryBorderCrossingInfo, tollCollectionInfo, serviceAreaInfo
     )
 
     private val defaultDistanceToStart = 1234.0
