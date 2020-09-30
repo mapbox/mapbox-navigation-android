@@ -63,6 +63,6 @@ public class AnimationAdapter extends RecyclerView.Adapter<AnimationAdapter.Anim
   }
 
   interface OnAnimationButtonClicked {
-    void onButtonClicked(AnimationType animationType);
+    void onButtonClicked(@NonNull AnimationType animationType);
   }
 }
