@@ -3,21 +3,21 @@ package com.mapbox.navigation.base.trip.model.alert
 import com.mapbox.geojson.Point
 
 /**
- * Route alert type that provides information about border crossings on the route.
+ * Route alert type that provides information about country border crossings on the route.
  *
- * @param from origin administrative info when crossing the border
- * @param to destination administrative info when crossing the border
+ * @param from origin administrative info when crossing the country border
+ * @param to destination administrative info when crossing the country border
  * @see RouteAlert
- * @see RouteAlertType.BorderCrossing
+ * @see RouteAlertType.CountryBorderCrossing
  */
-class BorderCrossingAlert private constructor(
+class CountryBorderCrossingAlert private constructor(
     coordinate: Point,
     distance: Double,
     alertGeometry: RouteAlertGeometry?,
-    val from: BorderCrossingAdminInfo?,
-    val to: BorderCrossingAdminInfo?
+    val from: CountryBorderCrossingAdminInfo?,
+    val to: CountryBorderCrossingAdminInfo?
 ) : RouteAlert(
-    RouteAlertType.BorderCrossing,
+    RouteAlertType.CountryBorderCrossing,
     coordinate,
     distance,
     alertGeometry
@@ -39,7 +39,7 @@ class BorderCrossingAlert private constructor(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
-        other as BorderCrossingAlert
+        other as CountryBorderCrossingAlert
 
         if (from != other.from) return false
         if (to != other.to) return false
@@ -61,21 +61,22 @@ class BorderCrossingAlert private constructor(
      * Returns a string representation of the object.
      */
     override fun toString(): String {
-        return "BorderCrossingAlert(from=$from, to=$to), ${super.toString()}"
+        return "CountryBorderCrossingAlert(from=$from, to=$to), ${super.toString()}"
     }
 
     /**
      * Use to create a new instance.
      *
-     * @see BorderCrossingAlert
+     * @see CountryBorderCrossingAlert
      */
     class Builder(
         private val coordinate: Point,
         private val distance: Double
     ) {
+
         private var alertGeometry: RouteAlertGeometry? = null
-        private var from: BorderCrossingAdminInfo? = null
-        private var to: BorderCrossingAdminInfo? = null
+        private var from: CountryBorderCrossingAdminInfo? = null
+        private var to: CountryBorderCrossingAdminInfo? = null
 
         /**
          * Add optional geometry if the alert has a length.
@@ -85,16 +86,16 @@ class BorderCrossingAlert private constructor(
         }
 
         /**
-         * Add the origin administrative info when crossing the border.
+         * Add the origin administrative info when crossing the country border.
          */
-        fun from(from: BorderCrossingAdminInfo?): Builder = apply {
+        fun from(from: CountryBorderCrossingAdminInfo?): Builder = apply {
             this.from = from
         }
 
         /**
-         * Add the destination administrative info when crossing the border.
+         * Add the destination administrative info when crossing the country border.
          */
-        fun to(to: BorderCrossingAdminInfo?): Builder = apply {
+        fun to(to: CountryBorderCrossingAdminInfo?): Builder = apply {
             this.to = to
         }
 
@@ -102,7 +103,7 @@ class BorderCrossingAlert private constructor(
          * Build the object instance.
          */
         fun build() =
-            BorderCrossingAlert(
+            CountryBorderCrossingAlert(
                 coordinate = coordinate,
                 distance = distance,
                 alertGeometry = alertGeometry,
