@@ -5,21 +5,22 @@ package com.mapbox.navigation.base.trip.model.alert
  *
  * Available values are:
  * - [RouteAlertType.TunnelEntrance]
- * - [RouteAlertType.BorderCrossing]
+ * - [RouteAlertType.CountryBorderCrossing]
  * - [RouteAlertType.TollCollection]
  * - [RouteAlertType.RestStop]
  * - [RouteAlertType.RestrictedArea]
  */
 object RouteAlertType {
+
     /**
      * Type of the [TunnelEntranceAlert].
      */
     const val TunnelEntrance = 0
 
     /**
-     * Type of the [BorderCrossingAlert].
+     * Type of the [CountryBorderCrossingAlert].
      */
-    const val BorderCrossing = 1
+    const val CountryBorderCrossing = 1
 
     /**
      * Type of the [TollCollectionAlert].

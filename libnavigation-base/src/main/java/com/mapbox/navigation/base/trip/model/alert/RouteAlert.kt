@@ -7,7 +7,7 @@ import com.mapbox.geojson.Point
  *
  * Available alert types are:
  * - [TunnelEntranceAlert]
- * - [BorderCrossingAlert]
+ * - [CountryBorderCrossingAlert]
  * - [TollCollectionAlert]
  * - [RestStopAlert]
  * - [RestrictedAreaAlert]

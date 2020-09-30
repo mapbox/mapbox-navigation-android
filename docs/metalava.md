@@ -37,7 +37,7 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72
 org.jetbrains.kotlin:kotlin-reflect:1.3.72
 ```
 
-- That places the latest `metalava.jar` into [`metalava`](https://github.com/mapbox/mapbox-navigation-android/blob/master/metalava) folder and prints out the its deps 👀
+- That places the latest `metalava.jar` into [`metalava`](https://github.com/mapbox/mapbox-navigation-android/blob/master/metalava) folder and prints out its deps 👀
 
 ```groovy
 // Metalava isn't released yet. Check in its jar and explicitly track its transitive deps.
