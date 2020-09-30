@@ -54,7 +54,7 @@
 
     <!-- Feedback description for Confusing Audio -->
     <string name="mapbox_feedback_description_guidance_too_early">Lời hướng dẫn quá sớm</string>
-    <string name="mapbox_feedback_description_guidance_too_late">Lời hướng dẫn quá chậm</string>
+    <string name="mapbox_feedback_description_guidance_too_late">Lời hướng dẫn quá trễ</string>
     <string name="mapbox_feedback_description_pronunciation_incorrect">Phát âm sai</string>
     <string name="mapbox_feedback_description_road_name_repeated">Đọc lại tên đường hai lần</string>
 

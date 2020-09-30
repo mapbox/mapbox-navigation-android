@@ -17,6 +17,8 @@
     <string name="title_select_replay_history">Chọn lịch sử</string>
 
     <string name="title_replay_waypoints">Phát lại tọa độ điểm</string>
+    <string name="description_replay_waypoints">Cho biết cách điều hướng đến các tọa độ điểm.</string>
+
     <string name="title_reroute_view">Sự kiện tìm đường đi mới</string>
     <string name="title_basic_navigation_kotlin">Điều hướng cơ bản</string>
     <string name="title_basic_navigation_fragment">Điều hướng cơ bản trong Fragment</string>
@@ -31,15 +33,19 @@
     <string name="title_custom_route_styling_kotlin">Đặt kiểu Tuyến đường Tùy biến trong Kotlin</string>
     <string name="title_navigation_view_fragment">NavigationView trong Fragment</string>
     <string name="title_navigation_route_ui">NavigationMapRoute</string>
+    <string name="description_navigation_route_ui">Ví dụ sử dụng NavigationMapRoute</string>
+
     <string name="title_traffic_toggle">Hiện/ẩn giao thông</string>
     <string name="title_runtime_styling">RuntimeRouteStyling</string>
+    <string name="description_runtime_styling">Ví dụ sử dụng RuntimeRouteStyling</string>
+
     <string name="title_map_matching">Khớp Bản đồ</string>
     <string name="settings">Thiết lập</string>
     <string name="simulate_route">Mô phỏng Tuyến đường</string>
     <string name="language">Ngôn ngữ</string>
     <string name="unit_type">Hệ Đo lường</string>
     <string name="route_profile">Chế độ</string>
-    <string name="nav_native_history_collect">Thu thập lịch sử Điều hướng Native</string>
+    <string name="nav_native_history_collect">Thu thập lịch sử</string>
     <string name="start_navigation">Bắt đầu Điều hướng</string>
     <string name="navigate_waypoints_next_stop">Điểm dừng sau</string>
     <string name="play_history">Phát lại lịch sử</string>
@@ -58,5 +64,6 @@
     <string name="history_failed_to_load_item">Thất bại khi tải mục lịch sử</string>
     <string name="history_failed_to_load_list">Thất bại khi tải danh sách</string>
     <string name="history_local_history_file">Tập tin lịch sử trên thiết bị</string>
+    <string name="history_recorded_history_file">Tập tin lịch sử đã thu thập</string>
 
 </resources>
