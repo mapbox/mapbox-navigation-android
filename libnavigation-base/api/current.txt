@@ -372,6 +372,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   }
 
   public final class TunnelEntranceAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo? getInfo();
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder toBuilder();
   }
 
@@ -379,6 +380,17 @@ package com.mapbox.navigation.base.trip.model.alert {
     ctor public TunnelEntranceAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
     method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert build();
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert.Builder info(com.mapbox.navigation.base.trip.model.alert.TunnelInfo? info);
+  }
+
+  public final class TunnelInfo {
+    method public String getName();
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo.Builder toBuilder();
+  }
+
+  public static final class TunnelInfo.Builder {
+    ctor public TunnelInfo.Builder(String name);
+    method public com.mapbox.navigation.base.trip.model.alert.TunnelInfo build();
   }
 
   public final class UpcomingRouteAlert {
