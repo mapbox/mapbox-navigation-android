@@ -308,6 +308,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".CoreActivity" />
         </activity>
+
+        <activity
+            android:name=".ui.FeedbackOptionsActivity"
+            android:label="@string/title_feedback_options"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".UIActivity" />
+        </activity>
         
         <meta-data
             android:name="com.mapbox.TestEventsServer"

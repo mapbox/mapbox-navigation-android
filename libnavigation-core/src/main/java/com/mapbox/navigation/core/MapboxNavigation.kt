@@ -70,6 +70,7 @@ import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
 import kotlinx.coroutines.channels.ReceiveChannel
 import java.lang.reflect.Field
+import java.util.Queue
 
 private const val MAPBOX_NAVIGATION_USER_AGENT_BASE = "mapbox-navigation-android"
 private const val MAPBOX_NAVIGATION_UI_USER_AGENT_BASE = "mapbox-navigation-ui-android"
@@ -151,6 +152,8 @@ class MapboxNavigation(
      */
     private var rerouteController: RerouteController?
     private val defaultRerouteController: RerouteController
+
+    private var userFeedbackFeedbackItemQueue: Queue<Array<Array<String>>>? = null
 
     init {
         ThreadController.init()
@@ -332,6 +335,7 @@ class MapboxNavigation(
             Tag(MapboxNavigationTelemetry.TAG),
             Message("onDestroy")
         )
+        MapboxNavigationTelemetry.sendQueuedUserFeedback()
         MapboxNavigationTelemetry.unregisterListeners(this@MapboxNavigation)
         directionsSession.shutdown()
         directionsSession.unregisterAllRoutesObservers()
@@ -629,6 +633,45 @@ class MapboxNavigation(
             feedbackSubType,
             appMetadata
         )
+    }
+
+    /**
+     * Queue the submission of user feedback information about an issue or
+     * problem with the Navigation SDK. Queuing the information allows for
+     * sending it at a later time, rather than immediately sending the
+     * feedback once the feedback's been given.
+     *
+     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param description description message
+     * @param feedbackSource one of [FeedbackEvent.Source]
+     * @param screenshot encoded screenshot (optional)
+     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param appMetadata [AppMetadata] information (optional)
+     */
+    fun queueUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String>? = emptyArray(),
+        appMetadata: AppMetadata? = null
+    ) {
+        MapboxNavigationTelemetry.queueUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        )
+    }
+
+    /**
+     * Send the queued user feedback information about an issue or
+     * problem with the Navigation SDK
+     */
+    fun sendQueuedUserFeedback() {
+        MapboxNavigationTelemetry.sendQueuedUserFeedback()
     }
 
     /**

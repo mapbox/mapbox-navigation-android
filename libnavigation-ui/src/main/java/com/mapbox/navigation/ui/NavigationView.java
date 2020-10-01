@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -31,15 +33,19 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.UiSettings;
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.route.Router;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
+import com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment;
+import com.mapbox.navigation.ui.feedback.FeedbackDetailsFragment;
+import com.mapbox.navigation.ui.feedback.FeedbackFlowListener;
+import com.mapbox.navigation.ui.feedback.FeedbackItem;
 import com.mapbox.navigation.ui.instruction.InstructionView;
 import com.mapbox.navigation.ui.instruction.NavigationAlertView;
 import com.mapbox.navigation.ui.internal.NavigationContract;
@@ -89,7 +95,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private RecenterButton recenterBtn;
   private WayNameView wayNameView;
   private ImageButton routeOverviewBtn;
-  private Symbol feedbackSymbol;
 
   private NavigationPresenter navigationPresenter;
   private NavigationViewEventDispatcher navigationViewEventDispatcher;
@@ -105,6 +110,9 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private LifecycleRegistry lifecycleRegistry;
   @NonNull
   private Set<OnNavigationReadyCallback> onNavigationReadyCallbacks = new CopyOnWriteArraySet<>();
+  private FeedbackFlowListener feedbackFlowListener;
+  private boolean enableDetailedFeedbackFlowAfterTbt;
+  private boolean enableArrivalExperienceFeedback;
 
   public NavigationView(@NonNull Context context) {
     this(context, null);
@@ -425,7 +433,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
 
     snackbar.getView().setBackgroundColor(
-        ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_secondary));
+        ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_tertiary));
     snackbar.setTextColor(ContextCompat.getColor(getContext(), R.color.mapbox_feedback_bottom_sheet_primary_text));
 
     snackbar.show();
@@ -661,13 +669,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
           } else {
             navigationMap.setPuckDrawableSupplier(navigationViewOptions.puckDrawableSupplier());
           }
-
           if (navigationViewOptions.camera() == null) {
             navigationMap.setCamera(new DynamicCamera(navigationMap.retrieveMap()));
           } else {
             navigationMap.setCamera(navigationViewOptions.camera());
           }
-
           initializeNavigationListeners(navigationViewOptions, navigationViewModel);
           setupNavigationMapboxMap(navigationViewOptions);
 
@@ -715,6 +721,49 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     }
   }
 
+  @Override
+  public void onFinalDestinationArrival() {
+    try {
+      Context context = getContext();
+      // unwrap the context if needed, see https://github.com/mapbox/mapbox-navigation-android/issues/2777
+      while (!(context instanceof FragmentActivity) && context instanceof ContextWrapper) {
+        context = ((ContextWrapper) context).getBaseContext();
+      }
+      if (retrieveMapboxNavigation() != null) {
+        FragmentActivity fragmentActivityContext = (FragmentActivity) context;
+        FragmentTransaction fragmentTransaction = fragmentActivityContext.getSupportFragmentManager().beginTransaction();
+
+        if (navigationViewModel.getCachedFeedbackItems() == null || navigationViewModel.getCachedFeedbackItems().isEmpty()) {
+          if (enableArrivalExperienceFeedback) {
+            fragmentTransaction.add(R.id.navigationLayout, FeedbackArrivalFragment.Companion.newInstance(
+                    feedbackFlowListener, navigationViewModel.getCachedFeedbackItems()),
+                    FeedbackArrivalFragment.class.getSimpleName()).commit();
+          }
+        } else {
+          fragmentTransaction.add(R.id.navigationLayout,
+                  FeedbackDetailsFragment.Companion.newInstance(enableArrivalExperienceFeedback,
+                          feedbackFlowListener, navigationViewModel.getCachedFeedbackItems()),
+                  FeedbackDetailsFragment.class.getSimpleName()).commit();
+        }
+      }
+    } catch (ClassCastException exception) {
+      throw new ClassCastException("Please ensure that the provided Context is a valid FragmentActivity");
+    }
+  }
+
+  @Override
+  public void onFeedbackSubmitted(FeedbackItem submittedFeedbackItem) {
+    /*
+     * enableDetailedFeedbackFlowAfterTbt determines whether the NavigationView is in
+     * "1tap" or "2tap" flow
+     */
+    if (enableDetailedFeedbackFlowAfterTbt) {
+      navigationViewModel.cacheFeedback(submittedFeedbackItem);
+    } else {
+      navigationViewModel.sendFeedback(submittedFeedbackItem);
+    }
+  }
+
   private void initializeSummaryBottomSheet() {
     summaryBehavior = BottomSheetBehavior.from(summaryBottomSheet);
     summaryBehavior.setHideable(false);
@@ -730,6 +779,15 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private void initializeInstructionListener() {
     instructionView.setInstructionListListener(new NavigationInstructionListListener(navigationViewEventDispatcher));
     instructionView.setGuidanceViewListener(new NavigationGuidanceViewListener(navigationPresenter));
+  }
+
+  private void initializeFeedbackFlowListener() {
+    feedbackFlowListener = new NavigationFeedbackFlowListener(navigationViewModel);
+  }
+
+  private void initFeedbackPreferences(@NonNull NavigationViewOptions navigationOptions) {
+    enableDetailedFeedbackFlowAfterTbt = navigationOptions.navigationFeedbackOptions().getEnableDetailedFeedbackAfterNavigation();
+    enableArrivalExperienceFeedback = navigationOptions.navigationFeedbackOptions().getEnableArrivalExperienceFeedback();
   }
 
   private void initializeNavigationMap(@NonNull MapView mapView, @NonNull MapboxMap map) {
@@ -862,7 +920,8 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     } else {
       navigationMap.disableVanishingRouteLine();
     }
-
+    initFeedbackPreferences(options);
+    initializeFeedbackFlowListener();
     initializeVoiceGuidanceMuteState(options);
     initializeNavigationListeners(options, navigationViewModel);
     setupNavigationMapboxMap(options);
@@ -891,7 +950,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
           SymbolOptions symbolOptions = new SymbolOptions();
           symbolOptions.withGeometry(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
           .withIconImage(MAPBOX_NAVIGATION_FEEDBACK_MARKER_NAME);
-          feedbackSymbol = navigationMap.addCustomMarker(symbolOptions);
+          navigationMap.addCustomMarker(symbolOptions);
         }
       }
 

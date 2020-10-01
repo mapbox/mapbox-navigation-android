@@ -20,6 +20,7 @@ public class FeedbackItem {
   private String description;
   private int feedbackImage;
   private Set<String> feedbackSubType;
+  private String encodedScreenshot;
 
   public FeedbackItem(String feedbackText,
       int feedbackImage,
@@ -56,5 +57,14 @@ public class FeedbackItem {
 
   public Set<String> getFeedbackSubType() {
     return this.feedbackSubType;
+  }
+
+  public String getEncodedScreenshot() {
+    return encodedScreenshot;
+  }
+
+  public FeedbackItem setEncodedScreenshot(String encodedScreenshot) {
+    this.encodedScreenshot = encodedScreenshot;
+    return this;
   }
 }

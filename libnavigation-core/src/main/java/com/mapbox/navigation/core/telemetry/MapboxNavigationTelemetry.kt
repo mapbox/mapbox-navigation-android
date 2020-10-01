@@ -51,6 +51,8 @@ import kotlinx.coroutines.selects.select
 import java.lang.ref.WeakReference
 import java.util.ArrayDeque
 import java.util.Date
+import java.util.LinkedList
+import java.util.Queue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -162,6 +164,8 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
             Log.d(TAG, "Current session state is: $navigationSession")
         }
     }
+
+    private var userFeedbackQueue: Queue<Array<Array<String>>>? = null
 
     private fun switchToNotActiveGuidanceBehavior() {
         sessionEndPredicate()
@@ -456,6 +460,98 @@ internal object MapboxNavigationTelemetry : MapboxNavigationTelemetryInterface {
                 feedbackSubType,
                 appMetadata
             )
+        }
+    }
+
+    /**
+     * Queue the submission of user feedback information about an issue or
+     * problem with the Navigation SDK
+     *
+     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param description description message
+     * @param feedbackSource one of [FeedbackEvent.Source]
+     * @param screenshot encoded screenshot (optional)
+     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param appMetadata [AppMetadata] information (optional)
+     */
+    fun queueUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String>? = emptyArray(),
+        appMetadata: AppMetadata? = null
+    ) {
+        if (userFeedbackQueue.isNullOrEmpty()) {
+            userFeedbackQueue = LinkedList<Array<Array<String>>>()
+        }
+        userFeedbackQueue?.let { queue ->
+            val finalArrayOfArraysForSingleFeedback = mutableListOf(
+                arrayOf(feedbackType),
+                arrayOf(description),
+                arrayOf(feedbackSource))
+
+            finalArrayOfArraysForSingleFeedback.add(arrayOf(if (screenshot.isNullOrBlank()) "" else screenshot))
+            finalArrayOfArraysForSingleFeedback.add(if (feedbackSubType.isNullOrEmpty()) arrayOf("") else feedbackSubType)
+            if (appMetadata == null) {
+                finalArrayOfArraysForSingleFeedback.add(arrayOf(""))
+            } else {
+                val metaDataArray = mutableListOf(appMetadata.name, appMetadata.version)
+                appMetadata.userId?.let { userId ->
+                    metaDataArray.add(userId)
+                }
+                appMetadata.sessionId?.let { sessionId ->
+                    metaDataArray.add(sessionId)
+                }
+                finalArrayOfArraysForSingleFeedback.add(arrayOf(metaDataArray.toString()))
+            }
+            queue.add(finalArrayOfArraysForSingleFeedback.toTypedArray())
+        }
+    }
+
+    /**
+     * Send the queued user feedback information about an issue or
+     * problem with the Navigation SDK
+     */
+    fun sendQueuedUserFeedback() {
+        userFeedbackQueue?.let { queue ->
+            if (queue.isNotEmpty()) {
+                queue.forEach { singleQueueEntry ->
+                    val feedbackType = singleQueueEntry[0][0]
+                    val description = singleQueueEntry[1][0]
+                    val feedbackSource = singleQueueEntry[2][0]
+                    val screenshot = singleQueueEntry[3][0]
+                    val feedbackSubType = singleQueueEntry[4]
+                    if (singleQueueEntry[5][0].isEmpty()) {
+                        postUserFeedback(
+                            feedbackType,
+                            description,
+                            feedbackSource,
+                            screenshot,
+                            feedbackSubType,
+                            null
+                        )
+                    } else {
+                        val metaDataInfoStringList = singleQueueEntry[5]
+                        val metadataName = metaDataInfoStringList[0]
+                        val metadataVersion = metaDataInfoStringList[1]
+                        val metadataSessionId = metaDataInfoStringList[2]
+                        val metadataUserId = metaDataInfoStringList[3]
+                        val newMetaData = AppMetadata.Builder(metadataName, metadataVersion)
+                            .sessionId(metadataSessionId)
+                            .userId(metadataUserId)
+                            .build()
+                        postUserFeedback(
+                            feedbackType,
+                            description,
+                            feedbackSource,
+                            screenshot,
+                            feedbackSubType,
+                            newMetaData
+                        )
+                    }
+                }
+            }
         }
     }
 

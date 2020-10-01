@@ -49,6 +49,19 @@ class NavigationViewSubscriber implements LifecycleObserver {
         navigationPresenter.onFeedbackSent();
       }
     });
+
+    navigationViewModel.retrieveOnFinalDestinationArrival().observe(lifecycleOwner, shouldShowFeedbackDetailsFragment -> {
+      if (shouldShowFeedbackDetailsFragment != null && shouldShowFeedbackDetailsFragment) {
+        navigationPresenter.onFinalDestinationArrival();
+        navigationViewModel.retrieveOnFinalDestinationArrival().removeObservers(lifecycleOwner);
+      }
+    });
+
+    navigationViewModel.retrieveLatestIncomingFeedbackItem().observe(lifecycleOwner, latestIncomingFeedbackItem -> {
+      if (latestIncomingFeedbackItem != null) {
+        navigationPresenter.onFeedbackSubmitted(latestIncomingFeedbackItem);
+      }
+    });
   }
 
   @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -58,5 +71,6 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveIsFeedbackSentSuccess().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveLatestIncomingFeedbackItem().removeObservers(lifecycleOwner);
   }
 }

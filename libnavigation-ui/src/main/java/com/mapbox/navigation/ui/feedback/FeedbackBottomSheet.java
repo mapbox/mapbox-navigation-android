@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -82,7 +83,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private CountDownTimer timer = null;
   private FeedbackItem selectedFeedbackItem;
   private Map<String, List<FeedbackSubTypeItem>> feedbackSubTypeMap;
-  private Class<? extends FeedbackBottomSheetListener> listenerClass;
+  private Class<? extends FeedbackBottomSheetListener> feedbackBottomSheetListenerClass;
   @Nullable
   private DismissCommand dismissCommand = null;
 
@@ -170,7 +171,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (feedbackBottomSheetListener != null) {
-      listenerClass = feedbackBottomSheetListener.getClass();
+      feedbackBottomSheetListenerClass = feedbackBottomSheetListener.getClass();
     }
   }
 
@@ -212,7 +213,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   //endregion
 
   public void setFeedbackBottomSheetListener(FeedbackBottomSheetListener feedbackBottomSheetListener) {
-    if (listenerClass == null || listenerClass.isInstance(feedbackBottomSheetListener)) {
+    if (feedbackBottomSheetListenerClass == null || feedbackBottomSheetListenerClass.isInstance(feedbackBottomSheetListener)) {
       this.feedbackBottomSheetListener = feedbackBottomSheetListener;
     }
   }
@@ -227,6 +228,7 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private void bind(@NonNull View bottomSheetView) {
     feedbackBottomSheetTitleText = bottomSheetView.findViewById(R.id.feedbackBottomSheetTitleText);
     cancelBtn = bottomSheetView.findViewById(R.id.cancelBtn);
+    cancelBtn.setColorFilter(Color.WHITE);
 
     feedbackMainLayout = bottomSheetView.findViewById(R.id.feedbackMainLayout);
     feedbackCategories = bottomSheetView.findViewById(R.id.feedbackCategories);
@@ -533,7 +535,24 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   public @interface FeedbackFlowType {
   }
 
+  /**
+   * FEEDBACK_MAIN_FLOW limits the feedback process during
+   * turn-by-turn navigation to only one section. This section
+   * provides a way for a user to select the {@link FeedbackItem}'s
+   * high-level feedback type. A second section that asks for more detailed
+   * information within the selected type, will NOT be shown if
+   * FEEDBACK_MAIN_FLOW is used.
+   */
   public static final int FEEDBACK_MAIN_FLOW = 0;
+
+  /**
+   * FEEDBACK_MAIN_FLOW limits the feedback process during
+   * turn-by-turn navigation to only one section. This section
+   * provides a way for a user to select the {@link FeedbackItem}'s
+   * high-level feedback type. A second section that asks for more detailed
+   * information within the selected type, WILL be shown if
+   * FEEDBACK_DETAIL_FLOW is used.
+   */
   public static final int FEEDBACK_DETAIL_FLOW = 1;
 
   private interface DismissCommand {

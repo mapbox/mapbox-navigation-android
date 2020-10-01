@@ -69,6 +69,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
+import static com.mapbox.navigation.ui.feedback.FeedbackBottomSheet.FEEDBACK_MAIN_FLOW;
 import timber.log.Timber;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getUnitTypeForLocale;
@@ -172,6 +173,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   private int feedbackButtonStyle;
   private int alertViewStyle;
   private boolean disableInstructionViewList;
+  private int feedbackBottomSheetFlowType = FEEDBACK_MAIN_FLOW;
 
   public InstructionView(Context context) {
     this(context, null);
@@ -198,7 +200,9 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
 
   @Override
   public void onFeedbackSelected(FeedbackItem feedbackItem) {
-    navigationViewModel.updateFeedback(feedbackItem);
+    if (navigationViewModel != null) {
+      navigationViewModel.setLatestIncomingFeedbackItem(feedbackItem);
+    }
   }
 
   @Override
@@ -310,11 +314,11 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   public void showFeedbackBottomSheet() {
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
-      FeedbackBottomSheet.newInstance(this, FEEDBACK_BOTTOM_SHEET_DURATION)
-          .show(fragmentManager, FeedbackBottomSheet.TAG);
+      FeedbackBottomSheet.newInstance(this, feedbackBottomSheetFlowType, FEEDBACK_BOTTOM_SHEET_DURATION)
+              .show(fragmentManager, FeedbackBottomSheet.TAG);
     }
   }
-
+  
   /**
    * Will slide the reroute view down from the top of the screen
    * and make it visible
@@ -485,7 +489,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
   @Override
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
-    addBottomSheetListener();
+    addBottomSheetListeners();
   }
 
   @Override
@@ -715,7 +719,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
     }
   }
 
-  private void addBottomSheetListener() {
+  private void addBottomSheetListeners() {
     FragmentManager fragmentManager = obtainSupportFragmentManager();
     if (fragmentManager != null) {
       String tag = FeedbackBottomSheet.TAG;

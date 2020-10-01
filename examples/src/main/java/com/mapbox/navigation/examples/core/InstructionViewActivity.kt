@@ -5,10 +5,13 @@ package com.mapbox.navigation.examples.core
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.snackbar.Snackbar.LENGTH_SHORT
@@ -22,6 +25,9 @@ import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.api.directions.v5.models.VoiceInstructions
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -29,10 +35,16 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression.get
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
@@ -50,8 +62,11 @@ import com.mapbox.navigation.ui.NavigationButton
 import com.mapbox.navigation.ui.NavigationConstants
 import com.mapbox.navigation.ui.SoundButton
 import com.mapbox.navigation.ui.camera.NavigationCamera
+import com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment
+import com.mapbox.navigation.ui.feedback.FeedbackArrivalFragment.Companion.newInstance
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
+import com.mapbox.navigation.ui.feedback.FeedbackFlowListener
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
@@ -59,7 +74,11 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
-import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.instructionView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.instruction_view_layout_container
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.mapView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.screenshotView
+import kotlinx.android.synthetic.main.activity_instruction_view_layout.startNavigation
 import okhttp3.Cache
 import java.io.File
 import java.lang.ref.WeakReference
@@ -73,6 +92,8 @@ import java.util.Locale
 class InstructionViewActivity :
     AppCompatActivity(),
     OnMapReadyCallback,
+    FeedbackFlowListener,
+    ArrivalObserver,
     FeedbackBottomSheetListener {
 
     private var mapboxNavigation: MapboxNavigation? = null
@@ -88,6 +109,8 @@ class InstructionViewActivity :
 
     private var feedbackItem: FeedbackItem? = null
     private var feedbackEncodedScreenShot: String? = null
+    private var feedbackLocationFeatureList = mutableListOf<Feature>()
+    private var feedbackLocationPointGeoJsonSource: GeoJsonSource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,6 +130,7 @@ class InstructionViewActivity :
             registerRouteProgressObserver(routeProgressObserver)
             registerBannerInstructionsObserver(bannerInstructionObserver)
             registerVoiceInstructionsObserver(voiceInstructionsObserver)
+            registerArrivalObserver(this@InstructionViewActivity)
         }
 
         initListeners()
@@ -175,6 +199,7 @@ class InstructionViewActivity :
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
+            initFeedbackIconLayer()
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
 
@@ -193,7 +218,7 @@ class InstructionViewActivity :
                         locationListenerCallback
                     )
                     Snackbar.make(
-                        container,
+                        instruction_view_layout_container,
                         R.string.msg_long_press_map_to_place_waypoint,
                         LENGTH_SHORT
                     )
@@ -220,6 +245,26 @@ class InstructionViewActivity :
         }
     }
 
+    private fun initFeedbackIconLayer() {
+        mapboxMap?.getStyle { style ->
+            style.addImage("feedback-icon-id", ContextCompat.getDrawable(this, R.drawable.mapbox_marker_icon_default)!!)
+            feedbackLocationPointGeoJsonSource = GeoJsonSource("feedback-source-id")
+            style.addSource(feedbackLocationPointGeoJsonSource!!)
+            SymbolLayer("feedback-layer-id", "feedback-source-id").apply {
+                withProperties(
+                    PropertyFactory.iconAllowOverlap(true),
+                    PropertyFactory.iconIgnorePlacement(true),
+                    PropertyFactory.iconImage("feedback-icon-id"),
+                    PropertyFactory.textField(get("FEEDBACK_TEXT_KEY")),
+                    PropertyFactory.textOffset(arrayOf(0f, -2.4f)),
+                    PropertyFactory.textIgnorePlacement(true),
+                    PropertyFactory.textAllowOverlap(true)
+                )
+                style.addLayer(this)
+            }
+        }
+    }
+
     // InstructionView Feedback Bottom Sheet listener
     override fun onFeedbackDismissed() {
         // do nothing
@@ -228,6 +273,29 @@ class InstructionViewActivity :
     override fun onFeedbackSelected(feedbackItem: FeedbackItem?) {
         feedbackItem?.let { feedback ->
             this.feedbackItem = feedback
+            sendFeedback()
+        }
+    }
+
+    override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+        // Empty because not needed in this example
+    }
+
+    override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.add(R.id.instruction_view_layout_container, newInstance(
+            this@InstructionViewActivity, null),
+            FeedbackArrivalFragment::class.java.simpleName).commit()
+    }
+
+    override fun onDetailedFeedbackFlowFinished() {
+        // Empty because not needed in this example
+    }
+
+    override fun onArrivalExperienceFeedbackFinished(arrivalFeedbackItem: FeedbackItem?) {
+        mapboxMap?.snapshot(this@InstructionViewActivity::encodeSnapshot)
+        feedbackItem?.let {
+            this.feedbackItem = arrivalFeedbackItem
             sendFeedback()
         }
     }
@@ -243,8 +311,6 @@ class InstructionViewActivity :
         )
         screenshotView.visibility = View.INVISIBLE
         mapView.visibility = VISIBLE
-
-        sendFeedback()
     }
 
     private fun sendFeedback() {
@@ -317,22 +383,29 @@ class InstructionViewActivity :
             addOnClickListener {
                 feedbackItem = null
                 feedbackEncodedScreenShot = null
+                mapboxMap?.snapshot(this@InstructionViewActivity::encodeSnapshot)
                 supportFragmentManager.let {
                     mapboxMap?.snapshot(this@InstructionViewActivity::encodeSnapshot)
                     FeedbackBottomSheet.newInstance(
                         this@InstructionViewActivity,
                         NavigationConstants.FEEDBACK_BOTTOM_SHEET_DURATION
-                    )
-                        .show(it, FeedbackBottomSheet.TAG)
+                    ).show(it, FeedbackBottomSheet.TAG)
+                    mapboxMap?.locationComponent?.lastKnownLocation?.let {
+                        val feedbackFeature = Feature.fromGeometry(Point.fromLngLat(it.longitude, it.latitude))
+                        feedbackFeature.addStringProperty("FEEDBACK_TEXT_KEY", "feedback location")
+                        feedbackLocationFeatureList.add(feedbackFeature)
+                        feedbackLocationPointGeoJsonSource?.setGeoJson(
+                            FeatureCollection.fromFeatures(feedbackLocationFeatureList))
+                    }
                 }
             }
-        }
-        instructionSoundButton = instructionView.retrieveSoundButton().apply {
-            hide()
-            addOnClickListener {
-                val soundButton = instructionSoundButton
-                if (soundButton is SoundButton) {
-                    speechPlayer.isMuted = soundButton.toggleMute()
+            instructionSoundButton = instructionView.retrieveSoundButton().apply {
+                hide()
+                addOnClickListener {
+                    val soundButton = instructionSoundButton
+                    if (soundButton is SoundButton) {
+                        speechPlayer.isMuted = soundButton.toggleMute()
+                    }
                 }
             }
         }

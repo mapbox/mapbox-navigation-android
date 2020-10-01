@@ -1,7 +1,5 @@
 package com.mapbox.navigation.ui.feedback
 
-import android.os.Parcel
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -43,6 +41,7 @@ internal class FeedbackSubTypeAdapter constructor(
         fun onItemClick(position: Int): Boolean
     }
 
+    // TODO: Is this the cause for feedback items checkboxes already being checked during detail flow?
     class DiffCallback : DiffUtil.ItemCallback<FeedbackSubTypeItem>() {
         override fun areItemsTheSame(oldItem: FeedbackSubTypeItem, newItem: FeedbackSubTypeItem): Boolean {
             return oldItem.feedbackDescription == newItem.feedbackDescription && oldItem.isChecked == newItem.isChecked

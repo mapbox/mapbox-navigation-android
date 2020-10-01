@@ -30,7 +30,6 @@ import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
@@ -44,24 +43,20 @@ import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.BuildConfig
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.ui.NavigationViewFragment
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.NavigationConstants
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheet
 import com.mapbox.navigation.ui.feedback.FeedbackBottomSheetListener
-import com.mapbox.navigation.ui.feedback.FeedbackDetailsFragment
 import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
-import com.mapbox.navigation.ui.puck.PuckDrawableSupplier
-import kotlinx.android.synthetic.main.activity_feedback_button.*
+import kotlinx.android.synthetic.main.activity_feedback_button.feedbackButton
 import kotlinx.android.synthetic.main.activity_feedback_button.mapView
 import kotlinx.android.synthetic.main.activity_feedback_button.screenshotView
 import kotlinx.android.synthetic.main.activity_feedback_button.startNavigation
-import kotlinx.android.synthetic.main.activity_instruction_view_layout.*
 import java.lang.ref.WeakReference
 
 /**
@@ -77,6 +72,7 @@ class FeedbackButtonActivity :
     FeedbackBottomSheetListener,
     ArrivalObserver {
 
+    private var TAG = "FeedbackButtonActivity"
     private var mapboxMap: MapboxMap? = null
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
@@ -86,6 +82,7 @@ class FeedbackButtonActivity :
 
     private var feedbackItem: FeedbackItem? = null
     private var feedbackEncodedScreenShot: String? = null
+    private val feedbackList = ArrayList<FeedbackItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,7 +163,6 @@ class FeedbackButtonActivity :
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
             navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
-            navigationMapboxMap?.setPuckDrawableSupplier(CustomPuckDrawableSupplier())
 
             mapboxNavigation?.registerRouteProgressObserver(ReplayProgressObserver(mapboxReplayer))
             mapboxReplayer.pushRealLocation(this, 0.0)
@@ -216,10 +212,6 @@ class FeedbackButtonActivity :
 
     override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
         navigationMapboxMap?.clearMarkersWithIconImageProperty(FEEDBACK_ICON_IMAGE_ID)
-        supportFragmentManager
-            .beginTransaction()
-            .add(
-                R.id.navigationLayout, FeedbackDetailsFragment.newInstance(buildFeedbackListForTest(resources)), "FeedbackDetailsFragment").commit()
     }
 
     private fun initViews() {
@@ -384,18 +376,6 @@ class FeedbackButtonActivity :
 
     companion object {
         private const val FEEDBACK_ICON_IMAGE_ID = "marker-feedback"
-    }
-
-    class CustomPuckDrawableSupplier : PuckDrawableSupplier {
-        override fun getPuckDrawable(routeProgressState: RouteProgressState): Int =
-            when (routeProgressState) {
-                RouteProgressState.ROUTE_INVALID -> R.drawable.custom_puck_icon_uncertain_location
-                RouteProgressState.ROUTE_INITIALIZED -> R.drawable.custom_user_puck_icon
-                RouteProgressState.LOCATION_TRACKING -> R.drawable.custom_user_puck_icon
-                RouteProgressState.ROUTE_COMPLETE -> R.drawable.custom_puck_icon_uncertain_location
-                RouteProgressState.LOCATION_STALE -> R.drawable.custom_user_puck_icon
-                else -> R.drawable.custom_puck_icon_uncertain_location
-            }
     }
 }
 

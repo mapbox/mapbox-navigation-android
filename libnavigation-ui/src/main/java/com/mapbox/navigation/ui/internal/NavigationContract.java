@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.ui.feedback.FeedbackItem;
 
 public interface NavigationContract {
 
@@ -46,6 +47,10 @@ public interface NavigationContract {
     void updateCameraRouteOverview();
 
     void onFeedbackSent();
+
+    void onFinalDestinationArrival();
+
+    void onFeedbackSubmitted(FeedbackItem feedbackItem);
 
     void onGuidanceViewChange(int left, int top, int width, int height);
   }

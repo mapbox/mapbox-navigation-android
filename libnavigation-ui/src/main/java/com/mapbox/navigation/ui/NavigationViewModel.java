@@ -3,7 +3,7 @@ package com.mapbox.navigation.ui;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.location.Location;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
@@ -18,13 +18,14 @@ import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
 import com.mapbox.geojson.utils.PolylineUtils;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
+import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter;
+import com.mapbox.navigation.base.trip.model.RouteProgressState;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
+import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.core.replay.ReplayLocationEngine;
 import com.mapbox.navigation.core.replay.history.ReplayEventBase;
@@ -38,6 +39,7 @@ import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
 import com.mapbox.navigation.ui.feedback.FeedbackItem;
+import com.mapbox.navigation.ui.feedback.FeedbackItemCache;
 import com.mapbox.navigation.ui.internal.ConnectivityStatusProvider;
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer;
 import com.mapbox.navigation.ui.voice.SpeechPlayer;
@@ -50,6 +52,7 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
@@ -69,6 +72,8 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isFeedbackSentSuccess = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> onFinalDestinationArrival = new MutableLiveData<>();
+  private final MutableLiveData<FeedbackItem> latestIncomingFeedbackItem = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   @Nullable
@@ -98,6 +103,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private NavigationViewOptions navigationViewOptions;
   @NonNull
   private MapboxReplayer mapboxReplayer = new MapboxReplayer();
+  private FeedbackItemCache feedbackItemCache;
 
   public NavigationViewModel(@NonNull Application application) {
     super(application);
@@ -141,13 +147,22 @@ public class NavigationViewModel extends AndroidViewModel {
    * Used to update an existing {@link FeedbackItem}
    * with a feedback type and description.
    * <p>
-   * Uses cached feedbackId to ensure the proper item is updated.
-   *
-   * @param feedbackItem item to be updated
+   * @param feedbackItem item to be sent
    */
-  public void updateFeedback(FeedbackItem feedbackItem) {
+  public void sendFeedback(FeedbackItem feedbackItem) {
     this.feedbackItem = feedbackItem;
     sendFeedback();
+  }
+
+  /**
+   * Used to queue a {@link FeedbackItem}
+   * with a feedback type and description.
+   * <p>
+   * @param feedbackItem item to be queued
+   */
+  public void cacheFeedback(FeedbackItem feedbackItem) {
+    this.feedbackItem = feedbackItem;
+    cacheFeedback();
   }
 
   /**
@@ -200,6 +215,7 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeVoiceInstructionLoader();
       initializeVoiceInstructionCache();
       initializeNavigationSpeechPlayer(options);
+      initializeFeedbackItemCache();
     }
     navigation.setRoutes(Arrays.asList(options.directionsRoute()));
     navigation.startTripSession();
@@ -236,6 +252,10 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   void updateRouteProgress(RouteProgress routeProgress) {
+    // TODO: Refactor this part and use ArrivalObserver
+    if (routeProgress.getCurrentState() == RouteProgressState.ROUTE_COMPLETE) {
+      this.onFinalDestinationArrival.setValue(true);
+    }
     this.routeProgress.setValue(routeProgress);
   }
 
@@ -289,6 +309,16 @@ public class NavigationViewModel extends AndroidViewModel {
     return isOffRoute;
   }
 
+  @NonNull
+  public LiveData<Boolean> retrieveOnFinalDestinationArrival() {
+    return onFinalDestinationArrival;
+  }
+
+  @NonNull
+  public LiveData<FeedbackItem> retrieveLatestIncomingFeedbackItem() {
+    return latestIncomingFeedbackItem;
+  }
+
   NavigationViewOptions getNavigationViewOptions() {
     return navigationViewOptions;
   }
@@ -299,6 +329,10 @@ public class NavigationViewModel extends AndroidViewModel {
       initializeDistanceFormatter(navigationViewOptions);
     }
     return distanceFormatter;
+  }
+
+  List<FeedbackItem> getCachedFeedbackItems() {
+    return feedbackItemCache.getFeedbackItems();
   }
 
   private void initializeDistanceFormatter(@NonNull NavigationViewOptions options) {
@@ -391,6 +425,10 @@ public class NavigationViewModel extends AndroidViewModel {
     addNavigationListeners();
   }
 
+  private void initializeFeedbackItemCache() {
+    feedbackItemCache = FeedbackItemCache.Companion.newInstance();
+  }
+
   private void addNavigationListeners() {
     navigation.registerRouteProgressObserver(navigationProgressObserver);
     navigation.registerLocationObserver(navigationProgressObserver);
@@ -404,16 +442,46 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
+  public void setLatestIncomingFeedbackItem(FeedbackItem feedbackItem) {
+    latestIncomingFeedbackItem.setValue(feedbackItem);
+  }
+
   private synchronized void sendFeedback() {
     if (feedbackItem != null && !TextUtils.isEmpty(feedbackEncodedScreenShot)) {
       navigation.postUserFeedback(feedbackItem.getFeedbackType(),
               feedbackItem.getDescription(), UI, feedbackEncodedScreenShot,
               feedbackItem.getFeedbackSubType().toArray(new String[0]), null);
 
-      onFeedbackSent(feedbackItem);
+      onFeedbackSubmitted(feedbackItem);
       isFeedbackSentSuccess.setValue(true);
 
       clearFeedback();
+    }
+  }
+
+  /**
+   * Cache a feedback event so that it can be sent at a later time
+   */
+  private synchronized void cacheFeedback() {
+    if (feedbackItem != null && !TextUtils.isEmpty(feedbackEncodedScreenShot)) {
+      feedbackItem.setEncodedScreenshot(feedbackEncodedScreenShot);
+      feedbackItemCache.addNewFeedbackItem(feedbackItem);
+      clearFeedback();
+    }
+  }
+
+  /**
+   * Queue a feedback event so that it can be sent at a later time
+   */
+  public synchronized void sendCachedFeedback() {
+    if (getCachedFeedbackItems() != null) {
+      for (FeedbackItem singleFeedbackItem : getCachedFeedbackItems()) {
+        navigation.queueUserFeedback(singleFeedbackItem.getFeedbackType(),
+                singleFeedbackItem.getDescription(), UI, singleFeedbackItem.getEncodedScreenshot(),
+                singleFeedbackItem.getFeedbackSubType().toArray(new String[0]), null);
+      }
+      navigation.sendQueuedUserFeedback();
+      feedbackItemCache.removeAllItems();
     }
   }
 
@@ -496,7 +564,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void onFeedbackSent(FeedbackItem feedbackItem) {
+  private void onFeedbackSubmitted(FeedbackItem feedbackItem) {
     if (navigationViewEventDispatcher != null) {
       navigationViewEventDispatcher.onFeedbackSent(feedbackItem);
     }

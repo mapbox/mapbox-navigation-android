@@ -26,6 +26,8 @@
     <dimen name="mapbox_feedback_details_bottom_sheet_initial_peek_height">160dp</dimen>
     <dimen name="mapbox_feedback_details_bottom_sheet_peek_height">330dp</dimen>
     <dimen name="mapbox_feedback_details_button_bar_height">110dp</dimen>
+    <dimen name="mapbox_feedback_arrival_bottom_sheet_height">330dp</dimen>
+
     <!-- Feedback comment EditText view -->
     <dimen name="mapbox_feedback_comment_layout_height">178dp</dimen>
     <dimen name="mapbox_feedback_comment_edit_text_height">112dp</dimen>
