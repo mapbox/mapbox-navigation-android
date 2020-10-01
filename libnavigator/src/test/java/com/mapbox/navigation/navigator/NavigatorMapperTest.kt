@@ -12,6 +12,7 @@ import com.mapbox.navigation.base.trip.model.alert.RouteAlertType
 import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
 import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
 import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
+import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.navigator.internal.NavigatorMapper
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.PassiveManeuver
@@ -120,7 +121,9 @@ class NavigatorMapperTest {
                 Point.fromLngLat(33.0, 44.0),
                 2
             ).build()
-        ).build()
+        )
+            .info(TunnelInfo.Builder("Ted Williams Tunnel").build())
+            .build()
         assertEquals(expected, upcomingRouteAlert.routeAlert)
         assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
         assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
@@ -440,7 +443,10 @@ class NavigatorMapperTest {
 
     private val tunnelEntrancePassiveManeuver = createPassiveManeuver(
         hasLength = true,
-        type = PassiveManeuverType.KTUNNEL_ENTRANCE
+        type = PassiveManeuverType.KTUNNEL_ENTRANCE,
+        tunnelInfo = PassiveManeuverTunnelInfo(
+            "Ted Williams Tunnel"
+        )
     )
 
     private val countryBorderCrossingPassiveManeuver = createPassiveManeuver(
