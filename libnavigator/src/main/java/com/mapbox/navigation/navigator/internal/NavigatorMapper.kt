@@ -23,6 +23,7 @@ import com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry
 import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
 import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
 import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
+import com.mapbox.navigation.base.trip.model.alert.TunnelInfo
 import com.mapbox.navigation.base.trip.model.alert.UpcomingRouteAlert
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerComponent
@@ -36,6 +37,7 @@ import com.mapbox.navigator.PassiveManeuverServiceAreaInfo
 import com.mapbox.navigator.PassiveManeuverServiceAreaType
 import com.mapbox.navigator.PassiveManeuverTollCollectionInfo
 import com.mapbox.navigator.PassiveManeuverTollCollectionType
+import com.mapbox.navigator.PassiveManeuverTunnelInfo
 import com.mapbox.navigator.PassiveManeuverType
 import com.mapbox.navigator.RouteInfo
 import com.mapbox.navigator.RouteState
@@ -282,6 +284,7 @@ internal class NavigatorMapper {
                     maneuver.distance
                 )
                     .alertGeometry(maneuver.getAlertGeometry())
+                    .info(maneuver.tunnelInfo?.toTunnelInfo())
                     .build()
             }
             PassiveManeuverType.KBORDER_CROSSING -> {
@@ -362,13 +365,21 @@ internal class NavigatorMapper {
         private const val TWO_LEGS: Short = 2
     }
 
+    private fun PassiveManeuverTunnelInfo?.toTunnelInfo() = ifNonNull(
+        this?.name,
+    ) { name ->
+        TunnelInfo.Builder(
+            name = name
+        ).build()
+    }
+
     private fun PassiveManeuverAdminInfo?.toCountryBorderCrossingAdminInfo() = ifNonNull(
         this?.iso_3166_1,
         this?.iso_3166_1_alpha3,
-    ) { countryCode, CountryCodeAlpha3 ->
+    ) { countryCode, countryCodeAlpha3 ->
         CountryBorderCrossingAdminInfo.Builder(
             code = countryCode,
-            codeAlpha3 = CountryCodeAlpha3
+            codeAlpha3 = countryCodeAlpha3
         ).build()
     }
 

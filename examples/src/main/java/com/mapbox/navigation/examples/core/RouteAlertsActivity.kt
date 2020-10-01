@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
+import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
@@ -42,7 +43,7 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_replay_route_layout.mapView
-import kotlinx.android.synthetic.main.activity_route_alerts.*
+import kotlinx.android.synthetic.main.activity_route_alerts.distanceRemainingText
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -63,6 +64,7 @@ class RouteAlertsActivity : AppCompatActivity() {
     private val blueCircleImageId = "circle_blue_image"
     private val redCircleImageId = "circle_red_image"
     private val greenCircleImageId = "circle_green_image"
+    private val yellowCircleImageId = "circle_yellow_image"
 
     // tunnels
     private val tunnelSource = GeoJsonSource("tunnel_source")
@@ -70,6 +72,15 @@ class RouteAlertsActivity : AppCompatActivity() {
         .withProperties(
             *generateLineLayerProperties(Color.DKGRAY)
         )
+
+    private val tunnelNamesTextPropertyId = "tunnel_names_text_property"
+    private val tunnelNamesSource = GeoJsonSource("tunnel_names_source")
+    private val tunnelNamesLayer = SymbolLayer(
+        "tunnel_names_layer",
+        "tunnel_names_source"
+    ).withProperties(
+        *generateTunnelNamesLayerProperties(yellowCircleImageId, tunnelNamesTextPropertyId)
+    )
 
     // country border crossings
     private val countryBorderCrossingsTextPropertyId = "country_border_crossings_text_property"
@@ -161,8 +172,14 @@ class RouteAlertsActivity : AppCompatActivity() {
                     greenCircleImageId,
                     ContextCompat.getDrawable(this, R.drawable.ic_circle_green)!!
                 )
+                style.addImage(
+                    yellowCircleImageId,
+                    ContextCompat.getDrawable(this, R.drawable.ic_circle_yellow)!!
+                )
                 style.addSource(tunnelSource)
                 style.addLayer(tunnelLayer)
+                style.addSource(tunnelNamesSource)
+                style.addLayer(tunnelNamesLayer)
                 style.addSource(countryBorderCrossingsSource)
                 style.addLayer(countryBorderCrossingsLayer)
                 style.addSource(tollCollectionSource)
@@ -214,6 +231,7 @@ class RouteAlertsActivity : AppCompatActivity() {
                     // in this part of the example we're listening for the full list of alerts
                     // whenever a new route is set and marking all of the tunnels on the map
                     val tunnelFeatures = mutableListOf<Feature>()
+                    val tunnelNamesFeatures = mutableListOf<Feature>()
                     val countryBorderCrossingsFeatures = mutableListOf<Feature>()
                     val tollCollectionFeatures = mutableListOf<Feature>()
                     val restStopsFeatures = mutableListOf<Feature>()
@@ -228,6 +246,14 @@ class RouteAlertsActivity : AppCompatActivity() {
                                     val tunnelLineString =
                                         alertGeometry.toLineString(routeLineString)
                                     tunnelFeatures.add(Feature.fromGeometry(tunnelLineString))
+                                    routeAlert.info?.name.let {
+                                        val feature = Feature.fromGeometry(routeAlert.coordinate)
+                                        feature.addStringProperty(
+                                            tunnelNamesTextPropertyId,
+                                            it
+                                        )
+                                        tunnelNamesFeatures.add(feature)
+                                    }
                                 } else {
                                     throw IllegalArgumentException("missing tunnel geometry")
                                 }
@@ -306,6 +332,9 @@ class RouteAlertsActivity : AppCompatActivity() {
 
                     // update all sources
                     tunnelSource.setGeoJson(FeatureCollection.fromFeatures(tunnelFeatures))
+                    tunnelNamesSource.setGeoJson(
+                        FeatureCollection.fromFeatures(tunnelNamesFeatures)
+                    )
                     countryBorderCrossingsSource.setGeoJson(
                         FeatureCollection.fromFeatures(countryBorderCrossingsFeatures)
                     )
@@ -323,7 +352,10 @@ class RouteAlertsActivity : AppCompatActivity() {
         )
     }
 
-    private fun generateSymbolLayerProperties(imageId: String, textId: String) = arrayOf(
+    private fun generateSymbolLayerProperties(
+        imageId: String,
+        textId: String
+    ): Array<PropertyValue<out Any>> = arrayOf(
         PropertyFactory.iconImage(imageId),
         PropertyFactory.iconSize(3f),
         PropertyFactory.textField(
@@ -334,10 +366,29 @@ class RouteAlertsActivity : AppCompatActivity() {
         PropertyFactory.iconIgnorePlacement(true)
     )
 
-    private fun generateLineLayerProperties(@ColorInt color: Int) = arrayOf(
-        PropertyFactory.lineColor(color),
-        PropertyFactory.lineWidth(10f)
+    private fun generateTunnelNamesLayerProperties(
+        imageId: String,
+        textId: String
+    ): Array<PropertyValue<out Any>> = arrayOf(
+        PropertyFactory.iconImage(imageId),
+        PropertyFactory.iconSize(3f),
+        PropertyFactory.textField(
+            Expression.get(Expression.literal(textId))
+        ),
+        PropertyFactory.textAnchor(Property.TEXT_ANCHOR_BOTTOM_RIGHT),
+        PropertyFactory.iconAllowOverlap(true),
+        PropertyFactory.iconIgnorePlacement(true),
+        PropertyFactory.textAllowOverlap(true),
+        PropertyFactory.textIgnorePlacement(true)
     )
+
+    private fun generateLineLayerProperties(
+        @ColorInt color: Int
+    ): Array<PropertyValue<out Any>> =
+        arrayOf(
+            PropertyFactory.lineColor(color),
+            PropertyFactory.lineWidth(10f)
+        )
 
     override fun onStart() {
         super.onStart()
