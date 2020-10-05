@@ -1,13 +1,16 @@
 package com.mapbox.navigation.carbon.examples
 
 import android.Manifest.permission
+import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.animation.PathInterpolatorCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
@@ -21,6 +24,7 @@ import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
 import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
+import com.mapbox.maps.plugin.animation.animator.*
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.gesture.GesturePluginImpl
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
@@ -94,66 +98,120 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     }
 
     override fun onButtonClicked(animationType: AnimationType) {
-        when(animationType) {
-            AnimationType.Animation1 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation1",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation2 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation2",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation3 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation3",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation4 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation4",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation5 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation5",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation6 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation6",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation7 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation7",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation8 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation8",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation9 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation9",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation10 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation10",
-                        Toast.LENGTH_SHORT).show()
+        val location = locationComponent?.lastKnownLocation
+        if (location != null) {
+            when (animationType) {
+                AnimationType.Animation1 -> {
+                    val target = CameraCenterAnimator.create(
+                        Point.fromLngLat(location.longitude, location.latitude)
+                    ) {
+                        duration = 2000
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val zoom = CameraZoomAnimator.create(16.35) {
+                        startDelay = 600
+                        duration = 3000
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val bearing = CameraBearingAnimator.create(location.bearing.toDouble()) {
+                        startDelay = 1400
+                        duration = 1800
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val pitch = CameraPitchAnimator.create(40.0) {
+                        startDelay = 2300
+                        duration = 1200
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    mapCamera.registerAnimators(target, zoom, bearing, pitch)
+                    val set = AnimatorSet()
+                    set.playTogether(target, zoom, bearing, pitch)
+                    set.start()
+
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation1",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation2 -> {
+                    val target = CameraCenterAnimator.create(
+                        Point.fromLngLat(location.longitude, location.latitude)
+                    ) {
+                        duration = 1800
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val zoom = CameraZoomAnimator.create(12.35) {
+                        startDelay = 0
+                        duration = 1800
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val bearing = CameraBearingAnimator.create(0.0) {
+                        startDelay = 600
+                        duration = 1800
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    val pitch = CameraPitchAnimator.create(0.0) {
+                        startDelay = 0
+                        duration = 1200
+                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+                    }
+                    mapCamera.registerAnimators(target, zoom, bearing, pitch)
+                    val set = AnimatorSet()
+                    set.playTogether(target, zoom, bearing, pitch)
+                    set.start()
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation2",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation3 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation3",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation4 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation4",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation5 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation5",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation6 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation6",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation7 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation7",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation8 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation8",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation9 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation9",
+                            Toast.LENGTH_SHORT).show()
+                }
+                AnimationType.Animation10 -> {
+                    Toast
+                        .makeText(this@CameraAnimationsActivity,
+                            "Animation10",
+                            Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
