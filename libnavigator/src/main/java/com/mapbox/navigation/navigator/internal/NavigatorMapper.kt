@@ -76,39 +76,38 @@ internal class NavigatorMapper {
             val legProgressBuilder = RouteLegProgress.Builder()
             val stepProgressBuilder = RouteStepProgress.Builder()
 
-            ifNonNull(route.legs()) { legs ->
+            ifNonNull(route.legs(), activeGuidanceInfo) { legs, activeGuidanceInfo ->
                 var currentLeg: RouteLeg? = null
                 if (legIndex < legs.size) {
                     currentLeg = legs[legIndex]
                     legProgressBuilder.legIndex(legIndex)
                     legProgressBuilder.routeLeg(currentLeg)
 
-                    // todo mapbox java issue - leg distance is nullable
-                    val distanceTraveled =
-                        (currentLeg.distance()?.toFloat() ?: 0f) - remainingLegDistance
-                    legProgressBuilder.distanceTraveled(distanceTraveled)
+                    val distanceTraveled = activeGuidanceInfo.legProgress.distanceTraveled
+                    legProgressBuilder.distanceTraveled(distanceTraveled.toFloat())
                     legProgressBuilder.fractionTraveled(
-                        distanceTraveled / (currentLeg.distance()?.toFloat() ?: 0f)
+                        activeGuidanceInfo.legProgress.fractionTraveled.toFloat()
                     )
 
-                    var routeDistanceRemaining = remainingLegDistance
-                    var routeDurationRemaining = remainingLegDuration / ONE_SECOND_IN_MILLISECONDS
-                    if (legs.size >= TWO_LEGS) {
-                        for (i in legIndex + ONE_INDEX until legs.size) {
-                            routeDistanceRemaining += legs[i].distance()?.toFloat() ?: 0f
-                            routeDurationRemaining += legs[i].duration() ?: 0.0
-                        }
-                    }
-                    routeProgressBuilder.distanceRemaining(routeDistanceRemaining)
+                    val legDistanceRemaining = activeGuidanceInfo.legProgress.remainingDistance
+                    val legDurationRemaining =
+                        activeGuidanceInfo.legProgress.remainingDuration /
+                            ONE_SECOND_IN_MILLISECONDS
+                    legProgressBuilder.distanceRemaining(legDistanceRemaining.toFloat())
+                    legProgressBuilder.durationRemaining(legDurationRemaining)
+
+                    val routeDistanceRemaining = activeGuidanceInfo.routeProgress.remainingDistance
+                    val routeDurationRemaining =
+                        activeGuidanceInfo.routeProgress.remainingDuration /
+                            ONE_SECOND_IN_MILLISECONDS
+                    routeProgressBuilder.distanceRemaining(routeDistanceRemaining.toFloat())
                     routeProgressBuilder.durationRemaining(routeDurationRemaining)
 
-                    var routeDistance = 0f
-                    for (leg in legs) {
-                        routeDistance += leg.distance()?.toFloat() ?: 0f
-                    }
-                    val routeDistanceTraveled = routeDistance - routeDistanceRemaining
-                    routeProgressBuilder.distanceTraveled(routeDistanceTraveled)
-                    routeProgressBuilder.fractionTraveled(routeDistanceTraveled / routeDistance)
+                    val routeDistanceTraveled = activeGuidanceInfo.routeProgress.distanceTraveled
+                    routeProgressBuilder.distanceTraveled(routeDistanceTraveled.toFloat())
+                    routeProgressBuilder.fractionTraveled(
+                        activeGuidanceInfo.routeProgress.fractionTraveled.toFloat()
+                    )
 
                     routeProgressBuilder.remainingWaypoints(legs.size - (legIndex + 1))
                 }
@@ -120,7 +119,6 @@ internal class NavigatorMapper {
                         stepProgressBuilder.stepIndex(stepIndex)
                         stepProgressBuilder.step(currentStep)
 
-                        currentStep?.distance()
                         val stepGeometry = currentStep.geometry()
                         stepGeometry?.let {
                             stepProgressBuilder.stepPoints(
@@ -131,11 +129,10 @@ internal class NavigatorMapper {
                             )
                         }
 
-                        val distanceTraveled =
-                            currentStep.distance().toFloat() - remainingStepDistance
-                        stepProgressBuilder.distanceTraveled(distanceTraveled)
+                        val distanceTraveled = activeGuidanceInfo.stepProgress.distanceTraveled
+                        stepProgressBuilder.distanceTraveled(distanceTraveled.toFloat())
                         stepProgressBuilder.fractionTraveled(
-                            distanceTraveled / currentStep.distance().toFloat()
+                            activeGuidanceInfo.stepProgress.fractionTraveled.toFloat()
                         )
 
                         routeState.convertState().let {
@@ -168,17 +165,18 @@ internal class NavigatorMapper {
                             )
                         }
                     }
+
+                    val stepDistanceRemaining = activeGuidanceInfo.stepProgress.remainingDistance
+                    val stepDurationRemaining =
+                        activeGuidanceInfo.stepProgress.remainingDuration /
+                            ONE_SECOND_IN_MILLISECONDS
+
+                    stepProgressBuilder.distanceRemaining(stepDistanceRemaining.toFloat())
+                    stepProgressBuilder.durationRemaining(stepDurationRemaining)
                 }
             }
 
-            stepProgressBuilder.distanceRemaining(remainingStepDistance)
-            stepProgressBuilder.durationRemaining(
-                remainingStepDuration / ONE_SECOND_IN_MILLISECONDS
-            )
-
             legProgressBuilder.currentStepProgress(stepProgressBuilder.build())
-            legProgressBuilder.distanceRemaining(remainingLegDistance)
-            legProgressBuilder.durationRemaining(remainingLegDuration / ONE_SECOND_IN_MILLISECONDS)
 
             routeProgressBuilder.currentLegProgress(legProgressBuilder.build())
 
@@ -187,9 +185,7 @@ internal class NavigatorMapper {
 
             routeProgressBuilder.voiceInstructions(voiceInstruction?.mapToDirectionsApi())
 
-            routeProgressBuilder.upcomingRouteAlerts(
-                upcomingRouteAlerts.toUpcomingRouteAlerts()
-            )
+            routeProgressBuilder.upcomingRouteAlerts(upcomingRouteAlerts.toUpcomingRouteAlerts())
 
             return routeProgressBuilder.build()
         }
@@ -361,7 +357,6 @@ internal class NavigatorMapper {
         private const val ONE_INDEX = 1
         private const val ONE_SECOND_IN_MILLISECONDS = 1000.0
         private const val FIRST_BANNER_INSTRUCTION = 0
-        private const val TWO_LEGS: Short = 2
     }
 
     private fun RouteAlertTunnelInfo?.toTunnelInfo() = ifNonNull(

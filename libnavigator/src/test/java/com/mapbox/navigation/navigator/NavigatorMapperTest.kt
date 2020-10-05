@@ -424,10 +424,18 @@ class NavigatorMapperTest {
     private val navigationStatus: NavigationStatus = mockk {
         every { stepIndex } returns 0
         every { legIndex } returns 0
-        every { remainingLegDistance } returns 80.0f
-        every { remainingLegDuration } returns 10000
-        every { remainingStepDistance } returns 15.0f
-        every { remainingStepDuration } returns 300
+        every { activeGuidanceInfo?.routeProgress?.remainingDistance } returns 80.0
+        every { activeGuidanceInfo?.routeProgress?.remainingDuration } returns 10000
+        every { activeGuidanceInfo?.routeProgress?.distanceTraveled } returns 10.0
+        every { activeGuidanceInfo?.routeProgress?.fractionTraveled } returns 1.0
+        every { activeGuidanceInfo?.legProgress?.remainingDistance } returns 80.0
+        every { activeGuidanceInfo?.legProgress?.remainingDuration } returns 10000
+        every { activeGuidanceInfo?.legProgress?.distanceTraveled } returns 10.0
+        every { activeGuidanceInfo?.legProgress?.fractionTraveled } returns 1.0
+        every { activeGuidanceInfo?.stepProgress?.remainingDistance } returns 15.0
+        every { activeGuidanceInfo?.stepProgress?.remainingDuration } returns 300
+        every { activeGuidanceInfo?.stepProgress?.distanceTraveled } returns 10.0
+        every { activeGuidanceInfo?.stepProgress?.fractionTraveled } returns 50.0
         every { routeState } returns RouteState.TRACKING
         every { bannerInstruction } returns null
         every { voiceInstruction } returns null
