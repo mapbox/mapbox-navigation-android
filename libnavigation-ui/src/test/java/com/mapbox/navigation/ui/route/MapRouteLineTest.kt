@@ -11,8 +11,10 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
+import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.ui.R
@@ -31,6 +33,7 @@ import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -1115,6 +1118,18 @@ class MapRouteLineTest {
 
     @Test
     fun updateVanishingPoint() {
+        val expectedRouteLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
+        val expectedRouteTrafficLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 86.0, 168.0, 251.0, 1.0], " +
+            "0.150941, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.1905395, [\"rgba\", 86.0, 168.0, " +
+            "251.0, 1.0], 0.26964808, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.27944908, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.33272266, [\"rgba\", 86.0, 168.0, 251.0, " +
+            "1.0], 0.39298487, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.48991048, [\"rgba\", " +
+            "255.0, 77.0, 77.0, 1.0], 0.504132, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.8017851, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 1.0000086, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         every { style.layers } returns listOf(primaryRouteLayer)
         every { style.isFullyLoaded } returnsMany listOf(
             false,
@@ -1136,6 +1151,9 @@ class MapRouteLineTest {
         every {
             style.getLayer("mapbox-navigation-route-traffic-layer")
         } returns primaryRouteTrafficLayer
+        val routeLineExpressionSlot = slot<PropertyValue<Expression>>()
+        val routeLineCasingExpressionSlot = slot<PropertyValue<Expression>>()
+        val routeLineTrafficExpressionSlot = slot<PropertyValue<Expression>>()
         val route = getDirectionsRoute()
         val coordinates = LineString.fromPolyline(
             route.geometry()!!,
@@ -1155,9 +1173,22 @@ class MapRouteLineTest {
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
-        verify { primaryRouteCasingLayer.setProperties(any()) }
-        verify { primaryRouteLayer.setProperties(any()) }
-        verify { primaryRouteTrafficLayer.setProperties(any()) }
+        verify { primaryRouteCasingLayer.setProperties(capture(routeLineCasingExpressionSlot)) }
+        verify { primaryRouteLayer.setProperties(capture(routeLineExpressionSlot)) }
+        verify { primaryRouteTrafficLayer.setProperties(capture(routeLineTrafficExpressionSlot)) }
+        assertEquals(
+            expectedRouteLineVanishingExpression,
+            routeLineExpressionSlot.captured.expression.toString()
+        )
+        assertEquals(
+            expectedRouteLineCasingVanishingExpression,
+            routeLineCasingExpressionSlot.captured.expression.toString()
+        )
+
+        assertEquals(
+            expectedRouteTrafficLineVanishingExpression,
+            routeLineTrafficExpressionSlot.captured.expression.toString()
+        )
     }
 
     @Test
