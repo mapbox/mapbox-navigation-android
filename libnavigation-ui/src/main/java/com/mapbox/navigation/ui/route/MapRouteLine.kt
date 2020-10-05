@@ -62,6 +62,7 @@ import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
 import java.math.BigDecimal
+import kotlin.math.abs
 
 /**
  * Responsible for the appearance of the route lines on the map. This class applies styling
@@ -934,14 +935,15 @@ internal class MapRouteLine(
                 return
             }
 
-            val distanceRemainingFromCache: Float = distanceRemainingCache[primaryRoute] ?: 0f
+            val distanceRemainingFromCache: Float = distanceRemainingCache[primaryRoute]
+                ?: primaryRoute.distance().toFloat()
             val distanceRemaining = calculatePreciseDistanceTraveledAlongLine(
                 lineString,
                 distanceRemainingFromCache,
                 point
             )
             val distanceTraveled = (routeDistance - distanceRemaining)
-            val percentTraveled = (distanceTraveled / routeDistance).toFloat()
+            val percentTraveled = abs((distanceTraveled / routeDistance)).toFloat()
 
             if (percentTraveled > MINIMUM_ROUTE_LINE_OFFSET) {
                 val expression = getExpressionAtOffset(percentTraveled)
@@ -1379,6 +1381,8 @@ internal class MapRouteLine(
                     } else {
                         runningDistance += nextSectionDistance
                     }
+                } else {
+                    lastPointIndex = currentIndex
                 }
             }
 
