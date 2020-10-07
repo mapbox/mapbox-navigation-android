@@ -2,6 +2,32 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.1.0 - October 7, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+
+#### Performance improvements
+* Improved the time to first banner instructions by updating data from navigator status right after a route is set [#3431](https://github.com/mapbox/mapbox-navigation-android/pull/3431)
+
+#### Bug fixes
+* Fixed route / isOffRoute race condition which resulted in occasional missed offroute events [#3424](https://github.com/mapbox/mapbox-navigation-android/pull/3424)
+* Fixed incorrect telemetry location timestamp format which resulted in missing feedback events [#3456](https://github.com/mapbox/mapbox-navigation-android/pull/3456)
+* Fixed order of the routes ignored when drawing [#3525](https://github.com/mapbox/mapbox-navigation-android/pull/3525)
+* Fixed annotation of `NavigationMapRoute.Builder#build` to be `@NonNull` [#3510](https://github.com/mapbox/mapbox-navigation-android/pull/3510)
+* Adjusted RTL layout handling which fixed minor issues, especially in the `InstructionView` [#3426](https://github.com/mapbox/mapbox-navigation-android/pull/3426)
+* Resolved a bug where a route casing (route line border) was not visible [#3472](https://github.com/mapbox/mapbox-navigation-android/pull/3472)
+
+#### Other changes
+* Move post user feedback out of companion [#3529](https://github.com/mapbox/mapbox-navigation-android/pull/3529)
+* Merged onboard, offboard and hybrid routers together, leaving only one modular router component [#3498](https://github.com/mapbox/mapbox-navigation-android/pull/3498)
+* Updated Mapbox Gradle plugins and contributing docs [#3370](https://github.com/mapbox/mapbox-navigation-android/pull/3370)
+* Updated return types, class annotations and docs, exposed route options updater [#3429](https://github.com/mapbox/mapbox-navigation-android/pull/3429)
+* Bumped Kotlin version to 1.4.0 and Coroutines version to 1.3.9 [#3445](https://github.com/mapbox/mapbox-navigation-android/pull/3445)
+* Fix missing destination marker regression when using the Drop-in UI [#3462](https://github.com/mapbox/mapbox-navigation-android/pull/3462)
+* Updated Nav UI day and night styles to new stable production v1 versions [#3520](https://github.com/mapbox/mapbox-navigation-android/pull/3520)
+
 ### Mapbox Navigation SDK 1.0.0-rc.8 - September 9, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
