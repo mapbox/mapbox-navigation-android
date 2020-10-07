@@ -49,6 +49,7 @@ import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
@@ -127,6 +128,7 @@ private const val MAPBOX_NOTIFICATION_ACTION_CHANNEL = "notificationActionButton
 class MapboxNavigation(
     val navigationOptions: NavigationOptions
 ) {
+
     private val accessToken: String? = navigationOptions.accessToken
     private val mainJobController: JobControl = ThreadController.getMainScopeAndRootJob()
     private val directionsSession: DirectionsSession
@@ -142,7 +144,7 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val navigatorConfig = NavigatorConfig(null, null)
+    private val navigatorConfig = NavigatorConfig(null, null, null)
 
     private var notificationChannelField: Field? = null
 
@@ -343,6 +345,7 @@ class MapboxNavigation(
         tripSession.unregisterAllBannerInstructionsObservers()
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRouteAlertsObservers()
+        tripSession.unregisterAllEHorizonObservers()
         tripSession.route = null
 
         // TODO replace this with a destroy when nav-native has a destructor
@@ -604,6 +607,38 @@ class MapboxNavigation(
     }
 
     /**
+     * Observer will be called when the EHorizon changes.
+     *
+     * Registering an EHorizonObserver activates the Electronic Horizon module.
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * @see unregisterEHorizonObserver
+     */
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        tripSession.registerEHorizonObserver(eHorizonObserver)
+    }
+
+    /**
+     * Unregisters a EHorizon observer.
+     *
+     * Unregistering all observers deactivates the module.
+     *
+     * Electronic Horizon is still **experimental**, which means that the design of the
+     * APIs has open issues which may (or may not) lead to their changes in the future.
+     * Roughly speaking, there is a chance that those declarations will be deprecated in the near
+     * future or the semantics of their behavior may change in some way that may break some code.
+     *
+     * @see registerEHorizonObserver
+     */
+    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
+        tripSession.unregisterEHorizonObserver(eHorizonObserver)
+    }
+
+    /**
      * Send user feedback about an issue or problem with the Navigation SDK.
      *
      * @param feedbackType one of [FeedbackEvent.Type]
@@ -781,6 +816,7 @@ class MapboxNavigation(
     }
 
     companion object {
+
         private const val USER_AGENT: String = "MapboxNavigationNative"
         private const val THREADS_COUNT = 2
 

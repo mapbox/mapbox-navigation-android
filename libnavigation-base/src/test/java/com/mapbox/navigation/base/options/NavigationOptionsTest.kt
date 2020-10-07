@@ -54,6 +54,7 @@ class NavigationOptionsTest : BuilderTest<NavigationOptions, NavigationOptions.B
             .navigatorPredictionMillis(1)
             .onboardRouterOptions(mockk())
             .timeFormatType(1)
+            .eHorizonOptions(mockk())
     }
 
     @Test

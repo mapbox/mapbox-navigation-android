@@ -5,6 +5,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigator.BannerInstruction
+import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.RouterResult
@@ -18,6 +19,7 @@ import com.mapbox.navigator.VoiceInstruction
 interface MapboxNativeNavigator {
 
     companion object {
+
         private const val INDEX_FIRST_LEG = 0
         private const val GRID_SIZE = 0.0025f
         private const val BUFFER_DILATION: Short = 1
@@ -213,4 +215,12 @@ interface MapboxNativeNavigator {
      * @return [VoiceInstruction] for step index you passed
      */
     fun getVoiceInstruction(index: Int): VoiceInstruction?
+
+    // EH
+
+    /**
+     *
+     * @param eHorizonObserver
+     */
+    fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?)
 }

@@ -30,6 +30,7 @@ const val DEFAULT_NAVIGATOR_PREDICTION_MILLIS = 1100L
  * @param isFromNavigationUi Boolean *true* if is called from UI, otherwise *false*
  * @param isDebugLoggingEnabled Boolean
  * @param deviceProfile [DeviceProfile] defines how navigation data should be interpretation
+ * @param eHorizonOptions [EHorizonOptions] defines configuration for the Electronic Horizon
  */
 class NavigationOptions private constructor(
     val applicationContext: Context,
@@ -41,7 +42,8 @@ class NavigationOptions private constructor(
     val onboardRouterOptions: OnboardRouterOptions,
     val isFromNavigationUi: Boolean,
     val isDebugLoggingEnabled: Boolean,
-    val deviceProfile: DeviceProfile
+    val deviceProfile: DeviceProfile,
+    val eHorizonOptions: EHorizonOptions
 ) {
 
     /**
@@ -57,6 +59,7 @@ class NavigationOptions private constructor(
         isFromNavigationUi(isFromNavigationUi)
         isDebugLoggingEnabled(isDebugLoggingEnabled)
         deviceProfile(deviceProfile)
+        eHorizonOptions(eHorizonOptions)
     }
 
     /**
@@ -78,6 +81,7 @@ class NavigationOptions private constructor(
         if (isFromNavigationUi != other.isFromNavigationUi) return false
         if (isDebugLoggingEnabled != other.isDebugLoggingEnabled) return false
         if (deviceProfile != other.deviceProfile) return false
+        if (eHorizonOptions != other.eHorizonOptions) return false
 
         return true
     }
@@ -96,6 +100,7 @@ class NavigationOptions private constructor(
         result = 31 * result + isFromNavigationUi.hashCode()
         result = 31 * result + isDebugLoggingEnabled.hashCode()
         result = 31 * result + deviceProfile.hashCode()
+        result = 31 * result + eHorizonOptions.hashCode()
         return result
     }
 
@@ -113,7 +118,8 @@ class NavigationOptions private constructor(
             "onboardRouterOptions=$onboardRouterOptions, " +
             "isFromNavigationUi=$isFromNavigationUi, " +
             "isDebugLoggingEnabled=$isDebugLoggingEnabled, " +
-            "deviceProfile=$deviceProfile" +
+            "deviceProfile=$deviceProfile, " +
+            "eHorizonOptions=$eHorizonOptions" +
             ")"
     }
 
@@ -121,6 +127,7 @@ class NavigationOptions private constructor(
      * Build a new [NavigationOptions]
      */
     class Builder(applicationContext: Context) {
+
         private val applicationContext = applicationContext.applicationContext
         private var accessToken: String? = null
         private var locationEngine: LocationEngine? = null // Default is created when built
@@ -132,6 +139,7 @@ class NavigationOptions private constructor(
         private var isFromNavigationUi: Boolean = false
         private var isDebugLoggingEnabled: Boolean = false
         private var deviceProfile: DeviceProfile = DeviceProfile.Builder().build()
+        private var eHorizonOptions: EHorizonOptions = EHorizonOptions.Builder().build()
 
         /**
          * Defines [Mapbox Access Token](https://docs.mapbox.com/help/glossary/access-token/)
@@ -188,6 +196,12 @@ class NavigationOptions private constructor(
             apply { this.isDebugLoggingEnabled = flag }
 
         /**
+         * Defines configuration for the Electronic Horizon
+         */
+        fun eHorizonOptions(eHorizonOptions: EHorizonOptions): Builder =
+            apply { this.eHorizonOptions = eHorizonOptions }
+
+        /**
          * Build a new instance of [NavigationOptions]
          * @return NavigationOptions
          */
@@ -203,7 +217,8 @@ class NavigationOptions private constructor(
                 onboardRouterOptions = onboardRouterOptions,
                 isFromNavigationUi = isFromNavigationUi,
                 isDebugLoggingEnabled = isDebugLoggingEnabled,
-                deviceProfile = deviceProfile
+                deviceProfile = deviceProfile,
+                eHorizonOptions = eHorizonOptions
             )
         }
     }
