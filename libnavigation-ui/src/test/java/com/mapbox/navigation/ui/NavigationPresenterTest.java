@@ -6,6 +6,7 @@ import com.mapbox.navigation.ui.internal.NavigationContract;
 import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,12 +19,13 @@ public class NavigationPresenterTest {
 
     presenter.onRouteOverviewClick();
 
-    verify(view).updateCameraRouteOverview();
+    verify(view).updateCameraRouteGeometryOverview();
   }
 
   @Test
   public void onRouteOverviewButtonClick_recenterBtnIsShown() {
     NavigationContract.View view = mock(NavigationContract.View.class);
+    when(view.updateCameraRouteGeometryOverview()).thenReturn(true);
     NavigationPresenter presenter = new NavigationPresenter(view);
 
     presenter.onRouteOverviewClick();
@@ -32,8 +34,20 @@ public class NavigationPresenterTest {
   }
 
   @Test
+  public void onRouteOverviewButtonClick_failed_recenterBtnIsNotShown() {
+    NavigationContract.View view = mock(NavigationContract.View.class);
+    when(view.updateCameraRouteGeometryOverview()).thenReturn(false);
+    NavigationPresenter presenter = new NavigationPresenter(view);
+
+    presenter.onRouteOverviewClick();
+
+    verify(view, times(0)).showRecenterBtn();
+  }
+
+  @Test
   public void onRouteOverviewButtonClick_mapWaynameIsHidden() {
     NavigationContract.View view = mock(NavigationContract.View.class);
+    when(view.updateCameraRouteGeometryOverview()).thenReturn(true);
     NavigationPresenter presenter = new NavigationPresenter(view);
 
     presenter.onRouteOverviewClick();
@@ -151,7 +165,7 @@ public class NavigationPresenterTest {
 
     presenter.onRouteUpdate(directionsRoute);
 
-    verify(view).updateCameraRouteOverview();
+    verify(view).updateCameraRouteGeometryOverview();
   }
 
   @Test

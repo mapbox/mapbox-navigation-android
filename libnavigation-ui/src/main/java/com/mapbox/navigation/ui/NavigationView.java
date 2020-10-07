@@ -409,11 +409,18 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   }
 
   @Override
+  @Deprecated
   public void updateCameraRouteOverview() {
+    updateCameraRouteGeometryOverview();
+  }
+
+  @Override
+  public boolean updateCameraRouteGeometryOverview() {
     if (navigationMap != null) {
       int[] padding = buildRouteOverviewPadding(getContext());
-      navigationMap.showRouteOverview(padding);
+      return navigationMap.showRouteGeometryOverview(padding);
     }
+    return false;
   }
 
   @Override

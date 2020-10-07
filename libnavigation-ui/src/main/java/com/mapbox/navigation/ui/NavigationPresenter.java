@@ -52,7 +52,7 @@ class NavigationPresenter {
   void onRouteUpdate(DirectionsRoute directionsRoute) {
     view.drawRoute(directionsRoute);
     if (resumeState && view.isRecenterButtonVisible()) {
-      view.updateCameraRouteOverview();
+      view.updateCameraRouteGeometryOverview();
     } else {
       view.startCamera(directionsRoute);
     }
@@ -90,10 +90,11 @@ class NavigationPresenter {
   }
 
   void onRouteOverviewClick() {
-    view.setWayNameActive(false);
-    view.setWayNameVisibility(false);
-    view.updateCameraRouteOverview();
-    view.showRecenterBtn();
+    if (view.updateCameraRouteGeometryOverview()) {
+      view.setWayNameActive(false);
+      view.setWayNameVisibility(false);
+      view.showRecenterBtn();
+    }
   }
 
   void onFeedbackSent() {

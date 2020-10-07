@@ -712,10 +712,24 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * Also includes the given padding.
    *
    * @param padding for creating the overview camera position
+   * @deprecated use {@link #showRouteGeometryOverview(int[])} instead
    */
+  @Deprecated
   public void showRouteOverview(int[] padding) {
+    showRouteGeometryOverview(padding);
+  }
+
+  /**
+   * Adjusts the map camera to {@link DirectionsRoute} being traveled along.
+   * <p>
+   * Also includes the given padding.
+   *
+   * @param padding for creating the overview camera position
+   * @return true if the transition to overview succeeded, false otherwise
+   */
+  public boolean showRouteGeometryOverview(int[] padding) {
     mapPaddingAdjustor.updatePaddingWith(ZERO_MAP_PADDING);
-    mapCamera.showRouteOverview(padding);
+    return mapCamera.showRouteGeometryOverview(padding);
   }
 
   /**
