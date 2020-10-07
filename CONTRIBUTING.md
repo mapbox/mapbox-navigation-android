@@ -21,7 +21,7 @@ The Mapbox Navigation SDK for Android features several translations contributed 
 While you’re there, please consider also translating the following related projects:
 
 * [OSRM Text Instructions](https://www.transifex.com/project-osrm/osrm-text-instructions/), which the Mapbox Directions API uses to generate textual and verbal turn instructions ([instructions](https://github.com/Project-OSRM/osrm-text-instructions/blob/master/CONTRIBUTING.md#adding-or-updating-a-localization))
-* [Mapbox Navigation SDK for iOS](https://www.transifex.com/mapbox/mapbox-navigation-ios/), the analogous library for iOS applications ([instructions](https://github.com/mapbox/mapbox-navigation-ios/blob/master/CONTRIBUTING.md#adding-or-updating-a-localization))
+* [Mapbox Navigation SDK for iOS](https://www.transifex.com/mapbox/mapbox-navigation-ios/), the analogous library for iOS applications ([instructions](https://github.com/mapbox/mapbox-navigation-ios/blob/main/CONTRIBUTING.md#adding-or-updating-a-localization))
 * [Mapbox Maps SDK for Android](https://www.transifex.com/mapbox/mapbox-gl-native/), which is responsible for the map view and minor UI elements such as the Mapbox Telemetry permissions dialog
 
 Once you’ve finished translating the Android navigation SDK into a new language in Transifex, open an issue in this repository asking to pull in your localization. Or do it yourself:
