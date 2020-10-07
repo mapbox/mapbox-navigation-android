@@ -11,6 +11,7 @@ import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
 import com.mapbox.navigator.BannerInstruction
+import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.Navigator
 import com.mapbox.navigator.NavigatorConfig
@@ -286,4 +287,14 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      */
     override fun getVoiceInstruction(index: Int): VoiceInstruction? =
         navigator!!.getVoiceInstruction(index)
+
+    // EH
+
+    /**
+     *
+     * @param eHorizonObserver
+     */
+    override fun setElectronicHorizonObserver(eHorizonObserver: ElectronicHorizonObserver?) {
+        navigator!!.setElectronicHorizonObserver(eHorizonObserver)
+    }
 }

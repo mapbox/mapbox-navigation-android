@@ -49,4 +49,8 @@ internal interface TripSession {
     fun registerRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver)
     fun unregisterRouteAlertsObserver(routeAlertsObserver: RouteAlertsObserver)
     fun unregisterAllRouteAlertsObservers()
+
+    fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
+    fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)
+    fun unregisterAllEHorizonObservers()
 }

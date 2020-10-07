@@ -38,6 +38,8 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.EHorizon
+import com.mapbox.navigation.base.trip.model.EHorizonPosition
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -47,6 +49,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
+import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -298,6 +301,17 @@ class SimpleMapboxNavigationKt :
         }
     }
 
+    private val eHorizonObserver = object : EHorizonObserver {
+        override fun onElectronicHorizonUpdated(horizon: EHorizon, type: String) {
+            Timber.d("DEBUG EH horizon=$horizon")
+            Timber.d("DEBUG EH type=$type")
+        }
+
+        override fun onPositionUpdated(position: EHorizonPosition) {
+            Timber.d("DEBUG EH position=$position")
+        }
+    }
+
     private val routesObserver = object : RoutesObserver {
         override fun onRoutesChanged(routes: List<DirectionsRoute>) {
             navigationMapboxMap.drawRoutes(routes)
@@ -420,6 +434,7 @@ class SimpleMapboxNavigationKt :
         }
 
         mapboxNavigation.registerRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.registerEHorizonObserver(eHorizonObserver)
         mapboxNavigation.registerRoutesObserver(routesObserver)
         mapboxNavigation.registerTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.attachFasterRouteObserver(fasterRouteObserver)
@@ -430,13 +445,14 @@ class SimpleMapboxNavigationKt :
         mapView.onStop()
 
         mapboxNavigation.unregisterRouteProgressObserver(routeProgressObserver)
+        mapboxNavigation.unregisterEHorizonObserver(eHorizonObserver)
         mapboxNavigation.unregisterRoutesObserver(routesObserver)
         mapboxNavigation.unregisterTripSessionStateObserver(tripSessionStateObserver)
         mapboxNavigation.detachFasterRouteObserver()
         stopLocationUpdates()
 
-        if (mapboxNavigation.getRoutes()
-            .isEmpty() && mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
+        if (mapboxNavigation.getRoutes().isEmpty() &&
+            mapboxNavigation.getTripSessionState() == TripSessionState.STARTED
         ) {
             // use this to kill the service and hide the notification when going into the background in the Free Drive state,
             // but also ensure to restart Free Drive when coming back from background by using the channel

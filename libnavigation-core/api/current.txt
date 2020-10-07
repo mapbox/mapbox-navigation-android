@@ -16,6 +16,7 @@ package com.mapbox.navigation.core {
     method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void registerRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
@@ -37,6 +38,7 @@ package com.mapbox.navigation.core {
     method public void toggleHistory(boolean isEnabled);
     method public void unregisterArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
+    method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void unregisterRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
@@ -506,6 +508,11 @@ package com.mapbox.navigation.core.trip.session {
 
   public interface BannerInstructionsObserver {
     method public void onNewBannerInstructions(com.mapbox.api.directions.v5.models.BannerInstructions bannerInstructions);
+  }
+
+  public interface EHorizonObserver {
+    method public void onElectronicHorizonUpdated(com.mapbox.navigation.base.trip.model.EHorizon horizon, String type);
+    method public void onPositionUpdated(com.mapbox.navigation.base.trip.model.EHorizonPosition position);
   }
 
   public interface LocationObserver {
