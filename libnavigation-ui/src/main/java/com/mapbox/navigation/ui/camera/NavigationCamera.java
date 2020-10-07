@@ -6,6 +6,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
+import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.FragmentActivity;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
@@ -92,7 +93,8 @@ public class NavigationCamera {
   private Camera camera;
 
   @NonNull
-  private RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
+  @VisibleForTesting
+  RouteProgressObserver routeProgressObserver = new RouteProgressObserver() {
     @Override
     public void onRouteProgressChanged(@NotNull RouteProgress routeProgress) {
       NavigationCamera.this.currentRouteProgress = routeProgress;
@@ -215,12 +217,34 @@ public class NavigationCamera {
    * out to an overview of the current route being traveled.
    *
    * @param padding in pixels around the bounding box of the overview (left, top, right, bottom)
+   * @deprecated use {@link #showRouteGeometryOverview(int[])} instead
    */
+  @Deprecated
   public void showRouteOverview(@NonNull int[] padding) {
+    showRouteGeometryOverview(padding);
+  }
+
+  /**
+   * This method stops the map camera from tracking the current location, and then zooms
+   * out to an overview of the current route being traveled.
+   *
+   * @param padding in pixels around the bounding box of the overview (left, top, right, bottom)
+   * @return true if the transition to overview succeeded, false otherwise
+   */
+  public boolean showRouteGeometryOverview(@NonNull int[] padding) {
     updateCameraTrackingMode(NAVIGATION_TRACKING_MODE_NONE);
+    DirectionsRoute currentRoute;
+    if (currentRouteProgress != null) {
+      currentRoute = currentRouteProgress.getRoute();
+    } else if (currentRouteInformation != null) {
+      currentRoute = currentRouteInformation.getRoute();
+    } else {
+      Timber.e("Unable to show route overview, the route is null.");
+      return false;
+    }
     RouteInformation routeInformation =
-        new RouteInformation(currentRouteProgress.getRoute(), null, null);
-    animateCameraForRouteOverview(routeInformation, padding);
+            new RouteInformation(currentRoute, null, null);
+    return animateCameraForRouteOverview(routeInformation, padding);
   }
 
   /**
@@ -448,17 +472,16 @@ public class NavigationCamera {
     }
   }
 
-  private void animateCameraForRouteOverview(@NonNull RouteInformation routeInformation, @NonNull int[] padding) {
+  private boolean animateCameraForRouteOverview(@NonNull RouteInformation routeInformation, @NonNull int[] padding) {
     List<Point> routePoints = camera.overview(routeInformation);
-    if (!routePoints.isEmpty()) {
+    if (!routePoints.isEmpty() && routePoints.size() > ONE_POINT) {
       animateMapboxMapForRouteOverview(padding, routePoints);
+      return true;
     }
+    return false;
   }
 
   private void animateMapboxMapForRouteOverview(@NonNull int[] padding, @NonNull List<Point> routePoints) {
-    if (routePoints.size() <= ONE_POINT) {
-      return;
-    }
     CameraUpdate resetUpdate = buildResetCameraUpdate();
     final CameraUpdate overviewUpdate = buildOverviewCameraUpdate(padding, routePoints);
     mapboxMap.animateCamera(resetUpdate, 150,

@@ -43,7 +43,13 @@ public interface NavigationContract {
 
     boolean isRecenterButtonVisible();
 
+    /**
+     * @deprecated use {@link #updateCameraRouteGeometryOverview()}
+     */
+    @Deprecated
     void updateCameraRouteOverview();
+
+    boolean updateCameraRouteGeometryOverview();
 
     void onFeedbackSent();
 
