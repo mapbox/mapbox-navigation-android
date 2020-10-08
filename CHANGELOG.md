@@ -2,6 +2,23 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.2.0-alpha.1 - October 9, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+
+#### Features 
+* Added incident alerts [#3640](https://github.com/mapbox/mapbox-navigation-android/pull/3640)
+
+#### Bug fixes
+* Fix replay bearing for small maneuvers [#3636](https://github.com/mapbox/mapbox-navigation-android/pull/3636)
+
+#### Other changes
+* Bump mapbox-navigation-native version to 24.0.0 [#1955](https://github.com/mapbox/mapbox-navigation-android/pull/3633)
+* Bump mapboxEvents dependency to 6.2.0 and mapboxCore dependency to 3.1.0 [#3621](https://github.com/mapbox/mapbox-navigation-android/pull/3621)
+* Bump Maps SDK to 9.6.0-alpha.1 [#3632](https://github.com/mapbox/mapbox-navigation-android/pull/3632)
+
 ### Mapbox Navigation SDK 1.1.0 - October 7, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
