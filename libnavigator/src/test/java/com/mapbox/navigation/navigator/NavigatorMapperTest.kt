@@ -4,6 +4,11 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
+import com.mapbox.navigation.base.trip.model.alert.IncidentCongestion
+import com.mapbox.navigation.base.trip.model.alert.IncidentImpact
+import com.mapbox.navigation.base.trip.model.alert.IncidentInfo
+import com.mapbox.navigation.base.trip.model.alert.IncidentType.CONSTRUCTION
 import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
@@ -18,7 +23,9 @@ import com.mapbox.navigator.NavigationStatus
 import com.mapbox.navigator.RouteAlert
 import com.mapbox.navigator.RouteAlertAdminInfo
 import com.mapbox.navigator.RouteAlertBorderCrossingInfo
+import com.mapbox.navigator.RouteAlertIncidentCongestionInfo
 import com.mapbox.navigator.RouteAlertIncidentInfo
+import com.mapbox.navigator.RouteAlertIncidentType
 import com.mapbox.navigator.RouteAlertServiceAreaInfo
 import com.mapbox.navigator.RouteAlertServiceAreaType
 import com.mapbox.navigator.RouteAlertTollCollectionInfo
@@ -32,8 +39,8 @@ import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Date
 
 class NavigatorMapperTest {
 
@@ -76,19 +83,6 @@ class NavigatorMapperTest {
 
         assertEquals(1, result.routeAlerts.size)
         assertEquals(RouteAlertType.TunnelEntrance, result.routeAlerts[0].alertType)
-    }
-
-    @Test
-    fun `unsupported alert types are ignored in the route init info`() {
-        val routeInfo = RouteInfo(
-            listOf(
-                incidentRouteAlert
-            )
-        )
-
-        val result = navigatorMapper.getRouteInitInfo(routeInfo)!!
-
-        assertEquals(0, result.routeAlerts.size)
     }
 
     @Test
@@ -393,7 +387,7 @@ class NavigatorMapperTest {
     }
 
     @Test
-    fun `unsupported alert types are ignored in the progress update`() {
+    fun `incident alert collection is parsed correctly`() {
         every { navigationStatus.upcomingRouteAlerts } returns listOf(
             incidentRouteAlert.toUpcomingRouteAlert()
         )
@@ -403,8 +397,47 @@ class NavigatorMapperTest {
             mockk(relaxed = true),
             navigationStatus
         )
+        val upcomingRouteAlert = routeProgress!!.upcomingRouteAlerts[0]
 
-        assertTrue(routeProgress!!.upcomingRouteAlerts.isEmpty())
+        assertEquals(
+            defaultDistanceToStart,
+            upcomingRouteAlert.distanceToStart,
+            .00001
+        )
+        val expected = IncidentAlert.Builder(
+            Point.fromLngLat(10.0, 20.0),
+            123.0
+        )
+            .alertGeometry(
+                RouteAlertGeometry.Builder(
+                    456.0,
+                    Point.fromLngLat(10.0, 20.0),
+                    1,
+                    Point.fromLngLat(33.0, 44.0),
+                    2
+                ).build()
+            )
+            .info(
+                IncidentInfo.Builder("some_id")
+                    .type(CONSTRUCTION)
+                    .creationTime(Date(40))
+                    .startTime(Date(60))
+                    .endTime(Date(80))
+                    .isClosed(true)
+                    .congestion(IncidentCongestion.Builder().value(4).build())
+                    .impact(IncidentImpact.LOW)
+                    .description("incident description")
+                    .subType("incident sub-type")
+                    .subTypeDescription("incident sub-type description")
+                    .alertcCodes(listOf(10, 20, 30))
+                    .build()
+            )
+            .build()
+
+        assertEquals(expected, upcomingRouteAlert.routeAlert)
+        assertEquals(expected.hashCode(), upcomingRouteAlert.routeAlert.hashCode())
+        assertEquals(expected.toString(), upcomingRouteAlert.routeAlert.toString())
+        assertEquals(expected.alertType, RouteAlertType.Incident)
     }
 
     private val directionsRoute: DirectionsRoute = mockk {
@@ -445,7 +478,23 @@ class NavigatorMapperTest {
 
     private val incidentRouteAlert = createRouteAlert(
         hasLength = true,
-        type = com.mapbox.navigator.RouteAlertType.KINCIDENT
+        type = com.mapbox.navigator.RouteAlertType.KINCIDENT,
+        incidentInfo = RouteAlertIncidentInfo(
+            "some_id",
+            RouteAlertIncidentType.KCONSTRUCTION,
+            Date(60),
+            Date(80),
+            Date(40),
+            null,
+            emptyList(),
+            true,
+            RouteAlertIncidentCongestionInfo(4, null),
+            "low",
+            "incident description",
+            "incident sub-type",
+            "incident sub-type description",
+            listOf(10, 20, 30)
+        )
     )
 
     private val tunnelEntranceRouteAlert = createRouteAlert(

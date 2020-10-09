@@ -287,6 +287,90 @@ package com.mapbox.navigation.base.trip.model.alert {
     method public com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert.Builder to(com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAdminInfo? to);
   }
 
+  public final class IncidentAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo? getInfo();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder toBuilder();
+  }
+
+  public static final class IncidentAlert.Builder {
+    ctor public IncidentAlert.Builder(com.mapbox.geojson.Point coordinate, double distance);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder alertGeometry(com.mapbox.navigation.base.trip.model.alert.RouteAlertGeometry? alertGeometry);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert build();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentAlert.Builder info(com.mapbox.navigation.base.trip.model.alert.IncidentInfo? incidentInfo);
+  }
+
+  public final class IncidentCongestion {
+    method public Integer? getValue();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion.Builder toBuilder();
+  }
+
+  public static final class IncidentCongestion.Builder {
+    ctor public IncidentCongestion.Builder();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion build();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion.Builder value(Integer? value);
+  }
+
+  public final class IncidentImpact {
+    field public static final String CRITICAL = "critical";
+    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentImpact! INSTANCE;
+    field public static final String LOW = "low";
+    field public static final String MAJOR = "major";
+    field public static final String MINOR = "minor";
+    field public static final String UNKNOWN = "unknown";
+  }
+
+  @StringDef({com.mapbox.navigation.base.trip.model.alert.IncidentImpact.UNKNOWN, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.CRITICAL, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MAJOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.MINOR, com.mapbox.navigation.base.trip.model.alert.IncidentImpact.LOW}) @kotlin.annotation.Retention(AnnotationRetention.SOURCE) public static @interface IncidentImpact.Impact {
+  }
+
+  public final class IncidentInfo {
+    method public java.util.List<java.lang.Integer>? getAlertcCodes();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? getCongestion();
+    method public java.util.Date? getCreationTime();
+    method public String? getDescription();
+    method public java.util.Date? getEndTime();
+    method public String getId();
+    method public String? getImpact();
+    method public java.util.Date? getStartTime();
+    method public String? getSubType();
+    method public String? getSubTypeDescription();
+    method public int getType();
+    method public boolean isClosed();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder toBuilder();
+  }
+
+  public static final class IncidentInfo.Builder {
+    ctor public IncidentInfo.Builder(String id);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder alertcCodes(java.util.List<java.lang.Integer>? alertcCodes);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo build();
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder congestion(com.mapbox.navigation.base.trip.model.alert.IncidentCongestion? congestion);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder creationTime(java.util.Date? creationTime);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder description(String? description);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder endTime(java.util.Date? endTime);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder impact(@com.mapbox.navigation.base.trip.model.alert.IncidentImpact.Impact String? impact);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder isClosed(boolean isClosed);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder startTime(java.util.Date? startTime);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subType(String? subType);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder subTypeDescription(String? subTypeDescription);
+    method public com.mapbox.navigation.base.trip.model.alert.IncidentInfo.Builder type(int incidentType);
+  }
+
+  public final class IncidentType {
+    field public static final int ACCIDENT = 41; // 0x29
+    field public static final int CONGESTION = 42; // 0x2a
+    field public static final int CONSTRUCTION = 43; // 0x2b
+    field public static final int DISABLED_VEHICLE = 44; // 0x2c
+    field public static final com.mapbox.navigation.base.trip.model.alert.IncidentType! INSTANCE;
+    field public static final int LANE_RESTRICTION = 45; // 0x2d
+    field public static final int MASS_TRANSIT = 46; // 0x2e
+    field public static final int MISCELLANEOUS = 47; // 0x2f
+    field public static final int OTHER_NEWS = 48; // 0x30
+    field public static final int PLANNED_EVENT = 49; // 0x31
+    field public static final int ROAD_CLOSURE = 50; // 0x32
+    field public static final int ROAD_HAZARD = 51; // 0x33
+    field public static final int UNKNOWN = 40; // 0x28
+    field public static final int WEATHER = 52; // 0x34
+  }
+
   public final class RestStopAlert extends com.mapbox.navigation.base.trip.model.alert.RouteAlert {
     method public int getRestStopType();
     method public com.mapbox.navigation.base.trip.model.alert.RestStopAlert.Builder toBuilder();
@@ -341,6 +425,7 @@ package com.mapbox.navigation.base.trip.model.alert {
   public final class RouteAlertType {
     field public static final int CountryBorderCrossing = 1; // 0x1
     field public static final com.mapbox.navigation.base.trip.model.alert.RouteAlertType! INSTANCE;
+    field public static final int Incident = 5; // 0x5
     field public static final int RestStop = 3; // 0x3
     field public static final int RestrictedArea = 4; // 0x4
     field public static final int TollCollection = 2; // 0x2
