@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraManager
+import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,11 +18,9 @@ import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.geojson.Point
-import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapLoadError
-import com.mapbox.maps.MapboxMap
+import com.mapbox.maps.*
+import com.mapbox.maps.Map
 import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
-import com.mapbox.maps.Style
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
 import com.mapbox.maps.plugin.animation.animator.*
@@ -30,6 +29,7 @@ import com.mapbox.maps.plugin.gesture.GesturePluginImpl
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.maps.plugin.style.expressions.dsl.generated.zoom
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
@@ -38,6 +38,7 @@ import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.*
+import kotlin.math.sqrt
 
 class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked {
 
@@ -97,121 +98,194 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         animationsList.adapter = adapter
     }
 
-    override fun onButtonClicked(animationType: AnimationType) {
+    fun transitionToVehicleFollowing() {
         val location = locationComponent?.lastKnownLocation
         if (location != null) {
-            when (animationType) {
-                AnimationType.Animation1 -> {
-                    val target = CameraCenterAnimator.create(
-                        Point.fromLngLat(location.longitude, location.latitude)
-                    ) {
-                        duration = 2000
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val zoom = CameraZoomAnimator.create(16.35) {
-                        startDelay = 600
-                        duration = 3000
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val bearing = CameraBearingAnimator.create(location.bearing.toDouble()) {
-                        startDelay = 1400
-                        duration = 1800
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val pitch = CameraPitchAnimator.create(40.0) {
-                        startDelay = 2300
-                        duration = 1200
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    mapCamera.registerAnimators(target, zoom, bearing, pitch)
-                    val set = AnimatorSet()
-                    set.playTogether(target, zoom, bearing, pitch)
-                    set.start()
+            transitionFromLowZoomToHighZoom(location, location.bearing.toDouble(), 16.35, 40.0)
+        }
+    }
 
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation1",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation2 -> {
-                    val target = CameraCenterAnimator.create(
-                        Point.fromLngLat(location.longitude, location.latitude)
-                    ) {
-                        duration = 1800
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val zoom = CameraZoomAnimator.create(12.35) {
-                        startDelay = 0
-                        duration = 1800
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val bearing = CameraBearingAnimator.create(0.0) {
-                        startDelay = 600
-                        duration = 1800
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    val pitch = CameraPitchAnimator.create(0.0) {
-                        startDelay = 0
-                        duration = 1200
-                        interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
-                    }
-                    mapCamera.registerAnimators(target, zoom, bearing, pitch)
-                    val set = AnimatorSet()
-                    set.playTogether(target, zoom, bearing, pitch)
-                    set.start()
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation2",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation3 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation3",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation4 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation4",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation5 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation5",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation6 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation6",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation7 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation7",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation8 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation8",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation9 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation9",
-                            Toast.LENGTH_SHORT).show()
-                }
-                AnimationType.Animation10 -> {
-                    Toast
-                        .makeText(this@CameraAnimationsActivity,
-                            "Animation10",
-                            Toast.LENGTH_SHORT).show()
-                }
+    fun transitionToRouteOverview() {
+        val location = locationComponent?.lastKnownLocation
+        if (location != null) {
+            transitionFromHighZoomToLowZoom(location, 0.0, 12.35, 0.0)
+        }
+    }
+
+    private fun transitionFromLowZoomToHighZoom(location: Location, bearing: Double, zoomLevel: Double, pitch: Double) {
+        val currentMapCamera = mapboxMap.getCameraOptions(null)
+        val currentMapCameraCenter = currentMapCamera.center
+        var screenDistanceFromMapCenterToLocation = 0.0
+        if (currentMapCameraCenter != null) {
+            val currentCenterScreenCoordinate = mapboxMap.pixelForCoordinate(Point.fromLngLat(currentMapCameraCenter.longitude(), currentMapCameraCenter.latitude()))
+            val locationScreenCoordinate = mapboxMap.pixelForCoordinate(Point.fromLngLat(location.longitude, location.latitude))
+            screenDistanceFromMapCenterToLocation = Math.hypot(currentCenterScreenCoordinate.x - locationScreenCoordinate.x, currentCenterScreenCoordinate.y - locationScreenCoordinate.y)
+        }
+
+        val currentMapCameraZoomLevel = currentMapCamera.zoom
+        var zoomLevelDelta = 0.0
+        if (currentMapCameraZoomLevel != null) {
+            zoomLevelDelta = Math.abs(zoomLevel - currentMapCameraZoomLevel)
+        }
+
+        val centerAnimationRate = 300.0
+        val centerDuration = Math.min((screenDistanceFromMapCenterToLocation / centerAnimationRate) * 1000.0, 3000.0)
+
+        val zoomAnimationRate = 2.0
+        val zoomDelay = centerDuration * 0.3
+        val zoomDuration = Math.min((zoomLevelDelta / zoomAnimationRate) * 1000.0, 3000.0)
+
+        val bearingDuration = 1800.0
+        val bearingDelay = Math.max(zoomDelay + zoomDuration - bearingDuration , 0.0)
+
+        val pitchAndAnchorDuration = 1200.0
+        val pitchAndAnchorDelay = Math.max(zoomDelay + zoomDuration - pitchAndAnchorDuration + 100 , 0.0)
+
+        val center = CameraCenterAnimator.create(
+            Point.fromLngLat(location.longitude, location.latitude)
+        ) {
+            duration = centerDuration.toLong()
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val zoom = CameraZoomAnimator.create(zoomLevel) {
+            startDelay = zoomDelay.toLong()
+            duration = zoomDuration.toLong()
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val bearing = CameraBearingAnimator.create(bearing) {
+            startDelay = bearingDelay.toLong()
+            duration = bearingDuration.toLong()
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val pitch = CameraPitchAnimator.create(pitch) {
+            startDelay = pitchAndAnchorDelay.toLong()
+            duration = pitchAndAnchorDuration.toLong()
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+
+        val startPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 0))
+        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 300))
+
+        val padding = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
+            startDelay = pitchAndAnchorDelay.toLong()
+            duration = pitchAndAnchorDuration.toLong()
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+
+        mapCamera.registerAnimators(center, zoom, bearing, pitch, padding)
+        val set = AnimatorSet()
+        set.playTogether(center, zoom, bearing, pitch, padding)
+        set.start()
+
+        Toast
+            .makeText(this@CameraAnimationsActivity,
+                "transitionFromLowZoomToHighZoom",
+                Toast.LENGTH_SHORT).show()
+    }
+
+    private fun transitionFromHighZoomToLowZoom(location: Location, bearing: Double, zoomLevel: Double, pitch: Double) {
+        val center = CameraCenterAnimator.create(
+            Point.fromLngLat(location.longitude, location.latitude)
+        ) {
+            duration = 1800
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val zoom = CameraZoomAnimator.create(zoomLevel) {
+            startDelay = 0
+            duration = 1800
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val bearing = CameraBearingAnimator.create(bearing) {
+            startDelay = 600
+            duration = 1800
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+        val pitch = CameraPitchAnimator.create(pitch) {
+            startDelay = 0
+            duration = 1200
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+
+        val startPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 300))
+        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 0))
+
+        val padding = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
+            startDelay = 0
+            duration = 1200
+            interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
+        }
+
+        mapCamera.registerAnimators(center, zoom, bearing, pitch, padding)
+        val set = AnimatorSet()
+        set.playTogether(center, zoom, bearing, pitch, padding)
+        set.start()
+
+        Toast
+            .makeText(this@CameraAnimationsActivity,
+                "transitionFromHighZoomToLowZoom",
+                Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getEdgeInsetsFromScreenCenterOffset(mapSize: Size, centerOffset: android.graphics.Point = android.graphics.Point(0,0)): EdgeInsets {
+        val mapCenterScreenCoordinate = ScreenCoordinate((mapSize.width / 2).toDouble(), (mapSize.height / 2).toDouble())
+        return EdgeInsets(mapCenterScreenCoordinate.y + centerOffset.y, mapCenterScreenCoordinate.x + centerOffset.x, mapCenterScreenCoordinate.y - centerOffset.y, mapCenterScreenCoordinate.x - centerOffset.x)
+    }
+
+    override fun onButtonClicked(animationType: AnimationType) {
+        when (animationType) {
+            AnimationType.Animation1 -> {
+                transitionToVehicleFollowing()
+            }
+            AnimationType.Animation2 -> {
+                transitionToRouteOverview()
+            }
+            AnimationType.Animation3 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation3",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation4 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation4",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation5 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation5",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation6 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation6",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation7 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation7",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation8 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation8",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation9 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation9",
+                        Toast.LENGTH_SHORT).show()
+            }
+            AnimationType.Animation10 -> {
+                Toast
+                    .makeText(this@CameraAnimationsActivity,
+                        "Animation10",
+                        Toast.LENGTH_SHORT).show()
             }
         }
     }
