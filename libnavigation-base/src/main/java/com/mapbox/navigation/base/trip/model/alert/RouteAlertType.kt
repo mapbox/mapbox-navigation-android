@@ -9,6 +9,7 @@ package com.mapbox.navigation.base.trip.model.alert
  * - [RouteAlertType.TollCollection]
  * - [RouteAlertType.RestStop]
  * - [RouteAlertType.RestrictedArea]
+ * - [RouteAlertType.Incident]
  */
 object RouteAlertType {
 
@@ -36,4 +37,9 @@ object RouteAlertType {
      * Type of the [RestrictedAreaAlert].
      */
     const val RestrictedArea = 4
+
+    /**
+     * Type of the [IncidentAlert].
+     */
+    const val Incident = 5
 }

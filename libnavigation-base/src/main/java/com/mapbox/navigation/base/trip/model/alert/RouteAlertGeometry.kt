@@ -81,7 +81,7 @@ class RouteAlertGeometry private constructor(
             "startCoordinate=$startCoordinate," +
             "startGeometryIndex=$startGeometryIndex," +
             "endCoordinate=$endCoordinate," +
-            "endGeometryIndex=$endGeometryIndex,"
+            "endGeometryIndex=$endGeometryIndex"
     }
 
     /**
