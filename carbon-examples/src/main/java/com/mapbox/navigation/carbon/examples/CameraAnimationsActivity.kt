@@ -4,7 +4,6 @@ import android.Manifest.permission
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.hardware.camera2.CameraManager
 import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
@@ -17,35 +16,42 @@ import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.api.directions.v5.DirectionsCriteria
+import com.mapbox.api.directions.v5.models.DirectionsRoute
+import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.*
-import com.mapbox.maps.Map
 import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
 import com.mapbox.maps.plugin.animation.animator.*
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.gesture.GesturePluginImpl
+import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
-import com.mapbox.maps.plugin.style.expressions.dsl.generated.zoom
+import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
+import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.*
-import kotlin.math.sqrt
 
-class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked {
+class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener {
 
     private var  locationComponent: LocationComponentPlugin? = null
     private lateinit var  mapboxMap: MapboxMap
     private lateinit var  mapCamera: CameraAnimationsPluginImpl
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var route: DirectionsRoute
+    private val pointGeometries: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
 
@@ -83,6 +89,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             override fun onStyleLoaded(style: Style) {
                 initializeLocationComponent(style)
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
+                getGesturePlugin()?.addOnMapLongClickListener(this@CameraAnimationsActivity)
             }
         }, object: OnMapLoadErrorListener {
             override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
@@ -98,14 +105,14 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         animationsList.adapter = adapter
     }
 
-    fun transitionToVehicleFollowing() {
+    private fun transitionToVehicleFollowing() {
         val location = locationComponent?.lastKnownLocation
         if (location != null) {
             transitionFromLowZoomToHighZoom(location, location.bearing.toDouble(), 16.35, 40.0)
         }
     }
 
-    fun transitionToRouteOverview() {
+    private fun transitionToRouteOverview() {
         val location = locationComponent?.lastKnownLocation
         if (location != null) {
             transitionFromHighZoomToLowZoom(location, 0.0, 12.35, 0.0)
@@ -288,6 +295,50 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                         Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun findRoute(origin: Point, destination: Point) {
+        val routeOptions: RouteOptions = RouteOptions.builder()
+            .applyDefaultParams()
+            .accessToken(getMapboxAccessTokenFromResources())
+            .coordinates(Arrays.asList(origin, destination))
+            .alternatives(false)
+            .geometries(RouteUrl.GEOMETRY_POLYLINE)
+            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .build()
+
+        mapboxNavigation.requestRoutes(
+            routeOptions,
+            routesReqCallback
+        )
+    }
+
+    private val routesReqCallback = object : RoutesRequestCallback {
+        override fun onRoutesReady(routes: List<DirectionsRoute>) {
+            route = routes[0]
+            // All the geometries are added to this list [pointGeometries]
+            pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 5))
+        }
+
+        override fun onRoutesRequestFailure(throwable: Throwable, routeOptions: RouteOptions) {
+
+        }
+
+        override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
+
+        }
+
+    }
+
+    override fun onMapLongClick(point: Point): Boolean {
+        locationComponent?.let { locComp ->
+            val currentLocation = locComp.lastKnownLocation
+            if (currentLocation != null) {
+                val originPoint = Point.fromLngLat(currentLocation.longitude, currentLocation.latitude)
+                findRoute(originPoint, point)
+            }
+        }
+        return false
     }
 
     override fun onStart() {
