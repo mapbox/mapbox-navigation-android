@@ -119,4 +119,7 @@ dependencies {
     implementation(dependenciesList.okhttp) {
         force = true
     }
+
+    // Turf
+    implementation dependenciesList.mapboxSdkTurf
 }
