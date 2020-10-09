@@ -66,12 +66,17 @@ internal class ReplayRouteInterpolator {
      * point to the next location in the route.
      */
     fun createBearingProfile(replayRouteLocations: List<ReplayRouteLocation>) {
-        var bearing = replayRouteLocations.first().bearing
+        if (replayRouteLocations.size < 2) return
         val lookAhead = 2
+        var bearing = TurfMeasurement.bearing(
+            replayRouteLocations[0].point,
+            replayRouteLocations[1].point
+        )
         replayRouteLocations.forEachIndexed { index, location ->
-            if (index + lookAhead < replayRouteLocations.lastIndex) {
+            val nextIndex = min(index + lookAhead, replayRouteLocations.lastIndex)
+            if (index < nextIndex) {
                 val fromPoint = location.point
-                val toPoint = replayRouteLocations[index + lookAhead].point
+                val toPoint = replayRouteLocations[nextIndex].point
                 bearing = TurfMeasurement.bearing(fromPoint, toPoint)
             }
             location.bearing = bearing

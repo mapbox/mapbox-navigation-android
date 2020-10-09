@@ -1,6 +1,7 @@
 package com.mapbox.navigation.core.replay.route
 
 import com.mapbox.geojson.Point
+import com.mapbox.turf.TurfMeasurement
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -254,5 +255,35 @@ class ReplayRouteInterpolatorTest {
         // To stop in 19 meters, you need to be going about 12mps
         assertEquals(19.0, speedProfile[2].distance, 0.5)
         assertEquals(12.0, speedProfile[2].speedMps, 0.5)
+    }
+
+    @Test
+    fun `should complete route with bearing in the last direction`() {
+        val coordinates = listOf(
+            ReplayRouteLocation(0, Point.fromLngLat(11.5774679, 48.163475)),
+            ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593)),
+            ReplayRouteLocation(2, Point.fromLngLat(11.5774200, 48.163711)),
+            ReplayRouteLocation(3, Point.fromLngLat(11.5774634, 48.163716)),
+            ReplayRouteLocation(4, Point.fromLngLat(11.5775070, 48.163722))
+        )
+
+        val lastBearing = TurfMeasurement.bearing(coordinates[3].point, coordinates[4].point)
+        routeInterpolator.createBearingProfile(coordinates)
+
+        assertEquals(lastBearing, coordinates.last().bearing, 0.0001)
+    }
+
+    @Test
+    fun `should create bearing for a short route`() {
+        val coordinates = listOf(
+            ReplayRouteLocation(0, Point.fromLngLat(11.5774679, 48.163475)),
+            ReplayRouteLocation(1, Point.fromLngLat(11.5774440, 48.163593))
+        )
+
+        val bearing = TurfMeasurement.bearing(coordinates[0].point, coordinates[1].point)
+        routeInterpolator.createBearingProfile(coordinates)
+
+        assertEquals(bearing, coordinates[0].bearing, 0.0001)
+        assertEquals(bearing, coordinates[1].bearing, 0.0001)
     }
 }
