@@ -22,16 +22,9 @@ public class AnimationAdapter extends RecyclerView.Adapter<AnimationAdapter.Anim
   public AnimationAdapter(Context context, OnAnimationButtonClicked callback) {
     this.inflater = LayoutInflater.from(context);
     this.callback = callback;
-    animationList.add(Animation1);
-    animationList.add(Animation2);
-    animationList.add(Animation3);
-    animationList.add(Animation4);
-    animationList.add(Animation5);
-    animationList.add(Animation6);
-    animationList.add(Animation7);
-    animationList.add(Animation8);
-    animationList.add(Animation9);
-    animationList.add(Animation10);
+    animationList.add(Following);
+    animationList.add(Overview);
+    animationList.add(Recenter);
   }
 
   @NonNull @Override public AnimationsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -1,10 +1,10 @@
 package com.mapbox.navigation.carbon.examples
 
 import android.Manifest.permission
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +20,10 @@ import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.core.constants.Constants
-import com.mapbox.geojson.*
+import com.mapbox.geojson.Feature
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.LineString
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.*
 import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
@@ -34,9 +37,7 @@ import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
 import com.mapbox.maps.plugin.style.layers.addLayerBelow
-import com.mapbox.maps.plugin.style.layers.generated.fillLayer
 import com.mapbox.maps.plugin.style.layers.generated.lineLayer
-import com.mapbox.maps.plugin.style.layers.getLayer
 import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
 import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin
 import com.mapbox.maps.plugin.style.sources.addSource
@@ -45,20 +46,17 @@ import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.route.RouteUrl
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
-import com.mapbox.turf.TurfTransformation
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.*
-import kotlin.math.ln
-import kotlin.math.sqrt
 
 enum class CameraState(val id_string: String) {
     FREE("Free"),
@@ -80,6 +78,12 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private val pointGeometries: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
+
+    private val routeProgressObserver = object : RouteProgressObserver {
+        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+
+        }
+    }
 
     private var cameraState: CameraState = CameraState.FREE
 
@@ -108,7 +112,9 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         val navigationOptions = defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
             .locationEngine(LocationEngineProvider.getBestLocationEngine(this))
             .build()
-        mapboxNavigation = MapboxNavigation(navigationOptions)
+        mapboxNavigation = MapboxNavigation(navigationOptions).apply {
+            registerRouteProgressObserver(routeProgressObserver)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -254,6 +260,24 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         val set = AnimatorSet()
         set.playTogether(center, zoom, bearing, pitch, padding)
         set.start()
+        set.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                cameraState = CameraState.FOLLOWING
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+
+            }
+
+        })
 
         Toast
             .makeText(this@CameraAnimationsActivity,
@@ -339,61 +363,18 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         return Pair(2.0, Point.fromLngLat(0.0,0.0))
     }
 
+    @SuppressLint("MissingPermission")
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
-            AnimationType.Animation1 -> {
+            AnimationType.Following -> {
                 transitionToVehicleFollowing(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
+                mapboxNavigation.startTripSession()
             }
-            AnimationType.Animation2 -> {
+            AnimationType.Overview -> {
                 transitionToRouteOverview(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
             }
-            AnimationType.Animation3 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation3",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation4 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation4",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation5 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation5",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation6 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation6",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation7 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation7",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation8 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation8",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation9 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation9",
-                        Toast.LENGTH_SHORT).show()
-            }
-            AnimationType.Animation10 -> {
-                Toast
-                    .makeText(this@CameraAnimationsActivity,
-                        "Animation10",
-                        Toast.LENGTH_SHORT).show()
+            AnimationType.Recenter -> {
+                // Recenter animation
             }
         }
     }
@@ -466,10 +447,11 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                                 )
                             )
                         }
+                        transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
                     }
                 }
             })
-            transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
+            //transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
             Timber.d("some message: -------------------------------------------------------------------------")
             Toast
                 .makeText(this@CameraAnimationsActivity,
