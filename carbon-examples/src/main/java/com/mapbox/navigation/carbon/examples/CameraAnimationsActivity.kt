@@ -36,9 +36,7 @@ import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
-import com.mapbox.maps.plugin.style.StyleContract
 import com.mapbox.maps.plugin.style.layers.addLayerBelow
-import com.mapbox.maps.plugin.style.layers.generated.LineLayer
 import com.mapbox.maps.plugin.style.layers.generated.lineLayer
 import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
 import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin
@@ -46,7 +44,6 @@ import com.mapbox.maps.plugin.style.sources.addSource
 import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
 import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
-import com.mapbox.maps.plugin.style.style
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
@@ -361,27 +358,26 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             route = routes[0]
-            // All the geometries are added to this list [pointGeometries]
+            // Clear all the existing geometries first
+            pointGeometries.clear()
             pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 5))
             mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     val lSource = style.getSource("line-source-id")
                     route.geometry()?.let { geometry ->
                         if (lSource != null) {
-                            style.removeSource("line-source-id")
-                            style.removeLayer("line-layer-id")
-                        }
-                        initData(
-                            style,
-                            FeatureCollection.fromFeature(
-                                Feature.fromGeometry(
-                                    LineString.fromPolyline(
-                                        geometry,
-                                        Constants.PRECISION_5
+                            // update line source with new set of geometries
+                            lineSource.geometry(LineString.fromLngLats(pointGeometries))
+                        } else {
+                            initData(
+                                style,
+                                FeatureCollection.fromFeature(
+                                    Feature.fromGeometry(
+                                        LineString.fromPolyline(geometry, Constants.PRECISION_5)
                                     )
                                 )
                             )
-                        )
+                        }
                     }
                 }
             })
