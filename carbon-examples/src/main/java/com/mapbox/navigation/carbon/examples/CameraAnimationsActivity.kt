@@ -5,6 +5,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.animation.PathInterpolatorCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.api.directions.v5.DirectionsCriteria
@@ -46,13 +46,15 @@ import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.route.RouteUrl
-import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.MapboxNavigation.Companion.defaultNavigationOptionsBuilder
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.core.replay.MapboxReplayer
+import com.mapbox.navigation.core.replay.ReplayLocationEngine
+import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.trip.session.LocationObserver
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -74,18 +76,49 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var route: DirectionsRoute
     private lateinit var lineSource: GeojsonSource
-    private lateinit var bboxSource: GeojsonSource
+    private val mapboxReplayer = MapboxReplayer()
     private val pointGeometries: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
 
-    private val routeProgressObserver = object : RouteProgressObserver {
-        override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-
-        }
-    }
+    private val replayProgressObserver = ReplayProgressObserver(mapboxReplayer)
 
     private var cameraState: CameraState = CameraState.FREE
+
+    private val locationObserver: LocationObserver = object : LocationObserver {
+        override fun onRawLocationChanged(rawLocation: Location) {
+            Timber.d("raw location %s", rawLocation.toString());
+        }
+
+        override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
+            if (keyPoints.isEmpty()) {
+                updateLocation(enhancedLocation)
+            } else {
+                updateLocation(keyPoints)
+            }
+        }
+
+    }
+
+    private fun updateLocation(location: Location) {
+        updateLocation(Arrays.asList(location))
+    }
+
+    private fun updateLocation(locations: List<Location>) {
+        //val location: Location = locations[0]
+        getLocationComponent()!!.forceLocationUpdate(locations, false)
+        /*mapCamera.easeTo(
+            Builder()
+                .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
+                .bearing(location.getBearing() as Double)
+                .pitch(45.0)
+                .zoom(17.0)
+                .padding(EdgeInsets(1000, 0, 0, 0))
+                .build(),
+            1500L,
+            null
+        )*/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,11 +143,15 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
         val navigationOptions = defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
-            .locationEngine(LocationEngineProvider.getBestLocationEngine(this))
+            .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigation(navigationOptions).apply {
-            registerRouteProgressObserver(routeProgressObserver)
+            registerRouteProgressObserver(replayProgressObserver)
+            registerLocationObserver(locationObserver)
         }
+
+        mapboxReplayer.pushRealLocation(this, 0.0)
+        mapboxReplayer.play()
     }
 
     @SuppressLint("MissingPermission")

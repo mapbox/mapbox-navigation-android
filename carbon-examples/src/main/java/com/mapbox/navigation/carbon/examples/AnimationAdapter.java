@@ -38,7 +38,7 @@ public class AnimationAdapter extends RecyclerView.Adapter<AnimationAdapter.Anim
   }
 
   @Override public int getItemCount() {
-    return 10;
+    return 3;
   }
 
   class AnimationsViewHolder extends RecyclerView.ViewHolder {
