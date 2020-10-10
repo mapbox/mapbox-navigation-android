@@ -19,7 +19,8 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Point
+import com.mapbox.core.constants.Constants
+import com.mapbox.geojson.*
 import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.*
 import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
@@ -32,6 +33,16 @@ import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.maps.plugin.style.layers.addLayerBelow
+import com.mapbox.maps.plugin.style.layers.generated.fillLayer
+import com.mapbox.maps.plugin.style.layers.generated.lineLayer
+import com.mapbox.maps.plugin.style.layers.getLayer
+import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
+import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin
+import com.mapbox.maps.plugin.style.sources.addSource
+import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
+import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
+import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
@@ -49,16 +60,28 @@ import java.util.*
 import kotlin.math.ln
 import kotlin.math.sqrt
 
+enum class CameraState(val id_string: String) {
+    FREE("Free"),
+    FOLLOWING("Following"),
+    OVERVIEW("Overview"),
+    TRANSITION_TO_FOLLOWING("To_following"),
+    TRANSITION_TO_OVERVIEW("To_overview")
+}
+
 class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener {
 
     private var  locationComponent: LocationComponentPlugin? = null
-    private lateinit var  mapboxMap: MapboxMap
-    private lateinit var  mapCamera: CameraAnimationsPluginImpl
+    private lateinit var mapboxMap: MapboxMap
+    private lateinit var mapCamera: CameraAnimationsPluginImpl
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var route: DirectionsRoute
+    private lateinit var lineSource: GeojsonSource
+    private lateinit var bboxSource: GeojsonSource
     private val pointGeometries: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
+
+    private var cameraState: CameraState = CameraState.FREE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,15 +133,20 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         animationsList.adapter = adapter
     }
 
-    fun transitionToVehicleFollowing() {
+    fun transitionToVehicleFollowing(points: List<Point>, edgeInsets: EdgeInsets) {
+        cameraState = CameraState.TRANSITION_TO_FOLLOWING
+        updateCameraChangeView()
         val location = locationComponent?.lastKnownLocation
         if (location != null) {
             val centerPoint = Point.fromLngLat(location.longitude, location.latitude)
-            transitionFromLowZoomToHighZoom(centerPoint, location.bearing.toDouble(), 16.35, 40.0)
+            val yOffset = mapboxMap.getSize().height / 2 - edgeInsets.bottom
+            transitionFromLowZoomToHighZoom(centerPoint, location.bearing.toDouble(), 16.35, 40.0, ScreenCoordinate(0.0, yOffset))
         }
     }
 
     fun transitionToRouteOverview(points: List<Point>, edgeInsets: EdgeInsets) {
+        cameraState = CameraState.TRANSITION_TO_OVERVIEW
+        updateCameraChangeView()
         val location = locationComponent?.lastKnownLocation
         if (location != null) {
             val mutablePoints: MutableList<Point> = points.toMutableList()
@@ -128,7 +156,26 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
-    private fun transitionFromLowZoomToHighZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double) {
+    private var timeofLastCameraChangeViewUpdate: Date = Date()
+
+    private fun updateCameraChangeView() {
+        val newDate = Date()
+        val timeSinceLastUpdate = newDate.time - timeofLastCameraChangeViewUpdate.time
+        if (timeSinceLastUpdate < 16) {
+            return
+        }
+        val currentMapCamera = mapboxMap.getCameraOptions(null)
+        cameraChangeView_state.text = "state: ${cameraState.id_string}"
+        cameraChangeView_lng.text = "lng: ${currentMapCamera.center?.longitude().toString().format(6) ?: "null"}"
+        cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().toString().format(6) ?: "null"}"
+        cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.toString().format("%.2f") ?: "null"}"
+        cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.toString().format(2) ?: "null"}"
+        cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.toString().format(2) ?: "null"}"
+        cameraChangeView_anchor.text = "anchor: t: ${currentMapCamera.padding?.top.toString().format(1) ?: "null"} l: ${currentMapCamera.padding?.left.toString().format(1) ?: "null"} b: ${currentMapCamera.padding?.bottom.toString().format(1) ?: "null"} r: ${currentMapCamera.padding?.right.toString().format(1) ?: "null"}"
+        timeofLastCameraChangeViewUpdate = newDate
+    }
+
+    private fun transitionFromLowZoomToHighZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double, anchorOffset: ScreenCoordinate) {
         val currentMapCamera = mapboxMap.getCameraOptions(null)
         val currentMapCameraCenter = currentMapCamera.center
         var screenDistanceFromMapCenterToLocation = 0.0
@@ -138,10 +185,20 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             screenDistanceFromMapCenterToLocation = Math.hypot(currentCenterScreenCoordinate.x - locationScreenCoordinate.x, currentCenterScreenCoordinate.y - locationScreenCoordinate.y)
         }
 
+        var bearingShortestRotation = bearing
+        if (currentMapCamera.bearing != null) {
+            bearingShortestRotation = currentMapCamera.bearing!! + shortestRotation(currentMapCamera.bearing!!, bearing)
+        }
+
         val currentMapCameraZoomLevel = currentMapCamera.zoom
         var zoomLevelDelta = 0.0
         if (currentMapCameraZoomLevel != null) {
             zoomLevelDelta = Math.abs(zoomLevel - currentMapCameraZoomLevel)
+        }
+
+        var currentPadding = EdgeInsets(0.0,0.0,0.0,0.0)
+        if (currentMapCamera.padding != null) {
+            currentPadding = currentMapCamera.padding!!
         }
 
         val centerAnimationRate = 300.0
@@ -167,7 +224,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             duration = zoomDuration.toLong()
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
-        val bearing = CameraBearingAnimator.create(bearing) {
+        val bearing = CameraBearingAnimator.create(bearingShortestRotation) {
             startDelay = bearingDelay.toLong()
             duration = bearingDuration.toLong()
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
@@ -178,8 +235,8 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
 
-        val startPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 0))
-        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 300))
+        val startPadding = currentPadding
+        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), anchorOffset)
 
         val padding = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
             startDelay = pitchAndAnchorDelay.toLong()
@@ -187,7 +244,13 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
 
+        mapCamera.cancelAllAnimators()
         mapCamera.registerAnimators(center, zoom, bearing, pitch, padding)
+        mapCamera.addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Point) {
+                updateCameraChangeView()
+            }
+        })
         val set = AnimatorSet()
         set.playTogether(center, zoom, bearing, pitch, padding)
         set.start()
@@ -199,8 +262,21 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     }
 
     private fun transitionFromHighZoomToLowZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double) {
+        val currentMapCamera = mapboxMap.getCameraOptions(null)
+
+        var bearingShortestRotation = bearing
+        if (currentMapCamera.bearing != null) {
+            bearingShortestRotation = currentMapCamera.bearing!! + shortestRotation(currentMapCamera.bearing!!, bearing)
+        }
+
+        var currentPadding = EdgeInsets(0.0,0.0,0.0,0.0)
+        if (currentMapCamera.padding != null) {
+            currentPadding = currentMapCamera.padding!!
+        }
+
         val center = CameraCenterAnimator.create(center) {
-            duration = 1800
+            startDelay = 800
+            duration = 1000
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
         val zoom = CameraZoomAnimator.create(zoomLevel) {
@@ -208,19 +284,19 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             duration = 1800
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
-        val bearing = CameraBearingAnimator.create(bearing) {
+        val bearing = CameraBearingAnimator.create(bearingShortestRotation) {
             startDelay = 600
-            duration = 1800
+            duration = 1200
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
         val pitch = CameraPitchAnimator.create(pitch) {
             startDelay = 0
-            duration = 1200
+            duration = 1000
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
 
-        val startPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 300))
-        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), android.graphics.Point(0, 0))
+        val startPadding = currentPadding
+        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), ScreenCoordinate(0.0, 0.0))
 
         val padding = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
             startDelay = 0
@@ -228,7 +304,13 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             interpolator = PathInterpolatorCompat.create(0.4f, 0f, 0.4f, 1f)
         }
 
+        mapCamera.cancelAllAnimators()
         mapCamera.registerAnimators(center, zoom, bearing, pitch, padding)
+        mapCamera.addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Point) {
+                updateCameraChangeView()
+            }
+        })
         val set = AnimatorSet()
         set.playTogether(center, zoom, bearing, pitch, padding)
         set.start()
@@ -239,154 +321,31 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 Toast.LENGTH_SHORT).show()
     }
 
-    private fun getEdgeInsetsFromScreenCenterOffset(mapSize: Size, centerOffset: android.graphics.Point = android.graphics.Point(0,0)): EdgeInsets {
+    private fun shortestRotation(from: Double, to: Double): Double {
+        return (to - from + 540) % 360 - 180
+    }
+
+    private fun getEdgeInsetsFromScreenCenterOffset(mapSize: Size, centerOffset: ScreenCoordinate = ScreenCoordinate(0.0,0.0)): EdgeInsets {
         val mapCenterScreenCoordinate = ScreenCoordinate((mapSize.width / 2).toDouble(), (mapSize.height / 2).toDouble())
         return EdgeInsets(mapCenterScreenCoordinate.y + centerOffset.y, mapCenterScreenCoordinate.x + centerOffset.x, mapCenterScreenCoordinate.y - centerOffset.y, mapCenterScreenCoordinate.x - centerOffset.x)
     }
 
     private fun getZoomLevelAndCenterCoordinate(points: List<Point>, bearing: Double, pitch: Double, edgeInsets: EdgeInsets): Pair<Double, Point> {
-        val mapInsetWidth = mapboxMap.getSize().width - edgeInsets.left - edgeInsets.right
-        val mapInsetHeight = mapboxMap.getSize().height - edgeInsets.top - edgeInsets.bottom
+        val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
 
-        val widthForMinPitch = mapInsetWidth
-        val widthForMaxPitch = mapInsetHeight * 2
-        val widthDelta = widthForMaxPitch - widthForMinPitch
-        val widthWithPitchEffect = widthForMinPitch + ((pitch / 40.0) * widthDelta)
-        val heightWithPitchEffect = mapInsetHeight + (mapInsetHeight * Math.sin(pitch * Math.PI / 180.0) * 1.25)
-
-        val currentBearing = mapboxMap.getCameraOptions(null).bearing
-        val bearingDelta = shortestRotation(currentBearing ?: bearing, bearing)
-
-        val screenCoordinatesForPoints = points.map { mapboxMap.pixelForCoordinate(Point.fromLngLat(it.longitude(), it.latitude())) }
-        val centerScreenCoordinate = getCenterScreenCoordinate(screenCoordinatesForPoints)
-        val rotatedPixels = screenCoordinatesForPoints.map {rotate(it, centerScreenCoordinate, -bearingDelta)}
-
-        val screenCoordinatesBbox = getBboxFromScreenCoordinates(rotatedPixels)
-
-        var pointsFromRotatedPixels = screenCoordinatesBbox?.map { mapboxMap.coordinateForPixel(it) }
-
-        if (pointsFromRotatedPixels != null) {
-            val rotatedBbox = getBboxFromPoints(pointsFromRotatedPixels)!!
-            val zl = getCoordinateBoundsZoomLevel(rotatedBbox, Size(widthWithPitchEffect.toFloat(), heightWithPitchEffect.toFloat()))
-
-            return Pair(zl, getCenterPoint(pointsFromRotatedPixels))
+        if (cam != null && cam.zoom != null && cam.center != null) {
+            return Pair(cam.zoom!! - 0.2, cam.center!!)
         }
-
-
-//            val widthDistance = TurfMeasurement.distance(coordinatesFromScreenPointBbox[0], coordinatesFromScreenPointBbox[1]) * 1000.0
-//            val heightDistance = TurfMeasurement.distance(coordinatesFromScreenPointBbox[1], coordinatesFromScreenPointBbox[2]) * 1000.0
-//            val coordinateScreenPointsBboxSizeInMeters = Size(widthDistance.toFloat(), heightDistance.toFloat())
-//            val bboxNorth = TurfMeasurement.destination(centerCoordinateOfBbox, coordinateScreenPointsBboxSizeInMeters.height / 2.0, 0.0, TurfConstants.UNIT_METERS)
-//            val bboxSouth = TurfMeasurement.destination(centerCoordinateOfBbox, coordinateScreenPointsBboxSizeInMeters.height / 2.0, 180.0, TurfConstants.UNIT_METERS)
-//            val bboxWest = TurfMeasurement.destination(centerCoordinateOfBbox, coordinateScreenPointsBboxSizeInMeters.width / 2.0, -90.0, TurfConstants.UNIT_METERS)
-//            val bboxEast = TurfMeasurement.destination(centerCoordinateOfBbox, coordinateScreenPointsBboxSizeInMeters.width / 2.0, 90.0, TurfConstants.UNIT_METERS)
-//            val rotatedBbox = listOf(Point.fromLngLat(bboxWest.longitude(), bboxNorth.latitude()), Point.fromLngLat(bboxEast.longitude(), bboxNorth.latitude()), Point.fromLngLat(bboxEast.longitude(), bboxSouth.latitude()), Point.fromLngLat(bboxWest.longitude(), bboxSouth.latitude()))
-
-
-//        }
-
         return Pair(2.0, Point.fromLngLat(0.0,0.0))
-    }
-
-    private fun shortestRotation(from: Double, to: Double): Double {
-        return (to - from + 540) % 360 - 180
-    }
-
-    private fun rotate(pixel: ScreenCoordinate, around: ScreenCoordinate, angle: Double): ScreenCoordinate {
-        val centerPixel = around
-        val radians = angle * Math.PI / 180
-        val rx = Math.cos(radians) * (pixel.x-centerPixel.x) - Math.sin(radians) * (pixel.y-centerPixel.y) + centerPixel.x
-        val ry = Math.sin(radians) * (pixel.x-centerPixel.x) + Math.cos(radians) * (pixel.y-centerPixel.y) + centerPixel.y
-        return ScreenCoordinate(rx, ry)
-    }
-
-    private fun getBboxFromScreenCoordinates(pixels: List<ScreenCoordinate>): List<ScreenCoordinate>? {
-        val ys: List<Double> = pixels.map {it.y}
-        val xs: List<Double> = pixels.map {it.x}
-        val ysMax: Double? = ys.maxOrNull()
-        val xsMin: Double? = xs.minOrNull()
-        val ysMin: Double? = ys.minOrNull()
-        val xsMax: Double? = xs.maxOrNull()
-        if (ysMax != null && xsMin != null && ysMin != null && xsMax != null) {
-            val tl = ScreenCoordinate(xsMin, ysMin)
-            val tr = ScreenCoordinate(xsMax, ysMin)
-            val br = ScreenCoordinate(xsMax, ysMax)
-            val bl = ScreenCoordinate(xsMin, ysMax)
-            return listOf(tl, tr, br, bl)
-        }
-        return null
-    }
-
-    private fun getCenterScreenCoordinate(pixels: List<ScreenCoordinate>): ScreenCoordinate {
-        val avgX = pixels.map {it.x}.reduce {acc, it -> acc + it} / pixels.size
-        val avgY = pixels.map {it.y}.reduce {acc, it -> acc + it} / pixels.size
-        return ScreenCoordinate(avgX, avgY)
-    }
-
-    private fun getBboxFromPoints(points: List<Point>): List<Point>? {
-        val lats: List<Double> = points.map {it.latitude()}
-        val lngs: List<Double> = points.map {it.longitude()}
-        val latsMax = lats.maxOrNull()
-        val lngsMin = lngs.minOrNull()
-        val latsMin = lats.minOrNull()
-        val lngsMax = lngs.maxOrNull()
-        if (latsMax != null && lngsMin != null && latsMin != null && lngsMax != null) {
-            val nw = Point.fromLngLat(lngsMin, latsMax)
-            val ne = Point.fromLngLat(lngsMax, latsMax)
-            val se = Point.fromLngLat(lngsMax, latsMin)
-            val sw = Point.fromLngLat(lngsMin, latsMin)
-            return listOf(nw, ne, se, sw)
-        }
-        return null
-    }
-
-    private fun getCenterPoint(points: List<Point>): Point {
-        var avgLng = 0.0
-        var avgLat = 0.0
-        if (points.size > 0) {
-            avgLat = points.map { it.latitude() }.reduce { acc, it -> acc + it } / points.size
-            avgLng = points.map { it.longitude() }.reduce { acc, it -> acc + it } / points.size
-        }
-        return Point.fromLngLat(avgLng, avgLat)
-    }
-
-    private fun getCoordinateBoundsZoomLevel(bounds: List<Point>, fitToSize: Size): Double {
-        val bbox = getBboxFromPoints(bounds)
-        if (bbox != null) {
-            val nw = bbox[1]
-            val se = bbox[3]
-            val latFraction = (latRad(nw.latitude()) - latRad(se.latitude())) / Math.PI
-
-            val lngDiff = nw.longitude() - se.longitude()
-            val lngFraction = ( if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
-
-            val latZoom = zoom (fitToSize.height.toDouble(), 512.0, latFraction)
-            val lngZoom = zoom (fitToSize.width.toDouble(), 512.0, lngFraction)
-
-//            return Math.min(latZoom, 21.0)
-            return Math.min(Math.min(latZoom, lngZoom), 21.0)
-        }
-
-        return 12.0
-    }
-
-    private fun latRad(lat: Double): Double {
-        val sinVal = Math.sin(lat * Math.PI / 180)
-        val radX2 = Math.log((1 + sinVal) / (1 - sinVal)) / 2
-        return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2
-    }
-
-    private fun zoom(displayDimensionSize: Double, tileSize: Double, fraction: Double): Double {
-        return Math.log(displayDimensionSize / tileSize / fraction) / ln(2.0)
     }
 
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Animation1 -> {
-                transitionToVehicleFollowing()
+                transitionToVehicleFollowing(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Animation2 -> {
-                transitionToRouteOverview(pointGeometries, EdgeInsets(20.0,20.0,20.0,20.0))
+                transitionToRouteOverview(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Animation3 -> {
                 Toast
@@ -439,6 +398,35 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
+    /**
+     * Add data to the map once the GeoJSON has been loaded
+     *
+     * @param featureCollection returned GeoJSON FeatureCollection from the Directions API route request
+     */
+    private fun initData(style: Style, featureCollection: FeatureCollection) {
+        initSources(style, featureCollection)
+        initLinePath(style)
+    }
+
+    private fun initSources(style: Style, featureCollection: FeatureCollection) {
+        lineSource = geojsonSource("line-source-id") {
+            featureCollection(featureCollection)
+        }
+        style.addSource(lineSource)
+    }
+
+    private fun initLinePath(style: Style) {
+        style.addLayerBelow(
+            lineLayer("line-layer-id", "line-source-id") {
+                lineColor("#F13C6E")
+                lineCap(LineCap.ROUND)
+                lineJoin(LineJoin.ROUND)
+                lineWidth(4.0)
+            },
+            below = "road-label"
+        )
+    }
+
     private fun findRoute(origin: Point, destination: Point) {
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultParams()
@@ -458,9 +446,30 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             route = routes[0]
-            // All the geometries are added to this list [pointGeometries]
+            // Clear all the existing geometries first
+            pointGeometries.clear()
             pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 5))
-            transitionToRouteOverview(pointGeometries, EdgeInsets(20.0,20.0,20.0,20.0))
+            mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
+                override fun onStyleLoaded(style: Style) {
+                    val lSource = style.getSource("line-source-id")
+                    route.geometry()?.let { geometry ->
+                        if (lSource != null) {
+                            // update line source with new set of geometries
+                            lineSource.geometry(LineString.fromLngLats(pointGeometries))
+                        } else {
+                            initData(
+                                style,
+                                FeatureCollection.fromFeature(
+                                    Feature.fromGeometry(
+                                        LineString.fromPolyline(geometry, Constants.PRECISION_5)
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
+            })
+            transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
             Timber.d("some message: -------------------------------------------------------------------------")
             Toast
                 .makeText(this@CameraAnimationsActivity,
