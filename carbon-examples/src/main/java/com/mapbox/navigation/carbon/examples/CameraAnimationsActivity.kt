@@ -35,6 +35,7 @@ import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
+import com.mapbox.maps.plugin.style.expressions.dsl.generated.zoom
 import com.mapbox.maps.plugin.style.layers.addLayerBelow
 import com.mapbox.maps.plugin.style.layers.generated.lineLayer
 import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
@@ -44,6 +45,7 @@ import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
 import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
@@ -54,6 +56,11 @@ import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfConstants.TurfUnitCriteria
+import com.mapbox.turf.TurfException
+import com.mapbox.turf.TurfMisc
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -67,7 +74,7 @@ enum class CameraState(val id_string: String) {
     TRANSITION_TO_OVERVIEW("To_overview")
 }
 
-class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener {
+class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener, RouteProgressObserver {
 
     private var  locationComponent: LocationComponentPlugin? = null
     private lateinit var mapboxMap: MapboxMap
@@ -77,7 +84,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private lateinit var lineSource: GeojsonSource
     private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
-    private val pointGeometries: MutableList<Point> = mutableListOf()
+    private val fullRoutePoints: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
 
@@ -129,11 +136,12 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
+        val caa = this
         val navigationOptions = defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigation(navigationOptions).apply {
-            registerRouteProgressObserver(replayProgressObserver)
+            registerRouteProgressObserver(caa)
             registerLocationObserver(locationObserver)
         }
 
@@ -210,6 +218,37 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                     updateCameraChangeView()
                 }
             }
+        }
+    }
+
+    fun updateMapFrameForFollowing(points: List<Point>, edgeInsets: EdgeInsets) {
+        val location = locationComponent?.lastKnownLocation
+        location?.let {
+            val bearing = it.bearing
+            val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
+            val zoomLevel = Math.min(zoomAndCenter.first, 17.0)
+            val center = Point.fromLngLat(it.longitude, it.latitude)
+            val yOffset = mapboxMap.getSize().height / 2 - edgeInsets.bottom
+            transitionLinear(center, bearing.toDouble(), zoomLevel, 40.0, ScreenCoordinate(0.0, yOffset)) {
+
+            }
+        }
+    }
+
+    fun updateMapFrameForOverview(points: List<Point>, edgeInsets: EdgeInsets) {
+        val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
+        val zoomLevel = Math.min(zoomAndCenter.first, 17.0)
+        val center = zoomAndCenter.second
+        transitionLinear(center, 0.0, zoomLevel, 0.0, ScreenCoordinate(0.0, 0.0)) {
+
+        }
+    }
+
+    fun updateForTrackingCameraState(remainingPointsOnStep: List<Point>, remainingPointsOnRoute: List<Point>) {
+        if (cameraState == CameraState.FOLLOWING) {
+            updateMapFrameForFollowing(remainingPointsOnStep, EdgeInsets(20.0, 20.0, 20.0, 20.0))
+        } else if (cameraState == CameraState.OVERVIEW) {
+            updateMapFrameForOverview(remainingPointsOnRoute, EdgeInsets(20.0, 20.0, 20.0, 20.0))
         }
     }
 
@@ -414,6 +453,51 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 Toast.LENGTH_SHORT).show()
     }
 
+    private fun transitionLinear(center: Point, bearing: Double, zoomLevel: Double, pitch: Double, anchorOffset: ScreenCoordinate, onComplete: () -> Unit) {
+        val currentMapCamera = mapboxMap.getCameraOptions(null)
+
+        var bearingShortestRotation = bearing
+        if (currentMapCamera.bearing != null) {
+            bearingShortestRotation = currentMapCamera.bearing!! + shortestRotation(currentMapCamera.bearing!!, bearing)
+        }
+
+        var currentPadding = EdgeInsets(0.0,0.0,0.0,0.0)
+        if (currentMapCamera.padding != null) {
+            currentPadding = currentMapCamera.padding!!
+        }
+
+        val center = CameraCenterAnimator.create(center) {
+            duration = 1000
+            interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
+        }
+        val zoom = CameraZoomAnimator.create(zoomLevel) {
+            duration = 1000
+            interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
+        }
+        val bearing = CameraBearingAnimator.create(bearingShortestRotation) {
+            duration = 1000
+            interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
+        }
+        val pitch = CameraPitchAnimator.create(pitch) {
+            duration = 1000
+            interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
+        }
+
+        val startPadding = currentPadding
+        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), anchorOffset)
+
+        val padding = CameraPaddingAnimator.create(CameraAnimator.StartValue(startPadding), endPadding) {
+            duration = 1000
+            interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
+        }
+
+        mapCamera.cancelAllAnimators()
+        mapCamera.registerAnimators(center, zoom, bearing, pitch, padding)
+        val set = AnimatorSet()
+        set.playTogether(center, zoom, bearing, pitch, padding)
+        set.start()
+    }
+
     private fun shortestRotation(from: Double, to: Double): Double {
         return (to - from + 540) % 360 - 180
     }
@@ -436,10 +520,10 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
-                transitionToVehicleFollowing(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
+                transitionToVehicleFollowing(fullRoutePoints, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Overview -> {
-                transitionToRouteOverview(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
+                transitionToRouteOverview(fullRoutePoints, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Recenter -> {
                 // Recenter animation
@@ -503,27 +587,26 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             route = routes[0]
             // Clear all the existing geometries first
-            pointGeometries.clear()
-            pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 6))
+            makeRoutePoints(routes[0])
             mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     val lSource = style.getSource("line-source-id")
                     route.geometry()?.let { geometry ->
                         if (lSource != null) {
                             // update line source with new set of geometries
-                            lineSource.geometry(LineString.fromLngLats(pointGeometries))
+                            lineSource.geometry(LineString.fromLngLats(fullRoutePoints))
                         } else {
                             initData(
                                 style,
                                 FeatureCollection.fromFeature(
                                     Feature.fromGeometry(
-                                        LineString.fromLngLats(pointGeometries)
+                                        LineString.fromLngLats(fullRoutePoints)
                                     )
                                 )
                             )
                         }
                         startSimulation(route)
-                        transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
+                        transitionToRouteOverview(fullRoutePoints, EdgeInsets(40.0,40.0,40.0,40.0))
                     }
                 }
             })
@@ -540,7 +623,14 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         override fun onRoutesRequestCanceled(routeOptions: RouteOptions) {
 
         }
+    }
 
+    private var routeStepPoints: List<List<List<Point>>> = emptyList()
+
+    private fun makeRoutePoints(route: DirectionsRoute) {
+        fullRoutePoints.clear()
+        fullRoutePoints.addAll(PolylineUtils.decode(route.geometry()!!, 6))
+        routeStepPoints = route.legs()!!.map { it.steps()!!.map { PolylineUtils.decode(it.geometry()!!, 6).toList() }}
     }
 
     override fun onMapLongClick(point: Point): Boolean {
@@ -654,5 +744,31 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 Timber.i(exception)
             }
         }
+    }
+
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        val currentStepProgress = routeProgress.currentLegProgress?.currentStepProgress
+        val currentLegIndex = routeProgress.currentLegProgress?.legIndex ?: 0
+        val currentStepIndex = currentStepProgress?.stepIndex ?: 0
+        var remainingPointsOnStep: List<Point> = emptyList()
+        var remainingPointsAfterStep: List<Point> = emptyList()
+        currentStepProgress?.let {
+            val fullStepPoints = it.stepPoints ?: emptyList()
+            var distanceTraveledOnStepKM = Math.max(it.distanceTraveled / 1000.0, 0.0)
+            val fullDistanceOfCurrentStepKM = Math.max((it.distanceRemaining + it.distanceTraveled) / 1000.0, 0.0)
+            if (distanceTraveledOnStepKM > fullDistanceOfCurrentStepKM) distanceTraveledOnStepKM = 0.0
+            try {
+                val remainingLineStringOnStep = TurfMisc.lineSliceAlong(LineString.fromLngLats(fullStepPoints), distanceTraveledOnStepKM.toDouble(), fullDistanceOfCurrentStepKM.toDouble(), TurfConstants.UNIT_KILOMETERS)
+                remainingPointsOnStep = remainingLineStringOnStep.coordinates()
+            } catch (e: TurfException) {
+                return
+            }
+        }
+        val pointsForStepsOnCurrentLeg = routeStepPoints[currentLegIndex]
+        val remainingStepsAfterStep = if (currentStepIndex < pointsForStepsOnCurrentLeg.size) pointsForStepsOnCurrentLeg.slice(currentStepIndex + 1..pointsForStepsOnCurrentLeg.size-1) else emptyList()
+        remainingPointsAfterStep = remainingStepsAfterStep.flatten()
+
+        val remainingPointsOnRoute = listOf<List<Point>>(remainingPointsOnStep, remainingPointsAfterStep).flatten()
+        updateForTrackingCameraState(remainingPointsOnStep, remainingPointsOnRoute)
     }
 }
