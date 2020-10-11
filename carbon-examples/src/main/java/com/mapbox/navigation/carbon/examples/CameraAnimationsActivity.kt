@@ -97,7 +97,6 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 updateLocation(keyPoints)
             }
         }
-
     }
 
     private fun updateLocation(location: Location) {
@@ -184,7 +183,10 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         if (location != null) {
             val centerPoint = Point.fromLngLat(location.longitude, location.latitude)
             val yOffset = mapboxMap.getSize().height / 2 - edgeInsets.bottom
-            transitionFromLowZoomToHighZoom(centerPoint, location.bearing.toDouble(), 16.35, 40.0, ScreenCoordinate(0.0, yOffset))
+            transitionFromLowZoomToHighZoom(centerPoint, location.bearing.toDouble(), 16.35, 40.0, ScreenCoordinate(0.0, yOffset)) {
+                cameraState = CameraState.FOLLOWING
+                updateCameraChangeView()
+            }
         }
     }
 
@@ -196,7 +198,18 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             val mutablePoints: MutableList<Point> = points.toMutableList()
             mutablePoints.add(Point.fromLngLat(location.longitude, location.latitude))
             val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
-            transitionFromHighZoomToLowZoom(zoomAndCenter.second, 0.0, zoomAndCenter.first, 0.0)
+            val currentMapCamera = mapboxMap.getCameraOptions(null)
+            if (currentMapCamera.zoom ?: 2.0 < zoomAndCenter.first) {
+                transitionFromLowZoomToHighZoom(zoomAndCenter.second, 0.0, zoomAndCenter.first, 0.0, ScreenCoordinate(0.0, 0.0)) {
+                    cameraState = CameraState.OVERVIEW
+                    updateCameraChangeView()
+                }
+            } else {
+                transitionFromHighZoomToLowZoom(zoomAndCenter.second, 0.0, zoomAndCenter.first, 0.0) {
+                    cameraState = CameraState.OVERVIEW
+                    updateCameraChangeView()
+                }
+            }
         }
     }
 
@@ -219,7 +232,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         timeofLastCameraChangeViewUpdate = newDate
     }
 
-    private fun transitionFromLowZoomToHighZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double, anchorOffset: ScreenCoordinate) {
+    private fun transitionFromLowZoomToHighZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double, anchorOffset: ScreenCoordinate, onComplete: () -> Unit) {
         val currentMapCamera = mapboxMap.getCameraOptions(null)
         val currentMapCameraCenter = currentMapCamera.center
         var screenDistanceFromMapCenterToLocation = 0.0
@@ -304,7 +317,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                cameraState = CameraState.FOLLOWING
+                onComplete()
             }
 
             override fun onAnimationCancel(animation: Animator?) {
@@ -323,7 +336,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 Toast.LENGTH_SHORT).show()
     }
 
-    private fun transitionFromHighZoomToLowZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double) {
+    private fun transitionFromHighZoomToLowZoom(center: Point, bearing: Double, zoomLevel: Double, pitch: Double, onComplete: () -> Unit) {
         val currentMapCamera = mapboxMap.getCameraOptions(null)
 
         var bearingShortestRotation = bearing
@@ -376,6 +389,24 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         val set = AnimatorSet()
         set.playTogether(center, zoom, bearing, pitch, padding)
         set.start()
+        set.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                onComplete()
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+
+            }
+
+        })
 
         Toast
             .makeText(this@CameraAnimationsActivity,
