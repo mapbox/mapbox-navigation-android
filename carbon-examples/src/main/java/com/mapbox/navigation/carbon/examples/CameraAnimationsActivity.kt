@@ -19,7 +19,6 @@ import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.core.constants.Constants
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
@@ -45,7 +44,6 @@ import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
 import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
-import com.mapbox.navigation.base.internal.route.RouteUrl
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
@@ -54,6 +52,7 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
+import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
@@ -76,6 +75,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var route: DirectionsRoute
     private lateinit var lineSource: GeojsonSource
+    private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
     private val pointGeometries: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
@@ -105,19 +105,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     }
 
     private fun updateLocation(locations: List<Location>) {
-        //val location: Location = locations[0]
         getLocationComponent()!!.forceLocationUpdate(locations, false)
-        /*mapCamera.easeTo(
-            Builder()
-                .center(Point.fromLngLat(location.getLongitude(), location.getLatitude()))
-                .bearing(location.getBearing() as Double)
-                .pitch(45.0)
-                .zoom(17.0)
-                .padding(EdgeInsets(1000, 0, 0, 0))
-                .build(),
-            1500L,
-            null
-        )*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,6 +139,19 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
 
         mapboxReplayer.pushRealLocation(this, 0.0)
+        mapboxReplayer.playbackSpeed(1.0)
+        mapboxReplayer.play()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startSimulation(route: DirectionsRoute) {
+        mapboxReplayer.stop()
+        mapboxReplayer.clearEvents()
+        mapboxReplayer.pushRealLocation(this, 0.0)
+        val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(route)
+        mapboxReplayer.pushEvents(replayEvents)
+        mapboxReplayer.seekTo(replayEvents.first())
+        mapboxNavigation?.startTripSession()
         mapboxReplayer.play()
     }
 
@@ -405,7 +406,6 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         when (animationType) {
             AnimationType.Following -> {
                 transitionToVehicleFollowing(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
-                mapboxNavigation.startTripSession()
             }
             AnimationType.Overview -> {
                 transitionToRouteOverview(pointGeometries, EdgeInsets(12.0,12.0,12.0,12.0))
@@ -450,9 +450,16 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             .applyDefaultParams()
             .accessToken(getMapboxAccessTokenFromResources())
             .coordinates(Arrays.asList(origin, destination))
-            .alternatives(false)
-            .geometries(RouteUrl.GEOMETRY_POLYLINE)
+            .alternatives(true)
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+            .overview(DirectionsCriteria.OVERVIEW_FULL)
+            .annotationsList(
+                listOf(
+                    DirectionsCriteria.ANNOTATION_SPEED,
+                    DirectionsCriteria.ANNOTATION_DISTANCE,
+                    DirectionsCriteria.ANNOTATION_CONGESTION
+                )
+            )
             .build()
 
         mapboxNavigation.requestRoutes(
@@ -466,7 +473,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
             route = routes[0]
             // Clear all the existing geometries first
             pointGeometries.clear()
-            pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 5))
+            pointGeometries.addAll(PolylineUtils.decode(route.geometry()!!, 6))
             mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     val lSource = style.getSource("line-source-id")
@@ -479,17 +486,16 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                                 style,
                                 FeatureCollection.fromFeature(
                                     Feature.fromGeometry(
-                                        LineString.fromPolyline(geometry, Constants.PRECISION_5)
+                                        LineString.fromLngLats(pointGeometries)
                                     )
                                 )
                             )
                         }
+                        startSimulation(route)
                         transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
                     }
                 }
             })
-            //transitionToRouteOverview(pointGeometries, EdgeInsets(40.0,40.0,40.0,40.0))
-            Timber.d("some message: -------------------------------------------------------------------------")
             Toast
                 .makeText(this@CameraAnimationsActivity,
                     "routesReqCallback",
