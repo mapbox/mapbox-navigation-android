@@ -3,6 +3,7 @@ package com.mapbox.navigation.carbon.examples
 import android.animation.Animator
 import android.animation.AnimatorSet
 import androidx.core.view.animation.PathInterpolatorCompat
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
@@ -10,12 +11,15 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.maps.*
 import com.mapbox.maps.plugin.animation.animator.*
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
+import com.mapbox.maps.plugin.gesture.OnMoveListener
+import com.mapbox.maps.plugin.gesture.GesturePluginImpl
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import kotlinx.android.synthetic.main.layout_camera_animations.*
 import java.util.*
 
 enum class NavigationMapAnimatorState(val id_string: String) {
@@ -30,7 +34,7 @@ interface NavigationMapAnimatorChangeObserver {
     fun onNavigationMapAnimatorChanged()
 }
 
-class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver {
+class NavigationMapAnimator constructor(mapView: MapView): OnMoveListener, RouteProgressObserver {
 
     var state = NavigationMapAnimatorState.FREE
         private set(value) {
@@ -49,6 +53,7 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
     private var mapboxMap = mapView.getMapboxMap()
     private var mapCamera = mapView.getCameraAnimationsPlugin()
     private var locationComponent = mapView.getPlugin(LocationComponentPlugin::class.java)
+    private var gesturePlugin = mapView.getPlugin(GesturePluginImpl::class.java)
 
     var route: DirectionsRoute? = null
         set(value) {
@@ -89,6 +94,8 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
                 notifyCameraChange()
             }
         })
+
+        gesturePlugin?.addOnMoveListener(this)
     }
 
     fun transitionToVehicleFollowing() {
@@ -455,5 +462,17 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
         val set = AnimatorSet()
         set.playTogether(centerAnimator, zoomAnimator, bearingAnimator, pitchAnimator, anchorAnimator)
         set.start()
+    }
+
+    override fun onMove(detector: MoveGestureDetector) {
+
+    }
+
+    override fun onMoveBegin(detector: MoveGestureDetector) {
+        state = NavigationMapAnimatorState.FREE
+    }
+
+    override fun onMoveEnd(detector: MoveGestureDetector) {
+
     }
 }
