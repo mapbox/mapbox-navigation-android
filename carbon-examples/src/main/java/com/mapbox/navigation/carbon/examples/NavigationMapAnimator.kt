@@ -19,7 +19,6 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
-import kotlinx.android.synthetic.main.layout_camera_animations.*
 import java.util.*
 
 enum class NavigationMapAnimatorState(val id_string: String) {
@@ -54,6 +53,8 @@ class NavigationMapAnimator constructor(mapView: MapView): OnMoveListener, Route
     private var mapCamera = mapView.getCameraAnimationsPlugin()
     private var locationComponent = mapView.getPlugin(LocationComponentPlugin::class.java)
     private var gesturePlugin = mapView.getPlugin(GesturePluginImpl::class.java)
+
+    private var stateToRecenterTo = NavigationMapAnimatorState.OVERVIEW
 
     var route: DirectionsRoute? = null
         set(value) {
@@ -103,6 +104,7 @@ class NavigationMapAnimator constructor(mapView: MapView): OnMoveListener, Route
         location?.let {
             val points = currentRouteRemainingPointsOnStep
             state = NavigationMapAnimatorState.TRANSITION_TO_FOLLOWING
+            stateToRecenterTo = NavigationMapAnimatorState.FOLLOWING
             val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, it.bearing.toDouble(), followingPitch, edgeInsets)
             val center = Point.fromLngLat(it.longitude, it.latitude)
             val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
@@ -118,6 +120,7 @@ class NavigationMapAnimator constructor(mapView: MapView): OnMoveListener, Route
         location?.let {
             val points = currentRouteRemainingPointsOnRoute
             state = NavigationMapAnimatorState.TRANSITION_TO_OVERVIEW
+            stateToRecenterTo = NavigationMapAnimatorState.OVERVIEW
             val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
             val center = zoomAndCenter.second
             val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
@@ -135,7 +138,11 @@ class NavigationMapAnimator constructor(mapView: MapView): OnMoveListener, Route
     }
 
     fun recenter() {
-
+        if (stateToRecenterTo == NavigationMapAnimatorState.OVERVIEW) {
+            transitionToRouteOverview()
+        } else if (stateToRecenterTo == NavigationMapAnimatorState.FOLLOWING) {
+            transitionToVehicleFollowing()
+        }
     }
 
     fun registerChangeListener(listener: NavigationMapAnimatorChangeObserver) {

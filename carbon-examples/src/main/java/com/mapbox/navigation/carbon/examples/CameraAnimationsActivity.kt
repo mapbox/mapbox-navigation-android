@@ -178,14 +178,12 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         when (animationType) {
             AnimationType.Following -> {
                 navigationMapAnimator.transitionToVehicleFollowing()
-//                transitionToVehicleFollowing(fullRoutePoints, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Overview -> {
                 navigationMapAnimator.transitionToRouteOverview()
-//                transitionToRouteOverview(fullRoutePoints, EdgeInsets(12.0,12.0,12.0,12.0))
             }
             AnimationType.Recenter -> {
-                // Recenter animation
+                navigationMapAnimator.recenter()
             }
         }
     }
