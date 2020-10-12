@@ -16,6 +16,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
+import java.util.*
 
 enum class NavigationMapAnimatorState(val id_string: String) {
     FREE("Free"),
@@ -23,6 +24,10 @@ enum class NavigationMapAnimatorState(val id_string: String) {
     OVERVIEW("Overview"),
     TRANSITION_TO_FOLLOWING("To_following"),
     TRANSITION_TO_OVERVIEW("To_overview")
+}
+
+interface NavigationMapAnimatorChangeObserver {
+    fun onNavigationMapAnimatorChanged()
 }
 
 class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver {
@@ -35,6 +40,11 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
     var edgeInsets = EdgeInsets(20.0, 20.0, 20.0, 20.0)
     var followingPitch = 40.0
     var maxZoom = 17.0
+
+    var currentCameraOptions: CameraOptions? = null
+        get() {
+            return mapboxMap.getCameraOptions(null)
+        }
 
     private var mapboxMap = mapView.getMapboxMap()
     private var mapCamera = mapView.getCameraAnimationsPlugin()
@@ -51,12 +61,93 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
     private var currentRouteRemainingPointsOnStep: List<Point> = emptyList()
     private var currentRouteRemainingPointsOnRoute: List<Point> = emptyList()
 
-    private fun notifyStateChange() {
+    private var observers: MutableList<NavigationMapAnimatorChangeObserver> = emptyList<NavigationMapAnimatorChangeObserver>().toMutableList()
+
+    init {
+        mapCamera.addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Point) {
+                notifyCameraChange()
+            }
+        })
+        mapCamera.addCameraZoomChangeListener(object : CameraZoomAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Double) {
+                notifyCameraChange()
+            }
+        })
+        mapCamera.addCameraBearingChangeListener(object : CameraBearingAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Double) {
+                notifyCameraChange()
+            }
+        })
+        mapCamera.addCameraPitchChangeListener(object : CameraPitchAnimator.ChangeListener {
+            override fun onChanged(updatedValue: Double) {
+                notifyCameraChange()
+            }
+        })
+        mapCamera.addCameraPaddingChangeListener(object : CameraPaddingAnimator.ChangeListener {
+            override fun onChanged(updatedValue: EdgeInsets) {
+                notifyCameraChange()
+            }
+        })
+    }
+
+    fun transitionToVehicleFollowing() {
+        val location = locationComponent?.lastKnownLocation
+        location?.let {
+            val points = currentRouteRemainingPointsOnStep
+            state = NavigationMapAnimatorState.TRANSITION_TO_FOLLOWING
+            val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, it.bearing.toDouble(), followingPitch, edgeInsets)
+            val center = Point.fromLngLat(it.longitude, it.latitude)
+            val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
+            val yOffset = mapboxMap.getSize().height / 2 - edgeInsets.bottom
+            transitionFromLowZoomToHighZoom(center, it.bearing.toDouble(), zoomLevel, followingPitch, ScreenCoordinate(0.0, yOffset)) {
+                state = NavigationMapAnimatorState.FOLLOWING
+            }
+        }
+    }
+
+    fun transitionToRouteOverview() {
+        val location = locationComponent?.lastKnownLocation
+        location?.let {
+            val points = currentRouteRemainingPointsOnRoute
+            state = NavigationMapAnimatorState.TRANSITION_TO_OVERVIEW
+            val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
+            val center = zoomAndCenter.second
+            val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
+            val currentMapCamera = mapboxMap.getCameraOptions(null)
+            if (currentMapCamera.zoom ?: 2.0 < zoomAndCenter.first) {
+                transitionFromLowZoomToHighZoom(center, 0.0, zoomLevel, 0.0, ScreenCoordinate(0.0, 0.0)) {
+                    state = NavigationMapAnimatorState.OVERVIEW
+                }
+            } else {
+                transitionFromHighZoomToLowZoom(center, 0.0, zoomLevel, 0.0, ScreenCoordinate(0.0, 0.0)) {
+                    state = NavigationMapAnimatorState.OVERVIEW
+                }
+            }
+        }
+    }
+
+    fun recenter() {
 
     }
 
-    private fun notifyCameraChange() {
+    fun registerChangeListener(listener: NavigationMapAnimatorChangeObserver) {
+        observers.add(listener)
+    }
 
+    private fun notifyStateChange() {
+        observers.forEach { it.onNavigationMapAnimatorChanged() }
+    }
+
+    private var timeofLastCameraChangeViewUpdate: Date = Date()
+
+    private fun notifyCameraChange() {
+        val newDate = Date()
+        val timeSinceLastUpdate = newDate.time - timeofLastCameraChangeViewUpdate.time
+        if (timeSinceLastUpdate < 16) {
+            return
+        }
+        observers.forEach { it.onNavigationMapAnimatorChanged() }
     }
 
     private fun makeRoutePoints() {
@@ -108,42 +199,6 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
             updateMapFrameForFollowing()
         } else if (state == NavigationMapAnimatorState.OVERVIEW) {
             updateMapFrameForOverview()
-        }
-    }
-
-    fun transitionToVehicleFollowing() {
-        val location = locationComponent?.lastKnownLocation
-        location?.let {
-            val points = currentRouteRemainingPointsOnStep
-            state = NavigationMapAnimatorState.TRANSITION_TO_FOLLOWING
-            val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, it.bearing.toDouble(), followingPitch, edgeInsets)
-            val center = Point.fromLngLat(it.longitude, it.latitude)
-            val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
-            val yOffset = mapboxMap.getSize().height / 2 - edgeInsets.bottom
-            transitionFromLowZoomToHighZoom(center, it.bearing.toDouble(), zoomLevel, followingPitch, ScreenCoordinate(0.0, yOffset)) {
-                state = NavigationMapAnimatorState.FOLLOWING
-            }
-        }
-    }
-
-    fun transitionToRouteOverview() {
-        val location = locationComponent?.lastKnownLocation
-        location?.let {
-            val points = currentRouteRemainingPointsOnRoute
-            state = NavigationMapAnimatorState.TRANSITION_TO_OVERVIEW
-            val zoomAndCenter = getZoomLevelAndCenterCoordinate(points, 0.0, 0.0, edgeInsets)
-            val center = zoomAndCenter.second
-            val zoomLevel = Math.min(zoomAndCenter.first, maxZoom)
-            val currentMapCamera = mapboxMap.getCameraOptions(null)
-            if (currentMapCamera.zoom ?: 2.0 < zoomAndCenter.first) {
-                transitionFromLowZoomToHighZoom(center, 0.0, zoomLevel, 0.0, ScreenCoordinate(0.0, 0.0)) {
-                    state = NavigationMapAnimatorState.OVERVIEW
-                }
-            } else {
-                transitionFromHighZoomToLowZoom(center, 0.0, zoomLevel, 0.0, ScreenCoordinate(0.0, 0.0)) {
-                    state = NavigationMapAnimatorState.OVERVIEW
-                }
-            }
         }
     }
 
@@ -261,11 +316,6 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
 
         mapCamera.cancelAllAnimators()
         mapCamera.registerAnimators(centerAnimator, zoomAnimator, bearingAnimator, pitchAnimator, anchorAnimator)
-        mapCamera.addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
-            override fun onChanged(updatedValue: Point) {
-                notifyCameraChange()
-            }
-        })
         val set = AnimatorSet()
         set.playTogether(centerAnimator, zoomAnimator, bearingAnimator, pitchAnimator, anchorAnimator)
         set.start()

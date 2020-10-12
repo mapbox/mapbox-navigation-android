@@ -54,7 +54,7 @@ import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.*
 
-class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener {
+class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener, NavigationMapAnimatorChangeObserver {
 
     private var locationComponent: LocationComponentPlugin? = null
     private lateinit var mapboxMap: MapboxMap
@@ -96,6 +96,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         mapboxMap = mapView.getMapboxMap()
         locationComponent = getLocationComponent()
         navigationMapAnimator = NavigationMapAnimator(mapView)
+        navigationMapAnimator.registerChangeListener(this)
 
         if (areLocationPermissionsGranted(this)) {
             requestPermissionIfNotGranted(permission.WRITE_EXTERNAL_STORAGE)
@@ -160,23 +161,16 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         animationsList.adapter = adapter
     }
 
-    private var timeofLastCameraChangeViewUpdate: Date = Date()
-
     private fun updateCameraChangeView() {
-        val newDate = Date()
-        val timeSinceLastUpdate = newDate.time - timeofLastCameraChangeViewUpdate.time
-        if (timeSinceLastUpdate < 16) {
-            return
+        navigationMapAnimator.currentCameraOptions?.let { currentMapCamera ->
+            cameraChangeView_state.text = "state: ${navigationMapAnimator.state.id_string}"
+            cameraChangeView_lng.text = "lng: ${currentMapCamera.center?.longitude().toString().format(6) ?: "null"}"
+            cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().toString().format(6) ?: "null"}"
+            cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.toString().format("%.2f") ?: "null"}"
+            cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.toString().format(2) ?: "null"}"
+            cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.toString().format(2) ?: "null"}"
+            cameraChangeView_anchor.text = "anchor: t: ${currentMapCamera.padding?.top.toString().format(1) ?: "null"} l: ${currentMapCamera.padding?.left.toString().format(1) ?: "null"} b: ${currentMapCamera.padding?.bottom.toString().format(1) ?: "null"} r: ${currentMapCamera.padding?.right.toString().format(1) ?: "null"}"
         }
-        val currentMapCamera = mapboxMap.getCameraOptions(null)
-        cameraChangeView_state.text = "state: "
-        cameraChangeView_lng.text = "lng: ${currentMapCamera.center?.longitude().toString().format(6) ?: "null"}"
-        cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().toString().format(6) ?: "null"}"
-        cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.toString().format("%.2f") ?: "null"}"
-        cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.toString().format(2) ?: "null"}"
-        cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.toString().format(2) ?: "null"}"
-        cameraChangeView_anchor.text = "anchor: t: ${currentMapCamera.padding?.top.toString().format(1) ?: "null"} l: ${currentMapCamera.padding?.left.toString().format(1) ?: "null"} b: ${currentMapCamera.padding?.bottom.toString().format(1) ?: "null"} r: ${currentMapCamera.padding?.right.toString().format(1) ?: "null"}"
-        timeofLastCameraChangeViewUpdate = newDate
     }
 
     @SuppressLint("MissingPermission")
@@ -403,5 +397,9 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                 Timber.i(exception)
             }
         }
+    }
+
+    override fun onNavigationMapAnimatorChanged() {
+        updateCameraChangeView()
     }
 }
