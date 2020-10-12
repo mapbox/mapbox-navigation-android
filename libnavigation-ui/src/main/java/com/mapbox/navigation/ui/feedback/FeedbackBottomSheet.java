@@ -236,19 +236,13 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   }
 
   private void initButtons() {
-    cancelBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        dismiss();
-      }
-    });
+    cancelBtn.setOnClickListener(view -> dismiss());
 
-    reportIssueBtn.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
+    reportIssueBtn.setOnClickListener(view -> {
+      if (feedbackBottomSheetListener != null) {
         feedbackBottomSheetListener.onFeedbackSelected(selectedFeedbackItem);
-        startTimer();
       }
+      startTimer();
     });
   }
 
@@ -382,7 +376,9 @@ public class FeedbackBottomSheet extends BottomSheetDialogFragment implements An
   private void onFeedbackSelected(@NonNull FeedbackItem feedbackItem) {
     if (feedbackFlowType == FEEDBACK_MAIN_FLOW
         || feedbackItem.getFeedbackType().equals(FeedbackEvent.POSITIONING_ISSUE)) {
-      feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
+      if (feedbackBottomSheetListener != null) {
+        feedbackBottomSheetListener.onFeedbackSelected(feedbackItem);
+      }
       startTimer();
     } else {
       launchDetailFlow(feedbackItem);
