@@ -45,6 +45,8 @@ data class ReplayEventGetStatus(
 data class ReplayEventUpdateLocation(
     @SerializedName("event_timestamp")
     override val eventTimestamp: Double,
+
+    @SerializedName("location")
     val location: ReplayEventLocation
 ) : ReplayEventBase
 
@@ -61,13 +63,28 @@ data class ReplayEventUpdateLocation(
  * @param speed Double? estimated speed of the location update in meters per second
  */
 data class ReplayEventLocation(
+    @SerializedName("lon")
     val lon: Double,
+
+    @SerializedName("lat")
     val lat: Double,
+
+    @SerializedName("provider")
     val provider: String?,
+
+    @SerializedName("time")
     val time: Double?,
+
+    @SerializedName("altitude")
     val altitude: Double?,
+
+    @SerializedName("accuracyHorizontal")
     val accuracyHorizontal: Double?,
+
+    @SerializedName("bearing")
     val bearing: Double?,
+
+    @SerializedName("speed")
     val speed: Double?
 )
 
@@ -80,5 +97,7 @@ data class ReplayEventLocation(
 data class ReplaySetRoute(
     @SerializedName("event_timestamp")
     override val eventTimestamp: Double,
+
+    @SerializedName("route")
     val route: DirectionsRoute?
 ) : ReplayEventBase
