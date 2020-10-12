@@ -1,5 +1,6 @@
 package com.mapbox.navigation.examples.history
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,7 @@ data class ReplayPath(
     val dataSource: ReplayDataSource
 )
 
+@Keep
 enum class ReplayDataSource {
     HTTP_SERVER,
     ASSETS_DIRECTORY,
