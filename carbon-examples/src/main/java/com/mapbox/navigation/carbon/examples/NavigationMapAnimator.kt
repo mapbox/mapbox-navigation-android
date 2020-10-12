@@ -41,7 +41,7 @@ class NavigationMapAnimator constructor(mapView: MapView): RouteProgressObserver
     var followingPitch = 40.0
     var maxZoom = 17.0
 
-    var currentCameraOptions: CameraOptions? = null
+    val currentCameraOptions: CameraOptions?
         get() {
             return mapboxMap.getCameraOptions(null)
         }
