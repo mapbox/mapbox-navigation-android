@@ -1,6 +1,7 @@
 package com.mapbox.navigation.carbon.examples
 
 import android.Manifest.permission
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mapbox.android.core.location.LocationEngineCallback
 import com.mapbox.android.core.location.LocationEngineResult
 import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
@@ -25,9 +27,12 @@ import com.mapbox.maps.*
 import com.mapbox.maps.MapboxMap.OnMapLoadErrorListener
 import com.mapbox.maps.Style.Companion.MAPBOX_STREETS
 import com.mapbox.maps.plugin.animation.CameraAnimationsPluginImpl
+import com.mapbox.maps.plugin.animation.animator.*
 import com.mapbox.maps.plugin.animation.getCameraAnimationsPlugin
 import com.mapbox.maps.plugin.gesture.GesturePluginImpl
 import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
+import com.mapbox.maps.plugin.gesture.OnMoveListener
+import com.mapbox.maps.plugin.gesture.getGesturePlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
@@ -40,6 +45,7 @@ import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
 import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
 import com.mapbox.navigation.carbon.examples.LocationPermissionHelper.Companion.areLocationPermissionsGranted
 import com.mapbox.navigation.core.MapboxNavigation
@@ -49,28 +55,52 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver
+import com.mapbox.navigation.ui.maps.camera.*
+import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfException
+import com.mapbox.turf.TurfMisc
 import kotlinx.android.synthetic.main.layout_camera_animations.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.*
+import kotlin.math.max
 
-class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnimationButtonClicked, OnMapLongClickListener, NavigationMapAnimatorChangeObserver {
+class CameraAnimationsActivity :
+    AppCompatActivity(),
+    PermissionsListener,
+    OnAnimationButtonClicked,
+    OnMapLongClickListener,
+    OnMoveListener,
+    RouteProgressObserver,
+    MapboxCameraStateChangeObserver {
 
     private var locationComponent: LocationComponentPlugin? = null
     private lateinit var mapboxMap: MapboxMap
-    private lateinit var navigationMapAnimator: NavigationMapAnimator
     private lateinit var mapboxNavigation: MapboxNavigation
     private lateinit var route: DirectionsRoute
     private lateinit var lineSource: GeojsonSource
+    private lateinit var navigationStateTransitionProvider: NavigationStateTransitionProvider
+    private val navigationCameraOptions = NavigationCameraOptions.Builder().build()
     private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
     private val fullRoutePoints: MutableList<Point> = mutableListOf()
     private val permissionsHelper = LocationPermissionHelper(this)
     private val locationEngineCallback: MyLocationEngineCallback = MyLocationEngineCallback(this)
+    private var previousCameraState: MapboxCameraState = MapboxCameraState.IDLE
+
+    private var cameraState = MapboxCameraState.IDLE
+        set(value) {
+            field = value
+            updateCameraChangeView()
+        }
+    private var completeRoutePoints: List<List<List<Point>>> = emptyList()
+    private var remainingPointsOnCurrentStep: List<Point> = emptyList()
+    private var remainingPointsOnRoute: List<Point> = emptyList()
 
     private val locationObserver: LocationObserver = object : LocationObserver {
         override fun onRawLocationChanged(rawLocation: Location) {
-            Timber.d("raw location %s", rawLocation.toString());
+            Timber.d("raw location %s", rawLocation.toString())
         }
 
         override fun onEnhancedLocationChanged(enhancedLocation: Location, keyPoints: List<Location>) {
@@ -83,7 +113,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     }
 
     private fun updateLocation(location: Location) {
-        updateLocation(Arrays.asList(location))
+        updateLocation(listOf(location))
     }
 
     private fun updateLocation(locations: List<Location>) {
@@ -94,9 +124,12 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_camera_animations)
         mapboxMap = mapView.getMapboxMap()
+        mapView.getGesturePlugin().addOnMoveListener(this)
         locationComponent = getLocationComponent()
-        navigationMapAnimator = NavigationMapAnimator(mapView)
-        navigationMapAnimator.registerChangeListener(this)
+        navigationStateTransitionProvider = MapboxNavigationStateTransition(
+            mapView,
+            MapboxNavigationCameraTransition(mapView)
+        )
 
         if (areLocationPermissionsGranted(this)) {
             requestPermissionIfNotGranted(permission.WRITE_EXTERNAL_STORAGE)
@@ -105,20 +138,116 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
+    override fun onRouteProgressChanged(routeProgress: RouteProgress) {
+        routeProgress.currentLegProgress?.let { currentLegProgress ->
+            currentLegProgress.currentStepProgress?.let { currentStepProgress ->
+                val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
+                // TODO: do we need max here?
+                var distanceTraveledOnStepKM = max(
+                    currentStepProgress.distanceTraveled / 1000.0, 0.0)
+                // TODO: do we need max here?
+                val fullDistanceOfCurrentStepKM = max(
+                    (currentStepProgress.distanceRemaining
+                        + currentStepProgress.distanceTraveled) / 1000.0,
+                    0.0)
+                // TODO: will distanceTraveledOnStepKM be greater than fullDistanceOfCurrentStepKM in any case?
+                if (distanceTraveledOnStepKM > fullDistanceOfCurrentStepKM) distanceTraveledOnStepKM = 0.0
+
+                try {
+                    remainingPointsOnCurrentStep = TurfMisc.lineSliceAlong(
+                        LineString.fromLngLats(currentStepFullPoints),
+                        distanceTraveledOnStepKM,
+                        fullDistanceOfCurrentStepKM, TurfConstants.UNIT_KILOMETERS
+                    ).coordinates()
+                } catch (e: TurfException) {
+                    return
+                }
+
+                val currentLegPoints = completeRoutePoints[currentLegProgress.legIndex]
+                val remainingStepsAfterCurrentStep = if (currentStepProgress.stepIndex < currentLegPoints.size) currentLegPoints.slice(currentStepProgress.stepIndex + 1 until currentLegPoints.size - 1) else emptyList()
+                val remainingPointsAfterCurrentStep = remainingStepsAfterCurrentStep.flatten()
+                remainingPointsOnRoute = listOf(remainingPointsOnCurrentStep, remainingPointsAfterCurrentStep).flatten()
+
+                updateCameraTracking()
+            }
+        }
+    }
+
+    private fun updateCameraTracking() {
+        if (cameraState == MapboxCameraState.FOLLOWING) {
+            updateMapFrameForFollowing()
+        } else if (cameraState == MapboxCameraState.ROUTE_OVERVIEW) {
+            updateMapFrameForOverview()
+        }
+    }
+
+    private fun updateMapFrameForFollowing() {
+        locationComponent?.lastKnownLocation?.let {
+            navigationStateTransitionProvider.updateMapFrameForFollowing(NavigationStateTransitionOptionsToFollowing.Builder(
+                it, remainingPointsOnCurrentStep
+            ).apply {
+                padding(navigationCameraOptions.edgeInsets)
+                maxZoom(navigationCameraOptions.maxZoom)
+                pitch(navigationCameraOptions.followingPitch)
+            }.build()).start()
+        }
+    }
+
+    private fun updateMapFrameForOverview() {
+        locationComponent?.lastKnownLocation?.let {
+            navigationStateTransitionProvider.updateMapFrameForOverview(NavigationStateTransitionOptionsToRouteOverview.Builder(
+                it, remainingPointsOnRoute
+            ).apply {
+                padding(navigationCameraOptions.edgeInsets)
+                maxZoom(navigationCameraOptions.maxZoom)
+            }.build()).start()
+        }
+    }
+
     private fun init() {
         initAnimations()
         initNavigation()
         initStyle()
+        initCameraListeners()
+    }
+
+    private fun initCameraListeners() {
+        getMapCamera().apply {
+            addCameraCenterChangeListener(object : CameraCenterAnimator.ChangeListener {
+                override fun onChanged(updatedValue: Point) {
+                    updateCameraChangeView()
+                }
+            })
+            addCameraZoomChangeListener(object : CameraZoomAnimator.ChangeListener {
+                override fun onChanged(updatedValue: Double) {
+                    updateCameraChangeView()
+                }
+            })
+            addCameraBearingChangeListener(object : CameraBearingAnimator.ChangeListener {
+                override fun onChanged(updatedValue: Double) {
+                    updateCameraChangeView()
+                }
+            })
+            addCameraPitchChangeListener(object : CameraPitchAnimator.ChangeListener {
+                override fun onChanged(updatedValue: Double) {
+                    updateCameraChangeView()
+                }
+            })
+            addCameraPaddingChangeListener(object : CameraPaddingAnimator.ChangeListener {
+                override fun onChanged(updatedValue: EdgeInsets) {
+                    updateCameraChangeView()
+                }
+            })
+        }
     }
 
     @SuppressLint("MissingPermission")
     private fun initNavigation() {
-        val caa = this
         val navigationOptions = defaultNavigationOptionsBuilder(this, getMapboxAccessTokenFromResources())
             .locationEngine(ReplayLocationEngine(mapboxReplayer))
             .build()
         mapboxNavigation = MapboxNavigation(navigationOptions).apply {
-            registerRouteProgressObserver(navigationMapAnimator)
+            registerRouteProgressObserver(this@CameraAnimationsActivity)
             registerLocationObserver(locationObserver)
         }
 
@@ -135,19 +264,19 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         val replayEvents = replayRouteMapper.mapDirectionsRouteLegAnnotation(route)
         mapboxReplayer.pushEvents(replayEvents)
         mapboxReplayer.seekTo(replayEvents.first())
-        mapboxNavigation?.startTripSession()
+        mapboxNavigation.startTripSession()
         mapboxReplayer.play()
     }
 
     @SuppressLint("MissingPermission")
     private fun initStyle() {
-        mapboxMap.loadStyleUri(MAPBOX_STREETS, object: Style.OnStyleLoaded {
+        mapboxMap.loadStyleUri(MAPBOX_STREETS, object : Style.OnStyleLoaded {
             override fun onStyleLoaded(style: Style) {
                 initializeLocationComponent(style)
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
                 getGesturePlugin()?.addOnMapLongClickListener(this@CameraAnimationsActivity)
             }
-        }, object: OnMapLoadErrorListener {
+        }, object : OnMapLoadErrorListener {
             override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
                 Timber.e("Error loading map: %s", mapViewLoadError.name)
             }
@@ -161,15 +290,16 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         animationsList.adapter = adapter
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateCameraChangeView() {
-        navigationMapAnimator.currentCameraOptions?.let { currentMapCamera ->
-            cameraChangeView_state.text = "state: ${navigationMapAnimator.state.id_string}"
-            cameraChangeView_lng.text = "lng: ${currentMapCamera.center?.longitude().toString().format(6) ?: "null"}"
-            cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().toString().format(6) ?: "null"}"
-            cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.toString().format("%.2f") ?: "null"}"
-            cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.toString().format(2) ?: "null"}"
-            cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.toString().format(2) ?: "null"}"
-            cameraChangeView_anchor.text = "anchor: t: ${currentMapCamera.padding?.top.toString().format(1) ?: "null"} l: ${currentMapCamera.padding?.left.toString().format(1) ?: "null"} b: ${currentMapCamera.padding?.bottom.toString().format(1) ?: "null"} r: ${currentMapCamera.padding?.right.toString().format(1) ?: "null"}"
+        mapboxMap.getCameraOptions(null).let { currentMapCamera ->
+            cameraChangeView_state.text = "state: $cameraState"
+            cameraChangeView_lng.text = "lng: ${currentMapCamera.center?.longitude().toString().format(6)}"
+            cameraChangeView_lat.text = "lat: ${currentMapCamera.center?.latitude().toString().format(6)}"
+            cameraChangeView_zoom.text = "zoom: ${currentMapCamera.zoom.toString().format("%.2f")}"
+            cameraChangeView_bearing.text = "bearing: ${currentMapCamera.bearing.toString().format(2)}"
+            cameraChangeView_pitch.text = "pitch: ${currentMapCamera.pitch.toString().format(2)}"
+            cameraChangeView_anchor.text = "anchor: t: ${currentMapCamera.padding?.top.toString().format(1)} l: ${currentMapCamera.padding?.left.toString().format(1)} b: ${currentMapCamera.padding?.bottom.toString().format(1)} r: ${currentMapCamera.padding?.right.toString().format(1)}"
         }
     }
 
@@ -177,15 +307,51 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     override fun onButtonClicked(animationType: AnimationType) {
         when (animationType) {
             AnimationType.Following -> {
-                navigationMapAnimator.transitionToVehicleFollowing()
+                previousCameraState = MapboxCameraState.FOLLOWING
+                requestCameraToFollowing()
             }
             AnimationType.Overview -> {
-                navigationMapAnimator.transitionToRouteOverview()
+                previousCameraState = MapboxCameraState.ROUTE_OVERVIEW
+                requestCameraToRouteOverview()
             }
             AnimationType.Recenter -> {
-                navigationMapAnimator.recenter()
+                if (previousCameraState == MapboxCameraState.FOLLOWING) {
+                    requestCameraToFollowing()
+                } else if (previousCameraState == MapboxCameraState.ROUTE_OVERVIEW) {
+                    requestCameraToRouteOverview()
+                }
             }
         }
+    }
+
+    private fun requestCameraToFollowing() {
+        if (cameraState == MapboxCameraState.TRANSITION_TO_FOLLOWING
+            || cameraState == MapboxCameraState.FOLLOWING) {
+            return
+        }
+
+        navigationStateTransitionProvider.transitionToVehicleFollowing(NavigationStateTransitionOptionsToFollowing.Builder(
+            locationComponent?.lastKnownLocation!!,
+            remainingPointsOnCurrentStep).apply {
+            pitch(navigationCameraOptions.followingPitch)
+            padding(navigationCameraOptions.edgeInsets)
+            maxZoom(navigationCameraOptions.maxZoom)
+        }.build()).apply { addListener(toFollowingTransitionAnimatorListener) }.start()
+    }
+
+    private fun requestCameraToRouteOverview() {
+        if (cameraState == MapboxCameraState.TRANSITION_TO_ROUTE_OVERVIEW
+            || cameraState == MapboxCameraState.ROUTE_OVERVIEW) {
+            return
+        }
+
+        navigationStateTransitionProvider.transitionToRouteOverview(NavigationStateTransitionOptionsToRouteOverview.Builder(
+            locationComponent?.lastKnownLocation!!,
+            remainingPointsOnRoute).apply {
+            pitch(navigationCameraOptions.followingPitch)
+            padding(navigationCameraOptions.edgeInsets)
+            maxZoom(navigationCameraOptions.maxZoom)
+        }.build()).apply { addListener(toRouteOverviewTransitionAnimatorListener) }.start()
     }
 
     /**
@@ -221,7 +387,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultParams()
             .accessToken(getMapboxAccessTokenFromResources())
-            .coordinates(Arrays.asList(origin, destination))
+            .coordinates(listOf(origin, destination))
             .alternatives(true)
             .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
             .overview(DirectionsCriteria.OVERVIEW_FULL)
@@ -243,13 +409,14 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
     private val routesReqCallback = object : RoutesRequestCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             route = routes[0]
+            processRouteInfo()
             // Clear all the existing geometries first
             fullRoutePoints.clear()
             fullRoutePoints.addAll(PolylineUtils.decode(route.geometry()!!, 6))
             mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
                 override fun onStyleLoaded(style: Style) {
                     val lSource = style.getSource("line-source-id")
-                    route.geometry()?.let { geometry ->
+                    route.geometry()?.let { _ ->
                         if (lSource != null) {
                             // update line source with new set of geometries
                             lineSource.geometry(LineString.fromLngLats(fullRoutePoints))
@@ -263,8 +430,9 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
                                 )
                             )
                         }
-                        navigationMapAnimator.route = route
-                        navigationMapAnimator.transitionToRouteOverview()
+                        previousCameraState = MapboxCameraState.ROUTE_OVERVIEW
+                        requestCameraToRouteOverview()
+
                         startSimulation(route)
                     }
                 }
@@ -307,6 +475,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
 
     override fun onDestroy() {
         super.onDestroy()
+        mapView.getGesturePlugin().removeOnMoveListener(this)
         mapView.onDestroy()
         mapboxNavigation.onDestroy()
     }
@@ -364,6 +533,7 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun requestPermissionIfNotGranted(permission: String) {
         val permissionsNeeded: MutableList<String> = ArrayList()
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -374,9 +544,19 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
+    private fun processRouteInfo() {
+        completeRoutePoints = route.legs()?.map { routeLeg ->
+            routeLeg.steps()?.map { legStep ->
+                legStep.geometry()?.let { geometry ->
+                    PolylineUtils.decode(geometry, 6).toList()
+                } ?: emptyList()
+            } ?: emptyList()
+        } ?: emptyList()
+    }
+
     companion object {
-        class MyLocationEngineCallback(activity: CameraAnimationsActivity): LocationEngineCallback<LocationEngineResult> {
-            private val activityRef = WeakReference<CameraAnimationsActivity>(activity)
+        class MyLocationEngineCallback(activity: CameraAnimationsActivity) : LocationEngineCallback<LocationEngineResult> {
+            private val activityRef = WeakReference(activity)
 
             override fun onSuccess(result: LocationEngineResult?) {
                 val activity = activityRef.get()
@@ -397,7 +577,49 @@ class CameraAnimationsActivity: AppCompatActivity(), PermissionsListener, OnAnim
         }
     }
 
-    override fun onNavigationMapAnimatorChanged() {
+    override fun onMapboxCameraStateChange(mapboxCameraState: MapboxCameraState) {
         updateCameraChangeView()
+    }
+
+    override fun onMove(detector: MoveGestureDetector) {
+        cameraState = MapboxCameraState.IDLE
+    }
+
+    override fun onMoveBegin(detector: MoveGestureDetector) {
+    }
+
+    override fun onMoveEnd(detector: MoveGestureDetector) {
+    }
+
+    private val toFollowingTransitionAnimatorListener = object : Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator?) {
+            cameraState = MapboxCameraState.TRANSITION_TO_FOLLOWING
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            cameraState = MapboxCameraState.FOLLOWING
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
+    }
+
+    private val toRouteOverviewTransitionAnimatorListener = object : Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator?) {
+            cameraState = MapboxCameraState.TRANSITION_TO_ROUTE_OVERVIEW
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            cameraState = MapboxCameraState.ROUTE_OVERVIEW
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
     }
 }
