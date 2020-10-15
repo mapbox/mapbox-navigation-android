@@ -41,10 +41,10 @@ internal class ElectronicHorizonObserverImpl(
         type: ElectronicHorizonResultType
     ) {
         val horizon = horizon.mapToEHorizon()
-        currentHorizon = horizon
         val type = type.convertResultType()
-        currentType = type
         jobController.scope.launch {
+            currentHorizon = horizon
+            currentType = type
             eHorizonObservers.forEach {
                 it.onElectronicHorizonUpdated(
                     horizon,
@@ -56,9 +56,9 @@ internal class ElectronicHorizonObserverImpl(
 
     override fun onPositionUpdated(position: GraphPosition) {
         val position = position.mapToEHorizonPosition()
-        currentPosition = position
         jobController.scope.launch {
             eHorizonObservers.forEach {
+                currentPosition = position
                 it.onPositionUpdated(position)
             }
         }
