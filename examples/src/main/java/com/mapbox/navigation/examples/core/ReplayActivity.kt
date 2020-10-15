@@ -76,7 +76,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         this.mapboxMap = mapboxMap
         mapboxMap.setStyle(Style.MAPBOX_STREETS) { style ->
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
-            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, true)
+            navigationMapboxMap = NavigationMapboxMap(mapView, mapboxMap, this, null, true, true)
             initializeFirstLocation()
 
             mapboxNavigation?.attachFasterRouteObserver(
@@ -98,7 +98,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
                     RouteOptions.builder().applyDefaultParams()
                         .accessToken(Utils.getMapboxAccessToken(applicationContext))
                         .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(true)
+                        .alternatives(false)
                         .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
                         .overview(DirectionsCriteria.OVERVIEW_FULL)
                         .annotationsList(

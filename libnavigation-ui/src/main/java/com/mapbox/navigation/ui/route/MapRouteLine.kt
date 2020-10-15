@@ -2,11 +2,12 @@ package com.mapbox.navigation.ui.route
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.util.LruCache
+import android.util.SparseArray
 import androidx.annotation.AnyRes
 import androidx.annotation.ColorInt
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteLeg
 import com.mapbox.core.constants.Constants
@@ -14,6 +15,7 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
@@ -24,19 +26,19 @@ import com.mapbox.mapboxsdk.style.layers.PropertyFactory.lineGradient
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
-import com.mapbox.navigation.ui.internal.route.RouteConstants.POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
-import com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
@@ -45,9 +47,9 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_PROPERTY_
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.internal.utils.MapUtils
-import com.mapbox.navigation.ui.internal.utils.MemoizeUtils.memoize
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
-import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateDistance
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateGranularDistances
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.generateFeatureCollection
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBelowLayer
@@ -58,11 +60,13 @@ import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
+import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
-import java.math.BigDecimal
-import kotlin.math.abs
+import kotlin.math.ln
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * Responsible for the appearance of the route lines on the map. This class applies styling
@@ -92,7 +96,7 @@ internal class MapRouteLine(
     allRoutesVisible: Boolean,
     alternativesVisible: Boolean,
     mapRouteSourceProvider: MapRouteSourceProvider,
-    vanishPoint: Float,
+    vanishPoint: Double,
     routeLineInitializedCallback: MapRouteLineInitializedCallback?
 ) {
 
@@ -123,7 +127,7 @@ internal class MapRouteLine(
         true,
         true,
         mapRouteSourceProvider,
-        0f,
+        0.0,
         routeLineInitializedCallback
     )
 
@@ -144,10 +148,14 @@ internal class MapRouteLine(
     private var alternativesVisible = true
     private var allLayersAreVisible = true
     private var primaryRoute: DirectionsRoute? = null
-    var vanishPointOffset: Float = 0f
+    var vanishPointOffset: Double = 0.0
         private set
     private var vanishingPointUpdateInhibited: Boolean = true
-    private val distanceRemainingCache = LruCache<DirectionsRoute, Float>(2)
+
+    private var primaryRoutePoints: RoutePoints? = null
+    private var primaryRouteLineGranularDistances: RouteLineGranularDistances? = null
+    private var primaryRouteRemainingDistancesIndex: Int? = null
+    private var lastIndexUpdateTimeNano: Long = 0
 
     @get:ColorInt
     private val routeLineTraveledColor: Int by lazy {
@@ -338,6 +346,8 @@ internal class MapRouteLine(
 
             this.drawnWaypointsFeatureCollection =
                 buildWayPointFeatureCollection(routeFeatureData.first().route)
+
+            initPrimaryRoutePoints(routeFeatureData.first().route)
         }
 
         val wayPointGeoJsonOptions = GeoJsonOptions().withMaxZoom(16)
@@ -402,12 +412,108 @@ internal class MapRouteLine(
         )
     }
 
-    fun updateDistanceRemainingCache(route: DirectionsRoute, distanceRemaining: Float) {
-        distanceRemainingCache.put(route, distanceRemaining)
+    private fun initPrimaryRoutePoints(route: DirectionsRoute) {
+        primaryRoutePoints = parseRoutePoints(route)
+        primaryRouteLineGranularDistances =
+            calculateRouteGranularDistances(primaryRoutePoints?.flatList ?: emptyList())
     }
 
-    fun inhibitVanishingPointUpdate(inhibitVanishingPointUpdate: Boolean) {
+    /**
+     * Decodes the route geometry into nested arrays of legs -> steps -> points.
+     *
+     * The first and last point of adjacent steps overlap and are duplicated.
+     */
+    private fun parseRoutePoints(route: DirectionsRoute): RoutePoints? {
+        val precision =
+            if (route.routeOptions()?.geometries() == DirectionsCriteria.GEOMETRY_POLYLINE) {
+                Constants.PRECISION_5
+            } else {
+                Constants.PRECISION_6
+            }
+
+        val nestedList = route.legs()?.map { routeLeg ->
+            routeLeg.steps()?.map { legStep ->
+                legStep.geometry()?.let { geometry ->
+                    PolylineUtils.decode(geometry, precision).toList()
+                } ?: return null
+            } ?: return null
+        } ?: return null
+
+        val flatList = nestedList.flatten().flatten()
+
+        return RoutePoints(nestedList, flatList)
+    }
+
+    /**
+     * Tries to find and cache the index of the upcoming [RouteLineDistancesIndex].
+     */
+    fun updateUpcomingRoutePointIndex(routeProgress: RouteProgress) {
+        ifNonNull(
+            routeProgress.currentLegProgress,
+            routeProgress.currentLegProgress?.currentStepProgress,
+            primaryRoutePoints
+        ) { currentLegProgress, currentStepProgress, completeRoutePoints ->
+            var allRemainingPoints = 0
+            /**
+             * Finds the count of remaining points in the current step.
+             *
+             * TurfMisc.lineSliceAlong places an additional point at index 0 to mark the precise
+             * cut-off point which we can safely ignore.
+             * We'll add the distance from the upcoming point to the current's puck position later.
+             */
+            allRemainingPoints += try {
+                TurfMisc.lineSliceAlong(
+                    LineString.fromLngLats(currentStepProgress.stepPoints ?: emptyList()),
+                    currentStepProgress.distanceTraveled.toDouble(),
+                    currentStepProgress.step?.distance() ?: 0.0,
+                    TurfConstants.UNIT_METERS
+                ).coordinates().drop(1).size
+            } catch (e: TurfException) {
+                0
+            }
+
+            /**
+             * Add to the count of remaining points all of the remaining points on the current leg,
+             * after the current step.
+             */
+            val currentLegSteps = completeRoutePoints.nestedList[currentLegProgress.legIndex]
+            allRemainingPoints += if (currentStepProgress.stepIndex < currentLegSteps.size) {
+                currentLegSteps.slice(
+                    currentStepProgress.stepIndex + 1 until currentLegSteps.size - 1
+                ).flatten().size
+            } else {
+                0
+            }
+
+            /**
+             * Add to the count of remaining points all of the remaining legs.
+             */
+            for (i in currentLegProgress.legIndex + 1 until completeRoutePoints.nestedList.size) {
+                allRemainingPoints += completeRoutePoints.nestedList[i].flatten().size
+            }
+
+            /**
+             * When we know the number of remaining points and the number of all points,
+             * calculate the index of the upcoming point.
+             */
+            val allPoints = completeRoutePoints.flatList.size
+            primaryRouteRemainingDistancesIndex = allPoints - allRemainingPoints - 1
+        } ?: run { primaryRouteRemainingDistancesIndex = null }
+
+        lastIndexUpdateTimeNano = System.nanoTime()
+    }
+
+    fun inhibitAutomaticVanishingPointUpdate(inhibitVanishingPointUpdate: Boolean) {
         vanishingPointUpdateInhibited = inhibitVanishingPointUpdate
+    }
+
+    fun setVanishingOffset(offset: Double) {
+        if (offset >= 0) {
+            val expression = getExpressionAtOffset(offset)
+            hideCasingLineAtOffset(offset)
+            hideRouteLineAtOffset(offset)
+            decorateRouteLine(expression)
+        }
     }
 
     /**
@@ -712,6 +818,7 @@ internal class MapRouteLine(
             val expression = getExpressionAtOffset(vanishPointOffset)
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
         }
+        initPrimaryRoutePoints(routeData.route)
     }
 
     private fun updateRouteTrafficSegments(routeData: RouteFeatureData) {
@@ -743,12 +850,17 @@ internal class MapRouteLine(
      *
      * @return the Expression that can be used in a Layer's properties.
      */
-    fun getExpressionAtOffset(distanceOffset: Float): Expression {
+    fun getExpressionAtOffset(distanceOffset: Double): Expression {
         vanishPointOffset = distanceOffset
         val filteredItems = routeLineExpressionData.filter { it.offset > distanceOffset }
         val trafficExpressions = when (filteredItems.isEmpty()) {
             true -> when (routeLineExpressionData.isEmpty()) {
-                true -> listOf(RouteLineExpressionData(distanceOffset, routeUnknownColor))
+                true -> listOf(
+                    RouteLineExpressionData(
+                        distanceOffset,
+                        Expression.color(routeUnknownColor)
+                    )
+                )
                 false -> listOf(routeLineExpressionData.last().copy(offset = distanceOffset))
             }
             false -> {
@@ -762,8 +874,8 @@ internal class MapRouteLine(
             }
         }.map {
             Expression.stop(
-                it.offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
-                Expression.color(it.segmentColor)
+                it.offset,
+                it.segmentColorExpression
             )
         }
 
@@ -775,7 +887,9 @@ internal class MapRouteLine(
     }
 
     fun clearRouteData() {
-        vanishPointOffset = 0f
+        vanishPointOffset = 0.0
+        primaryRoutePoints = null
+        primaryRouteLineGranularDistances = null
         primaryRoute = null
         directionsRoutes.clear()
         routeFeatureData.clear()
@@ -789,6 +903,15 @@ internal class MapRouteLine(
         drawnPrimaryRouteFeatureCollection = featureCollection
         primaryRouteLineSource.setGeoJson(drawnPrimaryRouteFeatureCollection)
     }
+
+    private fun calculateRouteGranularDistances(coordinates: List<Point>):
+        RouteLineGranularDistances? {
+            return if (coordinates.isNotEmpty()) {
+                calculateGranularDistances(coordinates)
+            } else {
+                null
+            }
+        }
 
     private fun setAlternativeRoutesSource(featureCollection: FeatureCollection) {
         drawnAlternativeRouteFeatureCollection = featureCollection
@@ -856,12 +979,12 @@ internal class MapRouteLine(
      *
      * @param offset the offset of the visibility in the expression
      */
-    fun hideCasingLineAtOffset(offset: Float) {
+    fun hideCasingLineAtOffset(offset: Double) {
         val expression = Expression.step(
             Expression.lineProgress(),
             Expression.color(routeLineCasingTraveledColor),
             Expression.stop(
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+                offset,
                 Expression.color(routeCasingColor)
             )
         )
@@ -876,12 +999,12 @@ internal class MapRouteLine(
      *
      * @param offset the offset of the visibility in the expression
      */
-    fun hideRouteLineAtOffset(offset: Float) {
+    fun hideRouteLineAtOffset(offset: Double) {
         val expression = Expression.step(
             Expression.lineProgress(),
             Expression.color(routeLineTraveledColor),
             Expression.stop(
-                offset.toBigDecimal().setScale(9, BigDecimal.ROUND_DOWN),
+                offset,
                 Expression.color(routeDefaultColor)
             )
         )
@@ -901,55 +1024,46 @@ internal class MapRouteLine(
      */
     fun decorateRouteLine(expression: Expression) {
         if (style.isFullyLoaded) {
-            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(
-                lineGradient(
-                    expression
-                )
-            )
+            style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
         }
     }
 
     /**
-     * Updates the route line appearance from the origin point to the point indicated in
-     * @param point representing the portion of the route that has been traveled.
+     * Updates the route line appearance from the origin point to the indicated point
+     * @param point representing the current position of the puck
      */
     fun updateTraveledRouteLine(point: Point) {
-        if (vanishingPointUpdateInhibited) {
+        if (vanishingPointUpdateInhibited ||
+            System.nanoTime() - lastIndexUpdateTimeNano > MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
+        ) {
             return
         }
 
-        ifNonNull(primaryRoute, primaryRoute?.distance()) { primaryRoute, routeDistance ->
-            val lineString = getLineStringForRoute(primaryRoute)
+        ifNonNull(
+            primaryRouteLineGranularDistances,
+            primaryRouteRemainingDistancesIndex
+        ) { granularDistances, index ->
+            val traveledIndex = granularDistances.distancesArray[index]
+            val upcomingPoint = traveledIndex.point
 
-            if (lineString.coordinates().size < 2) {
-                return
-            }
+            /**
+             * Take the remaining distance from the upcoming point on the route and extends it
+             * by the exact position of the puck.
+             */
+            val remainingDistance =
+                traveledIndex.distanceRemaining + calculateDistance(upcomingPoint, point)
 
-            val nearestPointOnLineDistance = TurfMisc.nearestPointOnLine(
-                point,
-                lineString.coordinates(),
-                TurfConstants.UNIT_METERS
-            ).getProperty("dist").asDouble
-
-            if (nearestPointOnLineDistance > ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS) {
-                return
-            }
-
-            val distanceRemainingFromCache: Float = distanceRemainingCache[primaryRoute]
-                ?: primaryRoute.distance().toFloat()
-            val distanceRemaining = calculatePreciseDistanceTraveledAlongLine(
-                lineString,
-                distanceRemainingFromCache,
-                point
-            )
-            val distanceTraveled = (routeDistance - distanceRemaining)
-            val percentTraveled = abs((distanceTraveled / routeDistance)).toFloat()
-
-            if (percentTraveled > MINIMUM_ROUTE_LINE_OFFSET) {
-                val expression = getExpressionAtOffset(percentTraveled)
-                hideCasingLineAtOffset(percentTraveled)
-                hideRouteLineAtOffset(percentTraveled)
-                decorateRouteLine(expression)
+            /**
+             * Calculate the percentage of the route traveled and update the expression.
+             */
+            if (granularDistances.distance >= remainingDistance) {
+                val offset = (1.0 - remainingDistance / granularDistances.distance)
+                if (offset >= 0) {
+                    val expression = getExpressionAtOffset(offset)
+                    hideCasingLineAtOffset(offset)
+                    hideRouteLineAtOffset(offset)
+                    decorateRouteLine(expression)
+                }
             }
         }
     }
@@ -1214,14 +1328,14 @@ internal class MapRouteLine(
                 false -> calculateRouteLineSegmentsFromCongestion(
                     congestionSections,
                     routeLineString,
-                    route.distance() ?: 0.0,
+                    route.distance(),
                     isPrimaryRoute,
                     congestionColorProvider
                 )
                 true -> listOf(
                     RouteLineExpressionData(
-                        0f,
-                        congestionColorProvider("", isPrimaryRoute)
+                        0.0,
+                        Expression.color(congestionColorProvider("", isPrimaryRoute))
                     )
                 )
             }
@@ -1272,16 +1386,21 @@ internal class MapRouteLine(
                     if (expressionStops.isEmpty()) {
                         expressionStops.add(
                             RouteLineExpressionData(
-                                0f,
-                                congestionColorProvider(congestionSections[i], isPrimary)
+                                0.0,
+                                Expression.color(
+                                    congestionColorProvider(
+                                        congestionSections[i],
+                                        isPrimary
+                                    )
+                                )
                             )
                         )
                     }
                     val routeColor = congestionColorProvider(congestionSections[i], isPrimary)
                     expressionStops.add(
                         RouteLineExpressionData(
-                            fractionalDist.toFloat(),
-                            routeColor
+                            fractionalDist,
+                            Expression.color(routeColor)
                         )
                     )
                     previousCongestion = congestionSections[i]
@@ -1290,8 +1409,8 @@ internal class MapRouteLine(
             if (expressionStops.isEmpty()) {
                 expressionStops.add(
                     RouteLineExpressionData(
-                        0f,
-                        congestionColorProvider("", isPrimary)
+                        0.0,
+                        Expression.color(congestionColorProvider("", isPrimary))
                     )
                 )
             }
@@ -1339,62 +1458,46 @@ internal class MapRouteLine(
             }
         }
 
-        val getDistanceBetweenPoints: (firstPoint: Point, secondPoint: Point) -> Double =
-            { firstPoint: Point, secondPoint: Point ->
-                TurfMeasurement.distance(firstPoint, secondPoint, TurfConstants.UNIT_METERS)
-            }.memoize(POINT_DISTANCE_CALCULATION_FUN_CACHE_SIZE)
-
-        val getReversedCoordinates: (line: LineString) -> List<Point> = { line: LineString ->
-            line.coordinates().reversed()
-        }.memoize(1)
-
-        fun calculatePreciseDistanceTraveledAlongLine(
-            line: LineString,
-            targetDistance: Float,
-            targetPoint: Point
-        ): Double {
-            val linePoints = getReversedCoordinates(line)
-            var runningDistance = 0.0
-            var lastPointIndex = 0
-
-            for (currentIndex in linePoints.indices) {
-                if (currentIndex + 1 < linePoints.size) {
-                    val nextSectionDistance = getDistanceBetweenPoints(
-                        linePoints[currentIndex],
-                        linePoints[currentIndex + 1]
-                    )
-                    if (runningDistance + nextSectionDistance > targetDistance) {
-                        val currentPointToTargetPointDist =
-                            TurfMeasurement.distance(
-                                linePoints[currentIndex],
-                                targetPoint,
-                                TurfConstants.UNIT_METERS
-                            )
-
-                        if (currentPointToTargetPointDist > nextSectionDistance) {
-                            runningDistance += nextSectionDistance
-                            lastPointIndex = currentIndex + 1
-                        } else {
-                            lastPointIndex = currentIndex
-                        }
-                        break
-                    } else {
-                        runningDistance += nextSectionDistance
-                    }
-                } else {
-                    lastPointIndex = currentIndex
-                }
+        fun calculateGranularDistances(points: List<Point>): RouteLineGranularDistances {
+            var distance = 0.0
+            val indexArray = SparseArray<RouteLineDistancesIndex>(points.size)
+            for (i in (points.size - 1) downTo 1) {
+                val curr = points[i]
+                val prev = points[i - 1]
+                distance += calculateDistance(curr, prev)
+                indexArray.append(i - 1, RouteLineDistancesIndex(prev, distance))
             }
-
-            val distFromTargetToLastIndexPoint = getDistanceBetweenPoints(
-                linePoints[lastPointIndex],
-                targetPoint
+            indexArray.append(
+                points.size - 1,
+                RouteLineDistancesIndex(points[points.size - 1], 0.0)
             )
+            return RouteLineGranularDistances(distance, indexArray)
+        }
 
-            return if (lastPointIndex == 0) {
-                distFromTargetToLastIndexPoint
-            } else {
-                runningDistance + distFromTargetToLastIndexPoint
+        /**
+         * Calculates the distance between 2 points using
+         * [EPSG:3857 projection](https://epsg.io/3857).
+         * Info in [mapbox-gl-js/issues/9998](https://github.com/mapbox/mapbox-gl-js/issues/9998).
+         */
+        fun calculateDistance(point1: Point, point2: Point): Double {
+            val d = doubleArrayOf(
+                (projectX(point1.longitude()) - projectX(point2.longitude())),
+                (projectY(point1.latitude()) - projectY(point2.latitude()))
+            )
+            return sqrt(d[0] * d[0] + d[1] * d[1])
+        }
+
+        private fun projectX(x: Double): Double {
+            return x / 360.0 + 0.5
+        }
+
+        private fun projectY(y: Double): Double {
+            val sin = sin(y * Math.PI / 180)
+            val y2 = 0.5 - 0.25 * ln((1 + sin) / (1 - sin)) / Math.PI
+            return when {
+                y2 < 0 -> 0.0
+                y2 > 1 -> 1.1
+                else -> y2
             }
         }
     }
@@ -1414,4 +1517,29 @@ internal data class RouteFeatureData(
     val lineString: LineString
 )
 
-internal data class RouteLineExpressionData(val offset: Float, val segmentColor: Int)
+internal data class RouteLineExpressionData(
+    val offset: Double,
+    val segmentColorExpression: Expression
+)
+
+/**
+ * @param point the upcoming, not yet visited point on the route
+ * @param distanceRemaining distance remaining from the upcoming point
+ */
+internal data class RouteLineDistancesIndex(val point: Point, val distanceRemaining: Double)
+
+/**
+ * @param distance full distance of the route
+ * @param distancesArray array where index is the index of the upcoming not yet visited point on the route
+ */
+internal data class RouteLineGranularDistances(
+    val distance: Double,
+    val distancesArray: SparseArray<RouteLineDistancesIndex>
+)
+
+/**
+ * @param nestedList nested arrays of legs -> steps -> points
+ * @param flatList list of all points on the route.
+ * The first and last point of adjacent steps overlap and are duplicated in this list.
+ */
+internal data class RoutePoints(val nestedList: List<List<List<Point>>>, val flatList: List<Point>)

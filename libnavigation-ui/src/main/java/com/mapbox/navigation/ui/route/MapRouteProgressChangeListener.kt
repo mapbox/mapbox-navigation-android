@@ -1,6 +1,5 @@
 package com.mapbox.navigation.ui.route
 
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -21,20 +20,11 @@ internal class MapRouteProgressChangeListener(
     private var shouldReInitializePrimaryRoute = false
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
-        onProgressChange(routeProgress)
-    }
-
-    private fun onProgressChange(routeProgress: RouteProgress) {
-        val directionsRoute = routeLine.getPrimaryRoute()
-        updateRoute(directionsRoute, routeProgress)
-    }
-
-    private fun updateRoute(directionsRoute: DirectionsRoute?, routeProgress: RouteProgress) {
-        routeLine.updateDistanceRemainingCache(routeProgress.route, routeProgress.distanceRemaining)
+        routeLine.updateUpcomingRoutePointIndex(routeProgress)
 
         val currentRoute = routeProgress.route
         val hasGeometry = currentRoute.geometry()?.isNotEmpty() ?: false
-        if (hasGeometry && currentRoute != directionsRoute) {
+        if (hasGeometry && currentRoute != routeLine.getPrimaryRoute()) {
             routeLine.reinitializeWithRoutes(listOf(currentRoute))
             shouldReInitializePrimaryRoute = true
 
@@ -59,9 +49,13 @@ internal class MapRouteProgressChangeListener(
         }
 
         when (routeProgress.currentState) {
-            RouteProgressState.LOCATION_TRACKING -> routeLine.inhibitVanishingPointUpdate(false)
-            RouteProgressState.ROUTE_COMPLETE -> routeLine.inhibitVanishingPointUpdate(false)
-            else -> routeLine.inhibitVanishingPointUpdate(true)
+            RouteProgressState.LOCATION_TRACKING ->
+                routeLine.inhibitAutomaticVanishingPointUpdate(false)
+            RouteProgressState.ROUTE_COMPLETE -> {
+                routeLine.inhibitAutomaticVanishingPointUpdate(true)
+                routeLine.setVanishingOffset(1.0)
+            }
+            else -> routeLine.inhibitAutomaticVanishingPointUpdate(true)
         }
     }
 

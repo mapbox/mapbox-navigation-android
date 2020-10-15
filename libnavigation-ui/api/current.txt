@@ -605,6 +605,7 @@ package com.mapbox.navigation.ui.route {
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withRouteStyleDescriptors(java.util.List<com.mapbox.navigation.ui.route.RouteStyleDescriptor!>!);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withStyle(@StyleRes int);
     method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withVanishRouteLineEnabled(boolean);
+    method public com.mapbox.navigation.ui.route.NavigationMapRoute.Builder withVanishingRouteLineUpdateIntervalNano(long);
   }
 
   public interface OnRouteSelectionChangeListener {

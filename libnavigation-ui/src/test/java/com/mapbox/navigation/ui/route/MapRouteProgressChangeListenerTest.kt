@@ -4,6 +4,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -30,7 +31,7 @@ class MapRouteProgressChangeListenerTest {
         every { routeLine.retrieveDirectionsRoutes() } returns emptyList()
         every { routeLine.draw(capture(drawDirections)) } returns Unit
         every { routeLine.reinitializeWithRoutes(capture(routeListSlot)) } returns Unit
-        every { routeLine.vanishPointOffset } returns 0f
+        every { routeLine.vanishPointOffset } returns 0.0
         every { routeArrow.addUpcomingManeuverArrow(capture(addRouteProgress)) } returns Unit
         every { routeArrow.routeArrowIsVisible() } returns true
     }
@@ -240,5 +241,37 @@ class MapRouteProgressChangeListenerTest {
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
         verify { routeLine.reinitializePrimaryRoute() }
+    }
+
+    @Test
+    fun `should vanish the whole route on arrival`() {
+        val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow)
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { currentState } returns RouteProgressState.ROUTE_COMPLETE
+        }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify { routeLine.setVanishingOffset(1.0) }
+    }
+
+    @Test
+    fun `should inhibit for automatic vanishing point updates when not tracking`() {
+        val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow)
+
+        RouteProgressState.values().forEach {
+            clearMocks(routeLine)
+            val routeProgress: RouteProgress = mockk(relaxed = true) {
+                every { currentState } returns it
+            }
+            progressChangeListener.onRouteProgressChanged(routeProgress)
+            if (it == RouteProgressState.LOCATION_TRACKING) {
+                verify(exactly = 0) { routeLine.inhibitAutomaticVanishingPointUpdate(true) }
+                verify(exactly = 1) { routeLine.inhibitAutomaticVanishingPointUpdate(false) }
+            } else {
+                verify(exactly = 1) { routeLine.inhibitAutomaticVanishingPointUpdate(true) }
+                verify(exactly = 0) { routeLine.inhibitAutomaticVanishingPointUpdate(false) }
+            }
+        }
     }
 }
