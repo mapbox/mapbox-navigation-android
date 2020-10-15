@@ -12,8 +12,8 @@ package com.mapbox.navigation.base.trip.model
  * @param percentAlong the progress along the current edge [0,1)
  */
 class EHorizonPosition private constructor(
-    var edgeId: Long,
-    var percentAlong: Double
+    val edgeId: Long,
+    val percentAlong: Double
 ) {
 
     /**

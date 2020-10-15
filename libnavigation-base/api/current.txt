@@ -200,8 +200,6 @@ package com.mapbox.navigation.base.trip.model {
   public final class EHorizonPosition {
     method public long getEdgeId();
     method public double getPercentAlong();
-    method public void setEdgeId(long p);
-    method public void setPercentAlong(double p);
     method public com.mapbox.navigation.base.trip.model.EHorizonPosition.Builder toBuilder();
   }
 
