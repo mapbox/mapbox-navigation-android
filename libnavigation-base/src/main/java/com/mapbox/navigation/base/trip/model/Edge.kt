@@ -139,6 +139,7 @@ class Edge private constructor(
         if (frc != other.frc) return false
         if (wayId != other.wayId) return false
         if (positiveDirection != other.positiveDirection) return false
+        if (speed != other.speed) return false
         if (ramp != other.ramp) return false
         if (motorway != other.motorway) return false
         if (bridge != other.bridge) return false
@@ -169,6 +170,7 @@ class Edge private constructor(
         result = 31 * result + frc.hashCode()
         result = 31 * result + wayId.hashCode()
         result = 31 * result + positiveDirection.hashCode()
+        result = 31 * result + speed.hashCode()
         result = 31 * result + ramp.hashCode()
         result = 31 * result + motorway.hashCode()
         result = 31 * result + bridge.hashCode()
@@ -199,6 +201,7 @@ class Edge private constructor(
             "frc=$frc, " +
             "wayId=$wayId, " +
             "positiveDirection=$positiveDirection, " +
+            "speed=$speed, " +
             "ramp=$ramp, " +
             "motorway=$motorway, " +
             "bridge=$bridge, " +
@@ -210,7 +213,6 @@ class Edge private constructor(
             "speedLimit=$speedLimit, " +
             "laneCount=$laneCount, " +
             "meanElevation=$meanElevation, " +
-            "speedLimit=$speedLimit, " +
             "countryCode=$countryCode, " +
             "stateCode=$stateCode" +
             ")"

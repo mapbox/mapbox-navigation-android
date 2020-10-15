@@ -291,6 +291,7 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
     // EH
 
     /**
+     * Sets the Electronic Horizon observer
      *
      * @param eHorizonObserver
      */

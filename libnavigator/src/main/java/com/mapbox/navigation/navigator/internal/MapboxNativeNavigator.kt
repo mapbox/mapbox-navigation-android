@@ -219,6 +219,7 @@ interface MapboxNativeNavigator {
     // EH
 
     /**
+     * Sets the Electronic Horizon observer
      *
      * @param eHorizonObserver
      */
