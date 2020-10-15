@@ -2,6 +2,17 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.1.1 - October 15, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+
+#### Other changes
+* Bump mapbox-common-native version to 7.1.1 [#3651](https://github.com/mapbox/mapbox-navigation-android/pull/3651)
+* Bump mapbox-android-telemetry version to 6.2.1 [#3652](https://github.com/mapbox/mapbox-navigation-android/pull/3652)
+* Bump mapbox-core version to 3.1.0 [#3652](https://github.com/mapbox/mapbox-navigation-android/pull/3652)
+
 ### Mapbox Navigation SDK 1.2.0-alpha.1 - October 9, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
