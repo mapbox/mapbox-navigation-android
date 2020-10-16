@@ -4,6 +4,16 @@ import android.animation.Animator
 import com.mapbox.geojson.Point
 import com.mapbox.maps.ScreenCoordinate
 
+/**
+ * This value will be used for navigation camera linear transition use.
+ *
+ * @param center use for [com.mapbox.maps.plugin.animation.animator.CameraCenterAnimator]
+ * @param zoom use for [com.mapbox.maps.plugin.animation.animator.CameraZoomAnimator]
+ * @param bearing use for [com.mapbox.maps.plugin.animation.animator.CameraBearingAnimator]
+ * @param pitch use for [com.mapbox.maps.plugin.animation.animator.CameraPitchAnimator]
+ * @param anchorOffset use for [com.mapbox.maps.plugin.animation.animator.CameraAnchorAnimator]
+ * @param animatorListener callbacks that will be called of different transition animation states
+ */
 class NavigationCameraLinearTransitionOptions private constructor(
     val center: Point,
     val zoom: Double,
@@ -12,6 +22,9 @@ class NavigationCameraLinearTransitionOptions private constructor(
     val anchorOffset: ScreenCoordinate,
     val animatorListener: Animator.AnimatorListener?
 ) {
+    /**
+     * Get a builder to customize a subset of current options.
+     */
     fun toBuilder(): Builder = Builder(center, zoom).apply {
         bearing(bearing)
         pitch(pitch)
@@ -45,6 +58,9 @@ class NavigationCameraLinearTransitionOptions private constructor(
         return result
     }
 
+    /**
+     * Build a new [NavigationCameraLinearTransitionOptions]
+     */
     class Builder(private var center: Point,
                   private var zoom: Double) {
         private var bearing: Double = 0.0
@@ -52,30 +68,52 @@ class NavigationCameraLinearTransitionOptions private constructor(
         private var anchorOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)
         private var animatorListener: Animator.AnimatorListener? = null
 
+        /**
+         * Override [center] that use for [com.mapbox.maps.plugin.animation.animator.CameraCenterAnimator]
+         */
         fun center(center: Point): Builder = apply {
             this.center = center
         }
 
+        /**
+         * Override [zoom] that use for [com.mapbox.maps.plugin.animation.animator.CameraZoomAnimator]
+         */
         fun zoom(zoom: Double): Builder = apply {
             this.zoom = zoom
         }
 
+        /**
+         * Override [bearing] that use for [com.mapbox.maps.plugin.animation.animator.CameraBearingAnimator]
+         */
         fun bearing(bearing: Double): Builder = apply {
             this.bearing = bearing
         }
 
+        /**
+         * Override [pitch] that use for [com.mapbox.maps.plugin.animation.animator.CameraPitchAnimator]
+         */
         fun pitch(pitch: Double): Builder = apply {
             this.pitch = pitch
         }
 
+        /**
+         * Override [anchorOffset] that use for [com.mapbox.maps.plugin.animation.animator.CameraAnchorAnimator]
+         */
         fun anchorOffset(anchorOffset: ScreenCoordinate): Builder = apply {
             this.anchorOffset = anchorOffset
         }
 
+        /**
+         * Override [animatorListener]
+         */
         fun animatorListener(animatorListener: Animator.AnimatorListener?): Builder = apply {
             this.animatorListener = animatorListener
         }
 
+        /**
+         * Build a new instance of [NavigationCameraLinearTransitionOptions]
+         * @return NavigationCameraLinearTransitionOptions
+         */
         fun build(): NavigationCameraLinearTransitionOptions =
             NavigationCameraLinearTransitionOptions(
                 center, zoom, bearing, pitch, anchorOffset, animatorListener

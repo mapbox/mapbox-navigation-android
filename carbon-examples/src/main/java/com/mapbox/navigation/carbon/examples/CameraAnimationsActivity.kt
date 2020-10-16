@@ -183,7 +183,7 @@ class CameraAnimationsActivity :
 
     private fun updateMapFrameForFollowing() {
         locationComponent?.lastKnownLocation?.let {
-            navigationStateTransitionProvider.updateMapFrameForFollowing(NavigationStateTransitionOptionsToFollowing.Builder(
+            navigationStateTransitionProvider.updateMapFrameForFollowing(NavigationStateTransitionToFollowingOptions.Builder(
                 it, remainingPointsOnCurrentStep
             ).apply {
                 padding(navigationCameraOptions.edgeInsets)
@@ -195,7 +195,7 @@ class CameraAnimationsActivity :
 
     private fun updateMapFrameForOverview() {
         locationComponent?.lastKnownLocation?.let {
-            navigationStateTransitionProvider.updateMapFrameForOverview(NavigationStateTransitionOptionsToRouteOverview.Builder(
+            navigationStateTransitionProvider.updateMapFrameForOverview(NavigationStateTransitionToRouteOverviewOptions.Builder(
                 it, remainingPointsOnRoute
             ).apply {
                 padding(navigationCameraOptions.edgeInsets)
@@ -330,7 +330,7 @@ class CameraAnimationsActivity :
             return
         }
 
-        navigationStateTransitionProvider.transitionToVehicleFollowing(NavigationStateTransitionOptionsToFollowing.Builder(
+        navigationStateTransitionProvider.transitionToVehicleFollowing(NavigationStateTransitionToFollowingOptions.Builder(
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnCurrentStep).apply {
             pitch(navigationCameraOptions.followingPitch)
@@ -345,7 +345,7 @@ class CameraAnimationsActivity :
             return
         }
 
-        navigationStateTransitionProvider.transitionToRouteOverview(NavigationStateTransitionOptionsToRouteOverview.Builder(
+        navigationStateTransitionProvider.transitionToRouteOverview(NavigationStateTransitionToRouteOverviewOptions.Builder(
             locationComponent?.lastKnownLocation!!,
             remainingPointsOnRoute).apply {
             pitch(navigationCameraOptions.followingPitch)

@@ -14,7 +14,7 @@ class MapboxNavigationStateTransition(
     private val mapboxMap = mapView.getMapboxMap()
 
     override fun transitionToVehicleFollowing(
-        transitionOptions: NavigationStateTransitionOptionsToFollowing
+        transitionOptions: NavigationStateTransitionToFollowingOptions
     ): AnimatorSet {
         val points = listOf(transitionOptions.pointsAheadOfVehicleLocation,
             transitionOptions.additionalPointsToFrame).flatten()
@@ -36,7 +36,7 @@ class MapboxNavigationStateTransition(
         )
     }
 
-    override fun updateMapFrameForFollowing(transitionOptions: NavigationStateTransitionOptionsToFollowing): AnimatorSet {
+    override fun updateMapFrameForFollowing(transitionOptions: NavigationStateTransitionToFollowingOptions): AnimatorSet {
         val points = listOf(transitionOptions.pointsAheadOfVehicleLocation,
             transitionOptions.additionalPointsToFrame).flatten()
         val bearing = transitionOptions.vehicleLocation.bearing.toDouble()
@@ -57,7 +57,7 @@ class MapboxNavigationStateTransition(
     }
 
     override fun transitionToRouteOverview(
-        transitionOptions: NavigationStateTransitionOptionsToRouteOverview
+        transitionOptions: NavigationStateTransitionToRouteOverviewOptions
     ): AnimatorSet {
         val points = listOf(transitionOptions.remainingPointsOfRoute,
             transitionOptions.additionalPointsToFrame).flatten()
@@ -81,7 +81,7 @@ class MapboxNavigationStateTransition(
     }
 
     override fun updateMapFrameForOverview(
-        transitionOptions: NavigationStateTransitionOptionsToRouteOverview
+        transitionOptions: NavigationStateTransitionToRouteOverviewOptions
     ): AnimatorSet {
         val points = listOf(transitionOptions.remainingPointsOfRoute,
             transitionOptions.additionalPointsToFrame).flatten()
