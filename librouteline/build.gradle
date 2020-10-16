@@ -63,8 +63,8 @@ dependencies {
     ktlint dependenciesList.ktlint
 
     // Navigation SDK
-    api project(':libnavigation-core')
-    implementation project(':libnavigation-util')
+    api 'com.mapbox.navigation:core:1.2.0-alpha.2'
+    api 'com.mapbox.navigation:utils:1.2.0-alpha.2'
 
     // Mapbox
     implementation dependenciesList.mapboxSdkTurf
