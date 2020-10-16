@@ -1,5 +1,6 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.mapbox.sdkRegistry'
+apply plugin: 'com.jfrog.bintray'
 apply from: file("${rootDir}/gradle/artifact-settings.gradle")
 
 afterEvaluate {
@@ -76,4 +77,43 @@ task androidSourcesJar(type: Jar) {
 task androidJavadocsJar(type: Jar, dependsOn: dokka) {
     classifier = 'javadoc'
     from dokka.outputDirectory
+}
+
+
+ext {
+    mapboxArtifactId = project.property('POM_ARTIFACT_ID')
+    mapboxArtifactTitle = project.property('POM_ARTIFACT_TITLE')
+    mapboxDeveloperName = 'Mapbox'
+    mapboxDeveloperId = 'mapbox'
+    versionName = project.property('POM_SNAPSHOT_VERSION_NAME')
+
+    mapboxBintrayUserOrg = 'mapbox'
+    mapboxBintrayRepoName = 'mapbox_collab'
+    mapboxBintrayPackageName = "com.mapbox.navigation:" + project.property('POM_ARTIFACT_ID')
+    mapboxBintrayUser = project.hasProperty('BINTRAY_USER') ? project.property('BINTRAY_USER') : System.getenv('BINTRAY_USER')
+    mapboxBintrayApiKey = project.hasProperty('BINTRAY_API_KEY') ? project.property('BINTRAY_API_KEY') : System.getenv('BINTRAY_API_KEY')
+    mapboxGpgPassphrase = project.hasProperty('GPG_PASSPHRASE') ? project.property('GPG_PASSPHRASE') : System.getenv('GPG_PASSPHRASE')
+}
+
+bintray {
+    user = mapboxBintrayUser
+    key = mapboxBintrayApiKey
+    publications('release')
+    pkg {
+        repo = project.ext.mapboxBintrayRepoName
+        name = project.ext.mapboxBintrayPackageName
+        userOrg = project.ext.mapboxBintrayUserOrg
+        publish = false
+        version {
+            name = project.ext.versionName
+            released = new Date()
+            gpg {
+                sign = true
+                passphrase = mapboxGpgPassphrase
+            }
+            mavenCentralSync {
+                sync = false
+            }
+        }
+    }
 }
