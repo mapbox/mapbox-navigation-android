@@ -2,17 +2,13 @@ package com.mapbox.navigation.ui.route
 
 import android.graphics.drawable.Drawable
 import com.mapbox.maps.Style
-import com.mapbox.maps.plugin.style.expressions.Expression
-import com.mapbox.maps.plugin.style.expressions.Expression.Companion.color
-import com.mapbox.maps.plugin.style.expressions.Expression.Companion.switchCase
-import com.mapbox.maps.plugin.style.expressions.dsl.eq
-import com.mapbox.maps.plugin.style.expressions.dsl.interpolate
-import com.mapbox.maps.plugin.style.expressions.dsl.match
-import com.mapbox.maps.plugin.style.layers.LineLayer
-import com.mapbox.maps.plugin.style.layers.SymbolLayer
-import com.mapbox.maps.plugin.style.layers.properties.IconPitchAlignment
-import com.mapbox.maps.plugin.style.layers.properties.LineCap
-import com.mapbox.maps.plugin.style.layers.properties.LineJoin
+import com.mapbox.maps.plugin.style.expressions.dsl.generated.*
+import com.mapbox.maps.plugin.style.expressions.generated.Expression
+import com.mapbox.maps.plugin.style.layers.generated.LineLayer
+import com.mapbox.maps.plugin.style.layers.generated.SymbolLayer
+import com.mapbox.maps.plugin.style.layers.properties.generated.IconPitchAlignment
+import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
+import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
@@ -38,22 +34,22 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     fun getRouteLineColorExpressions(
         defaultColor: Int,
         routeColorProvider: KProperty1<RouteStyleDescriptor, Int>
-    ): List<Expression> {
-        val expressions = mutableListOf<Expression>(
+    ): Expression {
+        return switchCase {
             eq {
                 get { literal(DEFAULT_ROUTE_DESCRIPTOR_PLACEHOLDER) }
                 literal(true)
-            },
+            }
             color(defaultColor)
-        )
-        routeStyleDescriptors.forEach {
-            expressions.add(eq {
-                get { it.routeIdentifier }
-                literal(true)
-            })
-            expressions.add(color(routeColorProvider.get(it)))
+            routeStyleDescriptors.forEach {
+                eq {
+                    get { it.routeIdentifier }
+                    literal(true)
+                }
+                color(routeColorProvider.get(it))
+            }
+            color(defaultColor)
         }
-        return expressions.plus(color(defaultColor))
     }
 
     fun getRouteLineWidthExpressions(scale: Double): Expression {
@@ -306,7 +302,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
         layerId: String,
         layerSourceId: String,
         lineWidthExpression: Expression,
-        colorExpressions: List<Expression>
+        colorExpressions: Expression
     ): LineLayer {
         if (style.layerExists(layerId)) {
             style.removeLayer(layerId)
@@ -327,7 +323,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
             .lineJoin(lineJoinValue)
             .lineWidth(lineWidthExpression)
             .lineColor(
-                switchCase(*colorExpressions.toTypedArray())
+                colorExpressions
             )
     }
 }

@@ -14,18 +14,16 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.LayerPosition
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.location.LocationComponentConstants
-import com.mapbox.maps.plugin.style.expressions.Expression
-import com.mapbox.maps.plugin.style.layers.LineLayer
+import com.mapbox.maps.plugin.style.expressions.generated.Expression
+import com.mapbox.maps.plugin.style.layers.generated.LineLayer
 import com.mapbox.maps.plugin.style.layers.getLayer
-import com.mapbox.maps.plugin.style.layers.properties.Visibility
-import com.mapbox.maps.plugin.style.sources.GeojsonSource
-import com.mapbox.maps.plugin.style.sources.geojsonSource
-import com.mapbox.maps.plugin.style.sources.updateGeoJSON
+import com.mapbox.maps.plugin.style.layers.properties.generated.Visibility
+import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
+import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.*
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
-import com.mapbox.navigation.ui.internal.utils.MapUtils
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.buildWayPointFeatureCollection
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.generateFeatureCollection
@@ -778,17 +776,17 @@ internal class MapRouteLine(
 
     private fun setPrimaryRoutesSource(featureCollection: FeatureCollection) {
         drawnPrimaryRouteFeatureCollection = featureCollection
-        primaryRouteLineSource.updateGeoJSON(drawnPrimaryRouteFeatureCollection)
+        primaryRouteLineSource.featureCollection(drawnPrimaryRouteFeatureCollection)
     }
 
     private fun setAlternativeRoutesSource(featureCollection: FeatureCollection) {
         drawnAlternativeRouteFeatureCollection = featureCollection
-        alternativeRouteLineSource.updateGeoJSON(drawnAlternativeRouteFeatureCollection)
+        alternativeRouteLineSource.featureCollection(drawnAlternativeRouteFeatureCollection)
     }
 
     private fun setWaypointsSource(featureCollection: FeatureCollection) {
         drawnWaypointsFeatureCollection = featureCollection
-        wayPointSource.updateGeoJSON(drawnWaypointsFeatureCollection)
+        wayPointSource.featureCollection(drawnWaypointsFeatureCollection)
     }
 
     private fun updateAlternativeLayersVisibility(
