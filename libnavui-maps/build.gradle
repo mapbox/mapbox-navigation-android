@@ -49,6 +49,7 @@ android {
 dependencies {
     api project(":libnavui-base")
     api project(":libnavigation-core")
+    api project(':librouteline')
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.mapboxSdkTurf
     api 'com.mapbox.maps:android:10.0.0-beta.4'

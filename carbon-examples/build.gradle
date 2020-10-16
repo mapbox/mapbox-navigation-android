@@ -77,7 +77,7 @@ android {
 
 dependencies {
     // Mapbox Navigation SDK
-    implementation project(':libnavui-maps')
+    implementation project(':librouteline')
 
     // test
     androidTestImplementation project(':libtesting-ui')

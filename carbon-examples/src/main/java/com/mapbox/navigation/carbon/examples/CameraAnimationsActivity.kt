@@ -18,8 +18,6 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.api.directions.v5.DirectionsCriteria
 import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -34,16 +32,9 @@ import com.mapbox.maps.plugin.gesture.OnMapLongClickListener
 import com.mapbox.maps.plugin.gesture.OnMoveListener
 import com.mapbox.maps.plugin.gesture.getGesturePlugin
 import com.mapbox.maps.plugin.location.LocationComponentActivationOptions
+import com.mapbox.maps.plugin.location.LocationComponentConstants
 import com.mapbox.maps.plugin.location.LocationComponentPlugin
 import com.mapbox.maps.plugin.location.modes.RenderMode
-import com.mapbox.maps.plugin.style.layers.addLayerBelow
-import com.mapbox.maps.plugin.style.layers.generated.lineLayer
-import com.mapbox.maps.plugin.style.layers.properties.generated.LineCap
-import com.mapbox.maps.plugin.style.layers.properties.generated.LineJoin
-import com.mapbox.maps.plugin.style.sources.addSource
-import com.mapbox.maps.plugin.style.sources.generated.GeojsonSource
-import com.mapbox.maps.plugin.style.sources.generated.geojsonSource
-import com.mapbox.maps.plugin.style.sources.getSource
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.carbon.examples.AnimationAdapter.OnAnimationButtonClicked
@@ -57,6 +48,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.core.trip.session.LocationObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.ui.maps.camera.*
+import com.mapbox.navigation.ui.route.NavigationMapRoute
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
 import com.mapbox.turf.TurfMisc
@@ -78,8 +70,8 @@ class CameraAnimationsActivity :
     private var locationComponent: LocationComponentPlugin? = null
     private lateinit var mapboxMap: MapboxMap
     private lateinit var mapboxNavigation: MapboxNavigation
+    private lateinit var navigationMapRoute: NavigationMapRoute
     private lateinit var route: DirectionsRoute
-    private lateinit var lineSource: GeojsonSource
     private lateinit var navigationStateTransitionProvider: NavigationStateTransitionProvider
     private val navigationCameraOptions = NavigationCameraOptions.Builder().build()
     private val replayRouteMapper = ReplayRouteMapper()
@@ -142,15 +134,12 @@ class CameraAnimationsActivity :
         routeProgress.currentLegProgress?.let { currentLegProgress ->
             currentLegProgress.currentStepProgress?.let { currentStepProgress ->
                 val currentStepFullPoints = currentStepProgress.stepPoints ?: emptyList()
-                // TODO: do we need max here?
                 var distanceTraveledOnStepKM = max(
                     currentStepProgress.distanceTraveled / 1000.0, 0.0)
-                // TODO: do we need max here?
                 val fullDistanceOfCurrentStepKM = max(
                     (currentStepProgress.distanceRemaining
                         + currentStepProgress.distanceTraveled) / 1000.0,
                     0.0)
-                // TODO: will distanceTraveledOnStepKM be greater than fullDistanceOfCurrentStepKM in any case?
                 if (distanceTraveledOnStepKM > fullDistanceOfCurrentStepKM) distanceTraveledOnStepKM = 0.0
 
                 try {
@@ -275,6 +264,11 @@ class CameraAnimationsActivity :
                 initializeLocationComponent(style)
                 mapboxNavigation.navigationOptions.locationEngine.getLastLocation(locationEngineCallback)
                 getGesturePlugin()?.addOnMapLongClickListener(this@CameraAnimationsActivity)
+                navigationMapRoute = NavigationMapRoute.Builder(mapView, mapboxMap, this@CameraAnimationsActivity)
+                    .withBelowLayer(LocationComponentConstants.FOREGROUND_LAYER)
+                    .withMapboxNavigation(mapboxNavigation)
+                    .withVanishRouteLineEnabled(true)
+                    .build()
             }
         }, object : OnMapLoadErrorListener {
             override fun onMapLoadError(mapViewLoadError: MapLoadError, msg: String) {
@@ -354,35 +348,6 @@ class CameraAnimationsActivity :
         }.build()).apply { addListener(toRouteOverviewTransitionAnimatorListener) }.start()
     }
 
-    /**
-     * Add data to the map once the GeoJSON has been loaded
-     *
-     * @param featureCollection returned GeoJSON FeatureCollection from the Directions API route request
-     */
-    private fun initData(style: Style, featureCollection: FeatureCollection) {
-        initSources(style, featureCollection)
-        initLinePath(style)
-    }
-
-    private fun initSources(style: Style, featureCollection: FeatureCollection) {
-        lineSource = geojsonSource("line-source-id") {
-            featureCollection(featureCollection)
-        }
-        style.addSource(lineSource)
-    }
-
-    private fun initLinePath(style: Style) {
-        style.addLayerBelow(
-            lineLayer("line-layer-id", "line-source-id") {
-                lineColor("#F13C6E")
-                lineCap(LineCap.ROUND)
-                lineJoin(LineJoin.ROUND)
-                lineWidth(4.0)
-            },
-            below = "road-label"
-        )
-    }
-
     private fun findRoute(origin: Point, destination: Point) {
         val routeOptions: RouteOptions = RouteOptions.builder()
             .applyDefaultParams()
@@ -413,30 +378,11 @@ class CameraAnimationsActivity :
             // Clear all the existing geometries first
             fullRoutePoints.clear()
             fullRoutePoints.addAll(PolylineUtils.decode(route.geometry()!!, 6))
-            mapView.getMapboxMap().getStyle(object : Style.OnStyleLoaded {
-                override fun onStyleLoaded(style: Style) {
-                    val lSource = style.getSource("line-source-id")
-                    route.geometry()?.let { _ ->
-                        if (lSource != null) {
-                            // update line source with new set of geometries
-                            lineSource.geometry(LineString.fromLngLats(fullRoutePoints))
-                        } else {
-                            initData(
-                                style,
-                                FeatureCollection.fromFeature(
-                                    Feature.fromGeometry(
-                                        LineString.fromLngLats(fullRoutePoints)
-                                    )
-                                )
-                            )
-                        }
-                        previousCameraState = MapboxCameraState.ROUTE_OVERVIEW
-                        requestCameraToRouteOverview()
-
-                        startSimulation(route)
-                    }
-                }
-            })
+            navigationMapRoute.addRoute(route)
+            previousCameraState = MapboxCameraState.ROUTE_OVERVIEW
+            remainingPointsOnRoute = fullRoutePoints
+            requestCameraToRouteOverview()
+            startSimulation(route)
             Toast
                 .makeText(this@CameraAnimationsActivity,
                     "routesReqCallback",
@@ -487,7 +433,7 @@ class CameraAnimationsActivity :
         locationComponent?.let {
             it.activateLocationComponent(activationOptions)
             it.enabled = true
-            it.renderMode = RenderMode.COMPASS
+            it.renderMode = RenderMode.GPS
         }
     }
 
@@ -622,4 +568,16 @@ class CameraAnimationsActivity :
         override fun onAnimationRepeat(animation: Animator?) {
         }
     }
+}
+
+enum class MapboxCameraState {
+    IDLE,
+    TRANSITION_TO_FOLLOWING,
+    FOLLOWING,
+    TRANSITION_TO_ROUTE_OVERVIEW,
+    ROUTE_OVERVIEW
+}
+
+interface MapboxCameraStateChangeObserver {
+    fun onMapboxCameraStateChange(mapboxCameraState: MapboxCameraState)
 }
