@@ -75,6 +75,10 @@ assemble-core-release:
 core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
+.PHONY: core-unit-tests-jacoco
+core-unit-tests-jacoco:
+	$(call run-gradle-tasks,$(CORE_MODULES),jacocoTestReport)
+
 .PHONY: core-publish-to-sdk-registry
 core-publish-to-sdk-registry:
 	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
@@ -114,6 +118,10 @@ assemble-ui-release:
 .PHONY: ui-unit-tests
 ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
+
+.PHONY: ui-unit-tests-jacoco
+ui-unit-tests-jacoco:
+	$(call run-gradle-tasks,$(UI_MODULES),jacocoTestReport)
 
 .PHONY: ui-publish-to-sdk-registry
 ui-publish-to-sdk-registry:
