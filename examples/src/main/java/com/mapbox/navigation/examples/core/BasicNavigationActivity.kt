@@ -163,7 +163,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 directionRoute = routes[0]
-                navigationMapboxMap?.drawRoute(routes[0])
+                navigationMapboxMap?.drawRoutes(routes)
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE

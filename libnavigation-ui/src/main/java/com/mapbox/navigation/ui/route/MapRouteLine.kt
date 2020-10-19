@@ -484,6 +484,11 @@ internal class MapRouteLine(
      */
     fun updatePrimaryRouteIndex(route: DirectionsRoute) {
         this.primaryRoute = route
+        val partitionedRoutes = routeFeatureData.partition { it.route == primaryRoute }
+        routeFeatureData.apply {
+            clear()
+            addAll(listOf(partitionedRoutes.first, partitionedRoutes.second).flatten())
+        }
         drawRoutes(routeFeatureData)
     }
 
