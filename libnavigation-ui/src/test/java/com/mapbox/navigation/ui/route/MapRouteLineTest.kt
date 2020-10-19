@@ -389,13 +389,13 @@ class MapRouteLineTest {
             mapRouteSourceProvider,
             null
         ).also { it.draw(listOf(directionsRoute, directionsRoute2)) }
+        val routeFeatureData = mapRouteLine.retrieveRouteFeatureData()
 
-        assertEquals(mapRouteLine.getPrimaryRoute(), directionsRoute)
+        assertEquals(routeFeatureData.first().route, directionsRoute)
 
         mapRouteLine.updatePrimaryRouteIndex(directionsRoute2)
-        val result = mapRouteLine.getPrimaryRoute()
 
-        assertEquals(result, directionsRoute2)
+        assertEquals(routeFeatureData.first().route, directionsRoute2)
     }
 
     @Test
@@ -1495,6 +1495,57 @@ class MapRouteLineTest {
         assertEquals(4.0f, result[0].scaleStop)
         assertEquals(3.0f, result[0].scaleMultiplier)
         assertEquals(1.0f, result[0].scale)
+    }
+
+    @Test
+    fun keepPrimaryRouteWhenRecreate() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val firstRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondRoute: DirectionsRoute = getDirectionsRoute(false)
+        val firstRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val secondRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val directionsRoutes = listOf(
+            RouteFeatureData(firstRoute, firstRouteFeatureCollection, mockk<LineString>()),
+            RouteFeatureData(secondRoute, secondRouteFeatureCollection, mockk<LineString>())
+        )
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            directionsRoutes,
+            listOf(),
+            false,
+            false,
+            mapRouteSourceProvider,
+            0f,
+            null
+        )
+        val primaryRouteBeforeRecreate = mapRouteLine.getPrimaryRoute()
+
+        mapRouteLine.updatePrimaryRouteIndex(secondRoute)
+        val recreatedMapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteLine.retrieveRouteFeatureData(),
+            mapRouteLine.retrieveRouteExpressionData(),
+            mapRouteLine.retrieveVisibility(),
+            mapRouteLine.retrieveAlternativesVisible(),
+            mapRouteSourceProvider,
+            0f,
+            null
+        )
+
+        assertEquals(primaryRouteBeforeRecreate, firstRoute)
+        assertEquals(recreatedMapRouteLine.getPrimaryRoute(), secondRoute)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {
