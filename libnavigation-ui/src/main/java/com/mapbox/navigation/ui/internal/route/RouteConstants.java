@@ -44,6 +44,7 @@ public class RouteConstants {
   public static final String HEAVY_CONGESTION_VALUE = "heavy";
   public static final String SEVERE_CONGESTION_VALUE = "severe";
   public static final String UNKNOWN_CONGESTION_VALUE = "unknown";
+  public static final String LOW_CONGESTION_VALUE = "low";
   public static final String ORIGIN_MARKER_NAME = "originMarker";
   public static final String DESTINATION_MARKER_NAME = "destinationMarker";
   public static final String MAPBOX_LOCATION_ID = "mapbox-location";

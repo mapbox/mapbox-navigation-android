@@ -9,6 +9,10 @@
         <item>0.5</item>
     </string-array>
 
+    <string-array name="customTrafficBackFillRoadClasses">
+        <item>motorway</item>
+    </string-array>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -147,5 +151,6 @@
             @color/customAlternativeRouteCasingColor
         </item>
         <item name="routeLineTrafficScales">@array/customRouteLineTrafficScalesArray</item>
+        <item name="trafficBackFillRoadClasses">@array/customTrafficBackFillRoadClasses</item>
     </style>
 </resources>

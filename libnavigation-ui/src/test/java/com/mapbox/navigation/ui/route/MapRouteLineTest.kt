@@ -23,18 +23,23 @@ import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_CASING_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.calculatePreciseDistanceTraveledAlongLine
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getRouteLineExpressionDataWithStreetClassOverride
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getRouteLineTrafficExpressionData
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfMeasurement
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import junit.framework.Assert.assertNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -348,7 +353,7 @@ class MapRouteLineTest {
             false,
             false,
             mapRouteSourceProvider,
-            0f,
+            0.0,
             null
         )
 
@@ -389,13 +394,13 @@ class MapRouteLineTest {
             mapRouteSourceProvider,
             null
         ).also { it.draw(listOf(directionsRoute, directionsRoute2)) }
+        val routeFeatureData = mapRouteLine.retrieveRouteFeatureData()
 
-        assertEquals(mapRouteLine.getPrimaryRoute(), directionsRoute)
+        assertEquals(routeFeatureData.first().route, directionsRoute)
 
         mapRouteLine.updatePrimaryRouteIndex(directionsRoute2)
-        val result = mapRouteLine.getPrimaryRoute()
 
-        assertEquals(result, directionsRoute2)
+        assertEquals(routeFeatureData.first().route, directionsRoute2)
     }
 
     @Test
@@ -667,11 +672,9 @@ class MapRouteLineTest {
     @Test
     fun buildRouteLineExpression() {
         every { style.layers } returns listOf(primaryRouteLayer)
-        val expectedExpression =
-            "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.2, [\"rgba\", " +
-                "86.0, 168.0, 251.0, 1.0], 0.31436133, [\"rgba\", 86.0, 168.0, 251.0, 1.0], " +
-                "0.92972755, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 1.0003215, [\"rgba\", 86.0, " +
-                "168.0, 251.0, 1.0]]"
+        val expectedExpression = "[\"step\", [\"line-progress\"], [\"rgba\", 0.0, 0.0, 0.0, 0.0]," +
+            " 0.2, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.31435135, [\"rgba\", 255.0, 77.0, " +
+            "77.0, 1.0], 0.929698, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val route = getDirectionsRoute(true)
         val mapRouteLine = MapRouteLine(
             ctx,
@@ -683,7 +686,7 @@ class MapRouteLineTest {
             null
         ).also { it.draw(listOf(route)) }
 
-        val expression = mapRouteLine.getExpressionAtOffset(.2f)
+        val expression = mapRouteLine.getExpressionAtOffset(.2)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -703,7 +706,7 @@ class MapRouteLineTest {
             null
         ).also { it.draw(listOf(route)) }
 
-        val expression = mapRouteLine.getExpressionAtOffset(0f)
+        val expression = mapRouteLine.getExpressionAtOffset(0.0)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -725,7 +728,7 @@ class MapRouteLineTest {
             null
         ).also { it.draw(listOf(route)) }
 
-        val expression = mapRouteLine.getExpressionAtOffset(.2f)
+        val expression = mapRouteLine.getExpressionAtOffset(.2)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -747,7 +750,7 @@ class MapRouteLineTest {
             null
         ).also { it.draw(listOf(route)) }
 
-        val expression = mapRouteLine.getExpressionAtOffset(.9f)
+        val expression = mapRouteLine.getExpressionAtOffset(.9)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -755,15 +758,19 @@ class MapRouteLineTest {
     @Test
     fun calculateRouteLineSegmentsMultilegRoute() {
         val route = getMultilegRoute()
-        val lineString = LineString.fromPolyline(route.geometry()!!, Constants.PRECISION_6)
+        val expectedResultCount = route.legs()!!.map {
+            it.annotation()!!.distance()!!.size
+        }.sum()
 
         val result = MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments(
             route,
-            lineString,
+            listOf(),
             true
         ) { _, _ -> 1 }
 
-        assertEquals(21, result.size)
+        assertEquals(expectedResultCount, result.size)
+        assertEquals(0.021345333539355343, result[1].offset, 0.0)
+        assertEquals(0.9996221880758245, result.last().offset, 0.0)
     }
 
     @Test
@@ -773,7 +780,7 @@ class MapRouteLineTest {
 
         val result = MapRouteLine.MapRouteLineSupport.calculateRouteLineSegments(
             route,
-            lineString,
+            listOf(),
             true
         ) { _, _ -> 1 }
 
@@ -1107,11 +1114,11 @@ class MapRouteLineTest {
             true,
             false,
             mapRouteSourceProvider,
-            0f,
+            0.0,
             null
         )
 
-        val expression = mapRouteLine.getExpressionAtOffset(.2f)
+        val expression = mapRouteLine.getExpressionAtOffset(.2)
 
         assertEquals(expectedExpression, expression.toString())
     }
@@ -1123,13 +1130,20 @@ class MapRouteLineTest {
         val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
             "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
         val expectedRouteTrafficLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
-            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 86.0, 168.0, 251.0, 1.0], " +
-            "0.150941, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.1905395, [\"rgba\", 86.0, 168.0, " +
-            "251.0, 1.0], 0.26964808, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.27944908, " +
-            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.33272266, [\"rgba\", 86.0, 168.0, 251.0, " +
-            "1.0], 0.39298487, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.48991048, [\"rgba\", " +
-            "255.0, 77.0, 77.0, 1.0], 0.504132, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.8017851, " +
-            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 1.0000086, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.12680313, [\"rgba\", 86.0, 168.0, 251.0, 1.0]," +
+            " 0.15093622, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.19053344, [\"rgba\", 86.0," +
+            " 168.0, 251.0, 1.0], 0.20669733, [\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.2696395," +
+            " [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.2794402, [\"rgba\", 86.0, 168.0, " +
+            "251.0, 1.0], 0.3259839, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.33271208, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.39297238, [\"rgba\", 255.0, 77.0, 77.0, " +
+            "1.0], 0.48989493, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.50411594, [\"rgba\", " +
+            "86.0, 168.0, 251.0, 1.0], 0.54441005, [\"rgba\", 86.0, 168.0, 251.0, 1.0], " +
+            "0.57775295, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.6183232, [\"rgba\", 86.0, " +
+            "168.0, 251.0, 1.0], 0.6476241, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.6980415, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.72365564, [\"rgba\", 86.0, 168.0, 251.0," +
+            " 1.0], 0.7560197, [\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.80175966, [\"rgba\", " +
+            "86.0, 168.0, 251.0, 1.0], 0.8366673, [\"rgba\", 86.0, 168.0, 251.0, 1.0], " +
+            "0.8804991, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         every { style.layers } returns listOf(primaryRouteLayer)
         every { style.isFullyLoaded } returnsMany listOf(
             false,
@@ -1495,6 +1509,133 @@ class MapRouteLineTest {
         assertEquals(4.0f, result[0].scaleStop)
         assertEquals(3.0f, result[0].scaleMultiplier)
         assertEquals(1.0f, result[0].scale)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWhenStreetClassDataExists() {
+        val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = getRouteLineTrafficExpressionData(route)
+
+        assertEquals(54, result.size)
+        assertEquals(1319.0000000000002, result.last().distanceFromOrigin, 0.0)
+        assertEquals(LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertEquals("service", result.last().roadClass)
+    }
+
+    @Test
+    fun getRouteLineTrafficExpressionDataWhenStreetClassDataDoesNotExist() {
+        val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val result = getRouteLineTrafficExpressionData(route)
+
+        assertEquals(54, result.size)
+        assertEquals(1319.0000000000002, result.last().distanceFromOrigin, 0.0)
+        assertEquals(LOW_CONGESTION_VALUE, result.last().trafficCongestionIdentifier)
+        assertNull(result.last().roadClass)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClasses() {
+        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
+            when (trafficCongestion) {
+                UNKNOWN_CONGESTION_VALUE -> -9
+                LOW_CONGESTION_VALUE -> -1
+                else -> 33
+            }
+        }
+        val routeAsJsonJson = loadJsonFixture("route-with-road-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+        assertEquals("service", trafficExpressionData[0].roadClass)
+        assertEquals("street", trafficExpressionData[1].roadClass)
+        assertEquals(UNKNOWN_CONGESTION_VALUE, trafficExpressionData[0].trafficCongestionIdentifier)
+        assertEquals(UNKNOWN_CONGESTION_VALUE, trafficExpressionData[1].trafficCongestionIdentifier)
+
+        val result = getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            congestionColorProvider,
+            true,
+            listOf("street")
+        )
+
+        assertEquals(Expression.color(-9), result[0].segmentColorExpression)
+        assertEquals(trafficExpressionData.size, result.size)
+        assertEquals(0.016404052025563352, result[1].offset, 0.0)
+        assertEquals(Expression.color(-1), result[1].segmentColorExpression)
+    }
+
+    @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenDoesNotHaveStreetClasses() {
+        val routeAsJsonJson = loadJsonFixture("route-with-traffic-no-street-classes.txt")
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+
+        val result = getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            { _, _, -> -9 },
+            true,
+            listOf()
+        )
+
+        assertEquals(trafficExpressionData.size, result.size)
+        assertEquals(0.016404052025563352, result[1].offset, 0.0)
+        assertEquals(Expression.color(-9), result[1].segmentColorExpression)
+    }
+
+    @Test
+    fun keepPrimaryRouteWhenRecreate() {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        val firstRoute: DirectionsRoute = getDirectionsRoute(true)
+        val secondRoute: DirectionsRoute = getDirectionsRoute(false)
+        val firstRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val secondRouteFeatureCollection = mockk<FeatureCollection> {
+            every { features() } returns listOf()
+        }
+        val directionsRoutes = listOf(
+            RouteFeatureData(firstRoute, firstRouteFeatureCollection, mockk<LineString>()),
+            RouteFeatureData(secondRoute, secondRouteFeatureCollection, mockk<LineString>())
+        )
+        val mapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            directionsRoutes,
+            listOf(),
+            false,
+            false,
+            mapRouteSourceProvider,
+            0.0,
+            null
+        )
+        val primaryRouteBeforeRecreate = mapRouteLine.getPrimaryRoute()
+
+        mapRouteLine.updatePrimaryRouteIndex(secondRoute)
+        val recreatedMapRouteLine = MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteLine.retrieveRouteFeatureData(),
+            mapRouteLine.retrieveRouteExpressionData(),
+            mapRouteLine.retrieveVisibility(),
+            mapRouteLine.retrieveAlternativesVisible(),
+            mapRouteSourceProvider,
+            0.0,
+            null
+        )
+
+        assertEquals(primaryRouteBeforeRecreate, firstRoute)
+        assertEquals(recreatedMapRouteLine.getPrimaryRoute(), secondRoute)
     }
 
     private fun getMultilegRoute(): DirectionsRoute {

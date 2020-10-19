@@ -30,7 +30,7 @@ class MapRouteProgressChangeListenerTest {
         every { routeLine.retrieveDirectionsRoutes() } returns emptyList()
         every { routeLine.draw(capture(drawDirections)) } returns Unit
         every { routeLine.reinitializeWithRoutes(capture(routeListSlot)) } returns Unit
-        every { routeLine.vanishPointOffset } returns 0f
+        every { routeLine.vanishPointOffset } returns 0.0
         every { routeArrow.addUpcomingManeuverArrow(capture(addRouteProgress)) } returns Unit
         every { routeArrow.routeArrowIsVisible() } returns true
     }
