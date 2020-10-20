@@ -1,0 +1,4 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="MissingTranslation">Kimono</string>
+    <string name="sample_test_activity_description" tools:ignore="MissingTranslation">This is a sample description for a test activity</string>
+</resources>

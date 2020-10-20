@@ -1,0 +1,63 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.mapbox.navigation.qa"
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // Support libraries
+    implementation dependenciesList.androidXCore
+    implementation dependenciesList.materialDesign
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXPreference
+
+    // Mapbox Navigation SDK
+    implementation project(':libnavigation-ui')
+    implementation dependenciesList.mapboxSdkTurf
+
+    //ktlint
+    ktlint dependenciesList.ktlint
+
+    // Kotlin support
+    implementation dependenciesList.kotlinStdLib
+
+    //Coroutines
+    implementation dependenciesList.coroutinesAndroid
+
+    implementation dependenciesList.multidex
+
+    // Logging
+    implementation dependenciesList.timber
+
+    // Leak Canary
+    debugImplementation dependenciesList.leakCanaryDebug
+}
