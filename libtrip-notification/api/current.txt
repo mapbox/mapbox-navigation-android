@@ -1,8 +1,1 @@
 // Signature format: 3.0
-package com.mapbox.navigation.trip.notification.time.span {
-
-  public final class SpanExKt {
-  }
-
-}
-

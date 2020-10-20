@@ -1,0 +1,11 @@
+<resources>
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="one">nap</item>
+        <item quantity="other">nap</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">óra</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">perc</string>
+</resources>

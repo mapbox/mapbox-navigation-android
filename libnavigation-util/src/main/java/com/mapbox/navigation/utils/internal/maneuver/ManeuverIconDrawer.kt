@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification.internal.maneuver
+package com.mapbox.navigation.utils.internal.maneuver
 
 import android.graphics.Canvas
 import android.graphics.PointF

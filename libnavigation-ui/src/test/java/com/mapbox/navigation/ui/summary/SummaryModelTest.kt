@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.internal.VoiceUnit.METRIC
+import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.Rounding.INCREMENT_FIFTY
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
-import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
 import com.mapbox.navigation.ui.BaseTest
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -18,6 +18,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Calendar
+import kotlin.jvm.Throws
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)

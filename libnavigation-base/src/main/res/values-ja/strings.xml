@@ -1,0 +1,10 @@
+<resources>
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="other">日</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">時間</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">分</string>
+</resources>

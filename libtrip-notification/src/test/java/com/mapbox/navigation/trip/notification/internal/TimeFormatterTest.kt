@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.mapbox.navigation.base.TimeFormat.NONE_SPECIFIED
 import com.mapbox.navigation.base.TimeFormat.TWELVE_HOURS
 import com.mapbox.navigation.base.TimeFormat.TWENTY_FOUR_HOURS
+import com.mapbox.navigation.base.internal.time.TimeFormatter
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

@@ -181,6 +181,13 @@ package com.mapbox.navigation.base.route {
 
 }
 
+package com.mapbox.navigation.base.time.span {
+
+  public final class SpanExKt {
+  }
+
+}
+
 package com.mapbox.navigation.base.trip.model {
 
   public final class EHorizon {

@@ -18,14 +18,13 @@ import androidx.core.util.Pair;
 import com.mapbox.api.directions.v5.models.ManeuverModifier;
 import com.mapbox.api.directions.v5.models.StepManeuver;
 import com.mapbox.navigation.ui.R;
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper;
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconDrawer;
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuversStyleKit;
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconDrawer;
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper;
+import com.mapbox.navigation.utils.internal.maneuver.ManeuversStyleKit;
 
-import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
-import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
-import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
-import static com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
+import static com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP;
+import static com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS;
+import static com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES;
 
 
 /**
@@ -43,7 +42,7 @@ public class ManeuverView extends View {
   private int primaryColor;
   @ColorInt
   private int secondaryColor;
-  private float roundaboutAngle = DEFAULT_ROUNDABOUT_ANGLE;
+  private float roundaboutAngle = ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE;
   @Nullable
   private Pair<String, String> maneuverTypeAndModifier = new Pair<>(null, null);
   private PointF size;

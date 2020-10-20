@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.internal.extensions.LocaleEx;
+import com.mapbox.navigation.base.internal.time.TimeFormatter;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
-import com.mapbox.navigation.trip.notification.internal.TimeFormatter;
 import timber.log.Timber;
 
 import java.util.Calendar;
