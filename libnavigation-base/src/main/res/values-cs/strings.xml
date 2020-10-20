@@ -1,0 +1,13 @@
+<resources>
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="one">den</item>
+        <item quantity="few">dni</item>
+        <item quantity="many">dnů</item>
+        <item quantity="other">den</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">hod.</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">min.</string>
+</resources>

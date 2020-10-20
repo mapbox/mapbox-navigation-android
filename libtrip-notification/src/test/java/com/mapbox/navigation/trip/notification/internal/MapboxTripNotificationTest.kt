@@ -15,6 +15,7 @@ import android.widget.RemoteViews
 import com.mapbox.api.directions.v5.models.BannerInstructions
 import com.mapbox.api.directions.v5.models.BannerText
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.time.TimeFormatter
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress

@@ -2,13 +2,4 @@
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">Muu Lilọ kiri</string>
     <string name="mapbox_eta_format">%s ETA</string>
-
-    <!-- Time formatting -->
-    <plurals name="mapbox_number_of_days">
-        <item quantity="other">ọjọ</item>
-    </plurals>
-    <!-- Hour -->
-    <string name="mapbox_unit_hr">hr</string>
-    <!-- Minute -->
-    <string name="mapbox_unit_min">min</string>
 </resources>

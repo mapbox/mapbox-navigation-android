@@ -4,14 +4,4 @@
     <string name="mapbox_stop_session">Sitzung beenden</string>
     <string name="mapbox_free_drive_session">Freie Fahrt-Sitzung</string>
     <string name="mapbox_eta_format">%s ETA</string>
-
-    <!-- Time formatting -->
-    <plurals name="mapbox_number_of_days">
-        <item quantity="one">Tag</item>
-        <item quantity="other">Tage</item>
-    </plurals>
-    <!-- Hour -->
-    <string name="mapbox_unit_hr">Std.</string>
-    <!-- Minute -->
-    <string name="mapbox_unit_min">Min.</string>
 </resources>

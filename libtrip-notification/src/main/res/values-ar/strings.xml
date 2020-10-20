@@ -2,18 +2,4 @@
     <!-- Notification Strings -->
     <string name="mapbox_end_navigation">انهاء الرحلة</string>
     <string name="mapbox_eta_format">%s الوقت المتوقع للوصول</string>
-
-    <!-- Time formatting -->
-    <plurals name="mapbox_number_of_days">
-        <item quantity="zero">يوم</item>
-        <item quantity="one">يوم</item>
-        <item quantity="two">يومان</item>
-        <item quantity="few">أيام</item>
-        <item quantity="many">أيام</item>
-        <item quantity="other">أيام</item>
-    </plurals>
-    <!-- Hour -->
-    <string name="mapbox_unit_hr">ساعة</string>
-    <!-- Minute -->
-    <string name="mapbox_unit_min">دقيقة</string>
 </resources>

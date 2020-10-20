@@ -1,0 +1,6 @@
+<resources>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">שעות</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">דק׳</string>
+</resources>

@@ -1,0 +1,12 @@
+<resources>
+
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">hr</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">min</string>
+</resources>

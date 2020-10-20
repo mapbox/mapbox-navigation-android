@@ -1,0 +1,10 @@
+<resources>
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="other">kun</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">soat</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">minut</string>
+</resources>

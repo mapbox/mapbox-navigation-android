@@ -30,6 +30,7 @@ import com.mapbox.api.directions.v5.models.ManeuverModifier
 import com.mapbox.api.directions.v5.models.StepManeuver
 import com.mapbox.api.directions.v5.models.StepManeuver.StepManeuverType
 import com.mapbox.navigation.base.formatter.DistanceFormatter
+import com.mapbox.navigation.base.internal.time.TimeFormatter.formatTime
 import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.notification.NotificationAction
@@ -37,13 +38,6 @@ import com.mapbox.navigation.base.trip.notification.TripNotification
 import com.mapbox.navigation.trip.notification.NavigationNotificationProvider
 import com.mapbox.navigation.trip.notification.R
 import com.mapbox.navigation.trip.notification.RemoteViewsProvider
-import com.mapbox.navigation.trip.notification.internal.TimeFormatter.formatTime
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
-import com.mapbox.navigation.trip.notification.internal.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
 import com.mapbox.navigation.utils.internal.END_NAVIGATION_ACTION
 import com.mapbox.navigation.utils.internal.NAVIGATION_NOTIFICATION_CHANNEL
 import com.mapbox.navigation.utils.internal.NOTIFICATION_CHANNEL
@@ -51,6 +45,12 @@ import com.mapbox.navigation.utils.internal.NOTIFICATION_ID
 import com.mapbox.navigation.utils.internal.SET_BACKGROUND_COLOR
 import com.mapbox.navigation.utils.internal.ifChannelException
 import com.mapbox.navigation.utils.internal.ifNonNull
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.DEFAULT_ROUNDABOUT_ANGLE
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_ICON_DRAWER_MAP
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.MANEUVER_TYPES_WITH_NULL_MODIFIERS
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.ROUNDABOUT_MANEUVER_TYPES
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.adjustRoundaboutAngle
+import com.mapbox.navigation.utils.internal.maneuver.ManeuverIconHelper.isManeuverIconNeedFlip
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ClosedSendChannelException

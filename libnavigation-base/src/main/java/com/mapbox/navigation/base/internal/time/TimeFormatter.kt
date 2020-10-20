@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification.internal
+package com.mapbox.navigation.base.internal.time
 
 import android.content.Context
 import android.content.res.Configuration
@@ -7,12 +7,12 @@ import android.graphics.Typeface
 import android.text.SpannableStringBuilder
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import com.mapbox.navigation.base.R
 import com.mapbox.navigation.base.TimeFormat
-import com.mapbox.navigation.trip.notification.R
-import com.mapbox.navigation.trip.notification.time.TimeFormattingChain
-import com.mapbox.navigation.trip.notification.time.span.SpanItem
-import com.mapbox.navigation.trip.notification.time.span.TextSpanItem
-import com.mapbox.navigation.trip.notification.time.span.combineSpan
+import com.mapbox.navigation.base.time.TimeFormattingChain
+import com.mapbox.navigation.base.time.span.SpanItem
+import com.mapbox.navigation.base.time.span.TextSpanItem
+import com.mapbox.navigation.base.time.span.combineSpan
 import java.util.ArrayList
 import java.util.Calendar
 import java.util.Locale

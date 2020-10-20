@@ -37,6 +37,8 @@ android {
 dependencies {
     implementation dependenciesList.kotlinStdLib
     implementation dependenciesList.coroutinesAndroid
+    implementation dependenciesList.androidXCore
+    api dependenciesList.mapboxSdkDirectionsModels
 
     //ktlint
     ktlint dependenciesList.ktlint

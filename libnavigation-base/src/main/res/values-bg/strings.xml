@@ -1,0 +1,11 @@
+<resources>
+    <!-- Time formatting -->
+    <plurals name="mapbox_number_of_days">
+        <item quantity="one">дни</item>
+        <item quantity="other">дни</item>
+    </plurals>
+    <!-- Hour -->
+    <string name="mapbox_unit_hr">ч</string>
+    <!-- Minute -->
+    <string name="mapbox_unit_min">мин</string>
+</resources>

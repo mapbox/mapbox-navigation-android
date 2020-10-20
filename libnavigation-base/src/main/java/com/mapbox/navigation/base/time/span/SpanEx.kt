@@ -1,4 +1,4 @@
-package com.mapbox.navigation.trip.notification.time.span
+package com.mapbox.navigation.base.time.span
 
 import android.os.Build
 import android.text.Spannable
