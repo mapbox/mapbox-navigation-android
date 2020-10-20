@@ -32,6 +32,7 @@ import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.replay.MapboxReplayer
@@ -39,6 +40,7 @@ import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent.UI
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
+import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
@@ -56,6 +58,8 @@ import com.mapbox.navigation.ui.feedback.FeedbackItem
 import com.mapbox.navigation.ui.internal.utils.BitmapEncodeOptions
 import com.mapbox.navigation.ui.internal.utils.ViewUtils
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayer
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
@@ -70,6 +74,7 @@ import java.util.Locale
  * InstructionView, FeedbackButton, and SoundButton with
  * the Navigation SDK.
  */
+@SuppressLint("MissingPermission")
 class InstructionViewActivity :
     AppCompatActivity(),
     OnMapReadyCallback,
@@ -79,7 +84,15 @@ class InstructionViewActivity :
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private lateinit var speechPlayer: NavigationSpeechPlayer
     private lateinit var destination: LatLng
+
     private val mapboxReplayer = MapboxReplayer()
+    private val mapboxRouteAlertsDisplayer: MapboxRouteAlertsDisplayer by lazy {
+        MapboxRouteAlertsDisplayer(
+            MapboxRouteAlertsDisplayerOptions.Builder(this)
+                .showToll(true)
+                .build()
+        )
+    }
 
     private var mapboxMap: MapboxMap? = null
     private var feedbackButton: NavigationButton? = null
@@ -107,6 +120,13 @@ class InstructionViewActivity :
             registerRouteProgressObserver(routeProgressObserver)
             registerBannerInstructionsObserver(bannerInstructionObserver)
             registerVoiceInstructionsObserver(voiceInstructionsObserver)
+            registerRouteAlertsObserver(
+                object : RouteAlertsObserver {
+                    override fun onNewRouteAlerts(routeAlerts: List<RouteAlert>) {
+                        mapboxRouteAlertsDisplayer.onNewRouteAlerts(routeAlerts)
+                    }
+                }
+            )
         }
 
         initListeners()
@@ -203,6 +223,8 @@ class InstructionViewActivity :
                 }
                 else -> restoreNavigation()
             }
+
+            mapboxRouteAlertsDisplayer.onStyleLoaded(it)
         }
 
         mapboxMap.addOnMapLongClickListener { latLng ->

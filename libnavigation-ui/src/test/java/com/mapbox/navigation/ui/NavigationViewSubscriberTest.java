@@ -58,6 +58,7 @@ public class NavigationViewSubscriberTest {
     when(navigationViewModel.retrieveDestination()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveShouldRecordScreenshot()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveIsFeedbackSentSuccess()).thenReturn(mock(MutableLiveData.class));
+    when(navigationViewModel.retrieveRouteAlerts()).thenReturn(mock(MutableLiveData.class));
 
     theNavigationViewSubscriber.unsubscribe();
 
@@ -66,6 +67,7 @@ public class NavigationViewSubscriberTest {
     verify(navigationViewModel.retrieveDestination()).removeObservers(eq(lifecycleOwner));
     verify(navigationViewModel.retrieveShouldRecordScreenshot()).removeObservers(eq(lifecycleOwner));
     verify(navigationViewModel.retrieveIsFeedbackSentSuccess()).removeObservers(eq(lifecycleOwner));
+    verify(navigationViewModel.retrieveRouteAlerts()).removeObservers(eq(lifecycleOwner));
   }
 
   @Test
@@ -75,6 +77,7 @@ public class NavigationViewSubscriberTest {
     when(navigationViewModel.retrieveDestination()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveShouldRecordScreenshot()).thenReturn(mock(MutableLiveData.class));
     when(navigationViewModel.retrieveIsFeedbackSentSuccess()).thenReturn(mock(MutableLiveData.class));
+    when(navigationViewModel.retrieveRouteAlerts()).thenReturn(mock(MutableLiveData.class));
 
     theNavigationViewSubscriber.subscribe();
 
@@ -83,5 +86,6 @@ public class NavigationViewSubscriberTest {
     verify(navigationViewModel.retrieveDestination()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveShouldRecordScreenshot()).observe(eq(lifecycleOwner), any(Observer.class));
     verify(navigationViewModel.retrieveIsFeedbackSentSuccess()).observe(eq(lifecycleOwner), any(Observer.class));
+    verify(navigationViewModel.retrieveRouteAlerts()).observe(eq(lifecycleOwner), any(Observer.class));
   }
 }

@@ -32,6 +32,11 @@ class NavigationViewSubscriber implements LifecycleObserver {
       }
     });
 
+    navigationViewModel.retrieveRouteAlerts().observe(
+            lifecycleOwner,
+            navigationPresenter::onRouteAlertsUpdate
+    );
+
     navigationViewModel.retrieveNavigationLocation().observe(lifecycleOwner, location -> {
       if (location != null) {
         navigationPresenter.onNavigationLocationUpdate(location);
@@ -58,5 +63,6 @@ class NavigationViewSubscriber implements LifecycleObserver {
     navigationViewModel.retrieveNavigationLocation().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveShouldRecordScreenshot().removeObservers(lifecycleOwner);
     navigationViewModel.retrieveIsFeedbackSentSuccess().removeObservers(lifecycleOwner);
+    navigationViewModel.retrieveRouteAlerts().removeObservers(lifecycleOwner);
   }
 }

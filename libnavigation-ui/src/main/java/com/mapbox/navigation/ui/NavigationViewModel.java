@@ -22,6 +22,7 @@ import com.mapbox.navigation.base.internal.extensions.ContextEx;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.options.NavigationOptions;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert;
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
@@ -32,6 +33,7 @@ import com.mapbox.navigation.core.replay.route.ReplayProgressObserver;
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper;
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver;
 import com.mapbox.navigation.core.trip.session.OffRouteObserver;
+import com.mapbox.navigation.core.trip.session.RouteAlertsObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver;
 import com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver;
@@ -48,8 +50,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import static com.mapbox.navigation.base.internal.extensions.LocaleEx.getLocaleDirectionsRoute;
@@ -69,6 +73,7 @@ public class NavigationViewModel extends AndroidViewModel {
   private final MutableLiveData<Boolean> shouldRecordScreenshot = new MutableLiveData<>();
   private final MutableLiveData<Boolean> isFeedbackSentSuccess = new MutableLiveData<>();
   private final MutableLiveData<Point> destination = new MutableLiveData<>();
+  private final MutableLiveData<List<RouteAlert>> routeAlerts = new MutableLiveData<>();
 
   private MapboxNavigation navigation;
   @Nullable
@@ -231,6 +236,7 @@ public class NavigationViewModel extends AndroidViewModel {
       navigation.unregisterBannerInstructionsObserver(bannerInstructionsObserver);
       navigation.unregisterVoiceInstructionsObserver(voiceInstructionsObserver);
       navigation.unregisterTripSessionStateObserver(tripSessionStateObserver);
+      navigation.unregisterRouteAlertsObserver(routeAlertsObserver);
       navigation.stopTripSession();
     }
   }
@@ -262,6 +268,11 @@ public class NavigationViewModel extends AndroidViewModel {
   @NonNull
   LiveData<Point> retrieveDestination() {
     return destination;
+  }
+
+  @NonNull
+  LiveData<List<RouteAlert>> retrieveRouteAlerts() {
+    return routeAlerts;
   }
 
   @NonNull
@@ -399,6 +410,7 @@ public class NavigationViewModel extends AndroidViewModel {
     navigation.registerBannerInstructionsObserver(bannerInstructionsObserver);
     navigation.registerVoiceInstructionsObserver(voiceInstructionsObserver);
     navigation.registerTripSessionStateObserver(tripSessionStateObserver);
+    navigation.registerRouteAlertsObserver(routeAlertsObserver);
     if (navigationViewOptions.shouldSimulateRoute()) {
       navigation.registerRouteProgressObserver(new ReplayProgressObserver(mapboxReplayer));
     }
@@ -472,6 +484,11 @@ public class NavigationViewModel extends AndroidViewModel {
         destination.setValue(routeOptions.coordinates().get(routes.get(0).routeOptions().coordinates().size() - 1));
       }
     }
+  };
+
+  @NonNull
+  private RouteAlertsObserver routeAlertsObserver = routeAlertList -> {
+    routeAlerts.setValue(new ArrayList<>(routeAlertList));
   };
 
   private void endNavigation() {

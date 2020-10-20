@@ -30,11 +30,11 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.UiSettings;
 import com.mapbox.navigation.base.TimeFormat;
 import com.mapbox.navigation.base.formatter.DistanceFormatter;
 import com.mapbox.navigation.base.route.Router;
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert;
 import com.mapbox.navigation.core.MapboxNavigation;
 import com.mapbox.navigation.core.replay.MapboxReplayer;
 import com.mapbox.navigation.ui.camera.DynamicCamera;
@@ -47,8 +47,11 @@ import com.mapbox.navigation.ui.internal.utils.ViewUtils;
 import com.mapbox.navigation.ui.map.NavigationMapboxMap;
 import com.mapbox.navigation.ui.map.WayNameView;
 import com.mapbox.navigation.ui.puck.DefaultMapboxPuckDrawableSupplier;
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions;
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayer;
 import com.mapbox.navigation.ui.summary.SummaryBottomSheet;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -79,6 +82,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   private static final int DEFAULT_PX_BETWEEN_BOTTOM_SHEET_LOGO_AND_ATTRIBUTION = 16;
   private static final long WAY_NAME_TRANSLATIONX_DURATION = 750L;
   private MapView mapView;
+  private MapboxRouteAlertsDisplayer mapboxRouteAlertsDisplayer = new MapboxRouteAlertsDisplayer(
+          new MapboxRouteAlertsDisplayerOptions.Builder(getContext())
+                  .showToll(true)
+                  .build()
+  );
   private InstructionView instructionView;
   private SummaryBottomSheet summaryBottomSheet;
   private BottomSheetBehavior summaryBehavior;
@@ -125,6 +133,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   public void onCreate(@Nullable Bundle savedInstanceState) {
     mapView.onCreate(savedInstanceState);
+    mapView.addOnDidFinishLoadingStyleListener(() -> {
+      if (navigationMap != null) {
+        mapboxRouteAlertsDisplayer.onStyleLoaded(navigationMap.retrieveMap().getStyle());
+      }
+    });
     updatePresenterState(savedInstanceState);
     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
   }
@@ -177,12 +190,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
   public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     String instanceKey = getContext().getString(R.string.mapbox_navigation_view_instance_state);
     NavigationViewInstanceState navigationViewInstanceState = savedInstanceState.getParcelable(instanceKey);
-    recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
-    wayNameView.setVisibility(navigationViewInstanceState.isWayNameVisible() ? VISIBLE : INVISIBLE);
-    wayNameView.updateWayNameText(navigationViewInstanceState.getWayNameText());
-    resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
-    updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
-    restoreInstructionMutedState(navigationViewInstanceState.isMuted());
+    if (navigationViewInstanceState != null) {
+      recenterBtn.setVisibility(navigationViewInstanceState.getRecenterButtonVisibility());
+      wayNameView.setVisibility(navigationViewInstanceState.isWayNameVisible() ? VISIBLE : INVISIBLE);
+      wayNameView.updateWayNameText(navigationViewInstanceState.getWayNameText());
+      resetBottomSheetState(navigationViewInstanceState.getBottomSheetBehaviorState());
+      updateInstructionListState(navigationViewInstanceState.isInstructionViewVisible());
+      restoreInstructionMutedState(navigationViewInstanceState.isMuted());
+    }
     mapInstanceState = savedInstanceState;
   }
 
@@ -236,17 +251,14 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
    */
   @Override
   public void onMapReady(@NonNull final MapboxMap mapboxMap) {
-    mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), new Style.OnStyleLoaded() {
-      @Override
-      public void onStyleLoaded(@NonNull Style style) {
-        initializeNavigationMap(mapView, mapboxMap);
-        moveMapboxLogoAboveBottomSheet();
-        moveMapboxAttributionAboveBottomSheet();
-        logoAndAttributionShownForFirstTime = true;
-        initializeWayNameListener();
-        updateNavigationReadyListeners(navigationViewModel.isRunning());
-        isMapInitialized = true;
-      }
+    mapboxMap.setStyle(ThemeSwitcher.retrieveMapStyle(getContext()), style -> {
+      initializeNavigationMap(mapView, mapboxMap);
+      moveMapboxLogoAboveBottomSheet();
+      moveMapboxAttributionAboveBottomSheet();
+      logoAndAttributionShownForFirstTime = true;
+      initializeWayNameListener();
+      updateNavigationReadyListeners(navigationViewModel.isRunning());
+      isMapInitialized = true;
     });
   }
 
@@ -311,6 +323,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     if (navigationMap != null) {
       navigationMap.addDestinationMarker(position);
     }
+  }
+
+  @Override
+  public void onRouteAlertsUpdated(List<RouteAlert> routeAlerts) {
+    mapboxRouteAlertsDisplayer.onNewRouteAlerts(routeAlerts);
   }
 
   /**
@@ -746,7 +763,6 @@ public class NavigationView extends CoordinatorLayout implements LifecycleOwner,
     navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
     if (mapInstanceState != null) {
       navigationMap.restoreStateFrom(mapInstanceState);
-      return;
     }
   }
 

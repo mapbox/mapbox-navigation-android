@@ -29,8 +29,6 @@ import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
 import com.mapbox.navigation.base.trip.model.alert.RouteAlertType
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionAlert
-import com.mapbox.navigation.base.trip.model.alert.TollCollectionType
 import com.mapbox.navigation.base.trip.model.alert.TunnelEntranceAlert
 import com.mapbox.navigation.base.trip.model.alert.toLineString
 import com.mapbox.navigation.core.MapboxNavigation
@@ -44,13 +42,22 @@ import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
 import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayer
+import com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions
 import kotlinx.android.synthetic.main.activity_replay_route_layout.mapView
 import kotlinx.android.synthetic.main.activity_route_alerts.distanceRemainingText
-import kotlinx.android.synthetic.main.fragment_basic_navigation.*
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 class RouteAlertsActivity : AppCompatActivity() {
+
+    private val mapboxRouteAlertsDisplayer: MapboxRouteAlertsDisplayer by lazy {
+        MapboxRouteAlertsDisplayer(
+            MapboxRouteAlertsDisplayerOptions.Builder(this)
+                .showToll(true)
+                .build()
+        )
+    }
 
     private val directionsRoute: DirectionsRoute by lazy {
         val directionsResponseJson = resources.openRawResource(
@@ -65,7 +72,6 @@ class RouteAlertsActivity : AppCompatActivity() {
     }
 
     private val blueCircleImageId = "circle_blue_image"
-    private val redCircleImageId = "circle_red_image"
     private val greenCircleImageId = "circle_green_image"
     private val yellowCircleImageId = "circle_yellow_image"
     private val blackCircleImageId = "circle_black_image"
@@ -94,16 +100,6 @@ class RouteAlertsActivity : AppCompatActivity() {
         "country_border_crossings_source"
     ).withProperties(
         *generateSymbolLayerProperties(blueCircleImageId, countryBorderCrossingsTextPropertyId)
-    )
-
-    // toll collection
-    private val tollCollectionTextPropertyId = "toll_collections_text_property"
-    private val tollCollectionSource = GeoJsonSource("toll_collections_source")
-    private val tollCollectionLayer = SymbolLayer(
-        "toll_collections_layer",
-        "toll_collections_source"
-    ).withProperties(
-        *generateSymbolLayerProperties(redCircleImageId, tollCollectionTextPropertyId)
     )
 
     // rest stop
@@ -182,13 +178,11 @@ class RouteAlertsActivity : AppCompatActivity() {
                     mapboxReplayer.play()
                 }
 
+                mapboxRouteAlertsDisplayer.onStyleLoaded(style)
+
                 style.addImage(
                     blueCircleImageId,
                     ContextCompat.getDrawable(this, R.drawable.ic_circle_blue)!!
-                )
-                style.addImage(
-                    redCircleImageId,
-                    ContextCompat.getDrawable(this, R.drawable.ic_circle_red)!!
                 )
                 style.addImage(
                     greenCircleImageId,
@@ -212,11 +206,6 @@ class RouteAlertsActivity : AppCompatActivity() {
                 style.addSource(countryBorderCrossingsSource)
                 style.addLayerBelow(
                     countryBorderCrossingsLayer,
-                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
-                )
-                style.addSource(tollCollectionSource)
-                style.addLayerBelow(
-                    tollCollectionLayer,
                     RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
                 )
                 style.addSource(restStopSource)
@@ -273,12 +262,13 @@ class RouteAlertsActivity : AppCompatActivity() {
         mapboxNavigation.registerRouteAlertsObserver(
             object : RouteAlertsObserver {
                 override fun onNewRouteAlerts(routeAlerts: List<RouteAlert>) {
+                    mapboxRouteAlertsDisplayer.onNewRouteAlerts(routeAlerts)
+
                     // in this part of the example we're listening for the full list of alerts
                     // whenever a new route is set and marking all of the tunnels on the map
                     val tunnelFeatures = mutableListOf<Feature>()
                     val tunnelNamesFeatures = mutableListOf<Feature>()
                     val countryBorderCrossingsFeatures = mutableListOf<Feature>()
-                    val tollCollectionFeatures = mutableListOf<Feature>()
                     val restStopsFeatures = mutableListOf<Feature>()
                     val restrictedAreasFeatures = mutableListOf<Feature>()
                     val incidentsFeatures = mutableListOf<Feature>()
@@ -314,30 +304,6 @@ class RouteAlertsActivity : AppCompatActivity() {
                                     "$from -> $to"
                                 )
                                 countryBorderCrossingsFeatures.add(feature)
-                            }
-                            is TollCollectionAlert -> {
-                                val typeString = when (routeAlert.tollCollectionType) {
-                                    TollCollectionType.TollGantry -> {
-                                        "toll gantry"
-                                    }
-                                    TollCollectionType.TollBooth -> {
-                                        "toll booth"
-                                    }
-                                    TollCollectionType.Unknown -> {
-                                        "unknown"
-                                    }
-                                    else -> {
-                                        throw IllegalArgumentException(
-                                            "unknown toll collection point type"
-                                        )
-                                    }
-                                }
-                                val feature = Feature.fromGeometry(routeAlert.coordinate)
-                                feature.addStringProperty(
-                                    tollCollectionTextPropertyId,
-                                    typeString
-                                )
-                                tollCollectionFeatures.add(feature)
                             }
                             is RestStopAlert -> {
                                 val typeString = when (routeAlert.restStopType) {
@@ -402,9 +368,6 @@ class RouteAlertsActivity : AppCompatActivity() {
                     )
                     countryBorderCrossingsSource.setGeoJson(
                         FeatureCollection.fromFeatures(countryBorderCrossingsFeatures)
-                    )
-                    tollCollectionSource.setGeoJson(
-                        FeatureCollection.fromFeatures(tollCollectionFeatures)
                     )
                     restStopSource.setGeoJson(
                         FeatureCollection.fromFeatures(restStopsFeatures)

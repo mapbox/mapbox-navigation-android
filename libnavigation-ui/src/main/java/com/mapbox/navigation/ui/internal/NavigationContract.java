@@ -6,6 +6,9 @@ import androidx.annotation.NonNull;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert;
+
+import java.util.List;
 
 public interface NavigationContract {
 
@@ -54,5 +57,7 @@ public interface NavigationContract {
     void onFeedbackSent();
 
     void onGuidanceViewChange(int left, int top, int width, int height);
+
+    void onRouteAlertsUpdated(List<RouteAlert> routeAlerts);
   }
 }

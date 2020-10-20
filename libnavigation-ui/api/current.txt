@@ -60,6 +60,7 @@ package com.mapbox.navigation.ui {
     method public void onPause();
     method public void onRestoreInstanceState(android.os.Bundle);
     method public void onResume();
+    method public void onRouteAlertsUpdated(java.util.List<com.mapbox.navigation.base.trip.model.alert.RouteAlert!>!);
     method public void onSaveInstanceState(android.os.Bundle);
     method public void onStart();
     method public void onStop();
@@ -648,6 +649,69 @@ package com.mapbox.navigation.ui.route {
     method public int getLineColorResourceId();
     method public int getLineShieldColorResourceId();
     method public String getRouteIdentifier();
+  }
+
+}
+
+package com.mapbox.navigation.ui.routealert {
+
+  public final class MapboxRouteAlertsDisplayer {
+    ctor public MapboxRouteAlertsDisplayer(com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions options, com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayer tollCollectionAlertDisplayer);
+    ctor public MapboxRouteAlertsDisplayer(com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions options);
+    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert> routeAlerts);
+    method public void onStyleLoaded(com.mapbox.mapboxsdk.maps.Style? style);
+    field public static final com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayer.Companion! Companion;
+  }
+
+  public static final class MapboxRouteAlertsDisplayer.Companion {
+  }
+
+  public final class MapboxRouteAlertsDisplayerOptions {
+    method public android.content.Context getContext();
+    method public boolean getShowToll();
+    method public com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions.Builder toBuilder();
+  }
+
+  public static final class MapboxRouteAlertsDisplayerOptions.Builder {
+    ctor public MapboxRouteAlertsDisplayerOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions build();
+    method public com.mapbox.navigation.ui.routealert.MapboxRouteAlertsDisplayerOptions.Builder showToll(boolean showToll);
+  }
+
+  public final class TollCollectionAlertDisplayer {
+    ctor public TollCollectionAlertDisplayer(com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayerOptions tollCollectionAlertDisplayerOptions);
+    method public void onNewRouteAlerts(java.util.List<? extends com.mapbox.navigation.base.trip.model.alert.RouteAlert> routeAlerts);
+    method public void onNewRouteTollAlerts(java.util.List<com.mapbox.navigation.ui.routealert.TollCollectionAlertUiModel> tollCollectionAlertUiModels);
+    method public void onStyleLoaded(com.mapbox.mapboxsdk.maps.Style style);
+    field public static final com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayer.Companion! Companion;
+  }
+
+  public static final class TollCollectionAlertDisplayer.Companion {
+  }
+
+  public final class TollCollectionAlertDisplayerOptions {
+    method public android.graphics.drawable.Drawable getDrawable();
+    method public com.mapbox.mapboxsdk.style.layers.PropertyValue<?>![] getProperties();
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayerOptions.Builder toBuilder();
+  }
+
+  public static final class TollCollectionAlertDisplayerOptions.Builder {
+    ctor public TollCollectionAlertDisplayerOptions.Builder(android.content.Context context);
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayerOptions build();
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayerOptions.Builder drawable(android.graphics.drawable.Drawable drawable);
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertDisplayerOptions.Builder properties(com.mapbox.mapboxsdk.style.layers.PropertyValue<?>[] properties);
+  }
+
+  public final class TollCollectionAlertUiModel {
+    method public com.mapbox.geojson.Point getCoordinate();
+    method public String getTollDescription();
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertUiModel.Builder toBuilder();
+  }
+
+  public static final class TollCollectionAlertUiModel.Builder {
+    ctor public TollCollectionAlertUiModel.Builder(com.mapbox.geojson.Point coordinate);
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertUiModel build();
+    method public com.mapbox.navigation.ui.routealert.TollCollectionAlertUiModel.Builder tollDescription(String tollDescription);
   }
 
 }

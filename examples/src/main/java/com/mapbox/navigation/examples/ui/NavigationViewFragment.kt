@@ -139,7 +139,7 @@ class NavigationViewFragment : Fragment(), OnNavigationReadyCallback, Navigation
 
     private fun getDirectionsRoute(): DirectionsRoute {
         val directionsRouteAsJson = resources
-            .openRawResource(R.raw.sample_route_2_token_replacement)
+            .openRawResource(R.raw.sample_route_with_toll)
             .bufferedReader()
             .use { it.readText() }
         return DirectionsRoute.fromJson(directionsRouteAsJson)

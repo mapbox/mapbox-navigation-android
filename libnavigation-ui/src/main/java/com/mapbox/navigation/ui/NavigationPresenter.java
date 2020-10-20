@@ -8,7 +8,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.core.utils.TextUtils;
 import com.mapbox.geojson.Point;
+import com.mapbox.navigation.base.trip.model.alert.RouteAlert;
 import com.mapbox.navigation.ui.internal.NavigationContract;
+
+import java.util.List;
 
 class NavigationPresenter {
 
@@ -60,6 +63,10 @@ class NavigationPresenter {
 
   void onDestinationUpdate(Point point) {
     view.addMarker(point);
+  }
+
+  void onRouteAlertsUpdate(List<RouteAlert> routeAlerts) {
+    view.onRouteAlertsUpdated(routeAlerts);
   }
 
   void onShouldRecordScreenshot() {
