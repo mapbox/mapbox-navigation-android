@@ -2,6 +2,22 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.2.0-alpha.3 - October 21, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+
+#### Improvements
+* Update the algorithm to calculate the vanishing point of the route to use EPSG:3857 projection instead of turf measurements. This greatly increases the precision, even on extremely long routes. It also improves the performance of the `MapRouteLine`. [#3661](https://github.com/mapbox/mapbox-navigation-android/pull/3661)
+
+#### Bug fixes
+* Assign `currentHorizon`, `currentType` and `currentPosition` from the main thread to avoid synchronization issues [#3653](https://github.com/mapbox/mapbox-navigation-android/pull/3653)
+* Keep the selected route as primary after map style has been changed [#3664](https://github.com/mapbox/mapbox-navigation-android/pull/3664)
+
+#### Other changes
+* Remove dependency of UI SDK on the modular notification classes. This fixes an issue where the default `TripNotification` implementation couldn't be replaced with a custom one. [#3665](https://github.com/mapbox/mapbox-navigation-android/pull/3665)
+
 ### Mapbox Navigation SDK 1.1.1 - October 15, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
