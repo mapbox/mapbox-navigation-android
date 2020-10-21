@@ -2,6 +2,27 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### Mapbox Navigation SDK 1.2.0-alpha.3 - October 21, 2020
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+
+#### Features
+* Update the algorithm to calculate the vanishing point of the route to use EPSG:3857 projection instead of turf measurements [#3661](https://github.com/mapbox/mapbox-navigation-android/pull/3661)
+
+#### Bug fixes
+* Assign `currentHorizon`, `currentType` and `currentPosition` from the main thread to avoid synchronization issues [#3653](https://github.com/mapbox/mapbox-navigation-android/pull/3653)
+* Keep the selected route as primary after map style has been changed [#3664](https://github.com/mapbox/mapbox-navigation-android/pull/3664)
+
+#### Other changes
+* Bump mapboxCommonNative version to 7.1.1 [#3650](https://github.com/mapbox/mapbox-navigation-android/pull/3650)
+* Add Electronic Horizon Builder tests [#3655](https://github.com/mapbox/mapbox-navigation-android/pull/3655)
+* Override commonOkHttp dependency with 7.1.1 [#3657](https://github.com/mapbox/mapbox-navigation-android/pull/3657)
+* Include Codecov reports to Github PR checks [#3663](https://github.com/mapbox/mapbox-navigation-android/pull/3663)
+* Remove dependency of UI SDK on the modular notification classes [#3665](https://github.com/mapbox/mapbox-navigation-android/pull/3665)
+* Bump mapboxSdkServices version to 5.8.0-beta.2 [#3668](https://github.com/mapbox/mapbox-navigation-android/pull/3668)
+
 ### Mapbox Navigation SDK 1.1.1 - October 15, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
