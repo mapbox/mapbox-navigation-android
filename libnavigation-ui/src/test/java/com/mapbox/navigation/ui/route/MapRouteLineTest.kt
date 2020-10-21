@@ -1596,7 +1596,7 @@ class MapRouteLineTest {
             false,
             false,
             mapRouteSourceProvider,
-            0f,
+            0.0,
             null
         )
         val primaryRouteBeforeRecreate = mapRouteLine.getPrimaryRoute()
@@ -1613,7 +1613,7 @@ class MapRouteLineTest {
             mapRouteLine.retrieveVisibility(),
             mapRouteLine.retrieveAlternativesVisible(),
             mapRouteSourceProvider,
-            0f,
+            0.0,
             null
         )
 
