@@ -88,6 +88,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         initListeners()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         mapboxMap.setStyle(Style.MAPBOX_STREETS) {
             mapboxMap.moveCamera(CameraUpdateFactory.zoomTo(15.0))
@@ -143,6 +144,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
         if (!shouldSimulateRoute()) {
             val requestLocationUpdateRequest =
@@ -163,7 +165,7 @@ open class BasicNavigationActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onRoutesReady(routes: List<DirectionsRoute>) {
             if (routes.isNotEmpty()) {
                 directionRoute = routes[0]
-                navigationMapboxMap?.drawRoutes(routes)
+                navigationMapboxMap?.drawRoute(routes[0])
                 startNavigation.visibility = View.VISIBLE
             } else {
                 startNavigation.visibility = View.GONE

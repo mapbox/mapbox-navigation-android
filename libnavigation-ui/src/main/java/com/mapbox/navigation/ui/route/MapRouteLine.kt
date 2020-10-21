@@ -35,8 +35,8 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.ALTERNATIVE_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.HEAVY_CONGESTION_VALUE
+import com.mapbox.navigation.ui.internal.route.RouteConstants.LOW_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
-import com.mapbox.navigation.ui.internal.route.RouteConstants.MINIMUM_ROUTE_LINE_OFFSET
 import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
@@ -59,12 +59,12 @@ import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBelowL
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getBooleanStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getResourceStyledValue
 import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledColor
+import com.mapbox.navigation.ui.route.MapRouteLine.MapRouteLineSupport.getStyledStringArray
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.parallelMap
 import com.mapbox.turf.TurfConstants
 import com.mapbox.turf.TurfException
-import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
 import kotlin.math.ln
@@ -329,6 +329,15 @@ internal class MapRouteLine(
         )
     }
 
+    private val trafficBackfillRoadClasses: List<String> by lazy {
+        getStyledStringArray(
+            R.styleable.MapboxStyleNavigationMapRoute_trafficBackFillRoadClasses,
+            context,
+            styleRes,
+            R.styleable.MapboxStyleNavigationMapRoute
+        )
+    }
+
     /**
      * Initializes the instance with appropriate default values.
      */
@@ -550,6 +559,15 @@ internal class MapRouteLine(
         reinitializeWithRoutes(directionsRoutes, featureDataProvider)
     }
 
+    fun reinitializePrimaryRoute() {
+        this@MapRouteLine.routeFeatureData.firstOrNull { it.route == primaryRoute }?.let {
+            updateRouteTrafficSegments(it)
+            drawPrimaryRoute(it)
+            hideRouteLineAtOffset(vanishPointOffset)
+            hideCasingLineAtOffset(vanishPointOffset)
+        }
+    }
+
     private fun reinitializeWithRoutes(
         directionsRoutes: List<DirectionsRoute>,
         getRouteFeatureData: () -> List<RouteFeatureData>
@@ -574,26 +592,19 @@ internal class MapRouteLine(
         }
     }
 
-    fun reinitializePrimaryRoute() {
-        this.routeFeatureData.firstOrNull { it.route == primaryRoute }?.let {
-            drawPrimaryRoute(it)
-            hideRouteLineAtOffset(vanishPointOffset)
-            hideCasingLineAtOffset(vanishPointOffset)
-        }
-    }
-
     /**
      * Updates which route is identified as the primary route.
      *
      * @param route the DirectionsRoute which should be designated as the primary
      */
     fun updatePrimaryRouteIndex(route: DirectionsRoute) {
-        this.primaryRoute = route
+        this@MapRouteLine.primaryRoute = route
         val partitionedRoutes = routeFeatureData.partition { it.route == primaryRoute }
         routeFeatureData.apply {
             clear()
             addAll(listOf(partitionedRoutes.first, partitionedRoutes.second).flatten())
         }
+        updateRouteTrafficSegments(routeFeatureData.first())
         drawRoutes(routeFeatureData)
     }
 
@@ -817,7 +828,6 @@ internal class MapRouteLine(
 
     private fun drawPrimaryRoute(routeData: RouteFeatureData) {
         setPrimaryRoutesSource(routeData.featureCollection)
-        updateRouteTrafficSegments(routeData)
         if (style.isFullyLoaded) {
             val expression = getExpressionAtOffset(vanishPointOffset)
             style.getLayer(PRIMARY_ROUTE_TRAFFIC_LAYER_ID)?.setProperties(lineGradient(expression))
@@ -826,10 +836,9 @@ internal class MapRouteLine(
     }
 
     private fun updateRouteTrafficSegments(routeData: RouteFeatureData) {
-        val lineString: LineString = getLineStringForRoute(routeData.route)
         val segments = calculateRouteLineSegments(
             routeData.route,
-            lineString,
+            trafficBackfillRoadClasses,
             true,
             ::getRouteColorForCongestion
         )
@@ -1193,14 +1202,23 @@ internal class MapRouteLine(
             styleRes: Int,
             attributes: IntArray
         ): List<Float> {
+            return getStyledStringArray(arrayResourceId, context, styleRes, attributes).mapNotNull {
+                it.toFloatOrNull()
+            }
+        }
+
+        fun getStyledStringArray(
+            arrayResourceId: Int,
+            context: Context,
+            styleRes: Int,
+            attributes: IntArray
+        ): List<String> {
             return try {
                 val typedArray = context.obtainStyledAttributes(styleRes, attributes)
                 val resourceId = typedArray.getResourceId(arrayResourceId, 0).also {
                     typedArray.recycle()
                 }
-                context.resources.getStringArray(resourceId).mapNotNull {
-                    it?.toFloatOrNull()
-                }
+                context.resources.getStringArray(resourceId).toList()
             } catch (ex: Exception) {
                 Timber.e(ex)
                 listOf()
@@ -1391,10 +1409,13 @@ internal class MapRouteLine(
          * Calculates line segments based on the legs in the route line and color representation
          * of the traffic congestion. The items returned can be used to create a style expression
          * which can be used to style the route line. The styled route line will be colored
-         * according to the traffic conditions indicated in the @param route.
+         * according to the traffic conditions indicated in the @param route. For any road class
+         * included in the @param trafficBackfillRoadClasses, all route segments with an 'unknown'
+         * traffic congestion annotation and a matching road class will be colored with the low
+         * traffic color instead of the color configured for unknown traffic congestion.
          *
          * @param route the DirectionsRoute used for the [Expression] calculations
-         * @param routeLineString an optional LineString derived from the [DirectionsRoute.geometry]
+         * @param trafficBackfillRoadClasses a collection of road classes defined in the styles.xml
          * @param isPrimaryRoute indicates if the route used is the primary route
          * @param congestionColorProvider a function that provides the colors used for various
          * traffic congestion values
@@ -1404,21 +1425,18 @@ internal class MapRouteLine(
          */
         fun calculateRouteLineSegments(
             route: DirectionsRoute,
-            routeLineString: LineString,
+            trafficBackfillRoadClasses: List<String>,
             isPrimaryRoute: Boolean,
             congestionColorProvider: (String, Boolean) -> Int
         ): List<RouteLineExpressionData> {
-            val congestionSections = route.legs()
-                ?.map { it.annotation()?.congestion() ?: listOf() }
-                ?.flatten() ?: listOf()
-
-            return when (congestionSections.isEmpty()) {
-                false -> calculateRouteLineSegmentsFromCongestion(
-                    congestionSections,
-                    routeLineString,
+            val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+            return when (trafficExpressionData.isEmpty()) {
+                false -> getRouteLineExpressionDataWithStreetClassOverride(
+                    trafficExpressionData,
                     route.distance(),
+                    congestionColorProvider,
                     isPrimaryRoute,
-                    congestionColorProvider
+                    trafficBackfillRoadClasses
                 )
                 true -> listOf(
                     RouteLineExpressionData(
@@ -1427,82 +1445,6 @@ internal class MapRouteLine(
                     )
                 )
             }
-        }
-
-        /**
-         * Calculates the traffic congestion segments based on the @param routeLeg and color representation
-         * of the traffic congestion.
-         *
-         * @param congestionSections the traffic congestion sections from the route legs
-         * @param lineString an optional LineString derived from the [DirectionsRoute.geometry]
-         * @param routeDistance the total distance of the route
-         * @param isPrimary indicates if the route used is the primary route
-         * @param congestionColorProvider a function that provides the colors used for various
-         * traffic congestion values
-         *
-         * @return the distance offset and traffic congestion color for the route leg(s)
-         */
-        fun calculateRouteLineSegmentsFromCongestion(
-            congestionSections: List<String>,
-            lineString: LineString,
-            routeDistance: Double,
-            isPrimary: Boolean,
-            congestionColorProvider: (String, Boolean) -> Int
-        ): List<RouteLineExpressionData> {
-            val expressionStops = mutableListOf<RouteLineExpressionData>()
-            val numCongestionPoints: Int = congestionSections.size
-            var previousCongestion = ""
-            var distanceTraveled = 0.0
-            for (i in 0 until numCongestionPoints) {
-                if (i + 1 < lineString.coordinates().size) {
-                    distanceTraveled += (
-                        TurfMeasurement.distance(
-                            lineString.coordinates()[i],
-                            lineString.coordinates()[i + 1]
-                        ) * 1000
-                        )
-
-                    if (congestionSections[i] == previousCongestion) {
-                        continue
-                    }
-
-                    val fractionalDist: Double = distanceTraveled / routeDistance
-                    if (fractionalDist < MINIMUM_ROUTE_LINE_OFFSET) {
-                        continue
-                    }
-
-                    if (expressionStops.isEmpty()) {
-                        expressionStops.add(
-                            RouteLineExpressionData(
-                                0.0,
-                                Expression.color(
-                                    congestionColorProvider(
-                                        congestionSections[i],
-                                        isPrimary
-                                    )
-                                )
-                            )
-                        )
-                    }
-                    val routeColor = congestionColorProvider(congestionSections[i], isPrimary)
-                    expressionStops.add(
-                        RouteLineExpressionData(
-                            fractionalDist,
-                            Expression.color(routeColor)
-                        )
-                    )
-                    previousCongestion = congestionSections[i]
-                }
-            }
-            if (expressionStops.isEmpty()) {
-                expressionStops.add(
-                    RouteLineExpressionData(
-                        0.0,
-                        Expression.color(congestionColorProvider("", isPrimary))
-                    )
-                )
-            }
-            return expressionStops
         }
 
         /**
@@ -1588,6 +1530,157 @@ internal class MapRouteLine(
                 else -> y2
             }
         }
+
+        /**
+         * This will extract all of the road classes for the various sections of the route
+         * and determine the distance from the origin point to the starting point for each
+         * road class section and associate that data with a traffic congestion value.
+         *
+         * Each item returned represents a distance from the origin point, the road class
+         * beginning at that distance and the traffic congestion value for that section. The
+         * road class and congestion remain until the next item in the collections.
+         *
+         * The items returned are ordered from the point closest to the origin to the point
+         * farthest from the origin. In other words from the beginning of the route until the end.
+         *
+         * @param route the the calculations should be performed on.
+         */
+        fun getRouteLineTrafficExpressionData(route: DirectionsRoute):
+            List<RouteLineTrafficExpressionData> {
+                val distances = route.legs()?.mapNotNull {
+                    it.annotation()?.distance()
+                }?.flatten()
+                ifNonNull(distances) { distanceList ->
+                    val roadClassMap = mutableMapOf<Int, String>()
+                    route.legs()?.asSequence()
+                        ?.mapNotNull { it.steps() }
+                        ?.flatten()
+                        ?.mapNotNull { it.intersections() }
+                        ?.flatten()
+                        ?.filter {
+                            it.geometryIndex() != null
+                        }?.toList()?.forEach {
+                            roadClassMap[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
+                                ?: "intersection_without_class_fallback"
+                        }
+
+                    var runningDistance = 0.0
+                    val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
+                    route.legs()?.mapNotNull {
+                        it.annotation()?.congestion()
+                    }?.flatten()?.forEachIndexed { index, congestion ->
+                        val roadclass = getRoadClassForIndex(roadClassMap, index)
+                        if (index == 0) {
+                            routeLineTrafficData.add(
+                                RouteLineTrafficExpressionData(
+                                    0.0,
+                                    congestion,
+                                    roadclass
+                                )
+                            )
+                        } else {
+                            runningDistance += distanceList[index - 1]
+                            if (routeLineTrafficData.last().trafficCongestionIdentifier ==
+                                congestion &&
+                                routeLineTrafficData.last().roadClass == roadclass
+                            ) {
+                                // continue
+                            } else if (routeLineTrafficData.last().trafficCongestionIdentifier ==
+                                congestion &&
+                                roadclass == null
+                            ) {
+                                // continue
+                            } else {
+                                routeLineTrafficData.add(
+                                    RouteLineTrafficExpressionData(
+                                        runningDistance,
+                                        congestion,
+                                        roadclass
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    return routeLineTrafficData
+                }
+                Timber.i(
+                    "Route leg annotation does not contain distance and/or congestion " +
+                        "so route line traffic cannot be calculated."
+                )
+                return listOf()
+            }
+
+        private fun getRoadClassForIndex(roadClassMap: Map<Int, String>, index: Int): String? {
+            for (indexCountdown in index downTo 0) {
+                if (roadClassMap.containsKey(indexCountdown)) {
+                    return roadClassMap[indexCountdown]
+                }
+            }
+            return null
+        }
+
+        /**
+         * For each item in the trafficExpressionData collection a color substitution will take
+         * place that has a road class contained in the trafficOverrideRoadClasses
+         * collection. For each of these items the color for 'unknown' traffic congestion
+         * will be replaced with the color for 'low' traffic congestion. In addition the
+         * percentage of the route distance traveled will be calculated for each item in the
+         * trafficExpressionData collection and included in the returned data.
+         *
+         * @param trafficExpressionData the traffic data to perform the substitution on
+         * @param routeDistance the total distance of the route
+         * @param congestionColorProvider a function that provides the colors used for various
+         * traffic congestion values
+         * @param isPrimaryRoute indicates if the route used is the primary route
+         * @param trafficOverrideRoadClasses a collection of road classes for which a color
+         * substitution should occur.
+         */
+        fun getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData: List<RouteLineTrafficExpressionData>,
+            routeDistance: Double,
+            congestionColorProvider: (String, Boolean) -> Int,
+            isPrimaryRoute: Boolean,
+            trafficOverrideRoadClasses: List<String>
+        ): List<RouteLineExpressionData> {
+            val colorExpressionMap = mutableMapOf<Int, Expression>()
+            val expressionDataToReturn = mutableListOf<RouteLineExpressionData>()
+            trafficExpressionData.forEachIndexed { index, trafficExpData ->
+                val percentDistanceTraveled = trafficExpData.distanceFromOrigin / routeDistance
+                val trafficIdentifier =
+                    if (
+                        trafficOverrideRoadClasses.contains(trafficExpData.roadClass) &&
+                        trafficExpData.trafficCongestionIdentifier == UNKNOWN_CONGESTION_VALUE
+                    ) {
+                        LOW_CONGESTION_VALUE
+                    } else {
+                        trafficExpData.trafficCongestionIdentifier
+                    }
+
+                val trafficColor = congestionColorProvider(trafficIdentifier, isPrimaryRoute)
+                val colorExpression = colorExpressionMap.getOrPut(
+                    trafficColor,
+                    { Expression.color(trafficColor) }
+                )
+                if (index == 0) {
+                    expressionDataToReturn.add(
+                        RouteLineExpressionData(
+                            percentDistanceTraveled,
+                            colorExpression
+                        )
+                    )
+                } else if (colorExpression !=
+                    expressionDataToReturn.last().segmentColorExpression
+                ) {
+                    expressionDataToReturn.add(
+                        RouteLineExpressionData(
+                            percentDistanceTraveled,
+                            colorExpression
+                        )
+                    )
+                }
+            }
+            return expressionDataToReturn
+        }
     }
 }
 
@@ -1608,6 +1701,12 @@ internal data class RouteFeatureData(
 internal data class RouteLineExpressionData(
     val offset: Double,
     val segmentColorExpression: Expression
+)
+
+internal data class RouteLineTrafficExpressionData(
+    val distanceFromOrigin: Double,
+    val trafficCongestionIdentifier: String,
+    val roadClass: String?
 )
 
 /**
