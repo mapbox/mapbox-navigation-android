@@ -7,12 +7,12 @@ ext {
   ]
 
   version = [
-      mapboxMapSdk              : '9.6.0-alpha.1',
+      mapboxMapSdk              : '9.6.0-beta.1',
       mapboxSdkServices         : '5.8.0-beta.2',
       mapboxEvents              : '6.2.1',
       mapboxCore                : '3.1.0',
-      mapboxNavigator           : '25.0.0',
-      mapboxCommonNative        : '7.1.1',
+      mapboxNavigator           : '26.0.0',
+      mapboxCommonNative        : '9.0.2',
       mapboxCrashMonitor        : '2.0.0',
       mapboxAnnotationPlugin    : '0.8.0',
       mapboxAccounts            : '0.4.1',
@@ -66,7 +66,6 @@ ext {
       mapboxCore                : "com.mapbox.mapboxsdk:mapbox-android-core:${version.mapboxCore}",
       mapboxNavigator           : "com.mapbox.navigator:mapbox-navigation-native:${version.mapboxNavigator}",
       mapboxCommonNative        : "com.mapbox.common:common:${version.mapboxCommonNative}",
-      mapboxCommonOkHttp        : "com.mapbox.common:okhttp:${version.mapboxCommonNative}",
       mapboxAnnotationPlugin    : "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:${version.mapboxAnnotationPlugin}",
       mapboxCrashMonitor        : "com.mapbox.crashmonitor:mapbox-crash-monitor-native:${version.mapboxCrashMonitor}",
       mapboxAndroidAccounts     : "com.mapbox.mapboxsdk:mapbox-navigation-accounts-android:${version.mapboxAccounts}",
