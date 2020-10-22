@@ -3,6 +3,7 @@ package com.mapbox.navigation.ui.maps.camera
 import com.mapbox.maps.EdgeInsets
 
 const val MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH = 40.0
+const val MAPBOX_CAMERA_OPTION_OVERVIEW_PITCH = 0.0
 const val MAPBOX_CAMERA_OPTION_MAX_ZOOM = 17.0
 const val MAPBOX_CAMERA_OPTION_EDGE_INSET = 20.0
 
@@ -10,10 +11,12 @@ const val MAPBOX_CAMERA_OPTION_EDGE_INSET = 20.0
  * This value will be used for navigation camera transition use.
  *
  * @param followingPitch the pitch for camera when following the vehicle
+ * @param overviewPitch the pitch for camera when viewing the route in overview mode
  * @param maxZoom the max camera zoom during the transition
  * @param edgeInsets the edge insets for the camera viewport
  */
 class NavigationCameraOptions private constructor(val followingPitch: Double,
+                                                  val overviewPitch: Double,
                                                   val maxZoom: Double,
                                                   val edgeInsets: EdgeInsets) {
 
@@ -22,6 +25,7 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
      */
     fun toBuilder(): Builder = Builder().apply {
         followingPitch(followingPitch)
+        overviewPitch(overviewPitch)
         maxZoom(maxZoom)
         edgeInsets(edgeInsets)
     }
@@ -33,6 +37,7 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
         other as NavigationCameraOptions
 
         if (followingPitch != other.followingPitch) return false
+        if (overviewPitch != other.overviewPitch) return false
         if (maxZoom != other.maxZoom) return false
         if (edgeInsets != other.edgeInsets) return false
 
@@ -41,6 +46,7 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
 
     override fun hashCode(): Int {
         var result = followingPitch.hashCode()
+        result = 31 * result + overviewPitch.hashCode()
         result = 31 * result + maxZoom.hashCode()
         result = 31 * result + edgeInsets.hashCode()
         return result
@@ -51,6 +57,7 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
      */
     class Builder {
         private var followingPitch = MAPBOX_CAMERA_OPTION_FOLLOWING_PITCH
+        private var overviewPitch = MAPBOX_CAMERA_OPTION_OVERVIEW_PITCH
         private var maxZoom = MAPBOX_CAMERA_OPTION_MAX_ZOOM
         private var edgeInsets = EdgeInsets(MAPBOX_CAMERA_OPTION_EDGE_INSET,
             MAPBOX_CAMERA_OPTION_EDGE_INSET,
@@ -62,6 +69,13 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
          */
         fun followingPitch(followingPitch: Double): Builder = apply {
             this.followingPitch = followingPitch
+        }
+
+        /**
+         * Override [overviewPitch] for camera when viewing the route in overview mode
+         */
+        fun overviewPitch(overviewPitch: Double): Builder = apply {
+            this.overviewPitch = overviewPitch
         }
 
         /**
@@ -84,6 +98,7 @@ class NavigationCameraOptions private constructor(val followingPitch: Double,
          */
         fun build(): NavigationCameraOptions = NavigationCameraOptions(
             followingPitch,
+            overviewPitch,
             maxZoom,
             edgeInsets
         )

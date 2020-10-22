@@ -189,6 +189,7 @@ class CameraAnimationsActivity :
             ).apply {
                 padding(navigationCameraOptions.edgeInsets)
                 maxZoom(navigationCameraOptions.maxZoom)
+                pitch(navigationCameraOptions.overviewPitch)
             }.build()).start()
         }
     }
