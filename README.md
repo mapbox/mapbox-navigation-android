@@ -57,7 +57,7 @@ allprojects {
 }
 
 dependencies {
-   implementation 'com.mapbox.navigation:ui:1.0.0-SNAPSHOT'
+   implementation 'com.mapbox.navigation:ui:1.2.0-SNAPSHOT'
 }
 ```
 
