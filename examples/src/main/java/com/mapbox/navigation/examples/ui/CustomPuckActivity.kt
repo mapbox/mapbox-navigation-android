@@ -110,8 +110,8 @@ class CustomPuckActivity :
         }
     }
 
-    override fun willDisplay(instructions: BannerInstructions?): BannerInstructions {
-        return instructions!!
+    override fun willDisplay(instructions: BannerInstructions?): BannerInstructions? {
+        return instructions
     }
 
     override fun onNavigationRunning() {
