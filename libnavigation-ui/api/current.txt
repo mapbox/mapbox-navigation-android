@@ -360,7 +360,7 @@ package com.mapbox.navigation.ui.instruction {
     method public void subscribe(androidx.lifecycle.LifecycleOwner!, com.mapbox.navigation.ui.NavigationViewModel);
     method public void toggleGuidanceView(com.mapbox.api.directions.v5.models.BannerInstructions?);
     method @androidx.lifecycle.OnLifecycleEvent(androidx.lifecycle.Lifecycle.Event.ON_DESTROY) public void unsubscribe();
-    method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions!);
+    method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions?);
     method public void updateBannerInstructionsWith(com.mapbox.api.directions.v5.models.BannerInstructions?, String!);
     method public void updateDistanceWith(com.mapbox.navigation.base.trip.model.RouteProgress?);
   }
@@ -409,7 +409,7 @@ package com.mapbox.navigation.ui.instruction.turnlane {
 package com.mapbox.navigation.ui.listeners {
 
   public interface BannerInstructionsListener {
-    method public com.mapbox.api.directions.v5.models.BannerInstructions willDisplay(com.mapbox.api.directions.v5.models.BannerInstructions!);
+    method public com.mapbox.api.directions.v5.models.BannerInstructions? willDisplay(com.mapbox.api.directions.v5.models.BannerInstructions!);
   }
 
   public interface FeedbackListener {

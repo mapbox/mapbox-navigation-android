@@ -283,7 +283,7 @@ public class InstructionView extends RelativeLayout implements LifecycleObserver
    *
    * @param instructions for banner info used to populate the views
    */
-  public void updateBannerInstructionsWith(BannerInstructions instructions) {
+  public void updateBannerInstructionsWith(@Nullable BannerInstructions instructions) {
     updateBannerInstructionsWith(instructions, ManeuverModifier.RIGHT);
   }
 
