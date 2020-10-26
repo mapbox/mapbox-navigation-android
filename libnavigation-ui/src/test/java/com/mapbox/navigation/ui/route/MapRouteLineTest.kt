@@ -13,7 +13,8 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
-import com.mapbox.mapboxsdk.style.layers.Layer
+import com.mapbox.mapboxsdk.style.layers.CircleLayer
+import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
@@ -547,52 +548,94 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getBelowLayerWithNullLayerId() {
+    fun getBelowLayerWithNullLayerId_1() {
         val style = mockk<Style>()
-        val layerApple = mockk<Layer>()
-        val layerBanana = mockk<Layer>()
-        val layerCantaloupe = mockk<Layer>()
-        val layerDragonfruit = mockk<SymbolLayer>()
-        val layers = listOf(layerApple, layerBanana, layerCantaloupe, layerDragonfruit)
-        every { style.layers } returns layers
-        every { layerApple.id } returns "layerApple"
-        every { layerBanana.id } returns RouteConstants.MAPBOX_LOCATION_ID
-        every { layerCantaloupe.id } returns "layerCantaloupe"
-        every { layerDragonfruit.id } returns "layerDragonfruit"
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns RouteConstants.MAPBOX_LOCATION_ID + "1"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns RouteConstants.MAPBOX_LOCATION_ID + "2"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer(null, style)
 
-        assertEquals("layerCantaloupe", result)
+        assertEquals(RouteConstants.MAPBOX_LOCATION_ID + "1", result)
+    }
+
+    @Test
+    fun getBelowLayerWithNullLayerId_2() {
+        val style = mockk<Style>()
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<CircleLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
+
+        val result = MapRouteLine.MapRouteLineSupport.getBelowLayer(null, style)
+
+        assertEquals("layerDragonfruit", result)
     }
 
     @Test
     fun getBelowLayerWithEmptyLayerId() {
         val style = mockk<Style>()
-        val layerApple = mockk<Layer>()
-        val layerBanana = mockk<Layer>()
-        val layerCantaloupe = mockk<Layer>()
-        val layerDragonfruit = mockk<SymbolLayer>()
-        val layers = listOf(layerApple, layerBanana, layerCantaloupe, layerDragonfruit)
-        every { style.layers } returns layers
-        every { layerApple.id } returns "layerApple"
-        every { layerBanana.id } returns RouteConstants.MAPBOX_LOCATION_ID
-        every { layerCantaloupe.id } returns "layerCantaloupe"
-        every { layerDragonfruit.id } returns "layerDragonfruit"
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer("", style)
 
-        assertEquals("layerCantaloupe", result)
+        assertEquals("layerBanana", result)
     }
 
     @Test
     fun getBelowLayerReturnsShadowLayerIdAsDefault() {
         val style = mockk<Style>()
-        val layerApple = mockk<Layer>()
-        val layerBanana = mockk<SymbolLayer>()
-        val layers = listOf(layerApple, layerBanana)
-        every { style.layers } returns layers
-        every { layerApple.id } returns RouteConstants.MAPBOX_LOCATION_ID
-        every { layerBanana.id } returns "layerBanana"
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<CircleLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer(null, style)
 
@@ -602,16 +645,20 @@ class MapRouteLineTest {
     @Test
     fun getBelowLayerReturnsInputIdIfFound() {
         val style = mockk<Style>()
-        val layerApple = mockk<Layer>()
-        val layerBanana = mockk<Layer>()
-        val layerCantaloupe = mockk<Layer>()
-        val layerDragonfruit = mockk<Layer>()
-        val layers = listOf(layerApple, layerBanana, layerCantaloupe, layerDragonfruit)
-        every { style.layers } returns layers
-        every { layerApple.id } returns "layerApple"
-        every { layerBanana.id } returns "layerBanana"
-        every { layerCantaloupe.id } returns "layerCantaloupe"
-        every { layerDragonfruit.id } returns "layerDragonfruit"
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<CircleLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer("layerBanana", style)
 
@@ -621,16 +668,20 @@ class MapRouteLineTest {
     @Test
     fun getBelowLayerReturnsShadowLayerIfInputNotNullOrEmptyAndNotFound() {
         val style = mockk<Style>()
-        val layerApple = mockk<Layer>()
-        val layerBanana = mockk<Layer>()
-        val layerCantaloupe = mockk<Layer>()
-        val layerDragonfruit = mockk<Layer>()
-        val layers = listOf(layerApple, layerBanana, layerCantaloupe, layerDragonfruit)
-        every { style.layers } returns layers
-        every { layerApple.id } returns "layerApple"
-        every { layerBanana.id } returns "layerBanana"
-        every { layerCantaloupe.id } returns "layerCantaloupe"
-        every { layerDragonfruit.id } returns "layerDragonfruit"
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<CircleLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<FillLayer> {
+                every { id } returns "layerCantaloupe"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer("foobar", style)
 
