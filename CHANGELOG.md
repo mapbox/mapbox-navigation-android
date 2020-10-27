@@ -90,7 +90,11 @@ This release as compared to legacy offers all the features but with much finer c
 - Providing UI components that visualize a single building footprint or extrusion. Great to use for marking the final destination in an improved arrival experience.
 
 ### Pricing
-When routes are requested with `MapboxNavigation#requestRoutes`, usage of Mapbox APIs is now [billed](https://www.mapbox.com/pricing/#navmaus) together based on [monthly active users](https://docs.mapbox.com/help/glossary/monthly-active-users/) rather than individually by HTTP request. Learn more in the [pricing by product documentation](https://docs.mapbox.com/accounts/overview/pricing/#navigation-sdk-for-ios-and-android). If you prefer to still use request-based billing, inject the routes with `MapboxNavigation#setRoutes` or `NavigationViewOptions.Builder#directionsRoute` instead.
+Applications built with v1.0.0+ are billed based only on [monthly active users](https://docs.mapbox.com/help/glossary/monthly-active-users/), specifically ["Navigation SDKs" MAUs](https://www.mapbox.com/pricing/#navmaus). Navigation SDK MAUs include Directions API, Vector Tiles API, and Raster Tiles API requests with no upfront commitments or annual contracts. A Navigation SDK MAU becomes a billable event only once a user utilizes the Navigation SDK for turn-by-turn directions or for free-drive.
+
+A single user is billed as one MAU across app upgrades as long as the app is not deleted. Deleting and re-installing an app that uses the Navigation SDK would result in an additional MAU. This happens because the SDK does not store personally identifying information.
+
+To see the number of Navigation SDKs MAUs included in the free tier and the cost per Navigation SDKs MAU beyond the free tier, see the Navigation SDKs section of our [pricing page](https://www.mapbox.com/pricing/#navmaus).
 
 ### Other docs
 
