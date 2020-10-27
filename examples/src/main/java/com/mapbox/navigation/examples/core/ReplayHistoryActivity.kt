@@ -31,6 +31,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
+import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.history.HistoryFilesActivity
 import com.mapbox.navigation.examples.utils.Utils
@@ -64,6 +65,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
     // You choose your loading mechanism. Use Coroutines, ViewModels, RxJava, Threads, etc..
     private var loadNavigationJob: Job? = null
 
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replay_history_layout)
@@ -71,8 +73,7 @@ class ReplayHistoryActivity : AppCompatActivity() {
 
         selectHistoryButton.setOnClickListener {
             val activityIntent = Intent(this, HistoryFilesActivity::class.java)
-            startActivity(activityIntent)
-            finish()
+            startActivityForResult(activityIntent, HistoryFilesActivity.REQUEST_CODE)
         }
 
         getNavigationAsync {
@@ -83,6 +84,29 @@ class ReplayHistoryActivity : AppCompatActivity() {
             it.navigationMapboxMap
                 .updateCameraTrackingMode(NavigationCamera.NAVIGATION_TRACKING_MODE_GPS)
             it.locationEngine.getLastLocation(FirstLocationCallback(it))
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == HistoryFilesActivity.REQUEST_CODE) {
+            navigationContext?.handleHistoryFileSelected()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun ReplayNavigationContext.handleHistoryFileSelected() {
+        loadNavigationJob = CoroutineScope(Dispatchers.Main).launch {
+            val events = loadReplayHistory()
+            mapboxReplayer.clearEvents()
+            mapboxReplayer.pushEvents(events)
+            mapboxNavigation.resetTripSession()
+            mapboxReplayer.playFirstLocation()
+            if (mapboxNavigation.getTripSessionState() == TripSessionState.STOPPED) {
+                val navigationContext = this@handleHistoryFileSelected
+                locationEngine.getLastLocation(FirstLocationCallback(navigationContext))
+            }
         }
     }
 

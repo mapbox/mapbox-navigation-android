@@ -34,6 +34,13 @@ interface MapboxNativeNavigator {
         tilesConfig: TilesConfig
     ): MapboxNativeNavigator
 
+    /**
+     * Reset the navigator state with the same configuration. The location becomes unknown,
+     * but the [NavigatorConfig] stays the same. This can be used to transport the
+     * navigator to a new location.
+     */
+    fun resetRideSession()
+
     // Route following
 
     /**

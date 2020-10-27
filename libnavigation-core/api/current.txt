@@ -26,6 +26,7 @@ package com.mapbox.navigation.core {
     method public void registerVoiceInstructionsObserver(com.mapbox.navigation.core.trip.session.VoiceInstructionsObserver voiceInstructionsObserver);
     method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions, com.mapbox.navigation.core.directions.session.RoutesRequestCallback? routesRequestCallback = null);
     method public void requestRoutes(com.mapbox.api.directions.v5.models.RouteOptions routeOptions);
+    method public void resetTripSession();
     method public String retrieveHistory();
     method public String? retrieveSsmlAnnouncementInstruction(int index);
     method public void setArrivalController(com.mapbox.navigation.core.arrival.ArrivalController? arrivalController = com.mapbox.navigation.core.arrival.AutoArrivalController());
