@@ -161,7 +161,8 @@ ext {
       googleServices     : '4.3.3',
       mapboxSdkVersions  : '1.1.0',
       dokka              : '0.10.1',
-      mapbox             : '0.2.1'
+      mapboxSdkRegistry  : '0.4.0',
+      mapboxAccessToken  : '0.2.1'
   ]
 
   pluginDependencies = [
@@ -175,7 +176,7 @@ ext {
       googleServices     : "com.google.gms:google-services:${pluginVersion.googleServices}",
       mapboxSdkVersions  : "com.mapbox.mapboxsdk:mapbox-android-sdk-versions:${pluginVersion.mapboxSdkVersions}",
       dokka              : "org.jetbrains.dokka:dokka-gradle-plugin:${pluginVersion.dokka}",
-      mapboxSdkRegistry  : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapbox}",
-      mapboxAccessToken  : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapbox}"
+      mapboxSdkRegistry  : "com.mapbox.gradle.plugins:sdk-registry:${pluginVersion.mapboxSdkRegistry}",
+      mapboxAccessToken  : "com.mapbox.gradle.plugins:access-token:${pluginVersion.mapboxAccessToken}"
   ]
 }

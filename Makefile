@@ -75,9 +75,14 @@ assemble-core-release:
 core-unit-tests:
 	$(call run-gradle-tasks,$(CORE_MODULES),test)
 
+.PHONY: core-upload-to-sdk-registry
+core-upload-to-sdk-registry:
+	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
+
 .PHONY: core-publish-to-sdk-registry
 core-publish-to-sdk-registry:
-	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
+	python3 -m pip install git-pull-request
+	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublish)
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
@@ -115,9 +120,14 @@ assemble-ui-release:
 ui-unit-tests:
 	$(call run-gradle-tasks,$(UI_MODULES),test)
 
+.PHONY: ui-upload-to-sdk-registry
+ui-upload-to-sdk-registry:
+	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
+
 .PHONY: ui-publish-to-sdk-registry
 ui-publish-to-sdk-registry:
-	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
+	python3 -m pip install git-pull-request
+	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublish)
 
 .PHONY: ui-check-api
 ui-check-api:
