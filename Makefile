@@ -83,10 +83,10 @@ core-unit-tests-jacoco:
 core-upload-to-sdk-registry:
 	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryUpload)
 
-.PHONY: core-publish-to-sdk-registry
-core-publish-to-sdk-registry:
+.PHONY: publish-to-sdk-registry
+publish-to-sdk-registry:
 	python3 -m pip install git-pull-request
-	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublish)
+	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublishAll)
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
@@ -131,11 +131,6 @@ ui-unit-tests-jacoco:
 .PHONY: ui-upload-to-sdk-registry
 ui-upload-to-sdk-registry:
 	$(call run-gradle-tasks,$(UI_MODULES),mapboxSDKRegistryUpload)
-
-.PHONY: ui-publish-to-sdk-registry
-ui-publish-to-sdk-registry:
-	python3 -m pip install git-pull-request
-	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublish)
 
 .PHONY: ui-check-api
 ui-check-api:
