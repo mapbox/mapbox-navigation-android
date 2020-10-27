@@ -263,9 +263,9 @@ commands:
         type: string
     steps:
       - deploy:
-          name: Publish Navigation SDK to SDK Registry
+          name: Upload Navigation SDK to SDK Registry
           command: |
-            make << parameters.artifact-type >>-publish-to-sdk-registry
+            make << parameters.artifact-type >>-upload-to-sdk-registry
 
   check-public-documentation:
     steps:

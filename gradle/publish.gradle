@@ -64,6 +64,7 @@ registry {
     snapshot = project.ext.versionName.endsWith("-SNAPSHOT")
     override = snapshot ? true : false
     dryRun = false
+    publish = true
     publications = ["release"]
 }
 
