@@ -1,8 +1,8 @@
-## Changelog for the Mapbox Navigation SDK for Android
+# Changelog for the Mapbox Navigation SDK for Android
 
 Mapbox welcomes participation and contributions from everyone.
 
-### Mapbox Navigation SDK 1.2.0-alpha.3 - October 21, 2020
+## Mapbox Navigation SDK 1.2.0-alpha.3 - October 21, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
@@ -18,7 +18,7 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 #### Other changes
 * Remove dependency of UI SDK on the modular notification classes. This fixes an issue where the default `TripNotification` implementation couldn't be replaced with a custom one. [#3665](https://github.com/mapbox/mapbox-navigation-android/pull/3665)
 
-### Mapbox Navigation SDK 1.1.1 - October 15, 2020
+## Mapbox Navigation SDK 1.1.1 - October 15, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
@@ -29,7 +29,7 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 * Bump mapbox-android-telemetry version to 6.2.1 [#3652](https://github.com/mapbox/mapbox-navigation-android/pull/3652)
 * Bump mapbox-core version to 3.1.0 [#3652](https://github.com/mapbox/mapbox-navigation-android/pull/3652)
 
-### Mapbox Navigation SDK 1.2.0-alpha.1 - October 9, 2020
+## Mapbox Navigation SDK 1.2.0-alpha.1 - October 9, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
@@ -46,7 +46,7 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 * Bump mapboxEvents dependency to 6.2.0 and mapboxCore dependency to 3.1.0 [#3621](https://github.com/mapbox/mapbox-navigation-android/pull/3621)
 * Bump Maps SDK to 9.6.0-alpha.1 [#3632](https://github.com/mapbox/mapbox-navigation-android/pull/3632)
 
-### Mapbox Navigation SDK 1.1.0 - October 7, 2020
+## Mapbox Navigation SDK 1.1.0 - October 7, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
@@ -71,6 +71,38 @@ Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-an
 * Bumped Kotlin version to 1.4.0 and Coroutines version to 1.3.9 [#3445](https://github.com/mapbox/mapbox-navigation-android/pull/3445)
 * Fix missing destination marker regression when using the Drop-in UI [#3462](https://github.com/mapbox/mapbox-navigation-android/pull/3462)
 * Updated Nav UI day and night styles to new stable production v1 versions [#3520](https://github.com/mapbox/mapbox-navigation-android/pull/3520)
+
+## Mapbox Navigation SDK 1.0.0 - October 2, 2020
+Today, we are releasing Navigation SDK (Core & UI components) v.1.0 for Android 🎉 🚀 
+
+### Core Components
+This upgrade features 
+- a higher accuracy location engine which functions even in low GPS quality scenarios such as tunnels or overpasses, 
+- free-drive mode which enables accurate location positioning even without an active route for daily commuting, 
+- a new modular architecture that allows developers to customize the navigation experience for their use case, 
+- and MAUs-based billing that provides predictability in costs to developers.
+
+### UI Components
+This release as compared to legacy offers all the features but with much finer control and granularity. It mainly serves as a port of the legacy UI SDK implementation to use the `1.0` version of the Navigation SDK (Core components) and its features. The `1.0` UI Components also removes redundant methods & APIs while exposing new ones instead. It brings in new features, including:
+
+- Two different ways of providing feedback during a trip session, thereby helping Mapbox provide better route quality, turn-by-turn experiences, traffic congestion, etc.
+- Allowing developers to deemphasize portions of the route line behind the puck, thereby reflecting route progress state.
+- Providing UI components that visualize a single building footprint or extrusion. Great to use for marking the final destination in an improved arrival experience.
+
+### Pricing
+When routes are requested with `MapboxNavigation#requestRoutes`, usage of Mapbox APIs is now [billed](https://www.mapbox.com/pricing/#navmaus) together based on [monthly active users](https://docs.mapbox.com/help/glossary/monthly-active-users/) rather than individually by HTTP request. Learn more in the [pricing by product documentation](https://docs.mapbox.com/accounts/overview/pricing/#navigation-sdk-for-ios-and-android). If you prefer to still use request-based billing, inject the routes with `MapboxNavigation#setRoutes` or `NavigationViewOptions.Builder#directionsRoute` instead.
+
+### Other docs
+
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/beta/navigation/overview) for more information.
+
+Please review the [developer documentation](https://docs.mapbox.com/android/navigation/overview/#installation) to start building with the Mapbox Navigation SDK v1.0 for Android.
+
+Already use an older version of the Navigation SDK? Check out [the migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) to transition your project from the "legacy" Navigation SDK to the 1.0 version.
+
+Let us know if you have any questions or run into issues and please open tickets in https://github.com/mapbox/mapbox-navigation-android/issues/new and we will take it from there! We would love your feedback.
+
+Thank you!
 
 ### Mapbox Navigation SDK 1.0.0-rc.8 - September 9, 2020
 
