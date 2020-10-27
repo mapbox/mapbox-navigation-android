@@ -84,7 +84,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): LineLayer {
         val lineWidthScaleExpression = buildScalingExpression(routeLineScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColor)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -102,7 +102,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): LineLayer {
         val lineWidthScaleExpression = buildScalingExpression(routeLineTrafficScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColor)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -119,7 +119,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): LineLayer {
         val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineCasingColor)
         return initializeRouteLayer(
             style,
             true,
@@ -137,7 +137,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): LineLayer {
         val lineWidthExpression = buildScalingExpression(routeLineScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColorResourceId)
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineColor)
         return initializeRouteLayer(
             style,
             roundedLineCap,
@@ -154,7 +154,7 @@ internal interface MapboxRouteLayerProvider : RouteLayerProvider {
     ): LineLayer {
         val lineWidthScaleExpression = buildScalingExpression(routeLineCasingScaleValues)
         val routeLineColorExpressions =
-            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineShieldColorResourceId)
+            getRouteLineColorExpressions(color, RouteStyleDescriptor::lineCasingColor)
         return initializeRouteLayer(
             style,
             true,

@@ -79,7 +79,7 @@ class MapboxRouteLayerProviderTest {
         val result =
             layerProvider.getRouteLineColorExpressions(
                 2121,
-                RouteStyleDescriptor::lineColorResourceId
+                RouteStyleDescriptor::lineColor
             )
 
         assertEquals(expectedResult, result.toString())
@@ -100,7 +100,7 @@ class MapboxRouteLayerProviderTest {
 
         val result = layerProvider.getRouteLineColorExpressions(
             2121,
-            RouteStyleDescriptor::lineColorResourceId
+            RouteStyleDescriptor::lineColor
         )
 
         assertEquals(expectedResult, result.toString())
@@ -126,7 +126,7 @@ class MapboxRouteLayerProviderTest {
 
         val result = layerProvider.getRouteLineColorExpressions(
             2121,
-            RouteStyleDescriptor::lineShieldColorResourceId
+            RouteStyleDescriptor::lineCasingColor
         )
 
         assertEquals(expectedResult, result.toString())
@@ -147,7 +147,7 @@ class MapboxRouteLayerProviderTest {
 
         val result = layerProvider.getRouteLineColorExpressions(
             2121,
-            RouteStyleDescriptor::lineShieldColorResourceId
+            RouteStyleDescriptor::lineCasingColor
         )
 
         assertEquals(expectedResult, result.toString())
