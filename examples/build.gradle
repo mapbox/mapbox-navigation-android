@@ -120,7 +120,4 @@ dependencies {
 
     // Networking
     implementation dependenciesList.mapboxSdkServices
-    implementation(dependenciesList.okhttp) {
-        force = true
-    }
 }

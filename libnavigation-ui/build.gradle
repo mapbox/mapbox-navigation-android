@@ -97,12 +97,7 @@ dependencies {
   javadocDeps dependenciesList.mapboxMapSdk
 
   // Network
-  implementation(dependenciesList.okhttp) {
-    force = true
-  }
-  implementation(dependenciesList.okhttpInterceptor) {
-    force = true
-  }
+  implementation dependenciesList.okhttpInterceptor
 
   // Coroutines
   implementation dependenciesList.coroutinesAndroid
