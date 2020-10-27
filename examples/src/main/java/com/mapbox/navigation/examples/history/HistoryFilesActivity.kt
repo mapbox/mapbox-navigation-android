@@ -1,7 +1,6 @@
 package com.mapbox.navigation.examples.history
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -10,13 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.mapbox.navigation.core.replay.history.ReplayHistoryDTO
 import com.mapbox.navigation.examples.R
-import com.mapbox.navigation.examples.core.ReplayHistoryActivity
 import kotlinx.android.synthetic.main.history_files_activity.*
 
 @SuppressLint("HardwareIds")
 class HistoryFilesActivity : AppCompatActivity() {
 
     companion object {
+        val REQUEST_CODE: Int = 123
         var selectedHistory: ReplayHistoryDTO? = null
             private set
     }
@@ -49,18 +48,12 @@ class HistoryFilesActivity : AppCompatActivity() {
                 ).show()
             } else {
                 selectedHistory = historyDataResponse
-                launchReplayHistory()
+                finish()
             }
         }
 
         requestFileList()
         fab.setOnClickListener { requestFileList() }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-
-        launchReplayHistory()
     }
 
     private fun requestFileList() {
@@ -78,17 +71,5 @@ class HistoryFilesActivity : AppCompatActivity() {
                 fab.visibility = VISIBLE
             }
         }
-    }
-
-    private fun launchReplayHistory() {
-        // startActivityForResult needs to destroy the calling activity to ensure mapbox
-        // components are destroyed. Use startActivity to control the Activity lifecycles.
-        // Note that if you want to call this from another Activity, you should consider
-        // creating parameters with the Intent.
-        val activityIntent = Intent(this, ReplayHistoryActivity::class.java)
-        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        activityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        startActivity(activityIntent)
-        finish()
     }
 }

@@ -289,10 +289,10 @@ class MapboxNavigationTest {
     }
 
     @Test
-    fun onDestroySetsRouteToNullInTripSession() {
+    fun onDestroySetsRoutesToEmpty() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { tripSession.route = null }
+        verify(exactly = 1) { directionsSession.routes = emptyList() }
     }
 
     @Test
@@ -306,7 +306,7 @@ class MapboxNavigationTest {
     fun onDestroyCallsNativeNavigatorReset() {
         mapboxNavigation.onDestroy()
 
-        verify(exactly = 1) { navigator.create(any(), any(), any()) }
+        verify(exactly = 1) { navigator.resetRideSession() }
     }
 
     @Test
@@ -487,6 +487,13 @@ class MapboxNavigationTest {
         mapboxNavigation.unregisterRouteAlertsObserver(observer)
 
         verify(exactly = 1) { tripSession.unregisterRouteAlertsObserver(observer) }
+    }
+
+    @Test
+    fun `resetTripSession should reset the navigator`() {
+        mapboxNavigation.resetTripSession()
+
+        verify { navigator.resetRideSession() }
     }
 
     private fun mockLocation() {
