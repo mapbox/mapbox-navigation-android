@@ -48,15 +48,7 @@ dependencies {
     api dependenciesList.mapboxSdkGeoJSON
 
     implementation dependenciesList.mapboxAndroidCommon
-
-    // Network
-    implementation(dependenciesList.okhttp) {
-        force = true
-    }
-    implementation(dependenciesList.okhttpInterceptor) {
-        force = true
-    }
-
+    
     //ktlint
     ktlint dependenciesList.ktlint
 
