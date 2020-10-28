@@ -23,6 +23,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.CountryBorderCrossingAlert
+import com.mapbox.navigation.base.trip.model.alert.IncidentAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopAlert
 import com.mapbox.navigation.base.trip.model.alert.RestStopType
 import com.mapbox.navigation.base.trip.model.alert.RestrictedAreaAlert
@@ -41,6 +42,7 @@ import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.ui.camera.NavigationCamera
+import com.mapbox.navigation.ui.internal.route.RouteConstants
 import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import kotlinx.android.synthetic.main.activity_replay_route_layout.mapView
 import kotlinx.android.synthetic.main.activity_route_alerts.distanceRemainingText
@@ -65,6 +67,7 @@ class RouteAlertsActivity : AppCompatActivity() {
     private val redCircleImageId = "circle_red_image"
     private val greenCircleImageId = "circle_green_image"
     private val yellowCircleImageId = "circle_yellow_image"
+    private val blackCircleImageId = "circle_black_image"
 
     // tunnels
     private val tunnelSource = GeoJsonSource("tunnel_source")
@@ -119,6 +122,24 @@ class RouteAlertsActivity : AppCompatActivity() {
         "restricted_areas_source"
     ).withProperties(
         *generateLineLayerProperties(Color.RED)
+    )
+
+    // incidents
+    private val incidentSource = GeoJsonSource("incident_source")
+    private val incidentLayer = LineLayer(
+        "incident_layer",
+        "incident_source"
+    ).withProperties(
+        *generateLineLayerProperties(Color.rgb(255, 20, 147)) // deep pink
+    )
+
+    private val incidentNamesTextPropertyId = "incident_names_text_property"
+    private val incidentNamesSource = GeoJsonSource("incident_names_source")
+    private val incidentNamesLayer = SymbolLayer(
+        "incident_names_layer",
+        "incident_names_source"
+    ).withProperties(
+        *generateTunnelNamesLayerProperties(blackCircleImageId, incidentNamesTextPropertyId)
     )
 
     private val mapboxReplayer: MapboxReplayer by lazy {
@@ -176,18 +197,41 @@ class RouteAlertsActivity : AppCompatActivity() {
                     yellowCircleImageId,
                     ContextCompat.getDrawable(this, R.drawable.ic_circle_yellow)!!
                 )
+                style.addImage(
+                    blackCircleImageId,
+                    ContextCompat.getDrawable(this, R.drawable.ic_circle_black)!!
+                )
                 style.addSource(tunnelSource)
-                style.addLayer(tunnelLayer)
+                style.addLayerBelow(tunnelLayer, RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
                 style.addSource(tunnelNamesSource)
-                style.addLayer(tunnelNamesLayer)
+                style.addLayerBelow(
+                    tunnelNamesLayer,
+                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+                )
                 style.addSource(countryBorderCrossingsSource)
-                style.addLayer(countryBorderCrossingsLayer)
+                style.addLayerBelow(
+                    countryBorderCrossingsLayer,
+                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+                )
                 style.addSource(tollCollectionSource)
-                style.addLayer(tollCollectionLayer)
+                style.addLayerBelow(
+                    tollCollectionLayer,
+                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+                )
                 style.addSource(restStopSource)
-                style.addLayer(restStopLayer)
+                style.addLayerBelow(restStopLayer, RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
                 style.addSource(restrictedAreasSource)
-                style.addLayer(restrictedAreasLayer)
+                style.addLayerBelow(
+                    restrictedAreasLayer,
+                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+                )
+                style.addSource(incidentSource)
+                style.addLayerBelow(incidentLayer, RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID)
+                style.addSource(incidentNamesSource)
+                style.addLayerBelow(
+                    incidentNamesLayer,
+                    RouteConstants.ARROW_SHAFT_CASING_LINE_LAYER_ID
+                )
             }
         }
         mapboxNavigation.toggleHistory(true)
@@ -236,6 +280,8 @@ class RouteAlertsActivity : AppCompatActivity() {
                     val tollCollectionFeatures = mutableListOf<Feature>()
                     val restStopsFeatures = mutableListOf<Feature>()
                     val restrictedAreasFeatures = mutableListOf<Feature>()
+                    val incidentsFeatures = mutableListOf<Feature>()
+                    val incidentsNamesFeatures = mutableListOf<Feature>()
 
                     // when received, we're filling up features for all alert types
                     routeAlerts.forEach { routeAlert ->
@@ -327,6 +373,24 @@ class RouteAlertsActivity : AppCompatActivity() {
                                     )
                                 }
                             }
+                            is IncidentAlert -> {
+                                val alertGeometry = routeAlert.alertGeometry
+                                if (alertGeometry != null) {
+                                    val incidentAreaLineString =
+                                        alertGeometry.toLineString(routeLineString)
+                                    incidentsFeatures.add(
+                                        Feature.fromGeometry(incidentAreaLineString)
+                                    )
+                                }
+                                routeAlert.info?.subType?.let { incidentType ->
+                                    val feature = Feature.fromGeometry(routeAlert.coordinate)
+                                    feature.addStringProperty(
+                                        incidentNamesTextPropertyId,
+                                        incidentType
+                                    )
+                                    incidentsNamesFeatures.add(feature)
+                                }
+                            }
                         }
                     }
 
@@ -346,6 +410,12 @@ class RouteAlertsActivity : AppCompatActivity() {
                     )
                     restrictedAreasSource.setGeoJson(
                         FeatureCollection.fromFeatures(restrictedAreasFeatures)
+                    )
+                    incidentSource.setGeoJson(
+                        FeatureCollection.fromFeatures(incidentsFeatures)
+                    )
+                    incidentNamesSource.setGeoJson(
+                        FeatureCollection.fromFeatures(incidentsNamesFeatures)
                     )
                 }
             }
