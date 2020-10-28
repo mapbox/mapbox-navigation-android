@@ -86,7 +86,7 @@ core-upload-to-sdk-registry:
 .PHONY: publish-to-sdk-registry
 publish-to-sdk-registry:
 	python3 -m pip install git-pull-request
-	$(call run-gradle-tasks,$(CORE_MODULES),mapboxSDKRegistryPublishAll)
+	./gradlew mapboxSDKRegistryPublishAll
 
 .PHONY: core-dependency-graph
 core-dependency-graph:
