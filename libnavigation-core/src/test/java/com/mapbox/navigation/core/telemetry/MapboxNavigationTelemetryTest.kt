@@ -47,8 +47,10 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
 import junit.framework.TestCase.assertTrue
 import org.junit.After
+import org.junit.Ignore
 import org.junit.Test
 
+@Ignore
 class MapboxNavigationTelemetryTest {
 
     private companion object {
