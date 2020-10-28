@@ -36,7 +36,6 @@ import com.mapbox.navigation.core.telemetry.events.NavigationRerouteEvent
 import com.mapbox.navigation.metrics.MapboxMetricsReporter
 import com.mapbox.navigation.metrics.internal.event.NavigationAppUserTurnstileEvent
 import io.mockk.Runs
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -47,10 +46,8 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
 import junit.framework.TestCase.assertTrue
 import org.junit.After
-import org.junit.Ignore
 import org.junit.Test
 
-@Ignore
 class MapboxNavigationTelemetryTest {
 
     private companion object {
@@ -592,7 +589,7 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockLocationCollector() {
-        coEvery { locationsCollector.flushBuffers() } just Runs
+        every { locationsCollector.flushBuffers() } just Runs
         every { locationsCollector.lastLocation } returns lastLocation
         every { lastLocation.latitude } returns LAST_LOCATION_LAT
         every { lastLocation.longitude } returns LAST_LOCATION_LON
