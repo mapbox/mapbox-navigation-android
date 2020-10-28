@@ -130,6 +130,8 @@ internal object MapboxNavigationTelemetry :
         logger: Logger?,
         locationsCollector: LocationsCollector = LocationsCollectorImpl(logger)
     ) {
+        reset()
+        sessionState = IDLE
         this.logger = logger
         this.locationsCollector = locationsCollector
         navigationOptions = options
@@ -278,9 +280,7 @@ internal object MapboxNavigationTelemetry :
         if (dynamicValues.sessionStarted) {
             log("sessionStop")
             handleSessionCanceled()
-            dynamicValues.reset()
-            resetOriginalRoute()
-            resetRouteProgress()
+            reset()
         }
     }
 
@@ -425,6 +425,14 @@ internal object MapboxNavigationTelemetry :
 
             eventVersion = EVENT_VERSION
         }
+    }
+
+    private fun reset() {
+        dynamicValues.reset()
+        resetOriginalRoute()
+        resetRouteProgress()
+        needHandleReroute = false
+        needStartSession = false
     }
 
     private fun resetRouteProgress() {
