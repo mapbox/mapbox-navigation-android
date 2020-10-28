@@ -112,6 +112,7 @@ package com.mapbox.navigation.base.options {
     method public int getTimeFormatType();
     method public boolean isDebugLoggingEnabled();
     method public boolean isFromNavigationUi();
+    method public boolean isRouteRefreshEnabled();
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder toBuilder();
   }
 
@@ -124,6 +125,7 @@ package com.mapbox.navigation.base.options {
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder eHorizonOptions(com.mapbox.navigation.base.options.EHorizonOptions eHorizonOptions);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isDebugLoggingEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder isFromNavigationUi(boolean flag);
+    method public com.mapbox.navigation.base.options.NavigationOptions.Builder isRouteRefreshEnabled(boolean flag);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngine(com.mapbox.android.core.location.LocationEngine locationEngine);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder locationEngineRequest(com.mapbox.android.core.location.LocationEngineRequest locationEngineRequest);
     method public com.mapbox.navigation.base.options.NavigationOptions.Builder navigatorPredictionMillis(long predictionMillis);
