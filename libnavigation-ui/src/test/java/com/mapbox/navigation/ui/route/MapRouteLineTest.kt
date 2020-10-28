@@ -13,6 +13,7 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.BackgroundLayer
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.FillLayer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
@@ -548,13 +549,13 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getBelowLayerWithNullLayerId_1() {
+    fun getBelowLayerWithNullLayerId_alwaysBelowLocation() {
         val style = mockk<Style>()
         every { style.layers } returns listOf(
             mockk<FillLayer> {
                 every { id } returns "layerApple"
             },
-            mockk<SymbolLayer> {
+            mockk<CircleLayer> {
                 every { id } returns RouteConstants.MAPBOX_LOCATION_ID + "1"
             },
             mockk<SymbolLayer> {
@@ -574,13 +575,42 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getBelowLayerWithNullLayerId_2() {
+    fun getBelowLayerWithNullLayerId_ignorePuckNonSymbolLayers() {
         val style = mockk<Style>()
         every { style.layers } returns listOf(
             mockk<FillLayer> {
                 every { id } returns "layerApple"
             },
+            mockk<FillLayer> {
+                every { id } returns "layerBanana"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerCantaloupe"
+            },
             mockk<CircleLayer> {
+                every { id } returns RouteConstants.MAPBOX_LOCATION_ID + "1"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns RouteConstants.MAPBOX_LOCATION_ID + "2"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerDragonfruit"
+            }
+        )
+
+        val result = MapRouteLine.MapRouteLineSupport.getBelowLayer(null, style)
+
+        assertEquals("layerCantaloupe", result)
+    }
+
+    @Test
+    fun getBelowLayerWithNullLayerId_aboveFirstNonSymbolLayer() {
+        val style = mockk<Style>()
+        every { style.layers } returns listOf(
+            mockk<FillLayer> {
+                every { id } returns "layerApple"
+            },
+            mockk<SymbolLayer> {
                 every { id } returns "layerBanana"
             },
             mockk<FillLayer> {
@@ -588,6 +618,9 @@ class MapRouteLineTest {
             },
             mockk<SymbolLayer> {
                 every { id } returns "layerDragonfruit"
+            },
+            mockk<SymbolLayer> {
+                every { id } returns "layerEggfruit"
             }
         )
 
@@ -597,7 +630,7 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun getBelowLayerWithEmptyLayerId() {
+    fun getBelowLayerWithEmptyLayerId_symbolLayerNotAtTheTop() {
         val style = mockk<Style>()
         every { style.layers } returns listOf(
             mockk<FillLayer> {
@@ -616,11 +649,11 @@ class MapRouteLineTest {
 
         val result = MapRouteLine.MapRouteLineSupport.getBelowLayer("", style)
 
-        assertEquals("layerBanana", result)
+        assertEquals(LocationComponentConstants.SHADOW_LAYER, result)
     }
 
     @Test
-    fun getBelowLayerReturnsShadowLayerIdAsDefault() {
+    fun getBelowLayerWithNullLayerId_noSymbolLayers() {
         val style = mockk<Style>()
         every { style.layers } returns listOf(
             mockk<FillLayer> {
@@ -634,6 +667,20 @@ class MapRouteLineTest {
             },
             mockk<FillLayer> {
                 every { id } returns "layerDragonfruit"
+            }
+        )
+
+        val result = MapRouteLine.MapRouteLineSupport.getBelowLayer(null, style)
+
+        assertEquals(LocationComponentConstants.SHADOW_LAYER, result)
+    }
+
+    @Test
+    fun getBelowLayerWithNullLayerId_onlyOneLayerPresent() {
+        val style = mockk<Style>()
+        every { style.layers } returns listOf(
+            mockk<BackgroundLayer> {
+                every { id } returns "layerApple"
             }
         )
 
