@@ -2,6 +2,23 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.2.0-alpha.4 - October 28, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Improvements
+* Removed some synchronized disk access events from upstream library. [#3675](https://github.com/mapbox/mapbox-navigation-android/pull/3675)
+* Improved exceptions handling when toggling native history collection. [#3705](https://github.com/mapbox/mapbox-navigation-android/pull/3705)
+
+#### Bug fixes
+* Fixed additional edge cases that occured when trying to infer the route line's z-ordering on the map if not explicitly specified. [#3687](https://github.com/mapbox/mapbox-navigation-android/pull/3687) [#3702](https://github.com/mapbox/mapbox-navigation-android/pull/3702)
+* Fixed an issue that would make `off-route` and `invalid-route` inconsistent when there were no available road edges to map-match to. The state will now report `off-route` in those situations. [#3705](https://github.com/mapbox/mapbox-navigation-android/pull/3705)
+
+#### Other changes
+* Fixed `BannerInstructions#willDisplay` which was marked non-nullable and unusable from Kotlin codebases. [#3679](https://github.com/mapbox/mapbox-navigation-android/pull/3679)
+* Upgraded Maps SDK dependency to [`v9.6.0-beta.1`](https://github.com/mapbox/mapbox-gl-native-android/releases/tag/android-v9.6.0-beta.1). This includes performing an immediate puck/camera transition to the current location when resuming the map instead of an animated transition. [#3677](https://github.com/mapbox/mapbox-navigation-android/pull/3677)
+* Updated default routing tiles version to `2020_10_18-03_00_00`. [#3686](https://github.com/mapbox/mapbox-navigation-android/pull/3686)
+
 ## Mapbox Navigation SDK 1.2.0-alpha.3 - October 21, 2020
 
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
