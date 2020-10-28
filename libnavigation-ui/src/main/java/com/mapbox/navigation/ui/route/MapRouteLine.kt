@@ -19,6 +19,7 @@ import com.mapbox.geojson.utils.PolylineUtils
 import com.mapbox.mapboxsdk.location.LocationComponentConstants
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
+import com.mapbox.mapboxsdk.style.layers.Layer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory
@@ -1254,12 +1255,41 @@ internal class MapRouteLine(
          * @return either the layer ID if found else a default layer ID
          */
         fun getBelowLayer(layerId: String?, style: Style): String {
+            val layers = style.layers
             return when (layerId.isNullOrEmpty()) {
-                false -> style.layers.firstOrNull { it.id == layerId }?.id
-                true -> style.layers.firstOrNull {
-                    it.id.contains(RouteConstants.MAPBOX_LOCATION_ID) || it is SymbolLayer
-                }?.id
-            } ?: LocationComponentConstants.SHADOW_LAYER
+                false -> checkLayerIdPresent(layerId, layers)
+                true -> findLayerBelow(layers)
+            }
+        }
+
+        private fun checkLayerIdPresent(layerId: String, layers: List<Layer>): String {
+            val foundId = layers.firstOrNull { it.id == layerId }?.id
+            if (foundId == null) {
+                Timber.e(
+                    """Tried placing route line below "$layerId" which doesn't exist"""
+                )
+            }
+            return foundId ?: LocationComponentConstants.SHADOW_LAYER
+        }
+
+        /**
+         * Tries to find a reference layer ID that's above a first non-symbol layer from the top
+         * of the stack of layers. Additionally, the algorithm always ensures that the reference
+         * layer is below the puck layers.
+         */
+        private fun findLayerBelow(layers: List<Layer>): String {
+            val puckLayerIndex = layers.indexOfFirst {
+                it.id.contains(RouteConstants.MAPBOX_LOCATION_ID)
+            }
+            val lastSymbolLayerFromTopIndex = layers.indexOfLast {
+                it !is SymbolLayer && !it.id.contains(RouteConstants.MAPBOX_LOCATION_ID)
+            } + 1
+            val index = if (puckLayerIndex in 0 until lastSymbolLayerFromTopIndex) {
+                puckLayerIndex
+            } else {
+                lastSymbolLayerFromTopIndex
+            }
+            return layers.getOrNull(index)?.id ?: LocationComponentConstants.SHADOW_LAYER
         }
 
         /**
