@@ -43,6 +43,7 @@ import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
@@ -229,8 +230,14 @@ class MapboxNavigation(
             FasterRouteDetector(RouteComparator()),
             logger
         )
-        routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)
-        routeRefreshController.start()
+        routeRefreshController = RouteRefreshControllerProvider.createRouteRefreshController(
+            directionsSession,
+            tripSession,
+            logger
+        )
+        if (navigationOptions.isRouteRefreshEnabled) {
+            routeRefreshController.start()
+        }
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,

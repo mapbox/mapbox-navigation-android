@@ -26,6 +26,8 @@ import com.mapbox.navigation.core.directions.session.RoutesRequestCallback
 import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
+import com.mapbox.navigation.core.routerefresh.RouteRefreshController
+import com.mapbox.navigation.core.routerefresh.RouteRefreshControllerProvider
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
@@ -71,6 +73,7 @@ class MapboxNavigationTest {
     private val distanceFormatter: MapboxDistanceFormatter = mockk(relaxed = true)
     private val onBoardRouterOptions: OnboardRouterOptions = mockk(relaxed = true)
     private val fasterRouteRequestCallback: RoutesRequestCallback = mockk(relaxed = true)
+    private val routeRefreshController: RouteRefreshController = mockk(relaxUnitFun = true)
     private val routeOptions: RouteOptions = provideDefaultRouteOptionsBuilder().build()
     private val routes: List<DirectionsRoute> = listOf(mockk())
     private val routeProgress: RouteProgress = mockk(relaxed = true)
@@ -130,15 +133,7 @@ class MapboxNavigationTest {
 
         every { applicationContext.applicationContext } returns applicationContext
 
-        navigationOptions = NavigationOptions
-            .Builder(applicationContext)
-            .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
-            .navigatorPredictionMillis(1500L)
-            .onboardRouterOptions(onBoardRouterOptions)
-            .timeFormatType(NONE_SPECIFIED)
-            .locationEngine(locationEngine)
-            .build()
+        navigationOptions = provideNavigationOptions().build()
 
         mockLocation()
         mockNativeNavigator()
@@ -197,15 +192,7 @@ class MapboxNavigationTest {
     @Test
     fun init_registerOffRouteObserver_MapboxNavigation_recreated() {
         ThreadController.cancelAllUICoroutines()
-        val navigationOptions = NavigationOptions
-            .Builder(applicationContext)
-            .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
-            .navigatorPredictionMillis(1500L)
-            .onboardRouterOptions(onBoardRouterOptions)
-            .timeFormatType(NONE_SPECIFIED)
-            .locationEngine(locationEngine)
-            .build()
+        val navigationOptions = provideNavigationOptions().build()
 
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
@@ -217,15 +204,7 @@ class MapboxNavigationTest {
     @Test
     fun destroy_unregisterOffRouteObserver_MapboxNavigation_recreated() {
         ThreadController.cancelAllUICoroutines()
-        val navigationOptions = NavigationOptions
-            .Builder(applicationContext)
-            .accessToken(accessToken)
-            .distanceFormatter(distanceFormatter)
-            .navigatorPredictionMillis(1500L)
-            .onboardRouterOptions(onBoardRouterOptions)
-            .timeFormatType(NONE_SPECIFIED)
-            .locationEngine(locationEngine)
-            .build()
+        val navigationOptions = provideNavigationOptions().build()
         mapboxNavigation = MapboxNavigation(navigationOptions)
 
         mapboxNavigation.onDestroy()
@@ -233,6 +212,52 @@ class MapboxNavigationTest {
         verify(exactly = 1) { tripSession.unregisterOffRouteObserver(any()) }
 
         mapboxNavigation.onDestroy()
+    }
+
+    @Test
+    fun init_routeRefreshController_start_called_when_isRouteRefresh_enabled() {
+        ThreadController.cancelAllUICoroutines()
+        mockkObject(RouteRefreshControllerProvider)
+        every {
+            RouteRefreshControllerProvider.createRouteRefreshController(
+                directionsSession,
+                tripSession,
+                logger
+            )
+        } returns routeRefreshController
+        every { routeRefreshController.start() } returns mockk()
+        val navigationOptions = provideNavigationOptions()
+            .isRouteRefreshEnabled(true)
+            .build()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        verify(exactly = 1) { routeRefreshController.start() }
+
+        unmockkObject(RouteRefreshControllerProvider)
+    }
+
+    @Test
+    fun init_routeRefreshController_start_not_called_when_isRouteRefresh_disabled() {
+        ThreadController.cancelAllUICoroutines()
+        mockkObject(RouteRefreshControllerProvider)
+        every {
+            RouteRefreshControllerProvider.createRouteRefreshController(
+                directionsSession,
+                tripSession,
+                logger
+            )
+        } returns routeRefreshController
+        every { routeRefreshController.start() } returns mockk()
+        val navigationOptions = provideNavigationOptions()
+            .isRouteRefreshEnabled(false)
+            .build()
+
+        mapboxNavigation = MapboxNavigation(navigationOptions)
+
+        verify(exactly = 0) { routeRefreshController.start() }
+
+        unmockkObject(RouteRefreshControllerProvider)
     }
 
     @Test
@@ -611,4 +636,14 @@ class MapboxNavigationTest {
             .coordinates(emptyList())
             .geometries("")
             .requestUuid("")
+
+    private fun provideNavigationOptions() =
+        NavigationOptions
+            .Builder(applicationContext)
+            .accessToken(accessToken)
+            .distanceFormatter(distanceFormatter)
+            .navigatorPredictionMillis(1500L)
+            .onboardRouterOptions(onBoardRouterOptions)
+            .timeFormatType(NONE_SPECIFIED)
+            .locationEngine(locationEngine)
 }
