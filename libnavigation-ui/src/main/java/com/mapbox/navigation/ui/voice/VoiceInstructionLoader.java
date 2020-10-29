@@ -40,14 +40,20 @@ public class VoiceInstructionLoader {
   @Nullable
   private MapboxSpeech.Builder mapboxSpeechBuilder = null;
   private UrlSkuTokenProvider urlSkuTokenProvider;
+  private String baseUrl;
 
   public VoiceInstructionLoader(@NonNull Context context, String accessToken, Cache cache) {
+    this(context, accessToken, cache, null);
+  }
+
+  public VoiceInstructionLoader(@NonNull Context context, String accessToken, Cache cache, @Nullable String baseUrl) {
     this.connectivityStatus = new ConnectivityStatusProvider(context);
     this.accessToken = accessToken;
     this.context = context;
     this.urlsCached = new ArrayList<>();
     this.cache = cache;
     this.urlSkuTokenProvider = MapboxNavigationAccounts.getInstance(context.getApplicationContext());
+    this.baseUrl = baseUrl;
   }
 
   // Package private (no modifier) for testing purposes
@@ -102,6 +108,10 @@ public class VoiceInstructionLoader {
         .language(language)
         .cache(cache)
         .interceptor(provideOfflineCacheInterceptor());
+
+      if (baseUrl != null) {
+        mapboxSpeechBuilder.baseUrl(baseUrl);
+      }
     }
   }
 

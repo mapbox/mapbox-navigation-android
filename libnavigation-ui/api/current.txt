@@ -129,6 +129,7 @@ package com.mapbox.navigation.ui {
     method public abstract boolean shouldSimulateRoute();
     method public abstract com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener? speechAnnouncementListener();
     method public abstract com.mapbox.navigation.ui.voice.SpeechPlayer? speechPlayer();
+    method public abstract String? voiceInstructionLoaderBaseUrl();
     method public abstract boolean waynameChipEnabled();
   }
 
@@ -158,6 +159,7 @@ package com.mapbox.navigation.ui {
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! shouldSimulateRoute(boolean);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! speechAnnouncementListener(com.mapbox.navigation.ui.listeners.SpeechAnnouncementListener!);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! speechPlayer(com.mapbox.navigation.ui.voice.SpeechPlayer!);
+    method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! voiceInstructionLoaderBaseUrl(String?);
     method public abstract com.mapbox.navigation.ui.NavigationViewOptions.Builder! waynameChipEnabled(boolean);
   }
 
@@ -738,6 +740,7 @@ package com.mapbox.navigation.ui.voice {
 
   public class VoiceInstructionLoader {
     ctor public VoiceInstructionLoader(android.content.Context, String!, okhttp3.Cache!);
+    ctor public VoiceInstructionLoader(android.content.Context, String!, okhttp3.Cache!, String?);
     method public void cacheInstructions(java.util.List<java.lang.String!>);
     method public java.util.List<java.lang.String!> evictVoiceInstructions();
   }
