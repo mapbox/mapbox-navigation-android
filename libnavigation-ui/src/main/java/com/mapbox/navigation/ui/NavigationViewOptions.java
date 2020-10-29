@@ -90,6 +90,9 @@ public abstract class NavigationViewOptions {
 
   public abstract NavigationFeedbackOptions navigationFeedbackOptions();
 
+  @Nullable
+  public abstract String voiceInstructionLoaderBaseUrl();
+
   @AutoValue.Builder
   public abstract static class Builder {
 
@@ -186,6 +189,15 @@ public abstract class NavigationViewOptions {
      * turn-by-turn navigation.
      */
     public abstract Builder navigationFeedbackOptions(NavigationFeedbackOptions navigationFeedbackOptions);
+
+    /**
+     * Set the base URL for online voice instruction requests.
+     *
+     * If null, defaults to https://api.mapbox.com/.
+     *
+     * @return this {@link Builder}
+     */
+    public abstract Builder voiceInstructionLoaderBaseUrl(@Nullable String voiceInstructionLoaderBaseUrl);
 
     @NonNull
     public abstract NavigationViewOptions build();
