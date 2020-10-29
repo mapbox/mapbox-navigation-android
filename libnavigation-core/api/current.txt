@@ -5,15 +5,18 @@ package com.mapbox.navigation.core {
     ctor public MapboxNavigation(com.mapbox.navigation.base.options.NavigationOptions navigationOptions);
     method public void addHistoryEvent(String eventType, String eventJsonProperties);
     method public void attachFasterRouteObserver(com.mapbox.navigation.core.fasterroute.FasterRouteObserver fasterRouteObserver);
+    method public void cacheUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![] feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
     method public static com.mapbox.navigation.base.options.NavigationOptions.Builder defaultNavigationOptionsBuilder(android.content.Context context, String? accessToken);
     method public void detachFasterRouteObserver();
+    method public java.util.List<com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent> getCachedUserFeedback();
     method public com.mapbox.navigation.base.options.NavigationOptions getNavigationOptions();
     method public com.mapbox.navigation.core.reroute.RerouteController? getRerouteController();
     method public java.util.List<com.mapbox.api.directions.v5.models.DirectionsRoute> getRoutes();
     method public com.mapbox.navigation.core.trip.session.TripSessionState getTripSessionState();
     method public boolean navigateNextRouteLeg();
     method public void onDestroy();
-    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![]? feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
+    method public void postCachedUserFeedback(java.util.List<com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent> cachedFeedbackEventList);
+    method public void postUserFeedback(@com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String description, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Source String feedbackSource, String? screenshot, String![] feedbackSubType = emptyArray(), com.mapbox.navigation.core.telemetry.events.AppMetadata? appMetadata = null);
     method public void registerArrivalObserver(com.mapbox.navigation.core.arrival.ArrivalObserver arrivalObserver);
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
@@ -456,6 +459,16 @@ package com.mapbox.navigation.core.telemetry.events {
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata build();
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder sessionId(String? sessionId);
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder userId(String? userId);
+  }
+
+  public final class CachedNavigationFeedbackEvent {
+    ctor public CachedNavigationFeedbackEvent(String feedbackId, @com.mapbox.navigation.core.telemetry.events.FeedbackEvent.Type String feedbackType, String? description, String screenshot, java.util.Set<java.lang.String> feedbackSubType);
+    method public String? getDescription();
+    method public String getFeedbackId();
+    method public java.util.Set<java.lang.String> getFeedbackSubType();
+    method public String getFeedbackType();
+    method public String getScreenshot();
+    method public void setDescription(String? p);
   }
 
   public final class FeedbackEvent {

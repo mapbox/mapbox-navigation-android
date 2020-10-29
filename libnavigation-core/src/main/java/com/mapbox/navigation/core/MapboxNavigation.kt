@@ -45,6 +45,7 @@ import com.mapbox.navigation.core.routeoptions.MapboxRouteOptionsUpdater
 import com.mapbox.navigation.core.routerefresh.RouteRefreshController
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
+import com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
@@ -673,7 +674,7 @@ class MapboxNavigation(
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<String>? = emptyArray(),
+        feedbackSubType: Array<String> = emptyArray(),
         appMetadata: AppMetadata? = null
     ) {
         MapboxNavigationTelemetry.postUserFeedback(
@@ -684,6 +685,76 @@ class MapboxNavigation(
             feedbackSubType,
             appMetadata
         )
+    }
+
+    /**
+     * Create and cache a user feedback about an issue or problem with the Navigation SDK.
+     *
+     * Instead of sending the feedback, this API will cache the feedback in the Navigation SDK. The cached feedbacks can be retrieved by calling [getCachedUserFeedback] so the user can update and send them in a later time. To send the cached feedbacks, please use [postCachedUserFeedback].
+     *
+     * If you want to send the feedback directly without caching it, you should use [postUserFeedback].
+     *
+     * @param feedbackType one of [FeedbackEvent.Type]
+     * @param description description message
+     * @param feedbackSource one of [FeedbackEvent.Source]
+     * @param screenshot encoded screenshot (optional)
+     * @param feedbackSubType array of [FeedbackEvent.Description] (optional)
+     * @param appMetadata [AppMetadata] information (optional)
+     *
+     * @see [postUserFeedback]
+     * @see [getCachedUserFeedback]
+     * @see [postCachedUserFeedback]
+     */
+    fun cacheUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String> = emptyArray(),
+        appMetadata: AppMetadata? = null
+    ) {
+        MapboxNavigationTelemetry.cacheUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        )
+    }
+
+    /**
+     * Get a list of [CachedNavigationFeedbackEvent] which was created by [cacheUserFeedback].
+     *
+     * You can update the cached feedback to have more information like [CachedNavigationFeedbackEvent.feedbackSubType] and [CachedNavigationFeedbackEvent.description] or other fields. And use [postCachedUserFeedback] to send the updated cached feedbacks.
+     *
+     * @see [cacheUserFeedback]
+     * @see [postCachedUserFeedback]
+     *
+     * @return a list of [CachedNavigationFeedbackEvent]s
+     */
+    fun getCachedUserFeedback(): List<CachedNavigationFeedbackEvent> {
+        return MapboxNavigationTelemetry.getCachedUserFeedback()
+    }
+
+    /**
+     * Send a list of [CachedNavigationFeedbackEvent]s.
+     *
+     * Only the feedback that's been created by [cacheUserFeedback] will be sent. Otherwise that feedback will be dropped and not be sent.
+     *
+     * A complete caching feedback flow looks like this:
+     * * Create and cache feedback by calling [cacheUserFeedback].
+     * * Retrieve the cached feedback list by calling [getCachedUserFeedback].
+     * * Update the cached feedback list to provide more information of the feedback.
+     * * Call [postCachedUserFeedback] to send the updated cached feedback list.
+     *
+     * @param cachedFeedbackEventList the list should be the subset or the original list that you get from [getCachedUserFeedback].
+     *
+     * @see [cacheUserFeedback]
+     * @see [getCachedUserFeedback]
+     */
+    fun postCachedUserFeedback(cachedFeedbackEventList: List<CachedNavigationFeedbackEvent>) {
+        MapboxNavigationTelemetry.postCachedUserFeedback(cachedFeedbackEventList)
     }
 
     /**

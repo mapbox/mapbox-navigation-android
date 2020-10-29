@@ -22,8 +22,23 @@ internal class NavigationFeedbackEvent(
     var locationsBefore: Array<TelemetryLocation>? = emptyArray()
     var locationsAfter: Array<TelemetryLocation>? = emptyArray()
     var screenshot: String? = null
-    var feedbackSubType: Array<String>? = emptyArray()
+    var feedbackSubType: Array<String> = emptyArray()
     var appMetadata: AppMetadata? = null
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
+
+    fun getCachedNavigationFeedbackEvent() =
+        CachedNavigationFeedbackEvent(
+            feedbackId,
+            feedbackType ?: "",
+            description,
+            screenshot ?: "",
+            HashSet(feedbackSubType.toSet())
+        )
+
+    fun update(cachedNavigationFeedbackEvent: CachedNavigationFeedbackEvent) {
+        feedbackType = cachedNavigationFeedbackEvent.feedbackType
+        description = cachedNavigationFeedbackEvent.description
+        feedbackSubType = cachedNavigationFeedbackEvent.feedbackSubType.toTypedArray()
+    }
 }

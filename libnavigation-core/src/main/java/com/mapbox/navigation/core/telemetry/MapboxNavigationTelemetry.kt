@@ -28,6 +28,7 @@ import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
+import com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.MetricsRouteProgress
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
@@ -111,6 +112,7 @@ internal object MapboxNavigationTelemetry :
     private lateinit var locationsCollector: LocationsCollector
     private lateinit var sdkIdentifier: String
     private var logger: Logger? = null
+    private val feedbackEventCacheMap = LinkedHashMap<String, NavigationFeedbackEvent>()
 
     private var needHandleReroute = false
     private var sessionState: NavigationSession.State = IDLE
@@ -141,6 +143,7 @@ internal object MapboxNavigationTelemetry :
             "mapbox-navigation-android"
         }
         metricsReporter = reporter
+        feedbackEventCacheMap.clear()
 
         registerListeners(mapboxNavigation)
         postTurnstileEvent()
@@ -156,8 +159,69 @@ internal object MapboxNavigationTelemetry :
         description: String,
         @FeedbackEvent.Source feedbackSource: String,
         screenshot: String?,
-        feedbackSubType: Array<String>?,
+        feedbackSubType: Array<String>,
         appMetadata: AppMetadata?
+    ) {
+        createUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        ) {
+            sendMetricEvent(it)
+        }
+    }
+
+    fun cacheUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String>,
+        appMetadata: AppMetadata?
+    ) {
+        createUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        ) {
+            feedbackEventCacheMap[it.feedbackId] = it
+        }
+    }
+
+    fun getCachedUserFeedback(): List<CachedNavigationFeedbackEvent> {
+        return feedbackEventCacheMap.map {
+            it.value.getCachedNavigationFeedbackEvent()
+        }
+    }
+
+    fun postCachedUserFeedback(cachedFeedbackEventList: List<CachedNavigationFeedbackEvent>) {
+        log("post user feedback")
+        val feedbackEventCache = LinkedHashMap(feedbackEventCacheMap)
+        feedbackEventCacheMap.clear()
+
+        cachedFeedbackEventList.forEach { cachedFeedback ->
+            metricsReporter.addEvent(
+                feedbackEventCache[cachedFeedback.feedbackId]?.apply {
+                    update(cachedFeedback)
+                } ?: return@forEach
+            )
+        }
+    }
+
+    private fun createUserFeedback(
+        @FeedbackEvent.Type feedbackType: String,
+        description: String,
+        @FeedbackEvent.Source feedbackSource: String,
+        screenshot: String?,
+        feedbackSubType: Array<String>,
+        appMetadata: AppMetadata?,
+        onEventCreated: (NavigationFeedbackEvent) -> Unit
     ) {
         if (dynamicValues.sessionStarted && dataInitialized()) {
             log("collect post event locations for user feedback")
@@ -180,7 +244,7 @@ internal object MapboxNavigationTelemetry :
                     locationsBefore = preEventBuffer.toTelemetryLocations()
                     locationsAfter = postEventBuffer.toTelemetryLocations()
                 }
-                sendMetricEvent(feedbackEvent)
+                onEventCreated(feedbackEvent)
             }
         }
     }
