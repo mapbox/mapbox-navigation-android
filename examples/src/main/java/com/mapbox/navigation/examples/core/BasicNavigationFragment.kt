@@ -463,6 +463,7 @@ class BasicNavigationFragment :
                 screenShot,
                 feedback.feedbackSubType.toTypedArray()
             )
+
             showFeedbackSentSnackBar(
                 context = requireContext(),
                 view = if (summaryBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
