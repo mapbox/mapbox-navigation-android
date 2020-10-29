@@ -32,6 +32,7 @@ import com.mapbox.navigator.RouterParams
 import com.mapbox.navigator.RouterResult
 import com.mapbox.navigator.SensorData
 import com.mapbox.navigator.VoiceInstruction
+import java.lang.Error
 import java.util.Date
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -137,8 +138,10 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
         mutex.withLock {
             MapboxNativeNavigatorImpl.route = route
             val result = navigator!!.setRoute(route?.toJson() ?: "{}", PRIMARY_ROUTE_INDEX, legIndex)
-            navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
-                routeBufferGeoJson = GeometryGeoJson.fromJson(it)
+
+            val geometryWithBuffer = getRouteGeometryWithBuffer(GRID_SIZE, BUFFER_DILATION)
+            routeBufferGeoJson = ifNonNull(geometryWithBuffer) {
+                GeometryGeoJson.fromJson(it)
             }
             return result
         }
@@ -182,8 +185,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return a geojson as [String] representing the route buffer polygon
      */
-    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? =
-        navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
+    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? {
+        return try {
+            navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
+        } catch (error: Error) {
+            // failed to obtain the route buffer
+            // workaround for https://github.com/mapbox/mapbox-navigation-android/issues/2337
+            null
+        }
+    }
 
     /**
      * Follows a new leg of the already loaded directions.
