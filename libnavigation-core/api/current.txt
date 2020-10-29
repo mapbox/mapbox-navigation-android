@@ -35,6 +35,7 @@ package com.mapbox.navigation.core {
     method public void setRerouteController(com.mapbox.navigation.core.reroute.RerouteController? rerouteController = com.mapbox.navigation.core.MapboxNavigation.defaultRerouteController);
     method public void setRerouteController();
     method public void setRoutes(java.util.List<? extends com.mapbox.api.directions.v5.models.DirectionsRoute> routes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession(error.NonExistentClass locationPollingOptions = LocationPollingOptions.<ERROR FUNCTION>().<ERROR FUNCTION>());
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void startTripSession();
     method public void stopTripSession();
     method public void toggleHistory(boolean isEnabled);
@@ -456,6 +457,15 @@ package com.mapbox.navigation.core.telemetry.events {
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata build();
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder sessionId(String? sessionId);
     method public com.mapbox.navigation.core.telemetry.events.AppMetadata.Builder userId(String? userId);
+  }
+
+  public final class CachedNavigationFeedbackEvent {
+    method public String? getDescription();
+    method public String getFeedbackId();
+    method public java.util.Set<java.lang.String> getFeedbackSubType();
+    method public String getFeedbackType();
+    method public String getScreenshot();
+    method public void setDescription(String? p);
   }
 
   public final class FeedbackEvent {
