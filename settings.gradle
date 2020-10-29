@@ -1,5 +1,6 @@
 include ':examples',
         ':app-tests-wrapper',
+        ':instrumentation-tests',
         ':libnavigator',
         ':libnavigation-base',
         ':libnavigation-router',

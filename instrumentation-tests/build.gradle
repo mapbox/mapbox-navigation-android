@@ -1,0 +1,55 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.mapbox.maps.token'
+apply from: "${rootDir}/gradle/ktlint.gradle"
+
+android {
+    compileSdkVersion androidVersions.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "com.mapbox.navigation.instrumentation_tests"
+        minSdkVersion androidVersions.minSdkVersion
+        targetSdkVersion androidVersions.targetSdkVersion
+        multiDexEnabled true
+        versionCode 1
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+        vectorDrawables.useSupportLibrary = true
+    }
+}
+
+dependencies {
+    // Mapbox Navigation SDK
+    implementation project(':libnavigation-ui')
+
+    // test
+    androidTestImplementation project(':libtesting-ui')
+    androidTestImplementation dependenciesList.testRunner
+    androidTestUtil dependenciesList.testOrchestrator
+
+    // ktlint
+    ktlint dependenciesList.ktlint
+
+    // Kotlin support
+    implementation dependenciesList.kotlinStdLib
+
+    // Coroutines
+    implementation dependenciesList.coroutinesAndroid
+
+    // Support libraries
+    implementation dependenciesList.androidXCore
+    implementation dependenciesList.materialDesign
+    implementation dependenciesList.androidXAppCompat
+    implementation dependenciesList.androidXConstraintLayout
+    implementation dependenciesList.androidXPreference
+
+    implementation dependenciesList.gmsLocation
+
+    implementation dependenciesList.multidex
+}
