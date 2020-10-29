@@ -27,6 +27,9 @@ import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
 import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
 import com.mapbox.navigation.core.NavigationSession.State.IDLE
 import com.mapbox.navigation.core.telemetry.MapboxNavigationTelemetry.toTelemetryLocation
+import com.mapbox.navigation.core.telemetry.events.AppMetadata
+import com.mapbox.navigation.core.telemetry.events.CachedNavigationFeedbackEvent
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.START
 import com.mapbox.navigation.core.telemetry.events.FreeDriveEventType.STOP
 import com.mapbox.navigation.core.telemetry.events.NavigationArriveEvent
@@ -363,6 +366,134 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[8] is NavigationFeedbackEvent)
         assertTrue(events[9] is NavigationCancelEvent)
         assertEquals(10, events.size)
+    }
+
+    @Test
+    fun cache_feedback_is_cached() {
+        baseMock()
+
+        baseInitialization()
+        val cacheFeedbackType = FeedbackEvent.POSITIONING_ISSUE
+        cacheUserFeedback(feedbackType = cacheFeedbackType)
+        val cacheFeedbackDescription = "cacheFeedbackDescription"
+        cacheUserFeedback(description = cacheFeedbackDescription)
+        updateSessionState(FREE_DRIVE)
+
+        val cachedFeedbackEvents = MapboxNavigationTelemetry.getCachedUserFeedback()
+        assertEquals(cachedFeedbackEvents.size, 2)
+        assertEquals(
+            cacheFeedbackType,
+            cachedFeedbackEvents[0].feedbackType
+        )
+        assertEquals(
+            "cacheFeedbackDescription",
+            cachedFeedbackEvents[1].description
+        )
+    }
+
+    @Test
+    fun cache_feedback_not_send_on_session_stop() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        cacheUserFeedback()
+        offRoute()
+        updateRoute(anotherRoute)
+        updateRouteProgress()
+        postUserFeedback()
+        cacheUserFeedback()
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 6)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationRerouteEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[4] is NavigationCancelEvent)
+        assertTrue(events[5] is NavigationFreeDriveEvent)
+        assertEquals(6, events.size)
+    }
+
+    @Test
+    fun cache_feedback_sent_even_after_session_stop() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        cacheUserFeedback()
+        offRoute()
+        updateRoute(anotherRoute)
+        updateRouteProgress()
+        postUserFeedback()
+        cacheUserFeedback()
+        updateSessionState(FREE_DRIVE)
+        postCachedUserFeedback()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 8)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationRerouteEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[4] is NavigationCancelEvent)
+        assertTrue(events[5] is NavigationFreeDriveEvent)
+        assertTrue(events[6] is NavigationFeedbackEvent)
+        assertTrue(events[7] is NavigationFeedbackEvent)
+
+        assertEquals(8, events.size)
+    }
+
+    @Test
+    fun only_internal_cached_feedback_sent() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        val cacheFeedbackType = FeedbackEvent.POSITIONING_ISSUE
+        cacheUserFeedback(feedbackType = cacheFeedbackType)
+        offRoute()
+        updateRoute(anotherRoute)
+        updateRouteProgress()
+        postUserFeedback()
+        val cacheFeedbackDescription = "cacheFeedbackDescription"
+        cacheUserFeedback(description = cacheFeedbackDescription)
+        updateSessionState(FREE_DRIVE)
+        postCachedUserFeedback(
+            MapboxNavigationTelemetry
+                .getCachedUserFeedback()
+                .plus(
+                    listOf(
+                        CachedNavigationFeedbackEvent(
+                            "",
+                            FeedbackEvent.ROAD_CLOSED,
+                            "a feedback that not created by telemetry " +
+                                "will be dropped and not be sent",
+                            "",
+                            HashSet()
+                        )
+                    )
+                )
+        )
+
+        val events = captureAndVerifyMetricsReporter(exactly = 8)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        assertTrue(events[1] is NavigationDepartEvent)
+        assertTrue(events[2] is NavigationRerouteEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[4] is NavigationCancelEvent)
+        assertTrue(events[5] is NavigationFreeDriveEvent)
+        assertTrue(events[6] is NavigationFeedbackEvent)
+        assertEquals(
+            cacheFeedbackType,
+            (events[6] as NavigationFeedbackEvent).feedbackType
+        )
+        assertTrue(events[7] is NavigationFeedbackEvent)
+        assertEquals(
+            "cacheFeedbackDescription",
+            (events[7] as NavigationFeedbackEvent).description
+        )
+
+        assertEquals(8, events.size)
     }
 
     @Test
@@ -942,7 +1073,34 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun postUserFeedback() {
-        MapboxNavigationTelemetry.postUserFeedback("", "", "", null, null, null)
+        MapboxNavigationTelemetry.postUserFeedback("", "", "", null, emptyArray(), null)
+    }
+
+    private fun cacheUserFeedback(
+        feedbackType: String = "",
+        description: String = "",
+        feedbackSource: String = "",
+        screenshot: String? = null,
+        feedbackSubType: Array<String> = emptyArray(),
+        appMetadata: AppMetadata? = null
+    ) {
+        MapboxNavigationTelemetry.cacheUserFeedback(
+            feedbackType,
+            description,
+            feedbackSource,
+            screenshot,
+            feedbackSubType,
+            appMetadata
+        )
+    }
+
+    private fun postCachedUserFeedback(
+        cachedFeedbackEventList: List<CachedNavigationFeedbackEvent> =
+            MapboxNavigationTelemetry.getCachedUserFeedback()
+    ) {
+        MapboxNavigationTelemetry.postCachedUserFeedback(
+            cachedFeedbackEventList
+        )
     }
 
     /**

@@ -26,4 +26,19 @@ internal class NavigationFeedbackEvent(
     var appMetadata: AppMetadata? = null
 
     override fun getEventName(): String = NavigationMetrics.FEEDBACK
+
+    fun getCachedNavigationFeedbackEvent() =
+        CachedNavigationFeedbackEvent(
+            feedbackId,
+            feedbackType ?: "",
+            description,
+            screenshot ?: "",
+            HashSet(feedbackSubType?.toSet() ?: emptySet())
+        )
+
+    fun update(cachedNavigationFeedbackEvent: CachedNavigationFeedbackEvent) {
+        feedbackType = cachedNavigationFeedbackEvent.feedbackType
+        description = cachedNavigationFeedbackEvent.description
+        feedbackSubType = cachedNavigationFeedbackEvent.feedbackSubType.toTypedArray()
+    }
 }
