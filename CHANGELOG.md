@@ -2,6 +2,20 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.1.2 - October 29, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes
+* Avoid an occasional crash when setting a route due a failed attempt to generate a route geometry with a buffer. [#3710](https://github.com/mapbox/mapbox-navigation-android/pull/3710)
+
+## Mapbox Navigation SDK 1.0.1 - October 29, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes
+* Avoid an occasional crash when setting a route due a failed attempt to generate a route geometry with a buffer. [#3710](https://github.com/mapbox/mapbox-navigation-android/pull/3710)
+
 ## Mapbox Navigation SDK 1.2.0-alpha.4 - October 28, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
