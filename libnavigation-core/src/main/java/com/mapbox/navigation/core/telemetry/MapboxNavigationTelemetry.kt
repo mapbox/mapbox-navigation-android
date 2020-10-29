@@ -118,6 +118,7 @@ internal object MapboxNavigationTelemetry :
     private var sessionState: NavigationSession.State = IDLE
     private var routeProgress: RouteProgress? = null
     private var originalRoute: DirectionsRoute? = null
+    private var newRoute: DirectionsRoute? = null
     private var needStartSession = false
 
     /**
@@ -161,7 +162,7 @@ internal object MapboxNavigationTelemetry :
         feedbackSubType: Array<String>?,
         appMetadata: AppMetadata?
     ) {
-        if (dynamicValues.sessionStarted) {
+        if (dynamicValues.sessionStarted && dataInitialized()) {
             log("collect post event locations for user feedback")
             val feedbackEvent = NavigationFeedbackEvent(
                 PhoneState(context),
@@ -201,6 +202,7 @@ internal object MapboxNavigationTelemetry :
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         this.routeProgress = routeProgress
         startSessionIfNeedAndCan()
+        handleRerouteIfNeed()
 
         if (routeProgress.currentState == ROUTE_COMPLETE) {
             processArrival()
@@ -214,7 +216,8 @@ internal object MapboxNavigationTelemetry :
                 if (originalRoute != null) {
                     if (needHandleReroute) {
                         needHandleReroute = false
-                        handleReroute(it)
+                        resetRouteProgress()
+                        newRoute = it
                     } else {
                         log("handle ExternalRoute")
                         sessionStop()
@@ -277,7 +280,7 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun sessionStop() {
-        if (dynamicValues.sessionStarted) {
+        if (dynamicValues.sessionStarted && dataInitialized()) {
             log("sessionStop")
             handleSessionCanceled()
             reset()
@@ -305,34 +308,39 @@ internal object MapboxNavigationTelemetry :
         return originalRoute != null && dynamicValues.sessionStarted
     }
 
-    private fun handleReroute(newRoute: DirectionsRoute) {
-        log("handleReroute")
-        dynamicValues.run {
-            val currentTime = Time.SystemImpl.millis()
-            timeSinceLastReroute = (currentTime - timeOfReroute).toInt()
-            timeOfReroute = currentTime
-            rerouteCount++
-        }
+    private fun handleRerouteIfNeed() {
+        newRoute?.let {
+            log("handleReroute")
 
-        val navigationRerouteEvent = NavigationRerouteEvent(
-            PhoneState(context),
-            MetricsRouteProgress(routeProgress)
-        ).apply {
-            secondsSinceLastReroute = dynamicValues.timeSinceLastReroute / ONE_SECOND
-            newDistanceRemaining = newRoute.distance().toInt()
-            newDurationRemaining = newRoute.duration().toInt()
-            newGeometry = obtainGeometry(newRoute)
-            populate()
-        }
-
-        locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
-            navigationRerouteEvent.apply {
-                locationsBefore = preEventBuffer.toTelemetryLocations()
-                locationsAfter = postEventBuffer.toTelemetryLocations()
+            dynamicValues.run {
+                val currentTime = Time.SystemImpl.millis()
+                timeSinceLastReroute = (currentTime - timeOfReroute).toInt()
+                timeOfReroute = currentTime
+                rerouteCount++
             }
 
-            sendMetricEvent(navigationRerouteEvent)
+            val navigationRerouteEvent = NavigationRerouteEvent(
+                PhoneState(context),
+                MetricsRouteProgress(routeProgress)
+            ).apply {
+                secondsSinceLastReroute = dynamicValues.timeSinceLastReroute / ONE_SECOND
+                newDistanceRemaining = it.distance().toInt()
+                newDurationRemaining = it.duration().toInt()
+                newGeometry = obtainGeometry(it)
+                populate()
+            }
+
+            locationsCollector.collectLocations { preEventBuffer, postEventBuffer ->
+                navigationRerouteEvent.apply {
+                    locationsBefore = preEventBuffer.toTelemetryLocations()
+                    locationsAfter = postEventBuffer.toTelemetryLocations()
+                }
+
+                sendMetricEvent(navigationRerouteEvent)
+            }
         }
+
+        newRoute = null
     }
 
     private fun handleSessionCanceled() {
@@ -431,6 +439,7 @@ internal object MapboxNavigationTelemetry :
         dynamicValues.reset()
         resetOriginalRoute()
         resetRouteProgress()
+        newRoute = null
         needHandleReroute = false
         needStartSession = false
     }
@@ -446,13 +455,13 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun startSessionIfNeedAndCan() {
-        if (needStartSession && canSessionBeStarted()) {
+        if (needStartSession && dataInitialized()) {
             needStartSession = false
             sessionStart()
         }
     }
 
-    private fun canSessionBeStarted(): Boolean {
+    private fun dataInitialized(): Boolean {
         return originalRoute != null && routeProgress != null
     }
 
