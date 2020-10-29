@@ -10,6 +10,7 @@ import com.mapbox.navigation.base.options.DeviceProfile
 import com.mapbox.navigation.navigator.ActiveGuidanceOptionsMapper
 import com.mapbox.navigation.navigator.toFixLocation
 import com.mapbox.navigation.navigator.toLocation
+import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigator.BannerInstruction
 import com.mapbox.navigator.ElectronicHorizonObserver
 import com.mapbox.navigator.NavigationStatus
@@ -23,6 +24,7 @@ import com.mapbox.navigator.VoiceInstruction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.lang.Error
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -141,9 +143,12 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
                 legIndex,
                 ActiveGuidanceOptionsMapper.mapFrom(route)
             ).let { navigatorMapper.getRouteInitInfo(it) }
-            navigator!!.getRouteBufferGeoJson(GRID_SIZE, BUFFER_DILATION)?.also {
-                routeBufferGeoJson = GeometryGeoJson.fromJson(it)
+
+            val geometryWithBuffer = getRouteGeometryWithBuffer(GRID_SIZE, BUFFER_DILATION)
+            routeBufferGeoJson = ifNonNull(geometryWithBuffer) {
+                GeometryGeoJson.fromJson(it)
             }
+
             result
         }
 
@@ -185,8 +190,15 @@ object MapboxNativeNavigatorImpl : MapboxNativeNavigator {
      *
      * @return a geojson as [String] representing the route buffer polygon
      */
-    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? =
-        navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
+    override fun getRouteGeometryWithBuffer(gridSize: Float, bufferDilation: Short): String? {
+        return try {
+            navigator!!.getRouteBufferGeoJson(gridSize, bufferDilation)
+        } catch (error: Error) {
+            // failed to obtain the route buffer
+            // workaround for https://github.com/mapbox/mapbox-navigation-android/issues/2337
+            null
+        }
+    }
 
     /**
      * Follows a new leg of the already loaded directions.
