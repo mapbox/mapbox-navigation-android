@@ -2,6 +2,14 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+## Mapbox Navigation SDK 1.2.0-alpha.5 - October 29, 2020
+Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
+
+### Changelog
+#### Bug fixes
+* Avoid an occasional crash when setting a route due a failed attempt to generate a route geometry with a buffer. [#3710](https://github.com/mapbox/mapbox-navigation-android/pull/3710)
+* Fixed an issue where an outdated information was appended to a telemetry reroute event. [#3716](https://github.com/mapbox/mapbox-navigation-android/pull/3716)
+
 ## Mapbox Navigation SDK 1.1.2 - October 29, 2020
 Visit our [1.0.0 migration guide](https://github.com/mapbox/mapbox-navigation-android/wiki/1.0-Navigation-SDK-Migration-Guide) and the [documentation pages](http://docs.mapbox.com/android/navigation/overview) for more information.
 
