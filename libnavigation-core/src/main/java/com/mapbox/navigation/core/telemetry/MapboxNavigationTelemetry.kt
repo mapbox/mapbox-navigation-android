@@ -267,16 +267,18 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun sessionStart() {
-        log("sessionStart")
-        dynamicValues.run {
-            sessionId = obtainUniversalUniqueIdentifier()
-            sessionStartTime = Date()
-            sessionStarted = true
-            handleArrive = true
-        }
+        if (dataInitialized()) {
+            log("sessionStart")
+            dynamicValues.run {
+                sessionId = obtainUniversalUniqueIdentifier()
+                sessionStartTime = Date()
+                sessionStarted = true
+                handleArrive = true
+            }
 
-        val departEvent = NavigationDepartEvent(PhoneState(context)).apply { populate() }
-        sendMetricEvent(departEvent)
+            val departEvent = NavigationDepartEvent(PhoneState(context)).apply { populate() }
+            sendMetricEvent(departEvent)
+        }
     }
 
     private fun sessionStop() {
@@ -309,7 +311,7 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun handleRerouteIfNeed() {
-        newRoute?.let {
+        ifNonNull(newRoute, routeProgress) { route, _ ->
             log("handleReroute")
 
             dynamicValues.run {
@@ -324,9 +326,9 @@ internal object MapboxNavigationTelemetry :
                 MetricsRouteProgress(routeProgress)
             ).apply {
                 secondsSinceLastReroute = dynamicValues.timeSinceLastReroute / ONE_SECOND
-                newDistanceRemaining = it.distance().toInt()
-                newDurationRemaining = it.duration().toInt()
-                newGeometry = obtainGeometry(it)
+                newDistanceRemaining = route.distance().toInt()
+                newDurationRemaining = route.duration().toInt()
+                newGeometry = obtainGeometry(route)
                 populate()
             }
 
@@ -338,9 +340,9 @@ internal object MapboxNavigationTelemetry :
 
                 sendMetricEvent(navigationRerouteEvent)
             }
-        }
 
-        newRoute = null
+            newRoute = null
+        }
     }
 
     private fun handleSessionCanceled() {
@@ -364,7 +366,7 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun processArrival() {
-        if (dynamicValues.sessionStarted && dynamicValues.handleArrive) {
+        if (dynamicValues.sessionStarted && dynamicValues.handleArrive && dataInitialized()) {
             log("you have arrived")
 
             dynamicValues.run {

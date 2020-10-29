@@ -165,7 +165,7 @@ class MapboxNavigationTelemetryTest {
 
         initTelemetry()
         updateSessionState(ACTIVE_GUIDANCE)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
 
         val events = captureAndVerifyMetricsReporter(exactly = 1)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -205,7 +205,7 @@ class MapboxNavigationTelemetryTest {
         every { routeProgress.currentState } returns ROUTE_COMPLETE
 
         baseInitialization()
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -221,7 +221,7 @@ class MapboxNavigationTelemetryTest {
 
         baseInitialization()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
 
         val events = captureAndVerifyMetricsReporter(exactly = 4)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -254,7 +254,7 @@ class MapboxNavigationTelemetryTest {
 
         baseInitialization()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
 
         val firstDepart = events[1] as NavigationDepartEvent
         val secondDepart = events[3] as NavigationDepartEvent
@@ -272,7 +272,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
         postUserFeedback()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
@@ -291,7 +291,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
         postUserFeedback()
         postUserFeedback()
         postUserFeedback()
@@ -324,7 +324,7 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
         postUserFeedback()
         updateSessionState(IDLE)
 
@@ -351,7 +351,7 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
         locationsCollector.flushBuffers()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
@@ -400,7 +400,7 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
         locationsCollector.flushBuffers()
 
         val rerouteEvent = events[2] as NavigationRerouteEvent
@@ -502,7 +502,7 @@ class MapboxNavigationTelemetryTest {
         initTelemetry()
         updateSessionState(ACTIVE_GUIDANCE)
         updateRoute(originalRoute)
-        updateRouteProgress(routeProgress)
+        updateRouteProgress()
     }
 
     private fun updateSessionState(state: NavigationSession.State) {
@@ -513,8 +513,10 @@ class MapboxNavigationTelemetryTest {
         MapboxNavigationTelemetry.onRoutesChanged(listOf(route))
     }
 
-    private fun updateRouteProgress(routeProgress: RouteProgress) {
-        MapboxNavigationTelemetry.onRouteProgressChanged(routeProgress)
+    private fun updateRouteProgress(count: Int = 10) {
+        repeat(count) {
+            MapboxNavigationTelemetry.onRouteProgressChanged(routeProgress)
+        }
     }
 
     private fun offRoute() {
