@@ -320,11 +320,11 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  @Nullable
+  @NonNull
   private String initializeUnitType(@NonNull NavigationViewOptions options) {
     RouteOptions routeOptions = options.directionsRoute().routeOptions();
     String unitType = getUnitTypeForLocale(ContextEx.inferDeviceLocale(getApplication()));
-    if (routeOptions != null) {
+    if (routeOptions != null && routeOptions.voiceUnits() != null) {
       unitType = routeOptions.voiceUnits();
     }
     return unitType;
