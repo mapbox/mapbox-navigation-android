@@ -28,6 +28,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
 import com.mapbox.navigation.ui.internal.route.RouteConstants
@@ -40,6 +41,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.MODERATE_CONGESTIO
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_SOURCE_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
+import com.mapbox.navigation.ui.internal.route.RouteConstants.ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS
 import com.mapbox.navigation.ui.internal.route.RouteConstants.SEVERE_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.UNKNOWN_CONGESTION_VALUE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_DESTINATION_VALUE
@@ -66,6 +68,7 @@ import com.mapbox.turf.TurfMeasurement
 import com.mapbox.turf.TurfMisc
 import timber.log.Timber
 import kotlin.math.ln
+import kotlin.math.max
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -151,7 +154,7 @@ internal class MapRouteLine(
     private var primaryRoute: DirectionsRoute? = null
     var vanishPointOffset: Double = 0.0
         private set
-    private var vanishingPointUpdateInhibited: Boolean = true
+    private var vanishingPointState = VanishingPointState.DISABLED
 
     private var primaryRoutePoints: RoutePoints? = null
     private var primaryRouteLineGranularDistances: RouteLineGranularDistances? = null
@@ -504,16 +507,11 @@ internal class MapRouteLine(
         lastIndexUpdateTimeNano = System.nanoTime()
     }
 
-    fun inhibitAutomaticVanishingPointUpdate(inhibitVanishingPointUpdate: Boolean) {
-        vanishingPointUpdateInhibited = inhibitVanishingPointUpdate
-    }
-
-    fun setVanishingOffset(offset: Double) {
-        if (offset >= 0) {
-            val expression = getExpressionAtOffset(offset)
-            hideCasingLineAtOffset(offset)
-            hideRouteLineAtOffset(offset)
-            decorateRouteLine(expression)
+    fun updateVanishingPointState(routeProgressState: RouteProgressState) {
+        vanishingPointState = when (routeProgressState) {
+            RouteProgressState.LOCATION_TRACKING -> VanishingPointState.ENABLED
+            RouteProgressState.ROUTE_COMPLETE -> VanishingPointState.ONLY_INCREASE_PROGRESS
+            else -> VanishingPointState.DISABLED
         }
     }
 
@@ -896,6 +894,8 @@ internal class MapRouteLine(
         vanishPointOffset = 0.0
         primaryRoutePoints = null
         primaryRouteLineGranularDistances = null
+        primaryRouteRemainingDistancesIndex = null
+        vanishingPointState = VanishingPointState.DISABLED
         primaryRoute = null
         directionsRoutes.clear()
         routeFeatureData.clear()
@@ -1039,7 +1039,7 @@ internal class MapRouteLine(
      * @param point representing the current position of the puck
      */
     fun updateTraveledRouteLine(point: Point) {
-        if (vanishingPointUpdateInhibited ||
+        if (vanishingPointState == VanishingPointState.DISABLED ||
             System.nanoTime() - lastIndexUpdateTimeNano > MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO
         ) {
             return
@@ -1049,29 +1049,83 @@ internal class MapRouteLine(
             primaryRouteLineGranularDistances,
             primaryRouteRemainingDistancesIndex
         ) { granularDistances, index ->
-            val traveledIndex = granularDistances.distancesArray[index]
-            val upcomingPoint = traveledIndex.point
+            val upcomingIndex = granularDistances.distancesArray[index]
+            if (upcomingIndex == null) {
+                Timber.e(
+                    """
+                       Upcoming route line index is null.
+                       primaryRouteLineGranularDistances: $primaryRouteLineGranularDistances
+                       primaryRouteRemainingDistancesIndex: $primaryRouteRemainingDistancesIndex
+                    """.trimIndent()
+                )
+                return
+            }
+            val upcomingPoint = upcomingIndex.point
+
+            if (index > 0) {
+                val distanceToLine = findDistanceToNearestPointOnCurrentLine(
+                    point,
+                    granularDistances,
+                    index
+                )
+                if (distanceToLine > ROUTE_LINE_UPDATE_MAX_DISTANCE_THRESHOLD_IN_METERS) {
+                    return
+                }
+            }
 
             /**
              * Take the remaining distance from the upcoming point on the route and extends it
              * by the exact position of the puck.
              */
             val remainingDistance =
-                traveledIndex.distanceRemaining + calculateDistance(upcomingPoint, point)
+                upcomingIndex.distanceRemaining + calculateDistance(upcomingPoint, point)
 
             /**
              * Calculate the percentage of the route traveled and update the expression.
              */
-            if (granularDistances.distance >= remainingDistance) {
-                val offset = (1.0 - remainingDistance / granularDistances.distance)
-                if (offset >= 0) {
-                    val expression = getExpressionAtOffset(offset)
-                    hideCasingLineAtOffset(offset)
-                    hideRouteLineAtOffset(offset)
-                    decorateRouteLine(expression)
-                }
+            val offset = if (granularDistances.distance >= remainingDistance) {
+                (1.0 - remainingDistance / granularDistances.distance)
+            } else {
+                0.0
             }
+
+            if (vanishingPointState == VanishingPointState.ONLY_INCREASE_PROGRESS &&
+                vanishPointOffset > offset
+            ) {
+                return
+            }
+            val expression = getExpressionAtOffset(offset)
+            hideCasingLineAtOffset(offset)
+            hideRouteLineAtOffset(offset)
+            decorateRouteLine(expression)
         }
+    }
+
+    /**
+     * Creates a line from the upcoming geometry point and the previous 10 points
+     * and tries to find the the distance from current point to that line.
+     *
+     * We need to take more points than <previous - upcoming> because the route progress update
+     * can jump by more than 1 geometry point.
+     * If this happens, the puck will animate through multiple geometry points,
+     * so we need to make a line with a buffer.
+     */
+    private fun findDistanceToNearestPointOnCurrentLine(
+        point: Point,
+        granularDistances: RouteLineGranularDistances,
+        upcomingIndex: Int
+    ): Double {
+        return TurfMisc.nearestPointOnLine(
+            point,
+            granularDistances.distancesArray.run {
+                val points = mutableListOf<Point>()
+                for (i in max(upcomingIndex - 10, 0)..upcomingIndex) {
+                    points.add(this.get(i).point)
+                }
+                points
+            },
+            TurfConstants.UNIT_METERS
+        ).getNumberProperty("dist")?.toDouble() ?: 0.0
     }
 
     internal object MapRouteLineSupport {
@@ -1576,4 +1630,30 @@ internal data class RouteLineGranularDistances(
  * @param flatList list of all points on the route.
  * The first and last point of adjacent steps overlap and are duplicated in this list.
  */
-internal data class RoutePoints(val nestedList: List<List<List<Point>>>, val flatList: List<Point>)
+internal data class RoutePoints(
+    val nestedList: List<List<List<Point>>>,
+    val flatList: List<Point>
+)
+
+/**
+ * Describes the vanishing point update algorithm's state.
+ */
+internal enum class VanishingPointState {
+    /**
+     * Always try to take the most recently calculated distance and set the vanishing point.
+     */
+    ENABLED,
+
+    /**
+     * Try to take the most recently calculated distance and set the vanishing point.
+     *
+     * Accept the value only if the progress is greater than the last update. This avoids
+     * the vanishing point from creeping backwards after the destination is passed.
+     */
+    ONLY_INCREASE_PROGRESS,
+
+    /**
+     * Ignore puck position updates and leave the vanishing point in the current position.
+     */
+    DISABLED
+}

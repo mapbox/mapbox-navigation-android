@@ -1,7 +1,6 @@
 package com.mapbox.navigation.ui.route
 
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
 
 /**
@@ -21,6 +20,7 @@ internal class MapRouteProgressChangeListener(
 
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         routeLine.updateUpcomingRoutePointIndex(routeProgress)
+        routeLine.updateVanishingPointState(routeProgress.currentState)
 
         val currentRoute = routeProgress.route
         val hasGeometry = currentRoute.geometry()?.isNotEmpty() ?: false
@@ -46,16 +46,6 @@ internal class MapRouteProgressChangeListener(
                     shouldReInitializePrimaryRoute = false
                 }
             }
-        }
-
-        when (routeProgress.currentState) {
-            RouteProgressState.LOCATION_TRACKING ->
-                routeLine.inhibitAutomaticVanishingPointUpdate(false)
-            RouteProgressState.ROUTE_COMPLETE -> {
-                routeLine.inhibitAutomaticVanishingPointUpdate(true)
-                routeLine.setVanishingOffset(1.0)
-            }
-            else -> routeLine.inhibitAutomaticVanishingPointUpdate(true)
         }
     }
 

@@ -21,6 +21,7 @@ import com.mapbox.mapboxsdk.style.layers.PropertyValue
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigation.base.trip.model.RouteProgressState
 import com.mapbox.navigation.ui.R
 import com.mapbox.navigation.ui.internal.ThemeSwitcher
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider
@@ -32,7 +33,7 @@ import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_LAYE
 import com.mapbox.navigation.ui.internal.route.RouteConstants.PRIMARY_ROUTE_TRAFFIC_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteConstants.WAYPOINT_LAYER_ID
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider
-import com.mapbox.turf.TurfMeasurement
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -1217,11 +1218,75 @@ class MapRouteLineTest {
     @Test
     fun updateVanishingPoint() {
         val expectedRouteLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
-            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.01792979, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.3259991, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
         val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
-            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.01792979, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.3259991, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
         val expectedRouteTrafficLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
-            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.01792979, " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.3259991, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.33272266, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.39298487, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.48991048, " +
+            "[\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.504132, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.8017851, " +
+            "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 1.0000086, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val routeLineExpressionSlot = slot<PropertyValue<Expression>>()
+        val routeLineCasingExpressionSlot = slot<PropertyValue<Expression>>()
+        val routeLineTrafficExpressionSlot = slot<PropertyValue<Expression>>()
+        val route = getDirectionsRoute()
+        val secondStepCoordinates = LineString.fromPolyline(
+            route.legs()!![0].steps()!![2].geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPoint = secondStepCoordinates[0]
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![2].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 0f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                    }
+                    every { stepIndex } returns 2
+                }
+            }
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+
+        mapRouteLine.updateTraveledRouteLine(inputPoint)
+
+        verify { primaryRouteCasingLayer.setProperties(capture(routeLineCasingExpressionSlot)) }
+        verify { primaryRouteLayer.setProperties(capture(routeLineExpressionSlot)) }
+        verify { primaryRouteTrafficLayer.setProperties(capture(routeLineTrafficExpressionSlot)) }
+        assertEquals(
+            expectedRouteLineVanishingExpression,
+            routeLineExpressionSlot.captured.expression.toString()
+        )
+        assertEquals(
+            expectedRouteLineCasingVanishingExpression,
+            routeLineCasingExpressionSlot.captured.expression.toString()
+        )
+
+        assertEquals(
+            expectedRouteTrafficLineVanishingExpression,
+            routeLineTrafficExpressionSlot.captured.expression.toString()
+        )
+    }
+
+    @Test
+    fun updateVanishingPoint_outsideOfRouteOnStart() {
+        val expectedRouteLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedRouteLineCasingVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
+        val expectedRouteTrafficLineVanishingExpression = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.0, " +
             "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.056129422, " +
             "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.09373502, " +
             "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.150941, " +
@@ -1234,46 +1299,14 @@ class MapRouteLineTest {
             "[\"rgba\", 255.0, 77.0, 77.0, 1.0], 0.504132, " +
             "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 0.8017851, " +
             "[\"rgba\", 86.0, 168.0, 251.0, 1.0], 1.0000086, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
-        )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
         val routeLineExpressionSlot = slot<PropertyValue<Expression>>()
         val routeLineCasingExpressionSlot = slot<PropertyValue<Expression>>()
         val routeLineTrafficExpressionSlot = slot<PropertyValue<Expression>>()
         val route = getDirectionsRoute()
-        val coordinates = LineString.fromPolyline(
-            route.geometry()!!,
-            Constants.PRECISION_6
-        ).coordinates()
-        val inputPoint = Point.fromLngLat(-122.524000, 37.975207)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
-        mapRouteLine.inhibitAutomaticVanishingPointUpdate(false)
+        val inputPoint = Point.fromLngLat(-122.523809, 37.975207)
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
@@ -1282,7 +1315,7 @@ class MapRouteLineTest {
                         route.legs()!![0].steps()!![0].geometry()!!,
                         6
                     )
-                    every { distanceTraveled } returns 15f
+                    every { distanceTraveled } returns 0f
                     every { step } returns mockk {
                         every { distance() } returns route.legs()!![0].steps()!![0].distance()
                     }
@@ -1313,58 +1346,142 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun doNotUpdateVanishingPointWhenInhibited() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
+    fun updateVanishingPointMultiLeg() {
+        val expectedRouteExpFirstLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.101173036, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedCasingExpFirstLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.101173036, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
+        val expectedTrafficExpFirstLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.101173036, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedRouteExpSecondLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.38165757, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val expectedCasingExpSecondLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.38165757, [\"rgba\", 47.0, 122.0, 198.0, 1.0]]"
+        val expectedTrafficExpSecondLeg = "[\"step\", [\"line-progress\"], " +
+            "[\"rgba\", 0.0, 0.0, 0.0, 0.0], 0.38165757, [\"rgba\", 86.0, 168.0, 251.0, 1.0]]"
+        val routeExpressionSlot = slot<PropertyValue<Expression>>()
+        val casingExpressionSlot = slot<PropertyValue<Expression>>()
+        val trafficExpressionSlot = slot<PropertyValue<Expression>>()
+        val route = getMultiLegDirectionsRoute()
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+
+        val lastStepIndex = route.legs()!![0].steps()!!.size - 1
+        val lastStepOfFirstLegCoordinates = LineString.fromPolyline(
+            route.legs()!![0].steps()!![lastStepIndex].geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPointFirstLeg = lastStepOfFirstLegCoordinates[0]
+        val routeProgressFirstLeg = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![lastStepIndex].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 0f
+                    every { step } returns mockk {
+                        every { distance() } returns
+                            route.legs()!![0].steps()!![lastStepIndex].distance()
+                    }
+                    every { stepIndex } returns lastStepIndex
+                }
+            }
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgressFirstLeg)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.ROUTE_COMPLETE)
+        mapRouteLine.updateTraveledRouteLine(inputPointFirstLeg)
+
+        verify { primaryRouteCasingLayer.setProperties(capture(casingExpressionSlot)) }
+        verify { primaryRouteLayer.setProperties(capture(routeExpressionSlot)) }
+        verify { primaryRouteTrafficLayer.setProperties(capture(trafficExpressionSlot)) }
+        assertEquals(
+            expectedRouteExpFirstLeg,
+            routeExpressionSlot.captured.expression.toString()
         )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
+        assertEquals(
+            expectedCasingExpFirstLeg,
+            casingExpressionSlot.captured.expression.toString()
+        )
+
+        assertEquals(
+            expectedTrafficExpFirstLeg,
+            trafficExpressionSlot.captured.expression.toString()
+        )
+        clearMocks(primaryRouteCasingLayer, primaryRouteLayer, primaryRouteTrafficLayer)
+
+        val firstStepOfSecondLegCoordinates = LineString.fromPolyline(
+            route.legs()!![1].steps()!![2].geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPointSecondLeg = firstStepOfSecondLegCoordinates[2]
+        val routeProgressSecondLeg = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 1
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![1].steps()!![2].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 8f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![1].steps()!![2].distance()
+                    }
+                    every { stepIndex } returns 2
+                }
+            }
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgressSecondLeg)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
+        mapRouteLine.updateTraveledRouteLine(inputPointSecondLeg)
+
+        verify { primaryRouteCasingLayer.setProperties(capture(casingExpressionSlot)) }
+        verify { primaryRouteLayer.setProperties(capture(routeExpressionSlot)) }
+        verify { primaryRouteTrafficLayer.setProperties(capture(trafficExpressionSlot)) }
+        assertEquals(
+            expectedRouteExpSecondLeg,
+            routeExpressionSlot.captured.expression.toString()
+        )
+        assertEquals(
+            expectedCasingExpSecondLeg,
+            casingExpressionSlot.captured.expression.toString()
+        )
+
+        assertEquals(
+            expectedTrafficExpSecondLeg,
+            trafficExpressionSlot.captured.expression.toString()
+        )
+    }
+
+    @Test
+    fun doNotUpdateVanishingPointWhenUncertain() {
         val route = getDirectionsRoute()
-        val inputPoint = Point.fromLngLat(-122.524000, 37.975207)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
-        mapRouteLine.inhibitAutomaticVanishingPointUpdate(false)
+        val secondStepCoordinates = LineString.fromPolyline(
+            route.legs()!![0].steps()!![2].geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPoint = secondStepCoordinates[0]
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
-                        route.legs()!![0].steps()!![0].geometry()!!,
+                        route.legs()!![0].steps()!![2].geometry()!!,
                         6
                     )
-                    every { distanceTraveled } returns 15f
+                    every { distanceTraveled } returns 0f
                     every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![0].distance()
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
                     }
-                    every { stepIndex } returns 0
+                    every { stepIndex } returns 2
                 }
             }
         }
         mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
-        mapRouteLine.inhibitAutomaticVanishingPointUpdate(true)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.ROUTE_UNCERTAIN)
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
@@ -1375,56 +1492,32 @@ class MapRouteLineTest {
 
     @Test
     fun doNotUpdateVanishingPointWhenRouteProgressOutdated() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
-        )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
         val route = getDirectionsRoute()
-        val inputPoint = Point.fromLngLat(-122.524000, 37.975207)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
-        mapRouteLine.inhibitAutomaticVanishingPointUpdate(false)
+        val secondStepCoordinates = LineString.fromPolyline(
+            route.legs()!![0].steps()!![2].geometry()!!,
+            Constants.PRECISION_6
+        ).coordinates()
+        val inputPoint = secondStepCoordinates[0]
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
         val routeProgress = mockk<RouteProgress> {
             every { currentLegProgress } returns mockk {
                 every { legIndex } returns 0
                 every { currentStepProgress } returns mockk {
                     every { stepPoints } returns PolylineUtils.decode(
-                        route.legs()!![0].steps()!![0].geometry()!!,
+                        route.legs()!![0].steps()!![2].geometry()!!,
                         6
                     )
-                    every { distanceTraveled } returns 15f
+                    every { distanceTraveled } returns 0f
                     every { step } returns mockk {
-                        every { distance() } returns route.legs()!![0].steps()!![0].distance()
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
                     }
-                    every { stepIndex } returns 0
+                    every { stepIndex } returns 2
                 }
             }
         }
         mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
 
         Thread.sleep((RouteConstants.MAX_ELAPSED_SINCE_INDEX_UPDATE_NANO / 1E6).toLong())
 
@@ -1437,42 +1530,31 @@ class MapRouteLineTest {
 
     @Test
     fun updateVanishingPointInhibitedByDefault() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
-        )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
         val route = getDirectionsRoute()
-        val coordinates = LineString.fromPolyline(
-            route.geometry()!!,
+        val secondStepCoordinates = LineString.fromPolyline(
+            route.legs()!![0].steps()!![2].geometry()!!,
             Constants.PRECISION_6
         ).coordinates()
-        val inputPoint = TurfMeasurement.midpoint(coordinates[4], coordinates[5])
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
+        val inputPoint = secondStepCoordinates[0]
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![2].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 0f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![0].steps()!![2].distance()
+                    }
+                    every { stepIndex } returns 2
+                }
+            }
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
@@ -1482,39 +1564,29 @@ class MapRouteLineTest {
     }
 
     @Test
-    fun updateVanishingPointWhenPointDistanceBeyondThreshold() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
-        )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
+    fun doNotUpdateVanishingPointWhenPointDistanceBeyondThreshold() {
         val route = getDirectionsRoute()
         val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns mockk {
+                every { legIndex } returns 0
+                every { currentStepProgress } returns mockk {
+                    every { stepPoints } returns PolylineUtils.decode(
+                        route.legs()!![0].steps()!![0].geometry()!!,
+                        6
+                    )
+                    every { distanceTraveled } returns 15f
+                    every { step } returns mockk {
+                        every { distance() } returns route.legs()!![0].steps()!![0].distance()
+                    }
+                    every { stepIndex } returns 0
+                }
+            }
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING)
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
@@ -1525,39 +1597,15 @@ class MapRouteLineTest {
 
     @Test
     fun updateVanishingPointWhenLineCoordinatesIsLessThanTwoPoints() {
-        every { style.layers } returns listOf(primaryRouteLayer)
-        every { style.isFullyLoaded } returnsMany listOf(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            true
-        )
-        every {
-            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
-        } returns primaryRouteCasingLayer
-        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
-        every {
-            style.getLayer("mapbox-navigation-route-traffic-layer")
-        } returns primaryRouteTrafficLayer
         val route = getSingleCoordinateDirectionsRoute()
-
         val inputPoint = Point.fromLngLat(-122.508527, 37.974846)
-        val mapRouteLine = MapRouteLine(
-            ctx,
-            style,
-            styleRes,
-            null,
-            layerProvider,
-            mapRouteSourceProvider,
-            null
-        ).also { it.draw(listOf(route)) }
+        val mapRouteLine = getMapRouteLineForVanishingTest()
+        mapRouteLine.draw(listOf(route))
+        val routeProgress = mockk<RouteProgress> {
+            every { currentLegProgress } returns null
+        }
+        mapRouteLine.updateUpcomingRoutePointIndex(routeProgress)
+        mapRouteLine.updateVanishingPointState(RouteProgressState.ROUTE_INVALID)
 
         mapRouteLine.updateTraveledRouteLine(inputPoint)
 
@@ -1582,6 +1630,14 @@ class MapRouteLineTest {
     private fun getDirectionsRoute(): DirectionsRoute {
         val tokenHere = "someToken"
         val directionsRouteAsJson = loadJsonFixture("vanish_point_test.txt")
+            ?.replace("tokenHere", tokenHere)
+
+        return DirectionsRoute.fromJson(directionsRouteAsJson)
+    }
+
+    private fun getMultiLegDirectionsRoute(): DirectionsRoute {
+        val tokenHere = "someToken"
+        val directionsRouteAsJson = loadJsonFixture("vanish_point_test_multi_leg.json")
             ?.replace("tokenHere", tokenHere)
 
         return DirectionsRoute.fromJson(directionsRouteAsJson)
@@ -1729,5 +1785,38 @@ class MapRouteLineTest {
         val inputStream = classLoader?.getResourceAsStream(filename)
         val scanner = Scanner(inputStream, "UTF-8").useDelimiter("\\A")
         return if (scanner.hasNext()) scanner.next() else ""
+    }
+
+    private fun getMapRouteLineForVanishingTest(): MapRouteLine {
+        every { style.layers } returns listOf(primaryRouteLayer)
+        every { style.isFullyLoaded } returnsMany listOf(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true
+        )
+        every {
+            style.getLayerAs<LineLayer>("mapbox-navigation-route-casing-layer")
+        } returns primaryRouteCasingLayer
+        every { style.getLayer("mapbox-navigation-route-layer") } returns primaryRouteLayer
+        every {
+            style.getLayer("mapbox-navigation-route-traffic-layer")
+        } returns primaryRouteTrafficLayer
+        return MapRouteLine(
+            ctx,
+            style,
+            styleRes,
+            null,
+            layerProvider,
+            mapRouteSourceProvider,
+            null
+        )
     }
 }

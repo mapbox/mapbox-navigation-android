@@ -14,6 +14,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.base.common.logger.model.Message
 import com.mapbox.common.logger.MapboxLogger
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -47,6 +48,7 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mapboxNavigation: MapboxNavigation? = null
     private var navigationMapboxMap: NavigationMapboxMap? = null
     private val firstLocationCallback = FirstLocationCallback(this)
+    private var lastRequestPoint: Point? = null
 
     private val replayRouteMapper = ReplayRouteMapper()
     private val mapboxReplayer = MapboxReplayer()
@@ -94,23 +96,38 @@ class ReplayActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         mapboxMap.addOnMapLongClickListener { latLng ->
             mapboxMap.locationComponent.lastKnownLocation?.let { originLocation ->
-                mapboxNavigation?.requestRoutes(
-                    RouteOptions.builder().applyDefaultParams()
-                        .accessToken(Utils.getMapboxAccessToken(applicationContext))
-                        .coordinates(originLocation.toPoint(), null, latLng.toPoint())
-                        .alternatives(false)
-                        .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
-                        .overview(DirectionsCriteria.OVERVIEW_FULL)
-                        .annotationsList(
-                            listOf(
-                                DirectionsCriteria.ANNOTATION_SPEED,
-                                DirectionsCriteria.ANNOTATION_DISTANCE,
-                                DirectionsCriteria.ANNOTATION_CONGESTION
+                mapboxNavigation?.let {
+                    val point = latLng.toPoint()
+                    val coordinates = mutableListOf(
+                        originLocation.toPoint(),
+                        latLng.toPoint()
+                    )
+
+                    lastRequestPoint?.let { lastPoint ->
+                        if (it.getRoutes().firstOrNull()?.legs()?.size == 1) {
+                            coordinates.add(1, lastPoint)
+                        }
+                    }
+
+                    it.requestRoutes(
+                        RouteOptions.builder().applyDefaultParams()
+                            .accessToken(Utils.getMapboxAccessToken(applicationContext))
+                            .coordinates(coordinates)
+                            .alternatives(false)
+                            .profile(DirectionsCriteria.PROFILE_DRIVING_TRAFFIC)
+                            .overview(DirectionsCriteria.OVERVIEW_FULL)
+                            .annotationsList(
+                                listOf(
+                                    DirectionsCriteria.ANNOTATION_SPEED,
+                                    DirectionsCriteria.ANNOTATION_DISTANCE,
+                                    DirectionsCriteria.ANNOTATION_CONGESTION
+                                )
                             )
-                        )
-                        .build(),
-                    routesReqCallback
-                )
+                            .build(),
+                        routesReqCallback
+                    )
+                    lastRequestPoint = point
+                }
             }
             true
         }

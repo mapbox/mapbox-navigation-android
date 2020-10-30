@@ -4,7 +4,6 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -244,7 +243,7 @@ class MapRouteProgressChangeListenerTest {
     }
 
     @Test
-    fun `should vanish the whole route on arrival`() {
+    fun `should update traveled index on progress update`() {
         val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow)
         val routeProgress: RouteProgress = mockk(relaxed = true) {
             every { currentState } returns RouteProgressState.ROUTE_COMPLETE
@@ -252,26 +251,18 @@ class MapRouteProgressChangeListenerTest {
 
         progressChangeListener.onRouteProgressChanged(routeProgress)
 
-        verify { routeLine.setVanishingOffset(1.0) }
+        verify { routeLine.updateUpcomingRoutePointIndex(routeProgress) }
     }
 
     @Test
-    fun `should inhibit for automatic vanishing point updates when not tracking`() {
+    fun `should update vanishing point state on progress update`() {
         val progressChangeListener = MapRouteProgressChangeListener(routeLine, routeArrow)
-
-        RouteProgressState.values().forEach {
-            clearMocks(routeLine)
-            val routeProgress: RouteProgress = mockk(relaxed = true) {
-                every { currentState } returns it
-            }
-            progressChangeListener.onRouteProgressChanged(routeProgress)
-            if (it == RouteProgressState.LOCATION_TRACKING) {
-                verify(exactly = 0) { routeLine.inhibitAutomaticVanishingPointUpdate(true) }
-                verify(exactly = 1) { routeLine.inhibitAutomaticVanishingPointUpdate(false) }
-            } else {
-                verify(exactly = 1) { routeLine.inhibitAutomaticVanishingPointUpdate(true) }
-                verify(exactly = 0) { routeLine.inhibitAutomaticVanishingPointUpdate(false) }
-            }
+        val routeProgress: RouteProgress = mockk(relaxed = true) {
+            every { currentState } returns RouteProgressState.LOCATION_TRACKING
         }
+
+        progressChangeListener.onRouteProgressChanged(routeProgress)
+
+        verify { routeLine.updateVanishingPointState(RouteProgressState.LOCATION_TRACKING) }
     }
 }
