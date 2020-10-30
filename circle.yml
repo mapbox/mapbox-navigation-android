@@ -2,7 +2,7 @@ version: 2.1
 parameters:
   docker-image-tag:
     type: string
-    default: "mbgl/android-ndk-r21:769c31f1d8"
+    default: "mbgl/android-ndk-r21:latest"
 
 workflows:
   version: 2
@@ -39,7 +39,11 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-
+      - mobile-metrics-dry-run:
+          type: approval
+      - mobile-metrics-benchmarks:
+          requires:
+            - mobile-metrics-dry-run
 commands:
   restore-gradle-cache:
     steps:
@@ -194,7 +198,7 @@ commands:
     steps:
       - run:
           name: Post code coverage reports to Codecov.io
-          command: pip install --user codecov && /root/.local/bin/codecov
+          command: pip3 install --user codecov && /root/.local/bin/codecov
 
   generate-version-name:
     steps:
@@ -279,35 +283,13 @@ commands:
           name: Generate documentation
           command: make javadoc-dokka
 
-  track-performance:
+  trigger-mobile-metrics:
     steps:
       - run:
-          name: Track performance of the Navigation SDK
+          name: Track metrics of the Navigation SDK
           command: |
-            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-              if [[ $CIRCLE_BRANCH == master ]]; then
-               curl -u ${MOBILE_METRICS_TOKEN}: \
-                 -d build_parameters[CIRCLE_JOB]=android-navigation-benchmark \
-                 -d build_parameters[BENCHMARK_COMMIT]= ${CIRCLE_SHA1} \
-                 https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
-              fi
-            fi
-      - run:
-          name: Trigger android binary size check
-          command: |
-            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-              if [[ $CIRCLE_BRANCH == master ]]; then
-                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-binary-size https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
-              fi
-            fi
-      - run:
-          name: Trigger code coverage check
-          command: |
-            if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
-              if [[ $CIRCLE_BRANCH == master ]]; then
-                curl -u ${MOBILE_METRICS_TOKEN}: -d build_parameters[CIRCLE_JOB]=android-navigation-code-coverage https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/master
-              fi
-            fi
+            pip3 install requests
+            python3 scripts/trigger-mobile-metrics.py
 
 jobs:
   assemble-debug:
@@ -392,6 +374,14 @@ jobs:
           module_wrapper: "app-tests-wrapper"
           variant: "debug"
 
+  mobile-metrics-benchmarks:
+    working_directory: ~/code
+    docker:
+      - image: << pipeline.parameters.docker-image-tag >>
+    steps:
+      - checkout
+      - trigger-mobile-metrics
+
   release-snapshot:
     working_directory: ~/code
     docker:
@@ -407,7 +397,7 @@ jobs:
           artifact-type: "core"
       - publish-artifacts:
           artifact-type: "ui"
-      - track-performance
+      - trigger-mobile-metrics
 
   release:
     working_directory: ~/code
