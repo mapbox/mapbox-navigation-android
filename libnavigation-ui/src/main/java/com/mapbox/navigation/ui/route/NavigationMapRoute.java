@@ -15,13 +15,13 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.location.OnIndicatorPositionChangedListener;
-import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
-import com.mapbox.navigation.ui.R;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
+import com.mapbox.navigation.ui.R;
 import com.mapbox.navigation.ui.internal.route.MapRouteSourceProvider;
 import com.mapbox.navigation.ui.internal.route.RouteLayerProvider;
 import com.mapbox.navigation.ui.internal.utils.CompareUtils;
@@ -481,9 +481,9 @@ public class NavigationMapRoute implements LifecycleObserver {
     }
   }
 
-  @Nullable
+  @NonNull
   private MapRouteProgressChangeListener buildMapRouteProgressChangeListener() {
-    return new MapRouteProgressChangeListener(this.routeLine, routeArrow);
+    return new MapRouteProgressChangeListener(routeLine, routeArrow);
   }
 
   /**
