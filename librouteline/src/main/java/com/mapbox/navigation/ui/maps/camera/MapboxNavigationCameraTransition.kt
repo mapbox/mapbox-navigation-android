@@ -86,7 +86,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         currentMapCameraOptions.padding?.let {
             currentPadding = it
         }
-        val endPadding = getEdgeInsetsFromScreenCenterOffset(
+        val endPadding = convertScreenCenterOffsetToEdgeInsets(
             mapboxMap.getSize(), transitionOptions.anchorOffset)
         val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(currentPadding), endPadding) {
             startDelay = pitchAndAnchorDelay.toLong()
@@ -144,7 +144,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         }
 
         val startPadding = currentPadding
-        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), transitionOptions.anchorOffset)
+        val endPadding = convertScreenCenterOffsetToEdgeInsets(mapboxMap.getSize(), transitionOptions.anchorOffset)
         val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(startPadding), endPadding) {
             startDelay = 0
             duration = 1200
@@ -195,7 +195,7 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         currentMapCamera.padding?.let {
             currentPadding = it
         }
-        val endPadding = getEdgeInsetsFromScreenCenterOffset(mapboxMap.getSize(), transitionOptions.anchorOffset)
+        val endPadding = convertScreenCenterOffsetToEdgeInsets(mapboxMap.getSize(), transitionOptions.anchorOffset)
         val anchorAnimator = CameraPaddingAnimator.create(AbstractCameraAnimator.StartValue(currentPadding), endPadding) {
             duration = 1000
             interpolator = PathInterpolatorCompat.create(0f, 0f, 1f, 1f)
@@ -214,9 +214,11 @@ class MapboxNavigationCameraTransition(mapView: MapView) : NavigationCameraTrans
         return (to - from + 540) % 360 - 180
     }
 
-    private fun getEdgeInsetsFromScreenCenterOffset(mapSize: Size, centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)): EdgeInsets {
+    private fun convertScreenCenterOffsetToEdgeInsets(mapSize: Size, centerOffset: ScreenCoordinate = ScreenCoordinate(0.0, 0.0)): EdgeInsets {
         val mapCenterScreenCoordinate = ScreenCoordinate((mapSize.width / 2).toDouble(), (mapSize.height / 2).toDouble())
-        return EdgeInsets(mapCenterScreenCoordinate.y + centerOffset.y, mapCenterScreenCoordinate.x + centerOffset.x, mapCenterScreenCoordinate.y - centerOffset.y, mapCenterScreenCoordinate.x - centerOffset.x)
+        val top = mapCenterScreenCoordinate.y + centerOffset.y
+        val left = mapCenterScreenCoordinate.x + centerOffset.x
+        return getScaledEdgeInsets(EdgeInsets(top, left, mapSize.height - top, mapSize.width - left))
     }
 
 }

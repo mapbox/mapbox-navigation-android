@@ -101,7 +101,7 @@ class MapboxNavigationStateTransition(
         val cam = mapboxMap.cameraForCoordinates(points, edgeInsets, bearing, pitch)
 
         if (cam.zoom != null && cam.center != null) {
-            return Pair(cam.zoom!! - 0.2, cam.center!!)
+            return Pair(cam.zoom!!, cam.center!!)
         }
         return Pair(2.0, Point.fromLngLat(0.0, 0.0))
     }
