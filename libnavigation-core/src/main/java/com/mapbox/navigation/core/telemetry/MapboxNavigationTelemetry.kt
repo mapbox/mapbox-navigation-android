@@ -15,8 +15,8 @@ import com.mapbox.base.common.logger.model.Tag
 import com.mapbox.navigation.base.metrics.MetricEvent
 import com.mapbox.navigation.base.metrics.MetricsReporter
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
-import com.mapbox.navigation.base.trip.model.RouteProgressState.ROUTE_COMPLETE
 import com.mapbox.navigation.core.BuildConfig
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationSession
@@ -24,6 +24,7 @@ import com.mapbox.navigation.core.NavigationSession.State.ACTIVE_GUIDANCE
 import com.mapbox.navigation.core.NavigationSession.State.FREE_DRIVE
 import com.mapbox.navigation.core.NavigationSession.State.IDLE
 import com.mapbox.navigation.core.NavigationSessionStateObserver
+import com.mapbox.navigation.core.arrival.ArrivalObserver
 import com.mapbox.navigation.core.directions.session.RoutesObserver
 import com.mapbox.navigation.core.internal.accounts.MapboxNavigationAccounts
 import com.mapbox.navigation.core.telemetry.events.AppMetadata
@@ -50,22 +51,18 @@ private data class DynamicSessionValues(
     var timeOfReroute: Long = 0L,
     var timeSinceLastReroute: Int = 0,
     var sessionId: String? = null,
-    var tripIdentifier: String? = null,
     var sessionStartTime: Date? = null,
     var sessionArrivalTime: Date? = null,
     var sessionStarted: Boolean = false,
-    var handleArrive: Boolean = false
 ) {
     fun reset() {
         rerouteCount = 0
         timeOfReroute = 0
         timeSinceLastReroute = 0
         sessionId = null
-        tripIdentifier = null
         sessionStartTime = null
         sessionArrivalTime = null
         sessionStarted = false
-        handleArrive = false
     }
 }
 
@@ -85,7 +82,8 @@ internal object MapboxNavigationTelemetry :
     RouteProgressObserver,
     RoutesObserver,
     OffRouteObserver,
-    NavigationSessionStateObserver {
+    NavigationSessionStateObserver,
+    ArrivalObserver {
     internal val TAG = Tag("MAPBOX_TELEMETRY")
 
     private const val ONE_SECOND = 1000
@@ -195,6 +193,7 @@ internal object MapboxNavigationTelemetry :
             unregisterRoutesObserver(this@MapboxNavigationTelemetry)
             unregisterOffRouteObserver(this@MapboxNavigationTelemetry)
             unregisterNavigationSessionObserver(this@MapboxNavigationTelemetry)
+            unregisterArrivalObserver(this@MapboxNavigationTelemetry)
         }
         MapboxMetricsReporter.disable()
     }
@@ -203,10 +202,6 @@ internal object MapboxNavigationTelemetry :
         this.routeProgress = routeProgress
         startSessionIfNeedAndCan()
         handleRerouteIfNeed()
-
-        if (routeProgress.currentState == ROUTE_COMPLETE) {
-            processArrival()
-        }
     }
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
@@ -256,6 +251,19 @@ internal object MapboxNavigationTelemetry :
         }
     }
 
+    override fun onNextRouteLegStart(routeLegProgress: RouteLegProgress) {
+        log("onNextRouteLegStart")
+        processArrival()
+        handleSessionCanceled()
+        sessionStart()
+    }
+
+    override fun onFinalDestinationArrival(routeProgress: RouteProgress) {
+        log("onFinalDestinationArrival")
+        this.routeProgress = routeProgress
+        processArrival()
+    }
+
     private fun registerListeners(mapboxNavigation: MapboxNavigation) {
         mapboxNavigation.run {
             registerLocationObserver(locationsCollector)
@@ -263,6 +271,7 @@ internal object MapboxNavigationTelemetry :
             registerRoutesObserver(this@MapboxNavigationTelemetry)
             registerOffRouteObserver(this@MapboxNavigationTelemetry)
             registerNavigationSessionObserver(this@MapboxNavigationTelemetry)
+            registerArrivalObserver(this@MapboxNavigationTelemetry)
         }
     }
 
@@ -273,7 +282,6 @@ internal object MapboxNavigationTelemetry :
                 sessionId = obtainUniversalUniqueIdentifier()
                 sessionStartTime = Date()
                 sessionStarted = true
-                handleArrive = true
             }
 
             val departEvent = NavigationDepartEvent(PhoneState(context)).apply { populate() }
@@ -282,11 +290,9 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun sessionStop() {
-        if (dynamicValues.sessionStarted && dataInitialized()) {
-            log("sessionStop")
-            handleSessionCanceled()
-            reset()
-        }
+        log("sessionStop")
+        handleSessionCanceled()
+        reset()
     }
 
     private fun sendMetricEvent(event: MetricEvent) {
@@ -346,14 +352,16 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun handleSessionCanceled() {
-        log("handleSessionCanceled")
-        locationsCollector.flushBuffers()
+        if (dynamicValues.sessionStarted && dataInitialized()) {
+            log("handleSessionCanceled")
+            locationsCollector.flushBuffers()
 
-        val cancelEvent = NavigationCancelEvent(PhoneState(context)).apply { populate() }
-        ifNonNull(dynamicValues.sessionArrivalTime) {
-            cancelEvent.arrivalTimestamp = generateCreateDateFormatted(it)
+            val cancelEvent = NavigationCancelEvent(PhoneState(context)).apply { populate() }
+            ifNonNull(dynamicValues.sessionArrivalTime) {
+                cancelEvent.arrivalTimestamp = generateCreateDateFormatted(it)
+            }
+            sendMetricEvent(cancelEvent)
         }
-        sendMetricEvent(cancelEvent)
     }
 
     private fun postTurnstileEvent() {
@@ -366,14 +374,9 @@ internal object MapboxNavigationTelemetry :
     }
 
     private fun processArrival() {
-        if (dynamicValues.sessionStarted && dynamicValues.handleArrive && dataInitialized()) {
+        if (dynamicValues.sessionStarted && dataInitialized()) {
             log("you have arrived")
-
-            dynamicValues.run {
-                tripIdentifier = obtainUniversalUniqueIdentifier()
-                sessionArrivalTime = Date()
-                handleArrive = false
-            }
+            dynamicValues.sessionArrivalTime = Date()
 
             val arriveEvent = NavigationArriveEvent(PhoneState(context)).apply { populate() }
             sendMetricEvent(arriveEvent)

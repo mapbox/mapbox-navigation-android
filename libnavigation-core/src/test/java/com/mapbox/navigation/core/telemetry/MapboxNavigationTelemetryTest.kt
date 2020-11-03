@@ -108,6 +108,7 @@ class MapboxNavigationTelemetryTest {
     private val anotherStepManeuverLocation = mockk<Point>()
     private val legProgress = mockk<RouteLegProgress>()
     private val stepProgress = mockk<RouteStepProgress>()
+    private val nextRouteLegProgress = mockk<RouteLegProgress>()
 
     @After
     fun cleanUp() {
@@ -202,10 +203,9 @@ class MapboxNavigationTelemetryTest {
     fun arriveEvent_sent_on_arrival() {
         baseMock()
         mockRouteProgress()
-        every { routeProgress.currentState } returns ROUTE_COMPLETE
 
         baseInitialization()
-        updateRouteProgress()
+        arrive()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -266,7 +266,6 @@ class MapboxNavigationTelemetryTest {
     fun feedback_and_reroute_events_not_sent_on_arrival() {
         baseMock()
         mockAnotherRoute()
-        every { routeProgress.currentState } returns ROUTE_COMPLETE
 
         baseInitialization()
         postUserFeedback()
@@ -274,6 +273,7 @@ class MapboxNavigationTelemetryTest {
         updateRoute(anotherRoute)
         updateRouteProgress()
         postUserFeedback()
+        arrive()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
         assertTrue(events[0] is NavigationAppUserTurnstileEvent)
@@ -408,6 +408,106 @@ class MapboxNavigationTelemetryTest {
     }
 
     @Test
+    fun events_sent_correctly_on_multi_waypoints() {
+        baseMock()
+
+        baseInitialization()
+        nextWaypoint()
+        nextWaypoint()
+        nextWaypoint()
+        arrive()
+
+        val events = captureAndVerifyMetricsReporter(exactly = 12)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        // origin
+        assertTrue(events[1] is NavigationDepartEvent)
+        // waypoint1
+        assertTrue(events[2] is NavigationArriveEvent)
+        assertTrue(events[3] is NavigationCancelEvent)
+        assertTrue(events[4] is NavigationDepartEvent)
+        // waypoint2
+        assertTrue(events[5] is NavigationArriveEvent)
+        assertTrue(events[6] is NavigationCancelEvent)
+        assertTrue(events[7] is NavigationDepartEvent)
+        // waypoint3
+        assertTrue(events[8] is NavigationArriveEvent)
+        assertTrue(events[9] is NavigationCancelEvent)
+        assertTrue(events[10] is NavigationDepartEvent)
+        // destination
+        assertTrue(events[11] is NavigationArriveEvent)
+
+        assertEquals(12, events.size)
+    }
+
+    @Test
+    fun feedback_events_sent_correctly_on_multi_waypoints() {
+        baseMock()
+
+        baseInitialization()
+        postUserFeedback()
+        nextWaypoint()
+        mockFlushBuffers()
+        postUserFeedback()
+        postUserFeedback()
+        nextWaypoint()
+        arrive()
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 13)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        // origin
+        assertTrue(events[1] is NavigationDepartEvent)
+        // waypoint1
+        assertTrue(events[2] is NavigationArriveEvent)
+        assertTrue(events[3] is NavigationFeedbackEvent)
+        assertTrue(events[4] is NavigationCancelEvent)
+        assertTrue(events[5] is NavigationDepartEvent)
+        // waypoint2
+        assertTrue(events[6] is NavigationArriveEvent)
+        assertTrue(events[7] is NavigationFeedbackEvent)
+        assertTrue(events[8] is NavigationFeedbackEvent)
+        assertTrue(events[9] is NavigationCancelEvent)
+        assertTrue(events[10] is NavigationDepartEvent)
+        // destination
+        assertTrue(events[11] is NavigationArriveEvent)
+        assertTrue(events[12] is NavigationCancelEvent)
+
+        assertEquals(13, events.size)
+    }
+
+    @Test
+    fun reroute_event_sent_correctly_on_multi_waypoints() {
+        baseMock()
+        mockAnotherRoute()
+
+        baseInitialization()
+        nextWaypoint()
+        nextWaypoint()
+        mockFlushBuffers()
+        offRoute()
+        updateRoute(anotherRoute)
+        updateSessionState(FREE_DRIVE)
+
+        val events = captureAndVerifyMetricsReporter(exactly = 10)
+        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
+        // origin
+        assertTrue(events[1] is NavigationDepartEvent)
+        // waypoint1
+        assertTrue(events[2] is NavigationArriveEvent)
+        assertTrue(events[3] is NavigationCancelEvent)
+        assertTrue(events[4] is NavigationDepartEvent)
+        // waypoint2
+        assertTrue(events[5] is NavigationArriveEvent)
+        assertTrue(events[6] is NavigationCancelEvent)
+        assertTrue(events[7] is NavigationDepartEvent)
+        // destination
+        assertTrue(events[8] is NavigationRerouteEvent)
+        assertTrue(events[9] is NavigationCancelEvent)
+
+        assertEquals(10, events.size)
+    }
+
+    @Test
     fun onInit_registerRouteProgressObserver_called() {
         baseMock()
 
@@ -519,8 +619,19 @@ class MapboxNavigationTelemetryTest {
         }
     }
 
+    private fun nextWaypoint() {
+        MapboxNavigationTelemetry.onNextRouteLegStart(nextRouteLegProgress)
+        // mock locationsCollector to do nothing
+        // because buffers will be empty after handleSessionCanceled on nextLeg
+        every { locationsCollector.flushBuffers() } just Runs
+    }
+
     private fun offRoute() {
         MapboxNavigationTelemetry.onOffRouteStateChanged(true)
+    }
+
+    private fun arrive() {
+        MapboxNavigationTelemetry.onFinalDestinationArrival(routeProgress)
     }
 
     private fun captureMetricsReporter(): List<MetricEvent> {
@@ -611,11 +722,14 @@ class MapboxNavigationTelemetryTest {
     }
 
     private fun mockLocationCollector() {
-        every { locationsCollector.flushBuffers() } just Runs
         every { locationsCollector.lastLocation } returns lastLocation
         every { lastLocation.latitude } returns LAST_LOCATION_LAT
         every { lastLocation.longitude } returns LAST_LOCATION_LON
 
+        mockFlushBuffers()
+    }
+
+    private fun mockFlushBuffers() {
         val onBufferFull = mutableListOf<(List<Location>, List<Location>) -> Unit>()
         every { locationsCollector.collectLocations(capture(onBufferFull)) } just Runs
         every { locationsCollector.flushBuffers() } answers {
