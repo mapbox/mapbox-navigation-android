@@ -189,6 +189,10 @@ class MapboxNavigation(
         )
         tripSession.registerStateObserver(navigationSession)
         navigationSession.registerNavigationSessionStateObserver(navigationAccountsSession)
+
+        arrivalProgressObserver = ArrivalProgressObserver(tripSession)
+        setArrivalController()
+
         ifNonNull(accessToken) { token ->
             logger.d(
                 MapboxNavigationTelemetry.TAG,
@@ -219,9 +223,6 @@ class MapboxNavigation(
         )
         routeRefreshController = RouteRefreshController(directionsSession, tripSession, logger)
         routeRefreshController.start()
-
-        arrivalProgressObserver = ArrivalProgressObserver(tripSession)
-        setArrivalController()
 
         defaultRerouteController = MapboxRerouteController(
             directionsSession,

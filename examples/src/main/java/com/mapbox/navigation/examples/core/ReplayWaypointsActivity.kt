@@ -34,6 +34,7 @@ import com.mapbox.navigation.core.replay.MapboxReplayer
 import com.mapbox.navigation.core.replay.ReplayLocationEngine
 import com.mapbox.navigation.core.replay.route.ReplayProgressObserver
 import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
+import com.mapbox.navigation.core.telemetry.events.FeedbackEvent
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.core.trip.session.TripSessionStateObserver
 import com.mapbox.navigation.examples.R
@@ -49,6 +50,7 @@ import kotlinx.android.synthetic.main.activity_replay_waypoints_layout.startNavi
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import java.util.Collections
+import java.util.Date
 
 /**
  * This activity shows how to use navigate to various waypoints
@@ -166,6 +168,17 @@ class ReplayWaypointsActivity : AppCompatActivity(), OnMapReadyCallback {
             mapboxNavigation?.startTripSession()
             startNavigation.visibility = View.GONE
             mapboxReplayer.play()
+        }
+
+        findViewById<Button>(R.id.btn_send_user_feedback)?.let { button ->
+            button.setOnClickListener {
+                mapboxNavigation?.postUserFeedback(
+                    FeedbackEvent.GENERAL_ISSUE,
+                    "User feedback test at: ${Date().time}",
+                    FeedbackEvent.UI,
+                    null
+                )
+            }
         }
     }
 
