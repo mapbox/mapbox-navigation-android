@@ -116,7 +116,6 @@ internal object MapboxNavigationTelemetry :
     private var sessionState: NavigationSession.State = IDLE
     private var routeProgress: RouteProgress? = null
     private var originalRoute: DirectionsRoute? = null
-    private var newRoute: DirectionsRoute? = null
     private var needStartSession = false
 
     /**
@@ -201,7 +200,6 @@ internal object MapboxNavigationTelemetry :
     override fun onRouteProgressChanged(routeProgress: RouteProgress) {
         this.routeProgress = routeProgress
         startSessionIfNeedAndCan()
-        handleRerouteIfNeed()
     }
 
     override fun onRoutesChanged(routes: List<DirectionsRoute>) {
@@ -211,8 +209,7 @@ internal object MapboxNavigationTelemetry :
                 if (originalRoute != null) {
                     if (needHandleReroute) {
                         needHandleReroute = false
-                        resetRouteProgress()
-                        newRoute = it
+                        handleReroute(it)
                     } else {
                         log("handle ExternalRoute")
                         sessionStop()
@@ -316,8 +313,8 @@ internal object MapboxNavigationTelemetry :
         return originalRoute != null && dynamicValues.sessionStarted
     }
 
-    private fun handleRerouteIfNeed() {
-        ifNonNull(newRoute, routeProgress) { route, _ ->
+    private fun handleReroute(route: DirectionsRoute) {
+        if (dynamicValues.sessionStarted && dataInitialized()) {
             log("handleReroute")
 
             dynamicValues.run {
@@ -346,8 +343,6 @@ internal object MapboxNavigationTelemetry :
 
                 sendMetricEvent(navigationRerouteEvent)
             }
-
-            newRoute = null
         }
     }
 
@@ -444,7 +439,6 @@ internal object MapboxNavigationTelemetry :
         dynamicValues.reset()
         resetOriginalRoute()
         resetRouteProgress()
-        newRoute = null
         needHandleReroute = false
         needStartSession = false
     }

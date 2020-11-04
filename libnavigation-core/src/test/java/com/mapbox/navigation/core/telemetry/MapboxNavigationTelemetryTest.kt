@@ -20,7 +20,6 @@ import com.mapbox.navigation.base.options.NavigationOptions
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.RouteProgressState.LOCATION_TRACKING
-import com.mapbox.navigation.base.trip.model.RouteProgressState.ROUTE_COMPLETE
 import com.mapbox.navigation.base.trip.model.RouteStepProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.NavigationSession
@@ -271,7 +270,6 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress()
         postUserFeedback()
         arrive()
 
@@ -291,7 +289,6 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress()
         postUserFeedback()
         postUserFeedback()
         postUserFeedback()
@@ -324,7 +321,6 @@ class MapboxNavigationTelemetryTest {
         postUserFeedback()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress()
         postUserFeedback()
         updateSessionState(IDLE)
 
@@ -351,7 +347,6 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress()
         locationsCollector.flushBuffers()
 
         val events = captureAndVerifyMetricsReporter(exactly = 3)
@@ -359,23 +354,6 @@ class MapboxNavigationTelemetryTest {
         assertTrue(events[1] is NavigationDepartEvent)
         assertTrue(events[2] is NavigationRerouteEvent)
         assertEquals(3, events.size)
-    }
-
-    @Test
-    fun rerouteEvent_not_sent_on_offRoute_without_routeProgress() {
-        baseMock()
-        mockAnotherRoute()
-        mockRouteProgress()
-
-        baseInitialization()
-        offRoute()
-        updateRoute(anotherRoute)
-        locationsCollector.flushBuffers()
-
-        val events = captureAndVerifyMetricsReporter(exactly = 2)
-        assertTrue(events[0] is NavigationAppUserTurnstileEvent)
-        assertTrue(events[1] is NavigationDepartEvent)
-        assertEquals(2, events.size)
     }
 
     @Test
@@ -400,7 +378,6 @@ class MapboxNavigationTelemetryTest {
         baseInitialization()
         offRoute()
         updateRoute(anotherRoute)
-        updateRouteProgress()
         locationsCollector.flushBuffers()
 
         val rerouteEvent = events[2] as NavigationRerouteEvent
