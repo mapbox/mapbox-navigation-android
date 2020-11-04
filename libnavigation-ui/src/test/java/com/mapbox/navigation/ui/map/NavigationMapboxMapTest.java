@@ -1,29 +1,35 @@
 package com.mapbox.navigation.ui.map;
 
+import android.location.Location;
+
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.location.LocationComponent;
-import com.mapbox.mapboxsdk.location.LocationComponentOptions;
-import com.mapbox.mapboxsdk.location.OnIndicatorPositionChangedListener;
+import com.mapbox.mapboxsdk.location.LocationUpdate;
 import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.Projection;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
+import com.mapbox.navigation.core.MapboxNavigation;
+import com.mapbox.navigation.core.trip.session.MapMatcherResult;
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
 import com.mapbox.navigation.ui.camera.SimpleCamera;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -415,6 +421,135 @@ public class NavigationMapboxMapTest {
     theNavigationMap.disableVanishingRouteLine();
 
     verify(mapRoute).setVanishRouteLineEnabled(false);
+  }
+
+  @Test
+  public void locationUpdateOnNewProgressUpdate() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getProjection()).thenReturn(mock(Projection.class));
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(
+        mapboxMap,
+        mapWayName,
+        mapFpsDelegate,
+        mapRoute,
+        mapCamera,
+        locationFpsDelegate,
+        locationComponent,
+        false);
+
+    MapboxNavigation mapboxNavigation = mock(MapboxNavigation.class);
+    Location targetLocation = mock(Location.class);
+    List<Location> keyPoints = Collections.emptyList();
+    MapMatcherResult mapMatcherResult = mock(MapMatcherResult.class);
+    when(mapMatcherResult.getEnhancedLocation()).thenReturn(targetLocation);
+    when(mapMatcherResult.getKeyPoints()).thenReturn(keyPoints);
+    when(mapMatcherResult.isTeleport()).thenReturn(false);
+    ArgumentCaptor<MapMatcherResultObserver> observerArgumentCaptor =
+        ArgumentCaptor.forClass(MapMatcherResultObserver.class);
+    theNavigationMap.addProgressChangeListener(mapboxNavigation);
+    verify(mapboxNavigation).registerMapMatcherResultObserver(observerArgumentCaptor.capture());
+
+    observerArgumentCaptor.getValue().onNewMapMatcherResult(mapMatcherResult);
+
+    LocationUpdate expected = new LocationUpdate.Builder()
+        .location(targetLocation)
+        .intermediatePoints(keyPoints)
+        .build();
+    verify(locationComponent).forceLocationUpdate(eq(expected));
+  }
+
+  @Test
+  public void locationUpdateOnNewProgressUpdate_teleport() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getProjection()).thenReturn(mock(Projection.class));
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(
+        mapboxMap,
+        mapWayName,
+        mapFpsDelegate,
+        mapRoute,
+        mapCamera,
+        locationFpsDelegate,
+        locationComponent,
+        false);
+
+    MapboxNavigation mapboxNavigation = mock(MapboxNavigation.class);
+    Location targetLocation = mock(Location.class);
+    List<Location> keyPoints = Collections.emptyList();
+    MapMatcherResult mapMatcherResult = mock(MapMatcherResult.class);
+    when(mapMatcherResult.getEnhancedLocation()).thenReturn(targetLocation);
+    when(mapMatcherResult.getKeyPoints()).thenReturn(keyPoints);
+    when(mapMatcherResult.isTeleport()).thenReturn(true);
+    ArgumentCaptor<MapMatcherResultObserver> observerArgumentCaptor =
+        ArgumentCaptor.forClass(MapMatcherResultObserver.class);
+    theNavigationMap.addProgressChangeListener(mapboxNavigation);
+    verify(mapboxNavigation).registerMapMatcherResultObserver(observerArgumentCaptor.capture());
+
+    observerArgumentCaptor.getValue().onNewMapMatcherResult(mapMatcherResult);
+
+    LocationUpdate expected = new LocationUpdate.Builder()
+        .location(targetLocation)
+        .intermediatePoints(keyPoints)
+        .animationDuration(0L)
+        .build();
+    verify(locationComponent).forceLocationUpdate(eq(expected));
+  }
+
+  @Test
+  public void locationUpdateOnNewProgressUpdate_keyPoints() {
+    LocationComponent locationComponent = mock(LocationComponent.class);
+    MapWayName mapWayName = mock(MapWayName.class);
+    MapFpsDelegate mapFpsDelegate = mock(MapFpsDelegate.class);
+    NavigationMapRoute mapRoute = mock(NavigationMapRoute.class);
+    NavigationCamera mapCamera = mock(NavigationCamera.class);
+    LocationFpsDelegate locationFpsDelegate = mock(LocationFpsDelegate.class);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getProjection()).thenReturn(mock(Projection.class));
+    NavigationMapboxMap theNavigationMap = new NavigationMapboxMap(
+        mapboxMap,
+        mapWayName,
+        mapFpsDelegate,
+        mapRoute,
+        mapCamera,
+        locationFpsDelegate,
+        locationComponent,
+        false);
+
+    MapboxNavigation mapboxNavigation = mock(MapboxNavigation.class);
+    Location targetLocation = mock(Location.class);
+    Location intermediateLocation = mock(Location.class);
+    List<Location> keyPoints = new ArrayList<>();
+    keyPoints.add(intermediateLocation);
+    keyPoints.add(targetLocation);
+    MapMatcherResult mapMatcherResult = mock(MapMatcherResult.class);
+    when(mapMatcherResult.getEnhancedLocation()).thenReturn(targetLocation);
+    when(mapMatcherResult.getKeyPoints()).thenReturn(keyPoints);
+    when(mapMatcherResult.isTeleport()).thenReturn(false);
+    ArgumentCaptor<MapMatcherResultObserver> observerArgumentCaptor =
+        ArgumentCaptor.forClass(MapMatcherResultObserver.class);
+    theNavigationMap.addProgressChangeListener(mapboxNavigation);
+    verify(mapboxNavigation).registerMapMatcherResultObserver(observerArgumentCaptor.capture());
+
+    observerArgumentCaptor.getValue().onNewMapMatcherResult(mapMatcherResult);
+
+    List<Location> expectedIntermediateLocations = new ArrayList<>();
+    expectedIntermediateLocations.add(intermediateLocation);
+    LocationUpdate expected = new LocationUpdate.Builder()
+        .location(targetLocation)
+        .intermediatePoints(expectedIntermediateLocations)
+        .build();
+    verify(locationComponent).forceLocationUpdate(eq(expected));
   }
 
   private List<Source> buildMockSourcesWith(String url) {
