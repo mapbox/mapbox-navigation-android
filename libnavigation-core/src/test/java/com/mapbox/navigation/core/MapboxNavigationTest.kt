@@ -27,6 +27,7 @@ import com.mapbox.navigation.core.internal.formatter.MapboxDistanceFormatter
 import com.mapbox.navigation.core.reroute.RerouteController
 import com.mapbox.navigation.core.reroute.RerouteState
 import com.mapbox.navigation.core.trip.service.TripService
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.TripSession
@@ -233,6 +234,22 @@ class MapboxNavigationTest {
     }
 
     @Test
+    fun registerMapMatcherResultObserver() {
+        val observer: MapMatcherResultObserver = mockk()
+        mapboxNavigation.registerMapMatcherResultObserver(observer)
+
+        verify(exactly = 1) { tripSession.registerMapMatcherResultObserver(observer) }
+    }
+
+    @Test
+    fun unregisterMapMatcherResultObserver() {
+        val observer: MapMatcherResultObserver = mockk()
+        mapboxNavigation.unregisterMapMatcherResultObserver(observer)
+
+        verify(exactly = 1) { tripSession.unregisterMapMatcherResultObserver(observer) }
+    }
+
+    @Test
     fun init_registerStateObserver_navigationSession() {
         verify(exactly = 1) { tripSession.registerStateObserver(any()) }
 
@@ -328,6 +345,13 @@ class MapboxNavigationTest {
         mapboxNavigation.onDestroy()
 
         verify(exactly = 1) { navigationSession.unregisterAllNavigationSessionStateObservers() }
+    }
+
+    @Test
+    fun unregisterAllMapMatcherResultObservers() {
+        mapboxNavigation.onDestroy()
+
+        verify(exactly = 1) { tripSession.unregisterAllMapMatcherResultObservers() }
     }
 
     @Test

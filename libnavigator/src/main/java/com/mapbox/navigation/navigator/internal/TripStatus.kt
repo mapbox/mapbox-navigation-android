@@ -2,6 +2,7 @@ package com.mapbox.navigation.navigator.internal
 
 import android.location.Location
 import com.mapbox.navigation.base.trip.model.RouteProgress
+import com.mapbox.navigator.NavigationStatus
 
 /**
  * State of a trip at a particular timestamp.
@@ -17,5 +18,6 @@ data class TripStatus(
     val enhancedLocation: Location,
     val keyPoints: List<Location>,
     val routeProgress: RouteProgress?,
-    val offRoute: Boolean
+    val offRoute: Boolean,
+    val navigationStatus: NavigationStatus
 )

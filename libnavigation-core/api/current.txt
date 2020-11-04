@@ -18,6 +18,7 @@ package com.mapbox.navigation.core {
     method public void registerBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void registerEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void registerLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
+    method public void registerMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void registerOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void registerRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
     method public void registerRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
@@ -41,6 +42,7 @@ package com.mapbox.navigation.core {
     method public void unregisterBannerInstructionsObserver(com.mapbox.navigation.core.trip.session.BannerInstructionsObserver bannerInstructionsObserver);
     method public void unregisterEHorizonObserver(com.mapbox.navigation.core.trip.session.EHorizonObserver eHorizonObserver);
     method public void unregisterLocationObserver(com.mapbox.navigation.core.trip.session.LocationObserver locationObserver);
+    method public void unregisterMapMatcherResultObserver(com.mapbox.navigation.core.trip.session.MapMatcherResultObserver mapMatcherResultObserver);
     method public void unregisterOffRouteObserver(com.mapbox.navigation.core.trip.session.OffRouteObserver offRouteObserver);
     method public void unregisterRouteAlertsObserver(com.mapbox.navigation.core.trip.session.RouteAlertsObserver routeAlertsObserver);
     method public void unregisterRouteProgressObserver(com.mapbox.navigation.core.trip.session.RouteProgressObserver routeProgressObserver);
@@ -138,6 +140,13 @@ package com.mapbox.navigation.core.fasterroute {
   public static final class FasterRouteObserver.Companion {
     method public long getDEFAULT_INTERVAL_MILLIS();
     property public final long DEFAULT_INTERVAL_MILLIS;
+  }
+
+}
+
+package com.mapbox.navigation.core.navigator {
+
+  public final class NavigatorMapperKt {
   }
 
 }
@@ -516,6 +525,19 @@ package com.mapbox.navigation.core.trip.session {
   public interface LocationObserver {
     method public void onEnhancedLocationChanged(android.location.Location enhancedLocation, java.util.List<? extends android.location.Location> keyPoints);
     method public void onRawLocationChanged(android.location.Location rawLocation);
+  }
+
+  public final class MapMatcherResult {
+    method public android.location.Location getEnhancedLocation();
+    method public java.util.List<android.location.Location> getKeyPoints();
+    method public float getOffRoadProbability();
+    method public float getRoadEdgeMatchProbability();
+    method public boolean isOffRoad();
+    method public boolean isTeleport();
+  }
+
+  public interface MapMatcherResultObserver {
+    method public void onNewMapMatcherResult(com.mapbox.navigation.core.trip.session.MapMatcherResult mapMatcherResult);
   }
 
   public interface OffRouteObserver {

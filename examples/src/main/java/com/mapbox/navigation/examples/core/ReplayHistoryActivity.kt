@@ -31,6 +31,8 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.core.replay.history.ReplaySetRoute
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.TripSessionState
 import com.mapbox.navigation.examples.R
 import com.mapbox.navigation.examples.history.HistoryFilesActivity
@@ -227,6 +229,23 @@ class ReplayHistoryActivity : AppCompatActivity() {
             mapboxReplayer.play()
             mapboxNavigation.startTripSession()
         }
+
+        mapboxNavigation.registerMapMatcherResultObserver(
+            object : MapMatcherResultObserver {
+                @SuppressLint("SetTextI18n")
+                override fun onNewMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+                    mapMatcherDataTv.text =
+                        """
+                            enhancedLoc: ${mapMatcherResult.enhancedLocation}
+                            keyPoints: ${mapMatcherResult.keyPoints}
+                            isOffRoad: ${mapMatcherResult.isOffRoad}
+                            offRoadProbability: ${mapMatcherResult.offRoadProbability}
+                            isTeleport: ${mapMatcherResult.isTeleport}
+                            roadEdgeMatchProbability: ${mapMatcherResult.roadEdgeMatchProbability}
+                        """.trimIndent()
+                }
+            }
+        )
     }
 
     @SuppressLint("SetTextI18n")

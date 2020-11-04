@@ -53,4 +53,8 @@ internal interface TripSession {
     fun registerEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver)
     fun unregisterAllEHorizonObservers()
+
+    fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
+    fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver)
+    fun unregisterAllMapMatcherResultObservers()
 }
