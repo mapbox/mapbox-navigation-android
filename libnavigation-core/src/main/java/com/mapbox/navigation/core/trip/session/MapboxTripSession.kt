@@ -16,6 +16,7 @@ import com.mapbox.base.common.logger.model.Message
 import com.mapbox.navigation.base.trip.model.RouteLegProgress
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.sensors.SensorMapper
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.navigator.internal.MapboxNativeNavigator
@@ -108,6 +109,7 @@ internal class MapboxTripSession(
     private val voiceInstructionsObservers = CopyOnWriteArraySet<VoiceInstructionsObserver>()
     private val routeAlertsObservers = CopyOnWriteArraySet<RouteAlertsObserver>()
     private val electronicHorizonObserver = ElectronicHorizonObserverImpl(mainJobController)
+    private val mapMatcherResultObservers = CopyOnWriteArraySet<MapMatcherResultObserver>()
 
     private val bannerInstructionEvent = BannerInstructionEvent()
     private val voiceInstructionEvent = VoiceInstructionEvent()
@@ -141,6 +143,7 @@ internal class MapboxTripSession(
             field = value
             routeAlertsObservers.forEach { it.onNewRouteAlerts(value) }
         }
+    private var mapMatcherResult: MapMatcherResult? = null
 
     /**
      * Return raw location
@@ -203,6 +206,7 @@ internal class MapboxTripSession(
     }
 
     private fun reset() {
+        mapMatcherResult = null
         rawLocation = null
         enhancedLocation = null
         routeProgress = null
@@ -444,6 +448,25 @@ internal class MapboxTripSession(
         navigator.setElectronicHorizonObserver(null)
     }
 
+    override fun registerMapMatcherResultObserver(
+        mapMatcherResultObserver: MapMatcherResultObserver
+    ) {
+        mapMatcherResultObservers.add(mapMatcherResultObserver)
+        mapMatcherResult?.let {
+            mapMatcherResultObserver.onNewMapMatcherResult(it)
+        }
+    }
+
+    override fun unregisterMapMatcherResultObserver(
+        mapMatcherResultObserver: MapMatcherResultObserver
+    ) {
+        mapMatcherResultObservers.remove(mapMatcherResultObserver)
+    }
+
+    override fun unregisterAllMapMatcherResultObservers() {
+        mapMatcherResultObservers.clear()
+    }
+
     private var locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
         override fun onSuccess(result: LocationEngineResult?) {
             result?.locations?.lastOrNull()?.let {
@@ -489,6 +512,10 @@ internal class MapboxTripSession(
             if (!isActive) {
                 return@launch
             }
+            updateMapMatcherResult(status.getMapMatcherResult())
+            if (!isActive) {
+                return@launch
+            }
             updateRouteProgress(status.routeProgress)
             if (!isActive) {
                 return@launch
@@ -508,6 +535,11 @@ internal class MapboxTripSession(
     private fun updateEnhancedLocation(location: Location, keyPoints: List<Location>) {
         enhancedLocation = location
         locationObservers.forEach { it.onEnhancedLocationChanged(location, keyPoints) }
+    }
+
+    private fun updateMapMatcherResult(mapMatcherResult: MapMatcherResult) {
+        this.mapMatcherResult = mapMatcherResult
+        mapMatcherResultObservers.forEach { it.onNewMapMatcherResult(mapMatcherResult) }
     }
 
     private fun updateRouteProgress(progress: RouteProgress?) {

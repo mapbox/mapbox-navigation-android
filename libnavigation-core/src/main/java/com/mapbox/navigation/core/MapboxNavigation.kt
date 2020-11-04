@@ -50,6 +50,8 @@ import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.BannerInstructionsObserver
 import com.mapbox.navigation.core.trip.session.EHorizonObserver
 import com.mapbox.navigation.core.trip.session.LocationObserver
+import com.mapbox.navigation.core.trip.session.MapMatcherResult
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver
 import com.mapbox.navigation.core.trip.session.OffRouteObserver
 import com.mapbox.navigation.core.trip.session.RouteAlertsObserver
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver
@@ -351,6 +353,7 @@ class MapboxNavigation(
         tripSession.unregisterAllVoiceInstructionsObservers()
         tripSession.unregisterAllRouteAlertsObservers()
         tripSession.unregisterAllEHorizonObservers()
+        tripSession.unregisterAllMapMatcherResultObservers()
         directionsSession.routes = emptyList()
         resetTripSession()
 
@@ -635,6 +638,26 @@ class MapboxNavigation(
      */
     fun unregisterEHorizonObserver(eHorizonObserver: EHorizonObserver) {
         tripSession.unregisterEHorizonObserver(eHorizonObserver)
+    }
+
+    /**
+     * Registers an observer that gets notified whenever a new enhanced location update is available
+     * with details about the status of the enhanced location.
+     *
+     * @see [MapMatcherResult]
+     * @see [startTripSession]
+     */
+    fun registerMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver) {
+        tripSession.registerMapMatcherResultObserver(mapMatcherResultObserver)
+    }
+
+    /**
+     * Unregisters a [MapMatcherResultObserver].
+     *
+     * @see [MapMatcherResult]
+     */
+    fun unregisterMapMatcherResultObserver(mapMatcherResultObserver: MapMatcherResultObserver) {
+        tripSession.unregisterMapMatcherResultObserver(mapMatcherResultObserver)
     }
 
     /**

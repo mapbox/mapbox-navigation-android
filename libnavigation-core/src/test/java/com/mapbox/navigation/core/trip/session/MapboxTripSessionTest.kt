@@ -13,6 +13,7 @@ import com.mapbox.api.directions.v5.models.VoiceInstructions
 import com.mapbox.base.common.logger.Logger
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.base.trip.model.alert.RouteAlert
+import com.mapbox.navigation.core.navigator.getMapMatcherResult
 import com.mapbox.navigation.core.trip.service.TripService
 import com.mapbox.navigation.core.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_INTERVAL
 import com.mapbox.navigation.core.trip.session.MapboxTripSession.Companion.UNCONDITIONAL_STATUS_POLLING_PATIENCE
@@ -29,9 +30,11 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkObject
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import io.mockk.verifySequence
@@ -84,9 +87,12 @@ class MapboxTripSessionTest {
 
     private val stateObserver: TripSessionStateObserver = mockk(relaxUnitFun = true)
 
+    private val mapMatcherResult: MapMatcherResult = mockk(relaxUnitFun = true)
+
     @Before
     fun setUp() {
         mockkObject(ThreadController)
+        mockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
         every { ThreadController.getIOScopeAndRootJob() } returns JobControl(parentJob, testScope)
         every { ThreadController.getMainScopeAndRootJob() } returns JobControl(parentJob, testScope)
 
@@ -105,6 +111,7 @@ class MapboxTripSessionTest {
         every { tripStatus.enhancedLocation } returns enhancedLocation
         every { tripStatus.keyPoints } returns keyPoints
         every { tripStatus.offRoute } returns false
+        every { tripStatus.getMapMatcherResult() } returns mapMatcherResult
         every { routeProgress.bannerInstructions } returns null
         every { routeProgress.voiceInstructions } returns null
 
@@ -1110,9 +1117,70 @@ class MapboxTripSessionTest {
         tripSession.stop()
     }
 
+    @Test
+    fun `map matcher result success`() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.start()
+        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
+        tripSession.registerMapMatcherResultObserver(observer)
+        updateLocationAndJoin()
+
+        verify(exactly = 1) { observer.onNewMapMatcherResult(mapMatcherResult) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun `map matcher result immediate`() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.start()
+        updateLocationAndJoin()
+        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
+        tripSession.registerMapMatcherResultObserver(observer)
+
+        verify(exactly = 1) { observer.onNewMapMatcherResult(mapMatcherResult) }
+        tripSession.stop()
+    }
+
+    @Test
+    fun `map matcher result cleared on reset`() = coroutineRule.runBlockingTest {
+        tripSession = MapboxTripSession(
+            tripService,
+            locationEngine,
+            navigatorPredictionMillis,
+            navigator,
+            ThreadController,
+            logger = logger,
+            accessToken = "pk.1234"
+        )
+        tripSession.start()
+        updateLocationAndJoin()
+        tripSession.stop()
+        val observer: MapMatcherResultObserver = mockk(relaxUnitFun = true)
+        tripSession.registerMapMatcherResultObserver(observer)
+
+        verify(exactly = 0) { observer.onNewMapMatcherResult(any()) }
+    }
+
     @After
     fun cleanUp() {
         unmockkObject(ThreadController)
+        unmockkStatic("com.mapbox.navigation.core.navigator.NavigatorMapperKt")
     }
 
     private suspend fun updateLocationAndJoin() {
