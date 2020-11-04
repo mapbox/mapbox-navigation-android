@@ -18,8 +18,11 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.location.LocationUpdate;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.navigation.core.directions.session.RoutesObserver;
+import com.mapbox.navigation.core.trip.session.MapMatcherResult;
+import com.mapbox.navigation.core.trip.session.MapMatcherResultObserver;
 import com.mapbox.navigation.core.trip.session.RouteProgressObserver;
 import com.mapbox.navigation.core.trip.session.TripSessionState;
 import com.mapbox.navigation.ui.R;
@@ -40,7 +43,6 @@ import com.mapbox.mapboxsdk.style.sources.Source;
 import com.mapbox.mapboxsdk.style.sources.VectorSource;
 import com.mapbox.navigation.base.trip.model.RouteProgress;
 import com.mapbox.navigation.core.MapboxNavigation;
-import com.mapbox.navigation.core.trip.session.LocationObserver;
 import com.mapbox.navigation.ui.internal.ThemeSwitcher;
 import com.mapbox.navigation.ui.camera.Camera;
 import com.mapbox.navigation.ui.camera.NavigationCamera;
@@ -50,10 +52,9 @@ import com.mapbox.navigation.ui.puck.PuckDrawableSupplier;
 import com.mapbox.navigation.ui.route.NavigationMapRoute;
 import com.mapbox.navigation.ui.route.OnRouteSelectionChangeListener;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -247,6 +248,25 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @TestOnly
+  NavigationMapboxMap(MapboxMap mapboxMap,
+                      @NonNull MapWayName mapWayName,
+                      @NonNull MapFpsDelegate mapFpsDelegate,
+                      NavigationMapRoute mapRoute,
+                      NavigationCamera mapCamera,
+                      LocationFpsDelegate locationFpsDelegate,
+                      LocationComponent locationComponent,
+                      boolean vanishRouteLineEnabled) {
+    this.mapboxMap = mapboxMap;
+    this.mapWayName = mapWayName;
+    this.mapFpsDelegate = mapFpsDelegate;
+    this.mapRoute = mapRoute;
+    this.mapCamera = mapCamera;
+    this.locationFpsDelegate = locationFpsDelegate;
+    this.locationComponent = locationComponent;
+    this.vanishRouteLineEnabled = vanishRouteLineEnabled;
+  }
+
+  @TestOnly
   NavigationMapboxMap(
           @NonNull MapboxMap mapboxMap,
           MapLayerInteractor layerInteractor,
@@ -332,7 +352,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * for the given {@link Location}.
    * <p>
    * {@link NavigationMapboxMap} automatically listens to
-   * {@link LocationObserver#onEnhancedLocationChanged(Location, List)} when a progress observer
+   * {@link MapMatcherResultObserver#onNewMapMatcherResult(MapMatcherResult)} when a progress observer
    * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
    * and invoking this method in that scenario will lead to competing updates.
    *
@@ -340,9 +360,27 @@ public class NavigationMapboxMap implements LifecycleObserver {
    */
   public void updateLocation(@Nullable Location location) {
     if (location != null) {
-      List<Location> locations = new ArrayList<>(1);
-      locations.add(location);
-      updateLocation(locations);
+      updateLocation(location, null);
+    }
+  }
+
+  /**
+   * Updates the location icon on the map and way name data (if found)
+   * for the given {@link Location}.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link MapMatcherResultObserver#onNewMapMatcherResult(MapMatcherResult)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
+   *
+   * @param location to update the icon and query the map
+   * @param animationDuration specifies the duration of the transition animation.
+   *                          A default duration is used if the provided value is null.
+   *                          See {@link LocationUpdate.Builder#animationDuration(Long)}
+   */
+  public void updateLocation(@Nullable Location location, @Nullable Long animationDuration) {
+    if (location != null) {
+      updateLocation(location, Collections.emptyList(), animationDuration);
     }
   }
 
@@ -352,18 +390,68 @@ public class NavigationMapboxMap implements LifecycleObserver {
    * The puck and the camera will be animated between each of the points linearly until reaching the target.
    * <p>
    * {@link NavigationMapboxMap} automatically listens to
-   * {@link LocationObserver#onEnhancedLocationChanged(Location, List)} when a progress observer
+   * {@link MapMatcherResultObserver#onNewMapMatcherResult(MapMatcherResult)} when a progress observer
    * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
    * and invoking this method in that scenario will lead to competing updates.
    *
    * @param locations the path to update the location icon
    */
   public void updateLocation(@NonNull List<Location> locations) {
+    updateLocation(locations, null);
+  }
+
+  /**
+   * This method can be used to provide the list of locations where the last one is the target
+   * and the rest are intermediate points used as the animation path.
+   * The puck and the camera will be animated between each of the points linearly until reaching the target.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link MapMatcherResultObserver#onNewMapMatcherResult(MapMatcherResult)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
+   *
+   * @param locations the path to update the location icon
+   * @param animationDuration specifies the duration of the transition animation.
+   *                          A default duration is used if the provided value is null.
+   *                          See {@link LocationUpdate.Builder#animationDuration(Long)}
+   */
+  public void updateLocation(@NonNull List<Location> locations,  @Nullable Long animationDuration) {
     if (locations.size() > 0) {
-      Location targetLocation = locations.get(0);
-      locationComponent.forceLocationUpdate(locations, false);
-      updateMapWayNameWithLocation(targetLocation);
+      Location targetLocation = locations.get(locations.size() - 1);
+      List<Location> intermediateLocations = locations.subList(0, locations.size() - 1);
+      updateLocation(targetLocation, intermediateLocations, animationDuration);
     }
+  }
+
+  /**
+   * This method can be used to provide the target location
+   * and a list of intermediate points used as the animation path.
+   * The puck and the camera will be animated between each of the points linearly until reaching the target.
+   * <p>
+   * {@link NavigationMapboxMap} automatically listens to
+   * {@link MapMatcherResultObserver#onNewMapMatcherResult(MapMatcherResult)} when a progress observer
+   * is subscribed with {@link #addProgressChangeListener(MapboxNavigation)}
+   * and invoking this method in that scenario will lead to competing updates.
+   *
+   * @param location the target position
+   * @param intermediateLocations points that lead up to the target position for animation purposes
+   * @param animationDuration specifies the duration of the transition animation.
+   *                          A default duration is used if the provided value is null.
+   *                          See {@link LocationUpdate.Builder#animationDuration(Long)}
+   */
+  public void updateLocation(
+      @NonNull Location location,
+      @NonNull List<Location> intermediateLocations,
+      @Nullable Long animationDuration
+  ) {
+    locationComponent.forceLocationUpdate(
+        new LocationUpdate.Builder()
+            .location(location)
+            .intermediatePoints(intermediateLocations)
+            .animationDuration(animationDuration)
+            .build()
+    );
+    updateMapWayNameWithLocation(location);
   }
 
   /**
@@ -444,7 +532,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     mapRoute.addProgressChangeListener(navigation);
     mapCamera.addProgressChangeListener(navigation);
     mapFpsDelegate.addProgressChangeListener(navigation);
-    navigation.registerLocationObserver(locationObserver);
+    navigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
 
     if (navigationPuckPresenter != null) {
       navigationPuckPresenter.addProgressChangeListener(navigation);
@@ -496,7 +584,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
       }
 
       if (navigation != null) {
-        navigation.unregisterLocationObserver(locationObserver);
+        navigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
       }
 
       if (navigationPuckPresenter != null) {
@@ -919,7 +1007,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     locationFpsDelegate.onStart();
 
     if (navigation != null) {
-      navigation.registerLocationObserver(locationObserver);
+      navigation.registerMapMatcherResultObserver(mapMatcherResultObserver);
     }
 
     if (navigationPuckPresenter != null) {
@@ -938,7 +1026,7 @@ public class NavigationMapboxMap implements LifecycleObserver {
     locationFpsDelegate.onStop();
 
     if (navigation != null) {
-      navigation.unregisterLocationObserver(locationObserver);
+      navigation.unregisterMapMatcherResultObserver(mapMatcherResultObserver);
     }
 
     if (navigationPuckPresenter != null) {
@@ -1128,22 +1216,12 @@ public class NavigationMapboxMap implements LifecycleObserver {
   }
 
   @NonNull
-  private LocationObserver locationObserver = new LocationObserver() {
-    @Override
-    public void onRawLocationChanged(@NotNull Location rawLocation) {
-      Timber.d("raw location %s", rawLocation.toString());
-    }
-
-    @Override
-    public void onEnhancedLocationChanged(
-        @NotNull Location enhancedLocation,
-        @NotNull List<? extends Location> keyPoints
-    ) {
-      if (keyPoints.isEmpty()) {
-        updateLocation(enhancedLocation);
-      } else {
-        updateLocation((List<Location>) keyPoints);
-      }
+  private final MapMatcherResultObserver mapMatcherResultObserver = mapMatcherResult -> {
+    Long animationDuration = mapMatcherResult.isTeleport() ? 0L : null;
+    if (mapMatcherResult.getKeyPoints().isEmpty()) {
+      updateLocation(mapMatcherResult.getEnhancedLocation(), animationDuration);
+    } else {
+      updateLocation(mapMatcherResult.getKeyPoints(), animationDuration);
     }
   };
 }

@@ -486,7 +486,10 @@ package com.mapbox.navigation.ui.map {
     method public void updateCameraTrackingMode(@com.mapbox.navigation.ui.camera.NavigationCamera.TrackingMode int);
     method public void updateIncidentsVisibility(boolean);
     method public void updateLocation(android.location.Location?);
+    method public void updateLocation(android.location.Location?, Long?);
     method public void updateLocation(java.util.List<android.location.Location!>);
+    method public void updateLocation(java.util.List<android.location.Location!>, Long?);
+    method public void updateLocation(android.location.Location, java.util.List<android.location.Location!>, Long?);
     method public void updateLocationFpsThrottleEnabled(boolean);
     method public void updateLocationLayerRenderMode(@com.mapbox.mapboxsdk.location.modes.RenderMode.Mode int);
     method public void updateLocationVisibilityTo(boolean);
