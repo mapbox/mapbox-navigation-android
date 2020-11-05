@@ -1,1 +1,23 @@
 .jekyll-cache
+# Gradle
+.gradle
+/local.properties
+
+# IntelliJ
+out/
+
+build/
+/captures
+.externalNativeBuild
+
+# Idea
+.idea
+*.iml
+
+#MacOS
+.DS_Store
+
+jacoco.exec
+
+# project files
+developer-config.xml
