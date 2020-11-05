@@ -1860,6 +1860,34 @@ class MapRouteLineTest {
     }
 
     @Test
+    fun getRouteLineExpressionDataWithStreetClassOverrideWhenHasStreetClassesOnMotorwayMultiLeg() {
+        // test case for overlapping geometry indices across multiple legs
+        val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
+            when (trafficCongestion) {
+                UNKNOWN_CONGESTION_VALUE -> -9
+                LOW_CONGESTION_VALUE -> -1
+                else -> 33
+            }
+        }
+        val routeAsJsonJson = loadJsonFixture(
+            "motorway-with-road-classes-multi-leg.json"
+        )
+        val route = DirectionsRoute.fromJson(routeAsJsonJson)
+
+        val trafficExpressionData = getRouteLineTrafficExpressionData(route)
+        val result = getRouteLineExpressionDataWithStreetClassOverride(
+            trafficExpressionData,
+            route.distance(),
+            congestionColorProvider,
+            true,
+            listOf("motorway")
+        )
+
+        assertTrue(result.all { it.segmentColorExpression == Expression.color(-1) })
+        assertEquals(1, result.size)
+    }
+
+    @Test
     fun getRouteLineExpressionDataWithSomeRoadClassesDuplicatesRemoved() {
         val congestionColorProvider: (String, Boolean) -> Int = { trafficCongestion, _ ->
             when (trafficCongestion) {
