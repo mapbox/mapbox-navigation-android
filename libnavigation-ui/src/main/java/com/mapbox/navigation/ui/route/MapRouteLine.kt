@@ -1614,7 +1614,7 @@ internal class MapRouteLine(
 
         private fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
             return if (roadClassArray.size > index) {
-                roadClassArray.slice(0..index).last { it != null}
+                roadClassArray.slice(0..index).last { it != null }
             } else {
                 null
             }
