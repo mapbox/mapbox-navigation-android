@@ -11,6 +11,7 @@ import com.mapbox.geojson.Point
  * - [TollCollectionAlert]
  * - [RestStopAlert]
  * - [RestrictedAreaAlert]
+ * - [IncidentAlert]
  *
  * @param alertType constant describing the alert type, see [RouteAlertType].
  * @param coordinate location of the alert or its start point in case it has a length
