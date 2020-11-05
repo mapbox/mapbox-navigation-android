@@ -79,6 +79,9 @@
         <item>1</item>
     </string-array>
 
+    <string-array name="trafficBackFillRoadClasses">
+    </string-array>
+
     <style name="MapboxStyleNavigationMapRoute">
         <item name="routeLineScaleStops">@array/routeLineScaleStopsArray</item>
         <item name="routeLineScaleMultipliers">@array/routeLineScaleMultiplierArray</item>
@@ -89,6 +92,7 @@
         <item name="routeLineCasingScaleStops">@array/routeLineCasingScaleStopsArray</item>
         <item name="routeLineCasingScaleMultipliers">@array/routeLineCasingScaleMultiplierArray</item>
         <item name="routeLineCasingScales">@array/routeLineCasingScalesArray</item>
+        <item name="trafficBackFillRoadClasses">@array/trafficBackFillRoadClasses</item>
 
         <!-- Colors -->
         <item name="routeColor">@color/mapbox_navigation_route_layer_blue</item>

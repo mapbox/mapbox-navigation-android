@@ -38,6 +38,7 @@
     <attr name="routeLineCasingScaleStops" format="reference"/>
     <attr name="routeLineCasingScaleMultipliers" format="reference"/>
     <attr name="routeLineCasingScales" format="reference"/>
+    <attr name="trafficBackFillRoadClasses" format="reference"/>
 
     <attr name="upcomingManeuverArrowColor" format="color"/>
     <attr name="upcomingManeuverArrowBorderColor" format="color"/>
