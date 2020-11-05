@@ -1547,67 +1547,62 @@ internal class MapRouteLine(
          */
         fun getRouteLineTrafficExpressionData(route: DirectionsRoute):
             List<RouteLineTrafficExpressionData> {
-                val distances = route.legs()?.mapNotNull {
-                    it.annotation()?.distance()
-                }?.flatten()
-                ifNonNull(distances) { distanceList ->
-                    val roadClassMap = mutableMapOf<Int, String>()
-                    route.legs()?.asSequence()
-                        ?.mapNotNull { it.steps() }
-                        ?.flatten()
-                        ?.mapNotNull { it.intersections() }
-                        ?.flatten()
-                        ?.filter {
-                            it.geometryIndex() != null
-                        }?.toList()?.forEach {
-                            roadClassMap[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
-                                ?: "intersection_without_class_fallback"
-                        }
+                var runningDistance = 0.0
+                val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
 
-                    var runningDistance = 0.0
-                    val routeLineTrafficData = mutableListOf<RouteLineTrafficExpressionData>()
-                    route.legs()?.mapNotNull {
-                        it.annotation()?.congestion()
-                    }?.flatten()?.forEachIndexed { index, congestion ->
-                        val roadclass = getRoadClassForIndex(roadClassMap, index)
-                        if (index == 0) {
-                            routeLineTrafficData.add(
-                                RouteLineTrafficExpressionData(
-                                    0.0,
-                                    congestion,
-                                    roadclass
-                                )
-                            )
-                        } else {
-                            runningDistance += distanceList[index - 1]
-                            if (routeLineTrafficData.last().trafficCongestionIdentifier ==
-                                congestion &&
-                                routeLineTrafficData.last().roadClass == roadclass
-                            ) {
-                                // continue
-                            } else if (routeLineTrafficData.last().trafficCongestionIdentifier ==
-                                congestion &&
-                                roadclass == null
-                            ) {
-                                // continue
-                            } else {
+                route.legs()?.forEach { leg ->
+                    ifNonNull(leg.annotation()?.distance()) { distanceList ->
+                        val roadClassMap = mutableMapOf<Int, String>()
+                        leg.steps()
+                            ?.mapNotNull { it.intersections() }
+                            ?.flatten()
+                            ?.filter {
+                                it.geometryIndex() != null
+                            }?.toList()?.forEach {
+                                val geometryIndex = it.geometryIndex()!!
+                                val roadClass = it.mapboxStreetsV8()?.roadClass()
+                                    ?: "intersection_without_class_fallback"
+                                roadClassMap[geometryIndex] = roadClass
+                            }
+
+                        leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
+                            val roadClass = getRoadClassForIndex(roadClassMap, index)
+                            if (index == 0) {
                                 routeLineTrafficData.add(
                                     RouteLineTrafficExpressionData(
-                                        runningDistance,
+                                        0.0,
                                         congestion,
-                                        roadclass
+                                        roadClass
                                     )
                                 )
+                            } else {
+                                runningDistance += distanceList[index - 1]
+                                val last = routeLineTrafficData.lastOrNull()
+                                if (last?.trafficCongestionIdentifier == congestion &&
+                                    last?.roadClass == roadClass
+                                ) {
+                                    // continue
+                                } else if (last?.trafficCongestionIdentifier == congestion &&
+                                    roadClass == null
+                                ) {
+                                    // continue
+                                } else {
+                                    routeLineTrafficData.add(
+                                        RouteLineTrafficExpressionData(
+                                            runningDistance,
+                                            congestion,
+                                            roadClass
+                                        )
+                                    )
+                                }
                             }
                         }
+
+                        runningDistance += distanceList.last()
                     }
-                    return routeLineTrafficData
                 }
-                Timber.i(
-                    "Route leg annotation does not contain distance and/or congestion " +
-                        "so route line traffic cannot be calculated."
-                )
-                return listOf()
+
+                return routeLineTrafficData
             }
 
         private fun getRoadClassForIndex(roadClassMap: Map<Int, String>, index: Int): String? {
