@@ -1552,21 +1552,28 @@ internal class MapRouteLine(
 
                 route.legs()?.forEach { leg ->
                     ifNonNull(leg.annotation()?.distance()) { distanceList ->
-                        val roadClassMap = mutableMapOf<Int, String>()
-                        leg.steps()
+                        val intersectionsWithGeometryIndex = leg.steps()
                             ?.mapNotNull { it.intersections() }
                             ?.flatten()
                             ?.filter {
                                 it.geometryIndex() != null
-                            }?.toList()?.forEach {
-                                val geometryIndex = it.geometryIndex()!!
-                                val roadClass = it.mapboxStreetsV8()?.roadClass()
-                                    ?: "intersection_without_class_fallback"
-                                roadClassMap[geometryIndex] = roadClass
+                            }?.toList() ?: listOf()
+
+                        val roadClassArray = if (intersectionsWithGeometryIndex.isNotEmpty()) {
+                            arrayOfNulls<String>(
+                                intersectionsWithGeometryIndex.last().geometryIndex()!! + 1
+                            ).apply {
+                                intersectionsWithGeometryIndex.forEach {
+                                    this[it.geometryIndex()!!] = it.mapboxStreetsV8()?.roadClass()
+                                        ?: "intersection_without_class_fallback"
+                                }
                             }
+                        } else {
+                            arrayOfNulls(0)
+                        }
 
                         leg.annotation()?.congestion()?.forEachIndexed { index, congestion ->
-                            val roadClass = getRoadClassForIndex(roadClassMap, index)
+                            val roadClass = getRoadClassForIndex(roadClassArray, index)
                             if (index == 0) {
                                 routeLineTrafficData.add(
                                     RouteLineTrafficExpressionData(
@@ -1605,13 +1612,12 @@ internal class MapRouteLine(
                 return routeLineTrafficData
             }
 
-        private fun getRoadClassForIndex(roadClassMap: Map<Int, String>, index: Int): String? {
-            for (indexCountdown in index downTo 0) {
-                if (roadClassMap.containsKey(indexCountdown)) {
-                    return roadClassMap[indexCountdown]
-                }
+        private fun getRoadClassForIndex(roadClassArray: Array<String?>, index: Int): String? {
+            return if (roadClassArray.size > index) {
+                roadClassArray.slice(0..index).last { it != null}
+            } else {
+                null
             }
-            return null
         }
 
         /**
