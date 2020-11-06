@@ -67,6 +67,7 @@ import com.mapbox.navigation.utils.internal.NetworkStatusService
 import com.mapbox.navigation.utils.internal.ThreadController
 import com.mapbox.navigation.utils.internal.ifNonNull
 import com.mapbox.navigation.utils.internal.monitorChannelWithException
+import com.mapbox.navigator.ElectronicHorizonOptions
 import com.mapbox.navigator.NavigatorConfig
 import com.mapbox.navigator.TileEndpointConfiguration
 import com.mapbox.navigator.TilesConfig
@@ -145,7 +146,13 @@ class MapboxNavigation(
     private val fasterRouteController: FasterRouteController
     private val routeRefreshController: RouteRefreshController
     private val arrivalProgressObserver: ArrivalProgressObserver
-    private val navigatorConfig = NavigatorConfig(null, null, null)
+    private val electronicHorizonOptions: ElectronicHorizonOptions = ElectronicHorizonOptions(
+        navigationOptions.eHorizonOptions.length,
+        navigationOptions.eHorizonOptions.expansion.toByte(),
+        navigationOptions.eHorizonOptions.branchLength,
+        navigationOptions.eHorizonOptions.includeGeometries
+    )
+    private val navigatorConfig = NavigatorConfig(null, electronicHorizonOptions, null)
 
     private var notificationChannelField: Field? = null
 
